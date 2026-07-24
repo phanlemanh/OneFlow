@@ -6,10 +6,12 @@
 import type { NodeSlot } from "@/generated/abi";
 import { NODE_TYPE_TO_ABI_FEATURE } from "@/lib/abi/node-feature-registry";
 
-const PREFERRED_NODE_TYPE: Partial<Record<NodeSlot, string>> = {
+export const PREFERRED_NODE_TYPE: Partial<Record<NodeSlot, string>> = {
     "image-gen-video": "imageGenVideoNode",
     "text-gen-speech-clone": "textGenSpeechCloneNode",
     transcribe: "audioGenTextSpeechRecognizeNode",
+    "concat-videos": "concatVideoNode",
+    "speech-text-gen-video": "speechGenVideoNode",
 };
 
 function build(): Partial<Record<NodeSlot, string>> {
