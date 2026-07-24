@@ -23,38 +23,65 @@
  *     decides whether `x` is a node type or a field name.
  *
  * (b) `imageFusionNode.data.ids` (and the structurally identical
- *     `imagesGenVideoNode`, `speechGenVideoNode`) is read directly on mount —
- *     `const ids = data.ids ?? []; const fromNodes = useNodesData(ids);` in
- *     src/components/workspace/nodes/compose/image-fusion.tsx — it is NOT
- *     derived from incoming edges. It must be seeded at import time with the
- *     ordered ids of the upstream modality nodes that feed this step's handle
- *     inputs, or the node renders as if nothing were connected
- *     (`executeDisabled` stays true). We do that below (`IDS_KEYED_NODE_TYPES`).
+ *     `imagesGenVideoNode`, `speechGenVideoNode`, `genTextNode`,
+ *     `textGenVideoNode`) is read directly on mount —
+ *     `const ids = data.ids ?? []; const fromNodes = useNodesData(ids);` (or
+ *     an equivalent destructure of `data`) — it is NOT derived from incoming
+ *     edges. It must be seeded at import time with the ordered ids of the
+ *     upstream modality nodes that feed this step's handle inputs, or the
+ *     node renders as if nothing were connected (`executeDisabled` stays
+ *     true). We do that below (`IDS_KEYED_NODE_TYPES`) — the full set was
+ *     found by sweeping every node component for `data.ids` / a destructured
+ *     `ids` field
+ *     (`grep -rnE "data\.ids|\{\s*ids\s*(=|:)" src/components/workspace/nodes`),
+ *     not by inspection of `imageFusionNode` alone.
  *
  * (c) A field the raw ABI schema classifies as `kind: "config"` can still be
- *     rendered as a connectable handle by an individual node component's own
- *     `sourceSpec` prop (handle-introspect.ts's own comment: "sourceSpec can
- *     override to handle"). The shared `NODE_TYPE_SOURCE_SPEC` registry in
- *     node-feature-registry.ts is a best-effort table for pre-mount edge
- *     creation only, and does not cover `textGenImageNode` at all. The real
- *     override lives inline in
- *     src/components/workspace/nodes/transfer/text-gen-image.tsx:
- *     `sourceSpec={{ text: batchOn({ nodeType: "textNode", path: "texts" }) }}`.
- *     public/example.json confirms this: `image-gen`'s "text" field is fed by
- *     an `in:text` edge from an upstream textNode, not a config literal. We
- *     mirror that one override locally (`TEXT_HANDLE_OVERRIDE_SLOTS`) — it is
- *     the only slot among this compiler's supported slots where raw topology
- *     disagrees with the shipped node's actual handle behavior.
+ *     rendered as a connectable handle — or, conversely, a field the schema
+ *     would default to a handle (any `$ref`/`Asset` field) can be forced back
+ *     to config — by an individual node component's own `sourceSpec` prop
+ *     (handle-introspect.ts's own comment: "sourceSpec can override to
+ *     handle"). The shared `NODE_TYPE_SOURCE_SPEC` registry in
+ *     node-feature-registry.ts carries this for the node types the app's own
+ *     pre-mount edge creation needs it for, but several components declare
+ *     their override inline (or in a module-local const) instead of
+ *     registering it, and `resolvedSpecForNodeType` in that file silently
+ *     returns nothing for those. Rather than re-guessing per field, we run
+ *     every field's classification through the same `resolveSpec` the app
+ *     itself uses (src/lib/abi/resolve.ts), fed by `NODE_TYPE_SOURCE_SPEC`
+ *     merged with `LOCAL_SOURCE_SPEC_OVERRIDES` below — the node types whose
+ *     inline override actually changes a field's handle-vs-config or
+ *     `manual` classification, verified by reading each component (see that
+ *     table's own comment, and compile.test.ts's guard test, which sweeps
+ *     every component's real `sourceSpec` and fails if a classification-
+ *     changing override goes untracked).
+ *
+ *     `manual` (ComfyUI-style widget <-> input duality: an edge always wins,
+ *     the form value is the fallback — see resolve.ts's `buildPrompts`) is
+ *     itself part of the classification this compiler needs: a literal on a
+ *     `manual` handle field writes straight to `data.<field>` with no edge
+ *     (matches `imageFusionNode.text`, confirmed against
+ *     public/example.json); a literal on a non-manual handle field spawns an
+ *     `addTextNode`/`textNode` source pair and an edge (matches
+ *     `textGenImageNode.text`); a ref on a genuine config field is still
+ *     `REF_ON_CONFIG_FIELD`.
  */
 import type { Edge, Node } from "@xyflow/react";
 import type { NodeSlot } from "@/generated/abi";
 import {
     type DataNodeType,
-    type FieldClass,
     getAbiTopology,
     sourceHandleId,
     targetHandleId,
 } from "@/lib/abi/handle-introspect";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
+import {
+    batchOn,
+    configField,
+    type FieldSourceOverride,
+    handle,
+} from "@/lib/abi/sources";
 import { parseWorkflow } from "@/lib/workflow/parser";
 import { type DirectorPlan, type GenStep, isRef, refId } from "./dsl";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
@@ -104,45 +131,140 @@ const DATA_NODE_DEFAULT_DATA: Record<DataNodeType, Record<string, unknown>> = {
 };
 
 /**
- * Slots whose "text" field the shipped node component promotes from the raw
- * ABI "config" classification to a connectable textNode handle via its own
- * `sourceSpec` prop. See Step 0 note (c) above.
+ * Node types whose component declares its `sourceSpec` prop inline (or in a
+ * module-local const) rather than through the shared `NODE_TYPE_SOURCE_SPEC`
+ * registry, where that override actually changes a field's handle-vs-config
+ * or `manual` classification for this compiler's purposes. See Step 0 note
+ * (c) above. Verified by reading each component directly (field name,
+ * handle?, manual?) — do not extend this table without doing the same.
+ *
+ * Node types whose inline sourceSpec only *refines* a field the raw ABI
+ * schema already classifies as a handle (e.g. `image: batchOn()` on a
+ * `$ref` field — most of this compiler's ~58 supported slots do exactly
+ * this for their file-backed fields) are intentionally omitted: the raw
+ * classification this compiler falls back to is already correct for them,
+ * so there is nothing to override. compile.test.ts's guard test sweeps
+ * every node component's real `sourceSpec` (registry and inline alike) and
+ * fails if a classification-changing override is missing from here.
  */
-const TEXT_HANDLE_OVERRIDE_SLOTS = new Set<string>(["image-gen"]);
+export const LOCAL_SOURCE_SPEC_OVERRIDES: Partial<
+    Record<string, Record<string, FieldSourceOverride>>
+> = {
+    // text-gen-image.tsx — image-gen
+    textGenImageNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // text-gen-text.tsx — gen-text
+    genTextNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // text-audio-gen-speech.tsx — text-audio-gen-speech
+    textAudioGenSpeechNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // text-gen-speech-instruct.tsx — text-gen-speech-instruct
+    textGenSpeechInstructNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // text-gen-speech-preset.tsx — text-gen-speech-preset
+    textGenSpeechPresetNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+    },
+    // text-gen-speech-clone.tsx (CLONE_TRANSFER_SOURCE_SPEC) — text-gen-speech-clone
+    textGenSpeechCloneNode: {
+        text: batchOn({ nodeType: "textNode", path: "texts" }),
+        // `ref_audio` is a `$ref` in the ABI (raw default: handle), but this
+        // transfer-variant node owns reference audio via local
+        // upload/record and never renders an `in:ref_audio` handle — force
+        // it back to config so a `@ref` on this field is correctly rejected
+        // instead of producing a dangling edge.
+        ref_audio: configField(),
+    },
+    // text-gen-music.tsx — gen-music
+    textGenMusicNode: {
+        tags: handle({ nodeType: "textNode", path: "texts[0]" }),
+        lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+    // split-text.tsx — split-text
+    splitTextNode: {
+        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+    },
+};
 
 /**
  * ReactFlow node types whose component reads `data.ids` directly (rather
  * than deriving upstream values from edges) to look up their source nodes.
- * See Step 0 note (b) above.
+ * See Step 0 note (b) above. Full set found by sweeping every node
+ * component for `data.ids` / a destructured `ids` field.
  */
-const IDS_KEYED_NODE_TYPES = new Set<string>([
+export const IDS_KEYED_NODE_TYPES = new Set<string>([
     "imageFusionNode",
     "imagesGenVideoNode",
     "speechGenVideoNode",
+    "genTextNode",
+    "textGenVideoNode",
 ]);
 
-/** Resolve a step input/param field's effective classification, applying the
- * local sourceSpec overrides from Step 0 note (c). */
+/** Registry overrides merged with this compiler's local ones for the node
+ * types the registry doesn't carry (Step 0 note (c)). */
+function sourceSpecOverridesFor(
+    nodeType: string,
+): Record<string, FieldSourceOverride> | undefined {
+    return (
+        NODE_TYPE_SOURCE_SPEC[nodeType] ?? LOCAL_SOURCE_SPEC_OVERRIDES[nodeType]
+    );
+}
+
+// Memoized per node type — `resolveSpec` is pure given (slot, overrides),
+// and a node type determines both uniquely.
+const RESOLVED_SPEC_CACHE = new Map<string, ResolvedSpec>();
+
+function resolvedSpecFor(slot: NodeSlot, nodeType: string): ResolvedSpec {
+    const cached = RESOLVED_SPEC_CACHE.get(nodeType);
+    if (cached) return cached;
+    const spec = resolveSpec(slot, sourceSpecOverridesFor(nodeType));
+    RESOLVED_SPEC_CACHE.set(nodeType, spec);
+    return spec;
+}
+
+/**
+ * A step field's effective classification for this compiler's purposes:
+ * handle-vs-config (does a ref/edge apply), the upstream node type expected,
+ * whether multiple upstream connections are valid, and `manual` (a literal
+ * on a manual handle field falls back to a plain `data.<field>` write — see
+ * Step 0 note (c)). Derived from the real per-node-type sourceSpec
+ * (`NODE_TYPE_SOURCE_SPEC` merged with `LOCAL_SOURCE_SPEC_OVERRIDES`)
+ * instead of a hand-guessed table.
+ */
+interface EffectiveField {
+    kind: "handle" | "config";
+    /** Only meaningful when `kind === "handle"`. */
+    nodeType?: DataNodeType;
+    /** True when this field accepts more than one upstream connection. */
+    array: boolean;
+    /** True when a literal falls back to `data.<field>` instead of an edge. */
+    manual: boolean;
+}
+
 function classifyField(
-    slot: string,
+    slot: NodeSlot,
+    nodeType: string,
     field: string,
-    raw: FieldClass | undefined,
-): FieldClass | undefined {
-    if (!raw) return undefined;
-    if (
-        field === "text" &&
-        raw.kind === "config" &&
-        TEXT_HANDLE_OVERRIDE_SLOTS.has(slot)
-    ) {
+): EffectiveField | undefined {
+    const resolved = resolvedSpecFor(slot, nodeType).fields[field];
+    if (!resolved) return undefined;
+    if (resolved.kind === "handle") {
         return {
             kind: "handle",
-            nodeType: "textNode",
-            path: "texts",
-            array: true,
-            required: raw.required,
+            nodeType: resolved.nodeType,
+            array: resolved.array || !!resolved.batch || !!resolved.collect,
+            manual: !!resolved.manual,
         };
     }
-    return raw;
+    // `static` / `input` overrides aren't used by any node type this
+    // compiler currently resolves; treat them like `config` (literal ->
+    // data[field]) as the safe fallback.
+    return { kind: "config", array: false, manual: false };
 }
 
 interface StepOutput {
@@ -222,7 +344,8 @@ export function compilePlan(
             });
         }
 
-        const topo = getAbiTopology(step.slot as NodeSlot);
+        const slot = step.slot as NodeSlot;
+        const topo = getAbiTopology(slot);
         const genId = idFn();
         const data: Record<string, unknown> = {
             feature: step.slot,
@@ -230,7 +353,7 @@ export function compilePlan(
         };
 
         for (const { field, value } of step.params) {
-            const fc = classifyField(step.slot, field, topo.inputs[field]);
+            const fc = classifyField(slot, nodeType, field);
             if (!fc || fc.kind !== "config") {
                 issues.push({
                     code: "UNKNOWN_INPUT_FIELD",
@@ -255,7 +378,7 @@ export function compilePlan(
         let hasMediaHandleInput = false;
 
         for (const { field, value } of step.inputs) {
-            const fc = classifyField(step.slot, field, topo.inputs[field]);
+            const fc = classifyField(slot, nodeType, field);
             if (!fc) {
                 issues.push({
                     code: "UNKNOWN_INPUT_FIELD",
@@ -294,6 +417,16 @@ export function compilePlan(
             }
 
             for (const v of values) {
+                if (!isRef(v) && fc.manual) {
+                    // Manual handle field fed a literal: ComfyUI-style
+                    // widget <-> input duality (Step 0 note (c)) — an edge
+                    // would win, but with no edge the literal is just the
+                    // node's own form value. Write it straight to `data`;
+                    // no source pair, no edge (matches `imageFusionNode`,
+                    // confirmed against public/example.json).
+                    data[field] = v;
+                    continue;
+                }
                 let src: StepOutput | undefined;
                 if (isRef(v)) {
                     src = outputs.get(refId(v));
@@ -342,11 +475,12 @@ export function compilePlan(
             }
         }
 
-        // Required handle fields must be fed; config defaults come from the
-        // node's own form after mount (spec §5).
+        // Required handle fields must be fed; config defaults — and manual
+        // handle fields' fallback, same rationale — come from the node's own
+        // form after mount (spec §5).
         for (const field of topo.requiredInputs) {
-            const fc = classifyField(step.slot, field, topo.inputs[field]);
-            if (fc?.kind !== "handle") continue;
+            const fc = classifyField(slot, nodeType, field);
+            if (fc?.kind !== "handle" || fc.manual) continue;
             const provided = step.inputs.some((i) => i.field === field);
             if (!provided) {
                 issues.push({
