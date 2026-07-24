@@ -324,6 +324,15 @@ export function compilePlan(
     }
 
     function compileGenStep(step: GenStep): void {
+        if (!Object.hasOwn(SLOT_TO_NODE_TYPE, step.slot)) {
+            issues.push({
+                code: "UNKNOWN_SLOT",
+                stepId: step.id,
+                slot: step.slot,
+                message: `unknown slot "${step.slot}"`,
+            });
+            return;
+        }
         const nodeType = SLOT_TO_NODE_TYPE[step.slot as NodeSlot];
         if (!nodeType) {
             issues.push({
@@ -365,6 +374,15 @@ export function compilePlan(
                     stepId: step.id,
                     slot: step.slot,
                     message: `"${field}" is not a config field of ${step.slot}`,
+                });
+                continue;
+            }
+            if (typeof value === "string" && isRef(value)) {
+                issues.push({
+                    code: "REF_ON_CONFIG_FIELD",
+                    stepId: step.id,
+                    slot: step.slot,
+                    message: `config field "${field}" only accepts a single literal value`,
                 });
                 continue;
             }

@@ -961,3 +961,82 @@ describe("compilePlan — polish 4: ARITY_MISMATCH reachable on config fields", 
         ]);
     });
 });
+
+describe("compilePlan — hardening 1: Object.prototype keys rejected as slots", () => {
+    it("rejects plan with slot: constructor as UNKNOWN_SLOT instead of throwing", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "proto key slot",
+                description: "",
+                steps: [
+                    {
+                        id: "s1",
+                        kind: "gen",
+                        slot: "constructor",
+                        inputs: [],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "UNKNOWN_SLOT",
+                stepId: "s1",
+                slot: "constructor",
+                message: 'unknown slot "constructor"',
+            },
+        ]);
+    });
+});
+
+describe("compilePlan — hardening 3: ref-shaped strings in params rejected", () => {
+    it("rejects a ref-shaped value in params as REF_ON_CONFIG_FIELD and does not write data", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "ref in params",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "image 1" },
+                    { id: "s2", kind: "text", text: "image 2" },
+                    {
+                        id: "s3",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@s1" }],
+                        params: [],
+                    },
+                    {
+                        id: "s4",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@s2" }],
+                        params: [],
+                    },
+                    {
+                        id: "s5",
+                        kind: "gen",
+                        slot: "image-fusion",
+                        inputs: [{ field: "images", value: ["@s3", "@s4"] }],
+                        params: [{ field: "text", value: "@s1" }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "REF_ON_CONFIG_FIELD",
+                stepId: "s5",
+                slot: "image-fusion",
+                message:
+                    'config field "text" only accepts a single literal value',
+            },
+        ]);
+        const fusion = byType(result.nodes).imageFusionNode[0];
+        expect(fusion.data.text).toBeUndefined();
+    });
+});

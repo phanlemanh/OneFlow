@@ -54,7 +54,6 @@ export const DIRECTOR_EXCLUDED_SLOTS: ReadonlySet<string> = new Set([
 ]);
 
 export function isDirectorSafeSlot(slot: string): boolean {
-    const nodeType = SLOT_TO_NODE_TYPE[slot as never];
-    if (nodeType === undefined) return false;
+    if (!Object.hasOwn(SLOT_TO_NODE_TYPE, slot)) return false;
     return !DIRECTOR_EXCLUDED_SLOTS.has(slot);
 }

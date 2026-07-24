@@ -48,6 +48,25 @@ describe("director safe slots", () => {
         expect(unguarded).toEqual([]);
     });
 
+    it("every excluded slot is one the scan actually found needing exclusion", () => {
+        const modelledNodeTypes = new Set([
+            ...Object.keys(NODE_TYPE_SOURCE_SPEC),
+            ...Object.keys(LOCAL_SOURCE_SPEC_OVERRIDES),
+        ]);
+        const scannedSlots = slotsWithComponentSourceSpec();
+        const staleExclusions: string[] = [];
+        for (const slot of DIRECTOR_EXCLUDED_SLOTS) {
+            const nodeType = SLOT_TO_NODE_TYPE[slot as never];
+            const isScanned = scannedSlots.has(slot);
+            const modelled =
+                nodeType !== undefined && modelledNodeTypes.has(nodeType);
+            if (!isScanned || modelled) {
+                staleExclusions.push(slot);
+            }
+        }
+        expect(staleExclusions).toEqual([]);
+    });
+
     it("scans a plausible number of component files", () => {
         // Guards against the scan silently matching nothing (wrong path, rename).
         expect(slotsWithComponentSourceSpec().size).toBeGreaterThan(10);
@@ -76,6 +95,17 @@ describe("director safe slots", () => {
             "convert_voice",
             "parse-document",
             "arrange-group",
+        ]) {
+            expect(isDirectorSafeSlot(slot)).toBe(false);
+        }
+    });
+
+    it("rejects Object.prototype keys", () => {
+        for (const slot of [
+            "constructor",
+            "toString",
+            "valueOf",
+            "__proto__",
         ]) {
             expect(isDirectorSafeSlot(slot)).toBe(false);
         }
