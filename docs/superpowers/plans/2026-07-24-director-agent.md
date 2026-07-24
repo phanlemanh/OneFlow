@@ -1026,8 +1026,10 @@ git commit -m "test(director): compiler error taxonomy coverage"
 - Read first: `src/generated/abi/index.ts` (confirm the exported shape of `ABI_NODES` — expected: array of objects with a `nodeSlot` field, same as `config/tongflow.abi.json` `nodes`).
 
 **Interfaces:**
-- Consumes: `getAbiTopology` (handle-introspect), `SLOT_TO_NODE_TYPE` (Task 2), `loadPluginsRegistry` from `@/lib/plugins/plugins-registry.server` (server wrapper only).
+- Consumes: `getAbiTopology` (handle-introspect), `SLOT_TO_NODE_TYPE` (Task 2), `isDirectorSafeSlot` (Task 10), `loadPluginsRegistry` from `@/lib/plugins/plugins-registry.server` (server wrapper only).
 - Produces:
+
+**Additional requirement from Task 10 (executed before this task):** `buildDirectorCatalog` must exclude any slot for which `isDirectorSafeSlot(slot)` is false, in addition to the installed-plugin filter. A slot the compiler cannot classify correctly must never reach the LLM's vocabulary. Add a `vocabulary.test.ts` case asserting an unsafe slot is absent even when a plugin serves it.
 
 ```typescript
 // vocabulary.ts
@@ -2058,6 +2060,167 @@ executes it. Confirm the Director never triggered execution on its own.
 ```bash
 git add -A
 git commit -m "chore(director): pass lint/typecheck/test/build gates"
+```
+
+---
+
+### Task 10: Safe-slot allowlist + compiler polish
+
+> **Execution order:** dispatched immediately after Task 3, before Task 4. Numbered 10 only to avoid renumbering tasks already referenced elsewhere.
+
+**Why this task exists.** `compile.ts` classifies each ABI input field (handle vs config, upstream `nodeType`, `array`, `manual`) from `getAbiTopology` plus two override tables. But ~30 node components declare their real classification in an **inline `sourceSpec` JSX prop** that the shared `NODE_TYPE_SOURCE_SPEC` registry does not carry, and a server-side compiler cannot read JSX. For those slots the compiler silently guesses. Two confirmed consequences: six slots (`subtitle_remove`, `remove_watermark`, `denoise_audio`, `convert_voice`, `parse-document`, `arrange-group`) resolve their asset field to `imageNode` when the component declares video/audio/file, so a legal plan is rejected with a bogus `MODALITY_MISMATCH`; and ~24 `batchOn` fields resolve to `array: false`, so multi-reference plans hit a bogus `ARITY_MISMATCH`.
+
+The fix for v0 is **not** to mirror those components (a hand-copy that drifts and already produced 6 wrong rows in one attempt), and **not** to refactor the components onto the shared registry (right long-term, but ~30 files of live canvas wiring — its own PR). It is to make the Director offer **only** the slots it can classify correctly, and to make that allowlist self-policing by deriving its required exclusions from the component files themselves.
+
+**Files:**
+- Create: `src/lib/director/safe-slots.ts`
+- Test: `src/lib/director/safe-slots.test.ts`
+- Modify: `src/lib/director/compile.ts` (four polish items below)
+- Test: `src/lib/director/compile.test.ts` (append cases for the polish items)
+
+**Interfaces:**
+- Consumes: `SLOT_TO_NODE_TYPE` (Task 2); `LOCAL_SOURCE_SPEC_OVERRIDES`, `IDS_KEYED_NODE_TYPES` (Task 3, already exported); `NODE_TYPE_SOURCE_SPEC` from `@/lib/abi/node-feature-registry`.
+- Produces (Task 5 imports these verbatim):
+
+```typescript
+export const DIRECTOR_EXCLUDED_SLOTS: ReadonlySet<string>;
+export function isDirectorSafeSlot(slot: string): boolean;
+```
+
+`isDirectorSafeSlot` returns true when the slot has a canonical node type in `SLOT_TO_NODE_TYPE` **and** is not in `DIRECTOR_EXCLUDED_SLOTS`. `safe-slots.ts` stays pure (no I/O, no `server-only`) — the filesystem scan lives in the test, not the module.
+
+- [ ] **Step 1: Write the failing guard test (the self-policing part)**
+
+This test is the point of the task: it reads the real component files, so a component that gains or changes an inline `sourceSpec` fails here instead of silently producing a broken graph.
+
+```typescript
+// src/lib/director/safe-slots.test.ts
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import { LOCAL_SOURCE_SPEC_OVERRIDES } from "./compile";
+import { DIRECTOR_EXCLUDED_SLOTS, isDirectorSafeSlot } from "./safe-slots";
+import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
+
+const NODES_DIR = "src/components/workspace/nodes";
+
+function tsxFiles(dir: string): string[] {
+    const out: string[] = [];
+    for (const entry of readdirSync(dir)) {
+        const p = join(dir, entry);
+        if (statSync(p).isDirectory()) out.push(...tsxFiles(p));
+        else if (entry.endsWith(".tsx")) out.push(p);
+    }
+    return out;
+}
+
+/** slot -> true when its component declares any sourceSpec override. */
+function slotsWithComponentSourceSpec(): Map<string, string> {
+    const found = new Map<string, string>();
+    for (const file of tsxFiles(NODES_DIR)) {
+        const src = readFileSync(file, "utf8");
+        if (!src.includes("sourceSpec")) continue;
+        const m = src.match(/feature=["']([a-z0-9_-]+)["']/i);
+        if (m) found.set(m[1], file);
+    }
+    return found;
+}
+
+describe("director safe slots", () => {
+    it("every slot whose component declares a sourceSpec is either modelled or excluded", () => {
+        const modelledNodeTypes = new Set([
+            ...Object.keys(NODE_TYPE_SOURCE_SPEC),
+            ...Object.keys(LOCAL_SOURCE_SPEC_OVERRIDES),
+        ]);
+        const unguarded: string[] = [];
+        for (const [slot, file] of slotsWithComponentSourceSpec()) {
+            const nodeType = SLOT_TO_NODE_TYPE[slot as never];
+            const modelled =
+                nodeType !== undefined && modelledNodeTypes.has(nodeType);
+            if (!modelled && !DIRECTOR_EXCLUDED_SLOTS.has(slot)) {
+                unguarded.push(`${slot} (${file})`);
+            }
+        }
+        expect(unguarded).toEqual([]);
+    });
+
+    it("scans a plausible number of component files", () => {
+        // Guards against the scan silently matching nothing (wrong path, rename).
+        expect(slotsWithComponentSourceSpec().size).toBeGreaterThan(10);
+    });
+
+    it("keeps the demo path safe", () => {
+        for (const slot of [
+            "image-gen",
+            "image-fusion",
+            "image-gen-video",
+            "gen-text",
+        ]) {
+            expect(isDirectorSafeSlot(slot)).toBe(true);
+        }
+    });
+
+    it("rejects slots with no canonical node type", () => {
+        expect(isDirectorSafeSlot("not-a-real-slot")).toBe(false);
+    });
+
+    it("excludes the known mis-classified slots", () => {
+        for (const slot of [
+            "subtitle_remove",
+            "remove_watermark",
+            "denoise_audio",
+            "convert_voice",
+            "parse-document",
+            "arrange-group",
+        ]) {
+            expect(isDirectorSafeSlot(slot)).toBe(false);
+        }
+    });
+});
+```
+
+- [ ] **Step 2: Run it to verify RED**
+
+Run: `pnpm exec vitest run src/lib/director/safe-slots.test.ts`
+Expected: FAIL — `./safe-slots` not found.
+
+- [ ] **Step 3: Implement `safe-slots.ts`**
+
+Write the module with `DIRECTOR_EXCLUDED_SLOTS` and `isDirectorSafeSlot` as specified in Interfaces. Populate `DIRECTOR_EXCLUDED_SLOTS` by **running the guard test and adding exactly the slots it reports as unguarded** — do not guess the list, and do not add a slot the guard does not demand. Each entry needs no per-slot comment; one module-level comment explaining the mechanism (component inline `sourceSpec` invisible to the server; excluded until modelled or until the components move onto the shared registry) is enough.
+
+- [ ] **Step 4: Verify GREEN and that the guard bites**
+
+Run: `pnpm exec vitest run src/lib/director/safe-slots.test.ts` — all pass.
+Then prove the guard is real: temporarily delete one entry from `DIRECTOR_EXCLUDED_SLOTS`, re-run, observe the first test fail naming that slot and its component file, restore it.
+
+- [ ] **Step 5: Compiler polish — four review findings**
+
+All four are in `compile.ts`; each gets a test in `compile.test.ts`.
+
+1. **`params` on a `manual` handle field must be accepted.** Today the params loop requires `fc.kind === "config"`, so putting `image-fusion`'s caption in `params` yields `UNKNOWN_INPUT_FIELD: "text" is not a config field of image-fusion` — false, since a `manual` handle field is exactly a form value. Accept `kind === "config"` **or** (`kind === "handle"` and `manual`), writing the literal into `data[field]`. Test: a plan putting `text` in `params` for `image-fusion` produces no issues and sets `data.text`.
+
+2. **`data.texts` must not merge literals across different text handle fields.** `knownTexts` currently flattens every wired literal into one array, so a slot with two promoted text handles (`gen-music`: `tags` and `lyrics`) loses which is which. Seed `data.texts` only from the field whose `FieldClass.path` is `texts`/`texts[0]`; write other text handle literals under their own field name. Test: a `gen-music` plan with literals on both fields keeps them distinguishable.
+
+3. **The `LOCAL_SOURCE_SPEC_OVERRIDES` guard must fail cleanly on a renamed field.** It dereferences `resolveSpec(...).fields[field].kind` without a presence check, so a component field rename throws `TypeError` instead of reporting drift. Add the presence check and assert a readable message.
+
+4. **`ARITY_MISMATCH` must be reachable on config fields.** The config branch currently returns `REF_ON_CONFIG_FIELD` for both a ref and a multi-value array, so `{field:"width", value:["1","2"]}` reports the wrong code. Split the two conditions. Test: an array value on a genuine config field yields `ARITY_MISMATCH`, a ref still yields `REF_ON_CONFIG_FIELD`.
+
+- [ ] **Step 6: Full verification**
+
+```bash
+pnpm exec vitest run src/lib/director/
+pnpm exec biome check --error-on-warnings .
+pnpm exec tsc --noEmit -p .
+```
+
+Expected: all pass, output pristine.
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add src/lib/director/safe-slots.ts src/lib/director/safe-slots.test.ts src/lib/director/compile.ts src/lib/director/compile.test.ts
+git commit -m "feat(director): safe-slot allowlist guarded by component scan"
 ```
 
 ---
