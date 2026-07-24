@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DirectorPlanSchema, isRef, refId } from "./dsl";
 
-export const CAT_MOUSE_PLAN = {
+const CAT_MOUSE_PLAN = {
     dslVersion: 1,
     name: "Cat and mouse",
     description: "Two cartoon characters photographed together, then animated",
