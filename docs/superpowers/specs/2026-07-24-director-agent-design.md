@@ -109,15 +109,20 @@ structure later, and Gate-1-as-diff will diff it.
   "steps": [
     { "id": "s1", "kind": "text", "text": "a cute cat, cartoon style" },
     { "id": "s2", "kind": "gen",  "slot": "image-gen",
-      "inputs": { "text": "@s1" }, "params": { "width": 1024, "height": 1024 } },
+      "inputs": [ { "field": "text", "value": "@s1" } ],
+      "params": [ { "field": "width", "value": 1024 },
+                  { "field": "height", "value": 1024 } ] },
     { "id": "s3", "kind": "text", "text": "a cute mouse, cartoon style" },
-    { "id": "s4", "kind": "gen",  "slot": "image-gen", "inputs": { "text": "@s3" } },
+    { "id": "s4", "kind": "gen",  "slot": "image-gen",
+      "inputs": [ { "field": "text", "value": "@s3" } ] },
     { "id": "s5", "kind": "gen",  "slot": "image-fusion",
-      "inputs": { "images": ["@s2", "@s4"],
-                   "text": "cat and mouse take a photo together" } },
+      "inputs": [ { "field": "images", "value": ["@s2", "@s4"] },
+                  { "field": "text",
+                    "value": "cat and mouse take a photo together" } ] },
     { "id": "s6", "kind": "gen",  "slot": "image-gen-video",
-      "inputs": { "image": "@s5", "text": "drinking" },
-      "params": { "duration": 5 } }
+      "inputs": [ { "field": "image", "value": "@s5" },
+                  { "field": "text", "value": "drinking" } ],
+      "params": [ { "field": "duration", "value": 5 } ] }
   ]
 }
 ```
@@ -128,13 +133,20 @@ Semantics:
 - `kind: "text"` — a literal text source asset. The only source kind in v0.
 - `kind: "gen"` — an executable step. `slot` must be one of the ABI `nodeSlot`
   strings present in the vocabulary (i.e. has ≥1 installed plugin).
-- `inputs` — map from ABI **handle field** name → `"@id"` reference, literal
-  string (inline text for text-typed handle fields), or array of those (for
-  array-typed handle fields such as `images`). References must point to an
-  earlier step whose output modality matches the field's expected modality.
-- `params` — map from ABI **config field** name → scalar value (width, height,
-  duration, …). Optional; compiler fills nothing — absent params stay absent
-  and the node's own form defaults apply after mount.
+- `inputs` — array of `{ field, value }` entries. `field` is an ABI **input
+  field** name. On *handle* fields, `value` is a `"@id"` reference, a literal
+  string (inline text spawns its own text source pair), or an array of those
+  (for array-typed handle fields such as `images`); references must point to
+  an earlier step whose output modality matches the field's modality. On
+  *config* fields (e.g. `image-fusion`'s `text`), only literals are allowed —
+  the compiler routes them into node `data` instead of creating an edge, so
+  the LLM never has to distinguish handle-text from config-text. (Array-of-
+  pairs instead of a map because structured outputs forbid free-form
+  `additionalProperties` — records are not supported.)
+- `params` — array of `{ field, value }` entries for ABI **config fields**
+  (width, height, duration, …) with string/number/boolean values. Optional;
+  compiler fills nothing — absent params stay absent and the node's own form
+  defaults apply after mount.
 - Order matters only for readability; the compiler derives the DAG solely from
   references.
 
@@ -180,8 +192,12 @@ wrong keys become compiler errors that drive the retry loop).
    catalog when known), unknown reference, modality mismatch on a reference,
    array/scalar mismatch, cycle detected, unknown input field for slot.
 
-After compilation, run the existing connection validator over the emitted
-edges; validator failures join the same error list.
+Post-compile validation runs server-side: the compiler's own modality checks
+(same ABI topology data the canvas validator uses) plus
+`isWorkflowValid`/`parseWorkflow` for cycle and level structure. The existing
+connection validator (`tryAbiCompatibility`) is **not** callable here — it
+reads the client-side ABI mount registry, which only exists once nodes render
+on the canvas. It remains the safety net for user edits after import.
 
 ## 7. Vocabulary generation
 
@@ -243,6 +259,7 @@ Error responses `{ "error": { "code": "...", "message": "...", "details": [...] 
 
 | code | HTTP | Trigger | UI action |
 |---|---|---|---|
+| `INVALID_PROMPT` | 400 | Missing/empty/&gt;2000-char `prompt` in request body | Toast: enter a prompt |
 | `MISSING_API_KEY` | 400 | No `ANTHROPIC_API_KEY` in env store/process env | Toast + hint to open Settings |
 | `AUTH_FAILED` | 401 | SDK `AuthenticationError` | Toast: invalid key |
 | `RATE_LIMITED` | 429 | SDK `RateLimitError` | Toast: retry later |
