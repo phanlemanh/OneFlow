@@ -354,7 +354,12 @@ export function compilePlan(
 
         for (const { field, value } of step.params) {
             const fc = classifyField(slot, nodeType, field);
-            if (!fc || fc.kind !== "config") {
+            // A `manual` handle field (widget <-> input duality, Step 0 note
+            // (c)) is exactly a form value when nothing is wired to it — so a
+            // literal for it in `params` is as legitimate as a genuine config
+            // field, not an unknown input.
+            const isManualHandle = fc?.kind === "handle" && fc.manual;
+            if (!fc || (fc.kind !== "config" && !isManualHandle)) {
                 issues.push({
                     code: "UNKNOWN_INPUT_FIELD",
                     stepId: step.id,
@@ -366,7 +371,13 @@ export function compilePlan(
             data[field] = value;
         }
 
-        const knownTexts: string[] = [];
+        // Known literal text fed to each text-typed handle field, keyed by
+        // ABI field name — kept per field (not flattened into one array) so
+        // a slot with more than one promoted text handle (e.g. `gen-music`'s
+        // `tags` and `lyrics`) doesn't lose which literal belongs to which
+        // field. See the write-out below for how each field's cache lands
+        // on `data`.
+        const knownTextsByField = new Map<string, string[]>();
         const pendingEdges: Edge[] = [];
         // Ordered, deduplicated ids of every upstream modality node that
         // feeds one of this step's handle fields — only consumed by node
@@ -392,8 +403,21 @@ export function compilePlan(
 
             if (fc.kind === "config") {
                 // LLM-friendly leniency (spec §5): literal on a config field
-                // is routed into data; refs on config fields are errors.
-                if (values.length !== 1 || isRef(values[0])) {
+                // is routed into data; refs on config fields are errors. The
+                // two are distinct problems and get distinct codes: a
+                // multi-value array is an arity problem even if every
+                // element is a literal, while a ref is only ever a modality
+                // problem once arity is already satisfied.
+                if (values.length !== 1) {
+                    issues.push({
+                        code: "ARITY_MISMATCH",
+                        stepId: step.id,
+                        slot: step.slot,
+                        message: `config field "${field}" accepts a single value`,
+                    });
+                    continue;
+                }
+                if (isRef(values[0])) {
                     issues.push({
                         code: "REF_ON_CONFIG_FIELD",
                         stepId: step.id,
@@ -459,7 +483,9 @@ export function compilePlan(
                     continue;
                 }
                 if (src.literal !== undefined) {
-                    knownTexts.push(src.literal);
+                    const list = knownTextsByField.get(field) ?? [];
+                    list.push(src.literal);
+                    knownTextsByField.set(field, list);
                 }
                 if (fc.nodeType !== "textNode") {
                     hasMediaHandleInput = true;
@@ -492,8 +518,24 @@ export function compilePlan(
             }
         }
 
-        if (knownTexts.length > 0) {
-            data.texts = knownTexts;
+        // Cache each field's known literal(s) onto the node's own data so the
+        // canvas can render it before the step actually executes. The ABI's
+        // canonical single text field is always literally named `text` (or,
+        // for a genuinely array-typed field, `texts`) across every node type
+        // this compiler resolves — that's the field example.json's
+        // `textGenImageNode` caches under the generic `texts` array. Any
+        // *other* text-typed handle field on the same node (e.g.
+        // `gen-music`'s `tags`/`lyrics`) is a distinct ABI input with its own
+        // identity, so it's cached under its own field name instead of
+        // being merged into that same generic array, where it would become
+        // indistinguishable from a sibling field's literal.
+        for (const [field, texts] of knownTextsByField) {
+            if (field === "text" || field === "texts") {
+                data.texts = texts;
+                continue;
+            }
+            const fc = classifyField(slot, nodeType, field);
+            data[field] = fc?.array ? texts : texts[0];
         }
 
         if (IDS_KEYED_NODE_TYPES.has(nodeType)) {
