@@ -952,6 +952,129 @@ describe("compilePlan — polish 4: ARITY_MISMATCH reachable on config fields", 
     });
 });
 
+// --- Fix 2: params loop rejects a value whose JS type doesn't match the
+// field's declared JSON Schema type (dsl.ts's ParamEntrySchema can only
+// carry string | number | boolean, so a mismatch here is a real plan bug,
+// not something the node's own form can silently coerce) ---
+
+describe("compilePlan — Fix 2: param value type-checked against the field's declared schema type", () => {
+    it("reports MODALITY_MISMATCH when a number-typed config field gets a string value via params", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "bad width",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "a cute cat" },
+                    {
+                        id: "s2",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@s1" }],
+                        params: [{ field: "width", value: "large" }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "MODALITY_MISMATCH",
+                stepId: "s2",
+                slot: "image-gen",
+                message:
+                    'config field "width" declares type integer; got a value of type string',
+            },
+        ]);
+        const gen = byType(result.nodes).textGenImageNode[0];
+        expect((gen.data as Record<string, unknown>).width).toBeUndefined();
+    });
+
+    it("reports MODALITY_MISMATCH when a boolean-typed config field gets a number value via params", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "bad duplicatable",
+                description: "",
+                steps: [
+                    {
+                        id: "s1",
+                        kind: "gen",
+                        slot: "arrange-group",
+                        inputs: [],
+                        params: [{ field: "duplicatable", value: 1 }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toContainEqual({
+            code: "MODALITY_MISMATCH",
+            stepId: "s1",
+            slot: "arrange-group",
+            message:
+                'config field "duplicatable" declares type boolean; got a value of type number',
+        });
+        const gen = byType(result.nodes).arrangeNode[0];
+        expect(
+            (gen.data as Record<string, unknown>).duplicatable,
+        ).toBeUndefined();
+    });
+
+    it("rejects any scalar via params on an array-typed config field — the DSL can never carry a correct value for it", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "bad items",
+                description: "",
+                steps: [
+                    {
+                        id: "s1",
+                        kind: "gen",
+                        slot: "arrange-group",
+                        inputs: [],
+                        params: [{ field: "items", value: "not-an-array" }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toContainEqual({
+            code: "MODALITY_MISMATCH",
+            stepId: "s1",
+            slot: "arrange-group",
+            message:
+                'config field "items" declares type array; got a value of type string',
+        });
+    });
+
+    it("accepts a matching integer-typed value via params (integer schema type maps to JS number)", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "good seed",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "some audio" },
+                    {
+                        id: "s2",
+                        kind: "gen",
+                        slot: "music-complete",
+                        inputs: [],
+                        params: [{ field: "seed", value: 42 }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(
+            result.issues.filter((i) => i.code === "MODALITY_MISMATCH"),
+        ).toEqual([]);
+        const gen = byType(result.nodes).musicCompleteNode[0];
+        expect((gen.data as Record<string, unknown>).seed).toBe(42);
+    });
+});
+
 describe("compilePlan — hardening 1: Object.prototype keys rejected as slots", () => {
     it("rejects plan with slot: constructor as UNKNOWN_SLOT instead of throwing", () => {
         const result = compilePlan(
@@ -979,6 +1102,43 @@ describe("compilePlan — hardening 1: Object.prototype keys rejected as slots",
                 message: 'unknown slot "constructor"',
             },
         ]);
+    });
+});
+
+// --- Minor 9: classifyField's field lookup guarded the same way the slot
+// lookup already is (Object.hasOwn), so an Object.prototype member name
+// doesn't get silently treated as a real field. ---
+
+describe("compilePlan — Minor 9: Object.prototype keys rejected as field names", () => {
+    it("rejects params field: toString as UNKNOWN_INPUT_FIELD instead of writing data.toString", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "proto key field",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "a cute cat" },
+                    {
+                        id: "s2",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@s1" }],
+                        params: [{ field: "toString", value: "oops" }],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toContainEqual({
+            code: "UNKNOWN_INPUT_FIELD",
+            stepId: "s2",
+            slot: "image-gen",
+            message: '"toString" is not a config field of image-gen',
+        });
+        const gen = byType(result.nodes).textGenImageNode[0];
+        expect(
+            Object.hasOwn(gen.data as Record<string, unknown>, "toString"),
+        ).toBe(false);
     });
 });
 

@@ -177,8 +177,14 @@ function classifyField(
     nodeType: string,
     field: string,
 ): EffectiveField | undefined {
-    const resolved = resolvedSpecFor(slot, nodeType).fields[field];
-    if (!resolved) return undefined;
+    // `fields` is a plain object and `field` is LLM-controlled input, so an
+    // unguarded index (`fields[field]`) returns an inherited Object.prototype
+    // member for a name like "toString" (truthy, `.kind` undefined) instead
+    // of `undefined` — Object.hasOwn closes that the same way the slot
+    // lookup above already does (see hardening 1's Object.prototype test).
+    const { fields } = resolvedSpecFor(slot, nodeType);
+    if (!Object.hasOwn(fields, field)) return undefined;
+    const resolved = fields[field];
     if (resolved.kind === "handle") {
         return {
             kind: "handle",
@@ -191,6 +197,21 @@ function classifyField(
     // compiler currently resolves; treat them like `config` (literal ->
     // data[field]) as the safe fallback.
     return { kind: "config", array: false, manual: false };
+}
+
+/**
+ * Does a `params` entry's JS value match a config field's declared JSON
+ * Schema scalar `type`? `ParamEntrySchema` (dsl.ts) only ever hands this a
+ * `string | number | boolean`, so "integer" is treated as "number" (JSON
+ * Schema's integer/number split doesn't exist as a separate JS type).
+ */
+function paramValueMatchesSchemaType(
+    schemaType: string,
+    value: string | number | boolean,
+): boolean {
+    const jsType = typeof value;
+    if (schemaType === "integer") return jsType === "number";
+    return schemaType === jsType;
 }
 
 interface StepOutput {
@@ -309,6 +330,34 @@ export function compilePlan(
                     stepId: step.id,
                     slot: step.slot,
                     message: `config field "${field}" only accepts a single literal value`,
+                });
+                continue;
+            }
+            // Plan-semantics type check (mirrors field-name/modality/arity
+            // validation already done from this same schema, not runtime ABI
+            // validation, see Fix 2): a genuine config field's raw JSON
+            // Schema `type` is the field's declared scalar shape. No
+            // existing `CompileIssueCode` names "wrong scalar type"
+            // directly, so this reuses `MODALITY_MISMATCH` — that code
+            // already means "the value's declared kind doesn't match what
+            // this field expects" for handle fields (image vs video vs
+            // text); a config field's JS type mismatch (string vs number vs
+            // boolean, or an array-typed field the DSL can't carry at all,
+            // see vocabulary.ts's RENDERABLE_PARAM_TYPES) is the same idea
+            // one level down, and ARITY_MISMATCH's two existing uses are
+            // both strictly about value *count*, not value *kind*, so
+            // reusing it here would blur what "arity" means.
+            const rawField = topo.inputs[field];
+            if (
+                rawField?.kind === "config" &&
+                typeof rawField.schema.type === "string" &&
+                !paramValueMatchesSchemaType(rawField.schema.type, value)
+            ) {
+                issues.push({
+                    code: "MODALITY_MISMATCH",
+                    stepId: step.id,
+                    slot: step.slot,
+                    message: `config field "${field}" declares type ${rawField.schema.type}; got a value of type ${typeof value}`,
                 });
                 continue;
             }
