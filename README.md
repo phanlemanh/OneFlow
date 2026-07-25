@@ -289,15 +289,6 @@ Join the community on **[Discord](https://discord.gg/K7V8az94Zf)** or scan the *
   <img src="docs/assets/qr.png" alt="WeChat group QR code" width="180" />
 </div>
 
-## Business
-
-For business inquiries, please contact business@tongflow.com.
-
-- **Open-source model owners**: I can integrate your models so users can try them out smoothly.
-- **Enterprise**: I can help you deploy on your local GPU, build custom nodes and plugins, and more.
-- **Platform / router**: I can integrate your APIs.
-- **VCs**: I’m interested in partnering on [tongflow.com](https://tongflow.com), a cloud-hosted AI studio.
-
 ## Open-Source
 
 If you like this project, a Star on GitHub helps a lot. Thank you.
@@ -306,18 +297,22 @@ If you like this project, a Star on GitHub helps a lot. Thank you.
 
 ## License
 
-TongFlow is **dual-licensed**:
+OneFlow is licensed under **[AGPL-3.0](LICENSE)** — the same license as the
+upstream project it forks. That includes AGPL Section 13: if you run a modified
+OneFlow as a network service, you must offer its complete corresponding source
+to that service's users.
 
-- **[AGPL-3.0](LICENSE)** — free for individuals, research, open-source projects,
-  and anyone willing to comply with the AGPL (including its Section 13
-  network/source-disclosure obligation).
-- **[Commercial License](COMMERCIAL-LICENSE.md)** — for organizations that want to
-  use TongFlow in closed-source or SaaS products **without** AGPL's
-  source-disclosure obligation, or that need warranties and platform support.
-  Contact **business@tongflow.com**.
+This fork **cannot** grant a commercial license. The dual-licensing option
+belongs to the upstream copyright holder, tong-io — if you need TongFlow under
+non-AGPL terms, contact them directly at
+[tong-io/tongflow](https://github.com/tong-io/tongflow). The
+`COMMERCIAL-LICENSE.md` and `CLA.md` files retained in this repository are
+upstream documents and do **not** apply to OneFlow.
 
-This covers the entire repository, including the `sdk/` directory (the `tongflow`
-PyPI package). Contributions are covered by our [CLA](CLA.md).
+The license covers the entire repository, including the `sdk/` directory (the
+`tongflow` PyPI package, consumed unchanged from upstream).
+
+See [NOTICE.md](NOTICE.md) for fork attribution and modification notice.
 
 ## Star History
 

@@ -12,9 +12,9 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/manhphan/oneflow"
+        "url": "https://github.com/phanlemanh/OneFlow"
     },
-    "homepage": "https://github.com/manhphan/oneflow#readme",
+    "homepage": "https://github.com/phanlemanh/OneFlow#readme",
     "license": "AGPL-3.0-only",
     "private": true,
     "pnpm": {

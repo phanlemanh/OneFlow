@@ -1,3 +1,10 @@
+> **Upstream document — does not apply to OneFlow.**
+> This file is retained from the upstream TongFlow repository
+> (https://github.com/tong-io/tongflow), whose copyright holder is
+> tong-io. OneFlow is an independent AGPL-3.0 fork and cannot grant
+> commercial licenses or accept contributions under this agreement.
+> See [NOTICE.md](NOTICE.md).
+
 # TongFlow Contributor License Agreement (CLA)
 
 Thank you for your interest in contributing to TongFlow ("the Project"),
