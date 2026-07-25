@@ -5,7 +5,7 @@ import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -25,9 +25,7 @@ const TextGenSpeechInstructNode = ({
     return (
         <AbiNodeShell
             feature="text-gen-speech-instruct"
-            sourceSpec={{
-                text: batchOn({ nodeType: "textNode", path: "texts" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textGenSpeechInstructNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

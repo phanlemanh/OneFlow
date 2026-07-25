@@ -4,7 +4,7 @@ import { memo } from "react";
 
 import { Card } from "@/components/ui/card";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -19,7 +19,7 @@ const RemoveWatermarkNode = ({ selected, data }: RemoveWatermarkRfProps) => {
     return (
         <AbiNodeShell
             feature="remove_watermark"
-            sourceSpec={{ fileKey: batchOn({ nodeType: "videoNode" }) }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.removeWatermarkNode}
             form={form}
             selected={selected}
             data={data}

@@ -10,7 +10,6 @@ import { VIDEO_DURATION_DEFAULT } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
-import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -19,7 +18,7 @@ import { NodeTextarea } from "../base/node-textarea";
 import { VideoDurationSlider } from "../base/video-duration-slider";
 
 const VIDEO_IMAGE_GEN_VIDEO_MOVE_SOURCE_SPEC =
-    NODE_TYPE_SOURCE_SPEC.videoImageGenVideoMoveNode as SourceSpec<"video-image-gen-video-move">;
+    NODE_TYPE_SOURCE_SPEC.videoImageGenVideoMoveNode;
 
 const VideoImageGenVideoMoveNode = ({
     selected,

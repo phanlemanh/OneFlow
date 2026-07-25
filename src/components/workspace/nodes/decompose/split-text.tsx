@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { handle } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -15,16 +15,12 @@ const SplitTextNode = ({
 }: TongflowPluginNodeProps<"split-text", "splitTextNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-    const form = useAbiForm("split-text", {
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
-    });
+    const form = useAbiForm("split-text", NODE_TYPE_SOURCE_SPEC.splitTextNode);
 
     return (
         <AbiNodeShell
             feature="split-text"
-            sourceSpec={{
-                text: handle({ nodeType: "textNode", path: "texts[0]" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.splitTextNode}
             form={form}
             selected={selected}
             data={data}

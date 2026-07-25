@@ -23,7 +23,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { logger } from "@/lib/logger";
 import type { RfDataNodeProps } from "@/types/nodes";
 
@@ -51,7 +51,7 @@ const ConvertVoiceNode = ({ selected, data }: ConvertVoiceRfProps) => {
     return (
         <AbiNodeShell
             feature="convert_voice"
-            sourceSpec={{ sourceKey: batchOn({ nodeType: "audioNode" }) }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.convertVoiceNode}
             form={form}
             selected={selected}
             data={data}

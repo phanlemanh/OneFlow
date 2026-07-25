@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { SpeakerVoiceRecorder } from "@/components/workspace/speaker-voice-recorder";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { useUpload } from "@/hooks/use-upload";
-import { batchOn, configField, type SourceSpec } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { getFileUrl } from "@/lib/file/url";
 import { logger } from "@/lib/logger";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
@@ -16,13 +16,7 @@ import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { LanguageSelect } from "../base/language-select";
 
-// `ref_audio` is an Asset $ref in the ABI (default = upstream handle). This
-// transfer node owns reference audio via local upload/record → config override.
-// Wired text+audio uses `textGenSpeechCloneComposeNode` (default handles).
-const CLONE_TRANSFER_SOURCE_SPEC: SourceSpec<"text-gen-speech-clone"> = {
-    text: batchOn({ nodeType: "textNode", path: "texts" }),
-    ref_audio: configField(),
-};
+const CLONE_TRANSFER_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC.textGenSpeechCloneNode;
 
 const TextGenSpeechCloneNode = ({
     selected,

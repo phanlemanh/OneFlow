@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectAll } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -14,13 +14,13 @@ const DropVideoNode = ({
     data,
 }: TongflowPluginNodeProps<"drop-video", "dropVideoNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
-    const form = useAbiForm("drop-video", { videos: collectAll() });
+    const form = useAbiForm("drop-video", NODE_TYPE_SOURCE_SPEC.dropVideoNode);
     const fileKeys = data.fileKeys;
 
     return (
         <AbiNodeShell
             feature="drop-video"
-            sourceSpec={{ videos: collectAll() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.dropVideoNode}
             form={form}
             selected={selected}
             data={data}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { DEFAULT_QWEN_SPEAKER, QWEN_SPEAKERS } from "@/constants/qwen-speakers";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -58,9 +58,7 @@ const TextGenSpeechPresetNode = ({
     return (
         <AbiNodeShell
             feature="text-gen-speech-preset"
-            sourceSpec={{
-                text: batchOn({ nodeType: "textNode", path: "texts" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textGenSpeechPresetNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

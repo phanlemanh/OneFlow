@@ -12,7 +12,6 @@ import {
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import type { SourceSpec } from "@/lib/abi/sources";
 import { cn } from "@/lib/utils";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
@@ -33,8 +32,7 @@ const resolutions = [
 // upstream edge wins, the textarea value is the fallback (`manual: true`).
 // Defined centrally in NODE_TYPE_SOURCE_SPEC so compose-time edge creation
 // assigns the correct `in:text` targetHandle (matching sibling compose nodes).
-const sourceSpec =
-    NODE_TYPE_SOURCE_SPEC.imageFusionNode as SourceSpec<"image-fusion">;
+const sourceSpec = NODE_TYPE_SOURCE_SPEC.imageFusionNode;
 
 const ImageFusionNode = ({
     selected,

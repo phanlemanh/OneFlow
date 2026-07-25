@@ -18,7 +18,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { handle } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -149,14 +149,10 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const tLang = useTranslations("Languages");
     const LANGUAGE_OPTIONS = buildLanguageOptions(tLang);
     const BPM_OPTIONS = buildBpmOptions(t("music.auto"));
-    const form = useAbiForm("gen-music", {
-        // Both `tags` and `lyrics` are scalar strings that may be fed from
-        // upstream textNodes via the auto-rendered `in:tags` / `in:lyrics`
-        // handles. AbiHandles renders one handle per ABI input, so the user
-        // connects each upstream textNode to the handle they want to fill.
-        tags: handle({ nodeType: "textNode", path: "texts[0]" }),
-        lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
-    });
+    const form = useAbiForm(
+        "gen-music",
+        NODE_TYPE_SOURCE_SPEC.textGenMusicNode,
+    );
 
     const nodeId = useNodeId();
     const edges = useStore((state) => state.edges as Edge[]);
@@ -247,10 +243,7 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     return (
         <AbiNodeShell
             feature="gen-music"
-            sourceSpec={{
-                tags: handle({ nodeType: "textNode", path: "texts[0]" }),
-                lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textGenMusicNode}
             form={form}
             selected={selected}
             className="min-w-[520px]"

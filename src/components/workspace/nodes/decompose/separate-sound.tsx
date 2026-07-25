@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -19,8 +18,7 @@ import { NodeTextarea } from "../base/node-textarea";
 // upstream edge wins, the textarea value is the fallback (`manual: true`).
 // Defined centrally in NODE_TYPE_SOURCE_SPEC so compose-time edge creation
 // assigns the correct `in:text` targetHandle.
-const sourceSpec =
-    NODE_TYPE_SOURCE_SPEC.separateSoundNode as SourceSpec<"separate-sound">;
+const sourceSpec = NODE_TYPE_SOURCE_SPEC.separateSoundNode;
 
 const SeparateSoundNode = ({
     selected,

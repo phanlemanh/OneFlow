@@ -7,14 +7,16 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
-import { collectAll } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { MediaThumbnail } from "../base/media-thumbnail";
 
-const CONCAT_VIDEO_SOURCE_SPEC = { videos: collectAll() };
+// Mounted as both `concatVideoNode` (batch) and `concatVideoComposeNode`
+// (compose); the registry keys both node types to this same spec.
+const CONCAT_VIDEO_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC.concatVideoNode;
 
 const ConcatVideoNode = ({
     selected,

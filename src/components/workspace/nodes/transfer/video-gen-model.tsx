@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -19,7 +19,7 @@ const VideoGenModelNode = ({
     return (
         <AbiNodeShell
             feature="video-gen-model"
-            sourceSpec={{ video: batchOn() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.videoGenModelNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

@@ -9,7 +9,7 @@ import {
     type ResolutionTier,
 } from "@/constants/media-options";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { AspectRatioPicker } from "../base/aspect-ratio-picker";
@@ -82,9 +82,7 @@ const TextGenImageNode = ({ selected, data }: TextGenImageNodeProps) => {
     return (
         <AbiNodeShell
             feature="image-gen"
-            sourceSpec={{
-                text: batchOn({ nodeType: "textNode", path: "texts" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textGenImageNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"
