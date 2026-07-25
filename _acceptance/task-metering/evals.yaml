@@ -72,7 +72,7 @@ evals:
     criterion: AC-10
     executor: test
     cmd: config:executors.test.unit
-    expected: "exit 0; the whole vitest suite is green — the pre-existing 154 assertions plus the new metering tests, proving status/result/error/SSE behaviour is unchanged"
+    expected: "exit 0; the whole vitest suite is green — the pre-existing 152 assertions plus the 10 new metering tests, proving status/result/error/SSE behaviour is unchanged"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   - id: E11
