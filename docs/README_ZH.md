@@ -234,7 +234,7 @@ docker compose up -d
 
 想自己构建镜像而不是拉取：`docker build -t tongflow .`
 
-**数据与凭据。** 所有可写内容都存放在 `/data` 卷（SQLite 数据库、上传文件、设置）。API key 是可选的——在 app 内的**设置**对话框里填写，或在启动时传入（`-e OPENROUTER_API_KEY=…`）；支持的 key：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`。
+**数据与凭据。** 所有可写内容都存放在 `/data` 卷（SQLite 数据库、上传文件、设置）。API key 是可选的——在 app 内的**设置**对话框里填写，或在启动时传入（`-e OPENROUTER_API_KEY=…`）；支持的 key：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`、`ANTHROPIC_API_KEY`（为 Director agent 提供支持——见下文）。
 
 **插件。** 镜像不自带任何插件——请从 app 内的插件管理器安装（首次安装需要访问 GitHub 的网络）。首次运行时，插件会在 `/data/.tongflow/plugin-venv` 下创建一个共享的 Python venv（从 PyPI 安装 SDK 以及该插件的 `requirements.txt`），因此首次运行较慢且需要网络。基于 Modal 的插件还需要一个 Modal token。
 
@@ -258,9 +258,9 @@ docker compose up -d
 
 ### 2 — 配置凭据
 
-打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 API 插件用的 `OPENAI_API_KEY`，或 GPU/CPU 插件所需的凭据。
+打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 API 插件用的 `OPENAI_API_KEY`，或 GPU/CPU 插件所需的凭据。要使用 **Director agent**（画布上的星光图标——把自然语言提示词变成工作流图），也在这里填入 `ANTHROPIC_API_KEY`。
 
-> **插件凭据都在「设置」里。** TongFlow 不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用。各插件需要哪些 key 由它自己的 README 说明。值保存在本地，改动即时生效、无需重启。
+> **插件凭据都在「设置」里。** 插件系统本身不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用，各插件需要哪些 key 由它自己的 README 说明。Director agent 是唯一的第一方例外——它是 TongFlow 内置的功能（而非插件），且始终调用 Anthropic API，因此专门需要 `ANTHROPIC_API_KEY`。值保存在本地，改动即时生效、无需重启。
 
 ### 3 — 运行示例工作流
 

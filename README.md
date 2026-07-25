@@ -242,7 +242,7 @@ docker compose up -d
 
 To build the image yourself instead of pulling: `docker build -t tongflow .`
 
-**Data & credentials.** Everything writable lives in the `/data` volume (SQLite db, uploads, settings). API keys are optional — set them in the in-app **Settings** dialog, or pass them at launch (`-e OPENROUTER_API_KEY=…`); supported keys: `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`.
+**Data & credentials.** Everything writable lives in the `/data` volume (SQLite db, uploads, settings). API keys are optional — set them in the in-app **Settings** dialog, or pass them at launch (`-e OPENROUTER_API_KEY=…`); supported keys: `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`, `ANTHROPIC_API_KEY` (powers the Director agent — see below).
 
 **Plugins.** The image ships no plugins — install them from the in-app plugin manager (first install needs network access to GitHub). On first run, a plugin provisions a shared Python venv under `/data/.tongflow/plugin-venv` (installs the SDK + the plugin's `requirements.txt` from PyPI), so the first run is slower and needs network. Modal-backed plugins additionally need a Modal token.
 
@@ -266,9 +266,9 @@ Browse the full catalog — the official API plugins (OpenAI / Gemini / OpenRout
 
 ### 2 — Configure credentials
 
-Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY` for the API plugins, or the credentials your GPU/CPU plugins require.
+Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY` for the API plugins, or the credentials your GPU/CPU plugins require. To use the **Director agent** (the sparkles icon on the canvas — turns a natural-language prompt into a workflow graph), add `ANTHROPIC_API_KEY` there too.
 
-> **Plugin credentials live in Settings.** TongFlow is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins. Each plugin's README documents the keys it needs. Values are stored locally and take effect without a restart.
+> **Plugin credentials live in Settings.** The plugin system itself is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins, and each plugin's README documents the keys it needs. The Director agent is the one first-party exception — it is a built-in TongFlow feature (not a plugin) and always calls the Anthropic API, so it needs `ANTHROPIC_API_KEY` specifically. Values are stored locally and take effect without a restart.
 
 ### 3 — Run the example workflow
 
