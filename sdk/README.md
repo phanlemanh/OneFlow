@@ -139,7 +139,6 @@ Runs [`scripts/publish-tongflow-pypi.sh`](https://github.com/tong-io/tongflow/bl
 
 ## License
 
-AGPL-3.0 — see [LICENSE](https://github.com/tong-io/tongflow/blob/main/LICENSE). The
-whole project is dual-licensed under AGPL-3.0 / a commercial license; see
-[COMMERCIAL-LICENSE.md](https://github.com/tong-io/tongflow/blob/main/COMMERCIAL-LICENSE.md)
-or contact **business@tongflow.com**.
+AGPL-3.0 — see [LICENSE](https://github.com/tong-io/tongflow/blob/main/LICENSE).
+This fork cannot grant a commercial license; dual licensing is available only from
+the upstream copyright holder, [tong-io/tongflow](https://github.com/tong-io/tongflow).

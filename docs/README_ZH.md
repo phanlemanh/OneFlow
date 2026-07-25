@@ -299,16 +299,17 @@ docker compose up -d
 
 ## 授权协议
 
-TongFlow 采用 **双授权(dual-licensing)** 模式:
+OneFlow 采用 **[AGPL-3.0](../LICENSE)** 授权——与其分叉的上游项目相同。其中包含
+AGPL 第 13 条:如果你将修改后的 OneFlow 作为网络服务运行,必须向该服务的用户
+提供完整的对应源码。
 
-- **[AGPL-3.0](../LICENSE)** —— 对个人、研究、开源项目,以及愿意遵守 AGPL(含第 13 条
-  网络/源码公开义务)的使用者**免费**。
-- **[商业授权](../COMMERCIAL-LICENSE.md)** —— 面向希望在**闭源 / SaaS** 产品中使用
-  TongFlow 且**不愿公开源码**,或需要保证条款与平台技术支持的组织。
-  价格面议,联系 **business@tongflow.com**。
+本分叉**无法**授予商业授权。双授权选项属于上游版权方 tong-io——如需以非 AGPL
+条款使用 TongFlow,请直接联系 [tong-io/tongflow](https://github.com/tong-io/tongflow)。
+上游的 `COMMERCIAL-LICENSE.md` 与 `CLA.md` 文件不属于本分叉;贡献代码按 AGPL-3.0
+本身接受(inbound = outbound),无需签署 CLA。
 
 以上授权覆盖整个仓库,包括 `sdk/` 目录(发布到 PyPI 的 `tongflow` 包)。
-贡献代码受 [CLA](../CLA.md) 约束。
+分叉的署名与修改声明见 [NOTICE.md](../NOTICE.md)。
 
 ## Star 历史
 

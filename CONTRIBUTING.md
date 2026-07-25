@@ -53,14 +53,13 @@ Comments in code must be in English. File names use kebab-case; React components
 Use [GitHub Issues](https://github.com/tong-io/tongflow/issues) with the provided
 templates. For questions, join our [Discord](https://discord.gg/K7V8az94Zf).
 
-## License & Contributor License Agreement (CLA)
+## License
 
-TongFlow uses a **dual-licensing** model: [AGPL-3.0](LICENSE) for the community and a
-separate [commercial license](COMMERCIAL-LICENSE.md) for organizations that cannot
-comply with the AGPL.
+OneFlow is licensed under [AGPL-3.0](LICENSE) only. This fork cannot offer a
+commercial license — the dual-licensing option belongs to the upstream copyright
+holder, [tong-io/tongflow](https://github.com/tong-io/tongflow).
 
-To make this possible, **all contributions are covered by our
-[Contributor License Agreement (CLA)](CLA.md)**. By submitting a pull request you agree
-to the CLA: you keep full copyright of your contribution, and you grant tong-io the
-right to relicense it (including under AGPL-3.0 and commercial terms). This applies to
-the whole repository, including the `sdk/` directory (the `tongflow` PyPI package).
+There is **no CLA**: contributions are accepted under AGPL-3.0 itself
+(inbound = outbound). By submitting a pull request you agree to license your
+contribution under AGPL-3.0. This applies to the whole repository, including the
+`sdk/` directory (the `tongflow` PyPI package).

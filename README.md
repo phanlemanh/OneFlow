@@ -305,9 +305,10 @@ to that service's users.
 This fork **cannot** grant a commercial license. The dual-licensing option
 belongs to the upstream copyright holder, tong-io — if you need TongFlow under
 non-AGPL terms, contact them directly at
-[tong-io/tongflow](https://github.com/tong-io/tongflow). The
-`COMMERCIAL-LICENSE.md` and `CLA.md` files retained in this repository are
-upstream documents and do **not** apply to OneFlow.
+[tong-io/tongflow](https://github.com/tong-io/tongflow). The upstream
+`COMMERCIAL-LICENSE.md` and `CLA.md` documents are not part of this fork;
+contributions are accepted under AGPL-3.0 itself (inbound = outbound), with no
+CLA — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The license covers the entire repository, including the `sdk/` directory (the
 `tongflow` PyPI package, consumed unchanged from upstream).
