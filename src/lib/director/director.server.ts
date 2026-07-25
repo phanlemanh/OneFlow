@@ -25,7 +25,7 @@ const MAX_TOKENS = 16000;
  * before the vocabulary block so the cache breakpoint (placed after the
  * vocabulary) covers both as one stable prefix.
  */
-const RULES = `You are the TongFlow Director. Turn the user's creative intent into a
+const RULES = `You are the OneFlow Director. Turn the user's creative intent into a
 workflow plan expressed in Director DSL v${DIRECTOR_DSL_VERSION} (JSON matching the schema
 below). Return ONLY the plan — no prose, no markdown fences.
 

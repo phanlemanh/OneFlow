@@ -6,7 +6,7 @@ import { readSettingsBlob, writeSettingsBlob } from "@ext/settings-store";
 /**
  * Generic, platform-agnostic environment store.
  *
- * TongFlow itself declares no specific keys: this is a flat `key -> value` map
+ * OneFlow itself declares no specific keys: this is a flat `key -> value` map
  * that the user fills in (workspace settings dialog). Each plugin documents the
  * keys it needs in its own README. The stored values are merged into the
  * environment of spawned plugin processes at execution time, so edits take

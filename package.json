@@ -1,8 +1,8 @@
 {
-    "name": "tongflow",
+    "name": "oneflow",
     "version": "0.2.1",
-    "description": "A multi-modal AIGC studio for building generative AI workflows",
-    "author": "tong-io",
+    "description": "OneFlow (fork of TongFlow) - A multi-modal AIGC studio for building generative AI workflows",
+    "author": "Manh",
     "keywords": [
         "aigc",
         "ai",
@@ -12,9 +12,9 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/tong-io/tongflow"
+        "url": "https://github.com/manhphan/oneflow"
     },
-    "homepage": "https://github.com/tong-io/tongflow#readme",
+    "homepage": "https://github.com/manhphan/oneflow#readme",
     "license": "AGPL-3.0-only",
     "private": true,
     "pnpm": {

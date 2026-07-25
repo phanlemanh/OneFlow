@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "TongFlow",
+    title: "OneFlow",
     description:
         "Open-source AI workflow editor — drag and drop to create AI workflows with an infinite canvas.",
     icons: {

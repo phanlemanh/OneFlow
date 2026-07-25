@@ -24,7 +24,7 @@ export async function GET() {
 /**
  * PUT /api/settings/env
  * Replaces the entire env map. Body: `{ env: Record<string,string> }`.
- * TongFlow stays platform-agnostic: it does not validate which keys are present;
+ * OneFlow stays platform-agnostic: it does not validate which keys are present;
  * each plugin documents the keys it needs in its own README.
  */
 export async function PUT(request: NextRequest) {

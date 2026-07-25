@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="public/logo.svg" alt="TongFlow" width="320" />
+  <img src="public/logo.svg" alt="OneFlow" width="320" />
 
-  <h1>TongFlow : An Open-Source Multi-Modal GenAI Workflow Studio</h1>
+  <h1>OneFlow : An Open-Source Multi-Modal GenAI Workflow Studio</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -18,6 +18,7 @@
   </p>
 </div>
 
+> **Fork notice:** OneFlow is a personal/internal fork of [TongFlow](https://github.com/tong-io/tongflow) (copyright tong-io, AGPL-3.0). It is modified and maintained independently and is not affiliated with or endorsed by tong-io. See [`NOTICE.md`](NOTICE.md) for details.
 
 
 
@@ -34,11 +35,11 @@
 | **Intermediate** — (Add topic → write script → generate speech) + (character description → generate image) → lip-synced video = talking-head avatar.<br/><img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="620" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="200"></video> |
 | **Advanced** — Generate lyrics + song + characters + scenes + storyboard → produce a music video.<br/><img src="https://file.tongflow.com/public/demos/mv.png" width="620" alt="workflow" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="200"></video> |
 
-With TongFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
+With OneFlow, you can expand your imagination and stretch your ideas with generative AI, just have a try now!
 
 ## How To Start
 
-The TongFlow **desktop app** is a lightweight (~10 MB) shell around the cloud studio at **[app.tongflow.com](https://app.tongflow.com)** — install it, sign in, and start creating. The cloud studio also runs in any modern browser.
+The OneFlow **desktop app** is a lightweight (~10 MB) shell around the cloud studio at **[app.tongflow.com](https://app.tongflow.com)** — install it, sign in, and start creating. The cloud studio also runs in any modern browser.
 
 ### Step 1 — Install the desktop app
 
@@ -61,17 +62,17 @@ All builds are on the [Releases](https://github.com/tong-io/tongflow/releases/la
 
 Sign in with Google or WeChat and start creating — the cloud studio manages plugins and execution for you.
 
-> **Prefer a fully local, account-free TongFlow?** That's what self-hosting is for — see [Run from source](#run-from-source) or [Run with Docker](#run-with-docker), then follow [Self-host setup](#self-host-setup-plugins--credentials). (The desktop app up to v0.1.13 bundled this local runtime; those installers remain on the [Releases](https://github.com/tong-io/tongflow/releases) page.)
+> **Prefer a fully local, account-free OneFlow?** That's what self-hosting is for — see [Run from source](#run-from-source) or [Run with Docker](#run-with-docker), then follow [Self-host setup](#self-host-setup-plugins--credentials). (The desktop app up to v0.1.13 bundled this local runtime; those installers remain on the [Releases](https://github.com/tong-io/tongflow/releases) page.)
 
 ## Core Concept
 
-- **All models**: AI models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, speech models are text→audio, and so on). TongFlow wraps each capability as a node.
+- **All models**: AI models can be thought of as a **modality transform** (e.g. LLMs are text→text, image models are text→image, speech models are text→audio, and so on). OneFlow wraps each capability as a node.
 
-- **All modalities**: TongFlow supports almost every modality and file format that people actually ship over the web.
+- **All modalities**: OneFlow supports almost every modality and file format that people actually ship over the web.
 
 - **Low barrier, high ceiling**: no complex AI parameters to learn, no manual node connecting; just three operations — **add**, **transform**, and **combine** — to arrange ideas freely. And by orchestrating AI models freely, you can generate unique creations and works of your own.
 
-- **Open ecosystem**: TongFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node. The core stays small, the ecosystem stays open.
+- **Open ecosystem**: OneFlow's plugin-based design lets every platform package its own independent plugins, and we provide at least one official implementation plugin for each capability node. The core stays small, the ecosystem stays open.
 
 ## What’s Defined
 
@@ -220,7 +221,7 @@ pnpm plugins:install   # clone official plugins into plugins/
 pnpm start:prod        # builds once, then serves at http://localhost:3000
 ```
 
-Requires **Node** (with `pnpm`) and a **Python 3.10+** interpreter on your `PATH` (set `PYTHON` to point at a specific one). Plugins run as local Python processes; TongFlow provisions an isolated venv for them automatically and installs each plugin's `requirements.txt` on first use — no manual Python setup.
+Requires **Node** (with `pnpm`) and a **Python 3.10+** interpreter on your `PATH` (set `PYTHON` to point at a specific one). Plugins run as local Python processes; OneFlow provisions an isolated venv for them automatically and installs each plugin's `requirements.txt` on first use — no manual Python setup.
 
 Open **`http://localhost:3000`** and the canvas is live. Then follow [Self-host setup](#self-host-setup-plugins--credentials) (credentials go in the in-app **Settings** dialog, or a project `.env`).
 
@@ -248,7 +249,7 @@ To build the image yourself instead of pulling: `docker build -t tongflow .`
 
 ## Self-host setup (plugins & credentials)
 
-A self-hosted TongFlow ships with no plugins pre-installed, and the canvas is preloaded with an example workflow. Three steps get it running:
+A self-hosted OneFlow ships with no plugins pre-installed, and the canvas is preloaded with an example workflow. Three steps get it running:
 
 ### 1 — Install plugins
 
@@ -268,7 +269,7 @@ Browse the full catalog — the official API plugins (OpenAI / Gemini / OpenRout
 
 Open **Settings** (the gear icon, top-right) and add the environment variables your plugins need — e.g. `OPENAI_API_KEY` for the API plugins, or the credentials your GPU/CPU plugins require. To use the **Director agent** (the sparkles icon on the canvas — turns a natural-language prompt into a workflow graph), add `ANTHROPIC_API_KEY` there too.
 
-> **Plugin credentials live in Settings.** The plugin system itself is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins, and each plugin's README documents the keys it needs. The Director agent is the one first-party exception — it is a built-in TongFlow feature (not a plugin) and always calls the Anthropic API, so it needs `ANTHROPIC_API_KEY` specifically. Values are stored locally and take effect without a restart.
+> **Plugin credentials live in Settings.** The plugin system itself is platform-agnostic and hardcodes no provider: the Settings dialog is a generic key/value editor for environment variables passed to plugins, and each plugin's README documents the keys it needs. The Director agent is the one first-party exception — it is a built-in OneFlow feature (not a plugin) and always calls the Anthropic API, so it needs `ANTHROPIC_API_KEY` specifically. Values are stored locally and take effect without a restart.
 
 ### 3 — Run the example workflow
 

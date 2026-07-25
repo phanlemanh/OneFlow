@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="../public/logo.svg" alt="TongFlow" width="320" />
+  <img src="../public/logo.svg" alt="OneFlow" width="320" />
 
-  <h1>TongFlow：开源多模态 GenAI 工作流工作室</h1>
+  <h1>OneFlow：开源多模态 GenAI 工作流工作室</h1>
   <p>
     <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
@@ -18,6 +18,8 @@
   </p>
 </div>
 
+> **Fork 声明：** OneFlow 是 [TongFlow](https://github.com/tong-io/tongflow)（版权归 tong-io 所有，AGPL-3.0 许可）的个人/内部 fork。本 fork 独立修改和维护，与 tong-io 无关，未获其背书。详见 [`NOTICE.md`](../NOTICE.md)。
+
 ## Demo 示例
 
 | 工作流截图 | 输出结果 |
@@ -26,11 +28,11 @@
 | **中级** — （添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。<br/><img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="620" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="200"></video> |
 | **高级** — 生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV<br/><img src="https://file.tongflow.com/public/demos/mv.png" width="620" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="200"></video> |
 
-用TongFlow借助生成式AI释放想创意！
+用OneFlow借助生成式AI释放想创意！
 
 ## 快速开始
 
-TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载云端工作室 **[app.tongflow.com](https://app.tongflow.com)** ——安装、登录，即可开始创作。云端工作室也可以直接在浏览器里打开。
+OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载云端工作室 **[app.tongflow.com](https://app.tongflow.com)** ——安装、登录，即可开始创作。云端工作室也可以直接在浏览器里打开。
 
 ### Step 1 — 安装桌面版
 
@@ -53,17 +55,17 @@ TongFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 
 用 Google 或微信登录即可开始创作——插件与执行都由云端托管。
 
-> **想要完全本地、无需账号的 TongFlow？** 请使用自托管——参见[从源代码启动](#从源代码启动)或[用 Docker 启动](#用-docker-启动)，然后按照[自托管配置](#自托管配置插件与凭据)完成设置。（v0.1.13 及之前的桌面版内置了完整本地运行时，安装包仍保留在 [Releases](https://github.com/tong-io/tongflow/releases) 页面。）
+> **想要完全本地、无需账号的 OneFlow？** 请使用自托管——参见[从源代码启动](#从源代码启动)或[用 Docker 启动](#用-docker-启动)，然后按照[自托管配置](#自托管配置插件与凭据)完成设置。（v0.1.13 及之前的桌面版内置了完整本地运行时，安装包仍保留在 [Releases](https://github.com/tong-io/tongflow/releases) 页面。）
 
 ## 核心概念
 
-- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，语音模型是文本→音频等）。TongFlow 将每种能力封装为节点。
+- **全模型**: AI 模型可理解为**模态转换**（例如 LLM 是文本→文本，图像模型是文本→图像，语音模型是文本→音频等）。OneFlow 将每种能力封装为节点。
 
-- **全模态**: TongFlow 支持 Web 上实际流通的几乎所有模态与文件格式。
+- **全模态**: OneFlow 支持 Web 上实际流通的几乎所有模态与文件格式。
 
 - **低门槛，高可能性**: 无需学习复杂的AI参数，无需手动连接节点；只需**添加**、**转换**和**组合**三种操作，就能自由排列创意。同时，通过对AI模型的自由编排，可以生成独有的创意和作品。
 
-- **开放生态**: TongFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件。核心精简，生态开放。
+- **开放生态**: OneFlow 基于插件的设计，使得每个平台都可以封装独立的插件，官方将对每个能力节点提供至少一个实现插件。核心精简，生态开放。
 
 ## 已实现功能
 
@@ -212,7 +214,7 @@ pnpm plugins:install   # 克隆官方插件到 plugins/
 pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 ```
 
-需要 **Node**（含 `pnpm`）以及 `PATH` 上有一个 **Python 3.10+** 解释器（可用 `PYTHON` 指定具体的那个）。插件以本地 Python 进程运行；TongFlow 会自动为它们创建隔离的 venv，并在首次使用时安装各插件的 `requirements.txt`——无需手动配置 Python。
+需要 **Node**（含 `pnpm`）以及 `PATH` 上有一个 **Python 3.10+** 解释器（可用 `PYTHON` 指定具体的那个）。插件以本地 Python 进程运行；OneFlow 会自动为它们创建隔离的 venv，并在首次使用时安装各插件的 `requirements.txt`——无需手动配置 Python。
 
 打开 **`http://localhost:3000`**，画布已就绪。然后按照[自托管配置](#自托管配置插件与凭据)完成设置（凭据填在 app 内的**设置**对话框，或用项目 `.env`）。
 
@@ -240,7 +242,7 @@ docker compose up -d
 
 ## 自托管配置（插件与凭据）
 
-自托管的 TongFlow 默认不预装任何插件，画布已预加载一个示例工作流。三步即可跑起来：
+自托管的 OneFlow 默认不预装任何插件，画布已预加载一个示例工作流。三步即可跑起来：
 
 ### 1 — 安装插件
 
@@ -260,7 +262,7 @@ docker compose up -d
 
 打开**设置**（右上角齿轮图标），填入插件需要的环境变量——比如 API 插件用的 `OPENAI_API_KEY`，或 GPU/CPU 插件所需的凭据。要使用 **Director agent**（画布上的星光图标——把自然语言提示词变成工作流图），也在这里填入 `ANTHROPIC_API_KEY`。
 
-> **插件凭据都在「设置」里。** 插件系统本身不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用，各插件需要哪些 key 由它自己的 README 说明。Director agent 是唯一的第一方例外——它是 TongFlow 内置的功能（而非插件），且始终调用 Anthropic API，因此专门需要 `ANTHROPIC_API_KEY`。值保存在本地，改动即时生效、无需重启。
+> **插件凭据都在「设置」里。** 插件系统本身不绑定任何平台、不硬编码任何 provider：设置对话框是一个通用的环境变量 key/value 编辑器，传给插件使用，各插件需要哪些 key 由它自己的 README 说明。Director agent 是唯一的第一方例外——它是 OneFlow 内置的功能（而非插件），且始终调用 Anthropic API，因此专门需要 `ANTHROPIC_API_KEY`。值保存在本地，改动即时生效、无需重启。
 
 ### 3 — 运行示例工作流
 

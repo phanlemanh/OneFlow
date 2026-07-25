@@ -1,4 +1,4 @@
-# TongFlow Desktop (cloud shell)
+# OneFlow Desktop (cloud shell)
 
 The desktop app is a lightweight [Pake](https://github.com/tw93/Pake) (Tauri) shell
 that loads **https://app.tongflow.com** in a native WebView. It ships no local
@@ -15,7 +15,7 @@ Prerequisites: Node ≥ 22 and Rust ≥ 1.85 (`rustup` — pake-cli offers to in
 npm install -g pake-cli
 
 # From the repo root. First build compiles Tauri and takes ~10 minutes.
-pake https://app.tongflow.com --name TongFlow \
+pake https://app.tongflow.com --name OneFlow \
   --icon desktop/icon.png \
   --width 1440 --height 900 \
   --enable-drag-drop \
@@ -35,7 +35,7 @@ Platform notes:
   inside the app window instead of bouncing to the external browser.
 
 Releases are built by [`.github/workflows/desktop-release.yml`](../.github/workflows/desktop-release.yml)
-on `v*` tags and publish `TongFlow-mac-universal.dmg` and `TongFlow-win-x64.msi`.
+on `v*` tags and publish `OneFlow-mac-universal.dmg` and `OneFlow-win-x64.msi`.
 
 ## Unsigned builds
 
@@ -43,7 +43,7 @@ Builds are unsigned (same as the old Electron shell). On macOS, first launch
 requires right-click → Open, or:
 
 ```bash
-xattr -cr /Applications/TongFlow.app
+xattr -cr /Applications/OneFlow.app
 ```
 
 ## Icon
