@@ -1,5 +1,8 @@
 # dependencies
+# Match both the directory and a bare `node_modules` symlink — the trailing
+# slash alone lets a symlink of that name be staged by `git add -A`.
 node_modules/
+node_modules
 
 # next.js
 .next/
