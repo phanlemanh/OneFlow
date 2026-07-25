@@ -13,6 +13,7 @@ import {
     type ChangeEvent,
     type KeyboardEvent,
     useCallback,
+    useRef,
     useState,
 } from "react";
 import toast from "react-hot-toast";
@@ -52,6 +53,11 @@ interface DirectorErrorBody {
 /** Subset of AI Elements' ChatStatus this panel actually produces. */
 type Status = "ready" | "submitted" | "error";
 
+/** Client-side ceiling on a Director request: two attempts against a
+ * thinking-enabled model can legitimately run for minutes, but an upstream
+ * stall must still leave the user a way out. */
+const REQUEST_TIMEOUT_MS = 3 * 60 * 1000;
+
 export default function DirectorPrompt() {
     const t = useTranslations("Director");
     const [open, setOpen] = useState(false);
@@ -63,6 +69,14 @@ export default function DirectorPrompt() {
     const [draft, setDraft] = useState("");
     // Result awaiting confirm-replace because the canvas already has nodes.
     const [pending, setPending] = useState<DirectorSuccess | null>(null);
+    // In-flight request's controller, so the X button / Escape can cancel it
+    // instead of being disabled for the whole request (Fix 3).
+    const abortControllerRef = useRef<AbortController | null>(null);
+    // True only while the current abort was requested by the user (X /
+    // Escape) rather than the request timeout — distinguishes a silent,
+    // user-initiated cancel from a timeout or a genuine network failure,
+    // both of which must still surface the UPSTREAM_ERROR toast.
+    const userAbortedRef = useRef(false);
 
     const apply = useCallback(
         (result: DirectorSuccess) => {
@@ -93,17 +107,29 @@ export default function DirectorPrompt() {
             const prompt = text.trim();
             if (!prompt) return;
             setStatus("submitted");
+            userAbortedRef.current = false;
+            const controller = new AbortController();
+            abortControllerRef.current = controller;
+            const timeoutId = setTimeout(
+                () => controller.abort(),
+                REQUEST_TIMEOUT_MS,
+            );
             try {
                 const res = await fetch("/api/director", {
                     method: "POST",
                     headers: { "content-type": "application/json" },
                     body: JSON.stringify({ prompt }),
+                    signal: controller.signal,
                 });
 
                 let json: DirectorSuccess | DirectorErrorBody;
                 try {
                     json = await res.json();
                 } catch {
+                    // A user-requested abort can land here too (mid-body-read
+                    // after the response headers already arrived) — stay
+                    // silent for that case, same as the outer catch below.
+                    if (userAbortedRef.current) return;
                     showErrorToast({ message: t("errors.UPSTREAM_ERROR") });
                     setStatus("error");
                     return;
@@ -124,15 +150,30 @@ export default function DirectorPrompt() {
                     apply(json);
                 }
             } catch {
+                // Fetch itself rejects (AbortError) for both a user cancel
+                // and the timeout above; only the user-cancel case is
+                // silent — `close()` already reset status/UI for it. A
+                // timeout or a genuine network failure still needs the
+                // toast.
+                if (userAbortedRef.current) return;
                 showErrorToast({ message: t("errors.UPSTREAM_ERROR") });
                 setStatus("error");
+            } finally {
+                clearTimeout(timeoutId);
+                if (abortControllerRef.current === controller) {
+                    abortControllerRef.current = null;
+                }
             }
         },
         [apply, t],
     );
 
     const close = useCallback(() => {
-        if (status === "submitted") return;
+        if (status === "submitted") {
+            userAbortedRef.current = true;
+            abortControllerRef.current?.abort();
+            setStatus("ready");
+        }
         setOpen(false);
     }, [status]);
 
@@ -166,7 +207,6 @@ export default function DirectorPrompt() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={close}
-                                disabled={status === "submitted"}
                             >
                                 <X className="h-4 w-4" />
                             </Button>
