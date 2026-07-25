@@ -1030,3 +1030,250 @@ describe("compilePlan — hardening 3: ref-shaped strings in params rejected", (
         expect(fusion.data.text).toBeUndefined();
     });
 });
+
+// --- Task 4: remaining CompileIssueCode coverage ---
+//
+// UNKNOWN_SLOT, REF_ON_CONFIG_FIELD, and ARITY_MISMATCH already have full-
+// issue-object coverage above. The cases below fill in the rest of
+// CompileIssueCode. CYCLE is deliberately left uncovered — see the note at
+// the bottom of this file for why it is unreachable by construction.
+
+describe("compilePlan — DUPLICATE_ID", () => {
+    it("flags a repeated step id but still compiles both steps (does not suppress emission)", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "dup",
+                description: "",
+                steps: [
+                    { id: "t1", kind: "text", text: "a cute cat" },
+                    { id: "t1", kind: "text", text: "a cute dog" },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "DUPLICATE_ID",
+                stepId: "t1",
+                message: 'duplicate step id "t1"',
+            },
+        ]);
+        // Both text-source pairs are still emitted despite the id clash —
+        // the duplicate is reported, not fatal.
+        const t = byType(result.nodes);
+        expect(t.addTextNode).toHaveLength(2);
+        expect(t.textNode).toHaveLength(2);
+    });
+});
+
+describe("compilePlan — MISSING_PLUGIN", () => {
+    it("flags a slot with no installed plugin but still emits the node with an empty pluginId", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "no plugin",
+                description: "",
+                steps: [
+                    { id: "t1", kind: "text", text: "a cute cat" },
+                    {
+                        id: "g1",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@t1" }],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: {}, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "MISSING_PLUGIN",
+                stepId: "g1",
+                slot: "image-gen",
+                message: 'no installed plugin serves slot "image-gen"',
+            },
+        ]);
+        // Node emission is not suppressed; pluginId just falls back to "".
+        const gen = byType(result.nodes).textGenImageNode[0];
+        expect(gen.data.pluginId).toBe("");
+    });
+});
+
+describe("compilePlan — UNKNOWN_REF", () => {
+    it("flags a ref to a non-existent step id and skips only that edge", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "ghost ref",
+                description: "",
+                steps: [
+                    {
+                        id: "g1",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [{ field: "text", value: "@ghost" }],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "UNKNOWN_REF",
+                stepId: "g1",
+                message: '"@ghost" does not reference an earlier step',
+            },
+        ]);
+        // No text-source pair or "in:text" edge gets created for the
+        // unresolved ref; only the gen node's own primary-output edge exists.
+        const t = byType(result.nodes);
+        expect(t.addTextNode).toBeUndefined();
+        expect(t.textNode).toBeUndefined();
+        const inTextEdges = result.edges.filter(
+            (e: Edge) => e.targetHandle === "in:text",
+        );
+        expect(inTextEdges).toHaveLength(0);
+        expect(result.edges).toHaveLength(1); // gen -> output imageNode only
+    });
+});
+
+describe("compilePlan — UNKNOWN_INPUT_FIELD", () => {
+    it("flags an input field name the slot doesn't define and skips only that field", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "bogus field",
+                description: "",
+                steps: [
+                    { id: "t1", kind: "text", text: "a cute cat" },
+                    {
+                        id: "g1",
+                        kind: "gen",
+                        slot: "image-gen",
+                        inputs: [
+                            { field: "text", value: "@t1" },
+                            { field: "nonsense", value: "@t1" },
+                        ],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "UNKNOWN_INPUT_FIELD",
+                stepId: "g1",
+                slot: "image-gen",
+                message: '"nonsense" is not an input of image-gen',
+            },
+        ]);
+        // The valid "text" field still wires normally; "nonsense" produces
+        // no handle at all.
+        const inNonsenseEdge = result.edges.find(
+            (e: Edge) => e.targetHandle === "in:nonsense",
+        );
+        expect(inNonsenseEdge).toBeUndefined();
+        const inTextEdge = result.edges.find(
+            (e: Edge) => e.targetHandle === "in:text",
+        );
+        expect(inTextEdge?.sourceHandle).toBe("out:textNode");
+    });
+});
+
+describe("compilePlan — MODALITY_MISMATCH", () => {
+    it("flags a handle field fed a ref whose upstream node type doesn't match (image field <- text step)", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "wrong modality",
+                description: "",
+                steps: [
+                    { id: "t1", kind: "text", text: "not an image" },
+                    {
+                        id: "g1",
+                        kind: "gen",
+                        slot: "image-gen-video",
+                        inputs: [{ field: "image", value: "@t1" }],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "MODALITY_MISMATCH",
+                stepId: "g1",
+                message:
+                    'field "image" expects imageNode; "@t1" produces textNode',
+            },
+        ]);
+        // "image" is provided (just wrongly typed), so this does not also
+        // raise MISSING_REQUIRED_INPUT, and no edge/fileKeys placeholder is
+        // created for the rejected field.
+        const gen = byType(result.nodes).imageGenVideoNode[0];
+        expect(gen.data.fileKeys).toBeUndefined();
+        const inImageEdge = result.edges.find(
+            (e: Edge) => e.targetHandle === "in:image",
+        );
+        expect(inImageEdge).toBeUndefined();
+    });
+});
+
+describe("compilePlan — MISSING_REQUIRED_INPUT", () => {
+    it("flags a required, non-manual handle field left unconnected (image-gen-video's image)", () => {
+        // image-gen's own "text" is not ABI-required (config-fallback
+        // leniency, spec §5), so it can't exercise this code — use
+        // image-gen-video's "image", which the ABI does require and no
+        // node component demotes to manual.
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "no image",
+                description: "",
+                steps: [
+                    {
+                        id: "g1",
+                        kind: "gen",
+                        slot: "image-gen-video",
+                        inputs: [],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: DEMO_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues).toEqual([
+            {
+                code: "MISSING_REQUIRED_INPUT",
+                stepId: "g1",
+                slot: "image-gen-video",
+                message:
+                    'required input "image" of image-gen-video is not connected',
+            },
+        ]);
+        // Node emission is not suppressed; the field is just left unwired.
+        const gen = byType(result.nodes).imageGenVideoNode[0];
+        expect(gen).toBeDefined();
+        expect(gen.data.fileKeys).toBeUndefined();
+    });
+});
+
+// --- CYCLE: unreachable by construction, deliberately left uncovered ---
+//
+// compilePlan builds `outputs` forward, one step at a time (see the final
+// loop in compilePlan): a ref only resolves via `outputs.get(refId(v))`,
+// which only ever contains steps whose compilation has already completed.
+// Every edge this compiler emits therefore goes from an already-created
+// node to a brand-new one — the emission order is already a valid
+// topological order, so `layoutByLevels`'s stray-node check (the only
+// producer of CYCLE) can never find an unpositioned node for any graph this
+// compiler itself constructs from a DirectorPlan. Forcing a "cycle" would
+// require fabricating a graph compilePlan cannot produce (e.g. a
+// pathological idFn that reuses ids across distinct nodes) — that tests the
+// defensive fallback, not compiler behavior on any real DSL input, so per
+// the task brief it is left uncovered rather than faked.
