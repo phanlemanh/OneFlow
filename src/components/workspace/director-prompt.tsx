@@ -7,12 +7,14 @@
  * followed by the four useFlow setters. This component never triggers
  * execution; it only stages a graph on the canvas for the user to review.
  */
+import { useReactFlow } from "@xyflow/react";
 import { Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
     type ChangeEvent,
     type KeyboardEvent,
     useCallback,
+    useEffect,
     useRef,
     useState,
 } from "react";
@@ -60,6 +62,7 @@ const REQUEST_TIMEOUT_MS = 3 * 60 * 1000;
 
 export default function DirectorPrompt() {
     const t = useTranslations("Director");
+    const { fitView } = useReactFlow();
     const [open, setOpen] = useState(false);
     const [status, setStatus] = useState<Status>("ready");
     // The vendored PromptInput clears its textarea on every submit, whether
@@ -77,6 +80,22 @@ export default function DirectorPrompt() {
     // user-initiated cancel from a timeout or a genuine network failure,
     // both of which must still surface the UPSTREAM_ERROR toast.
     const userAbortedRef = useRef(false);
+    // Bumped every time `apply` commits a new graph to the canvas. The
+    // compiler lays generated nodes out at a fixed {x: 0, y: 0}-rooted grid,
+    // unrelated to wherever the user last left the viewport, so an applied
+    // graph must be reframed or it can land entirely off-screen.
+    const [appliedAt, setAppliedAt] = useState(0);
+
+    // Frame the freshly applied graph, but only once React has committed the
+    // new nodes that setNodes/setEdges below just pushed into the store —
+    // fitView() itself waits for React Flow to finish measuring every node
+    // (its internal fitViewQueued flag resolves once nodesInitialized), but
+    // calling it must still happen after this component's own render for the
+    // new appliedAt value has committed, not synchronously inside `apply`.
+    useEffect(() => {
+        if (appliedAt === 0) return;
+        void fitView({ padding: 0.2, duration: 400 });
+    }, [appliedAt, fitView]);
 
     const apply = useCallback(
         (result: DirectorSuccess) => {
@@ -89,6 +108,7 @@ export default function DirectorPrompt() {
                 if (parsed.description) {
                     flow.setWorkflowDescription(parsed.description);
                 }
+                setAppliedAt((n) => n + 1);
                 toast.success(t("applied"));
                 setPending(null);
                 setOpen(false);
