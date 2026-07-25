@@ -176,7 +176,11 @@ export default function DirectorPrompt() {
                         type="button"
                         variant="outline"
                         className="gap-1.5 rounded-full shadow"
-                        onClick={() => setOpen(true)}
+                        onClick={() => {
+                            // Clear a stale error indicator from a prior session.
+                            setStatus("ready");
+                            setOpen(true);
+                        }}
                     >
                         <Sparkles className="h-4 w-4" />
                         {t("open")}
