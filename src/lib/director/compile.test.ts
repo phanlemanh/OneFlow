@@ -1,15 +1,11 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import type { Edge, Node } from "@xyflow/react";
 import { describe, expect, it } from "vitest";
 import type { NodeSlot } from "@/generated/abi";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { resolveSpec } from "@/lib/abi/resolve";
-import {
-    batchOn,
-    collectAll,
-    configField,
-    type FieldSourceOverride,
-    handle,
-} from "@/lib/abi/sources";
+import { type FieldSourceOverride, handle } from "@/lib/abi/sources";
 import { compilePlan, IDS_KEYED_NODE_TYPES } from "./compile";
 import type { DirectorPlan } from "./dsl";
 
@@ -204,234 +200,13 @@ describe("compilePlan — inline literal on a text handle field", () => {
     });
 });
 
-// --- Finding 1 guard: field classification must be derived, not guessed ---
-//
-// Every node type below is a component under src/components/workspace/nodes
-// that declares its own `sourceSpec` (inline `sourceSpec={{...}}` or a
-// module-local const), found by sweeping
-// `grep -rn "sourceSpec=" src/components/workspace/nodes` and reading each
-// hit (2026-07-24). This mirrors each component's *actual* override object,
-// so the assertion below computes materiality itself instead of re-asserting a
-// hand-picked subset.
-//
-// Since every ABI node now reads its overrides from NODE_TYPE_SOURCE_SPEC, the
-// `tracked` check below is satisfied for all of these, and this sweep no longer
-// carries the weight it did when compile.ts kept a local mirror table. It is
-// kept as a second, independently-authored copy of what the components declare:
-// it still fails if a registry entry stops matching the component it serves.
-// `abi/node-feature-registry.test.ts` is now the primary guard.
-const INLINE_SOURCE_SPEC_SWEEP: Array<{
-    nodeType: string;
-    slot: NodeSlot;
-    overrides: Record<string, FieldSourceOverride>;
-}> = [
-    // --- material: config <-> handle promotions/demotions (must be tracked) ---
-    {
-        nodeType: "genTextNode",
-        slot: "gen-text",
-        overrides: { text: batchOn({ nodeType: "textNode", path: "texts" }) },
-    },
-    {
-        nodeType: "textGenImageNode",
-        slot: "image-gen",
-        overrides: { text: batchOn({ nodeType: "textNode", path: "texts" }) },
-    },
-    {
-        nodeType: "textAudioGenSpeechNode",
-        slot: "text-audio-gen-speech",
-        overrides: { text: batchOn({ nodeType: "textNode", path: "texts" }) },
-    },
-    {
-        nodeType: "textGenSpeechInstructNode",
-        slot: "text-gen-speech-instruct",
-        overrides: { text: batchOn({ nodeType: "textNode", path: "texts" }) },
-    },
-    {
-        nodeType: "textGenSpeechPresetNode",
-        slot: "text-gen-speech-preset",
-        overrides: { text: batchOn({ nodeType: "textNode", path: "texts" }) },
-    },
-    {
-        nodeType: "textGenSpeechCloneNode",
-        slot: "text-gen-speech-clone",
-        overrides: {
-            text: batchOn({ nodeType: "textNode", path: "texts" }),
-            ref_audio: configField(),
-        },
-    },
-    {
-        nodeType: "textGenMusicNode",
-        slot: "gen-music",
-        overrides: {
-            tags: handle({ nodeType: "textNode", path: "texts[0]" }),
-            lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
-        },
-    },
-    {
-        nodeType: "splitTextNode",
-        slot: "split-text",
-        overrides: { text: handle({ nodeType: "textNode", path: "texts[0]" }) },
-    },
-    // --- immaterial: refine a field the raw ABI schema already classifies
-    // as a handle (batch/collect on a `$ref` field, or collectAll on an
-    // already-handle "texts" array) — listed so the sweep is honest about
-    // everything found, but expected to need no tracking. ---
-    {
-        nodeType: "imageGenModelNode",
-        slot: "image-gen-model",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "speechGenVideoNode",
-        slot: "speech-text-gen-video",
-        overrides: { audio: handle({ nodeType: "audioNode" }) },
-    },
-    {
-        nodeType: "audioDescribeNode",
-        slot: "audio-describe",
-        overrides: { audio: batchOn() },
-    },
-    {
-        nodeType: "imageGenTextNode",
-        slot: "image-gen-text",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "videoGenTextNode",
-        slot: "video-gen-text",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "audioGenTextSpeechRecognizeNode",
-        slot: "transcribe",
-        overrides: { audio: batchOn() },
-    },
-    {
-        nodeType: "fileGenTextNode",
-        slot: "parse-document",
-        overrides: { document: batchOn({ nodeType: "fileNode" }) },
-    },
-    {
-        nodeType: "getFirstFrameNode",
-        slot: "get-first-frame",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "getLastFrameNode",
-        slot: "get-last-frame",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "imageBodySegNode",
-        slot: "image-body-seg",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "imageGenImageUpscaleNode",
-        slot: "image-upscale",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "imageMattingNode",
-        slot: "image-matting",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "imageNormalNode",
-        slot: "image-normal",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "imagePoseNode",
-        slot: "image-pose",
-        overrides: { image: batchOn() },
-    },
-    {
-        nodeType: "removeVideoSubtitleNode",
-        slot: "subtitle_remove",
-        overrides: { fileKey: batchOn({ nodeType: "videoNode" }) },
-    },
-    {
-        nodeType: "removeVideoAudioNode",
-        slot: "remove-video-audio",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "removeWatermarkNode",
-        slot: "remove_watermark",
-        overrides: { fileKey: batchOn({ nodeType: "videoNode" }) },
-    },
-    {
-        nodeType: "separateAudioTrackNode",
-        slot: "separate_audio_track",
-        overrides: { audio: batchOn() },
-    },
-    {
-        nodeType: "separateSpeakerNode",
-        slot: "separate_speaker",
-        overrides: { audio: batchOn() },
-    },
-    {
-        nodeType: "videoGenModelNode",
-        slot: "video-gen-model",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "videoUpscaleNode",
-        slot: "video-upscale",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "arrangeNode",
-        slot: "arrange-group",
-        overrides: { fileKeys: collectAll({ nodeType: "videoNode" }) },
-    },
-    {
-        nodeType: "concatVideoNode",
-        slot: "concat-videos",
-        overrides: { videos: collectAll() },
-    },
-    {
-        nodeType: "dropVideoNode",
-        slot: "drop-video",
-        overrides: { videos: collectAll() },
-    },
-    {
-        nodeType: "mergeVideoAudioNode",
-        slot: "merge-video-audio",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "splitVideoNode",
-        slot: "split-video",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "convertVoiceNode",
-        slot: "convert_voice",
-        overrides: { sourceKey: batchOn({ nodeType: "audioNode" }) },
-    },
-    {
-        nodeType: "denoiseAudioSubtitleNode",
-        slot: "denoise_audio",
-        overrides: { fileKey: batchOn({ nodeType: "audioNode" }) },
-    },
-    {
-        nodeType: "extractAudioNode",
-        slot: "extract-audio",
-        overrides: { video: batchOn() },
-    },
-    {
-        nodeType: "textsGenTextNode",
-        slot: "combine-text",
-        overrides: { texts: collectAll() },
-    },
-];
-
 /**
- * Materiality check shared by the "Finding 1 guard" tests below. Pulled out
- * of the test body so the renamed-field regression test (polish item 3) can
- * exercise the exact same presence-checked logic instead of re-deriving it.
+ * Materiality check originally shared by a hand-authored sweep of every ABI
+ * node component's real `sourceSpec` (deleted — Minor 10: it duplicated most
+ * of NODE_TYPE_SOURCE_SPEC itself and, by its own comment, `abi/
+ * node-feature-registry.test.ts`'s filesystem scan had already become the
+ * primary guard for "every component's override is tracked"). Kept because
+ * the renamed-field regression test below still exercises it directly.
  */
 function materialUntrackedFields(
     entries: ReadonlyArray<{
@@ -471,19 +246,7 @@ function materialUntrackedFields(
     return untracked;
 }
 
-describe("Finding 1 guard — inline sourceSpec overrides must be tracked", () => {
-    it("every node component's real sourceSpec is exercised without throwing", () => {
-        // Sanity: every (slot, overrides) pair above must resolve — a typo'd
-        // field name or slot would throw inside getAbiTopology/resolveSpec.
-        for (const { slot, overrides } of INLINE_SOURCE_SPEC_SWEEP) {
-            expect(() => resolveSpec(slot, overrides)).not.toThrow();
-        }
-    });
-
-    it("flags any override that changes a field's handle/manual classification but isn't tracked by NODE_TYPE_SOURCE_SPEC", () => {
-        expect(materialUntrackedFields(INLINE_SOURCE_SPEC_SWEEP)).toEqual([]);
-    });
-
+describe("materialUntrackedFields — renamed-field regression (Minor 10)", () => {
     // --- Polish item 3: the guard must fail cleanly on a renamed field ---
     it("reports a readable message instead of throwing TypeError when a swept field is absent from the resolved spec (simulated component field rename)", () => {
         const renamedFieldSweep = [
@@ -507,25 +270,82 @@ describe("Finding 1 guard — inline sourceSpec overrides must be tracked", () =
     });
 });
 
-// --- Finding 2 guard: every `data.ids`-reading node type must be listed ---
-//
-// Node types found by sweeping every node component for `data.ids` / a
-// destructured `ids` field:
-//   grep -rnE "data\.ids|\{\s*ids\s*(=|:)" src/components/workspace/nodes
-// (2026-07-24) — imageFusionNode, imagesGenVideoNode, speechGenVideoNode,
-// genTextNode (text-gen-text.tsx), textGenVideoNode (text-gen-video.tsx).
-const DATA_IDS_READING_NODE_TYPES = [
-    "imageFusionNode",
-    "imagesGenVideoNode",
-    "speechGenVideoNode",
-    "genTextNode",
-    "textGenVideoNode",
-];
+// --- Fix 7 / Finding 2 guard: every `data.ids`-reading node type must be
+// listed in IDS_KEYED_NODE_TYPES — enforced by scanning the real component
+// files at test time (readdirSync/readFileSync), not by comparing against a
+// second hand-copied list that a future component change could silently
+// leave stale. Mirrors safe-slots.test.ts / node-feature-registry.test.ts's
+// own filesystem-scan guards. ---
+
+const TYPES_FILE = "src/components/workspace/types.tsx";
+/** `data.ids` (a plain property read) or a destructured `{ ids }` /
+ * `{ ids: alias }` — the two shapes a component actually reads this field
+ * with, per compile.ts's Step 0 note (b). */
+const DATA_IDS_REGEX = /data\.ids|\{\s*ids\s*[=:]/;
+
+/**
+ * Repo-relative file path for every registered ReactFlow node type, derived
+ * by parsing `types.tsx` itself: its own `import Name from "./nodes/.../x"`
+ * statements (default *and* named — e.g. `AddModelNode`) give component ->
+ * file, and the `NODE_TYPES` object literal body gives nodeType ->
+ * component. Combining the two is exactly how the app itself resolves a
+ * node type to its component, so this can't drift from what the canvas
+ * actually renders the way a hand-copied file list could.
+ */
+function nodeTypeFilePaths(): Record<string, string> {
+    const src = readFileSync(TYPES_FILE, "utf8");
+
+    const componentPaths = new Map<string, string>();
+    const importRe =
+        /^import\s+(?:\{\s*(\w+)\s*\}|(\w+))\s+from\s+"([^"]+)";?\s*$/gm;
+    for (const m of src.matchAll(importRe)) {
+        const name = m[1] ?? m[2];
+        const modulePath = m[3];
+        if (!modulePath.startsWith(".")) continue; // e.g. "@xyflow/react"
+        componentPaths.set(name, `${modulePath}.tsx`);
+    }
+
+    const bodyMatch = src.match(
+        /export const NODE_TYPES: NodeTypes = \{([\s\S]*?)\n\};/,
+    );
+    if (!bodyMatch) {
+        throw new Error(
+            "could not locate the NODE_TYPES object literal in types.tsx — has its shape changed?",
+        );
+    }
+    const entryRe = /^\s*(\w+):\s*(\w+),?\s*$/gm;
+
+    const out: Record<string, string> = {};
+    for (const m of bodyMatch[1].matchAll(entryRe)) {
+        const [, nodeType, component] = m;
+        const rel = componentPaths.get(component);
+        if (!rel) continue;
+        out[nodeType] = join(dirname(TYPES_FILE), rel);
+    }
+    return out;
+}
+
+/** Every registered node type whose component source matches DATA_IDS_REGEX. */
+function nodeTypesReadingDataIds(): Set<string> {
+    const found = new Set<string>();
+    for (const [nodeType, path] of Object.entries(nodeTypeFilePaths())) {
+        if (DATA_IDS_REGEX.test(readFileSync(path, "utf8"))) {
+            found.add(nodeType);
+        }
+    }
+    return found;
+}
 
 describe("Finding 2 guard — IDS_KEYED_NODE_TYPES must match the data.ids sweep", () => {
+    it("resolves a plausible number of node types from types.tsx", () => {
+        // Guards against the scan silently matching nothing (wrong path,
+        // types.tsx's import/object-literal shape changed).
+        expect(Object.keys(nodeTypeFilePaths()).length).toBeGreaterThan(40);
+    });
+
     it("matches exactly the node types whose component reads data.ids", () => {
         expect(new Set(IDS_KEYED_NODE_TYPES)).toEqual(
-            new Set(DATA_IDS_READING_NODE_TYPES),
+            nodeTypesReadingDataIds(),
         );
     });
 });
