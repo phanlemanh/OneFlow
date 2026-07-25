@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { generateWorkflow, PlanValidationError } from "./director-core";
+import {
+    type DirectorTurn,
+    generateWorkflow,
+    PlanValidationError,
+} from "./director-core";
 import type { DirectorPlan } from "./dsl";
 
 const DEMO_PLUGINS = {
@@ -36,6 +40,11 @@ const BAD_PLAN: DirectorPlan = {
     ],
 };
 
+/** Every adjacent pair of turns has a different role. */
+function rolesAlternate(turns: DirectorTurn[]): boolean {
+    return turns.every((turn, i) => i === 0 || turn.role !== turns[i - 1].role);
+}
+
 describe("generateWorkflow", () => {
     it("returns nodes/edges for a valid first plan", async () => {
         const result = await generateWorkflow(
@@ -51,7 +60,7 @@ describe("generateWorkflow", () => {
     });
 
     it("retries once with error feedback, then succeeds", async () => {
-        const calls: string[][] = [];
+        const calls: DirectorTurn[][] = [];
         const result = await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
@@ -62,9 +71,10 @@ describe("generateWorkflow", () => {
         );
         expect(result.ok).toBe(true);
         expect(calls).toHaveLength(2);
-        // second call carries the compiler feedback turn
-        expect(calls[1].length).toBe(2);
-        expect(calls[1][1]).toContain("UNKNOWN_REF");
+        // second call carries the compiler feedback as a trailing user turn
+        expect(calls[1].length).toBe(3);
+        expect(calls[1][2].role).toBe("user");
+        expect(calls[1][2].text).toContain("UNKNOWN_REF");
     });
 
     it("fails with PLAN_INVALID after the retry also fails", async () => {
@@ -101,10 +111,11 @@ describe("generateWorkflow", () => {
         expect(calls).toBe(1);
     });
 
-    // --- Important 3: retry feedback must embed the failed plan itself ---
+    // --- Important 3 / retry turn shape: roles alternate, the failed plan
+    // rides as its own `assistant` turn, and the sequence ends on `user` ---
 
-    it("embeds the failed plan's JSON in the retry feedback turn", async () => {
-        const calls: string[][] = [];
+    it("sends an alternating turn sequence on retry, with the failed plan as an assistant turn", async () => {
+        const calls: DirectorTurn[][] = [];
         await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
@@ -114,13 +125,49 @@ describe("generateWorkflow", () => {
             DEMO_PLUGINS,
         );
         expect(calls).toHaveLength(2);
-        expect(calls[1][1]).toContain(JSON.stringify(BAD_PLAN));
+
+        const secondCallTurns = calls[1];
+        expect(rolesAlternate(secondCallTurns)).toBe(true);
+        expect(secondCallTurns.at(-1)?.role).toBe("user");
+
+        expect(secondCallTurns[0]).toEqual({
+            role: "user",
+            text: "draw a red bicycle",
+        });
+        expect(secondCallTurns[1].role).toBe("assistant");
+        expect(secondCallTurns[1].text).toContain(JSON.stringify(BAD_PLAN));
+        expect(secondCallTurns[2].role).toBe("user");
+    });
+
+    // --- Fix 5: a final-attempt PlanValidationError carries the earlier
+    // compiler issues through as `details` instead of discarding them ---
+
+    it("carries the first attempt's compiler issues through as details when the retry throws PlanValidationError", async () => {
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async (turns) => {
+                if (turns.length === 1) {
+                    return BAD_PLAN;
+                }
+                throw new PlanValidationError(
+                    "model returned no parsable plan",
+                );
+            },
+            DEMO_PLUGINS,
+        );
+        expect(result).toMatchObject({ ok: false, code: "PLAN_INVALID" });
+        if (!result.ok) {
+            expect(result.details).toBeDefined();
+            expect(result.details?.some((i) => i.code === "UNKNOWN_REF")).toBe(
+                true,
+            );
+        }
     });
 });
 
 describe("generateWorkflow — plan-validation throws (Important 2)", () => {
-    it("retries once after a PlanValidationError, then succeeds", async () => {
-        const calls: string[][] = [];
+    it("retries once after a PlanValidationError, then succeeds, merging the critique into a single user turn", async () => {
+        const calls: DirectorTurn[][] = [];
         const result = await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
@@ -136,8 +183,13 @@ describe("generateWorkflow — plan-validation throws (Important 2)", () => {
         );
         expect(result.ok).toBe(true);
         expect(calls).toHaveLength(2);
-        // second call carries feedback built from the thrown error message
-        expect(calls[1][1]).toContain("1bad");
+        // There is no schema-valid plan to echo as an assistant turn, so the
+        // critique is merged into the sole (still `user`) turn rather than
+        // appended as a second, same-role turn.
+        expect(calls[1]).toHaveLength(1);
+        expect(calls[1][0].role).toBe("user");
+        expect(calls[1][0].text).toContain("1bad");
+        expect(calls[1][0].text).toContain("draw a red bicycle");
     });
 
     it("returns PLAN_INVALID (not a throw) when every attempt raises PlanValidationError", async () => {

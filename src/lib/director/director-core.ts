@@ -30,7 +30,15 @@ export type DirectorResult =
           details?: CompileIssue[];
       };
 
-export type PlanGenerator = (userTurns: string[]) => Promise<DirectorPlan>;
+/** One turn of the conversation sent to the model. The sequence must always
+ * alternate `user`/`assistant` and end on a `user` turn (a trailing
+ * `assistant` turn is a prefill and is rejected by the model). */
+export interface DirectorTurn {
+    role: "user" | "assistant";
+    text: string;
+}
+
+export type PlanGenerator = (turns: DirectorTurn[]) => Promise<DirectorPlan>;
 
 /**
  * Thrown by a `PlanGenerator` when the model's response could not be turned
@@ -75,13 +83,12 @@ function failureFromIssues(issues: CompileIssue[]): DirectorResult {
     };
 }
 
-/** The retry turn fed back to the model after a compile failure: the failed
- * plan itself (so a model reading the turn has something to locate the
- * offending step ids against — the plan text otherwise never appears
- * anywhere in the visible conversation) followed by every issue, legible
- * enough that a model reading it can figure out what to change. */
-function feedbackTurn(plan: DirectorPlan, issues: CompileIssue[]): string {
-    return `Your previous plan failed validation:\n${JSON.stringify(plan)}\n\nFix these problems and return a corrected plan:\n${issues
+/** The compiler-issue critique: the failed plan itself is echoed back as its
+ * own `assistant` turn (see `generateWorkflow`) so this text only needs to
+ * carry the issues, legible enough that a model reading it can figure out
+ * what to change. */
+function issuesFeedback(issues: CompileIssue[]): string {
+    return `That plan failed validation. Fix these problems and return a corrected plan:\n${issues
         .map(
             (i) =>
                 `- [${i.code}]${i.stepId ? ` step "${i.stepId}":` : ""} ${i.message}`,
@@ -96,12 +103,26 @@ function feedbackTurnFromValidationError(message: string): string {
     return `Your previous response could not be parsed as a valid plan: ${message}\nReturn a corrected plan matching the schema.`;
 }
 
+/** Appends a `user` turn, merging into the trailing turn instead of pushing a
+ * new one when that trailing turn is already `user` — the only way to add
+ * critique text without ever producing two consecutive same-role turns. By
+ * construction the sequence handed to a `PlanGenerator` always ends on
+ * `user` (see below), so this is the sole append point the retry loop needs. */
+function appendUserTurn(turns: DirectorTurn[], text: string): void {
+    const last = turns[turns.length - 1];
+    if (last?.role === "user") {
+        last.text = `${last.text}\n\n${text}`;
+    } else {
+        turns.push({ role: "user", text });
+    }
+}
+
 export async function generateWorkflow(
     prompt: string,
     generatePlan: PlanGenerator,
     slotDefaultPlugin: Partial<Record<string, string>>,
 ): Promise<DirectorResult> {
-    const turns = [prompt];
+    const turns: DirectorTurn[] = [{ role: "user", text: prompt }];
     let lastIssues: CompileIssue[] = [];
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -122,9 +143,10 @@ export async function generateWorkflow(
                     ok: false,
                     code: "PLAN_INVALID",
                     message: err.message,
+                    details: lastIssues.length > 0 ? lastIssues : undefined,
                 };
             }
-            turns.push(feedbackTurnFromValidationError(err.message));
+            appendUserTurn(turns, feedbackTurnFromValidationError(err.message));
             continue;
         }
 
@@ -150,7 +172,14 @@ export async function generateWorkflow(
             return failureFromIssues(issues);
         }
         if (!isLastAttempt) {
-            turns.push(feedbackTurn(plan, issues));
+            // The model's failed plan becomes its own `assistant` turn (so a
+            // model reading the turn has something to locate the offending
+            // step ids against — the plan text otherwise never appears
+            // anywhere in the visible conversation), and the critique
+            // follows as the next `user` turn — keeping the sequence
+            // alternating, ending on `user`.
+            turns.push({ role: "assistant", text: JSON.stringify(plan) });
+            appendUserTurn(turns, issuesFeedback(issues));
         }
     }
     return failureFromIssues(lastIssues);

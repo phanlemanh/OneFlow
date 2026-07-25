@@ -3,6 +3,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { loadEnvStore } from "@/lib/settings/env-store.server";
+import { classifyPlanError } from "./classify-plan-error";
 import {
     type DirectorResult,
     generateWorkflow,
@@ -102,6 +103,10 @@ Rules for steps:
   handle fields) in English for best model performance, even if the user
   wrote in another language.
 
+The example below is illustrative only and may name slots absent from the
+"Available slots" vocabulary on a partial plugin install — the vocabulary
+always wins.
+
 Example — "${FEW_SHOT_EXAMPLE_PROMPT}":
 ${FEW_SHOT_EXAMPLE_JSON}`;
 
@@ -149,22 +154,26 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
         };
     }
 
-    const apiKey = await resolveApiKey();
-    if (!apiKey) {
-        return {
-            ok: false,
-            code: "MISSING_API_KEY",
-            message: "Set ANTHROPIC_API_KEY in Settings",
-        };
-    }
-
-    const { vocab, slotDefaultPlugin } = buildDirectorCatalog();
-    const client = new Anthropic({ apiKey });
-
     try {
+        const apiKey = await resolveApiKey();
+        if (!apiKey) {
+            return {
+                ok: false,
+                code: "MISSING_API_KEY",
+                message: "Set ANTHROPIC_API_KEY in Settings",
+            };
+        }
+
+        // Filesystem scan behind an extension seam (plugin registry) — kept
+        // inside this `try` so a throw here is mapped to a `DirectorResult`
+        // by `mapAnthropicError` below instead of rejecting the promise and
+        // breaking the `Promise<DirectorResult>` contract callers rely on.
+        const { vocab, slotDefaultPlugin } = buildDirectorCatalog();
+        const client = new Anthropic({ apiKey });
+
         return await generateWorkflow(
             prompt,
-            async (userTurns) => {
+            async (turns) => {
                 // `zodOutputFormat` strips constraints the API's JSON-schema
                 // grammar can't express (string pattern/length, array
                 // maxItems — see dsl.ts) and re-checks them client-side
@@ -172,11 +181,12 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
                 // `AnthropicError`, not an `APIError`. That's the SDK's own
                 // distinguishable signal for "the model's plan didn't pass
                 // validation" versus "the request itself failed" (auth, rate
-                // limit, connection, ... — all `APIError` subclasses), so we
-                // key off `instanceof Anthropic.APIError` rather than
-                // matching on error message text: a transport failure is
-                // rethrown unchanged for mapAnthropicError below to
-                // classify, while everything else becomes a
+                // limit, connection, ... — all `APIError` subclasses), so
+                // `classifyPlanError` (classify-plan-error.ts) keys off
+                // `instanceof Anthropic.APIError` rather than matching on
+                // error message text: a transport failure is rethrown
+                // unchanged for mapAnthropicError below to classify, while
+                // only the narrow "plan" signal becomes a
                 // `PlanValidationError` the retry loop in director-core.ts
                 // can absorb.
                 const response = await client.messages
@@ -192,16 +202,16 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
                                 cache_control: { type: "ephemeral" },
                             },
                         ],
-                        messages: userTurns.map((text) => ({
-                            role: "user" as const,
-                            content: text,
+                        messages: turns.map((turn) => ({
+                            role: turn.role,
+                            content: turn.text,
                         })),
                         output_config: {
                             format: zodOutputFormat(DirectorPlanSchema),
                         },
                     })
                     .catch((err) => {
-                        if (err instanceof Anthropic.APIError) {
+                        if (classifyPlanError(err) !== "plan") {
                             throw err;
                         }
                         throw new PlanValidationError(
