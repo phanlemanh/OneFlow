@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  * disagree, React components render in one language while toasts render in
  * another — which is exactly what a missing NEXT_LOCALE cookie used to do.
  *
- * `Director.open` is asserted because it differs in all four locales.
+ * `Director.open` is asserted because it differs across all five locales.
  */
 
 function stubBrowser(cookie: string, language: string): void {
@@ -33,6 +33,11 @@ describe("getClientTranslator locale resolution", () => {
         expect(await translateDirectorOpen()).toBe("ディレクター");
     });
 
+    it("honours an explicit NEXT_LOCALE=vi cookie", async () => {
+        stubBrowser("NEXT_LOCALE=vi", "en-US");
+        expect(await translateDirectorOpen()).toBe("Đạo diễn");
+    });
+
     it("negotiates the browser language when no cookie is set", async () => {
         stubBrowser("__next_hmr_refresh_hash__=abc", "en-US");
         expect(await translateDirectorOpen()).toBe("Director");
@@ -43,6 +48,11 @@ describe("getClientTranslator locale resolution", () => {
         expect(await translateDirectorOpen()).toBe("ディレクター");
         stubBrowser("", "ko-KR");
         expect(await translateDirectorOpen()).toBe("디렉터");
+    });
+
+    it("negotiates vi from the browser language", async () => {
+        stubBrowser("", "vi-VN");
+        expect(await translateDirectorOpen()).toBe("Đạo diễn");
     });
 
     it("falls back to zh for an unsupported browser language", async () => {

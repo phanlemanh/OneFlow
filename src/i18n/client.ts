@@ -16,9 +16,10 @@ import { createTranslator } from "next-intl";
 import enMessages from "@/i18n/messages/en.json";
 import jaMessages from "@/i18n/messages/ja.json";
 import koMessages from "@/i18n/messages/ko.json";
+import viMessages from "@/i18n/messages/vi.json";
 import zhMessages from "@/i18n/messages/zh.json";
 
-type AppLocale = "en" | "zh" | "ja" | "ko";
+type AppLocale = "en" | "zh" | "ja" | "ko" | "vi";
 
 // Loose typing: createTranslator's strict shape inference collapses to `never`
 // across our locale union, so we surface a looser `(key, vars?) => string`
@@ -28,6 +29,7 @@ const messagesByLocale: Record<AppLocale, Record<string, unknown>> = {
     zh: zhMessages,
     ja: jaMessages,
     ko: koMessages,
+    vi: viMessages,
 };
 
 const DEFAULT_LOCALE: AppLocale = "zh";
@@ -43,8 +45,8 @@ function readCookieLocale(): AppLocale | undefined {
 
 /**
  * Browser-language negotiation, matching what `request.ts` derives from the
- * `Accept-Language` header: a leading en / ja / ko tag selects that locale,
- * anything else leaves the default in place.
+ * `Accept-Language` header: a leading en / ja / ko / vi tag selects that
+ * locale, anything else leaves the default in place.
  */
 function negotiateBrowserLocale(): AppLocale | undefined {
     if (typeof navigator === "undefined") return undefined;
@@ -53,6 +55,7 @@ function negotiateBrowserLocale(): AppLocale | undefined {
     if (language.startsWith("en")) return "en";
     if (language.startsWith("ja")) return "ja";
     if (language.startsWith("ko")) return "ko";
+    if (language.startsWith("vi")) return "vi";
     return undefined;
 }
 
