@@ -40,6 +40,23 @@ const BAD_PLAN: DirectorPlan = {
     ],
 };
 
+/** Same shape as GOOD_PLAN but names a slot ("gen-text") that DEMO_PLUGINS
+ * never installs — compiles cleanly except for a single MISSING_PLUGIN
+ * issue, used to exercise Fix 8's no-longer-short-circuited retry. */
+const MISSING_PLUGIN_PLAN: DirectorPlan = {
+    ...GOOD_PLAN,
+    steps: [
+        GOOD_PLAN.steps[0],
+        {
+            id: "g1",
+            kind: "gen",
+            slot: "gen-text",
+            inputs: [{ field: "text", value: "@t1" }],
+            params: [],
+        },
+    ],
+};
+
 /** Every adjacent pair of turns has a different role. */
 function rolesAlternate(turns: DirectorTurn[]): boolean {
     return turns.every((turn, i) => i === 0 || turn.role !== turns[i - 1].role);
@@ -64,7 +81,11 @@ describe("generateWorkflow", () => {
         const result = await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
-                calls.push([...turns]);
+                // `appendUserTurn` mutates the trailing turn object in
+                // place, so a shallow `[...turns]` copy would still alias
+                // that object — an assertion made against an earlier call
+                // could silently observe post-mutation state (Minor 14).
+                calls.push(structuredClone(turns));
                 return calls.length === 1 ? BAD_PLAN : GOOD_PLAN;
             },
             DEMO_PLUGINS,
@@ -95,9 +116,12 @@ describe("generateWorkflow", () => {
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
     });
 
-    // --- Important 4: MISSING_PLUGIN-only issues short-circuit the retry ---
+    // --- Fix 8: MISSING_PLUGIN-only issues no longer short-circuit the
+    // retry — the vocabulary lists only installed slots, so MISSING_PLUGIN
+    // means the model hallucinated an unlisted one, and the retry feedback
+    // names it directly. That's recoverable, unlike a structural dead end. ---
 
-    it("does not call the generator a second time when every issue is MISSING_PLUGIN", async () => {
+    it("calls the generator a second time when every issue is MISSING_PLUGIN, unlike the old short-circuit", async () => {
         let calls = 0;
         const result = await generateWorkflow(
             "draw a red bicycle",
@@ -105,10 +129,49 @@ describe("generateWorkflow", () => {
                 calls++;
                 return GOOD_PLAN;
             },
-            {}, // nothing installed — every issue is MISSING_PLUGIN
+            {}, // nothing installed — every issue is MISSING_PLUGIN, both times
         );
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
-        expect(calls).toBe(1);
+        expect(calls).toBe(2);
+    });
+
+    it("recovers when the retry names an installed slot instead of the missing one", async () => {
+        const calls: DirectorTurn[][] = [];
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async (turns) => {
+                // structuredClone: appendUserTurn mutates in place (Minor 14).
+                calls.push(structuredClone(turns));
+                // First attempt names "gen-text", which nothing installs;
+                // the model course-corrects to "image-gen" on the retry.
+                return calls.length === 1 ? MISSING_PLUGIN_PLAN : GOOD_PLAN;
+            },
+            DEMO_PLUGINS, // only "image-gen" is installed
+        );
+        expect(result.ok).toBe(true);
+        expect(calls).toHaveLength(2);
+        expect(calls[1].at(-1)?.text).toContain(
+            'no installed plugin serves slot "gen-text"',
+        );
+    });
+
+    it("keeps the final code MISSING_PLUGIN when the retry throws PlanValidationError instead of producing a differently-shaped compile-issue list", async () => {
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async (turns) => {
+                if (turns.length === 1) return MISSING_PLUGIN_PLAN;
+                throw new PlanValidationError(
+                    "model returned no parsable plan",
+                );
+            },
+            {}, // nothing installed — first attempt is purely MISSING_PLUGIN
+        );
+        expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
+        if (!result.ok) {
+            expect(
+                result.details?.every((i) => i.code === "MISSING_PLUGIN"),
+            ).toBe(true);
+        }
     });
 
     // --- Important 3 / retry turn shape: roles alternate, the failed plan
@@ -119,7 +182,8 @@ describe("generateWorkflow", () => {
         await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
-                calls.push([...turns]);
+                // structuredClone: appendUserTurn mutates in place (Minor 14).
+                calls.push(structuredClone(turns));
                 return calls.length === 1 ? BAD_PLAN : GOOD_PLAN;
             },
             DEMO_PLUGINS,
@@ -171,7 +235,8 @@ describe("generateWorkflow — plan-validation throws (Important 2)", () => {
         const result = await generateWorkflow(
             "draw a red bicycle",
             async (turns) => {
-                calls.push([...turns]);
+                // structuredClone: appendUserTurn mutates in place (Minor 14).
+                calls.push(structuredClone(turns));
                 if (calls.length === 1) {
                     throw new PlanValidationError(
                         'step id "1bad" starts with a digit',

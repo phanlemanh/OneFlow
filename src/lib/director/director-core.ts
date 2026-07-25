@@ -70,11 +70,19 @@ const MAX_ATTEMPTS = 2;
  * always available on `details` for callers that want it. */
 const MESSAGE_ISSUE_LIMIT = 3;
 
+/** True when every issue in a non-empty list is MISSING_PLUGIN — the only
+ * shape `failureFromIssues` and the final-attempt `PlanValidationError`
+ * branch both treat as "the real problem is a missing plugin". */
+function isOnlyMissingPlugin(issues: CompileIssue[]): boolean {
+    return (
+        issues.length > 0 && issues.every((i) => i.code === "MISSING_PLUGIN")
+    );
+}
+
 function failureFromIssues(issues: CompileIssue[]): DirectorResult {
-    const onlyPluginIssues = issues.every((i) => i.code === "MISSING_PLUGIN");
     return {
         ok: false,
-        code: onlyPluginIssues ? "MISSING_PLUGIN" : "PLAN_INVALID",
+        code: isOnlyMissingPlugin(issues) ? "MISSING_PLUGIN" : "PLAN_INVALID",
         message: issues
             .slice(0, MESSAGE_ISSUE_LIMIT)
             .map((i) => `${i.code}: ${i.message}`)
@@ -139,9 +147,20 @@ export async function generateWorkflow(
                 throw err;
             }
             if (isLastAttempt) {
+                // No compile-issue list from *this* attempt — it never got
+                // as far as compiling — so the only signal available is
+                // `lastIssues` from the prior attempt. Route it through the
+                // same MISSING_PLUGIN-vs-PLAN_INVALID rule `failureFromIssues`
+                // applies everywhere else: if the prior attempt's problem
+                // really was a missing plugin, a differently-shaped (here:
+                // absent) issue list from the retry must not silently
+                // downgrade the user-facing code to a generic PLAN_INVALID
+                // (Fix 8).
                 return {
                     ok: false,
-                    code: "PLAN_INVALID",
+                    code: isOnlyMissingPlugin(lastIssues)
+                        ? "MISSING_PLUGIN"
+                        : "PLAN_INVALID",
                     message: err.message,
                     details: lastIssues.length > 0 ? lastIssues : undefined,
                 };
@@ -163,14 +182,14 @@ export async function generateWorkflow(
             };
         }
         lastIssues = issues;
-        // Every issue is MISSING_PLUGIN: no installed plugin serves the
-        // slot, and no amount of replanning changes that — short-circuit
-        // instead of burning a second model call on a guaranteed-useless
-        // retry (and instead of letting a later attempt's differently-shaped
-        // issue list flip the user-facing code away from MISSING_PLUGIN).
-        if (issues.every((i) => i.code === "MISSING_PLUGIN")) {
-            return failureFromIssues(issues);
-        }
+        // MISSING_PLUGIN means the model named a slot the vocabulary never
+        // listed (it only lists installed slots) — a hallucination, not a
+        // structural dead end. The retry's feedback names the offending
+        // slot directly ("no installed plugin serves slot ..."), which is
+        // exactly the nudge that gets a model to pick a listed one instead
+        // (Fix 8) — so this no longer short-circuits before the last
+        // attempt. `failureFromIssues` below still resolves the final code
+        // to MISSING_PLUGIN when that turns out to be the whole story.
         if (!isLastAttempt) {
             // The model's failed plan becomes its own `assistant` turn (so a
             // model reading the turn has something to locate the offending
