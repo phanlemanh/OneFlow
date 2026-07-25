@@ -43,6 +43,7 @@ import { useWorkflowRecovery } from "@/hooks/use-workflow-recovery";
 import { logger } from "@/lib/logger";
 import { isValidFlowConnection } from "@/lib/workflow/connection-rules";
 import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
+import DirectorPrompt from "./director-prompt";
 import { ModeSwitch } from "./mode-switch";
 import SmartIsland from "./smart-island";
 import { EDGE_TYPES, NODE_TYPES } from "./types";
@@ -399,6 +400,8 @@ function WorkspaceInner({
                 <WorkflowTitleMenu />
                 <WorkspaceLeftNav />
             </div>
+
+            <DirectorPrompt />
 
             <div className="absolute right-5 top-5 z-10">
                 <WorkspaceNav />

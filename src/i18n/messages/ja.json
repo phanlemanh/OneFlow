@@ -946,6 +946,24 @@
         "favoriteHint": "ノードの ❤️ アイコンをクリックして素材をお気に入りに追加",
         "portfolio": "ポートフォリオ"
     },
+    "Director": {
+        "open": "ディレクター",
+        "placeholder": "作りたいものを説明してください…",
+        "applied": "ワークフローを生成しました — 確認してから実行してください",
+        "replaceTitle": "現在のキャンバスを置き換えますか？",
+        "replaceDescription": "生成されたワークフローがキャンバス上のすべてのノードを置き換えます。",
+        "replaceConfirm": "置き換える",
+        "replaceCancel": "キャンセル",
+        "errors": {
+            "INVALID_PROMPT": "プロンプトを入力してください。",
+            "MISSING_API_KEY": "先に設定で ANTHROPIC_API_KEY を追加してください。",
+            "AUTH_FAILED": "Anthropic API キーが無効です。",
+            "RATE_LIMITED": "レート制限中です。しばらくしてから再試行してください。",
+            "PLAN_INVALID": "有効なワークフローを生成できませんでした。言い換えてみてください。",
+            "MISSING_PLUGIN": "必要なプラグインがインストールされていません。",
+            "UPSTREAM_ERROR": "AI サービスに接続できません。再試行してください。"
+        }
+    },
     "Recorder": {
         "audioStart": "録音開始",
         "audioCancel": "キャンセル",

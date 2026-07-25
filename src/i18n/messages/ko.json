@@ -1032,6 +1032,24 @@
         "favoriteHint": "노드의 ❤️ 아이콘을 클릭하여 자료를 즐겨찾기에 추가하세요",
         "portfolio": "포트폴리오"
     },
+    "Director": {
+        "open": "디렉터",
+        "placeholder": "만들고 싶은 것을 설명해 주세요…",
+        "applied": "워크플로가 생성되었습니다 — 확인 후 실행하세요",
+        "replaceTitle": "현재 캔버스를 교체할까요?",
+        "replaceDescription": "생성된 워크플로가 캔버스의 모든 노드를 교체합니다.",
+        "replaceConfirm": "교체",
+        "replaceCancel": "취소",
+        "errors": {
+            "INVALID_PROMPT": "프롬프트를 입력해 주세요.",
+            "MISSING_API_KEY": "먼저 설정에서 ANTHROPIC_API_KEY를 추가하세요.",
+            "AUTH_FAILED": "Anthropic API 키가 유효하지 않습니다.",
+            "RATE_LIMITED": "요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+            "PLAN_INVALID": "유효한 워크플로를 만들지 못했습니다. 다르게 표현해 보세요.",
+            "MISSING_PLUGIN": "필요한 플러그인이 설치되어 있지 않습니다.",
+            "UPSTREAM_ERROR": "AI 서비스에 연결할 수 없습니다. 다시 시도하세요."
+        }
+    },
     "Recorder": {
         "audioStart": "녹음 시작",
         "audioCancel": "취소",

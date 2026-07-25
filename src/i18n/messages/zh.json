@@ -1032,6 +1032,24 @@
         "favoriteHint": "点击节点上的 ❤️ 图标收藏素材",
         "portfolio": "作品集"
     },
+    "Director": {
+        "open": "导演",
+        "placeholder": "描述你想创作的内容…",
+        "applied": "工作流已生成 — 请检查后运行",
+        "replaceTitle": "替换当前画布？",
+        "replaceDescription": "生成的工作流将替换画布上现有的所有节点。",
+        "replaceConfirm": "替换",
+        "replaceCancel": "取消",
+        "errors": {
+            "INVALID_PROMPT": "请输入提示词。",
+            "MISSING_API_KEY": "请先在设置中添加 ANTHROPIC_API_KEY。",
+            "AUTH_FAILED": "Anthropic API 密钥无效。",
+            "RATE_LIMITED": "请求过于频繁，请稍后再试。",
+            "PLAN_INVALID": "无法生成有效的工作流，请换个说法。",
+            "MISSING_PLUGIN": "缺少所需插件。",
+            "UPSTREAM_ERROR": "AI 服务不可用，请重试。"
+        }
+    },
     "Recorder": {
         "audioStart": "开始录音",
         "audioCancel": "取消",

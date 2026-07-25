@@ -1032,6 +1032,24 @@
         "favoriteHint": "Click the ❤️ icon on a node to favorite the material",
         "portfolio": "Portfolio"
     },
+    "Director": {
+        "open": "Director",
+        "placeholder": "Describe what you want to create…",
+        "applied": "Workflow generated — review it, then run",
+        "replaceTitle": "Replace current canvas?",
+        "replaceDescription": "The generated workflow will replace all nodes currently on the canvas.",
+        "replaceConfirm": "Replace",
+        "replaceCancel": "Cancel",
+        "errors": {
+            "INVALID_PROMPT": "Please enter a prompt.",
+            "MISSING_API_KEY": "Add ANTHROPIC_API_KEY in Settings first.",
+            "AUTH_FAILED": "The Anthropic API key is invalid.",
+            "RATE_LIMITED": "Rate limited — try again shortly.",
+            "PLAN_INVALID": "Could not build a valid workflow. Try rephrasing.",
+            "MISSING_PLUGIN": "A required plugin is not installed.",
+            "UPSTREAM_ERROR": "The AI service is unreachable. Try again."
+        }
+    },
     "Recorder": {
         "audioStart": "Start recording",
         "audioCancel": "Cancel",
