@@ -10,11 +10,7 @@ import {
     type FieldSourceOverride,
     handle,
 } from "@/lib/abi/sources";
-import {
-    compilePlan,
-    IDS_KEYED_NODE_TYPES,
-    LOCAL_SOURCE_SPEC_OVERRIDES,
-} from "./compile";
+import { compilePlan, IDS_KEYED_NODE_TYPES } from "./compile";
 import type { DirectorPlan } from "./dsl";
 
 /** Deterministic id generator for stable assertions. */
@@ -215,19 +211,15 @@ describe("compilePlan — inline literal on a text handle field", () => {
 // module-local const), found by sweeping
 // `grep -rn "sourceSpec=" src/components/workspace/nodes` and reading each
 // hit (2026-07-24). This mirrors each component's *actual* override object,
-// not compile.ts's table — so the assertion below computes materiality
-// itself instead of re-asserting a hand-picked subset, and will catch a
-// future component whose new inline override changes classification without
-// a corresponding entry in NODE_TYPE_SOURCE_SPEC or
-// LOCAL_SOURCE_SPEC_OVERRIDES.
+// so the assertion below computes materiality itself instead of re-asserting a
+// hand-picked subset.
 //
-// Node types already covered by NODE_TYPE_SOURCE_SPEC (e.g. imageFusionNode,
-// imageGenVideoNode) are omitted here — that registry is exercised directly
-// via `NODE_TYPE_SOURCE_SPEC[nodeType]` in the materiality check. So are the
-// non-canonical duplicate-slot variants (e.g. speechTextGenVideoNode,
-// videoGenTextSpeechRecognizeNode, imageGenVideoComposeNode) — compile.ts
-// never emits them (see slot-node-type.ts's PREFERRED_NODE_TYPE), so an
-// unresolved override on them can't produce a broken compiled graph.
+// Since every ABI node now reads its overrides from NODE_TYPE_SOURCE_SPEC, the
+// `tracked` check below is satisfied for all of these, and this sweep no longer
+// carries the weight it did when compile.ts kept a local mirror table. It is
+// kept as a second, independently-authored copy of what the components declare:
+// it still fails if a registry entry stops matching the component it serves.
+// `abi/node-feature-registry.test.ts` is now the primary guard.
 const INLINE_SOURCE_SPEC_SWEEP: Array<{
     nodeType: string;
     slot: NodeSlot;
@@ -452,9 +444,7 @@ function materialUntrackedFields(
     for (const { nodeType, slot, overrides } of entries) {
         const withOverride = resolveSpec(slot, overrides);
         const withoutOverride = resolveSpec(slot, undefined);
-        const tracked =
-            nodeType in NODE_TYPE_SOURCE_SPEC ||
-            nodeType in LOCAL_SOURCE_SPEC_OVERRIDES;
+        const tracked = nodeType in NODE_TYPE_SOURCE_SPEC;
         for (const field of Object.keys(overrides)) {
             const withF = withOverride.fields[field];
             const withoutF = withoutOverride.fields[field];
@@ -490,7 +480,7 @@ describe("Finding 1 guard — inline sourceSpec overrides must be tracked", () =
         }
     });
 
-    it("flags any override that changes a field's handle/manual classification but isn't tracked by NODE_TYPE_SOURCE_SPEC or compile.ts's LOCAL_SOURCE_SPEC_OVERRIDES", () => {
+    it("flags any override that changes a field's handle/manual classification but isn't tracked by NODE_TYPE_SOURCE_SPEC", () => {
         expect(materialUntrackedFields(INLINE_SOURCE_SPEC_SWEEP)).toEqual([]);
     });
 

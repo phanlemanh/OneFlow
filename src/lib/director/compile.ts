@@ -42,19 +42,13 @@
  *     to config — by an individual node component's own `sourceSpec` prop
  *     (handle-introspect.ts's own comment: "sourceSpec can override to
  *     handle"). The shared `NODE_TYPE_SOURCE_SPEC` registry in
- *     node-feature-registry.ts carries this for the node types the app's own
- *     pre-mount edge creation needs it for, but several components declare
- *     their override inline (or in a module-local const) instead of
- *     registering it, and `resolvedSpecForNodeType` in that file silently
- *     returns nothing for those. Rather than re-guessing per field, we run
- *     every field's classification through the same `resolveSpec` the app
- *     itself uses (src/lib/abi/resolve.ts), fed by `NODE_TYPE_SOURCE_SPEC`
- *     merged with `LOCAL_SOURCE_SPEC_OVERRIDES` below — the node types whose
- *     inline override actually changes a field's handle-vs-config or
- *     `manual` classification, verified by reading each component (see that
- *     table's own comment, and compile.test.ts's guard test, which sweeps
- *     every component's real `sourceSpec` and fails if a classification-
- *     changing override goes untracked).
+ *     node-feature-registry.ts is the single declaration site for every ABI
+ *     node's overrides — components read from it rather than declaring their
+ *     own, and `abi/node-feature-registry.test.ts` fails the build if one
+ *     reintroduces an inline `sourceSpec`. So rather than re-guessing per
+ *     field, we run every field's classification through the same
+ *     `resolveSpec` the app itself uses (src/lib/abi/resolve.ts), fed by that
+ *     registry. There is no compiler-local mirror table to drift.
  *
  *     `manual` (ComfyUI-style widget <-> input duality: an edge always wins,
  *     the form value is the fallback — see resolve.ts's `buildPrompts`) is
@@ -76,12 +70,7 @@ import {
 } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
-import {
-    batchOn,
-    configField,
-    type FieldSourceOverride,
-    handle,
-} from "@/lib/abi/sources";
+import type { AnySourceSpec, FieldSourceOverride } from "@/lib/abi/sources";
 import { parseWorkflow } from "@/lib/workflow/parser";
 import { type DirectorPlan, type GenStep, isRef, refId } from "./dsl";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
@@ -131,67 +120,6 @@ const DATA_NODE_DEFAULT_DATA: Record<DataNodeType, Record<string, unknown>> = {
 };
 
 /**
- * Node types whose component declares its `sourceSpec` prop inline (or in a
- * module-local const) rather than through the shared `NODE_TYPE_SOURCE_SPEC`
- * registry, where that override actually changes a field's handle-vs-config
- * or `manual` classification for this compiler's purposes. See Step 0 note
- * (c) above. Verified by reading each component directly (field name,
- * handle?, manual?) — do not extend this table without doing the same.
- *
- * Node types whose inline sourceSpec only *refines* a field the raw ABI
- * schema already classifies as a handle (e.g. `image: batchOn()` on a
- * `$ref` field — most of this compiler's ~58 supported slots do exactly
- * this for their file-backed fields) are intentionally omitted: the raw
- * classification this compiler falls back to is already correct for them,
- * so there is nothing to override. compile.test.ts's guard test sweeps
- * every node component's real `sourceSpec` (registry and inline alike) and
- * fails if a classification-changing override is missing from here.
- */
-export const LOCAL_SOURCE_SPEC_OVERRIDES: Partial<
-    Record<string, Record<string, FieldSourceOverride>>
-> = {
-    // text-gen-image.tsx — image-gen
-    textGenImageNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // text-gen-text.tsx — gen-text
-    genTextNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // text-audio-gen-speech.tsx — text-audio-gen-speech
-    textAudioGenSpeechNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // text-gen-speech-instruct.tsx — text-gen-speech-instruct
-    textGenSpeechInstructNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // text-gen-speech-preset.tsx — text-gen-speech-preset
-    textGenSpeechPresetNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    // text-gen-speech-clone.tsx (CLONE_TRANSFER_SOURCE_SPEC) — text-gen-speech-clone
-    textGenSpeechCloneNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-        // `ref_audio` is a `$ref` in the ABI (raw default: handle), but this
-        // transfer-variant node owns reference audio via local
-        // upload/record and never renders an `in:ref_audio` handle — force
-        // it back to config so a `@ref` on this field is correctly rejected
-        // instead of producing a dangling edge.
-        ref_audio: configField(),
-    },
-    // text-gen-music.tsx — gen-music
-    textGenMusicNode: {
-        tags: handle({ nodeType: "textNode", path: "texts[0]" }),
-        lyrics: handle({ nodeType: "textNode", path: "texts[0]" }),
-    },
-    // split-text.tsx — split-text
-    splitTextNode: {
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
-    },
-};
-
-/**
  * ReactFlow node types whose component reads `data.ids` directly (rather
  * than deriving upstream values from edges) to look up their source nodes.
  * See Step 0 note (b) above. Full set found by sweeping every node
@@ -205,14 +133,13 @@ export const IDS_KEYED_NODE_TYPES = new Set<string>([
     "textGenVideoNode",
 ]);
 
-/** Registry overrides merged with this compiler's local ones for the node
- * types the registry doesn't carry (Step 0 note (c)). */
+/** Per-node-type source overrides, straight from the shared registry. */
 function sourceSpecOverridesFor(
     nodeType: string,
 ): Record<string, FieldSourceOverride> | undefined {
-    return (
-        NODE_TYPE_SOURCE_SPEC[nodeType] ?? LOCAL_SOURCE_SPEC_OVERRIDES[nodeType]
-    );
+    return (NODE_TYPE_SOURCE_SPEC as Partial<Record<string, AnySourceSpec>>)[
+        nodeType
+    ];
 }
 
 // Memoized per node type — `resolveSpec` is pure given (slot, overrides),
@@ -233,8 +160,7 @@ function resolvedSpecFor(slot: NodeSlot, nodeType: string): ResolvedSpec {
  * whether multiple upstream connections are valid, and `manual` (a literal
  * on a manual handle field falls back to a plain `data.<field>` write — see
  * Step 0 note (c)). Derived from the real per-node-type sourceSpec
- * (`NODE_TYPE_SOURCE_SPEC` merged with `LOCAL_SOURCE_SPEC_OVERRIDES`)
- * instead of a hand-guessed table.
+ * (`NODE_TYPE_SOURCE_SPEC`) instead of a hand-guessed table.
  */
 interface EffectiveField {
     kind: "handle" | "config";

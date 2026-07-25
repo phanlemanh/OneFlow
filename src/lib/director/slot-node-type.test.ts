@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { NODE_TYPE_TO_ABI_FEATURE } from "@/lib/abi/node-feature-registry";
+import {
+    featureForNodeType,
+    NODE_TYPE_TO_ABI_FEATURE,
+} from "@/lib/abi/node-feature-registry";
 import { PREFERRED_NODE_TYPE, SLOT_TO_NODE_TYPE } from "./slot-node-type";
 
 describe("SLOT_TO_NODE_TYPE", () => {
@@ -19,7 +22,9 @@ describe("SLOT_TO_NODE_TYPE", () => {
 
     it("every entry round-trips through NODE_TYPE_TO_ABI_FEATURE", () => {
         for (const [slot, nodeType] of Object.entries(SLOT_TO_NODE_TYPE)) {
-            expect(NODE_TYPE_TO_ABI_FEATURE[nodeType as string]).toBe(slot);
+            // `featureForNodeType` is the dynamic-lookup accessor; the map
+            // itself is `as const`, so it cannot be indexed by a plain string.
+            expect(featureForNodeType(nodeType as string), nodeType).toBe(slot);
         }
     });
 

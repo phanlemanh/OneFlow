@@ -2,7 +2,6 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { LOCAL_SOURCE_SPEC_OVERRIDES } from "./compile";
 import { DIRECTOR_EXCLUDED_SLOTS, isDirectorSafeSlot } from "./safe-slots";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
 
@@ -32,10 +31,7 @@ function slotsWithComponentSourceSpec(): Map<string, string> {
 
 describe("director safe slots", () => {
     it("every slot whose component declares a sourceSpec is either modelled or excluded", () => {
-        const modelledNodeTypes = new Set([
-            ...Object.keys(NODE_TYPE_SOURCE_SPEC),
-            ...Object.keys(LOCAL_SOURCE_SPEC_OVERRIDES),
-        ]);
+        const modelledNodeTypes = new Set(Object.keys(NODE_TYPE_SOURCE_SPEC));
         const unguarded: string[] = [];
         for (const [slot, file] of slotsWithComponentSourceSpec()) {
             const nodeType = SLOT_TO_NODE_TYPE[slot as never];
@@ -49,10 +45,7 @@ describe("director safe slots", () => {
     });
 
     it("every excluded slot is one the scan actually found needing exclusion", () => {
-        const modelledNodeTypes = new Set([
-            ...Object.keys(NODE_TYPE_SOURCE_SPEC),
-            ...Object.keys(LOCAL_SOURCE_SPEC_OVERRIDES),
-        ]);
+        const modelledNodeTypes = new Set(Object.keys(NODE_TYPE_SOURCE_SPEC));
         const scannedSlots = slotsWithComponentSourceSpec();
         const staleExclusions: string[] = [];
         for (const slot of DIRECTOR_EXCLUDED_SLOTS) {
@@ -87,7 +80,10 @@ describe("director safe slots", () => {
         expect(isDirectorSafeSlot("not-a-real-slot")).toBe(false);
     });
 
-    it("excludes the known mis-classified slots", () => {
+    it("admits the formerly mis-classified slots now that they read from the registry", () => {
+        // These six resolved their asset input to `imageNode` while the
+        // component declared video/audio/file, so they had to be excluded.
+        // NODE_TYPE_SOURCE_SPEC now carries the real classification.
         for (const slot of [
             "subtitle_remove",
             "remove_watermark",
@@ -96,7 +92,45 @@ describe("director safe slots", () => {
             "parse-document",
             "arrange-group",
         ]) {
-            expect(isDirectorSafeSlot(slot)).toBe(false);
+            expect(isDirectorSafeSlot(slot), slot).toBe(true);
+        }
+    });
+
+    it("classifies the formerly mis-classified asset fields from the registry", () => {
+        // The reason those slots were unsafe: upstream nodeType and array-ness.
+        // Assert the compiler now sees what the component wires, not the bare
+        // ABI default (`imageNode`, scalar).
+        const cases: Array<[string, string, string, boolean]> = [
+            // slot, field, upstream nodeType, array (batch/collect)
+            ["subtitle_remove", "fileKey", "videoNode", true],
+            ["remove_watermark", "fileKey", "videoNode", true],
+            ["denoise_audio", "fileKey", "audioNode", true],
+            ["convert_voice", "sourceKey", "audioNode", true],
+            ["parse-document", "document", "fileNode", true],
+            ["arrange-group", "fileKeys", "videoNode", true],
+        ];
+        for (const [slot, field, nodeType, array] of cases) {
+            const target = SLOT_TO_NODE_TYPE[slot as never] as string;
+            const spec = (
+                NODE_TYPE_SOURCE_SPEC as Record<
+                    string,
+                    Record<
+                        string,
+                        {
+                            kind: string;
+                            nodeType?: string;
+                            batch?: boolean;
+                            collect?: boolean;
+                        }
+                    >
+                >
+            )[target];
+            const f = spec?.[field];
+            expect(f?.kind, `${slot}.${field}`).toBe("handle");
+            expect(f?.nodeType, `${slot}.${field} nodeType`).toBe(nodeType);
+            expect(!!(f?.batch || f?.collect), `${slot}.${field} array`).toBe(
+                array,
+            );
         }
     });
 
