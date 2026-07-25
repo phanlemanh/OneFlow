@@ -45,7 +45,8 @@
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",
         "tongflow:publish": "bash scripts/publish-tongflow-pypi.sh",
         "test": "vitest run",
-        "verify:plugins": "tsx scripts/verify-plugins-scan.ts"
+        "verify:plugins": "tsx scripts/verify-plugins-scan.ts",
+        "hooks:install": "git config core.hooksPath .githooks"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "0.115.0",

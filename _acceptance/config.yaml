@@ -1,0 +1,90 @@
+# 2-space indentation REQUIRED — the kit's hook parses this file line-by-line.
+schema_version: 1
+enforcement: strict          # strict | warn | off
+recheck: strict              # fresh repo, no legacy reports — start strict (kit guidance).
+baseline_minutes: []         # pre-kit acceptance estimates (minutes/feature) — fill after first manual accepts.
+
+# Verify mechanism of this repo (CLAUDE.md checklist): biome lint + tsc + next build
+# + vitest + sdk pytest + plugins-scan verify + generated-ABI drift check.
+executors:
+  test:
+    build: "pnpm build"
+    typecheck: "pnpm typecheck"
+    # Sequential on purpose: next build rewrites .next/types while tsc reads them —
+    # parallel suite runs race (lesson: artifact-platform radar-m1 S4-r1).
+    build_typecheck: "pnpm build && pnpm typecheck"
+    lint: "pnpm lint:check"
+    unit: "pnpm test"
+    sdk_pytest: "cd sdk && python3 -m pytest -q"
+  script:
+    verify_plugins: "pnpm verify:plugins"
+    # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
+    gen_abi_clean: "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
+  design:
+    # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
+    # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
+    gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1)"
+    # ui_check is a browser-injected asset (runner loads it INTO the page) — PATH only, no `node` prefix.
+    ui_check: "$(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-scan.js | sort -V | tail -1)"
+
+risk_tiers:
+  # Docs/branding/config-only changes — acceptance gate skipped entirely.
+  t1_skip_globs:
+    - "docs/**"
+    - "**/*.md"
+    # Root-level .md files do NOT match "**/*.md" — list them explicitly
+    # (lesson: artifact-platform PR #200/#302 treadmill).
+    - "README.md"
+    - "CLAUDE.md"
+    - "AGENTS.md"
+    - "CONTRIBUTING.md"
+    - "STATUS.md"
+    - "CHANGELOG.md"
+    - "NOTICE.md"
+    - ".gitignore"
+    - ".claude/**"
+    - "_acceptance/**"
+    - "public/**"
+    - "src/i18n/messages/**"
+    # Vendored gate tooling = measuring stick, not product code; upgrading it must
+    # not stale-invalidate signed feature evidence (exact paths, not globs).
+    - "scripts/pre-merge-check.sh"
+    - "scripts/recheck-evidence.js"
+    - "lib/evidence-core.js"
+  # Contract chokepoints & wire/persistence shape — always T3 (full gate).
+  t3_paths:
+    - "config/tongflow.abi.json"
+    - "src/generated/abi/**"
+    - "src/lib/abi/**"
+    - "sdk/**"
+    - "src/db/**"
+    - "src/lib/plugin-executor/**"
+    - "src/lib/workflow/**"
+    - "src/app/api/**"
+    - "scripts/publish-tongflow-pypi.sh"
+
+signoff:
+  required_for: [T2, T3]     # tiers that pre-merge-check requires signoff for
+  approvers: ["Manh"]        # informational in v1 (not yet machine-enforced)
+  require_human_commit: true # Gate-2 signature lands in its own human-fields-only commit.
+
+# Suite verify chạy mỗi round S4 của plugin feature-loop (dotted keys trỏ vào executors.* ở trên).
+# Per-feature evals nằm trong evals.yaml của từng feature, KHÔNG khai ở đây.
+feature_loop:
+  suite_keys:
+    - executors.test.build_typecheck
+    - executors.test.lint
+    - executors.test.unit
+    - executors.test.sdk_pytest
+    - executors.script.verify_plugins
+    - executors.script.gen_abi_clean
+
+dev_server:
+  start: "pnpm dev"
+  url: "http://localhost:3000"
+
+# capture.ui: omitted for now — no screenshot-to-file command in repo yet.
+# To enable Gate-2 UI slideshow evidence: scaffold scripts/ui-capture.mjs from the kit
+# reference + `pnpm add -D puppeteer-core`, then set:
+#   capture:
+#     ui: "node scripts/ui-capture.mjs"

@@ -1,0 +1,13 @@
+#!/bin/sh
+# Guard: block direct pushes to main (CLAUDE.md rule: branch off main, never commit straight to it).
+# Enable per-machine: pnpm hooks:install. Deliberate escape hatch: ALLOW_MAIN_PUSH=1 git push
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ] && [ "${ALLOW_MAIN_PUSH:-}" != "1" ]; then
+    echo "" >&2
+    echo "⛔ Direct push to 'main' blocked." >&2
+    echo "   Workflow: branch + PR (see CLAUDE.md commit checklist)." >&2
+    echo "   Deliberate escape hatch: ALLOW_MAIN_PUSH=1 git push" >&2
+    exit 1
+  fi
+done
+exit 0

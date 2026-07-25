@@ -25,7 +25,11 @@
             "!**/.tongflow",
             "!data",
             "!.claude",
-            "!plugins"
+            "!plugins",
+            "!scripts/pre-merge-check.sh",
+            "!scripts/recheck-evidence.js",
+            "!lib/evidence-core.js",
+            "!_acceptance"
         ]
     },
     "formatter": {

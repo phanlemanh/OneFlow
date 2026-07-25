@@ -93,3 +93,19 @@ jobs:
       - name: Run SDK tests
         run: pytest
         working-directory: sdk
+
+  acceptance-gate:
+    name: Acceptance Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # pre-merge-check diffs against the PR base; shallow clones break it.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Pre-merge acceptance check
+        run: bash scripts/pre-merge-check.sh . --base "origin/${GITHUB_BASE_REF:-main}"
