@@ -6,7 +6,7 @@ import { memo, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { handle } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -43,7 +43,7 @@ const SpeechGenVideoNode = ({
     return (
         <AbiNodeShell
             feature="speech-text-gen-video"
-            sourceSpec={{ audio: handle({ nodeType: "audioNode" }) }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.speechGenVideoNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

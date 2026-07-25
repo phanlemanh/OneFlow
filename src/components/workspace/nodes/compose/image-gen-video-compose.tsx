@@ -14,7 +14,6 @@ import {
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
-import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -23,7 +22,7 @@ import { VideoDurationSlider } from "../base/video-duration-slider";
 
 /** Same ABI slot as transfer image-gen-video; both inputs from upstream handles. */
 const IMAGE_GEN_VIDEO_COMPOSE_SOURCE_SPEC =
-    NODE_TYPE_SOURCE_SPEC.imageGenVideoComposeNode as SourceSpec<"image-gen-video">;
+    NODE_TYPE_SOURCE_SPEC.imageGenVideoComposeNode;
 
 const ImageGenVideoComposeNode = ({
     selected,

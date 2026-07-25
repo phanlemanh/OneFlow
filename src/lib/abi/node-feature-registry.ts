@@ -8,6 +8,11 @@
  * Keep this in sync with the `feature="..."` strings hard-coded in each ABI
  * node component under `src/components/workspace/nodes/{transfer,compose,batch,decompose}/`.
  * Modality / add / data nodes are intentionally omitted — they're not ABI-driven.
+ *
+ * This module is the *only* declaration site for per-field source overrides
+ * (`NODE_TYPE_SOURCE_SPEC` below) — components read from it rather than
+ * declaring their own, so server-side and pre-mount consumers see the same
+ * classification the canvas does.
  */
 
 import { isModalityNode } from "@/constants/modality-nodes";
@@ -21,14 +26,15 @@ import {
 } from "./handle-introspect";
 import { type ResolvedSpec, resolveSpec } from "./resolve";
 import {
+    type AnySourceSpec,
     batchOn,
     collectAll,
     configField,
-    type FieldSourceOverride,
     handle,
+    type SourceSpec,
 } from "./sources";
 
-export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
+export const NODE_TYPE_TO_ABI_FEATURE = {
     // transfer/
     genTextNode: "gen-text",
     imageGenVideoNode: "image-gen-video",
@@ -99,44 +105,155 @@ export const NODE_TYPE_TO_ABI_FEATURE: Readonly<Record<string, NodeSlot>> = {
     splitTextNode: "split-text",
     musicBriefNode: "music-brief",
     separateSoundNode: "separate-sound",
-};
+} as const satisfies Readonly<Record<string, NodeSlot>>;
+
+/** React Flow node types backed by an ABI feature slot. */
+export type AbiNodeType = keyof typeof NODE_TYPE_TO_ABI_FEATURE;
+
+/** The ABI slot a given ABI node type executes. */
+export type FeatureForNodeType<N extends AbiNodeType> =
+    (typeof NODE_TYPE_TO_ABI_FEATURE)[N];
 
 export function featureForNodeType(
     nodeType: string | undefined,
 ): NodeSlot | undefined {
     if (!nodeType) return undefined;
-    return NODE_TYPE_TO_ABI_FEATURE[nodeType];
+    return (NODE_TYPE_TO_ABI_FEATURE as Readonly<Record<string, NodeSlot>>)[
+        nodeType
+    ];
 }
 
+/** A scalar `text` field fed from an upstream textNode. */
+const textScalar = () => handle({ nodeType: "textNode", path: "texts[0]" });
+
 /**
- * Per-node `sourceSpec` overrides used at graph-mutation time so new edges get
- * the correct `targetHandle` before the target mounts. Keep in sync with each
- * ABI node component's `sourceSpec` prop.
+ * A scalar `text` field with widget ⇄ input duality: an upstream edge wins,
+ * the node's own textarea is the fallback.
  */
-export const NODE_TYPE_SOURCE_SPEC: Partial<
-    Record<string, Record<string, FieldSourceOverride>>
-> = {
-    textGenVideoNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
+const textScalarManual = () =>
+    handle({ nodeType: "textNode", path: "texts[0]", manual: true });
+
+/** Fan out one call per string in the upstream textNode's `texts`. */
+const textBatch = () => batchOn({ nodeType: "textNode", path: "texts" });
+
+/** `concat-videos` is mounted as both a batch and a compose node type. */
+const CONCAT_VIDEOS = { videos: collectAll() };
+
+/**
+ * Per-node `sourceSpec` overrides — the single declaration site for every ABI
+ * node's field classification. Both the component (via `AbiNodeShell`) and
+ * graph-mutation-time edge creation (`resolveEdgeHandles`) read from here, so
+ * a new edge lands on the right `targetHandle` before the target mounts.
+ *
+ * **Node components must not declare their own inline `sourceSpec`** — a JSX
+ * object literal is invisible to any server-side or pre-mount consumer, which
+ * is what made edges resolve to the wrong modality. `node-feature-registry.test.ts`
+ * fails the build if one reappears.
+ *
+ * The `satisfies` clause checks each entry's field names against its own ABI
+ * slot, so reads need no cast and typos surface here at compile time.
+ */
+export const NODE_TYPE_SOURCE_SPEC = {
+    /* ---------------- transfer/ ---------------- */
+    genTextNode: { text: textBatch() },
+    textGenVideoNode: { text: textBatch() },
+    textGenImageNode: { text: textBatch() },
+    textGenSpeechInstructNode: { text: textBatch() },
+    textGenSpeechPresetNode: { text: textBatch() },
+    // `ref_audio` is an Asset $ref in the ABI (default = upstream handle). This
+    // transfer node owns reference audio via local upload/record → config override.
+    // Wired text+audio uses `textGenSpeechCloneComposeNode` (default handles).
+    textGenSpeechCloneNode: {
+        text: textBatch(),
+        ref_audio: configField(),
+    },
+    // Both `tags` and `lyrics` are scalar strings that may be fed from upstream
+    // textNodes via the auto-rendered `in:tags` / `in:lyrics` handles.
+    // AbiHandles renders one handle per ABI input, so the user connects each
+    // upstream textNode to the handle they want to fill.
+    textGenMusicNode: {
+        tags: textScalar(),
+        lyrics: textScalar(),
     },
     imageGenVideoNode: {
         image: batchOn(),
         text: configField(),
     },
-    imageGenVideoComposeNode: {
-        image: batchOn(),
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
-    },
     imageGenImageNode: {
         image: handle({ nodeType: "imageNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        text: textScalarManual(),
     },
+    imageGenImageUpscaleNode: { image: batchOn() },
+    imageGenModelNode: { image: batchOn() },
+    imageGenTextNode: { image: batchOn() },
+    imageBodySegNode: { image: batchOn() },
+    imageMattingNode: { image: batchOn() },
+    imageNormalNode: { image: batchOn() },
+    imagePoseNode: { image: batchOn() },
     videoEditNode: {
         video: handle({ nodeType: "videoNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        text: textScalarManual(),
+    },
+    videoGenModelNode: { video: batchOn() },
+    videoGenTextNode: { video: batchOn() },
+    videoUpscaleNode: { video: batchOn() },
+    extractAudioNode: { video: batchOn() },
+    removeVideoAudioNode: { video: batchOn() },
+    getFirstFrameNode: { video: batchOn() },
+    getLastFrameNode: { video: batchOn() },
+    // `fileKey` is a plain string keyed to a videoNode upload, not an Asset $ref.
+    removeVideoSubtitleNode: { fileKey: batchOn({ nodeType: "videoNode" }) },
+    removeWatermarkNode: { fileKey: batchOn({ nodeType: "videoNode" }) },
+    denoiseAudioSubtitleNode: { fileKey: batchOn({ nodeType: "audioNode" }) },
+    convertVoiceNode: { sourceKey: batchOn({ nodeType: "audioNode" }) },
+    audioDescribeNode: { audio: batchOn() },
+    separateAudioTrackNode: { audio: batchOn() },
+    separateSpeakerNode: { audio: batchOn() },
+    audioGenTextSpeechRecognizeNode: { audio: batchOn() },
+    // Same `transcribe` slot as the audio variant, but this one feeds the ABI
+    // `audio` field from a videoNode upstream.
+    videoGenTextSpeechRecognizeNode: {
+        audio: batchOn({ nodeType: "videoNode" }),
+    },
+    // `document` is a plain string keyed to a fileNode upload.
+    fileGenTextNode: { document: batchOn({ nodeType: "fileNode" }) },
+    // `url` is a plain string (not a $ref), so force it to a linkNode-sourced
+    // handle instead of the default config/text classification. batchOn fans
+    // out one extraction per URL stored in the linkNode's `texts`.
+    linkGenTextNode: { url: batchOn({ nodeType: "linkNode", path: "texts" }) },
+    // Transfer variant of `speech-text-gen-video`: only the audio is wired,
+    // the scene text stays a config field.
+    speechGenVideoNode: { audio: handle({ nodeType: "audioNode" }) },
+
+    /* ---------------- batch/ ---------------- */
+    dropVideoNode: { videos: collectAll() },
+    concatVideoNode: CONCAT_VIDEOS,
+    // `fileKeys` collects every connected videoNode into one arrangement.
+    arrangeNode: { fileKeys: collectAll({ nodeType: "videoNode" }) },
+
+    /* ---------------- compose/ ---------------- */
+    concatVideoComposeNode: CONCAT_VIDEOS,
+    mergeVideoAudioNode: { video: batchOn() },
+    audioVideoLipSyncNode: {
+        video: handle({ nodeType: "videoNode" }),
+        audio: handle({ nodeType: "audioNode" }),
+        text: configField(),
+    },
+    imageFusionNode: {
+        images: collectAll(),
+        text: textScalarManual(),
+    },
+    imagesGenVideoNode: {
+        images: collectAll(),
+        text: textScalarManual(),
+        duration: configField(),
+    },
+    imageGenVideoComposeNode: {
+        image: batchOn(),
+        text: textScalar(),
     },
     speechTextGenVideoNode: {
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
+        text: textScalar(),
         audio: handle({ nodeType: "audioNode" }),
     },
     speechImageGenVideoNode: {
@@ -145,54 +262,42 @@ export const NODE_TYPE_SOURCE_SPEC: Partial<
     },
     speechVideoGenVideoNode: {
         video: handle({ nodeType: "videoNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
-    },
-    audioVideoLipSyncNode: {
-        video: handle({ nodeType: "videoNode" }),
-        audio: handle({ nodeType: "audioNode" }),
-        text: configField(),
+        text: textScalar(),
     },
     videoImageGenVideoMoveNode: {
         image: handle({ nodeType: "imageNode" }),
         video: handle({ nodeType: "videoNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        text: textScalarManual(),
     },
-    textGenSpeechCloneComposeNode: {
-        text: batchOn({ nodeType: "textNode", path: "texts" }),
-    },
-    imageFusionNode: {
-        images: collectAll(),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
-    },
-    imagesGenVideoNode: {
-        images: collectAll(),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
-        duration: configField(),
-    },
-    // `url` is a plain string (not a $ref), so force it to a linkNode-sourced
-    // handle instead of the default config/text classification. batchOn fans
-    // out one extraction per URL stored in the linkNode's `texts`.
-    linkGenTextNode: {
-        url: batchOn({ nodeType: "linkNode", path: "texts" }),
-    },
+    textAudioGenSpeechNode: { text: textBatch() },
+    textGenSpeechCloneComposeNode: { text: textBatch() },
+    textsGenTextNode: { texts: collectAll() },
+
+    /* ---------------- decompose/ ---------------- */
+    splitVideoNode: { video: batchOn() },
+    splitTextNode: { text: textScalar() },
     // `text` is a plain string; promote it to a textNode-sourced handle so an
     // upstream text node can feed the music brief idea.
-    musicBriefNode: {
-        text: handle({ nodeType: "textNode", path: "texts[0]" }),
-    },
+    musicBriefNode: { text: textScalar() },
     // `text` describes the sound to isolate; it can be fed from an upstream
     // textNode or typed manually in the node (edge wins, textarea fallback).
     separateSoundNode: {
         audio: handle({ nodeType: "audioNode" }),
-        text: handle({ nodeType: "textNode", path: "texts[0]", manual: true }),
+        text: textScalarManual(),
     },
+} satisfies {
+    [N in AbiNodeType]?: SourceSpec<FeatureForNodeType<N>>;
 };
 
 export function resolvedSpecForNodeType(
     nodeType: string | undefined,
 ): ResolvedSpec | undefined {
     const feature = featureForNodeType(nodeType);
-    const overrides = nodeType ? NODE_TYPE_SOURCE_SPEC[nodeType] : undefined;
+    const overrides = nodeType
+        ? (NODE_TYPE_SOURCE_SPEC as Partial<Record<string, AnySourceSpec>>)[
+              nodeType
+          ]
+        : undefined;
     if (!feature || !overrides) return undefined;
     return resolveSpec(feature, overrides);
 }
@@ -207,13 +312,12 @@ export function resolvedSpecForNodeType(
  * created, just with the missing handle id absent (matching prior behavior).
  *
  * **Important:** the bare ABI topology classifies plain `string` inputs as
- * `config`. Many node components upgrade those to handles via `sourceSpec`
- * (e.g. `gen-text` has `text: batchOn(...)`). If a caller has access to the
- * already-resolved spec (e.g. from `useAbiExecution`'s `specRef`), it should
- * pass `targetSpec` so the override is respected. Otherwise we fall back to
- * raw topology — sufficient for fields the ABI itself classifies as a handle
- * (arrays of strings/refs, $ref scalars), but will miss sourceSpec-only
- * promotions. The post-mount heal in `useAbiExecution` covers that case.
+ * `config`. Many nodes upgrade those to handles via `NODE_TYPE_SOURCE_SPEC`
+ * (e.g. `gen-text` has `text: batchOn(...)`), so callers should pass
+ * `targetSpec` — `resolvedSpecForNodeType(type)` resolves it from the registry
+ * without needing the node to be mounted. Omitting it falls back to raw
+ * topology, which misses those promotions; the post-mount heal in
+ * `useAbiExecution` is the last line of defence.
  *
  * For ABI targets with multiple handles of the same upstream nodeType (e.g.
  * `image-fusion` taking a batch of images), the caller can pass `usedTargetHandles`

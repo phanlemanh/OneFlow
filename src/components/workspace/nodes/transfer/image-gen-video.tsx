@@ -12,7 +12,6 @@ import {
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { parseTargetHandleId } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import type { SourceSpec } from "@/lib/abi/sources";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -24,7 +23,7 @@ import { VideoDurationSlider } from "../base/video-duration-slider";
 // `text` is a config field on this transfer node (manual prompt). Image+audio
 // wired upstream uses `imageGenVideoComposeNode` (default handles).
 const IMAGE_GEN_VIDEO_TRANSFER_SOURCE_SPEC =
-    NODE_TYPE_SOURCE_SPEC.imageGenVideoNode as SourceSpec<"image-gen-video">;
+    NODE_TYPE_SOURCE_SPEC.imageGenVideoNode;
 
 const ImageGenVideoNode = ({
     selected,

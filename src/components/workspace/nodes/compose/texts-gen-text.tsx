@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectAll } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -15,12 +15,15 @@ const TextsGenTextNode = ({
 }: TongflowPluginNodeProps<"combine-text", "textsGenTextNode">) => {
     const t = useTranslations("Workspace.nodes");
     const tBase = useTranslations("Workspace.nodes.base");
-    const form = useAbiForm("combine-text", { texts: collectAll() });
+    const form = useAbiForm(
+        "combine-text",
+        NODE_TYPE_SOURCE_SPEC.textsGenTextNode,
+    );
 
     return (
         <AbiNodeShell
             feature="combine-text"
-            sourceSpec={{ texts: collectAll() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textsGenTextNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

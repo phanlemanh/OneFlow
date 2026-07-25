@@ -5,7 +5,7 @@ import { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -27,9 +27,7 @@ const TextAudioGenSpeechNode = ({
     return (
         <AbiNodeShell
             feature="text-audio-gen-speech"
-            sourceSpec={{
-                text: batchOn({ nodeType: "textNode", path: "texts" }),
-            }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.textAudioGenSpeechNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { collectAll } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -17,9 +17,7 @@ const ArrangeTextNode = ({
     data,
 }: TongflowPluginNodeProps<"arrange-group", "arrangeNode">) => {
     const t = useTranslations("Workspace.nodes.batch");
-    const form = useAbiForm("arrange-group", {
-        fileKeys: collectAll({ nodeType: "videoNode" }),
-    });
+    const form = useAbiForm("arrange-group", NODE_TYPE_SOURCE_SPEC.arrangeNode);
     const infos = data.infos ?? [];
     const groupCount = (form.state.groupCount as number | undefined) ?? 3;
     const duplicatable =
@@ -28,7 +26,7 @@ const ArrangeTextNode = ({
     return (
         <AbiNodeShell
             feature="arrange-group"
-            sourceSpec={{ fileKeys: collectAll({ nodeType: "videoNode" }) }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.arrangeNode}
             form={form}
             selected={selected}
             data={data}

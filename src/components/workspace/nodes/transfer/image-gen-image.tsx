@@ -9,14 +9,12 @@ import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { collectHandleValues, resolveSpec } from "@/lib/abi/resolve";
-import type { SourceSpec } from "@/lib/abi/sources";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 import { NodeTextarea } from "../base/node-textarea";
 
-const IMAGE_EDIT_SOURCE_SPEC =
-    NODE_TYPE_SOURCE_SPEC.imageGenImageNode as SourceSpec<"image-edit">;
+const IMAGE_EDIT_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC.imageGenImageNode;
 
 const ImageGenImageNode = ({
     selected,

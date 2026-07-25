@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { cn } from "@/lib/utils";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
@@ -38,7 +38,7 @@ const ImageGenImageUpscaleNode = ({
     return (
         <AbiNodeShell
             feature="image-upscale"
-            sourceSpec={{ image: batchOn() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.imageGenImageUpscaleNode}
             form={form}
             selected={selected}
             className="min-w-[480px]"

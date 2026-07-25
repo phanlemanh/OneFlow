@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -21,7 +21,7 @@ const RemoveVideoSubtitleNode = ({
     return (
         <AbiNodeShell
             feature="subtitle_remove"
-            sourceSpec={{ fileKey: batchOn({ nodeType: "videoNode" }) }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.removeVideoSubtitleNode}
             form={form}
             selected={selected}
             data={data}

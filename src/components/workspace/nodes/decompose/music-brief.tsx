@@ -17,14 +17,12 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import type { SourceSpec } from "@/lib/abi/sources";
 import { coerceBaseNodeData } from "@/lib/workflow/flow-node-data";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
 
-const BRIEF_SOURCE_SPEC =
-    NODE_TYPE_SOURCE_SPEC.musicBriefNode as SourceSpec<"music-brief">;
+const BRIEF_SOURCE_SPEC = NODE_TYPE_SOURCE_SPEC.musicBriefNode;
 
 function buildLanguageOptions(tLang: (key: string) => string) {
     return [

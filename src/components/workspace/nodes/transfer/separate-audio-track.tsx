@@ -4,7 +4,7 @@ import { memo, useCallback } from "react";
 import { useAbiForm } from "@/hooks/use-abi-form";
 import useFlow from "@/hooks/use-flow";
 import type { Task } from "@/hooks/use-task";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -47,7 +47,7 @@ const SeparateAudioTrackNode = ({
     return (
         <AbiNodeShell
             feature="separate_audio_track"
-            sourceSpec={{ audio: batchOn() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.separateAudioTrackNode}
             form={form}
             selected={selected}
             data={data}

@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { RfDataNodeProps } from "@/types/nodes";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -18,7 +18,7 @@ const SeparateSpeakerNode = ({ selected, data }: SeparateSpeakerRfProps) => {
     return (
         <AbiNodeShell
             feature="separate_speaker"
-            sourceSpec={{ audio: batchOn() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.separateSpeakerNode}
             form={form}
             selected={selected}
             data={data}

@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { memo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
-import { batchOn } from "@/lib/abi/sources";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -19,7 +19,7 @@ const ImageMattingNode = ({
     return (
         <AbiNodeShell
             feature="image-matting"
-            sourceSpec={{ image: batchOn() }}
+            sourceSpec={NODE_TYPE_SOURCE_SPEC.imageMattingNode}
             form={form}
             selected={selected}
             data={data}
