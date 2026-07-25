@@ -9,7 +9,12 @@
  */
 import { Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type KeyboardEvent, useCallback, useState } from "react";
+import {
+    type ChangeEvent,
+    type KeyboardEvent,
+    useCallback,
+    useState,
+} from "react";
 import toast from "react-hot-toast";
 import {
     PromptInput,
@@ -51,6 +56,11 @@ export default function DirectorPrompt() {
     const t = useTranslations("Director");
     const [open, setOpen] = useState(false);
     const [status, setStatus] = useState<Status>("ready");
+    // The vendored PromptInput clears its textarea on every submit, whether
+    // the request succeeds or fails. We keep the real draft here instead so a
+    // failed request never loses what the user typed; PromptInputTextarea is
+    // driven from this state and only cleared where clearing is correct.
+    const [draft, setDraft] = useState("");
     // Result awaiting confirm-replace because the canvas already has nodes.
     const [pending, setPending] = useState<DirectorSuccess | null>(null);
 
@@ -68,6 +78,7 @@ export default function DirectorPrompt() {
                 toast.success(t("applied"));
                 setPending(null);
                 setOpen(false);
+                setDraft("");
             } catch (e) {
                 logger.error("Failed to apply Director workflow:", e);
                 showErrorToast({ message: t("errors.PLAN_INVALID") });
@@ -132,6 +143,11 @@ export default function DirectorPrompt() {
         [close],
     );
 
+    const handleDraftChange = useCallback(
+        (e: ChangeEvent<HTMLTextAreaElement>) => setDraft(e.target.value),
+        [],
+    );
+
     return (
         <>
             <div
@@ -164,6 +180,8 @@ export default function DirectorPrompt() {
                             <PromptInputTextarea
                                 placeholder={t("placeholder")}
                                 disabled={status === "submitted"}
+                                value={draft}
+                                onChange={handleDraftChange}
                             />
                             <PromptInputSubmit
                                 status={status}
