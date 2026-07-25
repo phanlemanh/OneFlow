@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generateWorkflow } from "./director-core";
+import { generateWorkflow, PlanValidationError } from "./director-core";
 import type { DirectorPlan } from "./dsl";
 
 const DEMO_PLUGINS = {
@@ -83,5 +83,88 @@ describe("generateWorkflow", () => {
             {}, // nothing installed
         );
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
+    });
+
+    // --- Important 4: MISSING_PLUGIN-only issues short-circuit the retry ---
+
+    it("does not call the generator a second time when every issue is MISSING_PLUGIN", async () => {
+        let calls = 0;
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async () => {
+                calls++;
+                return GOOD_PLAN;
+            },
+            {}, // nothing installed — every issue is MISSING_PLUGIN
+        );
+        expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
+        expect(calls).toBe(1);
+    });
+
+    // --- Important 3: retry feedback must embed the failed plan itself ---
+
+    it("embeds the failed plan's JSON in the retry feedback turn", async () => {
+        const calls: string[][] = [];
+        await generateWorkflow(
+            "draw a red bicycle",
+            async (turns) => {
+                calls.push([...turns]);
+                return calls.length === 1 ? BAD_PLAN : GOOD_PLAN;
+            },
+            DEMO_PLUGINS,
+        );
+        expect(calls).toHaveLength(2);
+        expect(calls[1][1]).toContain(JSON.stringify(BAD_PLAN));
+    });
+});
+
+describe("generateWorkflow — plan-validation throws (Important 2)", () => {
+    it("retries once after a PlanValidationError, then succeeds", async () => {
+        const calls: string[][] = [];
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async (turns) => {
+                calls.push([...turns]);
+                if (calls.length === 1) {
+                    throw new PlanValidationError(
+                        'step id "1bad" starts with a digit',
+                    );
+                }
+                return GOOD_PLAN;
+            },
+            DEMO_PLUGINS,
+        );
+        expect(result.ok).toBe(true);
+        expect(calls).toHaveLength(2);
+        // second call carries feedback built from the thrown error message
+        expect(calls[1][1]).toContain("1bad");
+    });
+
+    it("returns PLAN_INVALID (not a throw) when every attempt raises PlanValidationError", async () => {
+        const result = await generateWorkflow(
+            "draw a red bicycle",
+            async () => {
+                throw new PlanValidationError("plan has 61 steps, max is 60");
+            },
+            DEMO_PLUGINS,
+        );
+        expect(result).toMatchObject({
+            ok: false,
+            code: "PLAN_INVALID",
+            message: expect.stringContaining("61 steps"),
+        });
+    });
+
+    it("does not absorb a non-PlanValidationError throw — lets it propagate", async () => {
+        class FakeTransportError extends Error {}
+        await expect(
+            generateWorkflow(
+                "draw a red bicycle",
+                async () => {
+                    throw new FakeTransportError("401 unauthorized");
+                },
+                DEMO_PLUGINS,
+            ),
+        ).rejects.toThrow("401 unauthorized");
     });
 });

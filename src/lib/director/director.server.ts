@@ -3,7 +3,11 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { loadEnvStore } from "@/lib/settings/env-store.server";
-import { type DirectorResult, generateWorkflow } from "./director-core";
+import {
+    type DirectorResult,
+    generateWorkflow,
+    PlanValidationError,
+} from "./director-core";
 import { DIRECTOR_DSL_VERSION, DirectorPlanSchema } from "./dsl";
 import {
     FEW_SHOT_EXAMPLE_JSON,
@@ -26,9 +30,9 @@ below). Return ONLY the plan — no prose, no markdown fences.
 Plan shape:
 {
   "dslVersion": ${DIRECTOR_DSL_VERSION},
-  "name": "<short title>",
-  "description": "<one sentence>",
-  "steps": [ <step>, ... ]
+  "name": "<short title, max 120 chars>",
+  "description": "<one sentence, max 500 chars>",
+  "steps": [ <step>, ... ]   // 1-60 steps
 }
 
 A step is either:
@@ -38,29 +42,58 @@ A step is either:
 "text" steps are the ONLY source of literal content in a plan — there is no
 other step kind that introduces new material.
 
+Vocabulary line format (see "Available slots" below): each line is
+  - slot "<slot>": inputs(<list>) params(<list>) -> <modality>
+- An inputs(...) entry is "<field>: <modality>", optionally followed by "[]"
+  (this field accepts more than one connection — an array of values, one per
+  connection) and optionally followed by one parenthesized, comma-separated
+  tag group, e.g. "(required, manual)" — tags never appear as separate
+  groups.
+- A params(...) entry is "<field>: <type>", optionally followed by
+  "(required)".
+- The trailing "-> <modality>" is what a "gen" step using that slot
+  produces — the modality carried by "@<thatStepId>" wherever it is
+  referenced elsewhere in the plan. "-> none" means the step produces
+  nothing referenceable; such a step can never be the target of "@id".
+
 Rules for steps:
 - "id" must start with a letter and contain only letters, digits, "_", "-"
   (max 24 chars), and must be unique across the plan.
 - "slot" must be exactly one of the slot names in the vocabulary below — no
   other slots exist, and field names for that slot come only from its
   vocabulary line.
-- "inputs" is an array of {"field", "value"} pairs, one per HANDLE field of
-  that slot (the "inputs(...)" list in the slot's vocabulary line). "value" is:
-    - "@<stepId>" — a reference to an earlier step's output, valid for any
-      handle field, or
+- "inputs" is an array of {"field", "value"} pairs, at most one per HANDLE
+  field of that slot (the "inputs(...)" list in the slot's vocabulary line).
+  "value" is:
+    - "@<stepId>" — a reference to an earlier step's output. The referenced
+      step's modality MUST match this field's modality: a "text" step's
+      modality is "text"; a "gen" step's modality is the "-> <modality>" its
+      slot's vocabulary line ends with. A field whose vocabulary entry names
+      modality "image" only accepts a ref to a step whose modality is
+      "image" — a mismatched ref is rejected, and a "-> none" step can never
+      be referenced at all (see "Vocabulary line format" above), or
     - a literal string — valid ONLY for a "text"-typed handle field (a step
       that outputs image/video/audio/file can never be replaced by a
       literal; reference it with "@id" instead), or
     - an array of the above — ONLY for a field marked "[]" in the vocabulary,
       one entry per connection.
-  A field tagged "(manual)" also accepts a literal string the same way; the
-  only difference is that a non-manual literal spawns its own "text" step
-  while a manual one is stored directly on the field.
+  A field tagged "manual" (part of the combined tag group, e.g.
+  "(required, manual)") also accepts a literal string the same way; the only
+  difference is that a non-manual literal spawns its own "text" step while a
+  manual one is stored directly on the field.
+  A handle field tagged "required" but NOT "manual" MUST be given an entry
+  (by ref or literal) — leaving it unfed makes the plan invalid. A field
+  tagged both "required" and "manual" does NOT need an entry — its node's
+  own form default satisfies the requirement even with nothing connected. A
+  handle field without the "required" tag is always optional and may be
+  omitted.
 - "params" is an array of {"field", "value"} pairs, one per CONFIG field of
   that slot (the "params(...)" list in the slot's vocabulary line — things
   like width, height, duration, seed). "value" is always a literal string,
-  number, or boolean — NEVER an "@id" reference. Always supply a value for a
-  param tagged "(required)". Omit params you have no opinion about; the node's
+  number, or boolean — NEVER an "@id" reference. A param tagged "(required)"
+  is NOT checked at plan-validation time (only a required, non-manual handle
+  field is, see above) — but the step needs a value for it to run correctly,
+  so always supply one. Omit params you have no opinion about; the node's
   own defaults apply.
 - A step may only reference ("@id") a step that appears earlier in "steps".
 - Prefer independent parallel branches over needless chains — only connect
@@ -83,6 +116,13 @@ function mapAnthropicError(err: unknown): DirectorResult {
             ok: false,
             code: "AUTH_FAILED",
             message: "Anthropic API key was rejected",
+        };
+    }
+    if (err instanceof Anthropic.PermissionDeniedError) {
+        return {
+            ok: false,
+            code: "AUTH_FAILED",
+            message: "Anthropic API key lacks permission for this request",
         };
     }
     if (err instanceof Anthropic.RateLimitError) {
@@ -125,28 +165,53 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
         return await generateWorkflow(
             prompt,
             async (userTurns) => {
-                const response = await client.messages.parse({
-                    model: MODEL,
-                    max_tokens: MAX_TOKENS,
-                    thinking: { type: "adaptive" },
-                    system: [
-                        { type: "text", text: RULES },
-                        {
-                            type: "text",
-                            text: `Available slots:\n${vocab}`,
-                            cache_control: { type: "ephemeral" },
+                // `zodOutputFormat` strips constraints the API's JSON-schema
+                // grammar can't express (string pattern/length, array
+                // maxItems — see dsl.ts) and re-checks them client-side
+                // inside `.parse()`; a failure there throws a plain
+                // `AnthropicError`, not an `APIError`. That's the SDK's own
+                // distinguishable signal for "the model's plan didn't pass
+                // validation" versus "the request itself failed" (auth, rate
+                // limit, connection, ... — all `APIError` subclasses), so we
+                // key off `instanceof Anthropic.APIError` rather than
+                // matching on error message text: a transport failure is
+                // rethrown unchanged for mapAnthropicError below to
+                // classify, while everything else becomes a
+                // `PlanValidationError` the retry loop in director-core.ts
+                // can absorb.
+                const response = await client.messages
+                    .parse({
+                        model: MODEL,
+                        max_tokens: MAX_TOKENS,
+                        thinking: { type: "adaptive" },
+                        system: [
+                            { type: "text", text: RULES },
+                            {
+                                type: "text",
+                                text: `Available slots:\n${vocab}`,
+                                cache_control: { type: "ephemeral" },
+                            },
+                        ],
+                        messages: userTurns.map((text) => ({
+                            role: "user" as const,
+                            content: text,
+                        })),
+                        output_config: {
+                            format: zodOutputFormat(DirectorPlanSchema),
                         },
-                    ],
-                    messages: userTurns.map((text) => ({
-                        role: "user" as const,
-                        content: text,
-                    })),
-                    output_config: {
-                        format: zodOutputFormat(DirectorPlanSchema),
-                    },
-                });
+                    })
+                    .catch((err) => {
+                        if (err instanceof Anthropic.APIError) {
+                            throw err;
+                        }
+                        throw new PlanValidationError(
+                            err instanceof Error ? err.message : String(err),
+                        );
+                    });
                 if (!response.parsed_output) {
-                    throw new Error("model returned no parsable plan");
+                    throw new PlanValidationError(
+                        "model returned no parsable plan",
+                    );
                 }
                 return response.parsed_output;
             },
