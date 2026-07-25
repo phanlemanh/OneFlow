@@ -2,6 +2,7 @@ import "server-only";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { logger } from "@/lib/logger";
 import { loadEnvStore } from "@/lib/settings/env-store.server";
 import { classifyPlanError } from "./classify-plan-error";
 import {
@@ -115,8 +116,21 @@ async function resolveApiKey(): Promise<string | undefined> {
     return stored.ANTHROPIC_API_KEY ?? process.env.ANTHROPIC_API_KEY;
 }
 
+/**
+ * Maps an SDK exception (or any other throw reaching `runDirector`'s catch —
+ * e.g. `buildDirectorCatalog()`'s filesystem scan) to the client-facing error
+ * taxonomy (spec §9). Every branch logs the real error server-side first:
+ * `err` is the Anthropic SDK's own response-side error object (or a plain
+ * `Error`), which never carries the API key (that's only ever a request
+ * header we send, never echoed back) but can carry detail — a stack trace,
+ * an absolute filesystem path from a fs failure — that must not cross into
+ * the HTTP response. The generic branch below returns a fixed message
+ * instead of `err.message` for exactly that reason (Fix 11); the real detail
+ * is only ever a `logger.error` call away.
+ */
 function mapAnthropicError(err: unknown): DirectorResult {
     if (err instanceof Anthropic.AuthenticationError) {
+        logger.error("[Director] Anthropic authentication failed:", err);
         return {
             ok: false,
             code: "AUTH_FAILED",
@@ -124,6 +138,7 @@ function mapAnthropicError(err: unknown): DirectorResult {
         };
     }
     if (err instanceof Anthropic.PermissionDeniedError) {
+        logger.error("[Director] Anthropic permission denied:", err);
         return {
             ok: false,
             code: "AUTH_FAILED",
@@ -131,17 +146,21 @@ function mapAnthropicError(err: unknown): DirectorResult {
         };
     }
     if (err instanceof Anthropic.RateLimitError) {
+        logger.error("[Director] Anthropic rate limit hit:", err);
         return {
             ok: false,
             code: "RATE_LIMITED",
             message: "Anthropic rate limit hit — retry shortly",
         };
     }
+    // Connection failures, 5xx APIStatusError, and any non-SDK throw (most
+    // notably buildDirectorCatalog()'s filesystem scan, per the comment at
+    // its call site below) all land here.
+    logger.error("[Director] upstream request failed:", err);
     return {
         ok: false,
         code: "UPSTREAM_ERROR",
-        message:
-            err instanceof Error ? err.message : "Anthropic request failed",
+        message: "Anthropic request failed",
     };
 }
 
@@ -171,7 +190,7 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
         const { vocab, slotDefaultPlugin } = buildDirectorCatalog();
         const client = new Anthropic({ apiKey });
 
-        return await generateWorkflow(
+        const result = await generateWorkflow(
             prompt,
             async (turns) => {
                 // `zodOutputFormat` strips constraints the API's JSON-schema
@@ -227,6 +246,35 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
             },
             slotDefaultPlugin,
         );
+
+        // PLAN_INVALID / MISSING_PLUGIN: the compiler's structured
+        // `CompileIssue[]` taxonomy (`result.details`) is exactly what an
+        // operator needs to diagnose a user-reported failure, and is
+        // otherwise discarded at this boundary. Not an operator-facing
+        // *error* — the model/compiler behaved correctly by rejecting a bad
+        // plan — so this logs at `warn`, matching `mapAnthropicError`'s
+        // `error` level being reserved for genuine request/transport
+        // failures.
+        if (
+            !result.ok &&
+            (result.code === "PLAN_INVALID" || result.code === "MISSING_PLUGIN")
+        ) {
+            logger.warn("[Director] plan compile failed:", {
+                code: result.code,
+                message: result.message,
+                issues: result.details,
+            });
+            // Dev-only trace of the actual prompt text (see logger.ts:
+            // `debug` no-ops outside NODE_ENV=development). The prompt is
+            // arbitrary user-authored free text — logging it unconditionally
+            // in production would put whatever the user typed into the
+            // server's always-on logs merely because their plan failed to
+            // compile, which is a routine, expected outcome (a hallucinated
+            // slot, a modality mismatch), not an incident. Local development
+            // still gets the full picture for debugging.
+            logger.debug("[Director] prompt:", prompt);
+        }
+        return result;
     } catch (err) {
         return mapAnthropicError(err);
     }
