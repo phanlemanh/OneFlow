@@ -145,6 +145,17 @@ export async function executeTask(taskId: string): Promise<void> {
 
     const controller = registerTask(taskId);
 
+    // Metering: time the plugin invocation only. Asset preparation is local
+    // I/O, so folding it in would inflate the number a GPU invoice is
+    // reconciled against. Monotonic clock, not Date.now() — a system clock
+    // adjustment mid-run must not corrupt the ledger. Stays null until the
+    // invocation actually starts, so a failure before that records no time.
+    let pluginStartedAt: number | null = null;
+    const pluginDurationMs = (): number | null =>
+        pluginStartedAt === null
+            ? null
+            : Math.max(0, Math.round(performance.now() - pluginStartedAt));
+
     try {
         // Mark task running in DB
         const db = await getDb();
@@ -176,6 +187,7 @@ export async function executeTask(taskId: string): Promise<void> {
         logger.info(
             `[TaskRunner] task=${taskId} assets ready, invoking plugin`,
         );
+        pluginStartedAt = performance.now();
         const result = await executePlugin({
             pluginId: taskData.pluginId,
             nodeSlot: taskData.nodeSlot,
@@ -216,6 +228,7 @@ export async function executeTask(taskId: string): Promise<void> {
                 .set({
                     status: "failed",
                     error: serializeTaskErrorForDb({ message: failMsg }),
+                    durationMs: pluginDurationMs(),
                 })
                 .where(eq(tasks.id, taskId));
         } else {
@@ -233,6 +246,7 @@ export async function executeTask(taskId: string): Promise<void> {
                 .set({
                     status: "completed",
                     result: JSON.stringify(result),
+                    durationMs: pluginDurationMs(),
                 })
                 .where(eq(tasks.id, taskId));
         }
@@ -261,6 +275,7 @@ export async function executeTask(taskId: string): Promise<void> {
             .set({
                 status: "failed",
                 error: serializeTaskErrorForDb({ message: errorMsg }),
+                durationMs: pluginDurationMs(),
             })
             .where(eq(tasks.id, taskId));
     } finally {

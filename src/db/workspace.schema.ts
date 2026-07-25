@@ -1,4 +1,10 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+    index,
+    integer,
+    real,
+    sqliteTable,
+    text,
+} from "drizzle-orm/sqlite-core";
 
 export const workflows = sqliteTable(
     "workflows",
@@ -40,6 +46,15 @@ export const tasks = sqliteTable(
         progress: integer("progress").default(0).notNull(),
         result: text("result"), // JSON string
         error: text("error"),
+        // Metering. `duration_ms` is the plugin invocation only (asset
+        // preparation excluded), so a GPU invoice can be attributed per node.
+        // `cost_usd` / `gpu_type` stay NULL until a backend-neutral plugin
+        // metadata channel exists — a derived estimate here would poison the
+        // very invoice reconciliation these columns are for, and NULL keeps
+        // "not measured" distinguishable from "measured as zero".
+        durationMs: integer("duration_ms"),
+        costUsd: real("cost_usd"),
+        gpuType: text("gpu_type"),
         createdAt: integer("created_at", { mode: "timestamp" })
             .defaultNow()
             .notNull(),
