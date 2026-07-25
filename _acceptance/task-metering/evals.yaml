@@ -1,0 +1,90 @@
+schema_version: 1
+feature_slug: task-metering
+evals:
+  # ---- Schema & migration -------------------------------------------------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_metering_schema
+    expected: "exit 0; the new migration file contains exactly three ALTER TABLE `tasks` ADD statements (cost_usd real, duration_ms integer, gpu_type text) and the assertion that it contains no DROP, no RENAME and no alteration of a pre-existing column FAILS the suite if violated"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_metering_schema
+    expected: "exit 0; a temp DB seeded at migration level 0001 with task rows, migrated forward, still returns every seeded row and reports NULL for all three new columns"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_metering_schema
+    expected: "exit 0; PRAGMA table_info(tasks) on a freshly migrated DB lists cost_usd/duration_ms/gpu_type with declared types REAL/INTEGER/TEXT and notnull=0 for all three"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Write paths --------------------------------------------------------
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; with executePlugin stubbed to return success:true, the captured DB update payload carries status:'completed' AND an integer duration_ms > 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; with executePlugin stubbed to return success:false, the captured update payload carries status:'failed' AND an integer duration_ms > 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; with executePlugin stubbed to throw, the catch-branch update payload carries status:'failed' AND an integer duration_ms > 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; with prepareAssetInput stubbed to take ~120ms and executePlugin ~20ms, the recorded duration_ms is far below the combined time (asserted < 100) — proving asset preparation is excluded from the billable measurement"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Should-NOT-fire / boundary ----------------------------------------
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; SUPPRESSION half — when the abort signal fires mid-invocation the runner takes its early return and NO update payload containing duration_ms is written for that task"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_metering_runner
+    expected: "exit 0; SUPPRESSION half — across the success, plugin-failure and throw paths, no update payload ever contains a cost_usd or gpu_type key; both stay NULL so 0.3 can tell 'not measured' from 'measured as zero'"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Regression & standing checks --------------------------------------
+  - id: E10
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; the whole vitest suite is green — the pre-existing 154 assertions plus the new metering tests, proving status/result/error/SSE behaviour is unchanged"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E11
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build succeeds and tsc --noEmit reports no errors (run sequentially — build rewrites .next/types that tsc reads)"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E12
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome check --error-on-warnings passes with no new warnings"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
