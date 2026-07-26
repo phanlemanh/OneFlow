@@ -43,9 +43,11 @@ for name in "$@"; do
     echo "ok job '${name}': success"
 done
 
-# The run as a whole must also be finished — a green subset of a run still in
-# flight is a snapshot, not a result.
-assert_run_complete "$JSON" || fail=1
+# The run must be finished — a green subset of a run still in flight is a
+# snapshot, not a result. Deliberately NOT the run's overall conclusion: this
+# script's whole contract is "these named jobs succeeded", and coupling it to
+# sibling jobs makes one eval fail for another eval's reason.
+assert_run_finished "$JSON"
 
 [ "$fail" -eq 0 ] || exit 1
 echo "all requested jobs succeeded at ${SHA}"

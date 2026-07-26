@@ -7,17 +7,17 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 50da8fac07d41cc48ea3cdc298374d0ab8375ad1
+verified_commit: f7e0217d13aff74527c05e3cb6e163e758594c07
 human_signoff: Manh 2026-07-26
 ---
 
 # Evidence Report: dependency-refresh-2026-07
 
-Round 2 (2026-07-26T04:49–04:52Z, commit 50da8fac). A **full** re-verify: this
-is the feature under review, and the one commit that landed since round 1
-(`50da8fa`) rewrites `scripts/deps/check-no-t3-drift.sh`, which this feature
-owns. All eight evals were re-executed against the working tree on branch
-`chore/dependency-updates`. Each `cmd` was resolved against
+Round 3 (2026-07-26T06:27–06:36Z, commit f7e0217d) is a **carry-forward
+re-pin**: this feature is merged and signed, and nothing it owns changed. Round
+2 was the last full re-verify, when `scripts/deps/check-no-t3-drift.sh` — a file
+this feature owns — was rewritten. All eight evals were re-executed this round
+against the working tree on branch `chore/ci-actions-bump`. Each `cmd` was resolved against
 `_acceptance/config.yaml` line by line rather than taken from the request. Only
 files under `_acceptance/` differ from the pinned commit, and `_acceptance/**`
 is a declared T1 skip glob, so the pin describes the code that was measured.
@@ -36,11 +36,11 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r2-e1-20260726044921
+  run_id: dependency-refresh-2026-07-r3-e1-20260726063523
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-26T04:49:21Z
+  verified_at: 2026-07-26T06:35:23Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
@@ -53,15 +53,15 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     from the production group, @biomejs/biome from the development group.
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-r2-e2-20260726044928
+  run_id: dependency-refresh-2026-07-r3-e2-20260726063503
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-26T04:49:28Z
+  verified_at: 2026-07-26T06:35:03Z
   output: |
     Lockfile is up to date, resolution step is skipped
     Progress: resolved 2, reused 2, downloaded 0, added 0, done
-    Done in 482ms using pnpm v10.12.1
+    Done in 484ms using pnpm v10.12.1
     "Lockfile is up to date, resolution step is skipped" is the substantive
     line: under --frozen-lockfile pnpm refuses to proceed when the lockfile and
     the manifest disagree, so this is the proof that the regenerated lockfile
@@ -70,15 +70,15 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     install neither rewrote nor repaired the lockfile behind the check.
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r2-e3-20260726044937
+  run_id: dependency-refresh-2026-07-r3-e3-20260726063434
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T04:49:37Z
+  verified_at: 2026-07-26T06:34:34Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
-    Checked 396 files in 90ms. No fixes applied.
+    Checked 396 files in 95ms. No fixes applied.
     Re-confirmed this round that this is not a vacuous pass: `biome --version`
     reports 2.5.5, and biome.json declares `css.parser.tailwindDirectives`,
     without which the Tailwind at-rules in src/app/globals.css are rejected.
@@ -86,18 +86,18 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     recorded in `## Analyst` and was not repeated this round.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r2-e4-20260726044944
+  run_id: dependency-refresh-2026-07-r3-e4-20260726063434
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T04:49:44Z
+  verified_at: 2026-07-26T06:34:34Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  21 passed (21)
           Tests  197 passed (197)
-       Duration  679ms (transform 1.33s, setup 0ms, import 2.45s, tests 583ms, environment 3ms)
+       Duration  606ms (transform 1.11s, setup 0ms, import 2.05s, tests 479ms, environment 1ms)
     The count matches AC-4's stated 197 exactly, so the criterion is checked on
     its number and not merely on a green result. This round's run used
     --reporter=verbose (a reporter flag only — selection and outcome are
@@ -105,29 +105,29 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     totals, confirming none were skipped or filtered.
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r2-e5-20260726044955
+  run_id: dependency-refresh-2026-07-r3-e5-20260726063515
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T04:49:55Z
+  verified_at: 2026-07-26T06:35:15Z
   output: |
     ..................................................................       [100%]
-    66 passed in 5.38s
+    66 passed in 4.23s
     The count matches AC-5's stated 66 exactly. The 66 dots are one per test and
     all are passes; the companion verbose listing of the packaging module (run
     for `sdk-distribution-rename`) named its 11 tests individually, all PASSED,
     consistent with the quiet-mode total not masking skips.
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r2-e6-20260726045014
+  run_id: dependency-refresh-2026-07-r3-e6-20260726062751
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T04:50:14Z
+  verified_at: 2026-07-26T06:27:51Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build
-     ✓ Compiled successfully in 2.8s
+     ✓ Compiled successfully in 3.0s
     ... route table rendered, all routes emitted ...
     + First Load JS shared by all             103 kB
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
@@ -137,13 +137,13 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     completed; tsc emitted no diagnostics under next 15.5.21 / react 19.2.8.
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-r2-e7-20260726045041
+  run_id: dependency-refresh-2026-07-r3-e7-20260726063502
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T04:50:41Z
+  verified_at: 2026-07-26T06:35:02Z
   output: |
-    Plugin time from /var/folders/.../oneflow-cogs-Q1VEdQ/good.db (status: completed, failed) — 5 task(s)
+    Plugin time from /var/folders/.../oneflow-cogs-dZ8EbA/good.db (status: completed, failed) — 5 task(s)
 
     plugin / slot                              n  meas  unmeas    total   median      p95
     modal-z-image / image-gen                   4     3       1    11.0s     4.0s     6.0s
@@ -161,11 +161,11 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
     and better-sqlite3 12.11.1, not merely compiling against their types.
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-r2-e8-20260726044921
+  run_id: dependency-refresh-2026-07-r3-e8-20260726063524
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-26T04:49:21Z
+  verified_at: 2026-07-26T06:35:24Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs origin/main
     This is the suppression half and the focus of this round, because the script
@@ -353,6 +353,56 @@ verification. The only files differing from the pinned commit are under
 pins the tree that was actually measured. The sign-off field in frontmatter is
 deliberately left empty: Gate 2 has not happened and this report does not
 anticipate it.
+
+Round 3 (2026-07-26T06:27–06:36Z, commit f7e0217d): **re-pin only,
+carry-forward applied — the verdict and the human signature stand unchanged.**
+The previous pin went stale because branch `chore/ci-actions-bump` (PR #17)
+landed the `actions/checkout` 4→7 and `docker/login-action` 3→4 bumps together
+with a dry-run guard for `docker-publish.yml` and seven new eval scripts under
+`scripts/ci/`. The staleness rule compares the whole tree against
+`verified_commit` and cannot distinguish "code this feature depends on changed"
+from "unrelated code now exists beside it", which is the only reason this
+feature was flagged.
+
+**The carry-forward precondition was re-derived here, not taken on trust.**
+`git diff --name-only origin/main...HEAD` filtered of `_acceptance/` lists
+exactly ten files: the three workflow files `.github/workflows/ci.yml`,
+`.github/workflows/desktop-release.yml` and `.github/workflows/docker-publish.yml`,
+plus the seven new scripts `scripts/ci/check-action-pins.sh`,
+`check-dispatch-run.sh`, `check-docker-dryrun.sh`, `check-ghcr-untouched.sh`,
+`check-run-jobs.sh`, `check-workflow-drift.sh` and `gh-run-lib.sh`. Every one of
+them belongs to `ci-actions-bump`. **This feature owns none of them**: `package.json`,
+`pnpm-lock.yaml`, `biome.json` and `scripts/deps/**` are all absent from the
+diff — `scripts/ci/` is a different directory from `scripts/deps/`, and the
+two guards this feature ships (`check-manifest.sh`, `check-no-t3-drift.sh`)
+are untouched. Its signature therefore carries.
+
+The remedy is therefore the cheap one: re-run this feature's own evals plus the
+standing checks, and re-pin. All 8 evals were re-executed on this tree and all 8 are green, including
+both purpose-built guards: `check-manifest.sh` re-asserting the three
+representative pins and the three repo scripts, and `check-no-t3-drift.sh`
+reporting `src/lib/abi` and `src/app/api` untouched vs `origin/main`. The
+frozen-lockfile install again printed "Lockfile is up to date, resolution
+step is skipped", and `git status --porcelain pnpm-lock.yaml package.json`
+was empty immediately afterwards, so the install neither rewrote nor
+repaired the lockfile behind the check. The shared standing checks were each
+executed **once** against this tree and their real result recorded for every
+feature that binds them, with distinct `run_id`s per feature — `pnpm lint:check` (396 files, no fixes), `pnpm test`
+(21 files, 197 tests), `cd sdk && python3 -m pytest -q` (66 tests),
+`pnpm build && pnpm typecheck`, and the COGS selftest shared with
+`measure-harness`, all green. Where
+several evals share one command, the command was run once with a verbose
+reporter (a reporter flag changes formatting only, not selection or outcome) and
+each eval credited to its own named covering test rather than to a shared
+result.
+
+No A/B baseline was measured this round either; every `baseline:` field
+above says so explicitly rather than carrying a value forward, for the
+reason given in `## Analyst`.
+`verified_commit` moves 50da8fac → f7e0217d; `run_id`, `verified_at`
+and `output` were updated and nothing else. The verdict is unchanged, and the
+human signature line in frontmatter is preserved byte-for-byte as signed —
+verified by diffing the file and confirming that line produced no change.
 
 ## Gate 2 checklist (human)
 

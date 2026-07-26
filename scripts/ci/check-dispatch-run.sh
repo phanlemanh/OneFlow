@@ -32,7 +32,7 @@ esac
 
 require_gh
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-RUN_ID="$(find_run "$KEY" workflow_dispatch)"
+RUN_ID="$(find_run "$KEY" workflow_dispatch "" "$BRANCH")"
 JSON="$(run_json "$RUN_ID")"
 
 RUN_SHA="$(printf '%s' "$JSON" | jq -r '.headSha')"

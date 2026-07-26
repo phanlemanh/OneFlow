@@ -7,6 +7,12 @@
 # rather than at the next dispatch.
 set -euo pipefail
 
+# NOTE on `grep` without -q below: `grep -q` exits on the first match, which
+# closes the pipe under it. With `set -o pipefail` the dead `printf` makes the
+# whole pipeline report 141, so a SUCCESSFUL match reads as no match — the guard
+# finds the answer and then throws it away. Only shows up once the input exceeds
+# the pipe buffer, which is exactly when it matters. Let grep read to the end.
+
 WF=".github/workflows/docker-publish.yml"
 
 if [ ! -f "$WF" ]; then
@@ -31,12 +37,12 @@ if [ "$(printf '%s\n' "$push_line" | wc -l | tr -d ' ')" -ne 1 ]; then
     exit 1
 fi
 
-if printf '%s' "$push_line" | grep -qE '^\s*push:\s*true\s*$'; then
+if printf '%s' "$push_line" | grep -E '^\s*push:\s*true\s*$' >/dev/null; then
     echo "FAIL: push is unconditionally true — a manual dispatch would publish" >&2
     exit 1
 fi
 
-if ! printf '%s' "$push_line" | grep -qE "github\.ref_type\s*==\s*'tag'"; then
+if ! printf '%s' "$push_line" | grep -E "^[[:space:]]*push:[[:space:]]*\\$\\{\\{[[:space:]]*github\\.ref_type[[:space:]]*==[[:space:]]*'tag'[[:space:]]*\\}\\}[[:space:]]*$" >/dev/null; then
     echo "FAIL: push is not gated on the ref being a tag:" >&2
     printf '%s\n' "$push_line" >&2
     exit 1
