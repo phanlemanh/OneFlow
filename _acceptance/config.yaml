@@ -29,8 +29,11 @@ executors:
     # measure-harness: end-to-end CLI runs over the fixtures committed with the
     # feature — proves the wiring, not just the pure core.
     smoke_measure_wer: "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"
-    smoke_measure_mos: "bash scripts/measure/selftest-mos.sh"
-    smoke_measure_cogs: "bash scripts/measure/selftest-cogs.sh"
+    # tsx rather than the bash wrapper declared at Gate 1: the selftests build
+    # temp databases and sample trees, which is TypeScript work. The eval refs
+    # are unchanged — only the command they resolve to.
+    smoke_measure_mos: "pnpm tsx scripts/measure/selftest-mos.ts"
+    smoke_measure_cogs: "pnpm tsx scripts/measure/selftest-cogs.ts"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
