@@ -1,0 +1,65 @@
+schema_version: 1
+feature_slug: oneflow-plugin-prefix
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_plugin_id
+    expected: "exit 0; the accepts-oneflow cases pass — oneflow-modal-foo and oneflow-api-foo are valid ids"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_plugin_id
+    expected: "exit 0; every id in config/official-plugins.json validates — the test reads the real manifest rather than a copied list, so adding an official plugin cannot silently escape this check"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_plugin_id
+    expected: "exit 0; SUPPRESSION half — foo-modal-bar, oneflow-gpu-x, oneflowmodal-x, ONEFLOW-MODAL-X, oneflow-modal- and bare oneflow- are all rejected"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_plugin_id
+    expected: "exit 0; the rejection message names oneflow-modal-* / oneflow-api-* and marks tongflow-* legacy"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.docs_plugin_prefix
+    expected: "exit 0; docs/plugins.md states the oneflow-api-… / oneflow-modal-… convention and records that tongflow-* stays installable for the upstream official set"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.prefix_no_config_drift
+    expected: "exit 0; SUPPRESSION half — the diff against main touches no file under config/, src/lib/plugins/plugins-registry*, or src/db/"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build and tsc --noEmit both succeed"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E8
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; the whole vitest suite passes — the widened regex breaks no existing behaviour"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome checks the tree with --error-on-warnings and reports nothing"
+    evidence_required: [run_id, exit_code, verifier, verified_at]

@@ -25,6 +25,8 @@ executors:
     # sdk-distribution-rename Gate 1 (2026-07-26): test file lands during
     # implementation; key declared now so eval refs stay portable.
     sdk_pytest_packaging: "cd sdk && python3 -m pytest -q tests/test_packaging.py"
+    # oneflow-plugin-prefix Gate 1 (2026-07-26): test file lands during implementation.
+    unit_plugin_id: "pnpm vitest run src/lib/plugins/plugin-id.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -55,6 +57,9 @@ executors:
     ci_ghcr_untouched: "bash scripts/ci/check-ghcr-untouched.sh"
     ci_desktop_dispatch_green: "bash scripts/ci/check-dispatch-run.sh desktop"
     ci_no_behaviour_drift: "bash scripts/ci/check-workflow-drift.sh origin/main"
+    # oneflow-plugin-prefix Gate 1 (2026-07-26).
+    docs_plugin_prefix: "bash scripts/plugins/check-prefix-docs.sh"
+    prefix_no_config_drift: "bash scripts/plugins/check-no-config-drift.sh origin/main"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
