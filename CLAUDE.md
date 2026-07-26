@@ -83,7 +83,7 @@ Run before every commit; CI ([`.github/workflows/ci.yml`](.github/workflows/ci.y
 - [ ] `pnpm typecheck` passes (`tsc --noEmit`).
 - [ ] `pnpm build` passes (catches Next.js / server-boundary issues lint misses).
 - [ ] **If `sdk/` changed:** `cd sdk && pytest` passes.
-- [ ] Branch off `main` (never commit straight to `main`); Conventional Commit message (`feat:`/`fix:`/`chore:`…). PRs are covered by the [CLA](CLA.md).
+- [ ] Branch off `main` (never commit straight to `main`); Conventional Commit message (`feat:`/`fix:`/`chore:`…). PRs are licensed under AGPL-3.0 — no CLA (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Release checklist
 
