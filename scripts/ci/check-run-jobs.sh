@@ -21,6 +21,10 @@ KEY="$1"
 shift
 
 require_gh
+# Validate the key HERE, in this shell. Inside find_run it is reached through a
+# command substitution, where `exit 2` only kills the subshell — the caller then
+# queries with an empty --workflow and any run at that commit answers.
+workflow_file "$KEY" >/dev/null
 SHA="$(head_sha)"
 RUN_ID="$(find_run "$KEY" "" "$SHA")"
 JSON="$(run_json "$RUN_ID")"

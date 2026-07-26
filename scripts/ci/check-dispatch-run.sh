@@ -112,6 +112,25 @@ while IFS= read -r name; do
     done
 done <<<"$(printf '%s' "$JSON" | jq -r '.jobs[].name')"
 
+# AC-5 claims both architectures were produced. Job and step conclusions do not
+# say that — a single-platform build succeeds identically — so read the log.
+if [ "$KEY" = "docker" ]; then
+    dlog=""
+    if ! dlog="$(gh run view --job "$(printf '%s' "$JSON" | jq -r '.jobs[0].databaseId')" --log 2>&1)"; then
+        echo "could not read the docker job log to confirm platforms — refusing to answer" >&2
+        exit 2
+    fi
+    for plat in linux/amd64 linux/arm64; do
+        # grep without -q: see the SIGPIPE note in check-ghcr-untouched.sh.
+        if printf '%s' "$dlog" | grep -F "[${plat} " >/dev/null; then
+            echo "ok  ${plat} build stages present in the log"
+        else
+            echo "FAIL: no ${plat} build stages — the run did not build both platforms" >&2
+            fail=1
+        fi
+    done
+fi
+
 # Every job skipped would satisfy the loop above without proving a thing.
 if [ "$checked" -eq 0 ]; then
     echo "FAIL: no job in this run actually executed — nothing was proved" >&2

@@ -29,13 +29,17 @@ if [ -z "$diff" ]; then
     exit 0
 fi
 
-guard_lines=0
+guard_removed=0
+guard_added=0
 offenders=""
+cur_file=""
 
 while IFS= read -r line; do
+    # Track which file we are inside; a budget not tied to a file lets a stray
+    # `push:` anywhere in any workflow spend the guard's allowance.
     case "$line" in
-        # Diff bookkeeping, not content.
-        +++*|---*) continue ;;
+        +++\ b/*) cur_file="${line#+++ b/}"; continue ;;
+        ---*) continue ;;
     esac
     case "$line" in
         +*|-*) ;;
@@ -56,16 +60,17 @@ while IFS= read -r line; do
         uses:*|-\ uses:*) continue ;;
     esac
 
-    # The declared dry-run guard: exactly one added and one removed `push:`.
-    # Only the input form (a value on the same line) counts — a bare `push:` is
-    # the workflow TRIGGER, and changing that is precisely the behaviour drift
-    # this check exists to catch.
-    case "$trimmed" in
-        push:*[!' ']*)
-            guard_lines=$((guard_lines + 1))
-            continue
-            ;;
-    esac
+    # The declared dry-run guard, and nothing else wearing its clothes: right
+    # file, right sign, exact value. A budget of "two push: lines somewhere" is
+    # spent by any stray `push: true`, and a bare `push:` is the TRIGGER.
+    if [ "$cur_file" = ".github/workflows/docker-publish.yml" ]; then
+        case "${line:0:1}${trimmed}" in
+            "-push: true")
+                guard_removed=$((guard_removed + 1)); continue ;;
+            "+push: \${{ github.ref_type == 'tag' }}")
+                guard_added=$((guard_added + 1)); continue ;;
+        esac
+    fi
 
     offenders="${offenders}${line}"$'\n'
 done <<<"$diff"
@@ -76,9 +81,9 @@ if [ -n "$offenders" ]; then
     exit 1
 fi
 
-if [ "$guard_lines" -gt 2 ]; then
-    echo "FAIL: ${guard_lines} 'push:' lines changed; the contract declares exactly one guard (one -, one +)" >&2
+if [ "$guard_removed" -gt 1 ] || [ "$guard_added" -gt 1 ]; then
+    echo "FAIL: the declared guard is one removed and one added line; saw -${guard_removed} +${guard_added}" >&2
     exit 1
 fi
 
-echo "workflow drift vs ${BASE}: pins and comments only, plus the declared dry-run guard (${guard_lines} push: line(s))"
+echo "workflow drift vs ${BASE}: pins and comments only, plus the declared dry-run guard (-${guard_removed} +${guard_added})"
