@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 50da8fac07d41cc48ea3cdc298374d0ab8375ad1
-human_signoff:
+human_signoff: Manh 2026-07-26
 ---
 
 # Evidence Report: dependency-refresh-2026-07
