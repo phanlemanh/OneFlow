@@ -8,6 +8,7 @@ import http from "isomorphic-git/http/node";
 import { getDb, tasks } from "@/db";
 import { logger } from "@/lib/logger";
 import {
+    findOfficialEntry,
     isPluginInstalled,
     loadOfficialPluginManifest,
     officialGitUrl,
@@ -132,13 +133,14 @@ export async function installPlugin(params: {
 
     if (params.id) {
         const manifest = loadOfficialPluginManifest();
-        if (!manifest.plugins.includes(params.id)) {
+        const entry = findOfficialEntry(manifest, params.id);
+        if (!entry) {
             throw new PluginInstallError(
                 `Unknown official plugin: ${params.id}`,
             );
         }
-        id = params.id;
-        gitUrl = officialGitUrl(manifest.org, id);
+        id = entry.id;
+        gitUrl = officialGitUrl(entry);
     } else if (params.gitUrl) {
         assertSafeGitUrl(params.gitUrl);
         gitUrl = params.gitUrl.trim();
