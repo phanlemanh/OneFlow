@@ -22,7 +22,7 @@ fail=0
 # $1 = action path, $2 = minimum major, $3 = expected site count
 check_action() {
     local action="$1" floor="$2" want_sites="$3"
-    local lines count=0
+    local lines count=0 below=0
 
     # grep exits 1 on no match; an absent action is a failure here, not a pass.
     lines="$(grep -rhoE "${action}@v[0-9]+" "$WF_DIR" || true)"
@@ -38,6 +38,7 @@ check_action() {
         if [ "$major" -lt "$floor" ]; then
             echo "FAIL ${action}: found ${pin}, below the required v${floor}" >&2
             fail=1
+            below=$((below + 1))
         fi
     done <<<"$lines"
 
@@ -45,6 +46,12 @@ check_action() {
         echo "FAIL ${action}: expected ${want_sites} pinned site(s), found ${count}" >&2
         echo "     a site was added or removed — re-read the contract before changing this number" >&2
         fail=1
+        return
+    fi
+
+    if [ "$below" -ne 0 ]; then
+        # Don't follow a FAIL with a line claiming the action is fine.
+        echo "-- ${action}: ${count} site(s), ${below} below v${floor}"
         return
     fi
 
