@@ -63,3 +63,17 @@ evals:
     cmd: config:executors.test.lint
     expected: "exit 0; biome checks the tree with --error-on-warnings and reports nothing"
     evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scan_prefix
+    expected: "exit 0; two byte-identical plugin dirs differing only in prefix both register with identical registry records, unknown prefixes and gpu/cpu ids are still rejected, and an uppercase id gets the rename hint rather than an unknown-prefix error"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest
+    expected: "exit 0; the whole SDK suite passes — widening the scanner's prefix gate breaks no existing scan behaviour"
+    evidence_required: [run_id, exit_code, verifier, verified_at]

@@ -45,6 +45,28 @@ def _iter_plugin_dirs(plugins_root: Path) -> list[Path]:
     return out
 
 
+# Directory-name conventions. `oneflow-` is the current one. `tongflow-` is
+# accepted as legacy and will be for a while: the official plugins are upstream
+# repos under an org this fork does not control, and a plugin's id is its git
+# repo basename — so rejecting `tongflow-` would reject every official plugin
+# the product ships with. Narrowing follows those repos as they get forked into
+# our own namespace, one at a time.
+#
+# This gate runs BEFORE a directory's contents are read, so it decides whether a
+# plugin exists at all. Widening the installer's regex without widening this
+# lets a plugin install and then never register — which is worse than refusing
+# to install it.
+_PLUGIN_PREFIXES = ("oneflow-", "tongflow-")
+
+
+def _strip_plugin_prefix(plugin_id: str) -> str | None:
+    """The part after a recognised prefix, or None if there is no prefix."""
+    for prefix in _PLUGIN_PREFIXES:
+        if plugin_id.startswith(prefix):
+            return plugin_id[len(prefix) :]
+    return None
+
+
 def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
     deploy = plugin_dir / "deploy.py"
     entry = plugin_dir / "entry.py"
@@ -57,38 +79,40 @@ def _detect_runner(plugin_dir: Path) -> tuple[str | None, str | None]:
     # silently miss the lowercase prefix checks below and be reported as an
     # "unknown prefix"; surface a clear rename hint instead.
     lowered = plugin_id.lower()
-    if plugin_id != lowered and (
-        lowered.startswith("tongflow-modal-") or lowered.startswith("tongflow-api-")
+    lowered_rest = _strip_plugin_prefix(lowered)
+    if plugin_id != lowered and lowered_rest is not None and (
+        lowered_rest.startswith("modal-") or lowered_rest.startswith("api-")
     ):
         return None, (
             f"{plugin_dir}:1: pluginId must be all lowercase; "
             f"fix: rename the plugin repo/dir to {lowered}"
         )
 
-    if plugin_id.startswith("tongflow-modal-gpu-") or plugin_id.startswith(
-        "tongflow-modal-cpu-"
-    ):
+    rest = _strip_plugin_prefix(plugin_id)
+    if rest is None:
         return None, (
-            f"{plugin_dir}:1: pluginId must not encode gpu/cpu; "
-            "fix: use tongflow-modal-<semantic-name>"
-        )
-    if plugin_id.startswith("tongflow-api-gpu-") or plugin_id.startswith(
-        "tongflow-api-cpu-"
-    ):
-        return None, (
-            f"{plugin_dir}:1: pluginId must not encode gpu/cpu; "
-            "fix: use tongflow-api-<semantic-name>"
+            f"{plugin_dir}:1: unknown pluginId prefix; "
+            "fix: use oneflow-modal-<name> or oneflow-api-<name> "
+            "(legacy tongflow-modal-<name> / tongflow-api-<name> still accepted)"
         )
 
+    for runner in ("modal", "api"):
+        if rest.startswith(f"{runner}-gpu-") or rest.startswith(f"{runner}-cpu-"):
+            return None, (
+                f"{plugin_dir}:1: pluginId must not encode gpu/cpu; "
+                f"fix: use oneflow-{runner}-<semantic-name>"
+            )
+
     prefix_runner: str | None = None
-    if plugin_id.startswith("tongflow-modal-"):
+    if rest.startswith("modal-"):
         prefix_runner = "modal"
-    elif plugin_id.startswith("tongflow-api-"):
+    elif rest.startswith("api-"):
         prefix_runner = "api"
     else:
         return None, (
             f"{plugin_dir}:1: unknown pluginId prefix; "
-            "fix: use tongflow-modal-<name> or tongflow-api-<name>"
+            "fix: use oneflow-modal-<name> or oneflow-api-<name> "
+            "(legacy tongflow-modal-<name> / tongflow-api-<name> still accepted)"
         )
 
     if not has_deploy and not has_entry:

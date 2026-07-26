@@ -92,7 +92,10 @@ The naming convention the scanner enforces:
   a while. The official plugins listed in [`config/official-plugins.json`](../config/official-plugins.json)
   are upstream repos under an org this fork does not control, and the installer derives the
   directory name from the git repo basename — so rejecting `tongflow-` would reject every
-  official plugin the product ships with. Use `oneflow-` for anything new; the legacy form
+  official plugin the product ships with. The rule lives in two places that must agree:
+  the installer's id check and `_detect_runner` in the scanner
+  ([`sdk/tongflow/scan.py`](../sdk/tongflow/scan.py)) — widening one alone lets a plugin
+  install and then never register. Use `oneflow-` for anything new; the legacy form
   narrows as those repos get forked into our own namespace, one at a time as reasons to fork
   appear rather than in one sweep.
 - It must **not** encode hardware (`gpu` / `cpu`) — that's the plugin's own concern, not part
