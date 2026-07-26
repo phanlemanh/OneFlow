@@ -12,6 +12,7 @@ import {
     loadOfficialPluginManifest,
     officialGitUrl,
 } from "@/lib/plugins/official-plugins.server";
+import { isValidPluginId, pluginIdError } from "@/lib/plugins/plugin-id";
 import { invalidatePluginsRegistry } from "@/lib/plugins/plugins-registry.server";
 import { pluginsDir } from "@/lib/runtime/paths.server";
 
@@ -20,10 +21,6 @@ import { pluginsDir } from "@/lib/runtime/paths.server";
 // supported, which is why assertSafeGitUrl restricts custom URLs to http(s).
 const PLUGIN_GIT_AUTHOR = { name: "tongflow", email: "tongflow@local" };
 
-// The scanner only detects directories that follow the naming convention; a
-// plugin cloned under any other name is silently ignored. We enforce the prefix
-// up front so a custom git URL either yields a usable plugin or a clear error.
-const PLUGIN_ID_RE = /^tongflow-(modal|api)-[a-z0-9][a-z0-9-]*$/;
 
 export interface InstallResult {
     id: string;
@@ -67,11 +64,12 @@ function assertSafeGitUrl(gitUrl: string): void {
     }
 }
 
+// The scanner only detects directories that follow the naming convention; a
+// plugin cloned under any other name is silently ignored. We enforce it up
+// front so a custom git URL either yields a usable plugin or a clear error.
 function assertValidPluginId(id: string): void {
-    if (!PLUGIN_ID_RE.test(id)) {
-        throw new PluginInstallError(
-            `Plugin directory "${id}" must match the tongflow-modal-* or tongflow-api-* convention, otherwise the scanner cannot detect it.`,
-        );
+    if (!isValidPluginId(id)) {
+        throw new PluginInstallError(pluginIdError(id));
     }
 }
 
