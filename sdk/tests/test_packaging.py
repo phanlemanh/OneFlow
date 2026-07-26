@@ -12,8 +12,15 @@ negative — the ways this change goes wrong are omissions, not mistakes.
 from __future__ import annotations
 
 import json
-import tomllib
 from pathlib import Path
+
+# tomllib is stdlib only from 3.11, and pyproject declares requires-python
+# ">=3.10" — so CI runs 3.10 and needs the backport. Keep both paths until the
+# floor moves.
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 import tongflow
 
