@@ -138,3 +138,17 @@
 {"ts": "2026-07-26T08:42:03Z", "round": 10, "evalId": "E11", "run_id": "sdk-distribution-rename-r10-E11-20260726084203", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
 {"ts": "2026-07-26T08:41:42Z", "round": 10, "evalId": "E12", "run_id": "sdk-distribution-rename-r10-E12-20260726084142", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
 {"ts": "2026-07-26T08:41:49Z", "round": 10, "evalId": "E13", "run_id": "sdk-distribution-rename-r10-E13-20260726084149", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E1", "run_id": "sdk-distribution-rename-r11-E1-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E2", "run_id": "sdk-distribution-rename-r11-E2-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E3", "run_id": "sdk-distribution-rename-r11-E3-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E4", "run_id": "sdk-distribution-rename-r11-E4-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E5", "run_id": "sdk-distribution-rename-r11-E5-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E6", "run_id": "sdk-distribution-rename-r11-E6-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E7", "run_id": "sdk-distribution-rename-r11-E7-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E8", "run_id": "sdk-distribution-rename-r11-E8-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E9", "run_id": "sdk-distribution-rename-r11-E9-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E10", "run_id": "sdk-distribution-rename-r11-E10-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:51Z", "round": 11, "evalId": "E14", "run_id": "sdk-distribution-rename-r11-E14-20260726091151", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T09:11:37Z", "round": 11, "evalId": "E11", "run_id": "sdk-distribution-rename-r11-E11-20260726091137", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T09:11:27Z", "round": 11, "evalId": "E12", "run_id": "sdk-distribution-rename-r11-E12-20260726091127", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T09:11:29Z", "round": 11, "evalId": "E13", "run_id": "sdk-distribution-rename-r11-E13-20260726091129", "exit_code": 0, "cmd": "config:executors.test.lint"}

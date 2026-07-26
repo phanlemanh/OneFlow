@@ -100,6 +100,26 @@ fully green is enforced by the merge itself, not by a criterion.
 - **Đường tag thật của cả hai workflow.** Dry run chứng minh build và login; nó không chứng minh `gh release` upload, việc lật draft sang public, hay push GHCR thật. Những thứ đó vẫn chỉ được chứng minh ở lần cắt release kế tiếp.
 - **Thương hiệu trong `desktop-release.yml`** (`app.tongflow.com`, `TongFlow-mac-universal.dmg`) — thuộc nửa sau hạng mục 0.1, đang chờ quyết định về URL cloud.
 
+## Known limits of the guards (recorded at Gate 2, not criteria)
+
+Six verification rounds each found a false pass in the eval scripts; the sixth
+found none. The change under test never moved — what kept moving was the
+quality of the guards. Two bounded limits remain, both surfaced by the round-6
+verifier and neither live on this tree:
+
+- **E1 is a grep, not a YAML parser.** A `uses:`-shaped line inside a `run: |`
+  block would count as a pinned site.
+- **E8 pairs pin lines without a parity check.** A lone removed
+  `-actions/checkout@v4` reads as a declared bump; the tell is E8's own summary
+  (16 pin lines on a clean tree, 15 with a dropped site).
+
+Planted together so as to predate the branch, both report clean — but the
+tree-provenance pin in E5/E6/E7 then fails, which the verifier drove and
+confirmed. Two cheap hardenings are queued rather than taken here: assert
+`declared_pins` is even, and count a site only when it parses as a step.
+Changing an eval script after verification would restart the round, and the
+suite already refuses the attack.
+
 ## Notes
 
 - Mọi input default của `checkout` **giống hệt nhau giữa v4 và v7** — đọc trực tiếp từ `action.yml` của hai tag, không tin diễn giải trong release notes. Delta thật chỉ có hai: `node20`→`node24` và input mới `allow-unsafe-pr-checkout`.

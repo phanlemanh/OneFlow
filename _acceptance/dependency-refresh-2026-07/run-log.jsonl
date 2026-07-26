@@ -46,3 +46,11 @@
 {"ts": "2026-07-26T08:41:42Z", "round": 6, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r6-e6-20260726084142", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
 {"ts": "2026-07-26T08:42:30Z", "round": 6, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r6-e7-20260726084230", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
 {"ts": "2026-07-26T08:42:09Z", "round": 6, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r6-e8-20260726084209", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}
+{"ts": "2026-07-26T09:12:06Z", "round": 7, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r7-e1-20260726091206", "exit_code": 0, "cmd": "config:executors.script.deps_manifest_intact"}
+{"ts": "2026-07-26T09:12:20Z", "round": 7, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r7-e2-20260726091220", "exit_code": 0, "cmd": "config:executors.script.deps_lockfile_clean"}
+{"ts": "2026-07-26T09:11:29Z", "round": 7, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r7-e3-20260726091129", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T09:11:36Z", "round": 7, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r7-e4-20260726091136", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T09:11:37Z", "round": 7, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r7-e5-20260726091137", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T09:11:27Z", "round": 7, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r7-e6-20260726091127", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T09:12:07Z", "round": 7, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r7-e7-20260726091207", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T09:12:06Z", "round": 7, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r7-e8-20260726091206", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}
