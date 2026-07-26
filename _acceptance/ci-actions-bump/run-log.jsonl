@@ -37,3 +37,11 @@
 {"ts": "2026-07-26T08:59:13Z", "round": 6, "evalId": "E6", "run_id": "ci-actions-bump-r6-e6-20260726085913", "exit_code": 0, "cmd": "bash scripts/ci/check-ghcr-untouched.sh"}
 {"ts": "2026-07-26T08:59:21Z", "round": 6, "evalId": "E7", "run_id": "ci-actions-bump-r6-e7-20260726085921", "exit_code": 0, "cmd": "bash scripts/ci/check-dispatch-run.sh desktop"}
 {"ts": "2026-07-26T08:59:25Z", "round": 6, "evalId": "E8", "run_id": "ci-actions-bump-r6-e8-20260726085925", "exit_code": 0, "cmd": "bash scripts/ci/check-workflow-drift.sh origin/main"}
+{"ts": "2026-07-26T14:00:19Z", "round": 7, "evalId": "E1", "run_id": "ci-actions-bump-r7-E1-20260726140019", "exit_code": 0, "cmd": "config:executors.script.ci_actions_pinned"}
+{"ts": "2026-07-26T14:00:19Z", "round": 7, "evalId": "E2", "run_id": "ci-actions-bump-r7-E2-20260726140019", "exit_code": 0, "cmd": "config:executors.script.ci_gate_plumbing"}
+{"ts": "2026-07-26T14:00:40Z", "round": 7, "evalId": "E3", "run_id": "ci-actions-bump-r7-E3-20260726140040", "exit_code": 0, "cmd": "config:executors.script.ci_jobs_green"}
+{"ts": "2026-07-26T14:00:27Z", "round": 7, "evalId": "E4", "run_id": "ci-actions-bump-r7-E4-20260726140027", "exit_code": 0, "cmd": "config:executors.script.ci_docker_dryrun_guard"}
+{"ts": "2026-07-26T14:00:43Z", "round": 7, "evalId": "E5", "run_id": "ci-actions-bump-r7-E5-20260726140043", "exit_code": 2, "cmd": "config:executors.script.ci_docker_dispatch_green", "note": "refused: no workflow_dispatch run of docker-publish.yml exists on this branch"}
+{"ts": "2026-07-26T14:00:27Z", "round": 7, "evalId": "E6", "run_id": "ci-actions-bump-r7-E6-20260726140027", "exit_code": 2, "cmd": "config:executors.script.ci_ghcr_untouched", "note": "refused: no workflow_dispatch run of docker-publish.yml exists on this branch"}
+{"ts": "2026-07-26T14:00:46Z", "round": 7, "evalId": "E7", "run_id": "ci-actions-bump-r7-E7-20260726140046", "exit_code": 2, "cmd": "config:executors.script.ci_desktop_dispatch_green", "note": "refused: no workflow_dispatch run of desktop-release.yml exists on this branch"}
+{"ts": "2026-07-26T14:00:29Z", "round": 7, "evalId": "E8", "run_id": "ci-actions-bump-r7-E8-20260726140029", "exit_code": 0, "cmd": "config:executors.script.ci_no_behaviour_drift"}

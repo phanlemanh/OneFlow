@@ -37,7 +37,11 @@ need() {
 need "state the oneflow-api convention" '^- It must begin with `oneflow-api-'
 need "state the oneflow-modal convention" '^- It must begin with .*`oneflow-modal-'
 need "record that the legacy tongflow form is still accepted" '^- The legacy `tongflow-api-'
-need "give the reason — the upstream repos are not ours" 'does not control|do not control'
+# Anchored like the rest. Left unanchored, this one accepted the phrase from
+# anywhere in the file — a sentence about the platform not controlling a plugin
+# PROCESS satisfied a check about not controlling a plugin REPO. Same bug as the
+# two above, one line below the comment describing them.
+need "give the reason — the upstream repos are not ours" 'are upstream repos under an org this fork does not control'
 need "keep the lowercase rule" '^- The directory name must be \*\*all lowercase\*\*'
 need "keep the no-hardware rule" '^- It must \*\*not\*\* encode hardware'
 
