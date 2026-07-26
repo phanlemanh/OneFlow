@@ -70,3 +70,11 @@
 {"ts": "2026-07-26T14:54:32Z", "round": 9, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r9-E6-20260726145432", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
 {"ts": "2026-07-26T14:52:39Z", "round": 9, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r9-E7-20260726145239", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
 {"ts": "2026-07-26T14:52:51Z", "round": 9, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r9-E8-20260726145251", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}
+{"ts": "2026-07-26T15:41:42Z", "round": 10, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r10-E1-20260726154142", "exit_code": 0, "cmd": "config:executors.script.deps_manifest_intact"}
+{"ts": "2026-07-26T15:41:42Z", "round": 10, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r10-E2-20260726154142", "exit_code": 0, "cmd": "config:executors.script.deps_lockfile_clean"}
+{"ts": "2026-07-26T15:41:23Z", "round": 10, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r10-E3-20260726154123", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T15:41:22Z", "round": 10, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r10-E4-20260726154122", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T15:41:17Z", "round": 10, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r10-E5-20260726154117", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T15:42:13Z", "round": 10, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r10-E6-20260726154213", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T15:41:41Z", "round": 10, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r10-E7-20260726154141", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T15:41:42Z", "round": 10, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r10-E8-20260726154142", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}

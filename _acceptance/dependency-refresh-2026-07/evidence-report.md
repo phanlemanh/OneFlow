@@ -4,10 +4,10 @@ feature_slug: dependency-refresh-2026-07
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 9)
+verified_by: fresh-context verification subagent (round 10)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8254c0bda4d98c02db789e816f6d19a6c09773a4
+verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
 human_signoff: Manh 2026-07-26
 ---
 
@@ -39,11 +39,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r9-E1-20260726145250
+  run_id: dependency-refresh-2026-07-r10-E1-20260726154142
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-26T14:52:50Z
+  verified_at: 2026-07-26T15:41:42Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
@@ -53,11 +53,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-r9-E2-20260726145250
+  run_id: dependency-refresh-2026-07-r10-E2-20260726154142
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-26T14:52:50Z
+  verified_at: 2026-07-26T15:41:42Z
   output: |
     Lockfile is up to date, resolution step is skipped
     Progress: resolved 2, reused 2, downloaded 0, added 0, done
@@ -66,11 +66,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified.
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r9-E3-20260726144417
+  run_id: dependency-refresh-2026-07-r10-E3-20260726154123
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T14:44:17Z
+  verified_at: 2026-07-26T15:41:23Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
@@ -80,11 +80,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:17Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r9-E4-20260726144424
+  run_id: dependency-refresh-2026-07-r10-E4-20260726154122
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T14:44:24Z
+  verified_at: 2026-07-26T15:41:22Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
@@ -96,11 +96,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:24Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r9-E5-20260726144428
+  run_id: dependency-refresh-2026-07-r10-E5-20260726154117
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T14:44:28Z
+  verified_at: 2026-07-26T15:41:17Z
   output: |
     ........................................................................ [ 83%]
     ..............                                                           [100%]
@@ -109,11 +109,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:28Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r9-E6-20260726145432
+  run_id: dependency-refresh-2026-07-r10-E6-20260726154213
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T14:54:32Z
+  verified_at: 2026-07-26T15:42:13Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -128,11 +128,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:54:32Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-r9-E7-20260726145239
+  run_id: dependency-refresh-2026-07-r10-E7-20260726154141
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T14:52:39Z
+  verified_at: 2026-07-26T15:41:41Z
   output: |
     Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-AekjfC/good.db (status: completed, failed) — 5 task(s)
 
@@ -152,11 +152,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-r9-E8-20260726145251
+  run_id: dependency-refresh-2026-07-r10-E8-20260726154142
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-26T14:52:51Z
+  verified_at: 2026-07-26T15:41:42Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs origin/main
 
@@ -599,6 +599,61 @@ in AGENTS.md authorises.
 `sdk/**`, and this branch changes `sdk/tongflow/scan.py` and adds
 `sdk/tests/test_scan_prefix.py`. Precondition 1 fails for it as written, so its
 report was left untouched and its pin was not moved.
+
+
+Round 10 (2026-07-26T15:41–15:42Z, commit 66f80430): **carry-forward re-pin —
+no fresh Gate-2 signature.** Re-pinned because commit `66f80430` landed on this
+branch after round 9 and `stale_files` compares the whole tree against
+`verified_commit`, unscoped to the feature.
+
+Precondition checked, not assumed. `git diff --name-only 8254c0bd..HEAD` with
+`_acceptance/**` removed lists **twelve** files:
+
+```
+scripts/plugins/check-prefix-docs.sh
+sdk/tests/test_scan_prefix.py
+src/components/workspace/nodes/base/node-plugin-id-select.tsx
+src/components/workspace/plugins-dialog.tsx
+src/components/workspace/settings-dialog.tsx
+src/i18n/messages/en.json
+src/i18n/messages/ja.json
+src/i18n/messages/ko.json
+src/i18n/messages/vi.json
+src/i18n/messages/zh.json
+src/lib/plugins/plugin-id.test.ts
+src/lib/plugins/plugin-id.ts
+```
+
+Every one belongs to **`oneflow-plugin-prefix`** — the commit moved
+`pluginDisplayName` into `plugin-id.ts` and taught it both vendor prefixes,
+refreshed the install hint in five locales and the dialog placeholder, added
+prefix-less cases to the scanner's prefix tests, and anchored an assertion in
+that feature's docs guard. None of the twelve falls in this feature's ownership
+set (`package.json`, `pnpm-lock.yaml`, `biome.json` and `scripts/deps/**`), so the carry-forward precondition in AGENTS.md holds: the
+signature attests to the same code it originally did.
+
+This feature's own evals were all re-run on this tree and all are green:
+`deps_manifest_intact` (react 19.2.8, drizzle-orm 0.45.2, @biomejs/biome 2.5.5,
+repo scripts intact), `deps_lockfile_clean` (`pnpm install --frozen-lockfile`),
+`deps_no_t3_drift` (`src/lib/abi` and `src/app/api` untouched vs origin/main)
+and `smoke_measure_cogs`, alongside the four standing checks it binds.
+
+The shared standing checks were each executed **once** for the whole PR and
+credited to every feature and eval that binds them, under a distinct `run_id`
+per eval — `pnpm build && pnpm typecheck` at 2026-07-26T15:42:13Z,
+`pnpm lint:check` at 2026-07-26T15:41:23Z (398 files, no fixes), `pnpm test` at
+2026-07-26T15:41:22Z (22 files, 272 tests) and `cd sdk && pytest` at
+2026-07-26T15:41:17Z (89 tests). One execution per command, one `run_id` per
+eval: the ids differ so the run-log stays per-eval addressable, while the
+`verified_at` timestamps of evals sharing a command are deliberately identical,
+because they record the same execution. No eval shares a `run_id` with another,
+here or across the other features re-pinned in this PR.
+
+`verified_commit` moves 8254c0bd → 66f80430; `verified_by` records round 10;
+`run_id` and `verified_at` were updated from this round's actual runs and nothing
+else in the report body changed. The human signature line in frontmatter was not
+touched — it attests to the same code it originally did, which is what the
+carry-forward rule in AGENTS.md authorises.
 
 ## Gate 2 checklist (human)
 

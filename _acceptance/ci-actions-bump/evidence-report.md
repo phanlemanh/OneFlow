@@ -4,10 +4,10 @@ feature_slug: ci-actions-bump
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 8)
+verified_by: fresh-context verification subagent (round 9)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8254c0bda4d98c02db789e816f6d19a6c09773a4
+verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
 human_signoff: Manh 2026-07-26
 ---
 
@@ -50,11 +50,11 @@ reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-r8-E1-20260726145251
+  run_id: ci-actions-bump-r9-E1-20260726154143
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-07-26T14:52:51Z
+  verified_at: 2026-07-26T15:41:43Z
   output: |
     ok actions/checkout: 7 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
@@ -63,43 +63,43 @@ reports them.
     Re-derived independently of the script this round: `grep -rn 'uses:' .github/workflows` lists exactly seven `actions/checkout@v7` sites — ci.yml lines 18, 42, 63, 84, 102; desktop-release.yml line 61; docker-publish.yml line 23 — and one `docker/login-action@v4` at docker-publish.yml line 32. AC-1 is true on this tree as written. Round 5's `sed` fix was re-driven against the concealment that defeated the previous version, including the variant where it predates the branch; it holds (Analyst item 3). Analyst item 4 records what a green E1 still does not establish.
 
 - eval: E2
-  run_id: ci-actions-bump-r8-E2-20260726145251
+  run_id: ci-actions-bump-r9-E2-20260726154143
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_gate_plumbing
-  verified_at: 2026-07-26T14:52:51Z
+  verified_at: 2026-07-26T15:41:43Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30206355728 @ 8254c0bda4d98c02db789e816f6d19a6c09773a4
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30207732088 @ 66f804306fb83fc12d5ed32e37031dac406068d6
     ok  checkout ran with fetch-depth: 0
     ok  the checkout under test is v7
     ok  pre-merge-check emitted 6 per-feature verdict line(s)
     ok  no shallow-history or unresolvable-base complaint anywhere in the log
-    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 8254c0bda4d98c02db789e816f6d19a6c09773a4
+    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 66f804306fb83fc12d5ed32e37031dac406068d6
 
     Re-read on this branch's own CI run at HEAD. The run's overall conclusion is not success, and that is expected: the Acceptance Gate job reports bookkeeping state, now for six features, one of them the feature under review on this branch awaiting its own signature. That is precisely why AC-2 was narrowed — see Analyst item 7. What this eval asserts is the plumbing: checkout@v7 ran with fetch-depth: 0 and pre-merge-check reached acceptance logic, emitting six real per-feature verdict lines with no shallow-history or unresolvable-base complaint.
 
 - eval: E3
-  run_id: ci-actions-bump-r8-E3-20260726145301
+  run_id: ci-actions-bump-r9-E3-20260726154149
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_jobs_green
-  verified_at: 2026-07-26T14:53:01Z
+  verified_at: 2026-07-26T15:41:49Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30206355728 @ 8254c0bda4d98c02db789e816f6d19a6c09773a4
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30207732088 @ 66f804306fb83fc12d5ed32e37031dac406068d6
     ok job 'Lint': success
     ok job 'Type Check': success
     ok job 'Build': success
     ok job 'SDK Tests (Python)': success
-    all requested jobs succeeded at 8254c0bda4d98c02db789e816f6d19a6c09773a4
+    all requested jobs succeeded at 66f804306fb83fc12d5ed32e37031dac406068d6
 
     Re-derived from the run object: the four named jobs each carry conclusion `success` at this head SHA under the node24 runtime. The run as a whole concluded otherwise because of the Acceptance Gate job, which this eval deliberately does not depend on — `assert_run_finished`, not `assert_run_complete`.
 
 - eval: E4
-  run_id: ci-actions-bump-r8-E4-20260726145259
+  run_id: ci-actions-bump-r9-E4-20260726154152
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-07-26T14:52:59Z
+  verified_at: 2026-07-26T15:41:52Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
@@ -109,7 +109,7 @@ reports them.
 - eval: E5
   run_id: ci-actions-bump-r6-e5-20260726085907
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dispatch_green
   verified_at: 2026-07-26T08:59:07Z
   output: |
@@ -129,7 +129,7 @@ reports them.
 - eval: E6
   run_id: ci-actions-bump-r6-e6-20260726085913
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_ghcr_untouched
   verified_at: 2026-07-26T08:59:13Z
   output: |
@@ -148,7 +148,7 @@ reports them.
 - eval: E7
   run_id: ci-actions-bump-r6-e7-20260726085921
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_desktop_dispatch_green
   verified_at: 2026-07-26T08:59:21Z
   output: |
@@ -172,11 +172,11 @@ reports them.
     Both matrix legs ran and both uploaded an artifact; the tag-only `prepare` and `publish` jobs were skipped, and the release-upload step was not taken in either leg. That is the dry run working, and it covers the cache@v6 debt from #16 on the two runner OSes ci.yml never touches.
 
 - eval: E8
-  run_id: ci-actions-bump-r8-E8-20260726145259
+  run_id: ci-actions-bump-r9-E8-20260726154152
   exit_code: 0
-  baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
+  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-07-26T14:52:59Z
+  verified_at: 2026-07-26T15:41:52Z
   output: |
     no workflow changes vs origin/main
 
@@ -759,6 +759,77 @@ in AGENTS.md authorises.
 `sdk/**`, and this branch changes `sdk/tongflow/scan.py` and adds
 `sdk/tests/test_scan_prefix.py`. Precondition 1 fails for it as written, so its
 report was left untouched and its pin was not moved.
+
+
+Round 9 (2026-07-26T15:41–15:42Z, commit 66f80430): **carry-forward re-pin —
+no fresh Gate-2 signature.** Re-pinned because commit `66f80430` landed on this
+branch after round 8 and `stale_files` compares the whole tree against
+`verified_commit`, unscoped to the feature.
+
+Precondition checked, not assumed. `git diff --name-only 8254c0bd..HEAD` with
+`_acceptance/**` removed lists **twelve** files:
+
+```
+scripts/plugins/check-prefix-docs.sh
+sdk/tests/test_scan_prefix.py
+src/components/workspace/nodes/base/node-plugin-id-select.tsx
+src/components/workspace/plugins-dialog.tsx
+src/components/workspace/settings-dialog.tsx
+src/i18n/messages/en.json
+src/i18n/messages/ja.json
+src/i18n/messages/ko.json
+src/i18n/messages/vi.json
+src/i18n/messages/zh.json
+src/lib/plugins/plugin-id.test.ts
+src/lib/plugins/plugin-id.ts
+```
+
+Every one belongs to **`oneflow-plugin-prefix`** — the commit moved
+`pluginDisplayName` into `plugin-id.ts` and taught it both vendor prefixes,
+refreshed the install hint in five locales and the dialog placeholder, added
+prefix-less cases to the scanner's prefix tests, and anchored an assertion in
+that feature's docs guard. None of the twelve falls in this feature's ownership
+set (`.github/workflows/**` and `scripts/ci/**`), so the carry-forward precondition in AGENTS.md holds: the
+signature attests to the same code it originally did.
+
+This feature's own evals were re-run where they can be. Five of the eight are
+green on this tree: `ci_actions_pinned`, `ci_gate_plumbing`, `ci_jobs_green`,
+`ci_docker_dryrun_guard` and `ci_no_behaviour_drift`. E2 and E3 read this
+branch's own CI run **30207732088** at head `66f804306fb83fc12d5ed32e37031dac406068d6`,
+where `Lint`, `Type Check`, `Build` and `SDK Tests (Python)` each carry
+conclusion `success`; their output excerpts were refreshed to that run rather
+than carried forward from round 8's.
+
+The three run-reading evals that need a manual dispatch — E5
+(`ci_docker_dispatch_green`), E6 (`ci_ghcr_untouched`) and E7
+(`ci_desktop_dispatch_green`) — **were not re-run**, and are not claimed as
+re-run. Each guard refused to report anything, correctly, because no
+`workflow_dispatch` run of `docker-publish.yml` or `desktop-release.yml` exists
+on this branch: "the workflow must actually have run before this eval can say
+anything". Their evidence blocks keep their earlier-round `run_id` and
+timestamp untouched, and the run-log records the refusal with a note rather than
+a result. This is the same state round 8 recorded; nothing about it changed.
+
+The failure-branch drives recorded in `## Analyst` are carried forward from
+round 8 and were **not** re-measured this round; the per-eval `baseline` lines
+say so explicitly.
+
+The shared standing checks were each executed **once** for the whole PR and
+credited to every feature and eval that binds them, under a distinct `run_id`
+per eval — `pnpm build && pnpm typecheck` at 2026-07-26T15:42:13Z,
+`pnpm lint:check` at 2026-07-26T15:41:23Z (398 files, no fixes), `pnpm test` at
+2026-07-26T15:41:22Z (22 files, 272 tests) and `cd sdk && pytest` at
+2026-07-26T15:41:17Z (89 tests). One execution per command, one `run_id` per
+eval: the ids differ so the run-log stays per-eval addressable, while the
+`verified_at` timestamps of evals sharing a command are deliberately identical,
+because they record the same execution. No eval shares a `run_id` with another,
+here or across the other features re-pinned in this PR.
+
+`verified_commit` moves 8254c0bd → 66f80430; `verified_by` records round 9;
+`run_id` and `verified_at` were updated from this round's actual runs and nothing
+else in the report body changed. The human signature line in frontmatter was not
+touched — it attests to the same code it originally did, which is what the
+carry-forward rule in AGENTS.md authorises.
 
 ## Gate 2 checklist (human)
 

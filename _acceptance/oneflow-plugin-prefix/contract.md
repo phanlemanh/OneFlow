@@ -105,6 +105,23 @@ Consequences, all accepted deliberately:
 - **URL cloud của desktop shell** (`app.tongflow.com`) và tên artifact `TongFlow-*.dmg` — phần còn lại của 0.1, vẫn chờ quyết định.
 - **Các tham chiếu `tongflow-*` mang tính lịch sử** trong `CHANGELOG.md` — đó là bản ghi những gì đã xảy ra, không phải cấu hình. Viết lại là làm sai lịch sử.
 
+## Known limits of the guards (recorded at Gate 2, not criteria)
+
+Three verification rounds. Round 1 **rejected** the feature on its own contract's
+false premise; rounds 2 and 3 each found real defects in the guards rather than
+in the change. One residual remains, recorded rather than fixed:
+
+- **`check-prefix-docs.sh`'s "give the reason" assertion is line-anchored, not
+  bullet-anchored.** Deleting the reason from the legacy bullet and reintroducing
+  the same sentence as a two-space-indented continuation elsewhere in the file
+  still reports the docs correct. Round 2's version matched the phrase *anywhere*,
+  which an ordinary doc quoting `scan.py` would have recreated by accident; that
+  path is closed, and what is left needs someone to do it on purpose. AC-5 was
+  verified by reading §3 directly, independent of the guard.
+
+Fixing it means editing an eval script after verification, which restarts the
+round. Queued, with the same disposition `ci-actions-bump` used for its two.
+
 ## Notes
 
 - Tiền tố được ép ở **hai** tầng — `PLUGIN_ID_RE` của trình cài đặt và `_detect_runner` của scanner. (Dòng ghi chú cũ ở đây từng khẳng định chỉ có một tầng; nó là chính câu bị bác bỏ trong mục Amendment, và vẫn nằm lại đây như một sự thật hiện hành cho tới khi verifier vòng 2 chỉ ra. Một điều đã rút lại thì phải rút ở mọi chỗ nó được viết.)
