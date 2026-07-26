@@ -15,7 +15,14 @@ executors:
     build_typecheck: "pnpm build && pnpm typecheck"
     lint: "pnpm lint:check"
     unit: "pnpm test"
-    sdk_pytest: "cd sdk && python3 -m pytest -q"
+    # Run through uv rather than the ambient python3. On macOS the ambient
+    # interpreter is Homebrew's, where PEP 668 refuses `pip install pytest`, so
+    # `python3 -m pytest` is permanently unavailable — CI passed only because it
+    # pip-installs into a runner-owned interpreter first. `--no-project` plus
+    # PYTHONPATH keeps sdk/uv.lock and sdk/.venv untouched, so a verify round
+    # never dirties the tree; the SDK's runtime deps are named explicitly
+    # because PYTHONPATH imports tongflow from source rather than installing it.
+    sdk_pytest: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic python -m pytest -q"
     # task-metering Gate 1 (2026-07-25): the test files land during implementation;
     # keys are declared now so eval refs stay portable (artifact-platform pattern).
     unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"
@@ -24,12 +31,12 @@ executors:
     unit_measure: "pnpm vitest run src/lib/measure"
     # sdk-distribution-rename Gate 1 (2026-07-26): test file lands during
     # implementation; key declared now so eval refs stay portable.
-    sdk_pytest_packaging: "cd sdk && python3 -m pytest -q tests/test_packaging.py"
+    sdk_pytest_packaging: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic python -m pytest -q tests/test_packaging.py"
     # oneflow-plugin-prefix Gate 1 (2026-07-26): test file lands during implementation.
     unit_plugin_id: "pnpm vitest run src/lib/plugins/plugin-id.test.ts"
     # oneflow-plugin-prefix, added at the T3 amendment: the scanner is the second
     # place the prefix is enforced, and the one that decides registration.
-    sdk_pytest_scan_prefix: "cd sdk && python3 -m pytest -q tests/test_scan_prefix.py"
+    sdk_pytest_scan_prefix: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic python -m pytest -q tests/test_scan_prefix.py"
     # per-plugin-origin Gate 1 (2026-07-27): file lands during implementation.
     unit_official_manifest: "pnpm vitest run src/lib/plugins/official-manifest.test.ts"
   script:
