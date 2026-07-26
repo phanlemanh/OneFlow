@@ -55,3 +55,22 @@
 {"ts":"2026-07-26T03:38:00Z","round":3,"evalId":"E17","run_id":"measure-harness-r3-e17-20260726033800","exit_code":0,"cmd":"pnpm test"}
 {"ts":"2026-07-26T03:38:01Z","round":3,"evalId":"E19","run_id":"measure-harness-r3-e19-20260726033801","exit_code":0,"cmd":"pnpm lint:check"}
 {"ts":"2026-07-26T03:38:08Z","round":3,"evalId":"E18","run_id":"measure-harness-r3-e18-20260726033808","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E1","run_id":"measure-harness-r4-e1-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E2","run_id":"measure-harness-r4-e2-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E3","run_id":"measure-harness-r4-e3-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E4","run_id":"measure-harness-r4-e4-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E5","run_id":"measure-harness-r4-e5-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E7","run_id":"measure-harness-r4-e7-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E8","run_id":"measure-harness-r4-e8-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E9","run_id":"measure-harness-r4-e9-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E10","run_id":"measure-harness-r4-e10-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E11","run_id":"measure-harness-r4-e11-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E13","run_id":"measure-harness-r4-e13-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E14","run_id":"measure-harness-r4-e14-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T03:59:59Z","round":4,"evalId":"E15","run_id":"measure-harness-r4-e15-20260726035959","exit_code":0,"cmd":"pnpm vitest run src/lib/measure"}
+{"ts":"2026-07-26T04:00:07Z","round":4,"evalId":"E6","run_id":"measure-harness-r4-e6-20260726040007","exit_code":0,"cmd":"pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"}
+{"ts":"2026-07-26T04:00:12Z","round":4,"evalId":"E12","run_id":"measure-harness-r4-e12-20260726040012","exit_code":0,"cmd":"pnpm tsx scripts/measure/selftest-mos.ts"}
+{"ts":"2026-07-26T04:00:19Z","round":4,"evalId":"E16","run_id":"measure-harness-r4-e16-20260726040019","exit_code":0,"cmd":"pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts":"2026-07-26T04:00:27Z","round":4,"evalId":"E17","run_id":"measure-harness-r4-e17-20260726040027","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-07-26T04:00:33Z","round":4,"evalId":"E19","run_id":"measure-harness-r4-e19-20260726040033","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-07-26T04:00:39Z","round":4,"evalId":"E18","run_id":"measure-harness-r4-e18-20260726040039","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
