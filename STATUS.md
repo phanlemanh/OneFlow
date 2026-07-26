@@ -24,10 +24,10 @@
 
 | # | Việc | Trạng thái |
 |---|---|---|
-| 0.1 | Fork SDK + mirror plugins + tách desktop | chưa bắt đầu |
-| 0.2 | 3 cột metering (`cost_usd`,`duration_ms`,`gpu_type`) vào `tasks` | chưa bắt đầu — sẵn sàng làm |
-| 0.3 | Bộ đo WER/TTS-vi/COGS (script tái chạy) | chưa bắt đầu |
-| 0.4 | Spec cache content-addressed + partial re-render | chưa bắt đầu — sẵn sàng làm |
+| 0.1 | Fork SDK + mirror plugins + tách desktop | **chặn** — chờ quyết định tên (PyPI + org) và các thao tác ngoài repo |
+| 0.2 | 3 cột metering (`cost_usd`,`duration_ms`,`gpu_type`) vào `tasks` | ✅ **xong** — PR #12, Cổng 2 đã ký 25/07. `duration_ms` đo thật; `cost_usd`/`gpu_type` NULL có chủ đích |
+| 0.3 | Bộ đo WER/TTS-vi/COGS (script tái chạy) | chưa bắt đầu — script viết được ngay, *chạy* cần clip thật + API key + tài khoản Modal |
+| 0.4 | Spec cache content-addressed + partial re-render | ✅ **xong** — PR #11, [spec](docs/spec/prd/engine-cache-partial-rerender.md). 3 câu hỏi mở chờ chốt |
 
 ## Nợ & cảnh báo đang mở
 

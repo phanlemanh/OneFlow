@@ -16,6 +16,10 @@ executors:
     lint: "pnpm lint:check"
     unit: "pnpm test"
     sdk_pytest: "cd sdk && python3 -m pytest -q"
+    # task-metering Gate 1 (2026-07-25): the test files land during implementation;
+    # keys are declared now so eval refs stay portable (artifact-platform pattern).
+    unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"
+    unit_metering_runner: "pnpm vitest run src/lib/task/metering.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
