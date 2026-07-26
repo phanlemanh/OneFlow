@@ -1,0 +1,105 @@
+schema_version: 1
+feature_slug: sdk-distribution-rename
+evals:
+  # ---- Distribution identity ---------------------------------------------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; pyproject.toml parsed with tomllib reports project.name == 'oneflow-sdk'"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; SUPPRESSION half — tool.setuptools.packages.find.include still selects 'tongflow*' and the directory sdk/tongflow/ still exists; option C renames the distribution only, and a stray rename here would ship an empty package"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; `import tongflow` succeeds and run_workflow / progress / deploy are all present on the module"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; project.version in pyproject.toml equals tongflow.__version__"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; SUPPRESSION half — no value in project.urls contains 'tong-io' or 'tongflow.com'"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Publish script ------------------------------------------------------
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; the publish script cleans 'oneflow_sdk.egg-info' and its local-install hint names dist/oneflow_sdk-<version>-py3-none-any.whl — setuptools normalises the dash to an underscore, and getting it wrong prints a path that does not exist"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; the script's final instruction reads 'pip install oneflow-sdk==<version>', and SUPPRESSION half — it must NOT still say 'pip install tongflow==', which would send an operator to upstream's package with this fork's version number"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Docs & scripts ------------------------------------------------------
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; CLAUDE.md, docs/plugins.md and sdk/README.md each name oneflow-sdk where they describe installing or pinning the SDK"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; the package.json publish script is renamed, and SUPPRESSION half — no tracked file still references the old script name, so no doc carries a broken instruction"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; SUPPRESSION half — a repo-wide sweep for distribution-name usages (pip install tongflow, pip_install(\"tongflow==, tongflow.egg-info, dist/tongflow-) finds none outside the gitignored plugins/ tree"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Functional dependency found during implementation -------------------
+  - id: E14
+    criterion: AC-13
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; tongflow.__distribution__ equals project.name in pyproject.toml, and SUPPRESSION half — engine/plugins.py contains no hard-coded 'tongflow==' install string, so the plugin venv can never be told to fetch a distribution that does not exist"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Regression ----------------------------------------------------------
+  - id: E11
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.sdk_pytest
+    expected: "exit 0; the whole SDK pytest suite is green — the rename touches packaging metadata, not behaviour"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E12
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build succeeds and tsc --noEmit reports no errors"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E13
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome check --error-on-warnings passes"
+    evidence_required: [run_id, exit_code, verifier, verified_at]

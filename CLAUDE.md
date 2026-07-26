@@ -22,10 +22,10 @@
 
 - **ABI first:** [`config/tongflow.abi.json`](config/tongflow.abi.json) is the contract. Prefer explicit `required` when the product guarantees a value (e.g. duration from a picker).
 - **Regenerate TS types:** `pnpm gen:abi` → [`src/generated/abi/index.ts`](src/generated/abi/index.ts).
-- **Python SDK:** Keep [`sdk/tongflow/models/`](sdk/tongflow/models/) in sync (e.g. [`sdk/tongflow/gen_models.py`](sdk/tongflow/gen_models.py) or hand-edits). Bump [`sdk/pyproject.toml`](sdk/pyproject.toml) and **publish** with `pnpm tongflow:publish` before Modal plugins depend on the new types or conventions.
+- **Python SDK:** Keep [`sdk/tongflow/models/`](sdk/tongflow/models/) in sync (e.g. [`sdk/tongflow/gen_models.py`](sdk/tongflow/gen_models.py) or hand-edits). Bump [`sdk/pyproject.toml`](sdk/pyproject.toml) and **publish** with `pnpm sdk:publish` before Modal plugins depend on the new types or conventions.
 - **Next.js executable nodes:** ABI first → `pnpm gen:abi`. Implement UI with **`useAbiForm`**, **`useAbiExecution`** (via [`AbiNodeShell`](src/components/workspace/nodes/base/abi-node-shell.tsx)), and **`<AbiHandles>`** (auto-renders `in:<field>` / `out:<field>` handles). The exporter ([`exporter.ts`](src/lib/workflow/exporter.ts)) and connection validator both read directly from the ABI mount registry ([`node-registry.ts`](src/lib/abi/node-registry.ts)) + [`resolveSpec`](src/lib/abi/resolve.ts); a node's `sourceSpec` is the single source of truth — never hand-maintain `bindings` / `paramMappings` / `getPrompts` in node files.
 - **Add / Modality nodes** (`add/*`, `modality/*`): not ABI-driven. Each renders its own fixed `<Handle id="in:<modality>">` / `<Handle id="out:<modality>">` directly inside `<BaseNodeShell>`.
-- **Modal plugins:** Bump every plugin's `pip_install("tongflow==X.Y.Z")` pin to match the just-published SDK version. Plugin slot methods consume the new types directly (see "Plugin authoring rules" below); plugin-internal defaults are not a substitute for an ABI field. The SDK is **backend-neutral** (no `modal` dependency): a Modal plugin marks its handler class `@deploy`, builds its app with `modal.App(Path(__file__).resolve().parent.name)` (no SDK helper), ships a thin `entry.py` bridge (identical across Modal plugins), and declares `modal` in its own `requirements.txt`.
+- **Modal plugins:** Bump every plugin's `pip_install("oneflow-sdk==X.Y.Z")` pin to match the just-published SDK version. Plugin slot methods consume the new types directly (see "Plugin authoring rules" below); plugin-internal defaults are not a substitute for an ABI field. The SDK is **backend-neutral** (no `modal` dependency): a Modal plugin marks its handler class `@deploy`, builds its app with `modal.App(Path(__file__).resolve().parent.name)` (no SDK helper), ships a thin `entry.py` bridge (identical across Modal plugins), and declares `modal` in its own `requirements.txt`.
 
 **Plugins directory** ([`plugins/`](plugins/)) is gitignored and populated at runtime — see [`docs/plugins.md`](docs/plugins.md).
 
@@ -49,9 +49,9 @@
 
 - **Annotate with the generated types.** `def foo(self, input: FooInput) -> FooOutput`. Access fields with `input.field` (attribute access). Return `FooOutput(success=..., ...)`.
 - **No dict shims.** `cast(dict, input)` / `dict(input)` / `d.get("field", default)` are forbidden — they bypass static checking.
-- **No `try: from tongflow.models ... except ModuleNotFoundError: TypedDict` fallback.** Plain `from tongflow.models.foo import FooInput` only. Dev environments must `pip install tongflow==<current>` locally.
+- **No `try: from tongflow.models ... except ModuleNotFoundError: TypedDict` fallback.** Plain `from tongflow.models.foo import FooInput` only. Dev environments must `pip install oneflow-sdk==<current>` locally.
 - **ABI gaps stay out of the ABI.** Fields only one plugin needs (model name, internal mode, output codec) become plugin-internal module-level constants or env vars (e.g. `DEFAULT_AUDIO_FORMAT = "mp3"`, `WHISPER_MODEL = os.environ.get(...)`). Don't invent fields the ABI doesn't expose — pyright will flag the access.
-- **Pin tongflow.** Every `deploy.py`'s `pip_install("tongflow==X.Y.Z")` must match [`sdk/pyproject.toml`](sdk/pyproject.toml).
+- **Pin the SDK.** Every `deploy.py`'s `pip_install("oneflow-sdk==X.Y.Z")` must match [`sdk/pyproject.toml`](sdk/pyproject.toml).
 - **Default implementation:** a module-level `TONGFLOW_DEFAULT_SLOTS = ["image-gen", ...]` (slot strings) claims those slots' default — the scanner hoists that plugin to the head of `nodePluginMap[slot]`, which is what a newly added node preselects and what the picker lists first. Use the constant, not `@node_slot(..., default=True)`: a constant is never executed, so the plugin still imports under the older SDKs baked into already-deployed runtimes (a deployed cloud executor pins its tongflow at provision time and never rolls forward on its own). At most one installed plugin per slot may claim it (a clash is resolved by directory order and reported in the registry `errors`); unclaimed slots keep the old first-in-directory-order behaviour.
 - **Backend-neutral SDK.** The SDK never imports `modal`. A deploy-first plugin marks its `@app.cls` handler class with **`@deploy`** (the scanner detects it by AST via [`parse_deploy.py`](sdk/tongflow/parse_deploy.py)), constructs `app = modal.App(Path(__file__).resolve().parent.name)` directly (the `current_app` helper was removed), ships a thin `entry.py` bridge that lazily imports `modal`, and lists `modal` in `requirements.txt`. Don't reintroduce a `modal` SDK dependency or `current_app`.
 
@@ -93,8 +93,8 @@ Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **des
 
 - [ ] Bump the version in **both** [`sdk/pyproject.toml`](sdk/pyproject.toml) **and** [`sdk/tongflow/__init__.py`](sdk/tongflow/__init__.py) (`__version__`) — they **must match**; drift between them is a recurring bug.
 - [ ] If ABI/types changed, regenerate models ([`sdk/tongflow/gen_models.py`](sdk/tongflow/gen_models.py)) and confirm `cd sdk && pytest` passes.
-- [ ] Publish: `pnpm tongflow:publish` ([`scripts/publish-tongflow-pypi.sh`](scripts/publish-tongflow-pypi.sh) — needs `TWINE_USERNAME=__token__` + `TWINE_PASSWORD` in `.env`; dry-run to TestPyPI with `TONGFLOW_UPLOAD_TESTPYPI=1`).
-- [ ] Bump every Modal plugin's `pip_install("tongflow==X.Y.Z")` pin to the just-published version (see "Plugin authoring rules").
+- [ ] Publish: `pnpm sdk:publish` ([`scripts/publish-tongflow-pypi.sh`](scripts/publish-tongflow-pypi.sh) — needs `TWINE_USERNAME=__token__` + `TWINE_PASSWORD` in `.env`; dry-run to TestPyPI with `TONGFLOW_UPLOAD_TESTPYPI=1`).
+- [ ] Bump every Modal plugin's `pip_install("oneflow-sdk==X.Y.Z")` pin to the just-published version (see "Plugin authoring rules").
 
 **Desktop app + GitHub release:**
 

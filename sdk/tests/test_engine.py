@@ -594,7 +594,11 @@ def test_shared_venv_installs_sdk_from_pypi(monkeypatch, tmp_path):
     plugins_mod._ensure_shared_venv(tmp_path / "data", lambda _m: None)
 
     pip_installs = [c for c in calls if "install" in c]
-    assert any(f"tongflow=={tongflow.__version__}" in c for c in pip_installs)
+    # Installs the DISTRIBUTION name, which differs from the import package.
+    assert any(
+        f"{tongflow.__distribution__}=={tongflow.__version__}" in c
+        for c in pip_installs
+    )
     # never installs from a local path
     assert not any("--upgrade" in c for c in pip_installs)
 

@@ -88,7 +88,8 @@ jobs:
           python-version: "3.10"
 
       - name: Install SDK with test deps
-        run: pip install -e sdk pytest
+        # tomli backports tomllib for the 3.10 floor the SDK declares.
+        run: pip install -e sdk pytest tomli
 
       - name: Run SDK tests
         run: pytest

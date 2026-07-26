@@ -149,6 +149,13 @@ def _sdk_version() -> str:
     return __version__
 
 
+def _sdk_distribution() -> str:
+    """PyPI name to install — not the import name, which stays ``tongflow``."""
+    from tongflow import __distribution__
+
+    return __distribution__
+
+
 def _ensure_shared_venv(data_dir: Path, log: LogCb) -> Path:
     venv_dir = _venv_dir(data_dir)
     py = _venv_python(venv_dir)
@@ -165,11 +172,13 @@ def _ensure_shared_venv(data_dir: Path, log: LogCb) -> Path:
             raise RuntimeError(f"failed to create plugin venv: {out.strip()}")
 
     # Always install the SDK from PyPI (pinned to this package's version) so a
-    # pip-installed tongflow provisions correctly — `pip install <SDK_ROOT>`
-    # only works from the repo checkout, not from site-packages.
-    log(f"installing tongflow=={version} into the plugin venv")
+    # pip-installed SDK provisions correctly — `pip install <SDK_ROOT>` only
+    # works from the repo checkout, not from site-packages. The name here is the
+    # DISTRIBUTION, which differs from the import package.
+    dist = _sdk_distribution()
+    log(f"installing {dist}=={version} into the plugin venv")
     code, out = _run(
-        [str(py), "-m", "pip", "install", f"tongflow=={version}"], venv_dir
+        [str(py), "-m", "pip", "install", f"{dist}=={version}"], venv_dir
     )
     if code != 0:
         raise RuntimeError(f"failed to install SDK into plugin venv: {out.strip()}")
