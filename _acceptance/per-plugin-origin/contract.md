@@ -5,9 +5,9 @@ slug: per-plugin-origin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins]
-status: draft
-approved_by:
-approved_at:
+status: approved
+approved_by: Manh
+approved_at: 2026-07-27
 time_human_minutes: {gate1: 0, gate2: 0}
 ---
 
@@ -53,8 +53,8 @@ Source input: prompt (bắt đầu (a) luôn)
 ## Criteria
 
 - AC-1: Given all 38 entries are plain strings today, When the manifest is loaded, Then every id resolves to the top-level `org` and the id list and its **order** are unchanged — order decides which plugin a slot preselects, so a reshuffle is a silent behaviour change.
-- AC-2: Given an entry written as `{"id": "...", "origin": "https://github.com/phanlemanh"}`, When the manifest is loaded, Then that id resolves to its own origin and **every other id still resolves to the default** — the point of the feature is that one plugin can move without the rest.
-- AC-3: Given the URL rule exists in both the in-app manager and the CLI installer, When both build a remote for the same id, Then they produce the **same URL from the same resolver** — no second copy of the rule survives this change.
+- AC-2: Given an entry written as `{"id": "x", "origin": "https://github.com/phanlemanh"}`, When the manifest is loaded, Then `x` resolves to exactly `https://github.com/phanlemanh/x.git` and **every other id still resolves to the default** — `origin` is a base URL carrying the same meaning as `org`, not a finished clone URL, so the id and `.git` are still appended. An object entry that omits `origin` (`{"id": "x"}`) is **valid** and falls back to the default `org`.
+- AC-3: Given the URL rule has three consumers — the in-app manager, the CLI installer, and the update checker, which today calls `checkPluginUpdate(manifest.org, id)` for every installed plugin — When each builds a remote for the same id, Then all three produce the **same URL from the same resolver** — no second copy of the rule survives this change, and a plugin that overrides its origin must not be update-checked against the default one.
 - AC-4: Given a malformed entry (unknown key, missing `id`, non-string `origin`, empty string, duplicate id), When the manifest is loaded, Then loading **fails with a message naming the offending entry** — a typo must not silently clone from the default origin.
 - AC-5: Given an origin that is not an `http(s)` URL (`git@github.com:x`, `../etc`, `javascript:`), When the manifest is loaded, Then it is rejected — an origin is a clone target, and the installer already refuses non-http(s) remotes for custom URLs.
 - AC-6: Given this change is a capability and not a migration, When the shipped manifest is inspected, Then it still holds **38 plain string entries and the same default org** — no plugin is repointed here, and the two guards from `oneflow-plugin-prefix` that assert this stay green.
@@ -62,7 +62,8 @@ Source input: prompt (bắt đầu (a) luôn)
 ## Coverage
 
 - Trục **hình dạng entry**: chuỗi (AC-1) | đối tượng có `origin` (AC-2) | hỏng (AC-4, AC-5).
-- Trục **người tiêu thụ**: quản lý trong app (AC-3) | trình cài đặt CLI (AC-3) | kiểm tra cập nhật (AC-3). [thước CE: ba đường đều dựng URL; một đường lệch là tải plugin từ nơi khác mà không ai biết]
+- Trục **hình dạng entry** (bổ sung sau gap-probe): object thiếu `origin` — hợp lệ, rơi về mặc định (AC-2).
+- Trục **người tiêu thụ**: quản lý trong app (AC-3) | trình cài đặt CLI (AC-3) | kiểm tra cập nhật (AC-3, nêu đích danh sau gap-probe). [thước CE: ba đường đều dựng URL; một đường lệch là tải plugin từ nơi khác mà không ai biết]
 - Trục **thứ tự & danh tính**: thứ tự id giữ nguyên (AC-1) | id trùng bị bắt (AC-4).
 - Trục **giữ phạm vi**: manifest xuất xưởng không đổi (AC-6) — nửa "không được kích hoạt".
 

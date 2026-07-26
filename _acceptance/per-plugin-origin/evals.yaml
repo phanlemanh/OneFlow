@@ -12,7 +12,7 @@ evals:
     criterion: AC-2
     executor: test
     cmd: config:executors.test.unit_official_manifest
-    expected: "exit 0; the override block passes — an entry carrying its own origin resolves to it while every sibling still resolves to the default"
+    expected: "exit 0; the override block passes — an entry {id: x, origin: https://github.com/phanlemanh} resolves to the literal string https://github.com/phanlemanh/x.git (origin is a base URL, id and .git still appended), every sibling still resolves to ${org}/${id}.git, and an object entry omitting origin ({id: x}) is accepted and falls back to the default org"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E3
@@ -33,14 +33,14 @@ evals:
     criterion: AC-3
     executor: script
     cmd: config:executors.script.origin_single_impl
-    expected: "exit 0; the `${...}/${id}.git` URL rule appears exactly once in the repo, and scripts/install-official-plugins.* imports the shared resolver rather than re-deriving it"
+    expected: "exit 0; the `${...}/${id}.git` URL rule appears exactly once across src/ and scripts/ (.ts, .tsx, .mjs, .js), excluding the check script itself and any *.test.* fixture; scripts/install-official-plugins.* imports the shared resolver rather than re-deriving it; and scripts/install-official-plugins.mjs no longer exists, having moved to TypeScript"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
     criterion: AC-3
     executor: script
     cmd: config:executors.script.origin_installer_parity
-    expected: "exit 0; the CLI installer and the in-app resolver print the same remote URL for every id in the shipped manifest, and for a fixture whose entry overrides its origin"
+    expected: "exit 0; all THREE consumers agree — the CLI installer, the in-app install path, and the update checker (checkOfficialPluginUpdates) each print, via a dry run of their own real code path, the remote URL they would actually use, and the three agree for every id in the shipped manifest and for a fixture whose entry overrides its origin; comparing the resolver against itself does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E7
