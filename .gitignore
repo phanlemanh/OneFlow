@@ -57,6 +57,10 @@ __pycache__/
 
 .claude/
 
+# Agent session scratch (working notes, reports). Untracked and never shipped —
+# listed here so a `git add -A` cannot sweep it into a commit.
+.superpowers/
+
 # Cloud shell extension points: a private shell repo links its own
 # implementations into these paths at build time (see src/ext-default/ for
 # the open-source defaults). They must never be committed here.
