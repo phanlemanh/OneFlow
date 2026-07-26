@@ -434,7 +434,7 @@ export function PluginsDialog() {
                             <Input
                                 value={gitUrl}
                                 onChange={(e) => setGitUrl(e.target.value)}
-                                placeholder="https://github.com/org/tongflow-api-foo.git"
+                                placeholder="https://github.com/org/oneflow-api-foo.git"
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !cloning)
                                         void installCustom();

@@ -9,7 +9,7 @@
         "upToDate": "Đã cập nhật",
         "checkUpdates": "Kiểm tra cập nhật",
         "emptyOfficial": "Chưa có plugin chính thức nào",
-        "customHint": "Tên repository phải theo quy ước tongflow-modal-* hoặc tongflow-api-*, nếu không sẽ không được nhận diện.",
+        "customHint": "Tên repository phải theo quy ước oneflow-modal-* hoặc oneflow-api-* (tên tongflow-* cũ vẫn được nhận diện), nếu không sẽ không được nhận diện.",
         "cloneButton": "Clone & cài đặt",
         "installSuccess": "Đã cài đặt {id}",
         "updateSuccess": "Đã cập nhật {id}",

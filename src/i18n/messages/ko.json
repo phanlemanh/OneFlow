@@ -9,7 +9,7 @@
         "upToDate": "최신 상태",
         "checkUpdates": "업데이트 확인",
         "emptyOfficial": "사용 가능한 공식 플러그인이 없습니다",
-        "customHint": "저장소 이름은 tongflow-modal-* 또는 tongflow-api-* 규칙을 따라야 하며, 그렇지 않으면 감지할 수 없습니다.",
+        "customHint": "저장소 이름은 oneflow-modal-* 또는 oneflow-api-* 규칙을 따라야 하며(기존 tongflow-* 이름도 계속 인식됩니다), 그렇지 않으면 감지할 수 없습니다.",
         "cloneButton": "복제 및 설치",
         "installSuccess": "{id} 설치 완료",
         "updateSuccess": "{id} 업데이트 완료",

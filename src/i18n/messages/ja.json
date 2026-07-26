@@ -9,7 +9,7 @@
         "upToDate": "最新です",
         "checkUpdates": "更新を確認",
         "emptyOfficial": "利用可能な公式プラグインがありません",
-        "customHint": "リポジトリ名は tongflow-modal-* または tongflow-api-* の規約に従う必要があります。従わない場合は検出できません。",
+        "customHint": "リポジトリ名は oneflow-modal-* または oneflow-api-* の規約に従う必要があります（従来の tongflow-* 名も引き続き利用できます）。従わない場合は検出できません。",
         "cloneButton": "クローンしてインストール",
         "installSuccess": "{id} をインストールしました",
         "updateSuccess": "{id} を更新しました",

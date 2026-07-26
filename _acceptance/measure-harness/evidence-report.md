@@ -4,10 +4,10 @@ feature_slug: measure-harness
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 11)
+verified_by: fresh-context verification subagent (round 14)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 572cb98a44f29174acd496e5aa648bd6a6ac08b0
+verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
 human_signoff: Manh 2026-07-26
 ---
 
@@ -38,81 +38,81 @@ human_signoff: Manh 2026-07-26
 ## Evidence
 
 - eval: E1
-  run_id: measure-harness-r11-e1-20260726091156
+  run_id: measure-harness-r14-E1-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > scores an identical transcript as zero 1ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E2
-  run_id: measure-harness-r11-e2-20260726091156
+  run_id: measure-harness-r14-E2-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > diacritics are preserved (AC-2) — suppression half > treats a missing tone mark as an error 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E3
-  run_id: measure-harness-r11-e3-20260726091156
+  run_id: measure-harness-r14-E3-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > Unicode composition (AC-3) > scores precomposed and decomposed text as equal 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E4
-  run_id: measure-harness-r11-e4-20260726091156
+  run_id: measure-harness-r14-E4-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > case and punctuation are not word errors (AC-4) > ignores letter case 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E5
-  run_id: measure-harness-r11-e5-20260726091156
+  run_id: measure-harness-r14-E5-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > numbers are reported, never converted (AC-5) — suppression half > counts a digits-versus-words price as an error 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E6
-  run_id: measure-harness-r11-e6-20260726091206
+  run_id: measure-harness-r14-E6-20260726154140
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_wer
-  verified_at: 2026-07-26T09:12:06Z
+  verified_at: 2026-07-26T15:41:40Z
   output: |
     WER over 2 clip(s) in src/lib/measure/__fixtures__/wer
 
@@ -126,84 +126,84 @@ human_signoff: Manh 2026-07-26
     26 reference words. "digit" counts edits where either side's token contains a digit —
     numbers are never converted automatically, so a price read aloud shows up here for a human to judge.
 
-    Re-run this round on commit 572cb98; the table above is this round's actual output.
+    Re-run this round on commit 8254c0bd; the table above is this round's actual output.
 
 - eval: E7
-  run_id: measure-harness-r11-e7-20260726091156
+  run_id: measure-harness-r14-E7-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/wer.test.ts > corpus scoring (AC-6) > aggregates over total words, not the mean of per-clip rates 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E8
-  run_id: measure-harness-r11-e8-20260726091156
+  run_id: measure-harness-r14-E8-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/mos.test.ts > the sheet is blind by construction (AC-7) — suppression half > leaks no system name anywhere in the sheet 1ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E9
-  run_id: measure-harness-r11-e9-20260726091156
+  run_id: measure-harness-r14-E9-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/mos.test.ts > the key is a separate artefact (AC-8) > keeps the answer out of the sheet the rater receives 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E10
-  run_id: measure-harness-r11-e10-20260726091156
+  run_id: measure-harness-r14-E10-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/mos.test.ts > aggregation reports the spread, not just the mean (AC-9) > matches hand-computed mean, sd, n and interval 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E11
-  run_id: measure-harness-r11-e11-20260726091156
+  run_id: measure-harness-r14-E11-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/mos.test.ts > bad input fails loudly (AC-10) — suppression half > rejects a score outside the MOS range instead of dropping it 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E12
-  run_id: measure-harness-r11-e12-20260726091207
+  run_id: measure-harness-r14-E12-20260726154140
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_mos
-  verified_at: 2026-07-26T09:12:07Z
+  verified_at: 2026-07-26T15:41:40Z
   output: |
     system                    n     MOS     sd      95% CI
     -----------------------------------------------------
@@ -214,58 +214,58 @@ human_signoff: Manh 2026-07-26
 
     selftest-mos: ok
 
-    Re-run this round on commit 572cb98; the table above is this round's actual output.
+    Re-run this round on commit 8254c0bd; the table above is this round's actual output.
 
 - eval: E13
-  run_id: measure-harness-r11-e13-20260726091156
+  run_id: measure-harness-r14-E13-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > groups by plugin and slot 1ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E14
-  run_id: measure-harness-r11-e14-20260726091156
+  run_id: measure-harness-r14-E14-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/cogs.test.ts > unmeasured rows are counted, not averaged (AC-12) — suppression half > keeps NULL durations out of the statistics 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E15
-  run_id: measure-harness-r11-e15-20260726091156
+  run_id: measure-harness-r14-E15-20260726154139
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T09:11:56Z
+  verified_at: 2026-07-26T15:41:39Z
   output: |
     ✓ src/lib/measure/cogs.test.ts > cost is applied, never invented (AC-13) — suppression half > omits the cost field entirely when no rates are supplied 0ms
 
     Test Files  3 passed (3)
          Tests  33 passed (33)
 
-    Re-run this round on commit 572cb98; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 8254c0bd; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E16
-  run_id: measure-harness-r11-e16-20260726091207
+  run_id: measure-harness-r14-E16-20260726154141
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T09:12:07Z
+  verified_at: 2026-07-26T15:41:41Z
   output: |
-    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-3NA8ZC/good.db (status: completed, failed) — 5 task(s)
+    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-AekjfC/good.db (status: completed, failed) — 5 task(s)
 
     plugin / slot                              n  meas  unmeas    total   median      p95
     -------------------------------------------------------------------------------------------
@@ -280,30 +280,30 @@ human_signoff: Manh 2026-07-26
 
     selftest-cogs: ok
 
-    Re-run this round on commit 572cb98; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
+    Re-run this round on commit 8254c0bd; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
 
 - eval: E17
-  run_id: measure-harness-r11-e17-20260726091136
+  run_id: measure-harness-r14-E17-20260726154122
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T09:11:36Z
+  verified_at: 2026-07-26T15:41:22Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
 
-    Test Files  21 passed (21)
-         Tests  197 passed (197)
-      Duration  603ms (transform 1.14s, setup 0ms, import 2.06s, tests 495ms, environment 1ms)
+    Test Files  22 passed (22)
+         Tests  270 passed (270)
+      Duration  682ms (transform 1.41s, setup 0ms, import 2.54s, tests 586ms, environment 1ms)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:50Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:24Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E18
-  run_id: measure-harness-r11-e18-20260726091127
+  run_id: measure-harness-r14-E18-20260726154213
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T09:11:27Z
+  verified_at: 2026-07-26T15:42:13Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -315,21 +315,21 @@ human_signoff: Manh 2026-07-26
 
     (tsc --noEmit produced no diagnostics)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:42Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:54:32Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E19
-  run_id: measure-harness-r11-e19-20260726091129
+  run_id: measure-harness-r14-E19-20260726154123
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T09:11:29Z
+  verified_at: 2026-07-26T15:41:23Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
 
-    Checked 396 files in 80ms. No fixes applied.
+    Checked 398 files in 97ms. No fixes applied.
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:49Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:17Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 ## Analyst
 
@@ -725,6 +725,141 @@ were updated and nothing else. Where a named test line's millisecond duration
 differed from this round's run, the excerpt was corrected to this round's actual
 value rather than carried forward. The signature field in frontmatter is
 preserved byte-for-byte as signed, and this round did not touch it.
+
+Round 12 (2026-07-26T13:52–14:00Z, commit 5975bb4): **carry-forward re-pin —
+no fresh Gate-2 signature.** Re-pinned because the `oneflow-plugin-prefix` work
+landed on this branch after round 11 and `stale_files` compares the whole tree
+against `verified_commit`.
+
+The tree changed only where `oneflow-plugin-prefix` owns it. `git diff --name-only
+origin/main...HEAD`, with `_acceptance/**` removed, lists six files:
+`docs/plugins.md`, `scripts/plugins/check-prefix-docs.sh`,
+`scripts/plugins/check-no-config-drift.sh`, `src/lib/plugins/plugin-id.ts`,
+`src/lib/plugins/plugin-id.test.ts` and `src/lib/plugins/plugins-install.server.ts`.
+Every one belongs to that feature; none falls in this feature's ownership set. This feature owns `src/lib/measure/**` and `scripts/measure/**`, and
+neither path appears in the diff.
+
+All nineteen evals were re-run on the new tree and all nineteen exited zero:
+`unit_measure` (3 files, 33 tests) covering E1–E5, E7–E11 and E13–E15; the three
+CLI smokes `smoke_measure_wer`, `smoke_measure_mos` and `smoke_measure_cogs`;
+and the three shared standing checks. `smoke_measure_cogs` was executed once and
+credited to both this feature's E16 and dependency-refresh-2026-07's E7, under
+separate `run_id`s.
+
+The three shared standing checks were each executed ONCE for the whole PR and
+credited to every feature and eval that binds them, under a distinct `run_id`
+per eval — `pnpm build && pnpm typecheck` at 2026-07-26T13:52:28Z,
+`pnpm lint:check` at 2026-07-26T13:55:47Z (398 files, no fixes) and `pnpm test`
+at 2026-07-26T13:55:54Z (22 files, 270 tests). `cd sdk && pytest` ran once at
+2026-07-26T13:59:51Z (66 tests). No eval shares a `run_id` with another, here or
+across the other features re-pinned in this PR.
+
+`verified_commit` moves 572cb98 → 5975bb4; `run_id`, `verified_at` and `output`
+were updated from this round's actual runs and nothing else in the report body
+changed. The human signature line is byte-identical to the one committed at Gate
+2 — it attests to the same code it originally did, which is what the
+carry-forward rule in AGENTS.md authorises.
+
+Round 13 (2026-07-26T14:44–14:54Z, commit 8254c0bd): **carry-forward re-pin —
+not a fresh Gate-2 signature.** The feature under review in PR #18 is
+`oneflow-plugin-prefix`; this feature is merged, signed, and went stale only
+because `stale_files` compares the whole tree against each report's
+`verified_commit`.
+
+Both carry-forward preconditions from AGENTS.md were checked, not assumed.
+
+1. **This feature's own code is unchanged.** `git diff --name-only 5975bb4`
+   filtered of `_acceptance/` lists four files — `docs/plugins.md`,
+   `scripts/plugins/check-prefix-docs.sh`, `sdk/tongflow/scan.py` and
+   `sdk/tests/test_scan_prefix.py`. Widened to the whole branch,
+   `git diff --name-only origin/main...HEAD` filtered of `_acceptance/` adds
+   `scripts/plugins/check-no-config-drift.sh`, `src/lib/plugins/plugin-id.ts`,
+   `src/lib/plugins/plugin-id.test.ts` and
+   `src/lib/plugins/plugins-install.server.ts`. `docs/**` is a declared T1 skip
+   glob; every other file belongs to `oneflow-plugin-prefix`. No file under `src/lib/measure/**` or `scripts/measure/**` — the paths this feature owns — differs.
+2. **The standing checks are green on the new tree.** `pnpm test` (22 files, 270 tests), `pnpm lint:check` (398 files, no fixes) and `pnpm build && pnpm typecheck` all exited zero on this tree.
+
+All nineteen of this feature's evals were re-executed at this commit and all
+nineteen exited zero. The fourteen unit evals come from one run of
+`config:executors.test.unit_measure` (3 files, 33 tests), each credited to its
+own named test line re-matched against this round's verbose output; the three
+end-to-end CLI smokes (`smoke_measure_wer`, `smoke_measure_mos`,
+`smoke_measure_cogs`) were each run separately over the fixtures committed with
+the feature.
+
+Each shared standing check was executed ONCE for the whole PR and credited to
+every feature and eval that binds it, under a **distinct `run_id` per eval** —
+`pnpm build && pnpm typecheck` at 2026-07-26T14:54:32Z, `pnpm lint:check` at
+2026-07-26T14:44:17Z (398 files, no fixes) and `pnpm test` at
+2026-07-26T14:44:24Z (22 files, 270 tests). `cd sdk && pytest` ran once at
+2026-07-26T14:44:28Z (86 tests — 20 more than the previous round, because
+`oneflow-plugin-prefix` added `sdk/tests/test_scan_prefix.py`). No eval shares a
+`run_id` with another, here or across the other features re-pinned in this PR.
+
+`verified_commit` moves 5975bb4 → 8254c0bd; `run_id`, `verified_at` and `output`
+were updated from this round's actual runs and nothing else in the report body
+changed. The signature bytes in frontmatter were not touched — the signature
+attests to the same code it originally did, which is what the carry-forward rule
+in AGENTS.md authorises.
+
+**One feature in this PR could not be carried.** `sdk-distribution-rename` owns
+`sdk/**`, and this branch changes `sdk/tongflow/scan.py` and adds
+`sdk/tests/test_scan_prefix.py`. Precondition 1 fails for it as written, so its
+report was left untouched and its pin was not moved.
+
+
+Round 14 (2026-07-26T15:41–15:42Z, commit 66f80430): **carry-forward re-pin —
+no fresh Gate-2 signature.** Re-pinned because commit `66f80430` landed on this
+branch after round 13 and `stale_files` compares the whole tree against
+`verified_commit`, unscoped to the feature.
+
+Precondition checked, not assumed. `git diff --name-only 8254c0bd..HEAD` with
+`_acceptance/**` removed lists **twelve** files:
+
+```
+scripts/plugins/check-prefix-docs.sh
+sdk/tests/test_scan_prefix.py
+src/components/workspace/nodes/base/node-plugin-id-select.tsx
+src/components/workspace/plugins-dialog.tsx
+src/components/workspace/settings-dialog.tsx
+src/i18n/messages/en.json
+src/i18n/messages/ja.json
+src/i18n/messages/ko.json
+src/i18n/messages/vi.json
+src/i18n/messages/zh.json
+src/lib/plugins/plugin-id.test.ts
+src/lib/plugins/plugin-id.ts
+```
+
+Every one belongs to **`oneflow-plugin-prefix`** — the commit moved
+`pluginDisplayName` into `plugin-id.ts` and taught it both vendor prefixes,
+refreshed the install hint in five locales and the dialog placeholder, added
+prefix-less cases to the scanner's prefix tests, and anchored an assertion in
+that feature's docs guard. None of the twelve falls in this feature's ownership
+set (`src/lib/measure/**` and `scripts/measure/**`), so the carry-forward precondition in AGENTS.md holds: the
+signature attests to the same code it originally did.
+
+This feature's own evals were all re-run on this tree and all are green:
+`unit_measure` (3 files, 33 tests) covering thirteen evals, and the three
+end-to-end CLI smokes `smoke_measure_wer`, `smoke_measure_mos` and
+`smoke_measure_cogs`, alongside the three standing checks it binds.
+
+The shared standing checks were each executed **once** for the whole PR and
+credited to every feature and eval that binds them, under a distinct `run_id`
+per eval — `pnpm build && pnpm typecheck` at 2026-07-26T15:42:13Z,
+`pnpm lint:check` at 2026-07-26T15:41:23Z (398 files, no fixes), `pnpm test` at
+2026-07-26T15:41:22Z (22 files, 272 tests) and `cd sdk && pytest` at
+2026-07-26T15:41:17Z (89 tests). One execution per command, one `run_id` per
+eval: the ids differ so the run-log stays per-eval addressable, while the
+`verified_at` timestamps of evals sharing a command are deliberately identical,
+because they record the same execution. No eval shares a `run_id` with another,
+here or across the other features re-pinned in this PR.
+
+`verified_commit` moves 8254c0bd → 66f80430; `verified_by` records round 14;
+`run_id` and `verified_at` were updated from this round's actual runs and nothing
+else in the report body changed. The human signature line in frontmatter was not
+touched — it attests to the same code it originally did, which is what the
+carry-forward rule in AGENTS.md authorises.
 
 ## Gate 2 checklist (human)
 

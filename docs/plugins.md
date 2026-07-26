@@ -84,10 +84,20 @@ it plays no part in discovery or execution.
 The naming convention the scanner enforces:
 
 - The directory name must be **all lowercase**.
-- It must begin with `tongflow-api-…` or `tongflow-modal-…`. **The prefix no longer selects an
+- It must begin with `oneflow-api-…` or `oneflow-modal-…`. **The prefix no longer selects an
   execution backend** — every plugin runs the same way (see [§5](#5-what-registers-a-handler)).
   It is now just a **label** shown in the node's plugin picker, a hint about where the work
   tends to run (a local/API adapter vs. hosted compute).
+- The legacy `tongflow-api-…` / `tongflow-modal-…` forms are **still accepted**, and will be for
+  a while. The official plugins listed in [`config/official-plugins.json`](../config/official-plugins.json)
+  are upstream repos under an org this fork does not control, and the installer derives the
+  directory name from the git repo basename — so rejecting `tongflow-` would reject every
+  official plugin the product ships with. The rule lives in two places that must agree:
+  the installer's id check and `_detect_runner` in the scanner
+  ([`sdk/tongflow/scan.py`](../sdk/tongflow/scan.py)) — widening one alone lets a plugin
+  install and then never register. Use `oneflow-` for anything new; the legacy form
+  narrows as those repos get forked into our own namespace, one at a time as reasons to fork
+  appear rather than in one sweep.
 - It must **not** encode hardware (`gpu` / `cpu`) — that's the plugin's own concern, not part
   of the id.
 

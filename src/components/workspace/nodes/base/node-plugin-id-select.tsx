@@ -11,16 +11,9 @@ import {
     usePluginsRegistry,
     usePluginsRegistryStore,
 } from "@/hooks/use-plugins-registry";
+import { pluginDisplayName } from "@/lib/plugins/plugin-id";
 import type { BaseNodeData } from "@/types/nodes";
 import { NodePluginSelect } from "./node-plugin-select";
-
-export function pluginDisplayName(pluginId: string): string {
-    const parts = pluginId.split("-").filter(Boolean);
-    // Strip only the leading vendor prefix, keep the type segment
-    // (e.g. "tongflow-api-openai" -> "api-openai").
-    const semantic = parts[0] === "tongflow" ? parts.slice(1) : parts;
-    return semantic.join("-");
-}
 
 type NodePluginIdSelectProps = {
     nodeSlot: string;
