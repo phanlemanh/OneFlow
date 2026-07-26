@@ -5,14 +5,14 @@ evals:
     criterion: AC-1
     executor: script
     cmd: config:executors.script.ci_actions_pinned
-    expected: "exit 0; no actions/checkout@v below 7 and no docker/login-action@v below 4 anywhere under .github/workflows, and the expected five checkout sites are all present — a partial bump fails"
+    expected: "exit 0; no actions/checkout@v below 7 and no docker/login-action@v below 4 anywhere under .github/workflows, and the expected seven checkout sites are all present — a partial bump fails"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2
     criterion: AC-2
     executor: script
-    cmd: config:executors.script.ci_job_gate_green
-    expected: "exit 0; the Acceptance Gate job on this branch's head SHA concluded success, proving fetch-depth: 0 under checkout@v7 still gives pre-merge-check.sh a base to diff against"
+    cmd: config:executors.script.ci_gate_plumbing
+    expected: "exit 0; in the Acceptance Gate job at this branch's head SHA, checkout@v7 ran with fetch-depth: 0 and pre-merge-check.sh reached acceptance logic — real per-feature verdict lines, no shallow-history or unresolvable-base complaint"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E3

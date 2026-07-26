@@ -63,13 +63,27 @@ Source input: prompt (gộp #1 và #2 vào một contract CI actions bump)
 ## Criteria
 
 - AC-1: Given `checkout` is pinned at seven separate sites across three workflow files, When the workflows are scanned, Then **no `actions/checkout@v` below 7 and no `docker/login-action@v` below 4 remain anywhere** — a partial bump is the real failure mode here, because the sites left behind keep working and so never report themselves.
-- AC-2: Given this PR's own CI runs `checkout@v7` five times (once per `ci.yml` job), When the `Acceptance Gate` job runs, Then it passes — proving `fetch-depth: 0` still produces a history deep enough for `pre-merge-check.sh` to diff against the base, on the very action version being adopted.
+- AC-2: Given this PR's own CI runs `checkout@v7` five times (once per `ci.yml` job), When the `Acceptance Gate` job runs, Then `fetch-depth: 0` gives `pre-merge-check.sh` a usable base — it reaches acceptance logic and emits real per-feature verdicts, with no shallow-history or unresolvable-base complaint anywhere in the job log.
 - AC-3: Given `Lint`, `Type Check`, `Build` and `SDK Tests` each check out under v7, When CI runs, Then all four pass, showing the node24 runtime change breaks no existing job.
 - AC-4: Given `docker-publish.yml` cannot be exercised without publishing, When its `workflow_dispatch` path is inspected, Then it builds **without pushing** — `push:` is false for a manual run and true only for a tag — so the workflow becomes provable on demand instead of only at release time.
 - AC-5: Given the dry-run guard, When `docker-publish.yml` is dispatched on this branch, Then the run succeeds through `docker/login-action@v4` and `docker/build-push-action@v7` and produces an image for `linux/amd64,linux/arm64` — covering PR #2 and retiring the qemu-v4 / build-push-v7 debt #16 recorded.
 - AC-6: Given the dry run must not publish, When that dispatched run finishes, Then **no new tag appears in the GHCR package** for this repository — the suppression half of AC-4.
 - AC-7: Given `desktop-release.yml` uses `checkout@v7` and `cache@v6` on macOS and Windows runners, When it is dispatched (dry run), Then both matrix legs pass their existing installer sanity check and upload artifacts, with no GitHub Release created — covering the cache-v6 debt from #16 on the two runner OSes `ci.yml` never touches.
 - AC-8: Given a version bump must not carry behaviour with it, When the workflow diff against `main` is inspected, Then **every changed line outside the declared `docker-publish.yml` dry-run guard is a `uses:` pin** — no job, trigger, permission or input is altered under cover of the bump.
+
+## Amendment (post-Gate 1, 2026-07-26)
+
+AC-2 originally read "the `Acceptance Gate` job passes". That is unsatisfiable
+as written, and the fault is the criterion's, not the bump's: that job runs the
+acceptance gate itself, so its colour is dominated by acceptance bookkeeping —
+a feature awaiting its Gate 2 signature keeps it red however well git behaved.
+Evidence must exist *before* the signature, so a criterion that can only be met
+*after* it is circular.
+
+Narrowed to what the checkout bump can actually be held to: the gate reached
+acceptance logic, meaning the base resolved and real verdicts came out rather
+than a complaint about shallow history. Nothing is lost by the change — CI being
+fully green is enforced by the merge itself, not by a criterion.
 
 ## Coverage
 
