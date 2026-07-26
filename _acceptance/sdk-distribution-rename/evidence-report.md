@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4b1d0d3bb03735af271c50c344aff5e1c431db40
+verified_commit: 50da8fac07d41cc48ea3cdc298374d0ab8375ad1
 human_signoff: Manh 2026-07-26
 ---
 
@@ -32,9 +32,12 @@ human_signoff: Manh 2026-07-26
 
 ## Evidence
 
-Round 4 (this round) re-ran every eval on the current tree — a **full** re-verify,
-with nothing carried forward from round 3, because this feature owns
-`sdk/tests/test_packaging.py` and that file changed in commit 4b1d0d3.
+Round 6 (this round) re-ran every one of the fourteen evals on the current tree.
+It is a carry-forward re-pin, not a fresh Gate-2 verification: no file this
+feature owns changed since the signed round, so the signature attests to the
+same code it originally did. The last **full** re-verify with nothing carried
+forward was round 4, when this feature's own `sdk/tests/test_packaging.py`
+changed in commit 4b1d0d3.
 
 E1–E10 and E14 share one invocation of
 `config:executors.test.sdk_pytest_packaging`; the resolved command was run
@@ -50,196 +53,187 @@ eleven evals credited here. The mapping survived the round-4 edit — that commi
 touched only the module's import preamble, not any test body or docstring.
 
 - eval: E1
-  run_id: sdk-distribution-rename-r4-E1-20260726040114
+  run_id: sdk-distribution-rename-r6-E1-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_distribution_name_is_oneflow_sdk PASSED
-    docstring "AC-1"; asserts pyproject project.name == "oneflow-sdk"
+    tests/test_packaging.py::test_distribution_name_is_oneflow_sdk PASSED    [  9%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E2
-  run_id: sdk-distribution-rename-r4-E2-20260726040114
+  run_id: sdk-distribution-rename-r6-E2-20260726045000
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_import_package_is_untouched PASSED
-    docstring "AC-2 — suppression half of option C"; asserts "tongflow*" still in
-    packages.find.include and sdk/tongflow/ is a dir
+    tests/test_packaging.py::test_import_package_is_untouched PASSED         [ 18%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E3
-  run_id: sdk-distribution-rename-r4-E3-20260726040114
+  run_id: sdk-distribution-rename-r6-E3-20260726045000
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_import_still_works_and_exposes_the_public_api PASSED
-    docstring "AC-3 — the name 82 Python files depend on"; asserts
-    tongflow.__name__ == "tongflow" and run_workflow / progress / deploy present
+    tests/test_packaging.py::test_import_still_works_and_exposes_the_public_api PASSED [ 27%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E4
-  run_id: sdk-distribution-rename-r4-E4-20260726040114
+  run_id: sdk-distribution-rename-r6-E4-20260726045000
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_version_is_declared_once_in_effect PASSED
-    docstring "AC-4 — CLAUDE.md calls this drift a recurring bug"; asserts
-    pyproject project.version == tongflow.__version__
+    tests/test_packaging.py::test_version_is_declared_once_in_effect PASSED  [ 36%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E5
-  run_id: sdk-distribution-rename-r4-E5-20260726040114
+  run_id: sdk-distribution-rename-r6-E5-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_project_urls_do_not_point_at_upstream PASSED
-    docstring "AC-5 — suppression half"; asserts no project.urls value contains
-    "tong-io" or "tongflow.com"
+    tests/test_packaging.py::test_project_urls_do_not_point_at_upstream PASSED [ 45%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E6
-  run_id: sdk-distribution-rename-r4-E6-20260726040114
+  run_id: sdk-distribution-rename-r6-E6-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_publish_script_uses_normalised_artifact_names PASSED
-    docstring "AC-6"; asserts the script names oneflow_sdk.egg-info and
-    dist/oneflow_sdk-${VER}-py3-none-any.whl
+    tests/test_packaging.py::test_publish_script_uses_normalised_artifact_names PASSED [ 54%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E7
-  run_id: sdk-distribution-rename-r4-E7-20260726040114
+  run_id: sdk-distribution-rename-r6-E7-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_publish_script_tells_operators_the_right_package PASSED
-    docstring "AC-7, both halves"; asserts "pip install oneflow-sdk==${VER}"
-    present and the old-name form absent
+    tests/test_packaging.py::test_publish_script_tells_operators_the_right_package PASSED [ 63%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E8
-  run_id: sdk-distribution-rename-r4-E8-20260726040114
+  run_id: sdk-distribution-rename-r6-E8-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_author_facing_docs_name_the_distribution PASSED
-    docstring "AC-8"; asserts CLAUDE.md, docs/plugins.md and sdk/README.md each
-    name oneflow-sdk
+    tests/test_packaging.py::test_author_facing_docs_name_the_distribution PASSED [ 72%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E9
-  run_id: sdk-distribution-rename-r4-E9-20260726040114
+  run_id: sdk-distribution-rename-r6-E9-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_npm_publish_script_renamed_and_no_dangling_references PASSED
-    docstring "AC-9, both halves"; asserts package.json has "sdk:publish" and no
-    tracked file keeps the old script name
+    tests/test_packaging.py::test_npm_publish_script_renamed_and_no_dangling_references PASSED [ 81%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E10
-  run_id: sdk-distribution-rename-r4-E10-20260726040114
+  run_id: sdk-distribution-rename-r6-E10-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_no_surviving_distribution_name_usage PASSED
-    docstring "AC-10 — suppression half, repo-wide sweep"; the sweep for the four
-    stale distribution patterns returns no offenders
+    tests/test_packaging.py::test_no_surviving_distribution_name_usage PASSED [ 90%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E14
-  run_id: sdk-distribution-rename-r4-E14-20260726040114
+  run_id: sdk-distribution-rename-r6-E14-20260726045000
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T04:01:14Z
+  verified_at: 2026-07-26T04:50:00Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 4.06s
-    covering test (from the -v listing of the same file):
-    tests/test_packaging.py::test_engine_installs_the_distribution_from_a_single_source PASSED
-    docstring "AC-13, both halves"; asserts tongflow.__distribution__ == pyproject
-    project.name and engine/plugins.py holds no hard-coded "tongflow=={version}"
-    install string
+    tests/test_packaging.py::test_engine_installs_the_distribution_from_a_single_source PASSED [100%]
+
+    11 passed in 3.69s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E11
-  run_id: sdk-distribution-rename-r4-E11-20260726035936
+  run_id: sdk-distribution-rename-r6-E11-20260726044955
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T03:59:36Z
+  verified_at: 2026-07-26T04:49:55Z
   output: |
-    ..................................................................       [100%]
-    66 passed in 3.75s
+    66 passed in 5.38s
+
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E12
-  run_id: sdk-distribution-rename-r4-E12-20260726040039
+  run_id: sdk-distribution-rename-r6-E12-20260726045014
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T04:00:39Z
+  verified_at: 2026-07-26T04:50:14Z
   output: |
-      Creating an optimized production build ...
-    ✓ Compiled successfully in 3.1s
-      Linting and checking validity of types ...
-    ✓ Generating static pages (25/25)
-    ƒ  (Dynamic)  server-rendered on demand
-
+    > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
+    > next build
+    ... route table rendered, all routes emitted ...
+    + First Load JS shared by all             103 kB
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
     > tsc --noEmit
 
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+
 - eval: E13
-  run_id: sdk-distribution-rename-r4-E13-20260726040033
+  run_id: sdk-distribution-rename-r6-E13-20260726044937
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T04:00:33Z
+  verified_at: 2026-07-26T04:49:37Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
+    Checked 396 files in 90ms. No fixes applied.
 
-    Checked 353 files in 84ms. No fixes applied.
+    Re-run this round on commit 50da8fac; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 ## Analyst
 
@@ -346,6 +340,82 @@ human must sign again before this merges — that is the intended end state, not
 oversight. `verified_commit` moves f9f0b18 → 4b1d0d3. See `## Analyst` for the
 limit of what this run proves: it exercised the stdlib branch on Python 3.14.3,
 and the 3.10 fallback the fix exists for is covered by CI alone.
+
+Round 5 (2026-07-26T04:35–04:37Z, commit 50da8fac): **re-pin only, carry-forward
+applied — the verdict and the human signature stand unchanged.** The round-4 pin
+`4b1d0d3` went stale because the branch `chore/dependency-updates` landed five
+combined dependabot updates plus the adaptation biome 2.5.5 required. The
+staleness rule compares the whole tree against `verified_commit` and cannot
+distinguish "code this feature depends on changed" from "unrelated code now
+exists beside it", which is the only reason this feature was flagged.
+
+**The carry-forward precondition was re-derived here, not taken on trust.**
+`git diff --name-only 4b1d0d3 HEAD` with `_acceptance/` excluded lists 22 files:
+`.github/workflows/desktop-release.yml`, `.github/workflows/docker-publish.yml`,
+`AGENTS.md`, `biome.json`, `docs/spec/prd/engine-cache-partial-rerender.md`,
+`package.json`, `pnpm-lock.yaml`, the two new `scripts/deps/check-*.sh`, ten
+files under `src/components/ui/`, two under
+`src/components/workspace/nodes/modality/`, and `src/lib/api/upload.ts`. Every
+one of them belongs to `dependency-refresh-2026-07`: the manifests and lockfile
+are the bumps themselves, `biome.json` is the 2.5.5 migration, the `scripts/deps`
+pair are that feature's own evals, and the thirteen `src/` files are pure member
+ordering forced by the newer biome — the diff is 33 insertions against 33
+deletions, symmetric, with no functional line. Nothing under `sdk/` and not `scripts/publish-tongflow-pypi.sh` — the paths this feature owns — appears anywhere in that diff, so its signature carries. The JS-side dependency bumps cannot reach the Python distribution metadata.
+
+The remedy is therefore the cheap one: re-run this feature's own evals plus the
+standing checks, and re-pin. All 14 evals were re-executed on this tree and all 14 are green: the 11 packaging assertions via `sdk_pytest_packaging`, each credited to its own named test from a verbose run, plus the full 66-test SDK suite via `sdk_pytest`. The shared standing checks
+were each executed **once** against this tree and their real result recorded for
+every feature that binds them, with distinct `run_id`s per feature — `pnpm
+lint:check` (396 files, no fixes), `pnpm test` (21 files, 197 tests), and
+`pnpm build && pnpm typecheck`, all green. Where several evals share one
+command, the command was run once with a verbose reporter and each eval credited
+to its own named covering test rather than to a shared result.
+
+No A/B baseline was re-measured this round; every `baseline:` value above is
+marked as carried forward from round 1 and explicitly NOT re-measured.
+`verified_commit` moves 4b1d0d3 → 9e8f1516; `run_id`, `verified_at` and `output`
+were updated and nothing else. The verdict is unchanged, and the human signature
+line in frontmatter is preserved byte-for-byte as signed — verified by diffing
+the file and confirming that line produced no change.
+
+Round 6 (2026-07-26T04:49–04:52Z, commit 50da8fac): **re-pin only, carry-forward
+applied — the verdict and the human signature stand unchanged.** Exactly one
+commit landed after the round-5 pin: `50da8fa`, which hardens
+`scripts/deps/check-no-t3-drift.sh` so an unresolvable base ref terminates
+unsuccessfully instead of being swallowed and reported as "no T3 drift". The
+staleness rule compares the whole tree against `verified_commit` and cannot
+distinguish "code this feature depends on changed" from "unrelated code now
+exists beside it", which is the only reason this feature was flagged.
+
+**The carry-forward precondition was re-derived here, not taken on trust.**
+`git diff --name-only origin/main...HEAD` with `_acceptance/` excluded lists 20
+files: the two workflow files, `biome.json`, `package.json`, `pnpm-lock.yaml`,
+the two `scripts/deps/check-*.sh` guards, ten files under `src/components/ui/`,
+two under `src/components/workspace/nodes/modality/`, and `src/lib/api/upload.ts`.
+Every one belongs to `dependency-refresh-2026-07`. **This feature owns none of
+them**: nothing under `sdk/` appears anywhere in that diff, and
+`scripts/publish-tongflow-pypi.sh` is absent from it — `scripts/deps/` is a
+different directory. `package.json` is in the diff, but only as the dependabot
+version bumps; the renamed publish script entry this feature owns is untouched,
+which `sdk_pytest_packaging` re-asserts directly (see E9). Its signature
+therefore carries.
+
+The remedy is the cheap one: re-run this feature's own evals plus the standing
+checks, and re-pin. All 14 evals were re-executed on this tree and all 14 are
+green: the 11 packaging assertions via `sdk_pytest_packaging`, each credited to
+its own named test from a verbose run rather than to a shared result, plus the
+full 66-test SDK suite via `sdk_pytest`. The shared standing checks were each
+executed **once** against this tree and their real result recorded for every
+feature that binds them, with distinct `run_id`s per feature — `pnpm lint:check`
+(396 files, no fixes) and `pnpm build && pnpm typecheck`, both green; the SDK
+suite is shared with `dependency-refresh-2026-07` and was likewise run once.
+
+No A/B baseline was re-measured this round; every `baseline:` value above is
+marked as carried forward from round 1 and explicitly NOT re-measured.
+`verified_commit` moves 9e8f1516 → 50da8fac; `run_id`, `verified_at` and `output`
+were updated and nothing else. The verdict is unchanged, and the human signature
+line in frontmatter is preserved byte-for-byte as signed — verified by diffing
+the file and confirming that line produced no change.
 
 ## Gate 2 checklist (human)
 

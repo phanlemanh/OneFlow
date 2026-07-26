@@ -37,6 +37,10 @@ executors:
     # are unchanged — only the command they resolve to.
     smoke_measure_mos: "pnpm tsx scripts/measure/selftest-mos.ts"
     smoke_measure_cogs: "pnpm tsx scripts/measure/selftest-cogs.ts"
+    # dependency-refresh-2026-07 Gate 1 (2026-07-26).
+    deps_manifest_intact: "bash scripts/deps/check-manifest.sh"
+    deps_lockfile_clean: "pnpm install --frozen-lockfile"
+    deps_no_t3_drift: "bash scripts/deps/check-no-t3-drift.sh origin/main"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

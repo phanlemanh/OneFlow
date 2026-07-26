@@ -212,4 +212,4 @@ const fbxNodeData = {
  * 3. Missing dependencies: Degrade gracefully (for example, when Spark is unavailable)
  */
 
-export { gltfNodeData, splatNodeData, objNodeData, fbxNodeData };
+export { fbxNodeData, gltfNodeData, objNodeData, splatNodeData };

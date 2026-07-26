@@ -17,7 +17,7 @@ export interface PresignedUrlResponse {
     expiresIn: number;
 }
 
-export { UploadValidationError, type FileValidationResult };
+export { type FileValidationResult, UploadValidationError };
 
 /**
  * Upload file to local server.
