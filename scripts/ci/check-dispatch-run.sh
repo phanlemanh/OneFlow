@@ -40,6 +40,26 @@ echo "dispatched run $(printf '%s' "$JSON" | jq -r '.url')"
 echo "  branch under test: ${BRANCH}   run head: ${RUN_SHA}"
 
 fail=0
+
+# A green run at some other tree proves nothing about the tree being merged.
+# Compare the workflow directory itself rather than the commit: later commits on
+# this branch add acceptance evidence under _acceptance/** (T1) and must not
+# invalidate a dry run that exercised identical workflow content.
+if ! run_tree="$(git rev-parse --verify --quiet "${RUN_SHA}:.github/workflows")"; then
+    echo "cannot read .github/workflows at the run's commit ${RUN_SHA} — fetch it first" >&2
+    exit 2
+fi
+head_tree="$(git rev-parse --verify "HEAD:.github/workflows")"
+if [ "$run_tree" != "$head_tree" ]; then
+    echo "FAIL: the dispatched run used a different .github/workflows tree" >&2
+    echo "      run  ${RUN_SHA}: ${run_tree}" >&2
+    echo "      HEAD:            ${head_tree}" >&2
+    echo "      re-dispatch after pushing the current workflows" >&2
+    fail=1
+else
+    echo "  workflow tree matches HEAD: ${head_tree}"
+fi
+
 assert_run_complete "$JSON" || fail=1
 
 job_count="$(printf '%s' "$JSON" | jq -r '.jobs | length')"
