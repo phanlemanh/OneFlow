@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8d1e57a41c3ea919dcbe544c8b21017238199d81
+verified_commit: f9f0b18774cfe40057325bafb482a758984ff41d
 human_signoff: Manh 2026-07-25
 ---
 
@@ -31,129 +31,129 @@ human_signoff: Manh 2026-07-25
 ## Evidence
 
 - eval: E1
-  run_id: task-metering-r2-e1-20260726011505
+  run_id: task-metering-r3-e1-20260726033650
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T01:15:05Z
+  verified_at: 2026-07-26T03:36:50Z
   output: |
     ✓ src/db/metering-schema.test.ts > metering migration shape (AC-1) > introduces the three columns in exactly one migration 1ms
     ✓ src/db/metering-schema.test.ts > metering migration shape (AC-1) > is purely additive — three ADDs, no DROP, no RENAME 0ms
 
      Test Files  1 passed (1)
           Tests  4 passed (4)
-       Duration  248ms (transform 13ms, setup 0ms, import 175ms, tests 10ms, environment 0ms)
+       Duration  243ms (transform 13ms, setup 0ms, import 175ms, tests 9ms, environment 0ms)
 
 - eval: E2
-  run_id: task-metering-r2-e2-20260726011505
+  run_id: task-metering-r3-e2-20260726033650
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T01:15:05Z
+  verified_at: 2026-07-26T03:36:50Z
   output: |
-    ✓ src/db/metering-schema.test.ts > upgrading an existing database (AC-2) > adds the columns without disturbing pre-existing rows 4ms
+    ✓ src/db/metering-schema.test.ts > upgrading an existing database (AC-2) > adds the columns without disturbing pre-existing rows 3ms
 
      Test Files  1 passed (1)
           Tests  4 passed (4)
-       Duration  248ms (transform 13ms, setup 0ms, import 175ms, tests 10ms, environment 0ms)
+       Duration  243ms (transform 13ms, setup 0ms, import 175ms, tests 9ms, environment 0ms)
 
 - eval: E3
-  run_id: task-metering-r2-e3-20260726011505
+  run_id: task-metering-r3-e3-20260726033650
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T01:15:05Z
+  verified_at: 2026-07-26T03:36:50Z
   output: |
     ✓ src/db/metering-schema.test.ts > fresh database (AC-3) > declares all three columns nullable with the intended types 5ms
 
      Test Files  1 passed (1)
           Tests  4 passed (4)
-       Duration  248ms (transform 13ms, setup 0ms, import 175ms, tests 10ms, environment 0ms)
+       Duration  243ms (transform 13ms, setup 0ms, import 175ms, tests 9ms, environment 0ms)
 
 - eval: E4
-  run_id: task-metering-r2-e4-20260726011514
+  run_id: task-metering-r3-e4-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
     ✓ src/lib/task/metering.test.ts > successful invocation (AC-4) > records the elapsed plugin time next to status completed 22ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E5
-  run_id: task-metering-r2-e5-20260726011514
+  run_id: task-metering-r3-e5-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
-    ✓ src/lib/task/metering.test.ts > plugin reports failure (AC-5) > still records the time — a failed generation burns GPU too 22ms
+    ✓ src/lib/task/metering.test.ts > plugin reports failure (AC-5) > still records the time — a failed generation burns GPU too 21ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E6
-  run_id: task-metering-r2-e6-20260726011514
+  run_id: task-metering-r3-e6-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
     ✓ src/lib/task/metering.test.ts > plugin throws (AC-6) > records the time from the catch branch 22ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E7
-  run_id: task-metering-r2-e7-20260726011514
+  run_id: task-metering-r3-e7-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: red)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
     ✓ src/lib/task/metering.test.ts > measurement boundary (AC-7) > excludes asset preparation from the billable number 143ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E8
-  run_id: task-metering-r2-e8-20260726011514
+  run_id: task-metering-r3-e8-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: green)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
-    ✓ src/lib/task/metering.test.ts > aborted run (AC-8) — suppression half > writes no duration for a cancelled task 12ms
+    ✓ src/lib/task/metering.test.ts > aborted run (AC-8) — suppression half > writes no duration for a cancelled task 13ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E9
-  run_id: task-metering-r2-e9-20260726011514
+  run_id: task-metering-r3-e9-20260726033651
   exit_code: 0
   baseline: carried-forward (r1: green)
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T01:15:14Z
+  verified_at: 2026-07-26T03:36:51Z
   output: |
     ✓ src/lib/task/metering.test.ts > cost and gpu stay unmeasured (AC-9) — suppression half > never writes cost_usd or gpu_type on any exit 2ms
 
      Test Files  1 passed (1)
           Tests  6 passed (6)
-       Duration  490ms (transform 54ms, setup 0ms, import 206ms, tests 224ms, environment 0ms)
+       Duration  490ms (transform 56ms, setup 0ms, import 205ms, tests 224ms, environment 0ms)
 
 - eval: E10
-  run_id: task-metering-r2-e10-20260726011523
+  run_id: task-metering-r3-e10-20260726033800
   exit_code: 0
   baseline: carried-forward (r1: green)
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T01:15:23Z
+  verified_at: 2026-07-26T03:38:00Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
@@ -164,13 +164,13 @@ human_signoff: Manh 2026-07-25
           Tests  197 passed (197)
 
 - eval: E11
-  run_id: task-metering-r2-e11-20260726011534
+  run_id: task-metering-r3-e11-20260726033808
   exit_code: 0
   baseline: carried-forward (r1: green)
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T01:15:34Z
+  verified_at: 2026-07-26T03:38:08Z
   output: |
-    ✓ Compiled successfully in 4.2s
+    ✓ Compiled successfully in 3.0s
     └ ƒ /workspace                            379 kB         563 kB
     + First Load JS shared by all             103 kB
 
@@ -180,16 +180,16 @@ human_signoff: Manh 2026-07-25
     > tsc --noEmit
 
 - eval: E12
-  run_id: task-metering-r2-e12-20260726011529
+  run_id: task-metering-r3-e12-20260726033801
   exit_code: 0
   baseline: carried-forward (r1: green)
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T01:15:29Z
+  verified_at: 2026-07-26T03:38:01Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
 
-    Checked 353 files in 70ms. No fixes applied.
+    Checked 353 files in 80ms. No fixes applied.
 
 ## Analyst
 
@@ -212,16 +212,33 @@ E9's "and never these two columns" meaningful rather than trivial.
 
 E1–E7 are red on baseline and therefore discriminate.
 
-The A/B above was measured in round 1 and is carried forward, not re-derived: round 2 is a
-re-pin of an already-signed-off PASS onto the current tree, and the discrimination question
-was settled then. Every per-eval `baseline:` is marked `carried-forward` for that reason —
-those values record round 1's measurement, not a round-2 one. Everything else in this
-report (run_ids, exit codes, timestamps, outputs) was produced by round-2 runs.
+**No A/B baseline was measured in round 3.** The A/B above was measured in round 1 and is
+carried forward, not re-derived: rounds 2 and 3 are re-pins of an already-signed-off PASS
+onto a moved tree, and the discrimination question was settled in round 1. Every per-eval
+`baseline:` is marked `carried-forward` for that reason — those values record round 1's
+measurement, not a round-3 one, and should be read as history rather than as a fresh
+result. Everything else in this report (run_ids, exit codes, timestamps, outputs) was
+produced by round-3 runs.
 
-Round 2 note on the standing checks: E10/E11/E12 are shared with the `measure-harness`
-feature verified in the same session. Each command was executed once against this tree and
-its real result recorded for both features, with distinct `run_id`s per feature. All three
-were run from the repo root at commit 8d1e57a with no working-tree code changes.
+Round 3 attribution, not shared exit codes: E1–E3 and E4–E9 each bind a targeted vitest
+file. I ran each resolved command twice — once verbatim for the recorded exit status, and
+once with `--reporter=verbose` (a reporter flag changes formatting only, not selection or
+outcome) so every test name is visible. Each eval below is credited to the specific test
+whose `describe` block names its AC, and all ten metering tests are individually listed
+and green: 4 in `metering-schema.test.ts` (AC-1 ×2, AC-2, AC-3) and 6 in
+`metering.test.ts` (AC-4 … AC-9, one each). **No eval is marked PASS on a shared exit
+code alone.**
+
+Round 3 note on the standing checks: E10/E11/E12 are shared with the `measure-harness` and
+`sdk-distribution-rename` features verified in the same session. Each command was executed
+exactly once against this tree and its real result recorded for every feature that binds
+it, with distinct `run_id`s per feature. All three were run from the repo root at commit
+f9f0b18 with a clean working tree — `git status --porcelain` was empty both before the
+runs and after `pnpm build` (whose `prebuild` regenerates the ABI types), so the build
+confirms the generated ABI is committed in sync. The suite is unchanged from round 2 at
+197 tests across 21 files, biome still checks 353 files, and the metering tests themselves
+are unchanged at 4 + 6 — consistent with a rebase that moved commits without altering this
+feature's code.
 
 ## Variance
 
@@ -250,6 +267,27 @@ and `output` were updated and nothing else. The human signature line is preserve
 exactly as signed. The suite has grown to 197 tests across 21 files (round 1: 162/18) and
 biome now checks 353 files (round 1: 341) — both consistent with `main` plus
 `measure-harness`, and the metering tests themselves are unchanged at 4 + 6.
+
+Round 3 (2026-07-26T03:36–03:38Z, commit f9f0b18): **re-pin only, forced by the rebase and
+by the coarse staleness rule — not by any code defect.** The branch
+`chore/sdk-distribution-rename` was rebased onto `main`, which replaced the commits round 2
+pinned to, and the `sdk-distribution-rename` feature now sits beside this one in the tree.
+`stale_files` compares the whole tree against `verified_commit` and cannot distinguish
+"code this feature depends on changed" from "unrelated code exists", so it reported all
+three features stale at once. **No task-metering code changed**, and I re-derived that here
+rather than taking it on trust: `git diff --name-only 8d1e57a HEAD` with `_acceptance/`
+excluded lists eleven files, and every one belongs to `sdk-distribution-rename`
+(`.env.example`, `CLAUDE.md`, `docs/plugins.md`, `package.json`,
+`scripts/publish-tongflow-pypi.sh`, `sdk/README.md`, `sdk/pyproject.toml`,
+`sdk/tests/test_engine.py`, `sdk/tests/test_packaging.py`, `sdk/tongflow/__init__.py`,
+`sdk/tongflow/engine/plugins.py`). Not one metering file — no migration, no
+`src/lib/task/`, neither test file — appears in that diff. The remedy is to re-run the
+evals and re-pin; the SHA was never
+hand-edited. All 12 evals were re-executed on this tree and all 12 are green, so the rebase
+introduced no regression and the PASS still holds on the code actually being merged.
+`verified_commit` moves 8d1e57a → f9f0b18; `run_id`, `verified_at` and `output` were
+updated and nothing else. The verdict is unchanged and the human signature line in
+frontmatter is preserved byte-for-byte as signed.
 
 ## Gate 2 checklist (human)
 
