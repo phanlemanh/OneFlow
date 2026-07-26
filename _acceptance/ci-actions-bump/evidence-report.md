@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent (round 6)
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 572cb98a44f29174acd496e5aa648bd6a6ac08b0
-human_signoff:
+human_signoff: Manh 2026-07-26
 ---
 
 # Evidence Report: ci-actions-bump
