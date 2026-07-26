@@ -45,7 +45,20 @@ head_sha() {
 find_run() {
     local key="$1" event="${2:-}" sha="${3:-}" branch="${4:-}"
     local file args id
-    file="$(workflow_file "$key")"
+    # NOT `file="$(workflow_file ...)"`: this function is itself invoked inside a
+    # command substitution, and bash suppresses set -e there, so workflow_file's
+    # exit 2 would kill only its own subshell and leave `file` empty — after
+    # which `gh run list --workflow ""` cheerfully answers with any run.
+    case "$key" in
+        ci) file="ci.yml" ;;
+        docker) file="docker-publish.yml" ;;
+        desktop) file="desktop-release.yml" ;;
+        *)
+            echo "unknown workflow key '${key}' (expected: ci | docker | desktop)" >&2
+            printf 'UNKNOWN_WORKFLOW_KEY'
+            return 2
+            ;;
+    esac
 
     args=(run list --workflow "$file" --limit 20 --json databaseId,headSha,event,status,conclusion)
     [ -n "$event" ] && args+=(--event "$event")

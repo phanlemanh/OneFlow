@@ -44,6 +44,19 @@ fi
 assert_run_finished "$JSON"
 echo "dispatched run ${URL} (started ${SINCE})"
 
+# Same provenance pin the dispatch check applies: a run of some other workflow
+# content says nothing about the guard being merged.
+RUN_SHA="$(printf '%s' "$JSON" | jq -r '.headSha')"
+if ! run_tree="$(git rev-parse --verify --quiet "${RUN_SHA}:.github/workflows")"; then
+    echo "cannot read .github/workflows at the run's commit ${RUN_SHA} — fetch it first" >&2
+    exit 2
+fi
+if [ "$run_tree" != "$(git rev-parse --verify 'HEAD:.github/workflows')" ]; then
+    echo "FAIL: this run used a different .github/workflows tree than HEAD" >&2
+    exit 1
+fi
+echo "ok  run's workflow tree matches HEAD"
+
 # ---------------------------------------------------------------- decisive half
 log=""
 if ! log="$(gh run view --job "$JOB_ID" --log 2>&1)"; then

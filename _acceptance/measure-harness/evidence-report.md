@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f7e0217d13aff74527c05e3cb6e163e758594c07
+verified_commit: f2928c05e13ca2693de765bac5a605187fffca85
 human_signoff: Manh 2026-07-26
 ---
 
@@ -38,315 +38,312 @@ human_signoff: Manh 2026-07-26
 ## Evidence
 
 - eval: E1
-  run_id: measure-harness-r7-e1-20260726063437
+  run_id: measure-harness-r8-e1-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > scores an identical transcript as zero 1ms
-     ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > scores an empty hypothesis as one 0ms
-     ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > counts substitutions, deletions and insertions separately 0ms
-     ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > refuses an empty reference rather than dividing by zero 0ms
+    ✓ src/lib/measure/wer.test.ts > WER arithmetic (AC-1) > scores an identical transcript as zero 1ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E2
-  run_id: measure-harness-r7-e2-20260726063437
+  run_id: measure-harness-r8-e2-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > diacritics are preserved (AC-2) — suppression half > treats a missing tone mark as an error 0ms
-     ✓ src/lib/measure/wer.test.ts > diacritics are preserved (AC-2) — suppression half > does not fold distinct Vietnamese words together 0ms
+    ✓ src/lib/measure/wer.test.ts > diacritics are preserved (AC-2) — suppression half > treats a missing tone mark as an error 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E3
-  run_id: measure-harness-r7-e3-20260726063437
+  run_id: measure-harness-r8-e3-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > Unicode composition (AC-3) > scores precomposed and decomposed text as equal 0ms
+    ✓ src/lib/measure/wer.test.ts > Unicode composition (AC-3) > scores precomposed and decomposed text as equal 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E4
-  run_id: measure-harness-r7-e4-20260726063437
+  run_id: measure-harness-r8-e4-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > case and punctuation are not word errors (AC-4) > ignores letter case 0ms
-     ✓ src/lib/measure/wer.test.ts > case and punctuation are not word errors (AC-4) > ignores surrounding punctuation 0ms
-     ✓ src/lib/measure/wer.test.ts > case and punctuation are not word errors (AC-4) > still keeps letters that punctuation stripping could eat 0ms
+    ✓ src/lib/measure/wer.test.ts > case and punctuation are not word errors (AC-4) > ignores letter case 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E5
-  run_id: measure-harness-r7-e5-20260726063437
+  run_id: measure-harness-r8-e5-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > numbers are reported, never converted (AC-5) — suppression half > counts a digits-versus-words price as an error 0ms
-     ✓ src/lib/measure/wer.test.ts > numbers are reported, never converted (AC-5) — suppression half > breaks digit-bearing edits out so a human can judge them 0ms
-     ✓ src/lib/measure/wer.test.ts > numbers are reported, never converted (AC-5) — suppression half > reports zero digit errors when no digits are involved 0ms
+    ✓ src/lib/measure/wer.test.ts > numbers are reported, never converted (AC-5) — suppression half > counts a digits-versus-words price as an error 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E6
-  run_id: measure-harness-r7-e6-20260726063501
+  run_id: measure-harness-r8-e6-20260726073818
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_wer
-  verified_at: 2026-07-26T06:35:01Z
+  verified_at: 2026-07-26T07:38:18Z
   output: |
     WER over 2 clip(s) in src/lib/measure/__fixtures__/wer
+
     clip                      WER      sub  del  ins  digit
     ------------------------------------------------------
     clip-01                    38.5%    1    0    4      1
     clip-02                     7.7%    1    0    0      0
     ------------------------------------------------------
     CORPUS                     23.1%    2    0    4      1
+
     26 reference words. "digit" counts edits where either side's token contains a digit —
     numbers are never converted automatically, so a price read aloud shows up here for a human to judge.
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E7
-  run_id: measure-harness-r7-e7-20260726063437
+  run_id: measure-harness-r8-e7-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/wer.test.ts > corpus scoring (AC-6) > aggregates over total words, not the mean of per-clip rates 0ms
-     ✓ src/lib/measure/wer.test.ts > corpus scoring (AC-6) > reports a missing hypothesis instead of averaging over fewer clips 0ms
+    ✓ src/lib/measure/wer.test.ts > corpus scoring (AC-6) > aggregates over total words, not the mean of per-clip rates 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E8
-  run_id: measure-harness-r7-e8-20260726063437
+  run_id: measure-harness-r8-e8-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/mos.test.ts > the sheet is blind by construction (AC-7) — suppression half > leaks no system name anywhere in the sheet 1ms
-     ✓ src/lib/measure/mos.test.ts > the sheet is blind by construction (AC-7) — suppression half > shuffles, so position does not encode the system either 0ms
-     ✓ src/lib/measure/mos.test.ts > the sheet is blind by construction (AC-7) — suppression half > gives every entry an opaque id 0ms
+    ✓ src/lib/measure/mos.test.ts > the sheet is blind by construction (AC-7) — suppression half > leaks no system name anywhere in the sheet 1ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E9
-  run_id: measure-harness-r7-e9-20260726063437
+  run_id: measure-harness-r8-e9-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/mos.test.ts > the key is a separate artefact (AC-8) > keeps the answer out of the sheet the rater receives 0ms
+    ✓ src/lib/measure/mos.test.ts > the key is a separate artefact (AC-8) > keeps the answer out of the sheet the rater receives 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E10
-  run_id: measure-harness-r7-e10-20260726063437
+  run_id: measure-harness-r8-e10-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/mos.test.ts > aggregation reports the spread, not just the mean (AC-9) > matches hand-computed mean, sd, n and interval 0ms
-     ✓ src/lib/measure/mos.test.ts > aggregation reports the spread, not just the mean (AC-9) > leaves the spread undefined rather than fake at n = 1 0ms
-     ✓ src/lib/measure/mos.test.ts > aggregation reports the spread, not just the mean (AC-9) > ranks systems by mean 0ms
+    ✓ src/lib/measure/mos.test.ts > aggregation reports the spread, not just the mean (AC-9) > matches hand-computed mean, sd, n and interval 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E11
-  run_id: measure-harness-r7-e11-20260726063437
+  run_id: measure-harness-r8-e11-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/mos.test.ts > bad input fails loudly (AC-10) — suppression half > rejects a score outside the MOS range instead of dropping it 0ms
-     ✓ src/lib/measure/mos.test.ts > bad input fails loudly (AC-10) — suppression half > rejects a rating for an id the key does not know 0ms
+    ✓ src/lib/measure/mos.test.ts > bad input fails loudly (AC-10) — suppression half > rejects a score outside the MOS range instead of dropping it 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E12
-  run_id: measure-harness-r7-e12-20260726063501
+  run_id: measure-harness-r8-e12-20260726073819
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_mos
-  verified_at: 2026-07-26T06:35:01Z
+  verified_at: 2026-07-26T07:38:19Z
   output: |
     system                    n     MOS     sd      95% CI
     -----------------------------------------------------
     elevenlabs                3   5.00   0.00     ±0.00
     vixtts                    3   3.00   0.00     ±0.00
+
     At this sample size the interval is wide by construction — read n before the mean.
+
     selftest-mos: ok
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
 
 - eval: E13
-  run_id: measure-harness-r7-e13-20260726063437
+  run_id: measure-harness-r8-e13-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > groups by plugin and slot 1ms
-     ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > matches hand-computed median and p95 0ms
-     ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > averages the middle pair for an even count 0ms
-     ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > sorts the heaviest groups first 0ms
+    ✓ src/lib/measure/cogs.test.ts > grouping and statistics (AC-11) > groups by plugin and slot 1ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E14
-  run_id: measure-harness-r7-e14-20260726063437
+  run_id: measure-harness-r8-e14-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/cogs.test.ts > unmeasured rows are counted, not averaged (AC-12) — suppression half > keeps NULL durations out of the statistics 0ms
-     ✓ src/lib/measure/cogs.test.ts > unmeasured rows are counted, not averaged (AC-12) — suppression half > reports a group with nothing measured without inventing zeros 0ms
+    ✓ src/lib/measure/cogs.test.ts > unmeasured rows are counted, not averaged (AC-12) — suppression half > keeps NULL durations out of the statistics 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E15
-  run_id: measure-harness-r7-e15-20260726063437
+  run_id: measure-harness-r8-e15-20260726073810
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-07-26T06:34:37Z
+  verified_at: 2026-07-26T07:38:10Z
   output: |
-     ✓ src/lib/measure/cogs.test.ts > cost is applied, never invented (AC-13) — suppression half > omits the cost field entirely when no rates are supplied 0ms
-     ✓ src/lib/measure/cogs.test.ts > cost is applied, never invented (AC-13) — suppression half > applies exactly the supplied rate 0ms
-     ✓ src/lib/measure/cogs.test.ts > cost is applied, never invented (AC-13) — suppression half > leaves plugins absent from the rate table without a cost 0ms
+    ✓ src/lib/measure/cogs.test.ts > cost is applied, never invented (AC-13) — suppression half > omits the cost field entirely when no rates are supplied 0ms
 
-     Test Files  3 passed (3)
-          Tests  33 passed (33)
-       Duration  89ms (transform 54ms, setup 0ms, import 72ms, tests 9ms, environment 0ms)
+    Test Files  3 passed (3)
+         Tests  33 passed (33)
+      Duration  88ms (transform 52ms, setup 0ms, import 70ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E16
-  run_id: measure-harness-r7-e16-20260726063502
+  run_id: measure-harness-r8-e16-20260726073820
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T06:35:02Z
+  verified_at: 2026-07-26T07:38:20Z
   output: |
-    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-dZ8EbA/good.db (status: completed, failed) — 5 task(s)
+    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-wqOMVf/good.db (status: completed, failed) — 5 task(s)
+
     plugin / slot                              n  meas  unmeas    total   median      p95
     -------------------------------------------------------------------------------------------
     modal-z-image / image-gen                   4     3       1    11.0s     4.0s     6.0s
     api-openrouter / gen-text                   1     1       0     0.5s     0.5s     0.5s
+
     1 task(s) have no measured duration — history from before metering, or aborted runs.
     They are counted but kept out of the statistics rather than averaged as zero.
+
     No --rates supplied, so no cost is reported. Pass a rate table derived from a real invoice:
       {"<pluginId>": <usdPerSecond>}
+
     selftest-cogs: ok
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. Shared with dependency-refresh-2026-07 E7: one execution, two run_ids.
 
 - eval: E17
-  run_id: measure-harness-r7-e17-20260726063434
+  run_id: measure-harness-r8-e17-20260726073801
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T06:34:34Z
+  verified_at: 2026-07-26T07:38:01Z
   output: |
-     Test Files  21 passed (21)
-          Tests  197 passed (197)
+    > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
+    > vitest run
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+
+    Test Files  21 passed (21)
+         Tests  197 passed (197)
+      Duration  591ms (transform 1.13s, setup 0ms, import 2.00s, tests 493ms, environment 1ms)
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:38:01Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E18
-  run_id: measure-harness-r7-e18-20260726062751
+  run_id: measure-harness-r8-e18-20260726073744
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T06:27:51Z
+  verified_at: 2026-07-26T07:37:44Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
-    > next build
-    ... route table rendered, all routes emitted ...
-    + First Load JS shared by all             103 kB
+    > next build --turbopack
+
+    (next build completed; route table printed in full)
+
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
     > tsc --noEmit
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    (tsc --noEmit produced no diagnostics)
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:44Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E19
-  run_id: measure-harness-r7-e19-20260726063434
+  run_id: measure-harness-r8-e19-20260726073741
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T06:34:34Z
+  verified_at: 2026-07-26T07:37:41Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
-    Checked 396 files in 95ms. No fixes applied.
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Checked 396 files in 84ms. No fixes applied.
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:41Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 ## Analyst
 
@@ -608,6 +605,44 @@ marked as carried forward from round 1 and explicitly NOT re-measured.
 and `output` were updated and nothing else. The verdict is unchanged, and the
 human signature line in frontmatter is preserved byte-for-byte as signed —
 verified by diffing the file and confirming that line produced no change.
+
+
+Round 8 (2026-07-26T07:37–07:38Z, commit f2928c05) is a **carry-forward re-pin**
+driven by a fresh-context verifier that wrote none of this code. It is not a
+fresh Gate-2 verification and does not extend approval over anything new: this
+feature is merged and signed, and **no file it owns changed**.
+
+Ownership was checked rather than assumed. `git diff --name-only origin/main...HEAD`
+minus `_acceptance/` lists exactly eleven files — the three workflows under
+`.github/workflows/` and the eight scripts under `scripts/ci/` — and every one of
+them belongs to `ci-actions-bump`, the feature under review in this PR. Against
+the previous pin `f7e0217d` the non-`_acceptance` delta is narrower still: only
+the eight `scripts/ci/*.sh` files, same owner. Nothing under `src/lib/measure/**`, `scripts/measure/**` differs, so
+the signature attests to the same code the human originally judged, and the
+first condition of the carry-forward rule in `AGENTS.md` holds.
+
+The second condition — standing checks green on the new tree — was met by
+executing them, not by inference. All 19 evals evals were re-run against the working
+tree at commit f2928c05, each `cmd` resolved line by line against
+`_acceptance/config.yaml` rather than taken from the request, and every one
+exited zero.
+
+The shared standing checks (`pnpm lint:check`, `pnpm test`,
+`cd sdk && python3 -m pytest -q`, `pnpm build && pnpm typecheck`) were each
+executed **ONCE** for this whole re-pin and their single real result recorded for
+every feature and every eval that binds them, with a **distinct `run_id` per
+eval** so no two evidence rows claim the same execution. Where several evals of
+this feature share one command, the command was additionally run once with a
+verbose reporter — a reporter flag changes formatting only, never selection or
+outcome — and each eval is credited to its own named covering test rather than
+to a shared exit status.
+
+No A/B baseline was measured this round; every `baseline:` field above says so
+explicitly rather than carrying a value forward. `verified_commit` moves
+f7e0217d → f2928c05; `run_id`, `verified_at` and `output` were updated and
+nothing else. The verdict is unchanged, and the human signature line in
+frontmatter is preserved byte-for-byte as signed — confirmed by diffing the file
+and observing that line produced no change.
 
 ## Gate 2 checklist (human)
 

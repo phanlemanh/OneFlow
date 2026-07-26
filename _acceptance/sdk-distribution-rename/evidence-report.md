@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f7e0217d13aff74527c05e3cb6e163e758594c07
+verified_commit: f2928c05e13ca2693de765bac5a605187fffca85
 human_signoff: Manh 2026-07-26
 ---
 
@@ -53,187 +53,192 @@ eleven evals credited here. The mapping survived the round-4 edit — that commi
 touched only the module's import preamble, not any test body or docstring.
 
 - eval: E1
-  run_id: sdk-distribution-rename-r7-E1-20260726063520
+  run_id: sdk-distribution-rename-r8-E1-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_distribution_name_is_oneflow_sdk PASSED    [  9%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E2
-  run_id: sdk-distribution-rename-r7-E2-20260726063520
+  run_id: sdk-distribution-rename-r8-E2-20260726073751
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_import_package_is_untouched PASSED         [ 18%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E3
-  run_id: sdk-distribution-rename-r7-E3-20260726063520
+  run_id: sdk-distribution-rename-r8-E3-20260726073751
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_import_still_works_and_exposes_the_public_api PASSED [ 27%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E4
-  run_id: sdk-distribution-rename-r7-E4-20260726063520
+  run_id: sdk-distribution-rename-r8-E4-20260726073751
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_version_is_declared_once_in_effect PASSED  [ 36%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E5
-  run_id: sdk-distribution-rename-r7-E5-20260726063520
+  run_id: sdk-distribution-rename-r8-E5-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_project_urls_do_not_point_at_upstream PASSED [ 45%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E6
-  run_id: sdk-distribution-rename-r7-E6-20260726063520
+  run_id: sdk-distribution-rename-r8-E6-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_publish_script_uses_normalised_artifact_names PASSED [ 54%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E7
-  run_id: sdk-distribution-rename-r7-E7-20260726063520
+  run_id: sdk-distribution-rename-r8-E7-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_publish_script_tells_operators_the_right_package PASSED [ 63%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E8
-  run_id: sdk-distribution-rename-r7-E8-20260726063520
+  run_id: sdk-distribution-rename-r8-E8-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_author_facing_docs_name_the_distribution PASSED [ 72%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E9
-  run_id: sdk-distribution-rename-r7-E9-20260726063520
+  run_id: sdk-distribution-rename-r8-E9-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_npm_publish_script_renamed_and_no_dangling_references PASSED [ 81%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E10
-  run_id: sdk-distribution-rename-r7-E10-20260726063520
+  run_id: sdk-distribution-rename-r8-E10-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_no_surviving_distribution_name_usage PASSED [ 90%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E14
-  run_id: sdk-distribution-rename-r7-E14-20260726063520
+  run_id: sdk-distribution-rename-r8-E14-20260726073751
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T06:35:20Z
+  verified_at: 2026-07-26T07:37:51Z
   output: |
     tests/test_packaging.py::test_engine_installs_the_distribution_from_a_single_source PASSED [100%]
 
-    11 passed in 3.53s
+    11 passed in 3.43s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Re-run this round on commit f2928c05; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E11
-  run_id: sdk-distribution-rename-r7-E11-20260726063515
+  run_id: sdk-distribution-rename-r8-E11-20260726073747
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T06:35:15Z
+  verified_at: 2026-07-26T07:37:47Z
   output: |
-    66 passed in 4.23s
+    ..................................................................       [100%]
+    66 passed in 5.85s
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:47Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E12
-  run_id: sdk-distribution-rename-r7-E12-20260726062751
+  run_id: sdk-distribution-rename-r8-E12-20260726073744
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T06:27:51Z
+  verified_at: 2026-07-26T07:37:44Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
-    > next build
-    ... route table rendered, all routes emitted ...
-    + First Load JS shared by all             103 kB
+    > next build --turbopack
+
+    (next build completed; route table printed in full)
+
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
     > tsc --noEmit
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    (tsc --noEmit produced no diagnostics)
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:44Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E13
-  run_id: sdk-distribution-rename-r7-E13-20260726063434
+  run_id: sdk-distribution-rename-r8-E13-20260726073741
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T06:34:34Z
+  verified_at: 2026-07-26T07:37:41Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
-    Checked 396 files in 95ms. No fixes applied.
 
-    Re-run this round on commit f7e0217d; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`.
+    Checked 396 files in 84ms. No fixes applied.
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:41Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 ## Analyst
 
@@ -462,6 +467,44 @@ marked as carried forward from round 1 and explicitly NOT re-measured.
 and `output` were updated and nothing else. The verdict is unchanged, and the
 human signature line in frontmatter is preserved byte-for-byte as signed —
 verified by diffing the file and confirming that line produced no change.
+
+
+Round 8 (2026-07-26T07:37–07:38Z, commit f2928c05) is a **carry-forward re-pin**
+driven by a fresh-context verifier that wrote none of this code. It is not a
+fresh Gate-2 verification and does not extend approval over anything new: this
+feature is merged and signed, and **no file it owns changed**.
+
+Ownership was checked rather than assumed. `git diff --name-only origin/main...HEAD`
+minus `_acceptance/` lists exactly eleven files — the three workflows under
+`.github/workflows/` and the eight scripts under `scripts/ci/` — and every one of
+them belongs to `ci-actions-bump`, the feature under review in this PR. Against
+the previous pin `f7e0217d` the non-`_acceptance` delta is narrower still: only
+the eight `scripts/ci/*.sh` files, same owner. Nothing under `sdk/**`, `scripts/publish-tongflow-pypi.sh` differs, so
+the signature attests to the same code the human originally judged, and the
+first condition of the carry-forward rule in `AGENTS.md` holds.
+
+The second condition — standing checks green on the new tree — was met by
+executing them, not by inference. All 14 evals evals were re-run against the working
+tree at commit f2928c05, each `cmd` resolved line by line against
+`_acceptance/config.yaml` rather than taken from the request, and every one
+exited zero.
+
+The shared standing checks (`pnpm lint:check`, `pnpm test`,
+`cd sdk && python3 -m pytest -q`, `pnpm build && pnpm typecheck`) were each
+executed **ONCE** for this whole re-pin and their single real result recorded for
+every feature and every eval that binds them, with a **distinct `run_id` per
+eval** so no two evidence rows claim the same execution. Where several evals of
+this feature share one command, the command was additionally run once with a
+verbose reporter — a reporter flag changes formatting only, never selection or
+outcome — and each eval is credited to its own named covering test rather than
+to a shared exit status.
+
+No A/B baseline was measured this round; every `baseline:` field above says so
+explicitly rather than carrying a value forward. `verified_commit` moves
+f7e0217d → f2928c05; `run_id`, `verified_at` and `output` were updated and
+nothing else. The verdict is unchanged, and the human signature line in
+frontmatter is preserved byte-for-byte as signed — confirmed by diffing the file
+and observing that line produced no change.
 
 ## Gate 2 checklist (human)
 

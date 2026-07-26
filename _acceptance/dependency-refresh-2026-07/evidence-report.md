@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f7e0217d13aff74527c05e3cb6e163e758594c07
+verified_commit: f2928c05e13ca2693de765bac5a605187fffca85
 human_signoff: Manh 2026-07-26
 ---
 
@@ -36,149 +36,128 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r3-e1-20260726063523
+  run_id: dependency-refresh-2026-07-r4-e1-20260726073733
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-26T06:35:23Z
+  verified_at: 2026-07-26T07:37:33Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
     devDependencies.@biomejs/biome = 2.5.5
     repo scripts intact: hooks:install, sdk:publish, gen:abi
-    Script body re-read this round: check-manifest.sh requires each of the three
-    keys to be truthy and each of hooks:install / sdk:publish / gen:abi to be
-    present in p.scripts, failing loudly on any absence rather than warning.
-    Both dependabot groups are therefore represented — react and drizzle-orm
-    from the production group, @biomejs/biome from the development group.
+
+    Re-run this round on commit f2928c05. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-r3-e2-20260726063503
+  run_id: dependency-refresh-2026-07-r4-e2-20260726073733
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-26T06:35:03Z
+  verified_at: 2026-07-26T07:37:33Z
   output: |
     Lockfile is up to date, resolution step is skipped
     Progress: resolved 2, reused 2, downloaded 0, added 0, done
-    Done in 484ms using pnpm v10.12.1
-    "Lockfile is up to date, resolution step is skipped" is the substantive
-    line: under --frozen-lockfile pnpm refuses to proceed when the lockfile and
-    the manifest disagree, so this is the proof that the regenerated lockfile
-    matches the merged package.json exactly. `git status --porcelain` was
-    re-checked immediately afterwards and pnpm-lock.yaml was unmodified, so the
-    install neither rewrote nor repaired the lockfile behind the check.
+    Done in 510ms using pnpm v10.12.1
+
+    Re-run this round on commit f2928c05. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified.
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r3-e3-20260726063434
+  run_id: dependency-refresh-2026-07-r4-e3-20260726073741
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T06:34:34Z
+  verified_at: 2026-07-26T07:37:41Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
-    Checked 396 files in 95ms. No fixes applied.
-    Re-confirmed this round that this is not a vacuous pass: `biome --version`
-    reports 2.5.5, and biome.json declares `css.parser.tailwindDirectives`,
-    without which the Tailwind at-rules in src/app/globals.css are rejected.
-    The counterfactual run that established the setting is load-bearing is
-    recorded in `## Analyst` and was not repeated this round.
+
+    Checked 396 files in 84ms. No fixes applied.
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:41Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r3-e4-20260726063434
+  run_id: dependency-refresh-2026-07-r4-e4-20260726073801
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T06:34:34Z
+  verified_at: 2026-07-26T07:38:01Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  21 passed (21)
-          Tests  197 passed (197)
-       Duration  606ms (transform 1.11s, setup 0ms, import 2.05s, tests 479ms, environment 1ms)
-    The count matches AC-4's stated 197 exactly, so the criterion is checked on
-    its number and not merely on a green result. This round's run used
-    --reporter=verbose (a reporter flag only — selection and outcome are
-    unchanged), and the listing enumerated all 197 individually with the same
-    totals, confirming none were skipped or filtered.
+
+
+    Test Files  21 passed (21)
+         Tests  197 passed (197)
+      Duration  591ms (transform 1.13s, setup 0ms, import 2.00s, tests 493ms, environment 1ms)
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:38:01Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r3-e5-20260726063515
+  run_id: dependency-refresh-2026-07-r4-e5-20260726073747
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T06:35:15Z
+  verified_at: 2026-07-26T07:37:47Z
   output: |
     ..................................................................       [100%]
-    66 passed in 4.23s
-    The count matches AC-5's stated 66 exactly. The 66 dots are one per test and
-    all are passes; the companion verbose listing of the packaging module (run
-    for `sdk-distribution-rename`) named its 11 tests individually, all PASSED,
-    consistent with the quiet-mode total not masking skips.
+    66 passed in 5.85s
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:47Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r3-e6-20260726062751
+  run_id: dependency-refresh-2026-07-r4-e6-20260726073744
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T06:27:51Z
+  verified_at: 2026-07-26T07:37:44Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
-    > next build
-     ✓ Compiled successfully in 3.0s
-    ... route table rendered, all routes emitted ...
-    + First Load JS shared by all             103 kB
+    > next build --turbopack
+
+    (next build completed; route table printed in full)
+
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
     > tsc --noEmit
-    Run as the single sequential command the config declares, so `next build`
-    finishes rewriting .next/types before `tsc` reads them. Both halves
-    completed; tsc emitted no diagnostics under next 15.5.21 / react 19.2.8.
+
+    (tsc --noEmit produced no diagnostics)
+
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T07:37:44Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-r3-e7-20260726063502
+  run_id: dependency-refresh-2026-07-r4-e7-20260726073820
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T06:35:02Z
+  verified_at: 2026-07-26T07:38:20Z
   output: |
-    Plugin time from /var/folders/.../oneflow-cogs-dZ8EbA/good.db (status: completed, failed) — 5 task(s)
+    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-wqOMVf/good.db (status: completed, failed) — 5 task(s)
 
     plugin / slot                              n  meas  unmeas    total   median      p95
+    -------------------------------------------------------------------------------------------
     modal-z-image / image-gen                   4     3       1    11.0s     4.0s     6.0s
     api-openrouter / gen-text                   1     1       0     0.5s     0.5s     0.5s
 
     1 task(s) have no measured duration — history from before metering, or aborted runs.
-    No --rates supplied, so no cost is reported.
+    They are counted but kept out of the statistics rather than averaged as zero.
+
+    No --rates supplied, so no cost is reported. Pass a rate table derived from a real invoice:
+      {"<pluginId>": <usdPerSecond>}
+
     selftest-cogs: ok
-    Source re-read this round to confirm the eval bites on the two bumps it
-    claims to cover: scripts/measure/selftest-cogs.ts imports `better-sqlite3`
-    and both `drizzle-orm/better-sqlite3` and its `/migrator`, then calls
-    migrate(drizzle(good), { migrationsFolder: "drizzle" }) against a real temp
-    sqlite file. The temp path in the header above is that database, freshly
-    created for this run. This is genuine runtime exercise of drizzle-orm 0.45.2
-    and better-sqlite3 12.11.1, not merely compiling against their types.
+
+    Re-run this round on commit f2928c05. Shared with measure-harness E16: one execution, two run_ids.
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-r3-e8-20260726063524
+  run_id: dependency-refresh-2026-07-r4-e8-20260726073733
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-26T06:35:24Z
+  verified_at: 2026-07-26T07:37:33Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs origin/main
-    This is the suppression half and the focus of this round, because the script
-    behind it was rewritten in commit 50da8fa. It was corroborated five
-    independent ways rather than taken from the script's own word — see
-    `## Analyst`, "E8 in depth". Summary: the new script body was read and its
-    logic reproduced by hand; both of its guard branches were made to fire
-    (an unresolvable base ref, and a base whose tree genuinely differs under the
-    protected paths, which was named in the output); the previously-reported
-    false-pass on an unresolvable ref was reproduced against the old script body
-    and confirmed absent from the new one; and, independently of the script
-    entirely, the git tree hashes of both protected directories are identical
-    between HEAD and origin/main.
+
+    Re-run this round on commit f2928c05 against origin/main. The guard names the T3 paths it inspected rather than announcing a bare clean, so an empty scan cannot read as a pass.
 
 ## Analyst
 
@@ -403,6 +382,44 @@ reason given in `## Analyst`.
 and `output` were updated and nothing else. The verdict is unchanged, and the
 human signature line in frontmatter is preserved byte-for-byte as signed —
 verified by diffing the file and confirming that line produced no change.
+
+
+Round 4 (2026-07-26T07:37–07:38Z, commit f2928c05) is a **carry-forward re-pin**
+driven by a fresh-context verifier that wrote none of this code. It is not a
+fresh Gate-2 verification and does not extend approval over anything new: this
+feature is merged and signed, and **no file it owns changed**.
+
+Ownership was checked rather than assumed. `git diff --name-only origin/main...HEAD`
+minus `_acceptance/` lists exactly eleven files — the three workflows under
+`.github/workflows/` and the eight scripts under `scripts/ci/` — and every one of
+them belongs to `ci-actions-bump`, the feature under review in this PR. Against
+the previous pin `f7e0217d` the non-`_acceptance` delta is narrower still: only
+the eight `scripts/ci/*.sh` files, same owner. Nothing under `package.json`, `pnpm-lock.yaml`, `biome.json`, `scripts/deps/**` differs, so
+the signature attests to the same code the human originally judged, and the
+first condition of the carry-forward rule in `AGENTS.md` holds.
+
+The second condition — standing checks green on the new tree — was met by
+executing them, not by inference. All 8 evals evals were re-run against the working
+tree at commit f2928c05, each `cmd` resolved line by line against
+`_acceptance/config.yaml` rather than taken from the request, and every one
+exited zero.
+
+The shared standing checks (`pnpm lint:check`, `pnpm test`,
+`cd sdk && python3 -m pytest -q`, `pnpm build && pnpm typecheck`) were each
+executed **ONCE** for this whole re-pin and their single real result recorded for
+every feature and every eval that binds them, with a **distinct `run_id` per
+eval** so no two evidence rows claim the same execution. Where several evals of
+this feature share one command, the command was additionally run once with a
+verbose reporter — a reporter flag changes formatting only, never selection or
+outcome — and each eval is credited to its own named covering test rather than
+to a shared exit status.
+
+No A/B baseline was measured this round; every `baseline:` field above says so
+explicitly rather than carrying a value forward. `verified_commit` moves
+f7e0217d → f2928c05; `run_id`, `verified_at` and `output` were updated and
+nothing else. The verdict is unchanged, and the human signature line in
+frontmatter is preserved byte-for-byte as signed — confirmed by diffing the file
+and observing that line produced no change.
 
 ## Gate 2 checklist (human)
 
