@@ -5,8 +5,9 @@
  * Lives outside `official-plugins.server.ts` for the same reason `plugin-id.ts`
  * does — that file is `server-only` and cannot be imported from vitest or from
  * a tsx script. Keeping this module pure (it takes parsed JSON; it never reads
- * a file) is what lets the in-app manager, the CLI installer, and the update
- * checker all share one implementation instead of three lookalikes.
+ * a file) is what lets the in-app manager, the CLI installer
+ * (scripts/install-official-plugins.ts), and the update checker all share one
+ * implementation instead of three lookalikes.
  *
  * `origin` on an entry is a **base URL**, exactly like the top-level `org`: the
  * id and `.git` are still appended. It is not a finished clone URL.
