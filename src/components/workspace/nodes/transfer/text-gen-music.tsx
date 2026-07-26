@@ -193,21 +193,21 @@ const TextGenMusicNode = ({ selected, data }: TextGenMusicNodeProps) => {
     const tagsUpstream = useMemo(() => {
         if (!tagsSourceId) return null;
         const n = upstreamNodes.find((u) => u.id === tagsSourceId);
-        if (!n || n.type !== "textNode") return null;
+        if (n?.type !== "textNode") return null;
         return coerceBaseNodeData(n.data).texts?.[0] ?? "";
     }, [tagsSourceId, upstreamNodes]);
 
     const lyricsUpstream = useMemo(() => {
         if (!lyricsSourceId) return null;
         const n = upstreamNodes.find((u) => u.id === lyricsSourceId);
-        if (!n || n.type !== "textNode") return null;
+        if (n?.type !== "textNode") return null;
         return coerceBaseNodeData(n.data).texts?.[0] ?? "";
     }, [lyricsSourceId, upstreamNodes]);
 
     const refAudioKey = useMemo(() => {
         if (!refAudioSourceId) return undefined;
         const n = upstreamNodes.find((u) => u.id === refAudioSourceId);
-        if (!n || n.type !== "audioNode") return undefined;
+        if (n?.type !== "audioNode") return undefined;
         return coerceBaseNodeData(n.data).fileKeys?.[0];
     }, [refAudioSourceId, upstreamNodes]);
 

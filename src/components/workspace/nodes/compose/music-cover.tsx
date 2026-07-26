@@ -48,14 +48,14 @@ const MusicCoverNode = ({
     const audioKey = useMemo(() => {
         if (!audioSourceId) return undefined;
         const n = upstreamNodes.find((u) => u.id === audioSourceId);
-        if (!n || n.type !== "audioNode") return undefined;
+        if (n?.type !== "audioNode") return undefined;
         return coerceBaseNodeData(n.data).fileKeys?.[0];
     }, [audioSourceId, upstreamNodes]);
 
     const refAudioKey = useMemo(() => {
         if (!refAudioSourceId) return undefined;
         const n = upstreamNodes.find((u) => u.id === refAudioSourceId);
-        if (!n || n.type !== "audioNode") return undefined;
+        if (n?.type !== "audioNode") return undefined;
         return coerceBaseNodeData(n.data).fileKeys?.[0];
     }, [refAudioSourceId, upstreamNodes]);
 

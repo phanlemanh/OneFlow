@@ -67,7 +67,7 @@ const MusicBriefNode = ({
     const textUpstream = useMemo(() => {
         if (!textSourceId) return null;
         const n = upstreamNodes.find((u) => u.id === textSourceId);
-        if (!n || n.type !== "textNode") return null;
+        if (n?.type !== "textNode") return null;
         return coerceBaseNodeData(n.data).texts?.[0] ?? "";
     }, [textSourceId, upstreamNodes]);
 

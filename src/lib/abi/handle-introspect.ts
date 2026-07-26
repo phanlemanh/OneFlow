@@ -104,7 +104,7 @@ function resolveRef(refStr: string): JSONSchema7 | undefined {
 }
 
 function refName(refStr: string | undefined): RefName | undefined {
-    if (!refStr || !refStr.startsWith("#/$defs/")) return undefined;
+    if (!refStr?.startsWith("#/$defs/")) return undefined;
     const name = refStr.slice("#/$defs/".length) as RefName;
     return name in REF_TO_NODE_TYPE ? name : undefined;
 }
@@ -338,13 +338,13 @@ export function sourceHandleId(field: string): string {
 export function parseTargetHandleId(
     handle: string | null | undefined,
 ): string | undefined {
-    if (!handle || !handle.startsWith("in:")) return undefined;
+    if (!handle?.startsWith("in:")) return undefined;
     return handle.slice(3);
 }
 
 export function parseSourceHandleId(
     handle: string | null | undefined,
 ): string | undefined {
-    if (!handle || !handle.startsWith("out:")) return undefined;
+    if (!handle?.startsWith("out:")) return undefined;
     return handle.slice(4);
 }
