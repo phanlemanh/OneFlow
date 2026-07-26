@@ -30,6 +30,8 @@ executors:
     # oneflow-plugin-prefix, added at the T3 amendment: the scanner is the second
     # place the prefix is enforced, and the one that decides registration.
     sdk_pytest_scan_prefix: "cd sdk && python3 -m pytest -q tests/test_scan_prefix.py"
+    # per-plugin-origin Gate 1 (2026-07-27): file lands during implementation.
+    unit_official_manifest: "pnpm vitest run src/lib/plugins/official-manifest.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -63,6 +65,10 @@ executors:
     # oneflow-plugin-prefix Gate 1 (2026-07-26).
     docs_plugin_prefix: "bash scripts/plugins/check-prefix-docs.sh"
     prefix_no_config_drift: "bash scripts/plugins/check-no-config-drift.sh origin/main"
+    # per-plugin-origin Gate 1 (2026-07-27).
+    origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
+    origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
+    origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

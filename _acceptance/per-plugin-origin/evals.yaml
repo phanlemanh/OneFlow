@@ -1,0 +1,86 @@
+schema_version: 1
+feature_slug: per-plugin-origin
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_official_manifest
+    expected: "exit 0; the string-entry block passes — every id in the real shipped manifest resolves to the top-level org, and the id list matches the raw file element for element, in order"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_official_manifest
+    expected: "exit 0; the override block passes — an entry carrying its own origin resolves to it while every sibling still resolves to the default"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_official_manifest
+    expected: "exit 0; SUPPRESSION half — unknown key, missing id, non-string origin, empty string, and duplicate id each raise an error naming the offending entry rather than falling back to the default origin"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_official_manifest
+    expected: "exit 0; SUPPRESSION half — a non-http(s) origin (scp-style git@, relative path, javascript:) is rejected"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.origin_single_impl
+    expected: "exit 0; the `${...}/${id}.git` URL rule appears exactly once in the repo, and scripts/install-official-plugins.* imports the shared resolver rather than re-deriving it"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.origin_installer_parity
+    expected: "exit 0; the CLI installer and the in-app resolver print the same remote URL for every id in the shipped manifest, and for a fixture whose entry overrides its origin"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.origin_manifest_unmoved
+    expected: "exit 0; SUPPRESSION half — the shipped manifest still holds 38 plain string entries and the same default org, so no plugin was repointed by this change"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_plugin_id
+    expected: "exit 0; oneflow-plugin-prefix's own suite still passes, including its assertion that the manifest points at the upstream org"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; the whole vitest suite passes"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build and tsc --noEmit both succeed, including the installer script's move to TypeScript"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E11
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome checks the tree with --error-on-warnings and reports nothing"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E12
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.verify_plugins
+    expected: "exit 0; the plugins scan verifier still runs green against the manifest"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
