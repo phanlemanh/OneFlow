@@ -6,9 +6,9 @@
  *
  * The manifest shape and the remote-URL rule come from
  * src/lib/plugins/official-manifest.ts — the same module the in-app plugin
- * manager and the update checker use. This script used to re-implement
- * `${ORG}/${id}.git` itself, which meant the CLI and the app could drift into
- * fetching from different places without anything noticing.
+ * manager and the update checker use. This script used to build the remote URL
+ * itself from the org and the id, which meant the CLI and the app could drift
+ * into fetching from different places without anything noticing.
  *
  * Mirrors src/lib/runtime/paths.server.ts so build-time seeding can target the
  * same relocated directories the packaged app uses.
