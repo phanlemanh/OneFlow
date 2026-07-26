@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { normalizeOfficialManifest } from "@/lib/plugins/official-manifest";
 import {
     isValidPluginId,
     pluginDisplayName,
@@ -25,12 +26,20 @@ describe("plugin id — tongflow stays installable (AC-2)", () => {
     // Read the REAL manifest rather than a copied list. A new official plugin
     // added to config/official-plugins.json cannot then slip past this check by
     // being absent from a fixture nobody remembered to update.
-    const manifest = JSON.parse(
-        readFileSync(
-            join(process.cwd(), "config/official-plugins.json"),
-            "utf8",
+    // Go through the shared normaliser rather than casting the parsed JSON.
+    // Entries may be either a plain string or `{id, origin}`; a cast to
+    // string[] compiles, then feeds an object into the id regex, where it
+    // stringifies to "[object Object]" and fails with a meaningless case name
+    // — precisely for the entries most likely to be newly added.
+    const manifest = normalizeOfficialManifest(
+        JSON.parse(
+            readFileSync(
+                join(process.cwd(), "config/official-plugins.json"),
+                "utf8",
+            ),
         ),
-    ) as { org: string; plugins: string[] };
+    );
+    const officialIds = manifest.entries.map((entry) => entry.id);
 
     it("the manifest still points at the upstream org we do not control", () => {
         // The premise of the whole feature: these are not our repos, so their
@@ -42,17 +51,10 @@ describe("plugin id — tongflow stays installable (AC-2)", () => {
     it("has a non-trivial number of official plugins", () => {
         // Guards against the file being emptied or reshaped, which would make
         // the per-id assertion below vacuously pass.
-        expect(manifest.plugins.length).toBeGreaterThan(30);
+        expect(officialIds.length).toBeGreaterThan(30);
     });
 
-    it.each(
-        JSON.parse(
-            readFileSync(
-                join(process.cwd(), "config/official-plugins.json"),
-                "utf8",
-            ),
-        ).plugins as string[],
-    )("accepts official plugin %s", (id) => {
+    it.each(officialIds)("accepts official plugin %s", (id) => {
         expect(isValidPluginId(id)).toBe(true);
     });
 });

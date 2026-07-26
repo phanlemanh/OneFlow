@@ -7,7 +7,7 @@ Codex/agent-native entry point. **[CLAUDE.md](CLAUDE.md) is the single source of
 - **ABI first:** [`config/tongflow.abi.json`](config/tongflow.abi.json) is the contract. Any ABI change → `pnpm gen:abi` → commit [`src/generated/abi/index.ts`](src/generated/abi/index.ts) → keep Python SDK models in sync → publish SDK before plugins depend on it.
 - **Contract enforcement is compile-time only.** No runtime validators; TS + Pydantic types are the whole gate.
 - **Wire shape:** `pluginId` is top-level in the create-task body and `ExecutableNode`; `prompt` carries business fields only.
-- **Verify suite** (run before every commit): `pnpm lint:check` · `pnpm typecheck` · `pnpm build` · `pnpm test` · `cd sdk && pytest` (if `sdk/` changed) · `pnpm verify:plugins`.
+- **Verify suite** (run before every commit): `pnpm lint:check` · `pnpm typecheck` · `pnpm build` · `pnpm test` · the SDK suite (if `sdk/` changed) · `pnpm verify:plugins`. Run the SDK suite the way `_acceptance/config.yaml` does — `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — not a bare `pytest`: on macOS PEP 668 blocks installing pytest into Homebrew's `python3`, so the bare form can never work there.
 - **Branch off `main`** — never commit straight to it. Enable the guard once per machine: `pnpm hooks:install`.
 - Comments in code: English only. Conventional Commits. No secrets in git.
 

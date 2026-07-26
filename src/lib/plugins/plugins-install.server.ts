@@ -89,14 +89,40 @@ async function cloneOrPull(
     const cloning = !existsSync(dir);
     try {
         if (!cloning) {
+            // Pull from the resolved URL, not from whatever the checkout was
+            // originally cloned with. Without `url` isomorphic-git reads the
+            // remote out of .git/config, so an entry that gained its own
+            // `origin` would keep fast-forwarding from the old repository: the
+            // update checker (which does use the new origin) would report an
+            // update forever, and every click would "succeed" against the old
+            // remote. Re-point the stored remote only after the pull works, so
+            // a failed pull never leaves the config claiming an origin the
+            // checkout never fetched from.
+            const storedUrl = await git.getConfig({
+                fs,
+                dir,
+                path: "remote.origin.url",
+            });
             await git.pull({
                 fs,
                 http,
                 dir,
+                url: gitUrl,
                 singleBranch: true,
                 fastForward: true,
                 author: PLUGIN_GIT_AUTHOR,
             });
+            if (storedUrl !== gitUrl) {
+                await git.setConfig({
+                    fs,
+                    dir,
+                    path: "remote.origin.url",
+                    value: gitUrl,
+                });
+                logger.info(
+                    `[plugins] ${id}: remote re-pointed ${storedUrl} -> ${gitUrl}`,
+                );
+            }
             return "updated";
         }
         await git.clone({

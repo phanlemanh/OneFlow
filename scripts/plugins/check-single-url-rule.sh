@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # E5 / AC-3: the `${...}/${id}.git` remote-URL template must exist in exactly
-# one place.
+# one place **within the TypeScript/JavaScript tree**.
+#
+# That scope limit is real and worth stating rather than glossing: the standalone
+# SDK engine (sdk/tongflow/engine/plugins.py) carries its own DEFAULT_ORG and its
+# own f-string version of this rule, and a grep restricted to .ts/.tsx/.mjs/.js
+# structurally cannot see it. Bringing Python under one resolver means changing
+# sdk/, which is outside this feature's approved scope; it is recorded as a known
+# limit on the contract instead of being silently implied away here.
 #
 # The scan scope is declared rather than implied. Without the exclusions a
 # correct tree fails, because this checker quotes the pattern and the test
@@ -54,4 +61,4 @@ if ! grep -q 'official-manifest' scripts/install-official-plugins.ts; then
     exit 1
 fi
 
-echo "OK: one URL rule, in ${home}; the CLI installer imports it"
+echo "OK: one URL rule across src/ and scripts/, in ${home}; the CLI installer imports it (the SDK engine's Python copy is out of this scan's scope — see the contract's known limits)"

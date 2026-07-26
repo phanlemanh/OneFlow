@@ -48,24 +48,40 @@ function pluginsDir(): string {
 // Returns "cloned" | "updated"; throws on git failure.
 async function installOne(entry: OfficialPluginEntry): Promise<string> {
     const dir = path.join(pluginsDir(), entry.id);
+    const url = officialGitUrl(entry);
     if (fs.existsSync(dir)) {
+        // Pull from the resolved URL rather than the one baked into
+        // .git/config at clone time, so an entry that gained its own `origin`
+        // actually moves. Re-point the stored remote only after a successful
+        // pull. Mirrors cloneOrPull in plugins-install.server.ts.
+        const storedUrl = await git.getConfig({
+            fs,
+            dir,
+            path: "remote.origin.url",
+        });
         await git.pull({
             fs,
             http,
             dir,
+            url,
             singleBranch: true,
             fastForward: true,
             author: { name: "oneflow", email: "oneflow@local" },
         });
+        if (storedUrl !== url) {
+            await git.setConfig({
+                fs,
+                dir,
+                path: "remote.origin.url",
+                value: url,
+            });
+            console.log(
+                `[install-plugins] ${entry.id}: remote re-pointed ${storedUrl} -> ${url}`,
+            );
+        }
         return "updated";
     }
-    await git.clone({
-        fs,
-        http,
-        dir,
-        url: officialGitUrl(entry),
-        singleBranch: true,
-    });
+    await git.clone({ fs, http, dir, url, singleBranch: true });
     return "cloned";
 }
 

@@ -75,6 +75,26 @@ Source input: prompt (bắt đầu (a) luôn)
 - **Hiển thị origin trên UI.** Phản hồi API giữ nguyên hình dạng (`org` là mặc định), nên đây không phải thay đổi T3 ở `src/app/api/**`.
 - **Ghim revision cho plugin.** Manifest vẫn bám nhánh mặc định của mỗi repo; thêm `ref` là việc khác.
 
+## Known limits
+
+Found by the S4 round-1 review, recorded rather than fixed because closing them
+would change files outside this feature's approved scope.
+
+- **The SDK engine keeps a fourth copy of the URL rule.**
+  `sdk/tongflow/engine/plugins.py` hardcodes its own `DEFAULT_ORG` and rebuilds
+  the remote in `_git_url_for`. It never reads `config/official-plugins.json`,
+  so the standalone engine's preflight would clone a forked plugin from
+  upstream. AC-3 covers the three consumers inside this app; unifying the Python
+  engine means touching `sdk/**`, which is a T3 path and belongs to its own
+  contract. `check-single-url-rule.sh` now states its scan scope instead of
+  claiming the rule exists in exactly one place repo-wide.
+- **`check-manifest-unmoved.sh` is a snapshot, not a standing invariant.** It
+  asserts exactly 38 plain string entries, which is precisely what AC-6 demands
+  of *this* change. It will therefore go red on the PR that registers a 39th
+  plugin, or on the first real fork — both of which are intended future work.
+  The coupling is now called out in CLAUDE.md's "Registering an official plugin"
+  checklist so that failure arrives with an explanation attached.
+
 ## Notes
 
 - `org` là **URL gốc**, không phải tên tổ chức — GitHub đối xử với namespace cá nhân và tổ chức như nhau khi clone (đã kiểm bằng `git ls-remote` trên chính repo này).

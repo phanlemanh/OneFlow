@@ -205,6 +205,23 @@ describe("non-http(s) origins are rejected (AC-5)", () => {
         ).toThrowError(/http/i);
     });
 
+    it("strips a trailing slash rather than emitting a double slash", () => {
+        const manifest = normalizeOfficialManifest({
+            org: `${DEFAULT_ORG}/`,
+            plugins: [
+                "tongflow-api-gemini",
+                { id: "oneflow-api-openai", origin: `${FORK_ORIGIN}//` },
+            ],
+        });
+        expect(manifest.org).toBe(DEFAULT_ORG);
+        expect(urlOf(manifest, "tongflow-api-gemini")).toBe(
+            `${DEFAULT_ORG}/tongflow-api-gemini.git`,
+        );
+        expect(urlOf(manifest, "oneflow-api-openai")).toBe(
+            `${FORK_ORIGIN}/oneflow-api-openai.git`,
+        );
+    });
+
     it("accepts a plain http origin", () => {
         const manifest = normalizeOfficialManifest({
             org: DEFAULT_ORG,

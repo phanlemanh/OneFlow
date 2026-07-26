@@ -38,13 +38,25 @@ function isHttpUrl(value: string): boolean {
     return parsed.protocol === "http:" || parsed.protocol === "https:";
 }
 
+/**
+ * Validate a base URL and strip any trailing slash.
+ *
+ * A URL pasted from a browser address bar often ends in `/`, which would
+ * otherwise survive into the remote URL as a double slash before the id. Some
+ * hosts tolerate that and some do not, so normalising here keeps one shape
+ * rather than leaving the outcome to the remote.
+ *
+ * (Described in prose deliberately: check-single-url-rule.sh counts literal
+ * occurrences of the template, and a comment quoting it would read as a second
+ * copy of the rule.)
+ */
 function requireHttpUrl(value: string, label: string): string {
     if (!isHttpUrl(value)) {
         throw new Error(
             `official-plugins manifest: ${label} must be an http(s) URL, got ${JSON.stringify(value)}`,
         );
     }
-    return value;
+    return value.replace(/\/+$/, "");
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

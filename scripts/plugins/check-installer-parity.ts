@@ -106,6 +106,35 @@ function assertNoBareOrgUrlBuild(): void {
     }
 }
 
+/**
+ * Building the right URL is not the same as fetching from it.
+ *
+ * `git.pull` without `url` resolves the remote from the checkout's own
+ * .git/config, so an already-installed plugin whose entry gains an `origin`
+ * would keep fast-forwarding from the repository it was first cloned from —
+ * while the update checker, which does use the new origin, reports an update
+ * that every click fails to apply, silently and forever. Comparing the URLs
+ * each consumer *builds* cannot see that, so it is asserted directly.
+ */
+function assertPullUsesResolvedUrl(): void {
+    const files = [
+        "src/lib/plugins/plugins-install.server.ts",
+        "scripts/install-official-plugins.ts",
+    ];
+    for (const file of files) {
+        const src = readFileSync(file, "utf8");
+        const pullCall = src.match(/git\.pull\(\{[^}]*\}/);
+        if (!pullCall) {
+            throw new Error(`${file}: no git.pull call found to check`);
+        }
+        if (!/\burl\b/.test(pullCall[0])) {
+            throw new Error(
+                `${file}: git.pull does not pass \`url\`, so it fetches from the checkout's stored remote rather than the entry's resolved origin — an override would never reach an already-installed plugin.`,
+            );
+        }
+    }
+}
+
 function main(): void {
     // 1. The shipped manifest: 38 string entries, all on the default org.
     const shipped = JSON.parse(
@@ -148,8 +177,11 @@ function main(): void {
     // 3. Neither server consumer may build a remote from a bare org.
     assertNoBareOrgUrlBuild();
 
+    // 4. Both pull paths must fetch from the resolved URL, not the stored one.
+    assertPullUsesResolvedUrl();
+
     console.log(
-        "OK: the CLI installer, the in-app install path and the update checker agree",
+        "OK: the CLI installer, the in-app install path and the update checker agree, and both pull paths use the resolved origin",
     );
 }
 
