@@ -1,0 +1,139 @@
+schema_version: 1
+feature_slug: measure-harness
+evals:
+  # ---- WER ---------------------------------------------------------------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; WER equals (S+D+I)/N from a word-level edit distance — an identical hypothesis scores 0, an empty one scores 1, and hand-computed substitution/deletion/insertion cases match"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — 'khong' scored against reference 'không' counts as an error; normalisation must NOT strip diacritics, or the scorer would certify the exact failure the product promises to avoid"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; the same Vietnamese word written NFC (precomposed) and NFD (base + combining marks) scores 0 errors — otherwise the report shows errors a human comparing the two files cannot see"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; differing case and surrounding punctuation contribute zero errors"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; a digit-vs-words price mismatch is counted as an error AND surfaced in a separate digit-token breakdown; SUPPRESSION half — no automatic number conversion happens, so '120000' is never silently accepted as 'một trăm hai mươi nghìn'"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.smoke_measure_wer
+    expected: "exit 0; the CLI walks the committed fixture directory and prints per-clip plus aggregate WER"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — a reference with no matching hypothesis is reported as missing and makes the run fail, rather than being dropped so the average silently covers fewer clips"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---- Blind TTS rating ---------------------------------------------------
+  - id: E8
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — every generated sheet entry has an opaque id, the order differs from input order, and no system name appears anywhere in the sheet"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; the id-to-system key is returned as a separate artefact from the sheet, so a rater can be handed the sheet alone"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; aggregation reports per-system mean, standard deviation, n, and a 95% confidence interval, verified against hand-computed values"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E11
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — a score outside 1–5 and a rating referencing an unknown id each throw, instead of being dropped from the mean"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E12
+    criterion: AC-15
+    executor: script
+    cmd: config:executors.script.smoke_measure_mos
+    expected: "exit 0; the blind + aggregate commands run end-to-end over committed fixtures"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---- COGS ---------------------------------------------------------------
+  - id: E13
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; rows aggregate by plugin_id × feature with count, total duration, median and p95 matching hand-computed values"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E14
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — NULL-duration rows are counted as unmeasured and excluded from the duration statistics; treating them as zero would understate real cost"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E15
+    criterion: AC-13
+    executor: test
+    cmd: config:executors.test.unit_measure
+    expected: "exit 0; SUPPRESSION half — with no rate table the report contains no cost figure whatsoever; with an operator-supplied table it applies exactly those rates and invents nothing"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E16
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.smoke_measure_cogs
+    expected: "exit 0; the CLI reports against a fixture database, and SUPPRESSION half — against a pre-metering database it exits non-zero with a clear message rather than a raw SQL error"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---- Standing ------------------------------------------------------------
+  - id: E17
+    criterion: AC-16
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; the whole vitest suite is green, proving the new measure tests coexist with the existing ones"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E18
+    criterion: AC-16
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build succeeds and tsc --noEmit reports no errors"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E19
+    criterion: AC-16
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome check --error-on-warnings passes"
+    evidence_required: [run_id, exit_code, verifier, verified_at]

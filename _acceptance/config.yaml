@@ -20,10 +20,17 @@ executors:
     # keys are declared now so eval refs stay portable (artifact-platform pattern).
     unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"
     unit_metering_runner: "pnpm vitest run src/lib/task/metering.test.ts"
+    # measure-harness Gate 1 (2026-07-26): files land during implementation.
+    unit_measure: "pnpm vitest run src/lib/measure"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
     gen_abi_clean: "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
+    # measure-harness: end-to-end CLI runs over the fixtures committed with the
+    # feature — proves the wiring, not just the pure core.
+    smoke_measure_wer: "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"
+    smoke_measure_mos: "bash scripts/measure/selftest-mos.sh"
+    smoke_measure_cogs: "bash scripts/measure/selftest-cogs.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
