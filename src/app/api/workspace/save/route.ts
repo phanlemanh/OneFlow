@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (!flow?.nodes || !flow.edges) {
+        if (!flow || !flow.nodes || !flow.edges) {
             return NextResponse.json(
                 { error: "Flow data is required" },
                 { status: 400 },

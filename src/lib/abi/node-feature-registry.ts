@@ -382,7 +382,7 @@ export function resolveEdgeHandles(args: {
             if (!isHandleForUpstream(field)) continue;
             const handleId = targetHandleId(field);
             if (firstMatch === undefined) firstMatch = handleId;
-            if (!usedTargetHandles?.has(handleId)) {
+            if (!usedTargetHandles || !usedTargetHandles.has(handleId)) {
                 targetHandle = handleId;
                 break;
             }

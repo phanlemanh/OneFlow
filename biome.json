@@ -52,7 +52,8 @@
                 "useValidAnchor": "off"
             },
             "complexity": {
-                "useLiteralKeys": "off"
+                "useLiteralKeys": "off",
+                "useOptionalChain": "off"
             },
             "correctness": {
                 "noNestedComponentDefinitions": "off",
