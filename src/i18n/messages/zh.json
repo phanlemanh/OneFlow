@@ -9,7 +9,7 @@
         "upToDate": "已是最新",
         "checkUpdates": "检查更新",
         "emptyOfficial": "暂无官方插件",
-        "customHint": "仓库名需符合 tongflow-modal-* 或 tongflow-api-* 约定，否则无法被识别。",
+        "customHint": "仓库名需符合 oneflow-modal-* 或 oneflow-api-* 约定（旧的 tongflow-* 名称仍可识别），否则无法被识别。",
         "cloneButton": "克隆并安装",
         "installSuccess": "已安装 {id}",
         "updateSuccess": "已更新 {id}",

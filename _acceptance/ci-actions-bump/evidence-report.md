@@ -4,10 +4,10 @@ feature_slug: ci-actions-bump
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 7)
+verified_by: fresh-context verification subagent (round 8)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5975bb43b6c61febe829718982c926d87fcea9d0
+verified_commit: 8254c0bda4d98c02db789e816f6d19a6c09773a4
 human_signoff: Manh 2026-07-26
 ---
 
@@ -16,8 +16,8 @@ human_signoff: Manh 2026-07-26
 Round 6 was the last full re-verification, at commit 572cb98: all eight evals
 executed, all eight exited zero, each with captured output below. Five earlier
 rounds each found a defect in these eval scripts, so that round assumed a sixth
-crop existed and went looking for it. Round 7 is a carry-forward re-pin on top of
-it — see `## Iterations` for exactly which evals ran again at commit 5975bb4 and
+crop existed and went looking for it. Round 8 is a carry-forward re-pin on top of
+it — see `## Iterations` for exactly which evals ran again at commit 8254c0bd and
 which three could not be evaluated on this branch.
 
 Round 5's fix was re-driven with the exact mutation that defeated the previous
@@ -50,11 +50,11 @@ reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-r7-E1-20260726140019
+  run_id: ci-actions-bump-r8-E1-20260726145251
   exit_code: 0
   baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-07-26T14:00:19Z
+  verified_at: 2026-07-26T14:52:51Z
   output: |
     ok actions/checkout: 7 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
@@ -63,43 +63,43 @@ reports them.
     Re-derived independently of the script this round: `grep -rn 'uses:' .github/workflows` lists exactly seven `actions/checkout@v7` sites — ci.yml lines 18, 42, 63, 84, 102; desktop-release.yml line 61; docker-publish.yml line 23 — and one `docker/login-action@v4` at docker-publish.yml line 32. AC-1 is true on this tree as written. Round 5's `sed` fix was re-driven against the concealment that defeated the previous version, including the variant where it predates the branch; it holds (Analyst item 3). Analyst item 4 records what a green E1 still does not establish.
 
 - eval: E2
-  run_id: ci-actions-bump-r7-E2-20260726140019
+  run_id: ci-actions-bump-r8-E2-20260726145251
   exit_code: 0
   baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
   verifier: config:executors.script.ci_gate_plumbing
-  verified_at: 2026-07-26T14:00:19Z
+  verified_at: 2026-07-26T14:52:51Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30195519130 @ 572cb98a44f29174acd496e5aa648bd6a6ac08b0
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30206355728 @ 8254c0bda4d98c02db789e816f6d19a6c09773a4
     ok  checkout ran with fetch-depth: 0
     ok  the checkout under test is v7
-    ok  pre-merge-check emitted 5 per-feature verdict line(s)
+    ok  pre-merge-check emitted 6 per-feature verdict line(s)
     ok  no shallow-history or unresolvable-base complaint anywhere in the log
-    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 572cb98a44f29174acd496e5aa648bd6a6ac08b0
+    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 8254c0bda4d98c02db789e816f6d19a6c09773a4
 
-    The run's overall conclusion is not success, and that is expected: the Acceptance Gate job reports bookkeeping state for five features, one of them this feature awaiting its own signature. That is precisely why AC-2 was narrowed — see Analyst item 7. What this eval asserts is the plumbing: checkout@v7 ran with fetch-depth: 0 and pre-merge-check reached acceptance logic, emitting five real per-feature verdict lines with no shallow-history or unresolvable-base complaint.
+    Re-read on this branch's own CI run at HEAD. The run's overall conclusion is not success, and that is expected: the Acceptance Gate job reports bookkeeping state, now for six features, one of them the feature under review on this branch awaiting its own signature. That is precisely why AC-2 was narrowed — see Analyst item 7. What this eval asserts is the plumbing: checkout@v7 ran with fetch-depth: 0 and pre-merge-check reached acceptance logic, emitting six real per-feature verdict lines with no shallow-history or unresolvable-base complaint.
 
 - eval: E3
-  run_id: ci-actions-bump-r7-E3-20260726140040
+  run_id: ci-actions-bump-r8-E3-20260726145301
   exit_code: 0
   baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
   verifier: config:executors.script.ci_jobs_green
-  verified_at: 2026-07-26T14:00:40Z
+  verified_at: 2026-07-26T14:53:01Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30195519130 @ 572cb98a44f29174acd496e5aa648bd6a6ac08b0
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30206355728 @ 8254c0bda4d98c02db789e816f6d19a6c09773a4
     ok job 'Lint': success
     ok job 'Type Check': success
     ok job 'Build': success
     ok job 'SDK Tests (Python)': success
-    all requested jobs succeeded at 572cb98a44f29174acd496e5aa648bd6a6ac08b0
+    all requested jobs succeeded at 8254c0bda4d98c02db789e816f6d19a6c09773a4
 
     Re-derived from the run object: the four named jobs each carry conclusion `success` at this head SHA under the node24 runtime. The run as a whole concluded otherwise because of the Acceptance Gate job, which this eval deliberately does not depend on — `assert_run_finished`, not `assert_run_complete`.
 
 - eval: E4
-  run_id: ci-actions-bump-r7-E4-20260726140027
+  run_id: ci-actions-bump-r8-E4-20260726145259
   exit_code: 0
   baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-07-26T14:00:27Z
+  verified_at: 2026-07-26T14:52:59Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
@@ -172,15 +172,15 @@ reports them.
     Both matrix legs ran and both uploaded an artifact; the tag-only `prepare` and `publish` jobs were skipped, and the release-upload step was not taken in either leg. That is the dry run working, and it covers the cache@v6 debt from #16 on the two runner OSes ci.yml never touches.
 
 - eval: E8
-  run_id: ci-actions-bump-r7-E8-20260726140029
+  run_id: ci-actions-bump-r8-E8-20260726145259
   exit_code: 0
   baseline: red — driven into its failure branches again this round on `--no-hardlinks` scratch clones and through a `gh` double written for this round; see Analyst item 2
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-07-26T14:00:29Z
+  verified_at: 2026-07-26T14:52:59Z
   output: |
-    workflow drift vs origin/main: 16 declared pin line(s), comments, and the dry-run guard (-1 +1); no file added, deleted or renamed
+    no workflow changes vs origin/main
 
-    Re-derived from the diff by hand: every changed line under .github/workflows is one of the 16 declared pin lines (`actions/checkout` v4→v7 at seven sites, `docker/login-action` v3→v4 at one, counted as removed+added), a comment, or the one declared guard line pair. `git diff --name-status` reports three `M` entries and nothing added, deleted or renamed.
+    The output changed shape this round because the feature is merged: on `feat/oneflow-plugin-prefix` the 16 declared pin lines and the dry-run guard are already in `origin/main`, so the diff under `.github/workflows` is empty and the guard reports the strongest possible form of "no behaviour drift". Re-derived from the diff by hand: `git diff --name-only origin/main...HEAD -- .github/workflows` prints nothing, and the round-6 finding — every changed line was one of the 16 declared pin lines (`actions/checkout` v4→v7 at seven sites, `docker/login-action` v3→v4 at one, counted as removed+added), a comment, or the one declared guard line pair — is what landed on main unchanged.
 
 ## Analyst
 
@@ -188,7 +188,7 @@ reports them.
 
 Round 6 was a full round: all eight evals were executed against the working tree
 at commit 572cb98 and all eight exited zero, each with captured output above.
-Round 7 re-ran five of them at commit 5975bb4, all zero; the three that read a
+Round 8 re-ran five of them at commit 8254c0bd, all zero; the three that read a
 dispatched workflow run could not be evaluated on this branch and keep their
 round-6 evidence (see `## Iterations`).
 Every `cmd` was resolved line by line against `_acceptance/config.yaml` before it
@@ -706,6 +706,59 @@ across the other features re-pinned in this PR.
 were updated from this round's actual runs for the five evals that ran, and
 nothing else in the report body changed. The human signature line is
 byte-identical to the one committed at Gate 2.
+
+Round 8 (2026-07-26T14:44–14:54Z, commit 8254c0bd): **carry-forward re-pin —
+not a fresh Gate-2 signature.** The feature under review in PR #18 is
+`oneflow-plugin-prefix`; this feature is merged, signed, and went stale only
+because `stale_files` compares the whole tree against each report's
+`verified_commit`.
+
+Both carry-forward preconditions from AGENTS.md were checked, not assumed.
+
+1. **This feature's own code is unchanged.** `git diff --name-only 5975bb4`
+   filtered of `_acceptance/` lists four files — `docs/plugins.md`,
+   `scripts/plugins/check-prefix-docs.sh`, `sdk/tongflow/scan.py` and
+   `sdk/tests/test_scan_prefix.py`. Widened to the whole branch,
+   `git diff --name-only origin/main...HEAD` filtered of `_acceptance/` adds
+   `scripts/plugins/check-no-config-drift.sh`, `src/lib/plugins/plugin-id.ts`,
+   `src/lib/plugins/plugin-id.test.ts` and
+   `src/lib/plugins/plugins-install.server.ts`. `docs/**` is a declared T1 skip
+   glob; every other file belongs to `oneflow-plugin-prefix`. No file under `.github/workflows/**` or `scripts/ci/**` — the paths this feature owns — differs.
+2. **The standing checks are green on the new tree.** `pnpm test` (22 files, 270 tests), `pnpm lint:check` (398 files, no fixes) and `pnpm build && pnpm typecheck` all exited zero on this tree.
+
+Five of this feature's own evals were also re-run at this commit and all five
+exited zero: E1 (`ci_actions_pinned`), E2 (`ci_gate_plumbing`), E3
+(`ci_jobs_green`), E4 (`ci_docker_dryrun_guard`) and E8 (`ci_no_behaviour_drift`).
+E2 and E3 read this branch's own CI run 30206355728 at 8254c0bd, where `Lint`,
+`Type Check`, `Build` and `SDK Tests (Python)` all concluded success and
+pre-merge-check emitted six per-feature verdict lines from a usable base. E8's
+output changed shape because the feature is merged: the workflow diff against
+`origin/main` is now empty, which is the strongest form of "no behaviour drift"
+the guard can report. E5, E6 and E7 read a dispatched `workflow_dispatch` run;
+no such run of `docker-publish.yml` or `desktop-release.yml` exists on
+`feat/oneflow-plugin-prefix`, so all three **refused rather than reported**, were
+logged with that refusal in `run-log.jsonl`, and keep their round-6 evidence
+blocks unchanged. That is the same disposition as round 7.
+
+Each shared standing check was executed ONCE for the whole PR and credited to
+every feature and eval that binds it, under a **distinct `run_id` per eval** —
+`pnpm build && pnpm typecheck` at 2026-07-26T14:54:32Z, `pnpm lint:check` at
+2026-07-26T14:44:17Z (398 files, no fixes) and `pnpm test` at
+2026-07-26T14:44:24Z (22 files, 270 tests). `cd sdk && pytest` ran once at
+2026-07-26T14:44:28Z (86 tests — 20 more than the previous round, because
+`oneflow-plugin-prefix` added `sdk/tests/test_scan_prefix.py`). No eval shares a
+`run_id` with another, here or across the other features re-pinned in this PR.
+
+`verified_commit` moves 5975bb4 → 8254c0bd; `run_id`, `verified_at` and `output`
+were updated from this round's actual runs and nothing else in the report body
+changed. The signature bytes in frontmatter were not touched — the signature
+attests to the same code it originally did, which is what the carry-forward rule
+in AGENTS.md authorises.
+
+**One feature in this PR could not be carried.** `sdk-distribution-rename` owns
+`sdk/**`, and this branch changes `sdk/tongflow/scan.py` and adds
+`sdk/tests/test_scan_prefix.py`. Precondition 1 fails for it as written, so its
+report was left untouched and its pin was not moved.
 
 ## Gate 2 checklist (human)
 

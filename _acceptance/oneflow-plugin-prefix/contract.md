@@ -107,6 +107,7 @@ Consequences, all accepted deliberately:
 
 ## Notes
 
-- `PLUGIN_ID_RE` là bề mặt duy nhất: scanner không lọc theo tên, và tiền tố đã thôi chọn backend từ trước (`docs/plugins.md` §5).
+- Tiền tố được ép ở **hai** tầng — `PLUGIN_ID_RE` của trình cài đặt và `_detect_runner` của scanner. (Dòng ghi chú cũ ở đây từng khẳng định chỉ có một tầng; nó là chính câu bị bác bỏ trong mục Amendment, và vẫn nằm lại đây như một sự thật hiện hành cho tới khi verifier vòng 2 chỉ ra. Một điều đã rút lại thì phải rút ở mọi chỗ nó được viết.)
+- Tiền tố đã thôi chọn backend từ trước (`docs/plugins.md` §5); nó là **nhãn**, nên `pluginDisplayName` cũng phải cắt cả hai dạng — nếu không, hai plugin song sinh hiện hai nhãn khác nhau và tiền tố lại thành một khác biệt nhìn thấy được.
 - README (ba ngôn ngữ) liệt kê 38 plugin chính thức theo tên upstream — chúng vẫn đúng, vì repo upstream vẫn tên đó. Không đụng.
 - Không có bề mặt web UI mới → bỏ qua eval design theo SKILL 2b.

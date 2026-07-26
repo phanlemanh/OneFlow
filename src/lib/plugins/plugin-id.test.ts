@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { isValidPluginId, pluginIdError } from "@/lib/plugins/plugin-id";
+import {
+    isValidPluginId,
+    pluginDisplayName,
+    pluginIdError,
+} from "@/lib/plugins/plugin-id";
 
 describe("plugin id — oneflow convention (AC-1)", () => {
     it.each([
@@ -111,5 +115,26 @@ describe("plugin id — the error teaches the current convention (AC-4)", () => 
     it("names both runner segments for the current convention", () => {
         expect(msg).toContain("oneflow-modal-*");
         expect(msg).toContain("oneflow-api-*");
+    });
+});
+
+describe("plugin display name — the prefix is a label, not a distinction", () => {
+    it("strips either vendor prefix, so twins render identically", () => {
+        // Before this was fixed, only `tongflow` was stripped: two plugins
+        // differing solely in prefix appeared in the picker as "api-openai" and
+        // "oneflow-api-openai" — the prefix leaking back out as a visible
+        // difference after the scanner had stopped treating it as one.
+        expect(pluginDisplayName("oneflow-api-openai")).toBe("api-openai");
+        expect(pluginDisplayName("tongflow-api-openai")).toBe("api-openai");
+        expect(pluginDisplayName("oneflow-modal-z-image")).toBe(
+            "modal-z-image",
+        );
+        expect(pluginDisplayName("tongflow-modal-z-image")).toBe(
+            "modal-z-image",
+        );
+    });
+
+    it("leaves a name with no vendor prefix alone", () => {
+        expect(pluginDisplayName("api-openai")).toBe("api-openai");
     });
 });

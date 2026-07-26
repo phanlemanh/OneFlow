@@ -37,3 +37,24 @@ export function pluginIdError(id: string): string {
         `official plugins), otherwise the scanner cannot detect it.`
     );
 }
+
+/** Vendor prefixes, longest-lived first. Kept beside the regex on purpose. */
+const VENDOR_PREFIXES = ["oneflow", "tongflow"];
+
+/**
+ * Label for the plugin picker: the id without its vendor prefix
+ * (`oneflow-api-openai` → `api-openai`).
+ *
+ * Both conventions are stripped. Two plugins differing only in prefix must not
+ * render under different labels — otherwise the prefix, which the scanner
+ * stopped treating as a distinction, leaks back out as a visible one. This
+ * function lived next to the picker and knew only about `tongflow`, which is
+ * how that happened; it sits here now so the naming convention has one home.
+ */
+export function pluginDisplayName(pluginId: string): string {
+    const parts = pluginId.split("-").filter(Boolean);
+    const semantic = VENDOR_PREFIXES.includes(parts[0] ?? "")
+        ? parts.slice(1)
+        : parts;
+    return semantic.join("-");
+}

@@ -116,6 +116,12 @@ def test_identical_plugins_differing_only_in_prefix_fare_identically(
         "one-flow-modal-foo",
         "oneflow-worker-foo",
         "oneflow-foo",
+        # No prefix at all. Kept explicit because removing the first
+        # unknown-prefix gate killed zero tests without these: every other case
+        # here carries a prefix and so reaches the second gate instead.
+        "modal-foo",
+        "api-foo",
+        "foo",
     ],
 )
 def test_unknown_prefix_is_still_rejected(tmp_path: Path, name: str) -> None:

@@ -7,3 +7,14 @@
 {"ts": "2026-07-26T13:52:28Z", "round": 1, "evalId": "E7", "run_id": "oneflow-plugin-prefix-r1-E7-20260726135228", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
 {"ts": "2026-07-26T13:55:54Z", "round": 1, "evalId": "E8", "run_id": "oneflow-plugin-prefix-r1-E8-20260726135554", "exit_code": 0, "cmd": "config:executors.test.unit"}
 {"ts": "2026-07-26T13:55:47Z", "round": 1, "evalId": "E9", "run_id": "oneflow-plugin-prefix-r1-E9-20260726135547", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T14:44:03Z", "round": 2, "evalId": "E1", "run_id": "oneflow-plugin-prefix-r2-E1-20260726144403", "exit_code": 0, "cmd": "config:executors.test.unit_plugin_id"}
+{"ts": "2026-07-26T14:44:03Z", "round": 2, "evalId": "E2", "run_id": "oneflow-plugin-prefix-r2-E2-20260726144403", "exit_code": 0, "cmd": "config:executors.test.unit_plugin_id"}
+{"ts": "2026-07-26T14:44:03Z", "round": 2, "evalId": "E3", "run_id": "oneflow-plugin-prefix-r2-E3-20260726144403", "exit_code": 0, "cmd": "config:executors.test.unit_plugin_id"}
+{"ts": "2026-07-26T14:44:03Z", "round": 2, "evalId": "E4", "run_id": "oneflow-plugin-prefix-r2-E4-20260726144403", "exit_code": 0, "cmd": "config:executors.test.unit_plugin_id"}
+{"ts": "2026-07-26T14:44:17Z", "round": 2, "evalId": "E5", "run_id": "oneflow-plugin-prefix-r2-E5-20260726144417", "exit_code": 0, "cmd": "config:executors.script.docs_plugin_prefix"}
+{"ts": "2026-07-26T14:44:17Z", "round": 2, "evalId": "E6", "run_id": "oneflow-plugin-prefix-r2-E6-20260726144417", "exit_code": 0, "cmd": "config:executors.script.prefix_no_config_drift"}
+{"ts": "2026-07-26T14:54:32Z", "round": 2, "evalId": "E7", "run_id": "oneflow-plugin-prefix-r2-E7-20260726145432", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T14:44:24Z", "round": 2, "evalId": "E8", "run_id": "oneflow-plugin-prefix-r2-E8-20260726144424", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T14:44:17Z", "round": 2, "evalId": "E9", "run_id": "oneflow-plugin-prefix-r2-E9-20260726144417", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T14:44:46Z", "round": 2, "evalId": "E10", "run_id": "oneflow-plugin-prefix-r2-E10-20260726144446", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_scan_prefix"}
+{"ts": "2026-07-26T14:44:28Z", "round": 2, "evalId": "E11", "run_id": "oneflow-plugin-prefix-r2-E11-20260726144428", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}

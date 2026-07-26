@@ -142,3 +142,15 @@
 {"ts": "2026-07-26T13:55:54Z", "round": 12, "evalId": "E10", "run_id": "task-metering-r12-E10-20260726135554", "exit_code": 0, "cmd": "config:executors.test.unit"}
 {"ts": "2026-07-26T13:52:28Z", "round": 12, "evalId": "E11", "run_id": "task-metering-r12-E11-20260726135228", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
 {"ts": "2026-07-26T13:55:47Z", "round": 12, "evalId": "E12", "run_id": "task-metering-r12-E12-20260726135547", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T14:52:36Z", "round": 13, "evalId": "E1", "run_id": "task-metering-r13-E1-20260726145236", "exit_code": 0, "cmd": "config:executors.test.unit_metering_schema"}
+{"ts": "2026-07-26T14:52:36Z", "round": 13, "evalId": "E2", "run_id": "task-metering-r13-E2-20260726145236", "exit_code": 0, "cmd": "config:executors.test.unit_metering_schema"}
+{"ts": "2026-07-26T14:52:36Z", "round": 13, "evalId": "E3", "run_id": "task-metering-r13-E3-20260726145236", "exit_code": 0, "cmd": "config:executors.test.unit_metering_schema"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E4", "run_id": "task-metering-r13-E4-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E5", "run_id": "task-metering-r13-E5-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E6", "run_id": "task-metering-r13-E6-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E7", "run_id": "task-metering-r13-E7-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E8", "run_id": "task-metering-r13-E8-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:52:37Z", "round": 13, "evalId": "E9", "run_id": "task-metering-r13-E9-20260726145237", "exit_code": 0, "cmd": "config:executors.test.unit_metering_runner"}
+{"ts": "2026-07-26T14:44:24Z", "round": 13, "evalId": "E10", "run_id": "task-metering-r13-E10-20260726144424", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T14:54:32Z", "round": 13, "evalId": "E11", "run_id": "task-metering-r13-E11-20260726145432", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T14:44:17Z", "round": 13, "evalId": "E12", "run_id": "task-metering-r13-E12-20260726144417", "exit_code": 0, "cmd": "config:executors.test.lint"}
