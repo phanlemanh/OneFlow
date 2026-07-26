@@ -1,0 +1,58 @@
+schema_version: 1
+feature_slug: dependency-refresh-2026-07
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.deps_manifest_intact
+    expected: "exit 0; package.json carries a bumped production dep, a bumped dev dep, and still declares hooks:install / sdk:publish / gen:abi"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.deps_lockfile_clean
+    expected: "exit 0; `pnpm install --frozen-lockfile` succeeds, proving the regenerated lockfile matches the merged manifest exactly"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome 2.5.5 checks the tree with --error-on-warnings and reports nothing, including the Tailwind at-rules in globals.css"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; 197 vitest tests pass on the new dependency set"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest
+    expected: "exit 0; 66 SDK tests pass"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; next build and tsc --noEmit both succeed under the new next/react"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.smoke_measure_cogs
+    expected: "exit 0; the COGS selftest builds real sqlite databases, runs the drizzle migrator and reads them back — exercising drizzle-orm 0.45.2 and better-sqlite3 12.11.1 rather than only compiling against them"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.deps_no_t3_drift
+    expected: "exit 0; SUPPRESSION half — the diff against main touches no file under src/lib/abi/ or src/app/api/, so biome's new useOptionalChain autofix did not ride into T3 code inside a version bump"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
