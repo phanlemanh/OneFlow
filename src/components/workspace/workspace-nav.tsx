@@ -34,6 +34,7 @@ const LOCALE_OPTIONS = [
     { code: "en", label: "English" },
     { code: "ja", label: "日本語" },
     { code: "ko", label: "한국어" },
+    { code: "vi", label: "Tiếng Việt" },
 ] as const;
 
 const navBtnClass =
