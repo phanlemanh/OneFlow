@@ -4,26 +4,27 @@ feature_slug: ci-actions-bump
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 3)
+verified_by: fresh-context verification subagent (round 4)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f2928c05e13ca2693de765bac5a605187fffca85
+verified_commit: a751b5fa7b842cf9373d1b358dc47b015fd10e7f
 human_signoff:
 ---
 
 # Evidence Report: ci-actions-bump
 
-Round 3 is the first **complete** round: all eight evals were executed against
-commit f2928c05 and all eight exited zero. Rounds 1 and 2 each found defects in
-these eval scripts, so this round assumed a third crop existed and went looking
-for it. It found one — reported in full in `## Analyst` item 4. It concerns the
-strength of E8's guard, not the truth of AC-8 on this tree, which was re-derived
-by hand below.
+Round 4 is a full re-verification at commit a751b5f: all eight evals executed,
+all eight exited zero, each with captured output below. Rounds 1, 2 and 3 each
+found defects in these eval scripts, so this round assumed a fourth crop existed
+and went looking for it. It found one — reported in Analyst item 4. It
+concerns what E8's guard can see, not the truth of AC-8 on this tree, which was
+re-derived by hand from the diff below.
 
-Nothing here was taken on trust from the previous rounds. Every `cmd` was
-resolved line by line against `_acceptance/config.yaml`; five criteria were
-additionally re-derived from the runs' own logs and from git, independently of
-the script that reports them.
+Nothing was taken on trust from the previous rounds. Every `cmd` was resolved
+line by line against `_acceptance/config.yaml`; five criteria were additionally
+re-derived from primary sources — the runs' own logs, the run objects, the
+artifact and release APIs, and the git diff — independently of the script that
+reports them.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -39,11 +40,11 @@ the script that reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-r3-e1-20260726072533
+  run_id: ci-actions-bump-r4-e1-20260726075840
   exit_code: 0
-  baseline: red — driven into its failure branch this round on scratch copies; see `## Analyst` item 2
+  baseline: red — driven into its failure branch this round on a scratch clone; see `## Analyst` item 2
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-07-26T07:25:33Z
+  verified_at: 2026-07-26T07:58:40Z
   output: |
     ok actions/checkout: 7 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
@@ -57,26 +58,27 @@ the script that reports them.
     written, and no site sits below the contracted floor.
 
 - eval: E2
-  run_id: ci-actions-bump-r3-e2-20260726072609
+  run_id: ci-actions-bump-r4-e2-20260726075847
   exit_code: 0
-  baseline: red — mutations of the run JSON and job log, each caught or declined; see `## Analyst` item 2
+  baseline: red — nine mutations of the run JSON and job log, each caught or declined; see `## Analyst` item 2
   verifier: config:executors.script.ci_gate_plumbing
-  verified_at: 2026-07-26T07:26:09Z
+  verified_at: 2026-07-26T07:58:47Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30192682106 @ f2928c05e13ca2693de765bac5a605187fffca85
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30193626163 @ a751b5fa7b842cf9373d1b358dc47b015fd10e7f
     ok  checkout ran with fetch-depth: 0
     ok  the checkout under test is v7
     ok  pre-merge-check emitted 5 per-feature verdict line(s)
     ok  no shallow-history or unresolvable-base complaint anywhere in the log
+    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at a751b5fa7b842cf9373d1b358dc47b015fd10e7f
 
     Re-derived independently of the script, from the Acceptance Gate job log of
-    run 30192682106 (the ci.yml run at this branch's head SHA). Provenance of each
+    run 30193626163 (the ci.yml run at this branch's head SHA). Provenance of the
     matched string was checked rather than assumed — the `fetch-depth: 0` match is
     the checkout step's own input echo, inside the `Run actions/checkout@v7` step
     group, not an incidental mention elsewhere in the log:
 
       Set up job              Download action repository 'actions/checkout@v7'
-                                (SHA: 3d3c42e5aac5ba805825da76410c181273ba90b1)
+                                (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
       Run actions/checkout@v7 ##[group]Run actions/checkout@v7
       Run actions/checkout@v7   with:
       Run actions/checkout@v7     fetch-depth: 0
@@ -84,37 +86,39 @@ the script that reports them.
 
     And the gate then reached acceptance logic rather than stopping at git: the
     log carries five per-feature verdict lines, one for each feature under
-    `_acceptance/`, each naming the feature and the bookkeeping state it found.
-    That is only reachable once the base ref has resolved and a file-level diff
-    has been produced. No shallow-history, `unknown revision` or unresolvable-base
-    complaint appears anywhere in the 231-line job log.
+    `_acceptance/`, each naming the feature and the bookkeeping state it found —
+    this feature's PASS report awaiting its Gate-2 signature, and the four merged
+    features stale against the pin they carried into this round. That is only
+    reachable once the base ref has resolved and a file-level diff has been
+    produced. No shallow-history, `unknown revision` or unresolvable-base
+    complaint appears anywhere in the 211-line job log.
 
 - eval: E3
-  run_id: ci-actions-bump-r3-e3-20260726072621
+  run_id: ci-actions-bump-r4-e3-20260726075859
   exit_code: 0
-  baseline: red — a named job absent, a named job unsuccessful, and a run still in flight are each caught; see `## Analyst` item 2
+  baseline: red — a named job absent, a named job unsuccessful, a named job skipped, a run with no jobs and a run still in flight are each caught; see `## Analyst` item 2
   verifier: config:executors.script.ci_jobs_green
-  verified_at: 2026-07-26T07:26:21Z
+  verified_at: 2026-07-26T07:58:59Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30192682106 @ f2928c05e13ca2693de765bac5a605187fffca85
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30193626163 @ a751b5fa7b842cf9373d1b358dc47b015fd10e7f
     ok job 'Lint': success
     ok job 'Type Check': success
     ok job 'Build': success
     ok job 'SDK Tests (Python)': success
-    all requested jobs succeeded at f2928c05e13ca2693de765bac5a605187fffca85
+    all requested jobs succeeded at a751b5fa7b842cf9373d1b358dc47b015fd10e7f
 
-    Confirmed against the run object directly (`gh run view 30192682106 --json
-    jobs`): the run contains five jobs, and the four named above each carry
-    conclusion `success` under the node24 runtime. The run is `status: completed`,
-    so these are final results rather than a snapshot of something still moving.
-    This is also the round-1 coupling defect closed — see `## Analyst` item 3.
+    Confirmed against the run object directly (`gh run view 30193626163 --json
+    jobs`): the run contains five jobs — Lint, Type Check, Build, SDK Tests
+    (Python) and Acceptance Gate — and the four named above each carry conclusion
+    `success` under the node24 runtime. The run is `status: completed`, so these
+    are final results rather than a snapshot of something still moving.
 
 - eval: E4
-  run_id: ci-actions-bump-r3-e4-20260726072540
+  run_id: ci-actions-bump-r4-e4-20260726075907
   exit_code: 0
-  baseline: red — seven mutations of the guard line, each caught; see `## Analyst` item 2
+  baseline: red — eleven mutations of the guard line, each caught; see `## Analyst` item 2
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-07-26T07:25:40Z
+  verified_at: 2026-07-26T07:59:07Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
@@ -126,11 +130,11 @@ the script that reports them.
     has a block under it rather than a value, so the two cannot be confused.
 
 - eval: E5
-  run_id: ci-actions-bump-r3-e5-20260726072632
+  run_id: ci-actions-bump-r4-e5-20260726075912
   exit_code: 0
-  baseline: red — ten mutations of the run JSON and log, each caught or declined; see `## Analyst` item 2
+  baseline: red — twelve mutations of the run JSON and log, each caught or declined; see `## Analyst` item 2
   verifier: config:executors.script.ci_docker_dispatch_green
-  verified_at: 2026-07-26T07:26:32Z
+  verified_at: 2026-07-26T07:59:12Z
   output: |
     dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168
       branch under test: chore/ci-actions-bump   run head: b48699c612fab479deede3d7d1d9959e110d7335
@@ -143,22 +147,24 @@ the script that reports them.
     ok  linux/arm64 build stages present in the log
     dispatched docker dry run succeeded, and reached every step that carries a bumped action
 
-    The platform half was re-counted by hand in the run's own log: 48 build-stage
-    lines prefixed `[linux/amd64 ` and 54 prefixed `[linux/arm64 `. The buildx
-    command line carries `--platform linux/amd64,linux/arm64`, and the step
-    concluded successfully, so both architectures were genuinely produced rather
-    than merely requested. The step that carries PR #2's action reported
-    `Login Succeeded!`, and the run's own credentials were removed afterwards by
-    the post step.
+    The platform half was re-counted by hand in the run's own log this round: 48
+    build-stage lines prefixed `[linux/amd64 ` and 54 prefixed `[linux/arm64 `.
+    The buildx command line carries `--platform linux/amd64,linux/arm64`, and the
+    step concluded successfully, so both architectures were genuinely produced
+    rather than merely requested. The step that carries PR #2's action reported
+    `Login Succeeded!`, and the run's credentials were removed afterwards by the
+    post step. The run's `.github/workflows` tree object is identical to HEAD's
+    (c2bd8c6), so this is a dry run of the workflow content being merged.
 
 - eval: E6
-  run_id: ci-actions-bump-r3-e6-20260726072644
+  run_id: ci-actions-bump-r4-e6-20260726075923
   exit_code: 0
-  baseline: red — a resolved `push: true`, a registry-write line, a `--push` invocation, a truncated log and a package version dated after the run are each caught or declined; see `## Analyst` item 2
+  baseline: red — eleven mutations of the run JSON, the log and the package listing, each caught or declined; see `## Analyst` item 2
   verifier: config:executors.script.ci_ghcr_untouched
-  verified_at: 2026-07-26T07:26:44Z
+  verified_at: 2026-07-26T07:59:23Z
   output: |
     dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168 (started 2026-07-26T06:01:26Z)
+    ok  run's workflow tree matches HEAD
     ok  runner resolved 'push: false'
     ok  no registry write anywhere in 3575 log lines
     ok  buildx invoked without --push
@@ -167,35 +173,46 @@ the script that reports them.
         is indistinguishable from a package this token simply cannot see.
     no publish occurred during the dry run
 
-    AC-6 was re-derived from run 30190339168's log this round, independently of
-    the script, and rests on four observations rather than on the registry:
+    AC-6 was re-derived from run 30190339168's log again this round,
+    independently of the script, and rests on five observations rather than on
+    the registry:
 
-      1. The only `push:` input line in the whole 3576-line log is the runner's
+      1. The run's own metadata: `event: workflow_dispatch`, `status: completed`,
+         `conclusion: success`, head b48699c. It is the dispatch under test.
+      2. The only `push:` input line in the whole 3576-line log is the runner's
          echo of the resolved build-push inputs, and it reads `push: false`.
-      2. The buildx command line contains no `--push` and no
-         `--output type=registry`. Its only exporters are `--iidfile`,
-         `--metadata-file` and `--cache-to type=gha,mode=max`.
-      3. Zero lines anywhere match `pushing manifest`, `pushing layer`,
-         `exporting to image` or `exporting to registry`. The single export stage
-         present reads `exporting to GitHub Actions Cache`.
-      4. buildx's own closing statement, which is the strongest form of this
+         `load:` reads false in the same block.
+      3. The buildx command line was read flag by flag. It carries
+         `--cache-from`, `--cache-to`, `--iidfile`, eight `--label`,
+         `--platform`, `--attest`, `--tag` and `--metadata-file`. There is no
+         `--push`, no `--output` and no `--load`.
+      4. Zero lines anywhere match `pushing manifest`, `pushing layer`,
+         `pushing blob`, `exporting to image`, `exporting to registry` or
+         `--output type=registry`. The only export stage in the run reads
+         `#42 exporting to GitHub Actions Cache`, which is the `cache-to:
+         type=gha,mode=max` input doing its job.
+      5. buildx's own closing statement, which is the strongest form of this
          evidence because the builder is describing what it did:
            "No output specified with docker-container driver. Build result will
             only remain in the build cache. To push result image into registry
             use --push or to load image into docker use --load"
 
     The tag `ghcr.io/phanlemanh/oneflow:sha-b48699c` was computed by the metadata
-    step and never pushed. The registry listing was NOT used as evidence: this
-    token holds scopes gist, read:org, repo, workflow and not `read:packages`, so
-    the script's scope probe fails and it declines to read the versions endpoint's
-    404 either way. That is the round-1 defect fixed — see `## Analyst` item 3.
+    step and never pushed. `Login Succeeded!` appears — logging in to a registry
+    is not publishing to it, and that login is what proves PR #2's action for
+    AC-5. The registry listing was NOT used as evidence: this token holds scopes
+    gist, read:org, repo and workflow, and not `read:packages`, so the script's
+    scope probe fails and it declines to read a 404 from the versions endpoint
+    either way. I make the same declaration in my own words: I could not observe
+    the GHCR namespace, and I do not claim the package is absent — I claim the
+    builder never attempted a write, which the log settles on its own.
 
 - eval: E7
-  run_id: ci-actions-bump-r3-e7-20260726072658
+  run_id: ci-actions-bump-r4-e7-20260726075938
   exit_code: 0
-  baseline: red — a leg missing, a leg unsuccessful, a required step absent and the release-upload step having run are each caught; see `## Analyst` item 2
+  baseline: red — seven mutations covering a missing leg, a skipped leg, an unsuccessful step, an absent required step and the release-upload step having run, each caught; see `## Analyst` item 2
   verifier: config:executors.script.ci_desktop_dispatch_green
-  verified_at: 2026-07-26T07:26:58Z
+  verified_at: 2026-07-26T07:59:38Z
   output: |
     dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190355369
       branch under test: chore/ci-actions-bump   run head: b48699c612fab479deede3d7d1d9959e110d7335
@@ -214,28 +231,29 @@ the script that reports them.
     -- job 'publish': skipped (tag-only path, expected on a dispatch)
     dispatched desktop dry run succeeded, and reached every step that carries a bumped action
 
-    The suppression half was re-derived independently: `gh release list` returns
-    nothing at all for this repository, so no Release — draft or public — was
-    created by the dispatch. The positive half was corroborated from the run's
-    artifacts rather than from step names: run 30190355369 holds
+    The suppression half was re-derived independently again this round: `gh
+    release list` returns nothing, and `GET repos/phanlemanh/OneFlow/releases`
+    returns an array of length 0 — so no Release, draft or public, exists at all,
+    let alone one created by the dispatch. The positive half was corroborated
+    from the run's artifacts rather than from step names: run 30190355369 holds
     TongFlow-mac-universal.dmg (8,234,308 bytes) and TongFlow-win-x64.msi
     (3,338,000 bytes), one per matrix leg, both inside the 1–30 MB band the
     workflow's own sanity check enforces. Both `cache@v6` steps ran and succeeded
     on the two runner OSes ci.yml never touches.
 
 - eval: E8
-  run_id: ci-actions-bump-r3-e8-20260726072549
+  run_id: ci-actions-bump-r4-e8-20260726075946
   exit_code: 0
-  baseline: red — a trigger edit, a permissions block, a job rename, a fetch-depth change and a stray `push: true` outside docker-publish.yml are each caught; see `## Analyst` items 2 and 4
+  baseline: red — sixteen mutations, thirteen caught and three residuals reported; see `## Analyst` items 2 and 4
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-07-26T07:25:49Z
+  verified_at: 2026-07-26T07:59:46Z
   output: |
-    workflow drift vs origin/main: pins and comments only, plus the declared dry-run guard (-1 +1)
+    workflow drift vs origin/main: 8 matched pin pair(s), comments, and the declared dry-run guard (-1 +1)
 
     AC-8 was re-derived by hand this round rather than accepted from the script,
-    because the script is weaker than the criterion (`## Analyst` item 4). The
-    complete diff under .github/workflows against origin/main is 26 changed lines,
-    every one of which was classified individually:
+    because the script is still weaker than the criterion (`## Analyst` item 4).
+    The complete diff under .github/workflows against origin/main is 26 changed
+    lines, every one of which was classified individually:
 
       16 lines  eight matched removed/added PAIRS, each the SAME action path with
                 only the major version changed — seven of actions/checkout v4→v7
@@ -247,180 +265,192 @@ the script that reports them.
                 `push: ${{ github.ref_type == 'tag' }}` added, in
                 docker-publish.yml, which the contract declares in advance.
 
-    No trigger, permission, job, `runs-on`, `if:`, input or step was altered. The
-    criterion holds on this tree, established from the diff itself.
+    Counted mechanically as a cross-check: 26 changed lines, of which 16 match
+    `uses:`, 8 are comment lines, and 2 are the guard pair — leaving zero lines
+    in any other class. No trigger, permission, job, `runs-on`, `if:`, input or
+    step was altered. The criterion holds on this tree, established from the diff
+    itself rather than from the guard.
 
 ## Analyst
 
 ### 1. Scope of this round
 
-Round 3 is the full round the contract asks for. All eight evals were executed
-and all eight exited zero, each with captured output above. Five criteria
-(AC-1, AC-2, AC-6, AC-7, AC-8) were additionally re-derived from primary sources
-— run logs, the run object, `gh release list`, and the git diff — so their
-verdicts do not rest on the eval scripts alone.
+Round 4 is a full round. All eight evals were executed and all eight exited zero,
+each with captured output above. Five criteria (AC-1, AC-2, AC-3, AC-6, AC-7)
+were re-derived from primary sources — the run objects, the Acceptance Gate and
+docker job logs, the artifacts and releases APIs — and AC-8 from the git diff
+line by line, so no verdict rests on an eval script alone.
 
 `enforcement_mode` is `strict`, read from `_acceptance/config.yaml`.
-`ACCEPTANCE_GATE_BYPASS` was checked with `printf '%s'` and is empty, so
+`ACCEPTANCE_GATE_BYPASS` was checked with `printf '%s'` and prints nothing, so
 `bypass_used` is false.
 
-### 2. Discrimination: every script and every helper was driven into failure
+### 2. Discrimination: every script and every helper was driven into failure again
 
 The baseline question for these evals is not "was it red before the feature" —
 five of them read real Actions runs that did not exist beforehand. The useful
 question is whether each guard can fail at all, and whether it fails for the
-right reason. Roughly fifty mutations were driven this round.
+right reason. Around eighty mutations and probes were driven this round.
 
 **Method, and the safety rule it respects.** The repository working tree was
-never modified. A `--no-hardlinks` clone was made in a scratch directory outside
-the repo and every workflow/diff mutation was committed and reset there; no probe
-commit, `git commit -am` or `git reset --hard` ever touched the real repository or
-its history. The `gh`-backed scripts were driven through a `gh` test double on
-`PATH`, seeded with fixtures captured from the real runs so the unmutated double
-reproduces the real output byte for byte before any mutation is applied.
+never modified and no commit was made in it. A `--no-hardlinks` clone was made in
+a scratch directory outside the repo and every workflow and diff mutation was
+committed and reset there. The `gh`-backed scripts were driven through a freshly
+written `gh` test double on `PATH` — not the one a previous round left behind —
+seeded with fixtures captured from the real runs, so the unmutated double
+reproduces the real output before any mutation is applied. Every mutation was
+verified to have actually changed the file before its result was believed: the
+first pass silently produced two no-ops (a BSD-`sed` address form and a pattern
+that did not exist in the target file), each of which would have read as a false
+pass, and the harness was changed to print the applied diff and refuse a no-op.
 
-- `check-action-pins.sh` (12 mutations) — one site downgraded; all seven
-  downgraded; an eighth site added; the login pin downgraded; the login step
-  commented out; a site replaced by a `run:` line that merely mentions the action;
-  a site SHA-pinned with a `# v7` trailing comment; a stray file in the workflow
-  directory carrying a `uses:` line. Each named the offence and terminated
-  unsuccessfully. With no `.github/workflows` directory, or with the workflow
-  files present but empty, it declines to answer rather than reporting clean.
-- `check-docker-dryrun.sh` (8 mutations) — `push: true` restored; the guard
-  gated on `github.event_name` instead of the ref type; the input deleted
-  entirely (which would restore the action's own publishing default); a second
-  `push:` input added; the same expression quoted; the same expression with a
-  trailing comment; and `github.ref_type == 'tag' || true`. All caught. The file
-  missing: declines to answer.
-- `check-workflow-drift.sh` (16 mutations) — a trigger key edited; a
-  `permissions:` block added; a job renamed; `fetch-depth: 0` changed to 1; the
-  guard's exact text smuggled into ci.yml; a whole workflow file deleted; a stray
-  `push: true` added inside a `with:` block in ci.yml. All caught. An unresolvable
-  base ref: declines to answer. Comment-only additions correctly pass. Three
-  mutations were NOT caught — see item 4.
-- `check-dispatch-run.sh` (15 mutations) — run conclusion flipped; run still in
-  flight; run with no jobs; every job skipped; a required step removed; a required
-  step unsuccessful; the run's head SHA pointed at a different tree; the log
-  showing only one architecture's build stages; the log showing neither; the log
-  unreadable; one matrix leg absent; a matrix leg unsuccessful; the
-  release-upload step marked as having run; every desktop job skipped; an
-  unknown or absent workflow key. All caught or declined.
-- `check-ghcr-untouched.sh` (12 mutations) — the runner resolving `push: true`;
-  the resolved input absent from the log; a `pushing manifest` line injected;
-  buildx invoked with `--push`; a truncated log; no buildx invocation in the log;
-  the log unreadable; the run still in flight; and, with a token that CAN read
-  packages, a package version created during the run. All caught or declined.
-  With only pre-existing versions, or a genuine 404 under a scope-confirmed
-  token, it correctly passes.
-- `gh-run-lib.sh` (9 probes) — `gh` absent from PATH; `gh` unauthenticated;
-  `gh run list` failing; no run matching the query; `gh run view` failing; HEAD
-  unresolvable outside a git repository; a run still in flight; a run whose
-  overall conclusion is unsuccessful. Each refuses or reports rather than
-  passing. One latent defect remains — see item 5.
+- `check-action-pins.sh` (7 mutations) — one site downgraded to v4; the login pin
+  downgraded to v3; a checkout step deleted; an eighth checkout step added; a step
+  replaced by a comment naming the pin; the login pin raised above the floor
+  (correctly still passes). Each failure named the offence and terminated
+  unsuccessfully. With no `.github/workflows` directory it declines to answer.
+- `check-docker-dryrun.sh` (11 mutations) — the file missing; the `push:` input
+  deleted; `push: true` restored; a second `push:` input added; the guard gated on
+  `github.event_name`; the comparison inverted to `!=`; `push: false`; the
+  expression double-quoted; the expression with a trailing comment. All caught or
+  declined. Extra inner whitespace inside `${{ }}` correctly still passes.
+- `check-workflow-drift.sh` (16 mutations) — the three round-3 survivors (below);
+  a permissions escalation `contents: read` → `write`; a `pull_request_target`
+  trigger added; a `run:` command extended; a duplicate insertion of an
+  already-paired action; a base ref that cannot be resolved. Thirteen caught,
+  three residuals reported in item 4.
+- `check-run-jobs.sh` (8 probes) — too few arguments; an unknown workflow key; a
+  job name absent from the run; a named job unsuccessful; a named job skipped; a
+  run with no jobs at all; and the named jobs green while the run is still in
+  flight. All caught or declined.
+- `check-dispatch-run.sh` (19 probes across both keys) — no key and an unknown
+  key; a run head SHA git cannot resolve; a run whose `.github/workflows` tree
+  differs from HEAD's; the run concluded unsuccessfully; a run with no jobs; every
+  job skipped; a required step absent; a required step unsuccessful; the log
+  showing only one architecture; the log unreadable; one desktop matrix leg
+  absent; one leg skipped; the `Cache cargo registry` step absent; the installer
+  sanity check unsuccessful; the release-upload step marked as having run; the run
+  still in flight. All caught or declined.
+- `check-ghcr-untouched.sh` (15 probes) — a differing workflow tree; an
+  unresolvable run SHA; a run still in flight; the log unreadable; a log too short
+  to have built anything; the runner resolving `push: true`; the resolved input
+  absent; a `pushing manifest` line injected; buildx invoked with `--push`; no
+  buildx invocation; and, with a token that CAN read packages, a version created
+  after the run started, only pre-existing versions, a genuine 404, and a 500.
+  All caught or declined; the two innocent shapes correctly pass.
+- `gh-run-lib.sh` (13 probes) — `workflow_file` with a valid and an unknown key,
+  the latter both directly and through a command substitution; `require_gh` with
+  `gh` absent and with `gh` unauthenticated; `head_sha` outside a repository;
+  `find_run` with an unknown key, with `gh run list` failing, with zero runs
+  returned, and with several runs (it takes the highest `databaseId`); `run_json`
+  with `gh run view` failing; `assert_run_finished` on an in-flight run;
+  `assert_run_complete` on a finished-but-unsuccessful run. Every one refuses or
+  reports rather than passing.
 
-### 3. The four fixes claimed for f2928c05 were re-driven and all four hold
+### 3. The three fixes claimed for a751b5f were re-driven and all three hold
 
 Each was tested by reproducing the exact mutation that defeated the previous
 version, not by reading the diff.
 
-1. **Pin check counted the string.** Deleting `- uses: actions/checkout@v7` from
-   ci.yml and leaving `# was: actions/checkout@v7` in its place: the old check
-   still counted seven. The current check reports "expected 7 pinned site(s),
-   found 6" and terminates unsuccessfully. It requires a real `uses:` step line,
-   so a commented-out login step, a `run:` line quoting the action, and a
-   SHA-pinned site with a `# v7` comment are all correctly invisible to the count.
-   **Fixed.**
-2. **Drift check's `push:` budget was global.** Adding a stray `push: true` inside
-   a `with:` block in ci.yml while the declared guard is present: the old budget
-   absorbed it. The current check reports it as an offender, because the budget is
-   now tied to the file, the sign and the exact text. The guard's own text
-   smuggled into ci.yml is likewise rejected. **Fixed** — though the check has a
-   separate weakness, see item 4.
-3. **`workflow_file`'s refusal was unreachable.** `check-run-jobs.sh bogus Lint`
-   now prints "unknown workflow key 'bogus' (expected: ci | docker | desktop)" and
-   terminates without querying anything, because the key is validated in the
-   calling shell before `find_run` is entered. **Fixed at every call site.** The
-   underlying library behaviour is not fixed — see item 5.
-4. **The platform assertion is new and real.** With every `[linux/arm64 ` line
-   removed from the docker job's log, the check reports "no linux/arm64 build
-   stages — the run did not build both platforms". With both architectures'
-   stages removed it reports both. With the log unreadable it declines to answer
-   rather than assuming. **Present and effective.**
+1. **The drift check's three round-3 survivors.** Inserting a brand-new step
+   `- uses: evil/exfiltrate@v1` into the `Lint` job now reports "action(s) added
+   that replace nothing" and terminates unsuccessfully. Swapping the publisher at
+   the same version (`docker/login-action@v4` → `evil/login-action@v4`) reports
+   the same. Deleting a `uses:` step outright reports "action(s) removed with no
+   replacement". A fourth shape was added this round and is also caught:
+   duplicating an already-paired action as an extra step leaves an unmatched
+   addition, because `comm` compares the sorted lists as multisets rather than
+   sets. **Fixed.**
+2. **`find_run`'s workflow key.** `gh-run-lib.sh` now resolves the key in an
+   inline `case` inside `find_run` itself. Driven through the test double with the
+   trace enabled, `--workflow` was never once empty: every query carried
+   `ci.yml`, `docker-publish.yml` or `desktop-release.yml`. Called with an unknown
+   key in the assignment form all four call sites use, it refuses and the caller
+   terminates. **Fixed in the library, not only at the call sites** — which is
+   what round 3 asked for.
+3. **`check-ghcr-untouched.sh` pins its run to HEAD's workflow tree.** Fed a run
+   whose head SHA carries `origin/main`'s `.github/workflows` tree, it now reports
+   "this run used a different .github/workflows tree than HEAD" and terminates.
+   Fed a head SHA git cannot resolve, it declines rather than guessing. **Fixed** —
+   round 3 recorded this as a minor residual and it is now closed.
 
-Three findings from round 1 were also re-tested and all three are closed. The
-dispatch queries are now branch-scoped (`find_run <key> workflow_dispatch ""
-"$BRANCH"`; confirmed against the live API that the same query returns nothing
-for `main` and exactly run 30190339168 for this branch). The GHCR check now
-probes the token's package scope first and, on this scope-less token, declines to
-treat a 404 as absence — which is why E6 rests on the build log. And
-`check-run-jobs.sh` now asserts only that the run is finished, not that it is
-green overall, so E3 exits zero this round even though the run containing it
-concluded unsuccessfully for the Acceptance Gate job's own bookkeeping reasons.
-That is the coupling between E2 and E3 removed.
+The `---` case arm was also narrowed as claimed: it matches `--- a/…` and
+`--- /dev/null` only, so a removed line beginning `--` is no longer swallowed
+generically. One narrow shape survives — see item 4.
 
-### 4. FALSE PASS FOUND — the drift check cannot tell a bumped pin from a new action
+### 4. FALSE PASS FOUND — the drift check pairs on the action path and ignores the ref
 
-`check-workflow-drift.sh` allows any changed line matching `uses:*` through
-unconditionally. It never pairs a removed pin with an added one, so it cannot
-distinguish "an existing pin's version changed" — the only thing AC-8 means to
-permit — from three other things it should refuse. All three were driven this
-round in the scratch clone and all three passed as "pins and comments only":
+`check-workflow-drift.sh` now pairs additions to removals, which closed round 3's
+three survivors. But it pairs on the action **path** only: `action="${pin%%@*}"`
+discards everything after the `@`. So any change to what a `uses:` line actually
+resolves to — as long as the publisher and repository stay the same — is a
+matched pair and passes as clean. Three shapes were driven this round in the
+scratch clone and all three passed with exit zero:
 
-- **A brand-new action step inserted.** Adding `- uses: evil/exfiltrate@v1` as a
-  new step in the `Lint` job passes. `check-action-pins.sh` does not catch it
-  either — the checkout count stays at seven and the new action is neither
-  checkout nor login-action — so **no eval in this suite catches it.** This is
-  the most serious of the three: adding a whole action step is precisely the
-  "behaviour smuggled under cover of a bump" that AC-8 exists to forbid.
-- **An existing pin swapped to a different publisher.** Changing
-  `pnpm/action-setup@v4` to `attacker/action-setup@v4` passes. The version does
-  not move at all, so this is not a version bump by any reading, yet the checker
-  classifies it as a pin.
-- **An existing step's `uses:` line deleted.** Removing the
-  `actions/setup-python` pin passes.
+- **An out-of-scope action repointed to a mutable branch.**
+  `docker/setup-buildx-action@v3` → `docker/setup-buildx-action@main` passes,
+  reported as "9 matched pin pair(s)". This is the serious one: the action now
+  resolves to whatever that branch's tip contains at run time, which is a
+  standing supply-chain change, and CI would stay green because the action still
+  works. `check-action-pins.sh` does not catch it either — E1 floors only
+  `actions/checkout` and `docker/login-action`, and this is neither. **No eval in
+  this suite catches it.**
+- **An out-of-scope action silently bumped a major.**
+  `actions/setup-node@v4` → `@v99` at all four sites passes, reported as "12
+  matched pin pair(s)". The contract's "Out of scope" section names
+  `actions/setup-node` explicitly among the actions not to be bumped alongside,
+  so this is exactly the thing AC-8's prose forbids.
+- **A pin moved to an arbitrary tag.** `actions/upload-artifact@v4` →
+  `@v4.9.9-evil` passes.
 
-A fourth, narrower miss: because the check only bounds the guard counts from
-above and never requires the removal to be present, git's minimal-diff line
-matching can absorb it. Inserting a second `push: true` immediately after the
-guard in docker-publish.yml leaves a tree that still contains `push: true`, while
-the diff shows only the guard's addition, and the check reports clean at
-`-0 +1`. That one **is** caught by E4, which requires exactly one `push:` input
-in the file, so it does not escape the suite — but E8 alone accepts it.
+AC-8's own eval text reads "every line this branch changes … is a `uses:` pin
+line", which these mutations satisfy literally. The criterion in the contract is
+stronger — "no job, trigger, permission or input is altered under cover of the
+bump" — and the version on a `uses:` line is the input that decides what code
+runs. Round 3's fix established that "it is a `uses:` line" is too weak a test;
+the same argument applies one level down. The fix is to pair on the whole pin and
+require the action path to be identical AND the ref to move only within the
+contracted set — or, minimally, to refuse a ref that is not `v<digits>`.
 
-A fifth, contrived: a removed line whose content begins with `--` renders as
-`---…` in the diff and is swallowed by the case arm that skips `---` file
-headers. Reaching it needs a column-0 `--` line, which no workflow here has.
+Two further residuals in the same script, both narrow:
+
+- **A pure rename or move is invisible.** Git records a 100%-similar rename as
+  `R100` with no `+`/`-` content lines, so the loop sees nothing. Moving
+  `.github/workflows/ci.yml` to `.github/workflows/disabled/ci.yml` — which
+  disables the whole CI workflow, because Actions only loads files at the top
+  level of that directory — is reported as "8 matched pin pair(s)", exit zero.
+  `check-action-pins.sh` also passes it at "7 site(s)", because its `grep -r`
+  descends into the new subdirectory. The suite as a whole does not false-pass:
+  E2 and E3 would then find no `ci.yml` run at HEAD and decline to answer. But
+  two evals describe a tree they have mis-read.
+- **The `---` arm still swallows one exact shape.** Removing a workflow line whose
+  content is literally `-- a/<anything>` (or `-- /dev/null`) renders in the diff as
+  `--- a/<anything>`, matches the file-header arm and is skipped; the script then
+  reports "0 matched pin pair(s)", exit zero. Demonstrated in the scratch clone
+  against a synthetic base. It needs a column-0 `--` line, which is not valid
+  YAML in any position these workflows use, so it is a parser hole rather than an
+  exploitable one.
 
 **None of these changes AC-8's verdict**, because the criterion was established
 from the actual 26-line diff by hand (see E8's block) and that diff contains only
-matched same-action version pairs, comments, and the declared guard. But E8's
-green must be read as "this diff was inspected", not "this guard would have
-stopped a behaviour change". The fix is to pair removals with additions per file
-and require that a `uses:` change keep the action path identical and move only
-the version — plus require the guard's removed line to be present, not merely
-not-duplicated.
+matched same-action, version-only pairs, comments, and the declared guard. But
+E8's green must be read as "this diff was inspected and classified", not "this
+guard would have stopped a behaviour change".
 
-### 5. Latent defect — the library's own refusal is still unreachable
+### 5. The round-3 latent defect is closed
 
-Round 2's third finding was patched at the call site, not in the library.
-`gh-run-lib.sh`'s `find_run` still calls `workflow_file` through a nested command
-substitution (`file="$(workflow_file "$key")"`), and bash does not apply `set -e`
-to that failing assignment when `find_run` is itself running inside a command
-substitution — which is how all four callers invoke it. Driven directly this
-round through a probe that sources the library and calls `find_run bogus` from a
-`$( )`: the refusal is printed, execution continues past it, `gh run list` is
-invoked with an empty `--workflow`, and a run id comes back. That is verbatim the
-round-2 behaviour.
+Round 3 recorded that `find_run` resolved its workflow key through a nested
+command substitution, where bash does not apply `set -e`, so an unknown key left
+`--workflow` empty and any run answered the query. That is fixed at the library
+level in a751b5f and was re-driven here. Called as
+`id="$(find_run bogus)"` — the form all four call sites use — it prints the
+refusal and the caller terminates with status 2.
 
-It is latent, not live: `check-run-jobs.sh` validates the key in the calling shell
-first, `check-dispatch-run.sh` validates it in its own `case`, and
-`check-gate-plumbing.sh` and `check-ghcr-untouched.sh` pass a literal. So no eval
-in this suite is affected today. The other refusals in the library — no run found,
-`gh run list` failing, `gh run view` failing, HEAD unresolvable — are at the top
-level of their function bodies and were each confirmed to propagate. The fix is
-to make `find_run` test the call explicitly — wrap the assignment in
-`if ! file="$(workflow_file "$key")"; then …; fi` and refuse from there — so the
-library is safe for any future caller.
+One cosmetic residual: called in a non-assignment substitution such as
+`echo "$(find_run bogus)"`, `return 2` is still swallowed by the substitution and
+the sentinel string `UNKNOWN_WORKFLOW_KEY` flows on. No caller uses that form,
+and the sentinel would fail the very next `gh run view`, so this is defence in
+depth rather than a live path.
 
 ### 6. Minor residuals, reported for completeness
 
@@ -428,21 +458,30 @@ library is safe for any future caller.
   `check-dispatch-run.sh`, a step listed in `SKIPPED_STEPS` that is simply absent
   from the run prints "not taken on a dispatch". If `Upload to draft GitHub
   Release` were renamed and then ran, the check would not notice. The suppression
-  half of AC-7 was therefore also established independently, from `gh release
-  list` being empty.
-- **E6 reads only the first job's log.** `check-ghcr-untouched.sh` uses
-  `.jobs[0].databaseId`. `docker-publish.yml` has exactly one job today, so the
-  decisive half sees everything; a second job added later would be invisible to it.
-- **E6 does not pin the run to HEAD's workflow tree** the way E5 does, so on its
-  own it would accept a dry run of an older workflow. In practice both scripts
-  select the same run id, and E5 does assert the tree, so the pair is sound.
+  half of AC-7 was therefore also established independently, from the releases
+  API returning an empty array.
+- **E5 and E6 read only the first job's log.** Both use `.jobs[0].databaseId`.
+  `docker-publish.yml` has exactly one job today, so both see everything; a second
+  job added later would be invisible to them.
+- **E6's registry cross-check assumes a user-owned package.** It queries
+  `/users/{owner}/packages/...`. This repository's owner is a user account, so
+  that is the right endpoint here; if the repo ever moved to an organisation the
+  correct endpoint would be `/orgs/{org}/...` and a real package would answer 404,
+  which the script would print as "no GHCR package exists". That branch is
+  corroboration only and the verdict rests on the log, but the wording would be
+  wrong.
+- **`check-workflow-drift.sh` is sensitive to git diff configuration.** With
+  `diff.noprefix=true` the file headers stop matching and every header becomes an
+  offender, so it fails closed — noisy but safe. `diff.mnemonicPrefix=true` does
+  not affect a commit-to-commit diff. Neither is set in this repository.
 - **Over-strictness in E4**, noted so a future editor is not surprised: the guard
   line must match a single anchored form, so quoting the expression or appending a
-  trailing comment is rejected even though YAML would treat it identically. That
-  is the safe direction to be wrong in.
+  trailing comment is rejected even though YAML would treat it identically. Extra
+  whitespace inside `${{ }}` is tolerated. That is the safe direction to be wrong
+  in.
 - **E1 counts any `uses:` line under `.github/workflows`**, including one in a
-  non-YAML file dropped in that directory. That inflates the count and reports the
-  mismatch — again the safe direction.
+  file Actions never loads. That is the safe direction for an added file and the
+  unsafe direction for a moved one — see item 4's rename residual.
 
 ### 7. Judgement on the AC-2 amendment: honest narrowing
 
@@ -456,7 +495,7 @@ defined away**, on four grounds.
    whether features have been signed and re-pinned. Evidence must exist before a
    Gate-2 signature; a criterion satisfiable only after that signature cannot be
    met by any honest round. This round demonstrates it concretely: the job did not
-   conclude successfully at f2928c05 for exactly five bookkeeping reasons —
+   conclude successfully at a751b5f for exactly five bookkeeping reasons —
    `ci-actions-bump` having no PASS report yet, and the four merged features being
    stale — none of which is a statement about `actions/checkout`.
 2. **The narrowed criterion still discriminates.** It is not a formality. Driven
@@ -480,6 +519,29 @@ defined away**, on four grounds.
 The one thing a reader should hold the amendment to: it means the Acceptance Gate
 job's colour is now covered by no eval at all. That is acceptable here only
 because merge itself enforces it.
+
+Round 4 concurs, having read the amendment fresh and checked its factual claim
+against the job log rather than against round 3's summary. Every one of the five
+verdict lines in the Acceptance Gate job at a751b5f is an acceptance-bookkeeping
+complaint — one that this feature's PASS report has no signature yet, four that
+merged features are stale against their pin. Not one is a git complaint. The
+circularity is demonstrated, not asserted.
+
+Two things a Gate-2 signer should consciously accept rather than have waved
+through. First, the amendment narrows a criterion that a human had already
+approved at Gate 1; it is a scope change, even though it narrows rather than
+widens and is recorded in the contract with its date and reason. Second, the
+amendment's closing move — "CI being fully green is enforced by the merge itself"
+— is a deferral to a different control, not evidence. It is true of this
+repository, and it is the reason the residual is acceptable, but AC-2 now carries
+no assertion that the gate job ever goes green.
+
+One looseness in the eval, for the record: `check-gate-plumbing.sh` greps the
+whole job log for `fetch-depth: 0` rather than confining the match to the
+checkout step's `with:` block. In this run the match is in the right place — the
+provenance is quoted in E2's block — but the assertion is weaker than the line it
+prints. It fails closed: when the string cannot be found at all the script
+declines to answer.
 
 ### 8. On the `latest` tag and the metadata step
 
@@ -559,24 +621,75 @@ three workflows and the eight `scripts/ci/*.sh`, all owned by this feature, so
 none of the four owns a changed file. The shared standing checks were each run
 ONCE and credited to every covering eval with a distinct `run_id`.
 
+Round 4 (2026-07-26T07:58–08:00Z, commit a751b5f): **complete round, verdict
+PASS.** All eight evals executed, all eight exited zero, every one with captured
+output above. Around eighty mutations and probes were driven, entirely outside
+the repository working tree — a scratch `--no-hardlinks` clone for the file- and
+diff-based checks, a freshly written `gh` test double seeded with fixtures from
+the real runs for the rest. No probe commit touched the repository or its
+history, and every mutation was verified to have actually changed its target
+before its result was believed (two silent no-ops in the first pass would each
+have read as a false pass).
+
+All three fixes claimed for a751b5f were re-driven with the exact mutations that
+defeated the previous versions, and all three hold (`## Analyst` item 3): the
+drift check now pairs additions to removals by action path, `find_run` resolves
+its workflow key inline so `--workflow` is never empty, and
+`check-ghcr-untouched.sh` pins its run to HEAD's `.github/workflows` tree. Round
+3's latent defect is closed (item 5), and round 3's "E6 does not pin the run
+tree" residual is closed too.
+
+A fourth crop was found, as expected, and it is the same shape one level down
+(`## Analyst` item 4): the drift check pairs on the action **path** and discards
+everything after the `@`, so any change to what a `uses:` line resolves to passes
+as a matched pair. Repointing `docker/setup-buildx-action@v3` to `@main` — a
+mutable branch, and a standing supply-chain change — passes E8 clean and is
+caught by no other eval in this suite, because E1 floors only `actions/checkout`
+and `docker/login-action`. Silently bumping `actions/setup-node@v4` to `@v99`,
+which the contract's "Out of scope" section names as an action not to be bumped
+alongside, likewise passes. Two narrower residuals are recorded with it: a pure
+rename or move of a workflow file is invisible to both E8 and E1 (moving `ci.yml`
+into a subdirectory disables CI and both still report clean), and one exact `--`
+line shape still reaches the `---` file-header arm. AC-8's verdict is unaffected,
+because the criterion was established by hand from the actual 26-line diff, but
+E8's green means "this diff was classified", not "this guard would have stopped a
+behaviour change".
+
+Six criteria were re-derived from primary sources independently of the scripts:
+AC-1 from `grep` over the workflow files, AC-2 and AC-6 from the runs' own job
+logs, AC-3 from the run object's job conclusions, AC-7 from the releases and
+artifacts APIs, and AC-8 from the git diff line by line. AC-6 in particular was
+rebuilt from run 30190339168's log without reference to any script here — five
+independent observations, listed in E6's block.
+
+This round also carried the four merged features' signatures forward onto
+a751b5f — see each of their reports' `## Iterations`. Ownership was checked, not
+assumed: `git diff --name-only f2928c05 HEAD` with `_acceptance/` excluded lists
+exactly three files, all `scripts/ci/*.sh` owned by this feature; against
+`origin/main` the branch's non-`_acceptance` footprint is the three workflows
+plus the eight `scripts/ci/*.sh`, again all this feature's. None of the four owns
+a changed file, and the standing checks are green, so both carry-forward
+conditions in AGENTS.md hold. Each shared standing check was executed ONCE and
+credited to every covering eval with its own distinct `run_id`.
+
 ## Gate 2 checklist (human)
 
 - [ ] Read `## Analyst` item 4 first. It is the one finding that changes what a
-      green E8 means: the drift guard would not stop a new action step being
-      added to a workflow, and nothing else in this suite would either. Decide
-      whether that is fixed in this PR or tracked as follow-up work.
+      green E8 means: the drift guard pairs on the action path and ignores the
+      ref, so an action could be repointed at a mutable branch — a supply-chain
+      change — and pass every eval here. Decide whether that is fixed in this PR
+      or tracked as follow-up work.
 - [ ] Read E6's block: the criterion is carried by the build log (resolved
-      `push: false`, a buildx command line with no `--push`, and buildx's own
+      `push: false`, a buildx command line with no `--push` and no `--output`,
+      the only export stage being the GitHub Actions Cache, and buildx's own
       statement that the result stayed in the cache), not by the registry
       listing, which this token cannot read and which the script correctly
       declines to use.
-- [ ] Note `## Analyst` item 5: `gh-run-lib.sh`'s own refusal is still
-      unreachable from a command substitution. No eval is affected today because
-      every caller validates its key first.
 - [ ] Confirm you accept the AC-2 amendment as recorded in the contract; the
-      verifier's reasoning is in `## Analyst` item 7. Its cost is that the
-      Acceptance Gate job's colour is now covered by no eval and is enforced only
-      by the merge itself.
+      verifier's reasoning is in `## Analyst` item 7. Two costs to accept
+      deliberately: the Acceptance Gate job's colour is now covered by no eval
+      and is enforced only by the merge itself, and the amendment narrows a
+      criterion that was already approved at Gate 1.
 - [ ] If you accept, fill the signature field in frontmatter — it is empty and
       must be filled by a human, in its own human-fields-only commit — and
       `time_human_minutes.gate2` in the contract.

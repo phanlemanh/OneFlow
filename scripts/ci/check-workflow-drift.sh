@@ -33,8 +33,7 @@ guard_removed=0
 guard_added=0
 offenders=""
 cur_file=""
-added_actions=""
-removed_actions=""
+declared_pins=0
 
 while IFS= read -r line; do
     # Track which file we are inside; a budget not tied to a file lets a stray
@@ -58,20 +57,20 @@ while IFS= read -r line; do
         \#*) continue ;;
     esac
 
-    # An action pin. Collected by ACTION, not waved through: "it is a uses: line"
-    # was the whole test, so inserting a brand-new step, swapping the publisher,
-    # or deleting a step all read as "pins only". Additions and removals are
-    # paired by action path below.
+    # An action pin. Matched against the two bumps this contract declares, ref
+    # and all — not merely "it is a uses: line", and not merely "the action path
+    # is unchanged". Pairing on the path alone let a pin move to a mutable
+    # branch (@main) or to an unrelated version, which is a standing
+    # supply-chain change wearing a version bump's clothes.
     case "$trimmed" in
         uses:*|-\ uses:*)
             pin="${trimmed#- }"; pin="${pin#uses:}"
             pin="${pin#"${pin%%[![:space:]]*}"}"
-            action="${pin%%@*}"
-            if [ "${line:0:1}" = "+" ]; then
-                added_actions="${added_actions}${action}"$'\n'
-            else
-                removed_actions="${removed_actions}${action}"$'\n'
-            fi
+            case "${line:0:1}${pin}" in
+                "-actions/checkout@v4"|"+actions/checkout@v7") declared_pins=$((declared_pins + 1)); continue ;;
+                "-docker/login-action@v3"|"+docker/login-action@v4") declared_pins=$((declared_pins + 1)); continue ;;
+            esac
+            offenders="${offenders}${line}   <- not a declared bump"$'\n'
             continue
             ;;
     esac
@@ -97,31 +96,22 @@ if [ -n "$offenders" ]; then
     exit 1
 fi
 
-# Every added pin must replace a removed pin of the SAME action. A version bump
-# is a matched pair; a new step, a publisher swap, and a deleted step each leave
-# an unmatched side. Without this, "every changed line is a uses: pin" is true of
-# a diff that inserts `- uses: evil/exfiltrate@v1`.
-only_in() {
-    comm -23 <(printf '%s' "$1" | sort) <(printf '%s' "$2" | sort)
-}
-new_actions="$(only_in "$added_actions" "$removed_actions")"
-gone_actions="$(only_in "$removed_actions" "$added_actions")"
-
-if [ -n "$new_actions" ]; then
-    echo "FAIL: action(s) added that replace nothing — a bump pairs each addition with a removal:" >&2
-    printf '%s\n' "$new_actions" >&2
-    exit 1
-fi
-if [ -n "$gone_actions" ]; then
-    echo "FAIL: action(s) removed with no replacement:" >&2
-    printf '%s\n' "$gone_actions" >&2
-    exit 1
-fi
-
 if [ "$guard_removed" -gt 1 ] || [ "$guard_added" -gt 1 ]; then
     echo "FAIL: the declared guard is one removed and one added line; saw -${guard_removed} +${guard_added}" >&2
     exit 1
 fi
 
-pairs="$(printf '%s' "$added_actions" | grep -c . || true)"
-echo "workflow drift vs ${BASE}: ${pairs} matched pin pair(s), comments, and the declared dry-run guard (-${guard_removed} +${guard_added})"
+# A workflow file added, deleted or renamed changes what CI does without
+# changing a line inside it — moving ci.yml aside disables the suite entirely.
+if ! names="$(git diff --name-status "${BASE}...HEAD" -- "$WF_DIR")"; then
+    echo "git diff --name-status failed — refusing to report no drift" >&2
+    exit 2
+fi
+notmod="$(printf '%s' "$names" | grep -vE '^M' || true)"
+if [ -n "$notmod" ]; then
+    echo "FAIL: workflow files added, deleted or renamed:" >&2
+    printf '%s\n' "$notmod" >&2
+    exit 1
+fi
+
+echo "workflow drift vs ${BASE}: ${declared_pins} declared pin line(s), comments, and the dry-run guard (-${guard_removed} +${guard_added}); no file added, deleted or renamed"

@@ -13,3 +13,11 @@
 {"ts": "2026-07-26T07:26:32Z", "round": 3, "evalId": "E5", "run_id": "ci-actions-bump-r3-e5-20260726072632", "exit_code": 0, "cmd": "bash scripts/ci/check-dispatch-run.sh docker"}
 {"ts": "2026-07-26T07:26:44Z", "round": 3, "evalId": "E6", "run_id": "ci-actions-bump-r3-e6-20260726072644", "exit_code": 0, "cmd": "bash scripts/ci/check-ghcr-untouched.sh"}
 {"ts": "2026-07-26T07:26:58Z", "round": 3, "evalId": "E7", "run_id": "ci-actions-bump-r3-e7-20260726072658", "exit_code": 0, "cmd": "bash scripts/ci/check-dispatch-run.sh desktop"}
+{"ts": "2026-07-26T07:58:40Z", "round": 4, "evalId": "E1", "run_id": "ci-actions-bump-r4-e1-20260726075840", "exit_code": 0, "cmd": "bash scripts/ci/check-action-pins.sh"}
+{"ts": "2026-07-26T07:58:47Z", "round": 4, "evalId": "E2", "run_id": "ci-actions-bump-r4-e2-20260726075847", "exit_code": 0, "cmd": "bash scripts/ci/check-gate-plumbing.sh"}
+{"ts": "2026-07-26T07:58:59Z", "round": 4, "evalId": "E3", "run_id": "ci-actions-bump-r4-e3-20260726075859", "exit_code": 0, "cmd": "bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"}
+{"ts": "2026-07-26T07:59:07Z", "round": 4, "evalId": "E4", "run_id": "ci-actions-bump-r4-e4-20260726075907", "exit_code": 0, "cmd": "bash scripts/ci/check-docker-dryrun.sh"}
+{"ts": "2026-07-26T07:59:12Z", "round": 4, "evalId": "E5", "run_id": "ci-actions-bump-r4-e5-20260726075912", "exit_code": 0, "cmd": "bash scripts/ci/check-dispatch-run.sh docker"}
+{"ts": "2026-07-26T07:59:23Z", "round": 4, "evalId": "E6", "run_id": "ci-actions-bump-r4-e6-20260726075923", "exit_code": 0, "cmd": "bash scripts/ci/check-ghcr-untouched.sh"}
+{"ts": "2026-07-26T07:59:38Z", "round": 4, "evalId": "E7", "run_id": "ci-actions-bump-r4-e7-20260726075938", "exit_code": 0, "cmd": "bash scripts/ci/check-dispatch-run.sh desktop"}
+{"ts": "2026-07-26T07:59:46Z", "round": 4, "evalId": "E8", "run_id": "ci-actions-bump-r4-e8-20260726075946", "exit_code": 0, "cmd": "bash scripts/ci/check-workflow-drift.sh origin/main"}
