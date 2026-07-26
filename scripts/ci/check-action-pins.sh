@@ -24,11 +24,16 @@ check_action() {
     local action="$1" floor="$2" want_sites="$3"
     local lines count=0 below=0
 
-    # Must be a real `uses:` step, not any occurrence of the string. Counting
-    # bare text let a deleted step be replaced by `# was: actions/checkout@v7`
-    # and still count — verbatim the substitution this check exists to catch.
-    lines="$(grep -rhE "^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*${action}@v[0-9]+([[:space:]]|$)" "$WF_DIR" \
-        | grep -oE "${action}@v[0-9]+" || true)"
+    # Must be a real `uses:` step, not any occurrence of the string, and exactly
+    # ONE pin per line. Two earlier versions of this leaked: counting bare text
+    # let `# was: actions/checkout@v7` stand in for a deleted step, and then
+    # extracting with grep -o counted every occurrence on a line, so a trailing
+    # `# mirrors actions/checkout@v7 in ci.yml` paid for a site deleted
+    # elsewhere. sed takes the token immediately after `uses:` and nothing else,
+    # so a comment anywhere on the line is inert.
+    lines="$(grep -rhE "^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*${action}@v[0-9]+([[:space:]]|#|$)" "$WF_DIR" \
+        | sed -E "s|^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*([^[:space:]#]+).*|\\2|" \
+        | grep -xE "${action}@v[0-9]+" || true)"
     if [ -z "$lines" ]; then
         echo "FAIL ${action}: not pinned anywhere under ${WF_DIR}" >&2
         fail=1

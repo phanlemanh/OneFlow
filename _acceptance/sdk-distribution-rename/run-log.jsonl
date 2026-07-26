@@ -124,3 +124,17 @@
 {"ts": "2026-07-26T08:11:19Z", "round": 9, "evalId": "E11", "run_id": "sdk-distribution-rename-r9-E11-20260726081119", "exit_code": 0, "cmd": "cd sdk && python3 -m pytest -q"}
 {"ts": "2026-07-26T08:12:13Z", "round": 9, "evalId": "E12", "run_id": "sdk-distribution-rename-r9-E12-20260726081213", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
 {"ts": "2026-07-26T08:11:12Z", "round": 9, "evalId": "E13", "run_id": "sdk-distribution-rename-r9-E13-20260726081112", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E1", "run_id": "sdk-distribution-rename-r10-E1-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E2", "run_id": "sdk-distribution-rename-r10-E2-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E3", "run_id": "sdk-distribution-rename-r10-E3-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E4", "run_id": "sdk-distribution-rename-r10-E4-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E5", "run_id": "sdk-distribution-rename-r10-E5-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E6", "run_id": "sdk-distribution-rename-r10-E6-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E7", "run_id": "sdk-distribution-rename-r10-E7-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E8", "run_id": "sdk-distribution-rename-r10-E8-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E9", "run_id": "sdk-distribution-rename-r10-E9-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E10", "run_id": "sdk-distribution-rename-r10-E10-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:07Z", "round": 10, "evalId": "E14", "run_id": "sdk-distribution-rename-r10-E14-20260726084207", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest_packaging"}
+{"ts": "2026-07-26T08:42:03Z", "round": 10, "evalId": "E11", "run_id": "sdk-distribution-rename-r10-E11-20260726084203", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T08:41:42Z", "round": 10, "evalId": "E12", "run_id": "sdk-distribution-rename-r10-E12-20260726084142", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T08:41:49Z", "round": 10, "evalId": "E13", "run_id": "sdk-distribution-rename-r10-E13-20260726084149", "exit_code": 0, "cmd": "config:executors.test.lint"}

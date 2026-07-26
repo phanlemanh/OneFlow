@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a751b5fa7b842cf9373d1b358dc47b015fd10e7f
+verified_commit: 73a8d935b7cc9bb649b2baee265379b7b207274a
 human_signoff: Manh 2026-07-26
 ---
 
@@ -36,81 +36,80 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r5-e1-20260726081104
+  run_id: dependency-refresh-2026-07-r6-e1-20260726084209
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-26T08:11:04Z
+  verified_at: 2026-07-26T08:42:09Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
     devDependencies.@biomejs/biome = 2.5.5
     repo scripts intact: hooks:install, sdk:publish, gen:abi
 
-    Re-run this round on commit a751b5f. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
+    Re-run this round on commit 73a8d93. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-r5-e2-20260726081105
+  run_id: dependency-refresh-2026-07-r6-e2-20260726084216
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-26T08:11:05Z
+  verified_at: 2026-07-26T08:42:16Z
   output: |
     Lockfile is up to date, resolution step is skipped
     Progress: resolved 2, reused 2, downloaded 0, added 0, done
-    Packages: +2 -1
-    Done in 547ms using pnpm v10.12.1
+    Done in 484ms using pnpm v10.12.1
 
-    Re-run this round on commit a751b5f. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified. The `+2 -1` is node_modules being reconciled with the already-committed lockfile on this machine, not a lockfile edit — pnpm would have refused the install outright had the two disagreed.
+    Re-run this round on commit 73a8d93. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified.
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r5-e3-20260726081112
+  run_id: dependency-refresh-2026-07-r6-e3-20260726084149
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T08:11:12Z
+  verified_at: 2026-07-26T08:41:49Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
 
-    Checked 396 files in 93ms. No fixes applied.
+    Checked 396 files in 80ms. No fixes applied.
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:11:12Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:49Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r5-e4-20260726081131
+  run_id: dependency-refresh-2026-07-r6-e4-20260726084150
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T08:11:31Z
+  verified_at: 2026-07-26T08:41:50Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
 
     Test Files  21 passed (21)
          Tests  197 passed (197)
-      Duration  666ms (transform 1.19s, setup 0ms, import 2.21s, tests 539ms, environment 1ms)
+      Duration  603ms (transform 1.14s, setup 0ms, import 2.06s, tests 495ms, environment 1ms)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:11:31Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:50Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r5-e5-20260726081119
+  run_id: dependency-refresh-2026-07-r6-e5-20260726084203
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T08:11:19Z
+  verified_at: 2026-07-26T08:42:03Z
   output: |
     ..................................................................       [100%]
-    66 passed in 6.34s
+    66 passed in 5.36s
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:11:19Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:42:03Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r5-e6-20260726081213
+  run_id: dependency-refresh-2026-07-r6-e6-20260726084142
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T08:12:13Z
+  verified_at: 2026-07-26T08:41:42Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -122,16 +121,16 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
 
     (tsc --noEmit produced no diagnostics)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:12:13Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:42Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-r5-e7-20260726081151
+  run_id: dependency-refresh-2026-07-r6-e7-20260726084230
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T08:11:51Z
+  verified_at: 2026-07-26T08:42:30Z
   output: |
-    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-nSjD5q/good.db (status: completed, failed) — 5 task(s)
+    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-3NA8ZC/good.db (status: completed, failed) — 5 task(s)
 
     plugin / slot                              n  meas  unmeas    total   median      p95
     -------------------------------------------------------------------------------------------
@@ -146,18 +145,18 @@ is a declared T1 skip glob, so the pin describes the code that was measured.
 
     selftest-cogs: ok
 
-    Re-run this round on commit a751b5f. Shared with measure-harness E16: one execution, two run_ids.
+    Re-run this round on commit 73a8d93; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-r5-e8-20260726081104
+  run_id: dependency-refresh-2026-07-r6-e8-20260726084209
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-26T08:11:04Z
+  verified_at: 2026-07-26T08:42:09Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs origin/main
 
-    Re-run this round on commit a751b5f against origin/main. The guard names the T3 paths it inspected rather than announcing a bare clean, so an empty scan cannot read as a pass.
+    Re-run this round on commit 73a8d93 against origin/main. The guard names the T3 paths it inspected rather than announcing a bare clean, so an empty scan cannot read as a pass.
 
 ## Analyst
 
@@ -451,6 +450,39 @@ invocation of the same selection under a verbose reporter, which changes neither
 the selection nor the outcome. `pnpm tsx scripts/measure/selftest-cogs.ts` ran
 once at 08:11:51Z and is credited to both `dependency-refresh-2026-07` E7 and
 `measure-harness` E16.
+
+Round 6 (2026-07-26T08:41–08:42Z, commit 73a8d93): **carry-forward re-pin —
+the verdict and the human signature stand unchanged.** The round-5 pin
+a751b5f went stale under the whole-tree staleness rule because `ci-actions-bump`
+round-5 verification landed one more eval-script fix on this branch. Ownership
+was re-derived here rather than assumed: `git diff --name-only a751b5f HEAD`
+with `_acceptance/` excluded lists exactly one file,
+`scripts/ci/check-workflow-drift.sh`, an eval script owned by `ci-actions-bump`.
+Measured against `origin/main` the branch's whole non-`_acceptance` footprint is
+the three files under `.github/workflows/` plus the eight under `scripts/ci/` —
+the same feature, start to finish. Nothing this feature owns appears in that diff: `package.json`, `pnpm-lock.yaml`, `biome.json` and `scripts/deps/` are all untouched.
+
+Both carry-forward conditions in AGENTS.md therefore hold: this feature's own
+code is unchanged, and the standing checks are green on the new tree. All 8
+evals were nonetheless re-executed on this tree and all 8 are green, so the pin
+moves on measured evidence rather than on an edited SHA. `verified_commit` moves
+a751b5f → 73a8d93; `run_id`, `verified_at` and `output` were updated and nothing
+else. The signature field in frontmatter is preserved byte-for-byte as signed,
+and no code was changed during verification.
+
+The shared standing checks were each executed **once** against this tree — `pnpm
+build && pnpm typecheck` finishing 08:41:42Z, `pnpm lint:check` at 08:41:49Z,
+`pnpm test` at 08:41:50Z, `cd sdk && python3 -m pytest -q` at 08:42:03Z — and
+every eval that binds one is credited to that single execution with its own
+distinct `run_id`; no eval shares a `run_id` with another, here or across the
+other three re-pinned features (53 evidence blocks, 53 distinct ids). This feature's own script evals ran at 08:42:09Z (`check-manifest.sh`), 08:42:16Z (`pnpm install --frozen-lockfile`), 08:42:09Z (`check-no-t3-drift.sh origin/main`); `pnpm tsx scripts/measure/selftest-cogs.ts` ran once at 08:42:30Z and is credited to both this feature's E7 and `measure-harness` E16 under separate run_ids.
+
+Where one command covers several evals the covering test is named per eval and
+read from a second invocation of the same selection under a verbose reporter,
+which changes neither the selection nor the outcome. This round those named
+lines were **re-matched** against the fresh verbose output rather than copied
+forward — a carried line that had not actually run again would have stopped the
+re-pin; none had.
 
 ## Gate 2 checklist (human)
 

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a751b5fa7b842cf9373d1b358dc47b015fd10e7f
+verified_commit: 73a8d935b7cc9bb649b2baee265379b7b207274a
 human_signoff: Manh 2026-07-25
 ---
 
@@ -31,162 +31,153 @@ human_signoff: Manh 2026-07-25
 ## Evidence
 
 - eval: E1
-  run_id: task-metering-r9-e1-20260726081138
+  run_id: task-metering-r10-e1-20260726084219
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T08:11:38Z
+  verified_at: 2026-07-26T08:42:19Z
   output: |
     ✓ src/db/metering-schema.test.ts > metering migration shape (AC-1) > introduces the three columns in exactly one migration 1ms
 
     Test Files  1 passed (1)
          Tests  4 passed (4)
-      Duration  227ms (transform 12ms, setup 0ms, import 164ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E2
-  run_id: task-metering-r9-e2-20260726081138
+  run_id: task-metering-r10-e2-20260726084219
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T08:11:38Z
+  verified_at: 2026-07-26T08:42:19Z
   output: |
     ✓ src/db/metering-schema.test.ts > upgrading an existing database (AC-2) > adds the columns without disturbing pre-existing rows 3ms
 
     Test Files  1 passed (1)
          Tests  4 passed (4)
-      Duration  227ms (transform 12ms, setup 0ms, import 164ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E3
-  run_id: task-metering-r9-e3-20260726081138
+  run_id: task-metering-r10-e3-20260726084219
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-07-26T08:11:38Z
+  verified_at: 2026-07-26T08:42:19Z
   output: |
-    ✓ src/db/metering-schema.test.ts > fresh database (AC-3) > declares all three columns nullable with the intended types 6ms
+    ✓ src/db/metering-schema.test.ts > fresh database (AC-3) > declares all three columns nullable with the intended types 4ms
 
     Test Files  1 passed (1)
          Tests  4 passed (4)
-      Duration  227ms (transform 12ms, setup 0ms, import 164ms, tests 9ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E4
-  run_id: task-metering-r9-e4-20260726081139
+  run_id: task-metering-r10-e4-20260726084220
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
-    ✓ src/lib/task/metering.test.ts > successful invocation (AC-4) > records the elapsed plugin time next to status completed 22ms
+    ✓ src/lib/task/metering.test.ts > successful invocation (AC-4) > records the elapsed plugin time next to status completed 21ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E5
-  run_id: task-metering-r9-e5-20260726081139
+  run_id: task-metering-r10-e5-20260726084220
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
-    ✓ src/lib/task/metering.test.ts > plugin reports failure (AC-5) > still records the time — a failed generation burns GPU too 22ms
+    ✓ src/lib/task/metering.test.ts > plugin reports failure (AC-5) > still records the time — a failed generation burns GPU too 21ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E6
-  run_id: task-metering-r9-e6-20260726081139
+  run_id: task-metering-r10-e6-20260726084220
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
-    ✓ src/lib/task/metering.test.ts > plugin throws (AC-6) > records the time from the catch branch 23ms
+    ✓ src/lib/task/metering.test.ts > plugin throws (AC-6) > records the time from the catch branch 22ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E7
-  run_id: task-metering-r9-e7-20260726081139
+  run_id: task-metering-r10-e7-20260726084220
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
-    ✓ src/lib/task/metering.test.ts > measurement boundary (AC-7) > excludes asset preparation from the billable number 145ms
+    ✓ src/lib/task/metering.test.ts > measurement boundary (AC-7) > excludes asset preparation from the billable number 143ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E8
-  run_id: task-metering-r9-e8-20260726081139
+  run_id: task-metering-r10-e8-20260726084220
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
-    ✓ src/lib/task/metering.test.ts > aborted run (AC-8) — suppression half > writes no duration for a cancelled task 14ms
+    ✓ src/lib/task/metering.test.ts > aborted run (AC-8) — suppression half > writes no duration for a cancelled task 13ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E9
-  run_id: task-metering-r9-e9-20260726081139
+  run_id: task-metering-r10-e9-20260726084220
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-07-26T08:11:39Z
+  verified_at: 2026-07-26T08:42:20Z
   output: |
     ✓ src/lib/task/metering.test.ts > cost and gpu stay unmeasured (AC-9) — suppression half > never writes cost_usd or gpu_type on any exit 2ms
 
     Test Files  1 passed (1)
          Tests  6 passed (6)
-      Duration  485ms (transform 57ms, setup 0ms, import 202ms, tests 229ms, environment 0ms)
 
-    Re-run this round on commit a751b5f; the named test(s) above and the suite totals are this round's actual output. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
+    Re-run this round on commit 73a8d93; the named test(s) above and the suite totals are this round's actual output. Each named line was re-matched against this round's verbose run rather than copied forward. The test-body analysis recorded in earlier rounds is carried forward, not re-derived here — this round re-ran the evals to move the pin, see `## Iterations`. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E10
-  run_id: task-metering-r9-e10-20260726081131
+  run_id: task-metering-r10-e10-20260726084150
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T08:11:31Z
+  verified_at: 2026-07-26T08:41:50Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
 
     Test Files  21 passed (21)
          Tests  197 passed (197)
-      Duration  666ms (transform 1.19s, setup 0ms, import 2.21s, tests 539ms, environment 1ms)
+      Duration  603ms (transform 1.14s, setup 0ms, import 2.06s, tests 495ms, environment 1ms)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:11:31Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:50Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E11
-  run_id: task-metering-r9-e11-20260726081213
+  run_id: task-metering-r10-e11-20260726084142
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T08:12:13Z
+  verified_at: 2026-07-26T08:41:42Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -198,21 +189,21 @@ human_signoff: Manh 2026-07-25
 
     (tsc --noEmit produced no diagnostics)
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:12:13Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:42Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E12
-  run_id: task-metering-r9-e12-20260726081112
+  run_id: task-metering-r10-e12-20260726084149
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T08:11:12Z
+  verified_at: 2026-07-26T08:41:49Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
 
-    Checked 396 files in 93ms. No fixes applied.
+    Checked 396 files in 80ms. No fixes applied.
 
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:11:12Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T08:41:49Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 ## Analyst
 
@@ -529,6 +520,39 @@ invocation of the same selection under a verbose reporter, which changes neither
 the selection nor the outcome. `pnpm tsx scripts/measure/selftest-cogs.ts` ran
 once at 08:11:51Z and is credited to both `dependency-refresh-2026-07` E7 and
 `measure-harness` E16.
+
+Round 10 (2026-07-26T08:41–08:42Z, commit 73a8d93): **carry-forward re-pin —
+the verdict and the human signature stand unchanged.** The round-9 pin
+a751b5f went stale under the whole-tree staleness rule because `ci-actions-bump`
+round-5 verification landed one more eval-script fix on this branch. Ownership
+was re-derived here rather than assumed: `git diff --name-only a751b5f HEAD`
+with `_acceptance/` excluded lists exactly one file,
+`scripts/ci/check-workflow-drift.sh`, an eval script owned by `ci-actions-bump`.
+Measured against `origin/main` the branch's whole non-`_acceptance` footprint is
+the three files under `.github/workflows/` plus the eight under `scripts/ci/` —
+the same feature, start to finish. Nothing this feature owns appears in that diff: no migration under `drizzle/`, nothing under `src/db/`, nothing under `src/lib/task/`, and neither metering test file.
+
+Both carry-forward conditions in AGENTS.md therefore hold: this feature's own
+code is unchanged, and the standing checks are green on the new tree. All 12
+evals were nonetheless re-executed on this tree and all 12 are green, so the pin
+moves on measured evidence rather than on an edited SHA. `verified_commit` moves
+a751b5f → 73a8d93; `run_id`, `verified_at` and `output` were updated and nothing
+else. The signature field in frontmatter is preserved byte-for-byte as signed,
+and no code was changed during verification.
+
+The shared standing checks were each executed **once** against this tree — `pnpm
+build && pnpm typecheck` finishing 08:41:42Z, `pnpm lint:check` at 08:41:49Z,
+`pnpm test` at 08:41:50Z, `cd sdk && python3 -m pytest -q` at 08:42:03Z — and
+every eval that binds one is credited to that single execution with its own
+distinct `run_id`; no eval shares a `run_id` with another, here or across the
+other three re-pinned features (53 evidence blocks, 53 distinct ids). This feature's own selections ran at 08:42:19Z (`src/db/metering-schema.test.ts`, 4 tests) and 08:42:20Z (`src/lib/task/metering.test.ts`, 6 tests).
+
+Where one command covers several evals the covering test is named per eval and
+read from a second invocation of the same selection under a verbose reporter,
+which changes neither the selection nor the outcome. This round those named
+lines were **re-matched** against the fresh verbose output rather than copied
+forward — a carried line that had not actually run again would have stopped the
+re-pin; none had.
 
 ## Gate 2 checklist (human)
 
