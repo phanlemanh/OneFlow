@@ -22,7 +22,10 @@ describe("plugin id — tongflow stays installable (AC-2)", () => {
     // added to config/official-plugins.json cannot then slip past this check by
     // being absent from a fixture nobody remembered to update.
     const manifest = JSON.parse(
-        readFileSync(join(process.cwd(), "config/official-plugins.json"), "utf8"),
+        readFileSync(
+            join(process.cwd(), "config/official-plugins.json"),
+            "utf8",
+        ),
     ) as { org: string; plugins: string[] };
 
     it("the manifest still points at the upstream org we do not control", () => {

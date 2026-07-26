@@ -21,7 +21,6 @@ import { pluginsDir } from "@/lib/runtime/paths.server";
 // supported, which is why assertSafeGitUrl restricts custom URLs to http(s).
 const PLUGIN_GIT_AUTHOR = { name: "tongflow", email: "tongflow@local" };
 
-
 export interface InstallResult {
     id: string;
     /** "cloned" for a fresh checkout, "updated" for a fast-forward pull. */
