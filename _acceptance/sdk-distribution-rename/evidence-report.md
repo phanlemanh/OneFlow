@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 12e7afdb4294a6e8f21ee8d73d8e854d62ceba36
-human_signoff:
+human_signoff: Manh 2026-07-26
 ---
 
 # Evidence Report: sdk-distribution-rename
