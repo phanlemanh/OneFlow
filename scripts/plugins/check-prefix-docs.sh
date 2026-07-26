@@ -30,12 +30,16 @@ need() {
     fi
 }
 
-need "state the oneflow-api convention" 'oneflow-api-'
-need "state the oneflow-modal convention" 'oneflow-modal-'
-need "record that the legacy tongflow form is still accepted" 'tongflow-(api|modal)-.*still accepted|still accepted.*tongflow-'
-need "give the reason — the upstream repos are not ours" 'does not control|do not control|upstream repos'
-need "keep the lowercase rule" 'all lowercase|\*\*all lowercase\*\*'
-need "keep the no-hardware rule" 'gpu.*cpu|hardware'
+# Anchored to the convention BULLETS, not to the words appearing anywhere in a
+# 400-line document. Both of these rules are also named in the troubleshooting
+# section near the end, so an unanchored search reported them present after the
+# rule itself had been deleted — the guard matching prose it wasn't asked about.
+need "state the oneflow-api convention" '^- It must begin with `oneflow-api-'
+need "state the oneflow-modal convention" '^- It must begin with .*`oneflow-modal-'
+need "record that the legacy tongflow form is still accepted" '^- The legacy `tongflow-api-'
+need "give the reason — the upstream repos are not ours" 'does not control|do not control'
+need "keep the lowercase rule" '^- The directory name must be \*\*all lowercase\*\*'
+need "keep the no-hardware rule" '^- It must \*\*not\*\* encode hardware'
 
 # The line that used to define the convention must no longer present the legacy
 # form as THE convention — otherwise a reader following the first bullet writes
