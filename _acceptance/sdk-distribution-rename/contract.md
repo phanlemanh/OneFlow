@@ -5,9 +5,9 @@ slug: sdk-distribution-rename
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk]
-status: draft
-approved_by:
-approved_at:
+status: implemented
+approved_by: Manh
+approved_at: 2026-07-26
 time_human_minutes: {gate1: 0, gate2: 0}
 ---
 
@@ -48,6 +48,7 @@ Source input: prompt (product plan Phase 0 item 0.1; option C decided by Manh 20
 - AC-10: Given the whole repository, When it is searched for distribution-name usages (`pip install tongflow`, `pip_install("tongflow==`, `tongflow.egg-info`, `dist/tongflow-`), Then none remains outside the gitignored `plugins/` tree.
 - AC-11: Given the SDK is functionally untouched, When `cd sdk && pytest` runs, Then the whole suite is green.
 - AC-12: Given `package.json` changed, When `pnpm lint:check`, `pnpm typecheck` and `pnpm build` run, Then all three pass.
+- AC-13: Given the engine provisions the shared plugin venv, When it installs the SDK from PyPI, Then it installs the name held in `tongflow.__distribution__` rather than a hard-coded string, and that constant equals `project.name` in `sdk/pyproject.toml` — otherwise the engine tells pip to fetch a distribution that does not exist. **Added during implementation, after Gate 1** (see Notes).
 
 ## Coverage
 
@@ -71,6 +72,15 @@ Morphological scan of the change surface:
 
 ## Notes
 
+- **AC-13 được thêm SAU khi Cổng 1 đã duyệt.** Lúc implement mới phát hiện
+  [`plugins.py`](../../sdk/tongflow/engine/plugins.py) chạy `pip install tongflow==<version>`
+  để dựng venv cho plugin — tức đổi tên phân phối mà không sửa chỗ này thì engine
+  sẽ bảo pip tải một gói không tồn tại. Đây là phụ thuộc **chức năng**, không phải
+  tài liệu, và bộ mẫu quét của AC-10 không bắt được (mẫu là `pip install tongflow`
+  có dấu cách, còn code dùng f-string `f"tongflow=={version}"`). Thêm tiêu chí là
+  làm chặt hơn chứ không nới lỏng, nhưng phạm vi đã lớn hơn cái được duyệt — cần
+  nêu rõ ở Cổng 2. Cách chữa: hằng số `__distribution__` cạnh `__version__` làm
+  nguồn sự thật duy nhất, đóng vòng lệch y như cách parity phiên bản đang làm.
 - setuptools chuẩn hoá `-` thành `_` trong tên artefact: phân phối `oneflow-sdk` sinh ra `oneflow_sdk-0.2.17-py3-none-any.whl` và `oneflow_sdk.egg-info`. Viết sai chỗ này thì script publish in ra đường dẫn không tồn tại mà không báo lỗi.
 - `python -m build` chưa cài ở môi trường này (script publish tự dựng venv riêng), nên eval khẳng định metadata bằng `tomllib` thay vì dựng artefact thật; `pip install -e sdk` trong CI vẫn chứng minh gói cài được dưới tên mới.
 - Không có bề mặt web UI → bỏ qua eval design theo SKILL 2b.

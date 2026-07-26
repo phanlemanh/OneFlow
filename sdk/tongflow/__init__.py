@@ -19,6 +19,13 @@ from .serve import (
 
 __version__ = "0.2.17"
 
+# PyPI distribution name. Deliberately different from the import package name
+# (`tongflow`): this fork cannot publish under the upstream distribution, but
+# renaming the import package would touch every plugin. Anything that installs
+# the SDK by name must read this constant rather than hard-coding a string, so
+# the two can never drift — `pip install <__distribution__>==<__version__>`.
+__distribution__ = "oneflow-sdk"
+
 __all__ = [
     "deploy",
     "progress",

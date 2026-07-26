@@ -110,7 +110,7 @@ Beyond that, your code can be laid out however you like.
 The SDK is the contract surface. The platform provides it automatically in the managed venv it
 runs your entry in (see [§6](#6-local-dependencies--progress)), so a self-contained plugin just
 imports it. A **Modal-backed** plugin additionally pins it in its image build
-(`pip_install("tongflow==X.Y.Z")`) so the remote side has it too — match
+(`pip_install("oneflow-sdk==X.Y.Z")`) so the remote side has it too — match
 [`sdk/pyproject.toml`](../sdk/pyproject.toml).
 
 ### Generated types
@@ -360,8 +360,8 @@ Workflow when you do change it:
    when the product guarantees a value.
 2. Regenerate the TypeScript types: `pnpm gen:abi`.
 3. Regenerate and publish the Python SDK so plugins can import the new types:
-   `pnpm tongflow:publish` (bump [`sdk/pyproject.toml`](../sdk/pyproject.toml) first).
-4. Bump each affected plugin's `pip_install("tongflow==X.Y.Z")` pin to match.
+   `pnpm sdk:publish` (bump [`sdk/pyproject.toml`](../sdk/pyproject.toml) first).
+4. Bump each affected plugin's `pip_install("oneflow-sdk==X.Y.Z")` pin to match.
 
 ---
 

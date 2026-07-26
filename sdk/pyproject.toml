@@ -3,15 +3,15 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tongflow"
+name = "oneflow-sdk"
 version = "0.2.17"
-description = "Python SDK for TongFlow — author plugins and run multi-modal GenAI workflows"
+description = "Python SDK for OneFlow — author plugins and run multi-modal GenAI workflows"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["pydantic>=2.0", "typing_extensions>=4.12"]
 license = "AGPL-3.0-only"
-authors = [{ name = "TongFlow contributors" }]
-keywords = ["tongflow", "plugin", "workflow", "genai", "multimodal"]
+authors = [{ name = "OneFlow contributors" }]
+keywords = ["oneflow", "tongflow", "plugin", "workflow", "genai", "multimodal"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -24,11 +24,15 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://tongflow.com"
-Repository = "https://github.com/tong-io/tongflow"
-Documentation = "https://github.com/tong-io/tongflow/blob/main/docs/plugins.md"
-Issues = "https://github.com/tong-io/tongflow/issues"
+Homepage = "https://github.com/phanlemanh/OneFlow"
+Repository = "https://github.com/phanlemanh/OneFlow"
+Documentation = "https://github.com/phanlemanh/OneFlow/blob/main/docs/plugins.md"
+Issues = "https://github.com/phanlemanh/OneFlow/issues"
 
+# The IMPORT package stays `tongflow` on purpose (option C): only the
+# distribution name moved to oneflow-sdk, so the 69 plugin files and 13 SDK
+# files that `from tongflow import ...` keep working untouched. Renaming this
+# include pattern would build an empty wheel without erroring.
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tongflow*"]

@@ -74,6 +74,14 @@ evals:
     expected: "exit 0; SUPPRESSION half — a repo-wide sweep for distribution-name usages (pip install tongflow, pip_install(\"tongflow==, tongflow.egg-info, dist/tongflow-) finds none outside the gitignored plugins/ tree"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
+  # ---- Functional dependency found during implementation -------------------
+  - id: E14
+    criterion: AC-13
+    executor: test
+    cmd: config:executors.test.sdk_pytest_packaging
+    expected: "exit 0; tongflow.__distribution__ equals project.name in pyproject.toml, and SUPPRESSION half — engine/plugins.py contains no hard-coded 'tongflow==' install string, so the plugin venv can never be told to fetch a distribution that does not exist"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
   # ---- Regression ----------------------------------------------------------
   - id: E11
     criterion: AC-11

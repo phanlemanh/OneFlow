@@ -6,12 +6,12 @@
 #   Or export in the shell:
 #   export TWINE_USERNAME=__token__
 #   export TWINE_PASSWORD=pypi-xxxxxxxx
-#   pnpm tongflow:publish
+#   pnpm sdk:publish
 #
 # TestPyPI:
 #   export TWINE_USERNAME=__token__
 #   export TWINE_PASSWORD=pypi-xxxxxxxx   # TestPyPI token
-#   TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish
+#   TONGFLOW_UPLOAD_TESTPYPI=1 pnpm sdk:publish
 #
 # Requires: Python >= 3.10 (prefers Homebrew python3.12; avoids Xcode python3.9 + PEP 668 issues).
 # Uses a cache venv outside the repo (XDG_CACHE_HOME or ~/.cache/tongflow/pypi-venv) for build tools.
@@ -67,7 +67,7 @@ PIP="${VENV}/bin/pip"
 PYTHON_BIN="${VENV}/bin/python"
 
 cd "${PKG}"
-rm -rf dist build tongflow.egg-info 2>/dev/null || true
+rm -rf dist build oneflow_sdk.egg-info 2>/dev/null || true
 
 "${PIP}" install -q --upgrade pip build twine
 
@@ -80,9 +80,9 @@ if [[ -z "${TWINE_PASSWORD:-}" ]]; then
   echo "To upload, add to repo-root .env or export:" >&2
   echo "  TWINE_USERNAME=__token__" >&2
   echo "  TWINE_PASSWORD=pypi-...   # https://pypi.org/manage/account/token/" >&2
-  echo "Then re-run: pnpm tongflow:publish" >&2
+  echo "Then re-run: pnpm sdk:publish" >&2
   VER="$(grep -E '^version[[:space:]]*=' pyproject.toml | head -1 | sed -E 's/^version[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/')"
-  echo "Local install: ${PYTHON_BIN} -m pip install \"dist/tongflow-${VER}-py3-none-any.whl\"" >&2
+  echo "Local install: ${PYTHON_BIN} -m pip install \"dist/oneflow_sdk-${VER}-py3-none-any.whl\"" >&2
   exit 0
 fi
 
@@ -99,4 +99,4 @@ else
 fi
 
 VER="$(grep -E '^version[[:space:]]*=' pyproject.toml | head -1 | sed -E 's/^version[[:space:]]*=[[:space:]]*\"([^\"]+)\".*/\1/')"
-echo "Done. Install with: pip install tongflow==${VER}"
+echo "Done. Install with: pip install oneflow-sdk==${VER}"

@@ -1,11 +1,10 @@
-# tongflow
+# oneflow-sdk
 
-**The Python SDK for [TongFlow](https://tongflow.com)** — an open-source, multi-modal GenAI workflow studio.
+**The Python SDK for [OneFlow](https://github.com/phanlemanh/OneFlow)** — an open-source, multi-modal GenAI workflow studio.
 
-- 🌐 Cloud studio & homepage: **https://tongflow.com**
-- 📦 Source, desktop app & docs: **https://github.com/tong-io/tongflow**
+- 📦 Source, desktop app & docs: **https://github.com/phanlemanh/OneFlow**
 
-`pip install tongflow` gives you the `tongflow` import package. It has two uses:
+`pip install oneflow-sdk` gives you the `tongflow` import package — the distribution was renamed for this fork, the import name was not. It has two uses:
 
 1. **[Run workflows](#run-a-workflow-as-an-embedded-engine)** — execute a workflow exported from the TongFlow canvas as an embedded engine, straight from Python (no desktop app needed).
 2. **[Author plugins](#author-a-plugin)** — implement node capabilities against TongFlow's ABI contract.
@@ -13,7 +12,7 @@
 ## Install
 
 ```bash
-pip install tongflow
+pip install oneflow-sdk
 ```
 
 Requires **Python 3.10+**. The SDK is **backend-neutral**: it depends only on `pydantic` and `typing_extensions`, and never imports `modal` (or any other backend).
@@ -117,7 +116,7 @@ the name prefix carries no execution meaning. Plugin repos are named
 These are only naming examples; the prefix does **not** decide whether a plugin is
 self-contained or deploy-first.
 
-Pin the SDK in your plugin's image build (`pip_install("tongflow==0.1.0")`) to match
+Pin the SDK in your plugin's image build (`pip_install("oneflow-sdk==0.1.0")`) to match
 the version you develop against.
 
 👉 **Full plugin guide** — directory layout, the ABI, generated model conventions,
@@ -130,12 +129,12 @@ From the repo root:
 ```bash
 export TWINE_USERNAME=__token__
 export TWINE_PASSWORD=pypi-xxxxxxxx   # https://pypi.org/manage/account/token/
-pnpm tongflow:publish
+pnpm sdk:publish
 ```
 
 Runs [`scripts/publish-tongflow-pypi.sh`](https://github.com/tong-io/tongflow/blob/main/scripts/publish-tongflow-pypi.sh)
 (clean, `python -m build`, `twine check`, `twine upload`). Dry-run to TestPyPI with
-`TONGFLOW_UPLOAD_TESTPYPI=1 pnpm tongflow:publish`.
+`TONGFLOW_UPLOAD_TESTPYPI=1 pnpm sdk:publish`.
 
 ## License
 
