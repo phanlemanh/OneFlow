@@ -1,0 +1,58 @@
+schema_version: 1
+feature_slug: ci-actions-bump
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.ci_actions_pinned
+    expected: "exit 0; no actions/checkout@v below 7 and no docker/login-action@v below 4 anywhere under .github/workflows, and the expected seven checkout sites are all present — a partial bump fails"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.ci_gate_plumbing
+    expected: "exit 0; in the Acceptance Gate job at this branch's head SHA, checkout@v7 ran with fetch-depth: 0 and pre-merge-check.sh reached acceptance logic — real per-feature verdict lines, no shallow-history or unresolvable-base complaint"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.ci_jobs_green
+    expected: "exit 0; Lint, Type Check, Build and SDK Tests all concluded success on this branch's head SHA under the node24 runtime"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.ci_docker_dryrun_guard
+    expected: "exit 0; docker-publish.yml resolves push: to false for a workflow_dispatch run and true only for a tag ref"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.ci_docker_dispatch_green
+    expected: "exit 0; the dispatched Docker Publish run on this branch concluded success, with the Log in to GHCR (login-action@v4) and Build & push (build-push-action@v7) steps both successful and both platforms built"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.ci_ghcr_untouched
+    expected: "exit 0; SUPPRESSION half — no GHCR container version for this repository was created during or after the dispatched dry run (a package that does not exist at all also passes)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.ci_desktop_dispatch_green
+    expected: "exit 0; the dispatched Desktop Release run concluded success on both macos-14 and windows-latest, each passing the installer sanity check and uploading an artifact, and no GitHub Release was created"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.ci_no_behaviour_drift
+    expected: "exit 0; SUPPRESSION half — every line this branch changes under .github/workflows outside the declared docker-publish.yml dry-run guard is a `uses:` pin line"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

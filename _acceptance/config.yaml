@@ -41,6 +41,20 @@ executors:
     deps_manifest_intact: "bash scripts/deps/check-manifest.sh"
     deps_lockfile_clean: "pnpm install --frozen-lockfile"
     deps_no_t3_drift: "bash scripts/deps/check-no-t3-drift.sh origin/main"
+    # ci-actions-bump Gate 1 (2026-07-26). The run-reading keys query real
+    # Actions runs via `gh` rather than re-running the work locally — a bumped
+    # action can only be proved by the runner that executes it.
+    ci_actions_pinned: "bash scripts/ci/check-action-pins.sh"
+    # Narrowed after Gate 1 (see contract "Amendment"): the gate job's colour is
+    # dominated by acceptance bookkeeping, so it cannot serve as evidence about
+    # a checkout bump. This asserts the plumbing instead.
+    ci_gate_plumbing: "bash scripts/ci/check-gate-plumbing.sh"
+    ci_jobs_green: "bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
+    ci_docker_dryrun_guard: "bash scripts/ci/check-docker-dryrun.sh"
+    ci_docker_dispatch_green: "bash scripts/ci/check-dispatch-run.sh docker"
+    ci_ghcr_untouched: "bash scripts/ci/check-ghcr-untouched.sh"
+    ci_desktop_dispatch_green: "bash scripts/ci/check-dispatch-run.sh desktop"
+    ci_no_behaviour_drift: "bash scripts/ci/check-workflow-drift.sh origin/main"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

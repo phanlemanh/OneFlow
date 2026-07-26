@@ -14,3 +14,43 @@
 {"ts": "2026-07-26T04:50:14Z", "round": 2, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r2-e6-20260726045014", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
 {"ts": "2026-07-26T04:50:41Z", "round": 2, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r2-e7-20260726045041", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
 {"ts": "2026-07-26T04:49:21Z", "round": 2, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r2-e8-20260726044921", "exit_code": 0, "cmd": "bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-07-26T06:35:23Z", "round": 3, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r3-e1-20260726063523", "exit_code": 0, "cmd": "bash scripts/deps/check-manifest.sh"}
+{"ts": "2026-07-26T06:35:03Z", "round": 3, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r3-e2-20260726063503", "exit_code": 0, "cmd": "pnpm install --frozen-lockfile"}
+{"ts": "2026-07-26T06:34:34Z", "round": 3, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r3-e3-20260726063434", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T06:34:34Z", "round": 3, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r3-e4-20260726063434", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T06:35:15Z", "round": 3, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r3-e5-20260726063515", "exit_code": 0, "cmd": "cd sdk && python3 -m pytest -q"}
+{"ts": "2026-07-26T06:27:51Z", "round": 3, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r3-e6-20260726062751", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T06:35:02Z", "round": 3, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r3-e7-20260726063502", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T06:35:24Z", "round": 3, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r3-e8-20260726063524", "exit_code": 0, "cmd": "bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-07-26T07:37:33Z", "round": 4, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r4-e1-20260726073733", "exit_code": 0, "cmd": "bash scripts/deps/check-manifest.sh"}
+{"ts": "2026-07-26T07:37:33Z", "round": 4, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r4-e2-20260726073733", "exit_code": 0, "cmd": "pnpm install --frozen-lockfile"}
+{"ts": "2026-07-26T07:37:41Z", "round": 4, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r4-e3-20260726073741", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T07:38:01Z", "round": 4, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r4-e4-20260726073801", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T07:37:47Z", "round": 4, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r4-e5-20260726073747", "exit_code": 0, "cmd": "cd sdk && python3 -m pytest -q"}
+{"ts": "2026-07-26T07:37:44Z", "round": 4, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r4-e6-20260726073744", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T07:38:20Z", "round": 4, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r4-e7-20260726073820", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T07:37:33Z", "round": 4, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r4-e8-20260726073733", "exit_code": 0, "cmd": "bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-07-26T08:11:04Z", "round": 5, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r5-e1-20260726081104", "exit_code": 0, "cmd": "bash scripts/deps/check-manifest.sh"}
+{"ts": "2026-07-26T08:11:05Z", "round": 5, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r5-e2-20260726081105", "exit_code": 0, "cmd": "pnpm install --frozen-lockfile"}
+{"ts": "2026-07-26T08:11:12Z", "round": 5, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r5-e3-20260726081112", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T08:11:31Z", "round": 5, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r5-e4-20260726081131", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T08:11:19Z", "round": 5, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r5-e5-20260726081119", "exit_code": 0, "cmd": "cd sdk && python3 -m pytest -q"}
+{"ts": "2026-07-26T08:12:13Z", "round": 5, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r5-e6-20260726081213", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T08:11:51Z", "round": 5, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r5-e7-20260726081151", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T08:11:04Z", "round": 5, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r5-e8-20260726081104", "exit_code": 0, "cmd": "bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-07-26T08:42:09Z", "round": 6, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r6-e1-20260726084209", "exit_code": 0, "cmd": "config:executors.script.deps_manifest_intact"}
+{"ts": "2026-07-26T08:42:16Z", "round": 6, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r6-e2-20260726084216", "exit_code": 0, "cmd": "config:executors.script.deps_lockfile_clean"}
+{"ts": "2026-07-26T08:41:49Z", "round": 6, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r6-e3-20260726084149", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T08:41:50Z", "round": 6, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r6-e4-20260726084150", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T08:42:03Z", "round": 6, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r6-e5-20260726084203", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T08:41:42Z", "round": 6, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r6-e6-20260726084142", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T08:42:30Z", "round": 6, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r6-e7-20260726084230", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T08:42:09Z", "round": 6, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r6-e8-20260726084209", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}
+{"ts": "2026-07-26T09:12:06Z", "round": 7, "evalId": "E1", "run_id": "dependency-refresh-2026-07-r7-e1-20260726091206", "exit_code": 0, "cmd": "config:executors.script.deps_manifest_intact"}
+{"ts": "2026-07-26T09:12:20Z", "round": 7, "evalId": "E2", "run_id": "dependency-refresh-2026-07-r7-e2-20260726091220", "exit_code": 0, "cmd": "config:executors.script.deps_lockfile_clean"}
+{"ts": "2026-07-26T09:11:29Z", "round": 7, "evalId": "E3", "run_id": "dependency-refresh-2026-07-r7-e3-20260726091129", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T09:11:36Z", "round": 7, "evalId": "E4", "run_id": "dependency-refresh-2026-07-r7-e4-20260726091136", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T09:11:37Z", "round": 7, "evalId": "E5", "run_id": "dependency-refresh-2026-07-r7-e5-20260726091137", "exit_code": 0, "cmd": "config:executors.test.sdk_pytest"}
+{"ts": "2026-07-26T09:11:27Z", "round": 7, "evalId": "E6", "run_id": "dependency-refresh-2026-07-r7-e6-20260726091127", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T09:12:07Z", "round": 7, "evalId": "E7", "run_id": "dependency-refresh-2026-07-r7-e7-20260726091207", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T09:12:06Z", "round": 7, "evalId": "E8", "run_id": "dependency-refresh-2026-07-r7-e8-20260726091206", "exit_code": 0, "cmd": "config:executors.script.deps_no_t3_drift"}

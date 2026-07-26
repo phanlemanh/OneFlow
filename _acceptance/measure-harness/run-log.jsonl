@@ -112,3 +112,98 @@
 {"ts": "2026-07-26T04:49:44Z", "round": 6, "evalId": "E17", "run_id": "measure-harness-r6-e17-20260726044944", "exit_code": 0, "cmd": "pnpm test"}
 {"ts": "2026-07-26T04:50:14Z", "round": 6, "evalId": "E18", "run_id": "measure-harness-r6-e18-20260726045014", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
 {"ts": "2026-07-26T04:49:37Z", "round": 6, "evalId": "E19", "run_id": "measure-harness-r6-e19-20260726044937", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E1", "run_id": "measure-harness-r7-e1-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E2", "run_id": "measure-harness-r7-e2-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E3", "run_id": "measure-harness-r7-e3-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E4", "run_id": "measure-harness-r7-e4-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E5", "run_id": "measure-harness-r7-e5-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:35:01Z", "round": 7, "evalId": "E6", "run_id": "measure-harness-r7-e6-20260726063501", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E7", "run_id": "measure-harness-r7-e7-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E8", "run_id": "measure-harness-r7-e8-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E9", "run_id": "measure-harness-r7-e9-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E10", "run_id": "measure-harness-r7-e10-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E11", "run_id": "measure-harness-r7-e11-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:35:01Z", "round": 7, "evalId": "E12", "run_id": "measure-harness-r7-e12-20260726063501", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-mos.ts"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E13", "run_id": "measure-harness-r7-e13-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E14", "run_id": "measure-harness-r7-e14-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:34:37Z", "round": 7, "evalId": "E15", "run_id": "measure-harness-r7-e15-20260726063437", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T06:35:02Z", "round": 7, "evalId": "E16", "run_id": "measure-harness-r7-e16-20260726063502", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T06:34:34Z", "round": 7, "evalId": "E17", "run_id": "measure-harness-r7-e17-20260726063434", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T06:27:51Z", "round": 7, "evalId": "E18", "run_id": "measure-harness-r7-e18-20260726062751", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T06:34:34Z", "round": 7, "evalId": "E19", "run_id": "measure-harness-r7-e19-20260726063434", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E1", "run_id": "measure-harness-r8-e1-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E2", "run_id": "measure-harness-r8-e2-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E3", "run_id": "measure-harness-r8-e3-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E4", "run_id": "measure-harness-r8-e4-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E5", "run_id": "measure-harness-r8-e5-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E7", "run_id": "measure-harness-r8-e7-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E8", "run_id": "measure-harness-r8-e8-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E9", "run_id": "measure-harness-r8-e9-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E10", "run_id": "measure-harness-r8-e10-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E11", "run_id": "measure-harness-r8-e11-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E13", "run_id": "measure-harness-r8-e13-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E14", "run_id": "measure-harness-r8-e14-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:10Z", "round": 8, "evalId": "E15", "run_id": "measure-harness-r8-e15-20260726073810", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T07:38:18Z", "round": 8, "evalId": "E6", "run_id": "measure-harness-r8-e6-20260726073818", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"}
+{"ts": "2026-07-26T07:38:19Z", "round": 8, "evalId": "E12", "run_id": "measure-harness-r8-e12-20260726073819", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-mos.ts"}
+{"ts": "2026-07-26T07:38:20Z", "round": 8, "evalId": "E16", "run_id": "measure-harness-r8-e16-20260726073820", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T07:38:01Z", "round": 8, "evalId": "E17", "run_id": "measure-harness-r8-e17-20260726073801", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T07:37:44Z", "round": 8, "evalId": "E18", "run_id": "measure-harness-r8-e18-20260726073744", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T07:37:41Z", "round": 8, "evalId": "E19", "run_id": "measure-harness-r8-e19-20260726073741", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E1", "run_id": "measure-harness-r9-e1-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E2", "run_id": "measure-harness-r9-e2-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E3", "run_id": "measure-harness-r9-e3-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E4", "run_id": "measure-harness-r9-e4-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E5", "run_id": "measure-harness-r9-e5-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:49Z", "round": 9, "evalId": "E6", "run_id": "measure-harness-r9-e6-20260726081149", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E7", "run_id": "measure-harness-r9-e7-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E8", "run_id": "measure-harness-r9-e8-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E9", "run_id": "measure-harness-r9-e9-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E10", "run_id": "measure-harness-r9-e10-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E11", "run_id": "measure-harness-r9-e11-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:50Z", "round": 9, "evalId": "E12", "run_id": "measure-harness-r9-e12-20260726081150", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-mos.ts"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E13", "run_id": "measure-harness-r9-e13-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E14", "run_id": "measure-harness-r9-e14-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:39Z", "round": 9, "evalId": "E15", "run_id": "measure-harness-r9-e15-20260726081139", "exit_code": 0, "cmd": "pnpm vitest run src/lib/measure"}
+{"ts": "2026-07-26T08:11:51Z", "round": 9, "evalId": "E16", "run_id": "measure-harness-r9-e16-20260726081151", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-07-26T08:11:31Z", "round": 9, "evalId": "E17", "run_id": "measure-harness-r9-e17-20260726081131", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-07-26T08:12:13Z", "round": 9, "evalId": "E18", "run_id": "measure-harness-r9-e18-20260726081213", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-07-26T08:11:12Z", "round": 9, "evalId": "E19", "run_id": "measure-harness-r9-e19-20260726081112", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E1", "run_id": "measure-harness-r10-e1-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E2", "run_id": "measure-harness-r10-e2-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E3", "run_id": "measure-harness-r10-e3-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E4", "run_id": "measure-harness-r10-e4-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E5", "run_id": "measure-harness-r10-e5-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:29Z", "round": 10, "evalId": "E6", "run_id": "measure-harness-r10-e6-20260726084229", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_wer"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E7", "run_id": "measure-harness-r10-e7-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E8", "run_id": "measure-harness-r10-e8-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E9", "run_id": "measure-harness-r10-e9-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E10", "run_id": "measure-harness-r10-e10-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E11", "run_id": "measure-harness-r10-e11-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:30Z", "round": 10, "evalId": "E12", "run_id": "measure-harness-r10-e12-20260726084230", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_mos"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E13", "run_id": "measure-harness-r10-e13-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E14", "run_id": "measure-harness-r10-e14-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:21Z", "round": 10, "evalId": "E15", "run_id": "measure-harness-r10-e15-20260726084221", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T08:42:30Z", "round": 10, "evalId": "E16", "run_id": "measure-harness-r10-e16-20260726084230", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T08:41:50Z", "round": 10, "evalId": "E17", "run_id": "measure-harness-r10-e17-20260726084150", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T08:41:42Z", "round": 10, "evalId": "E18", "run_id": "measure-harness-r10-e18-20260726084142", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T08:41:49Z", "round": 10, "evalId": "E19", "run_id": "measure-harness-r10-e19-20260726084149", "exit_code": 0, "cmd": "config:executors.test.lint"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E1", "run_id": "measure-harness-r11-e1-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E2", "run_id": "measure-harness-r11-e2-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E3", "run_id": "measure-harness-r11-e3-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E4", "run_id": "measure-harness-r11-e4-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E5", "run_id": "measure-harness-r11-e5-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:12:06Z", "round": 11, "evalId": "E6", "run_id": "measure-harness-r11-e6-20260726091206", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_wer"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E7", "run_id": "measure-harness-r11-e7-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E8", "run_id": "measure-harness-r11-e8-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E9", "run_id": "measure-harness-r11-e9-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E10", "run_id": "measure-harness-r11-e10-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E11", "run_id": "measure-harness-r11-e11-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:12:07Z", "round": 11, "evalId": "E12", "run_id": "measure-harness-r11-e12-20260726091207", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_mos"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E13", "run_id": "measure-harness-r11-e13-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E14", "run_id": "measure-harness-r11-e14-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:11:56Z", "round": 11, "evalId": "E15", "run_id": "measure-harness-r11-e15-20260726091156", "exit_code": 0, "cmd": "config:executors.test.unit_measure"}
+{"ts": "2026-07-26T09:12:07Z", "round": 11, "evalId": "E16", "run_id": "measure-harness-r11-e16-20260726091207", "exit_code": 0, "cmd": "config:executors.script.smoke_measure_cogs"}
+{"ts": "2026-07-26T09:11:36Z", "round": 11, "evalId": "E17", "run_id": "measure-harness-r11-e17-20260726091136", "exit_code": 0, "cmd": "config:executors.test.unit"}
+{"ts": "2026-07-26T09:11:27Z", "round": 11, "evalId": "E18", "run_id": "measure-harness-r11-e18-20260726091127", "exit_code": 0, "cmd": "config:executors.test.build_typecheck"}
+{"ts": "2026-07-26T09:11:29Z", "round": 11, "evalId": "E19", "run_id": "measure-harness-r11-e19-20260726091129", "exit_code": 0, "cmd": "config:executors.test.lint"}
