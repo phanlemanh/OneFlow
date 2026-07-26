@@ -17,10 +17,15 @@ time_human_minutes: {gate1: 0, gate2: 0}
 
 The two dependabot PRs left open after #16: `actions/checkout` 4→7 (#1) and
 `docker/login-action` 3→4 (#2). They were held back deliberately. `checkout` is
-used at **five** sites across all three workflows — including the
-`acceptance-gate` job, whose `fetch-depth: 0` is what lets `pre-merge-check.sh`
-diff against the PR base at all. A major bump of the action the gate stands on
-is not a passenger in a dependency sweep.
+used at **seven** sites across all three workflows — five of them in `ci.yml`
+alone, including the `acceptance-gate` job, whose `fetch-depth: 0` is what lets
+`pre-merge-check.sh` diff against the PR base at all. A major bump of the action
+the gate stands on is not a passenger in a dependency sweep.
+
+(The first draft of this contract said five sites. The pin-count check written
+to enforce AC-1 is what caught it — five is the `ci.yml` figure, not the total.
+Recorded rather than quietly corrected: a criterion asserting a number nobody
+counted is the kind of thing that passes review and proves nothing.)
 
 Upstream delta, read from the action manifests rather than the release prose:
 **every input default is byte-identical between v4 and v7** — `fetch-depth: 1`,
@@ -57,8 +62,8 @@ Source input: prompt (gộp #1 và #2 vào một contract CI actions bump)
 
 ## Criteria
 
-- AC-1: Given `checkout` is pinned at five separate sites across three workflow files, When the workflows are scanned, Then **no `actions/checkout@v` below 7 and no `docker/login-action@v` below 4 remain anywhere** — a partial bump is the real failure mode here, because the sites left behind keep working and so never report themselves.
-- AC-2: Given this PR's own CI runs `checkout@v7` five times, When the `Acceptance Gate` job runs, Then it passes — proving `fetch-depth: 0` still produces a history deep enough for `pre-merge-check.sh` to diff against the base, on the very action version being adopted.
+- AC-1: Given `checkout` is pinned at seven separate sites across three workflow files, When the workflows are scanned, Then **no `actions/checkout@v` below 7 and no `docker/login-action@v` below 4 remain anywhere** — a partial bump is the real failure mode here, because the sites left behind keep working and so never report themselves.
+- AC-2: Given this PR's own CI runs `checkout@v7` five times (once per `ci.yml` job), When the `Acceptance Gate` job runs, Then it passes — proving `fetch-depth: 0` still produces a history deep enough for `pre-merge-check.sh` to diff against the base, on the very action version being adopted.
 - AC-3: Given `Lint`, `Type Check`, `Build` and `SDK Tests` each check out under v7, When CI runs, Then all four pass, showing the node24 runtime change breaks no existing job.
 - AC-4: Given `docker-publish.yml` cannot be exercised without publishing, When its `workflow_dispatch` path is inspected, Then it builds **without pushing** — `push:` is false for a manual run and true only for a tag — so the workflow becomes provable on demand instead of only at release time.
 - AC-5: Given the dry-run guard, When `docker-publish.yml` is dispatched on this branch, Then the run succeeds through `docker/login-action@v4` and `docker/build-push-action@v7` and produces an image for `linux/amd64,linux/arm64` — covering PR #2 and retiring the qemu-v4 / build-push-v7 debt #16 recorded.

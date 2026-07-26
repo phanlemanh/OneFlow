@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# AC-2 / AC-3: named jobs of a workflow run succeeded at THIS commit.
+#
+# Usage: check-run-jobs.sh <ci|docker|desktop> <job name> [job name...]
+#
+# Pinning to the head SHA is the point. "the last CI run was green" is not
+# evidence about the tree being verified; a run at a different commit proves
+# nothing about this one.
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/ci/gh-run-lib.sh
+. "$DIR/gh-run-lib.sh"
+
+if [ "$#" -lt 2 ]; then
+    echo "usage: $(basename "$0") <ci|docker|desktop> <job name> [job name...]" >&2
+    exit 2
+fi
+
+KEY="$1"
+shift
+
+require_gh
+SHA="$(head_sha)"
+RUN_ID="$(find_run "$KEY" "" "$SHA")"
+JSON="$(run_json "$RUN_ID")"
+
+echo "run $(printf '%s' "$JSON" | jq -r '.url') @ ${SHA}"
+
+fail=0
+for name in "$@"; do
+    conclusion="$(printf '%s' "$JSON" | jq -r --arg n "$name" '.jobs[] | select(.name == $n) | .conclusion')"
+    if [ -z "$conclusion" ]; then
+        echo "FAIL: no job named '${name}' in this run" >&2
+        fail=1
+        continue
+    fi
+    if [ "$conclusion" != "success" ]; then
+        echo "FAIL: job '${name}' concluded ${conclusion}" >&2
+        fail=1
+        continue
+    fi
+    echo "ok job '${name}': success"
+done
+
+# The run as a whole must also be finished — a green subset of a run still in
+# flight is a snapshot, not a result.
+assert_run_complete "$JSON" || fail=1
+
+[ "$fail" -eq 0 ] || exit 1
+echo "all requested jobs succeeded at ${SHA}"
