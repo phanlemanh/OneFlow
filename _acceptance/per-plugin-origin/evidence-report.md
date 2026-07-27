@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: abfba9b00180c607d116b12de497ba6f8136f221
+verified_commit: 21eafc5ec0f3affa61cfb98bcfe542d782e5f907
 human_signoff:
 ---
 
@@ -31,123 +31,126 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: minted-per-plugin-origin-E1-r6
+  run_id: minted-per-plugin-origin-E1-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  47 passed (47)
-       Start at  14:21:24
-       Duration  216ms (transform 76ms, setup 0ms, import 91ms, tests 12ms, environment 0ms)
+         Tests  47 passed (47)
+      Start at  14:47:12
+      Duration  504ms (transform 158ms, setup 0ms, import 229ms, tests 9ms, environment 0ms)
 
 - eval: E2
-  run_id: minted-per-plugin-origin-E2-r6
+  run_id: minted-per-plugin-origin-E2-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  47 passed (47)
-       Start at  14:21:24
-       Duration  216ms (transform 76ms, setup 0ms, import 91ms, tests 12ms, environment 0ms)
+         Tests  47 passed (47)
+      Start at  14:47:12
+      Duration  504ms (transform 158ms, setup 0ms, import 229ms, tests 9ms, environment 0ms)
 
 - eval: E3
-  run_id: minted-per-plugin-origin-E3-r6
+  run_id: minted-per-plugin-origin-E3-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  47 passed (47)
-       Start at  14:21:24
-       Duration  216ms (transform 76ms, setup 0ms, import 91ms, tests 12ms, environment 0ms)
+         Tests  47 passed (47)
+      Start at  14:47:12
+      Duration  504ms (transform 158ms, setup 0ms, import 229ms, tests 9ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-per-plugin-origin-E4-r6
+  run_id: minted-per-plugin-origin-E4-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  47 passed (47)
-       Start at  14:21:24
-       Duration  216ms (transform 76ms, setup 0ms, import 91ms, tests 12ms, environment 0ms)
+         Tests  47 passed (47)
+      Start at  14:47:12
+      Duration  504ms (transform 158ms, setup 0ms, import 229ms, tests 9ms, environment 0ms)
 
 - eval: E5
-  run_id: minted-per-plugin-origin-E5-r6
+  run_id: minted-per-plugin-origin-E5-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_single_impl
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
     OK: one URL rule across src/ and scripts/, in src/lib/plugins/official-manifest.ts; the CLI installer imports it (the SDK engine's Python copy is out of this scan's scope — see the contract's known limits)
 
 - eval: E6
-  run_id: minted-per-plugin-origin-E6-r6
+  run_id: minted-per-plugin-origin-E6-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_installer_parity
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
     OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward
 
 - eval: E7
-  run_id: minted-per-plugin-origin-E7-r6
+  run_id: minted-per-plugin-origin-E7-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_manifest_unmoved
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
     OK: 38 plain string entries, default org unchanged
 
 - eval: E8
-  run_id: minted-per-plugin-origin-E8-r6
+  run_id: minted-per-plugin-origin-E8-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  75 passed (75)
-       Start at  14:21:25
-       Duration  134ms (transform 18ms, setup 0ms, import 27ms, tests 4ms, environment 0ms)
+         Tests  75 passed (75)
+      Start at  14:47:16
+      Duration  201ms (transform 29ms, setup 0ms, import 41ms, tests 4ms, environment 0ms)
 
 - eval: E9
-  run_id: minted-per-plugin-origin-E9-r6
+  run_id: minted-per-plugin-origin-E9-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-          Tests  319 passed (319)
-       Start at  14:21:23
-       Duration  987ms (transform 1.99s, setup 0ms, import 3.85s, tests 745ms, environment 8ms)
+         Tests  319 passed (319)
+      Start at  14:47:12
+      Duration  1.40s (transform 5.00s, setup 0ms, import 7.73s, tests 1.13s, environment 1ms)
 
 - eval: E10
-  run_id: minted-per-plugin-origin-E10-r6
+  run_id: minted-per-plugin-origin-E10-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+    ƒ  (Dynamic)  server-rendered on demand
+
     $ tsc --noEmit
 
 - eval: E11
-  run_id: minted-per-plugin-origin-E11-r6
+  run_id: minted-per-plugin-origin-E11-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
-    Checked 402 files in 129ms. No fixes applied.
+    $ pnpm exec biome check --error-on-warnings .
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+    Checked 402 files in 132ms. No fixes applied.
 
 - eval: E12
-  run_id: minted-per-plugin-origin-E12-r6
+  run_id: minted-per-plugin-origin-E12-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-07-27T07:20:50Z
+  verified_at: 2026-07-27T07:46:39Z
   output: |
     [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
     $ tsx scripts/verify-plugins-scan.ts
@@ -159,7 +162,7 @@ Two further commands were run as supplementary guards but are not attached to
 any eval id in this contract, so they do not appear in the table above and do
 not affect the verdict:
 
-- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — 1 run, passed (89 passed in 3.78s), baseline n-a.
+- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — 1 run, passed (89 passed in 3.44s), baseline n-a.
 - `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — 1 run, passed (fixed 1 file, wrote src/generated/abi/index.ts and sdk/tongflow/_data/tongflow.abi.json, no diff — files in sync), baseline n-a.
 
 ## Analyst
@@ -167,7 +170,7 @@ not affect the verdict:
 carried tu round truoc — baseline khong do lai round nay (P2 — evals.yaml
 khong doi tu lan baseline cuoi round 1).
 
-none — no non-discriminating evals reported for round 6 (baseline was not
+none — no non-discriminating evals reported for round 7 (baseline was not
 re-measured this round; see round 1's Analyst findings for the last measured
 baseline classification of E8/E9/E12 as intended regression-guards).
 
@@ -224,6 +227,18 @@ Round 6: all evals E1-E12 pass again (exit 0) against the re-verified tree at
 commit abfba9b00180c607d116b12de497ba6f8136f221. Unit test counts hold steady
 (E1-E4's suite at 47 tests, same as rounds 4-5; the whole-repo suite E9 at
 319, same as rounds 4-5; E8's suite holds at 75), build/typecheck, lint, and
+the plugins scan verifier remain green, and the two unmapped supplementary
+guards (SDK pytest 89 passed; ABI-generation diff check, which this round
+also regenerated and fixed one file with no resulting diff) stay green.
+Baseline was not re-measured this round (P2 — evals.yaml unchanged since
+round 1's baseline run); the Analyst section carries forward round 1's
+classification. No judgment items are pending for this contract this round
+(judge panel list is empty). Verdict: PASS.
+
+Round 7: all evals E1-E12 pass again (exit 0) against the re-verified tree at
+commit 21eafc5ec0f3affa61cfb98bcfe542d782e5f907. Unit test counts hold steady
+(E1-E4's suite at 47 tests, same as rounds 4-6; the whole-repo suite E9 at
+319, same as rounds 4-6; E8's suite holds at 75), build/typecheck, lint, and
 the plugins scan verifier remain green, and the two unmapped supplementary
 guards (SDK pytest 89 passed; ABI-generation diff check, which this round
 also regenerated and fixed one file with no resulting diff) stay green.
