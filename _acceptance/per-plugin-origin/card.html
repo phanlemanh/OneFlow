@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;padding:24px"><style>
+.gc{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:0 auto;color:#1f1f1d;line-height:1.5}
+.gc .card{background:#fff;border:1px solid #e6e4de;border-radius:14px;padding:16px 18px}
+.gc .h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.gc .ft{font-size:16px;font-weight:600}.gc .sub{font-size:12px;color:#6c6a64;margin-top:2px}
+.gc .chip{font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;white-space:nowrap}
+.gc .amber{background:#FAEEDA;color:#633806}.gc .teal{background:#E1F5EE;color:#085041}.gc .coral{background:#FAECE7;color:#712B13}.gc .gray{background:#f1efe8;color:#444441}
+.gc .lab{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#8a887f;margin:16px 0 8px;font-weight:600}
+.gc .grp{border-radius:10px;padding:11px 14px;margin-bottom:8px}.gc .gdo{background:#E1F5EE}.gc .gnot{background:#f4f2ec}
+.gc .li{font-size:14px;margin:0 0 6px;padding-left:17px;position:relative}.gc .li:last-child{margin-bottom:0}
+.gc .li:before{content:"";position:absolute;left:1px;top:7px;width:7px;height:7px;border-radius:50%}
+.gc .gdo .li{color:#085041}.gc .gdo .li:before{background:#1D9E75}.gc .gnot .li{color:#56544d}.gc .gnot .li:before{background:#b4b2a9}
+.gc .item{background:#FAEEDA;border:1px solid #EF9F27;border-radius:10px;padding:11px 13px;margin-bottom:8px}
+.gc .q{font-size:14px;font-weight:600;color:#412402;margin:0 0 3px}.gc .ai{font-size:12px;color:#854F0B;margin:0 0 9px}
+.gc .flag{display:flex;gap:8px;font-size:13px;padding:8px 11px;border-radius:9px;margin-bottom:6px}
+.gc .fwarn{background:#FAEEDA;color:#633806}.gc .finfo{background:#f4f2ec;color:#56544d}.gc .fok{background:#E1F5EE;color:#085041}.gc .fred{background:#FAECE7;color:#712B13}
+.gc .mach{background:#f4f2ec;border-radius:9px;padding:11px 13px;font-size:13px;color:#56544d}.gc .mach b{color:#1f1f1d}
+.gc .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid #e6e4de}
+.gc .rev{font-size:12px;color:#9a988f}
+.gc .btns{display:flex;gap:8px}
+.gc .b{font-size:13px;padding:6px 14px;border-radius:8px;border:1px solid;background:transparent;cursor:pointer}
+.gc .bn{border-color:#cfcdc4;color:#3f3e39}.gc .yes{background:#E1F5EE;border-color:#5DCAA5;color:#085041;font-weight:600}.gc .no{border-color:#F0997B;color:#993C1D}
+</style>
+<div class="gc"><div class="card">
+<div class="h"><div><div class="ft">Cho phép từng plugin trong danh sách chính thức tự khai kho tải về của riêng nó, để fork lẻ từng cái khi cần thay vì phải chuyển cả 38 plugin cùng lúc.</div><div class="sub">Cổng 2 · ký duyệt · ~5 phút</div></div><span class="chip teal">máy đã xong — ký nhanh</span></div>
+<a href="evidence-page.html" style="display:flex;justify-content:space-between;align-items:center;gap:10px;background:#E6F1FB;border:1px solid #B5D4F4;border-radius:10px;padding:9px 13px;margin:11px 0 2px;text-decoration:none;color:#0C447C;font-size:13px"><b>Bằng chứng đầy đủ — ảnh chụp + chạy thật</b><span style="font-size:12px;color:#185FA5;white-space:nowrap">đã mở trong trình duyệt</span></a>
+<div class="lab">Việc chỉ mình bạn quyết được — 1 việc</div>
+<div class="item"><p class="q">Xác nhận các phần đã cắt/hoãn ngoài phạm vi:</p><p class="ai">Lần này chỉ dựng cơ chế: chưa fork plugin nào, chưa đổi nguồn mặc định khỏi tong-io, chưa lập tổ chức GitHub, chưa hiện nguồn tải trên giao diện, và chưa ghim phiên bản cho plugin.</p><div class="btns"><button class="b bn">Đồng ý cắt</button><button class="b no">Không, kéo vào</button></div></div>
+<div class="lab">Quyết định CHƯA duyệt — cần phê (ghi sau Gate 1)</div>
+<div class="item"><p class="q">KHÔNG gộp bản sao luật trong bộ máy SDK viết bằng Python — nó nằm ngoài phạm vi bạn đã duyệt ở Cổng 1; đổi lại bộ máy chạy độc lập vẫn tải plugin đã fork từ kho gốc. Xem lại khi fork thật plugin đầu tiên.</p><p class="ai">S4-r1 · đề nghị KHÔNG làm · xem lại khi: khi fork that su plugin dau tien, hoac khi co contract rieng cho SDK engine</p><div class="btns"><button class="b bn">Phê</button><button class="b no">Không phê</button></div></div>
+<div class="item"><p class="q">KHONG sua link &#39;mo kho&#39; trong plugins-dialog.tsx du no se tro sai khi co override dau tien — giu dung pham vi Gate 1 — sua can doi hinh dang phan hoi API, thu da khai Out of scope, va src/app/api la duong T3 nen se nang tier vuot muc da duyet; doi lai link se sai ke tu lan fork that dau tien. Hom nay khong the sai vi AC-6 dam bao manifest van 38 chuoi thuan</p><p class="ai">S4-r2 · đề nghị KHÔNG làm · xem lại khi: phai sua cung contract cua lan fork that dau tien</p><div class="btns"><button class="b bn">Phê</button><button class="b no">Không phê</button></div></div>
+<div class="item"><p class="q">Sửa để lệnh cập nhật thật sự tải từ kho mới khai, thay vì lặng lẽ tải lại từ kho cũ — phương án nặng tay hơn là xoá đi tải lại từ đầu đã bị loại vì tốn và phá checkout đang dùng được.</p><p class="ai">S4-r1 · fix</p><div class="btns"><button class="b bn">Phê</button><button class="b no">Không phê</button></div></div>
+<div class="item"><p class="q">ep luat ten plugin (isValidPluginId) ngay trong normalizeOfficialManifest, thay vi chi assert trong unit test va chi ap dung o nhanh gitUrl cua installPlugin — chan ten kieu ../x thoat ra ngoai thu muc plugins truoc khi no thanh duong dan co lenh xoa de quy; doi lai manifest nghiem ngat hon, moi id phai theo quy uoc oneflow-/tongflow-</p><p class="ai">S4-r2 · fix</p><div class="btns"><button class="b bn">Phê</button><button class="b no">Không phê</button></div></div>
+<div class="item"><p class="q">dat fastForwardOnly:true cho ca hai duong pull, thay vi chi fastForward:true — phan ky bao loi on ao thay vi tao merge commit tham lang roi ket badge cap nhat vinh vien; doi lai nguoi dung gap loi ro rang thay vi im lang sai — dung y do</p><p class="ai">S4-r2 · fix</p><div class="btns"><button class="b bn">Phê</button><button class="b no">Không phê</button></div></div>
+<div class="lab">Đã duyệt từ Gate 1</div><div class="grp gnot"><p class="li">bỏ eval design cho feature này — thay đổi không chạm bề mặt thị giác nào; detector báo surface:true chỉ vì frontmatter khai surfaces:[plugins], vốn là tên hệ con chứ không phải bề mặt web UI — tiết kiệm công dựng static evals + mockup; đổi lại không có bằng chứng thị giác nào trong gói Cổng 2, nên nếu sau này resolver lộ ra UI thì phải nâng làn bằng contract riêng</p><p class="li">entry dạng object thiếu khoá origin (vd {&quot;id&quot;:&quot;x&quot;}) được coi là HỢP LỆ và rơi về org mặc định, thay vì bị từ chối như entry hỏng — tương thích ngược và ít bất ngờ cho người sửa manifest; đổi lại manifest có hai cách viết cho cùng một ý (chuỗi thuần và object thiếu origin), nên guard đếm 38 chuỗi thuần ở AC-6 vẫn là thứ giữ hình dạng file xuất xưởng</p></div>
+<div class="lab">Lưu ý trước khi ký</div><div class="flag fred">carried tu round truoc — baseline khong do lai round nay (P2: evals.yaml khong doi tu lan baseline cuoi round 1). none — no non-discriminating evals reported for round 3 (baseline was not re-measured this round; see round 1&#39;s Analyst findings for the last measured baseline classification of E8/E9/E12 as intended regression-guards).</div><div class="flag fok">Cổng chạy thật, bằng chứng máy đầy đủ (run_id · exit 0 · verifier).</div>
+<details style="margin-top:14px"><summary style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:#8a887f;font-weight:600;cursor:pointer">Máy đã lo (liếc qua, không cần làm gì)</summary>
+<div class="mach" style="margin-top:8px"><b>12/12 phép kiểm máy đều đạt</b> · bằng chứng đủ, không lỗi.</div>
+</details>
+<div class="foot"><span class="rev">↻ Đảo ngược dễ: trả lại → quay về code, không mất gì.</span><div class="btns"><button class="b no">Trả lại</button><button class="b yes">Ký duyệt</button></div></div>
+</div></div>
