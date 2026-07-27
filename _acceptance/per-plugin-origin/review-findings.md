@@ -1,81 +1,85 @@
-# Review Findings: per-plugin-origin (Round 1)
+# Review Findings: per-plugin-origin (Round 2)
 
 Informational only — not parsed by the acceptance-evidence-gate hook. These are
-adversarial-verified findings from reviewing the round-1 implementation, listed
+adversarial-verified findings from reviewing the round-2 implementation, listed
 most-severe first.
 
 ## Findings
 
-### 1. The prefix guard still reads the manifest raw as `string[]` — the first override entry breaks it
+### 1. The manifest normaliser validates `origin` but never validates the plugin `id`, which is then joined into a filesystem path
 
-- **File**: `src/lib/plugins/plugin-id.test.ts:54`
-- **Severity**: high
-- **Source**: conventions
-- **Detail**: `official-manifest.ts` is introduced as the one place that knows the manifest shape, but `plugin-id.test.ts` (the guard from the merged `oneflow-plugin-prefix` feature) still parses `config/official-plugins.json` itself and casts it: line 33 `as { org: string; plugins: string[] }`, line 54 `.plugins as string[]`, then `it.each(...)` asserts `isValidPluginId(id)` on each element.
-
-  The moment anyone writes the object form this PR exists to enable — `{ "id": "oneflow-api-openai", "origin": "..." }` — that test feeds an object into `PLUGIN_ID_RE.test(...)`, which coerces to `"[object Object]"` and returns false. The prefix guard fails with a meaningless case name, and it stops validating the actual id of exactly the entries most likely to be new. TypeScript cannot catch it because the shape is asserted with `as`, not derived.
-
-  So the shipped capability is unusable on first use without editing an unrelated feature's guard. The fix is one line in spirit: consume `normalizeOfficialManifest(...).entries.map(e => e.id)` like every other reader now does. `official-manifest.test.ts` already imports the resolver; `plugin-id.test.ts` is the one reader that was missed.
-
-### 2. The SDK engine keeps its own copy of the URL rule, outside every guard's reach
-
-- **File**: `sdk/tongflow/engine/plugins.py:48`
+- **File**: `src/lib/plugins/official-manifest.ts:147`
 - **Severity**: medium
 - **Source**: conventions
-- **Detail**: `sdk/tongflow/engine/plugins.py` hardcodes `DEFAULT_ORG = "https://github.com/tong-io"` (line 28) and re-implements the rule in `_git_url_for` (line 48): `f"{org.rstrip('/')}/{plugin_id}.git"`. Its module docstring states outright that the convention "matches `official-plugins.server.ts`" — the exact coupling this feature set out to remove.
+- **Detail**: `normalizeOfficialManifest` is the declared validation boundary for `config/official-plugins.json` ("The manifest is validated when it loads… a typo must never fall back silently and clone the wrong repository", docs/plugins.md). It checks the root shape, unknown keys, duplicate ids, and forces `org`/`origin` to be http(s) URLs — including explicit tests rejecting `../etc` as an origin. It does not check the id at all beyond non-empty/unique.
 
-  It never reads `config/official-plugins.json`, so a plugin with an entry `origin` gets cloned by the standalone engine's preflight from the upstream org (404, or worse, a stale upstream copy). The `plugin_git_urls` override parameter exists but the default path is the broken one.
+  That id flows straight into path construction with no further guard: `installPlugin({id})` looks the entry up and calls `cloneOrPull(entry.id, …)` → `join(pluginsDir(), id)` (src/lib/plugins/plugins-install.server.ts:82), which on a failed clone runs `fs.rmSync(dir, { recursive: true, force: true })`; `isPluginInstalled` and `uninstallPlugin` join the same way. Note that `installPlugin` applies `assertValidPluginId` only on the `gitUrl` branch — the official branch trusts the manifest — and `assertValidPluginId`'s own comment says it "also guards against path traversal — ids never contain '/' or '..'". An id like `../x` or `a/b` in the manifest would traverse out of the plugins dir and would also be invisible to the scanner.
 
-  This predates the diff, but the diff is what makes it consequential, and the new guard's scan scope (`grep -rn ... src scripts --include='*.ts' --include='*.tsx' --include='*.mjs' --include='*.js'`) structurally cannot see Python. The guard's own comment claims the rule exists in exactly one place; it enforces that over a subset of the repo.
+  The repo already owns the rule (`isValidPluginId`/`pluginIdError` in src/lib/plugins/plugin-id.ts, importable from non-server code — plugin-id.test.ts imports it), but today it is only asserted in a unit test against the shipped file, not at load time. Since this change makes the manifest a richer, per-entry-editable surface, the normaliser is the right place to enforce the id convention the rest of the system already assumes.
 
-### 3. `check-manifest-unmoved.sh` hardcodes 38 and forbids the object form it is shipped alongside
+### 2. The plugin manager's repo link is still built from the default org + id, ignoring a per-entry origin
 
-- **File**: `scripts/plugins/check-manifest-unmoved.sh:9`
+- **File**: `src/components/workspace/plugins-dialog.tsx:325`
 - **Severity**: medium
-- **Source**: conventions
-- **Detail**: The guard asserts `expected_count=38` AND that all 38 entries are plain strings. Two routine, documented operations turn it red:
+- **Source**: bugs
+- **Detail**: `listOfficialPlugins()` (src/lib/plugins/official-plugins.server.ts:85) still returns only `org: manifest.org` and drops each entry's resolved `origin`. The dialog then renders `href={`${org}/${p.id}`}`. So for a plugin carrying `{"id": ..., "origin": ...}` the app clones/pulls/update-checks against the fork while the visible 'open repo' link sends the user to the upstream repo — a fourth copy of the `org + id` rule that this feature set out to eliminate.
 
-  1. Registering a 39th official plugin — CLAUDE.md's "Registering an official plugin" section describes this as editing `config/official-plugins.json` plus the three READMEs. It was not updated to mention this fourth coupled constant, so the next registration fails an eval with no breadcrumb.
-  2. Using the capability this PR adds — the first `{id, origin}` entry fails the `strings != 38` branch.
+  Why the guards miss it: `scripts/plugins/check-single-url-rule.sh` greps for `\$\{...\}/\$\{...\}\.git`, and this call site has no `.git` suffix, so the single-rule guard structurally cannot see it. `check-installer-parity.ts` only inspects the two server modules, never the UI.
 
-  Contrast `scripts/plugins/check-no-config-drift.sh:47`, which deliberately uses `count -lt 30` and an org check so it tolerates growth. That guard's looseness is the right shape for a standing invariant; the exact-38 form is a snapshot assertion that only makes sense for the PR it was written in.
+  Note the contract (_acceptance/per-plugin-origin/contract.md:75) declares 'hiển thị origin trên UI' a non-goal, so this may be intentional deferral — but the rendered link is wrong, not merely absent, the moment the first override lands. Fix is either returning the resolved origin per entry from `listOfficialPlugins()` or having the API emit a `repoUrl` per plugin.
 
-  AGENTS.md's re-pin ritual says a merged feature's own evals get re-run "when cheap", so this will surface as a red eval on some later, unrelated PR. Either loosen it the way `check-no-config-drift.sh` is loosened, or note the coupling in CLAUDE.md's registration checklist.
+### 3. `git.pull` is fast-forward-preferring, not fast-forward-only: a re-pointed origin can silently create a merge commit and a permanently stuck "update available"
 
-### 4. The acceptance verify suite now requires `uv`, which no prerequisite list mentions
+- **File**: `src/lib/plugins/plugins-install.server.ts:112`
+- **Severity**: medium
+- **Source**: bugs
+- **Detail**: Both pull paths pass `fastForward: true` with `fastForwardOnly` left at its default `false` (src/lib/plugins/plugins-install.server.ts:106-114 and scripts/install-official-plugins.ts:62-70), while the comments above them describe the operation as 'fast-forward it to the latest commit'.
 
-- **File**: `_acceptance/config.yaml:25`
+  In isomorphic-git 1.40.0 `_merge` (node_modules/isomorphic-git/index.js:11158-11221): if `baseOid !== ourOid` and `fastForwardOnly` is false, it does NOT fail — it runs `mergeTree` and, absent conflicts, writes a merge commit with `parent: [ourOid, theirOid]`.
+
+  Concrete scenario, which is precisely the new origin-override case: a plugin is checked out at upstream tip Y; the manifest entry gains `origin` pointing at a fork that branched at X and advanced to Z. Pull now fetches from the fork, base = X, ours = Y, theirs = Z — not a fast-forward. A merge commit M is created locally, `cloneOrPull` returns "updated", and the user is told the install succeeded.
+
+  From then on `checkPluginUpdate` compares `localHeadCommit` (= M) against `remoteHeadCommit` (= Z, via ls-remote on HEAD) — they differ forever, so `hasUpdate` stays true and the dialog shows an update badge permanently. Clicking Update again hits the `baseOid === theirOid` branch (index.js:11152), returns `alreadyMerged`, and reports "updated" success with nothing changed. No error is raised at any point.
+
+  That is exactly the failure mode the comment at plugins-install.server.ts:92-100 says this change exists to prevent, reached by a different route. `fastForwardOnly: true` would surface it as a loud FastForwardError instead.
+
+### 4. The standalone SDK engine still rebuilds the remote from a hard-coded `DEFAULT_ORG`, so headless runs fetch an overridden plugin from upstream
+
+- **File**: `sdk/tongflow/engine/plugins.py:47`
+- **Severity**: medium
+- **Source**: bugs
+- **Detail**: `_git_url_for` does `f"{org.rstrip('/')}/{plugin_id}.git"` with `DEFAULT_ORG = "https://github.com/tong-io"` (line 28) and never reads config/official-plugins.json. A plugin whose manifest entry carries an `origin` is therefore cloned by the desktop app from the fork and by the engine from upstream — the same `pluginId` resolves to two different codebases, and the engine's clone succeeds silently, so the divergence shows up later as unexplained behaviour differences rather than an install error.
+
+  This is acknowledged as a known limit in _acceptance/per-plugin-origin/contract.md:84 and check-single-url-rule.sh's scan is deliberately scoped to .ts/.tsx/.mjs/.js so it cannot see the Python copy. Flagging it because the escape hatch (`plugin_git_urls` overrides passed by the caller) is not wired to the manifest, so nothing in the repo keeps the two in sync — the guard that would have caught it is scoped away.
+
+### 5. CLI installer claims to mirror `cloneOrPull` but omits its interrupted-clone recovery, and uses a different git author
+
+- **File**: `scripts/install-official-plugins.ts:52`
 - **Severity**: low
 - **Source**: conventions
-- **Detail**: All three SDK executors moved from `python3 -m pytest` to `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic python -m pytest -q`. The reasoning in the comment is sound (PEP 668 on Homebrew Python), but three conventions drift:
+- **Detail**: `installOne` branches on `fs.existsSync(dir)` and its comment says "Mirrors cloneOrPull in plugins-install.server.ts", but it skips the specific recovery that function documents at length: `cloneOrPull` (src/lib/plugins/plugins-install.server.ts:86-88) wipes a directory that exists without a `.git`, because "a leftover directory without a .git is the corpse of an interrupted/failed earlier clone: it can never be pulled and the scanner ignores it". The CLI path instead calls `git.getConfig({ dir, path: 'remote.origin.url' })` and `git.pull` against that corpse, both of which fail on every subsequent `pnpm plugins:install` run for that plugin — permanently, with no way to recover except manual `rm -rf`. This behaviour is inherited from the deleted `.mjs`, but the new comment now asserts parity that does not exist.
 
-  - `uv` appears nowhere in CONTRIBUTING.md's Prerequisites (Node 20+, pnpm, Python 3.10+, Modal), nor in README.md or sdk/README.md. A contributor running the gate hits `command not found` with no documented remedy.
-  - AGENTS.md's "Verify suite" still documents `cd sdk && pytest`, so the two authoritative agent-facing files now disagree on how SDK tests run.
-  - The SDK's runtime dependencies are now spelled out a second time, in `--with` flags, away from `sdk/pyproject.toml` (`dependencies = ["pydantic>=2.0", "typing_extensions>=4.12"]`). `typing_extensions` is already missing from the flags — harmless today because no `sdk/` module imports it, latent the day one does. CI (`pip install -e sdk pytest tomli`) resolves deps from pyproject and does not have this problem; `PYTHONPATH=.` opts out of that resolution.
+  Separately, the two paths sign with different identities: the server uses `PLUGIN_GIT_AUTHOR = { name: "tongflow", email: "tongflow@local" }` while this script hardcodes `{ name: "oneflow", email: "oneflow@local" }` (line 69). Harmless under `fastForward: true`, but it is a second copy of a constant the shared module could own.
 
-  The identical 100-character command is also pasted three times, so a future change touches three lines.
+### 6. Parity guard's `git.pull` assertion uses a regex that stops at the first `}`, so it inspects only part of the call
 
-### 5. An origin override never reaches an already-installed plugin — the pull silently uses the old remote
+- **File**: `scripts/plugins/check-installer-parity.ts:126`
+- **Severity**: low
+- **Source**: conventions
+- **Detail**: `assertPullUsesResolvedUrl` matches `/git\.pull\(\{[^}]*\}/` and then tests that window for `\burl\b`. `[^}]*` terminates at the first closing brace, which in `scripts/install-official-plugins.ts` is the brace of the inline `author: { name: "oneflow", … }` object — so the guard only ever sees the option keys that happen to precede `author`. It passes today because `url` is listed before `author` in both files. Reordering the object literal (a pure formatting change) would make the guard fail on correct code; conversely a `url` key inside a nested object would satisfy it on incorrect code.
 
-- **File**: `src/lib/plugins/plugins-install.server.ts:92`
-- **Severity**: high
-- **Source**: bugs
-- **Detail**: `cloneOrPull` only passes `url` to `git.clone`; the `git.pull` branch (plugins-install.server.ts:92-99) omits `url`, so isomorphic-git resolves the remote from the checkout's own `.git/config` (`url` is an accepted param on `pull` — see `node_modules/isomorphic-git/index.d.ts:2457` — it is simply not passed). `installOne` in `scripts/install-official-plugins.ts:52-59` has the identical shape.
+  Given this guard was added specifically because "building the right URL is not the same as fetching from it" — i.e. it is the only mechanical check standing between the feature and the defect it just fixed — it should not depend on argument ordering. Matching balanced braces, or asserting on the AST/`url,` key explicitly within the full call range, would make it say what it means.
 
-  This is exactly the case the feature exists for. Failure scenario: `tongflow-api-openai` is installed from the default org, then the manifest entry gains `{"id": ..., "origin": "https://github.com/phanlemanh"}`. From then on:
-  - `remoteHeadCommit` (`official-plugins.server.ts:150`) does ls-remote against the NEW origin, while the local HEAD came from the OLD one, so `hasUpdate` is true forever;
-  - the user clicks update, `installPlugin` resolves `gitUrl = officialGitUrl(entry)` (the new origin) and then throws it away — `cloneOrPull` fast-forwards from the OLD remote, returns "updated", logs success, and `hasUpdate` is still true on the next check.
+### 7. The parity guard's independent expectation model omits the trailing-slash normalisation the resolver performs, producing a false mismatch
 
-  No error is raised at any point. The user is told the plugin updated and is left on the upstream repo, not the fork. Only a manual `rm -rf plugins/<id>` (or uninstall) makes the override take effect. Neither the parity guard nor the unit tests cover this: the parity guard only compares the URL each consumer *builds*, never what the pull path actually fetches from. A fix is either passing `url: gitUrl` to `git.pull`, or comparing the stored `remote.origin.url` against the resolved entry URL and re-pointing/re-cloning when they differ.
-
-### 6. A trailing slash on `org` or `origin` passes validation and yields a double-slash clone URL
-
-- **File**: `src/lib/plugins/official-manifest.ts:41`
+- **File**: `scripts/plugins/check-installer-parity.ts:33`
 - **Severity**: low
 - **Source**: bugs
-- **Detail**: `requireHttpUrl` only checks the protocol; it never normalises the base. `officialGitUrl` (line 150) then does `${entry.origin}/${entry.id}.git`.
+- **Detail**: `expectedRemotes()` builds `${base}/${id}.git` straight from the raw JSON, where `base` is `entry.origin ?? raw.org` verbatim. The shared resolver's `requireHttpUrl` (src/lib/plugins/official-manifest.ts:59) strips trailing slashes: `value.replace(/\/+$/, "")`.
 
-  Failure scenario: `"origin": "https://github.com/phanlemanh/"` — a completely natural thing to paste from a browser address bar — validates cleanly and resolves to `https://github.com/phanlemanh//tongflow-api-openai.git`. The clone fails at the network layer with a git-level error, far from the manifest that caused it, which is precisely the class of failure the module's own comment says validation exists to prevent ("a typo that silently fell back to the default origin would clone the wrong repository"). Stripping trailing slashes in `requireHttpUrl` (and asserting no `?`/`#`) closes it; the unit tests currently exercise only protocol rejection (`official-manifest.test.ts:182-206`).
+  With an entry such as `"origin": "https://github.com/phanlemanh/"` — the exact browser-address-bar paste that trailing-slash stripping was added to handle, and which official-manifest.test.ts:208-223 asserts is valid — the guard expects `https://github.com/phanlemanh//x.git` while the installer correctly prints `https://github.com/phanlemanh/x.git`. `compare()` then throws and the guard fails on a manifest that is entirely correct.
+
+  The file's header justifies re-deriving the rule independently, which is sound, but the independent model has to encode the same normalisation contract or it flags conformance as divergence.
 
 ## Review incomplete
 
@@ -83,5 +87,5 @@ None — no finder/refuter died during this round's review.
 
 ## Chưa adversarial-verify (refuter chết)
 
-None — all 6 findings above went through adversarial verification (no
+None — all 7 findings above went through adversarial verification (no
 `unverified: true` findings in this round).
