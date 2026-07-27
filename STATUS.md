@@ -8,7 +8,7 @@
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
 - **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **6 feature đã ký**. CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
-- **Chiến lược sản phẩm:** đã chốt — xem memory dự án. Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
+- **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (8 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
 ## Feature đã ký (đọc `_acceptance/<slug>/` để biết chi tiết)
 
@@ -49,11 +49,10 @@ Hai thứ gộp cùng vì cùng một căn bệnh — **một luật viết ở 
 
 ## Quyết định đã chốt (đừng mở lại)
 
-- **Fork tuần tự, theo nhu cầu** — không mirror cả 38 plugin. Nguyên văn: *"dựa trên nguyên tắc tuần tự và phổ biến thay vì fork tất cả plugin"*.
-- **Namespace dùng tài khoản cá nhân `phanlemanh`** trước mắt; lập GitHub org để sau, khi có cộng sự hoặc chốt được tên sản phẩm.
-- **Tiền tố `oneflow-`** cho plugin mới; `tongflow-` vẫn cài được (38 plugin chính thức là repo upstream ở `tong-io`, ta không sở hữu).
-- **Hoãn compliance luật VN** — chỉ giữ thế sẵn sàng (provenance + tham số overlay), không đưa vào pipeline. Rà lại theo quý.
-- **Phạm vi kế hoạch: chỉ phát triển sản phẩm.** GTM/growth/vận hành ngoài phạm vi.
+Đã tách thành **ADR bất biến** — nội dung đầy đủ (bối cảnh, hệ quả, nguồn) ở [docs/adr/](docs/adr/README.md); file này chỉ giữ pointer:
+
+- [ADR-0001](docs/adr/0001-cache-before-cloud.md) cache trước cloud · [ADR-0002](docs/adr/0002-skill-template-orchestrator.md) skill = template + orchestrator, không mở rộng DSL · [ADR-0003](docs/adr/0003-media-judge-ranker-first.md) judge là ranker tới FPR < 5% · [ADR-0004](docs/adr/0004-universe-kg-three-entities.md) KG 3 thực thể · [ADR-0005](docs/adr/0005-managed-cloud-default.md) managed cloud mặc định · [ADR-0006](docs/adr/0006-defer-vn-compliance.md) hoãn compliance VN · [ADR-0007](docs/adr/0007-sequential-plugin-forking.md) fork plugin tuần tự · [ADR-0008](docs/adr/0008-naming-and-distribution.md) tên & phân phối (`oneflow-sdk`, import `tongflow`, tiền tố `oneflow-`, namespace `phanlemanh`)
+- **Phạm vi kế hoạch: chỉ phát triển sản phẩm** — GTM/growth/vận hành ngoài phạm vi (header [docs/roadmap.md](docs/roadmap.md)).
 - **Luật carry-forward** (AGENTS.md): chữ ký của một feature đã merge chỉ được mang sang khi code của chính nó **chứng minh được là không đổi** và standing check xanh. Nó vừa trả công lần đầu ở PR #18 — `sdk-distribution-rename` phải verify lại và ký lại vì nhánh đó chạm `sdk/**`.
 
 ## Nợ & cảnh báo đang mở
@@ -68,14 +67,7 @@ Hai thứ gộp cùng vì cùng một căn bệnh — **một luật viết ở 
 
 ## Kế hoạch 24 tuần (product-only)
 
-| Phase | Tuần | Nội dung chính | Gate |
-|---|---|---|---|
-| P0 Nền độc lập & số liệu | T1–4 | Fork SDK + tách desktop; 3 cột metering; bộ đo WER/TTS/COGS; spec cache | G0: số liệu đạt ngưỡng, spec cache duyệt |
-| P1 Năng lực P0 | T5–10 | Cache + partial re-render; slot `compose-overlay`; `normalize-text-vi`; plugin ElevenLabs; skill system v1; KG v0 | G1: 50 clip không lỗi dấu/giá; conformance canvas↔engine pass |
-| P2 Cloud & vòng dữ liệu | T11–16 | Shared deployment; Postgres + org/membership; retry/resume; metering→quota; telemetry | G2: sống sót restart; ≥25% render partial; COGS khớp ±20% |
-| P3 Ma trận & R&D chặng 2 | T17–24 | Skill Nguồn→ma trận; slot `media-judge`; thống nhất batch semantics; benchmark OF-CB-1 | G3: ma trận 20 biến thể <60'; OF-CB-1 có verdict |
-
-**Không được cắt:** cache engine + overlay.
+Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate G0–G3 với DoD; cập nhật mỗi lần qua gate — không lặp bảng ở đây để tránh hai nguồn sự thật). Tầm nhìn & bằng chứng thẩm định: [docs/strategy/](docs/strategy/vision.md).
 
 ## Hàng đợi hiện hành
 
