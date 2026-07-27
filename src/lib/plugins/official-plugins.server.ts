@@ -143,17 +143,23 @@ async function localHeadCommit(id: string): Promise<string | null> {
 }
 
 /** Remote default-branch HEAD commit (a single ls-remote, no clone). */
+export async function remoteHeadCommitForUrl(
+    url: string,
+): Promise<string | null> {
+    const refs = await git.listServerRefs({
+        http,
+        url,
+        prefix: "HEAD",
+        symrefs: true,
+    });
+    return refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+}
+
 async function remoteHeadCommit(
     entry: OfficialPluginEntry,
 ): Promise<string | null> {
     try {
-        const refs = await git.listServerRefs({
-            http,
-            url: officialGitUrl(entry),
-            prefix: "HEAD",
-            symrefs: true,
-        });
-        return refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+        return await remoteHeadCommitForUrl(officialGitUrl(entry));
     } catch (e) {
         // Network/auth failure: treat as "unknown" rather than surfacing an error
         // — the user can still pull manually.
@@ -161,6 +167,36 @@ async function remoteHeadCommit(
             `[plugins] update check failed for ${entry.id}: ${String(e)}`,
         );
         return null;
+    }
+}
+
+/**
+ * Is the remote holding something we do not have?
+ *
+ * Deliberately not `local !== remote`. After a fork is adopted the local HEAD
+ * can legitimately be *ahead* of the new origin, and plain inequality reads
+ * that as an available update — so the badge would never clear and every click
+ * would report success while changing nothing. The question is ancestry: an
+ * update exists only when the remote commit is not already in our history.
+ */
+async function remoteIsAhead(
+    dir: string,
+    localOid: string,
+    remoteOid: string,
+): Promise<boolean> {
+    if (localOid === remoteOid) return false;
+    try {
+        return !(await git.isDescendent({
+            fs,
+            dir,
+            oid: localOid,
+            ancestor: remoteOid,
+            depth: -1,
+        }));
+    } catch {
+        // The remote commit is not in the local object store at all, so it is
+        // genuinely new to us.
+        return true;
     }
 }
 
@@ -191,9 +227,13 @@ export async function checkPluginUpdate(
         id: entry.id,
         localCommit,
         remoteCommit,
-        hasUpdate: Boolean(
-            localCommit && remoteCommit && localCommit !== remoteCommit,
-        ),
+        hasUpdate:
+            Boolean(localCommit && remoteCommit) &&
+            (await remoteIsAhead(
+                join(pluginsDir(), entry.id),
+                localCommit as string,
+                remoteCommit as string,
+            )),
     };
 }
 

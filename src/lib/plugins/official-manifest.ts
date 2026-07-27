@@ -30,6 +30,21 @@ export interface NormalizedOfficialManifest {
 
 const ALLOWED_ENTRY_KEYS = new Set(["id", "origin"]);
 
+/**
+ * Written as a code-point scan rather than a regex on purpose: a character
+ * class covering the C0 range trips Biome's noControlCharactersInRegex, escaped
+ * or not, and the rule is right — a control character in a pattern is almost
+ * always a mistake. Here it is the subject, not an accident.
+ */
+function hasWhitespaceOrControl(value: string): boolean {
+    for (const ch of value) {
+        if (/\s/.test(ch)) return true;
+        const code = ch.codePointAt(0) ?? 0;
+        if (code < 0x20 || code === 0x7f) return true;
+    }
+    return false;
+}
+
 function isHttpUrl(value: string): boolean {
     let parsed: URL;
     try {
@@ -53,6 +68,17 @@ function isHttpUrl(value: string): boolean {
  * copy of the rule.)
  */
 function requireHttpUrl(value: string, label: string): string {
+    // Reject whitespace and control characters BEFORE parsing. `new URL()`
+    // strips surrounding whitespace and removes embedded tab/CR/LF while
+    // parsing, so a value that only looks valid would pass the check and then
+    // flow unchanged into git.clone — and a trailing space also defeats the
+    // trailing-slash strip below, producing a remote with a space in the middle
+    // of it. Failing here, naming the entry, is the whole point of this module.
+    if (hasWhitespaceOrControl(value)) {
+        throw new Error(
+            `official-plugins manifest: ${label} must not contain whitespace or control characters, got ${JSON.stringify(value)}`,
+        );
+    }
     if (!isHttpUrl(value)) {
         throw new Error(
             `official-plugins manifest: ${label} must be an http(s) URL, got ${JSON.stringify(value)}`,

@@ -12,7 +12,9 @@ import {
     isPluginInstalled,
     loadOfficialPluginManifest,
     officialGitUrl,
+    remoteHeadCommitForUrl,
 } from "@/lib/plugins/official-plugins.server";
+import { PLUGIN_GIT_AUTHOR } from "@/lib/plugins/plugin-git";
 import { isValidPluginId, pluginIdError } from "@/lib/plugins/plugin-id";
 import { invalidatePluginsRegistry } from "@/lib/plugins/plugins-registry.server";
 import { pluginsDir } from "@/lib/runtime/paths.server";
@@ -20,7 +22,6 @@ import { pluginsDir } from "@/lib/runtime/paths.server";
 // We clone with isomorphic-git (pure JS) so the host does not need a system git
 // binary. Trade-off: isomorphic-git speaks HTTP(S) only — SSH remotes are not
 // supported, which is why assertSafeGitUrl restricts custom URLs to http(s).
-const PLUGIN_GIT_AUTHOR = { name: "tongflow", email: "tongflow@local" };
 
 export interface InstallResult {
     id: string;
@@ -121,6 +122,22 @@ async function cloneOrPull(
                 author: PLUGIN_GIT_AUTHOR,
             });
             if (storedUrl !== gitUrl) {
+                // `fastForwardOnly` throws on divergence but NOT when the new
+                // origin's HEAD is an ancestor of ours — a fork taken from an
+                // older upstream snapshot. That case returns "already merged"
+                // with no error, so without this check we would re-point the
+                // config, log a move, and report "updated" while the working
+                // tree still held the OLD origin's code. Only accept the move
+                // once the checkout actually stands on the new remote's tip.
+                const [localHead, remoteHead] = await Promise.all([
+                    git.resolveRef({ fs, dir, ref: "HEAD" }),
+                    remoteHeadCommitForUrl(gitUrl),
+                ]);
+                if (!remoteHead || localHead !== remoteHead) {
+                    throw new PluginInstallError(
+                        `Cannot move ${id} to ${gitUrl}: a fast-forward from the current checkout does not reach that remote's HEAD (local ${localHead.slice(0, 8)}, remote ${remoteHead?.slice(0, 8) ?? "unknown"}). Uninstall the plugin and install it again to pick up the new origin.`,
+                    );
+                }
                 await git.setConfig({
                     fs,
                     dir,

@@ -23,6 +23,7 @@ import {
     type OfficialPluginEntry,
     officialGitUrl,
 } from "../src/lib/plugins/official-manifest";
+import { PLUGIN_GIT_AUTHOR } from "../src/lib/plugins/plugin-git";
 
 const resourcesDir = process.env.TONGFLOW_RESOURCES_DIR?.trim()
     ? path.resolve(process.env.TONGFLOW_RESOURCES_DIR.trim())
@@ -78,9 +79,27 @@ async function installOne(entry: OfficialPluginEntry): Promise<string> {
             // is consequently never used — a fast-forward writes no commit —
             // but isomorphic-git still requires the field.
             fastForwardOnly: true,
-            author: { name: "oneflow", email: "oneflow@local" },
+            author: PLUGIN_GIT_AUTHOR,
         });
         if (storedUrl !== url) {
+            // See cloneOrPull: fastForwardOnly does not fire when the new
+            // origin's HEAD is an ancestor of ours, so the move must be
+            // confirmed against the remote tip rather than assumed.
+            const [localHead, refs] = await Promise.all([
+                git.resolveRef({ fs, dir, ref: "HEAD" }),
+                git.listServerRefs({
+                    http,
+                    url,
+                    prefix: "HEAD",
+                    symrefs: true,
+                }),
+            ]);
+            const remoteHead = refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+            if (!remoteHead || localHead !== remoteHead) {
+                throw new Error(
+                    `cannot move to ${url}: a fast-forward does not reach that remote's HEAD (local ${localHead.slice(0, 8)}, remote ${remoteHead?.slice(0, 8) ?? "unknown"}). Delete plugins/${entry.id} and run again to pick up the new origin.`,
+                );
+            }
             await git.setConfig({
                 fs,
                 dir,

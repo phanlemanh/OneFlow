@@ -219,7 +219,7 @@ describe("non-http(s) origins are rejected (AC-5)", () => {
         "javascript:alert(1)",
         "file:///tmp/x",
         "ssh://git@github.com/x",
-        "not a url at all",
+        "notaurlatall",
     ])("rejects %s as an entry origin", (origin) => {
         expect(() =>
             normalizeOfficialManifest({
@@ -236,6 +236,37 @@ describe("non-http(s) origins are rejected (AC-5)", () => {
                 plugins: [],
             }),
         ).toThrowError(/http/i);
+    });
+
+    it.each([
+        [" https://github.com/x", "leading space"],
+        ["https://github.com/x ", "trailing space"],
+        ["https://github.com/x/ ", "trailing slash then space"],
+        ["https://git\nhub.com/x", "embedded newline"],
+        ["https://git\thub.com/x", "embedded tab"],
+        ["https://git\rhub.com/x", "embedded carriage return"],
+    ])(
+        "rejects an origin with %j (%s) instead of letting it reach git",
+        (origin) => {
+            // new URL() strips surrounding whitespace and removes embedded
+            // tab/CR/LF while parsing, so these all look valid to a protocol
+            // check and would then flow unchanged into the remote.
+            expect(() =>
+                normalizeOfficialManifest({
+                    org: DEFAULT_ORG,
+                    plugins: [{ id: "tongflow-api-gemini", origin }],
+                }),
+            ).toThrowError(/whitespace|control/i);
+        },
+    );
+
+    it("rejects a top-level org with whitespace", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: `${DEFAULT_ORG} `,
+                plugins: [],
+            }),
+        ).toThrowError(/whitespace|control/i);
     });
 
     it("strips a trailing slash rather than emitting a double slash", () => {
