@@ -403,6 +403,64 @@ The official plugins maintained alongside this repo are listed in
 [`config/official-plugins.json`](../config/official-plugins.json) and installed with
 `pnpm plugins:install` (or `pnpm plugins:install <pluginId>` for one).
 
+### Where a plugin is fetched from
+
+The manifest's top-level `org` is the **default origin** — a base URL, not an
+organisation name. An entry is normally a plain string, and its remote is that
+default with the id and `.git` appended:
+
+```json
+{
+    "org": "https://github.com/tong-io",
+    "plugins": ["tongflow-api-gemini"]
+}
+```
+
+An entry that has been forked can carry an `origin` of its own. Everything else
+keeps pointing at the default — plugins are forked one at a time, as reasons to
+fork appear, not in one sweep:
+
+```json
+{
+    "org": "https://github.com/tong-io",
+    "plugins": [
+        "tongflow-api-gemini",
+        { "id": "oneflow-api-openai", "origin": "https://github.com/phanlemanh" }
+    ]
+}
+```
+
+`origin` carries the same meaning as `org`: the id and `.git` are still
+appended, so the entry above resolves to
+`https://github.com/phanlemanh/oneflow-api-openai.git`. An object entry that
+omits `origin` is valid and falls back to the default.
+
+The manifest is validated when it loads. An unknown key, a missing or empty
+`id`, a duplicate id, an id that breaks the directory convention, or an origin
+that is not an `http(s)` URL fails with a message naming the offending entry —
+a typo must never fall back silently and clone the wrong repository. One
+resolver in
+[`src/lib/plugins/official-manifest.ts`](../src/lib/plugins/official-manifest.ts)
+serves the three consumers that fetch code: the in-app plugin manager, the CLI
+installer, and the update checker.
+
+**Two places still build a repo URL from the default `org` alone**, and both
+must be fixed before the first plugin is actually forked, or they will point at
+the upstream repo the plugin no longer tracks:
+
+- the plugin manager's "open repo" link
+  ([`plugins-dialog.tsx`](../src/components/workspace/plugins-dialog.tsx)) —
+  `listOfficialPlugins()` returns only the default `org` and drops each entry's
+  resolved origin, so fixing it changes the API response shape;
+- the standalone SDK engine
+  ([`sdk/tongflow/engine/plugins.py`](../sdk/tongflow/engine/plugins.py)), which
+  keeps its own `DEFAULT_ORG` and never reads this manifest.
+
+Neither can be wrong today: the shipped manifest still holds 38 plain string
+entries. See the "Known limits" section of
+`_acceptance/per-plugin-origin/contract.md` for why they were left out of that
+change's scope.
+
 ---
 
 ## Appendix: the `plugins/` directory at runtime

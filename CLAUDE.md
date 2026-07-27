@@ -61,6 +61,8 @@
 - **The READMEs are hand-maintained and silently drift.** Registering a plugin does **not** update the docs. When you add one, also edit **all three** READMEs ([`README.md`](README.md), [`docs/README_ZH.md`](docs/README_ZH.md), [`docs/README_JA.md`](docs/README_JA.md)):
   - the **Official plugins** list (**GPU/CPU plugins** or **API plugins**) — one entry, ordered to match `official-plugins.json`;
   - the **capability matrix** — flip the node from ⬜ to ✅ if this is the first official plugin for that ABI slot (e.g. TripoSplat made `image-gen-model` / "Image → 3D" available).
+- **A fourth coupled constant:** [`scripts/plugins/check-manifest-unmoved.sh`](scripts/plugins/check-manifest-unmoved.sh) asserts the manifest still holds exactly **38 plain string entries** under the upstream org. That is the `per-plugin-origin` feature's AC-6 — proof that adding the per-entry `origin` capability moved no plugin — so it is a snapshot of that PR, not a standing invariant. Registering a 39th plugin, or writing the first `{"id": ..., "origin": ...}` entry, turns it red. Bump `expected_count` (or retire the guard once the first fork lands) rather than wondering why an unrelated PR failed an eval.
+- **Where a plugin is fetched from:** an entry may be a plain string or `{"id": ..., "origin": ...}`; `origin` is a base URL like the top-level `org`. See [`docs/plugins.md` §10](docs/plugins.md) and the one resolver in [`src/lib/plugins/official-manifest.ts`](src/lib/plugins/official-manifest.ts).
 
 ## Wire / persistence shape
 

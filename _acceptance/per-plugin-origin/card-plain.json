@@ -1,0 +1,22 @@
+{
+  "feature_plain": "Cho phép từng plugin trong danh sách chính thức tự khai kho tải về của riêng nó, để fork lẻ từng cái khi cần thay vì phải chuyển cả 38 plugin cùng lúc.",
+  "scope_plain": "Lần này chỉ dựng cơ chế: chưa fork plugin nào, chưa đổi nguồn mặc định khỏi tong-io, chưa lập tổ chức GitHub, chưa hiện nguồn tải trên giao diện, và chưa ghim phiên bản cho plugin.",
+  "decisions_plain": [
+    {
+      "id": "d-20260726T221618Z-4471",
+      "p": "KHÔNG làm kiểm tra hình ảnh giao diện cho thay đổi này — nó không đụng màn hình nào; đổi lại gói duyệt không có bằng chứng thị giác."
+    },
+    {
+      "id": "d-20260726T221619Z-8823",
+      "p": "Chấp nhận lối viết rút gọn trong danh sách plugin (chỉ ghi tên, bỏ trống kho) là hợp lệ và tự hiểu là kho mặc định — dễ dùng hơn, đổi lại danh sách có hai cách viết cho cùng một ý."
+    },
+    {
+      "id": "d-20260726T2310Z-3312",
+      "p": "Sửa để lệnh cập nhật thật sự tải từ kho mới khai, thay vì lặng lẽ tải lại từ kho cũ — phương án nặng tay hơn là xoá đi tải lại từ đầu đã bị loại vì tốn và phá checkout đang dùng được."
+    },
+    {
+      "id": "d-20260726T2311Z-7745",
+      "p": "KHÔNG gộp bản sao luật trong bộ máy SDK viết bằng Python — nó nằm ngoài phạm vi bạn đã duyệt ở Cổng 1; đổi lại bộ máy chạy độc lập vẫn tải plugin đã fork từ kho gốc. Xem lại khi fork thật plugin đầu tiên."
+    }
+  ]
+}

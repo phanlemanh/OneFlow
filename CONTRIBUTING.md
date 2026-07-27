@@ -11,6 +11,7 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful and construc
 - Node.js 20+
 - pnpm
 - Python 3.10+ (only needed for Modal plugin development)
+- [uv](https://docs.astral.sh/uv/) — needed to run the SDK tests. On macOS the ambient `python3` is usually Homebrew's, where [PEP 668](https://peps.python.org/pep-0668/) refuses `pip install pytest` outright, so `_acceptance/config.yaml` runs the SDK suites through `uv` instead. Install with `brew install uv`.
 - Modal account (free tier at [modal.com](https://modal.com)) — for GPU/CPU inference
 
 ## Development Setup

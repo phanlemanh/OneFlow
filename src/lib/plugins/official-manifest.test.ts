@@ -1,0 +1,355 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import {
+    findOfficialEntry,
+    normalizeOfficialManifest,
+    type OfficialPluginEntry,
+    officialGitUrl,
+    sameGitRemote,
+} from "@/lib/plugins/official-manifest";
+
+const DEFAULT_ORG = "https://github.com/tong-io";
+const FORK_ORIGIN = "https://github.com/phanlemanh";
+
+function shipped(): unknown {
+    return JSON.parse(
+        readFileSync(
+            join(process.cwd(), "config", "official-plugins.json"),
+            "utf8",
+        ),
+    );
+}
+
+function urlOf(
+    manifest: ReturnType<typeof normalizeOfficialManifest>,
+    id: string,
+): string {
+    const entry = findOfficialEntry(manifest, id);
+    if (!entry) throw new Error(`fixture error: no entry for ${id}`);
+    return officialGitUrl(entry);
+}
+
+describe("string entries — today's manifest (AC-1)", () => {
+    it("resolves every id to the top-level org", () => {
+        const manifest = normalizeOfficialManifest(shipped());
+        expect(manifest.org).toBe(DEFAULT_ORG);
+        for (const entry of manifest.entries) {
+            expect(entry.origin).toBe(DEFAULT_ORG);
+            expect(officialGitUrl(entry)).toBe(
+                `${DEFAULT_ORG}/${entry.id}.git`,
+            );
+        }
+    });
+
+    it("preserves the id list element for element, in order", () => {
+        const raw = shipped() as { plugins: string[] };
+        const manifest = normalizeOfficialManifest(raw);
+        expect(manifest.entries.map((e) => e.id)).toEqual(raw.plugins);
+    });
+});
+
+describe("override entries (AC-2)", () => {
+    const raw = {
+        org: DEFAULT_ORG,
+        plugins: [
+            "tongflow-api-gemini",
+            { id: "oneflow-api-openai", origin: FORK_ORIGIN },
+            "tongflow-api-deepseek",
+        ],
+    };
+
+    it("appends id and .git to the entry's own origin", () => {
+        const manifest = normalizeOfficialManifest(raw);
+        expect(urlOf(manifest, "oneflow-api-openai")).toBe(
+            `${FORK_ORIGIN}/oneflow-api-openai.git`,
+        );
+    });
+
+    it("leaves every sibling on the default origin", () => {
+        const manifest = normalizeOfficialManifest(raw);
+        for (const id of ["tongflow-api-gemini", "tongflow-api-deepseek"]) {
+            expect(urlOf(manifest, id)).toBe(`${DEFAULT_ORG}/${id}.git`);
+        }
+    });
+
+    it("accepts an object entry with no origin and falls back to the default", () => {
+        const manifest = normalizeOfficialManifest({
+            org: DEFAULT_ORG,
+            plugins: [{ id: "tongflow-api-gemini" }],
+        });
+        expect(urlOf(manifest, "tongflow-api-gemini")).toBe(
+            `${DEFAULT_ORG}/tongflow-api-gemini.git`,
+        );
+    });
+
+    it("keeps order across mixed string and object entries", () => {
+        const manifest = normalizeOfficialManifest(raw);
+        expect(manifest.entries.map((e) => e.id)).toEqual([
+            "tongflow-api-gemini",
+            "oneflow-api-openai",
+            "tongflow-api-deepseek",
+        ]);
+    });
+
+    it("finds nothing for an id that is not in the manifest", () => {
+        const manifest = normalizeOfficialManifest(raw);
+        expect(
+            findOfficialEntry(manifest, "tongflow-api-nope"),
+        ).toBeUndefined();
+    });
+});
+
+describe("malformed entries are rejected by name (AC-4)", () => {
+    it.each([
+        [
+            "unknown key",
+            { id: "tongflow-api-gemini", orgin: FORK_ORIGIN },
+            "orgin",
+        ],
+        ["missing id", { origin: FORK_ORIGIN }, "id"],
+        ["non-string id", { id: 7 }, "id"],
+        ["empty string entry", "", "empty"],
+        ["empty id", { id: "" }, "empty"],
+        [
+            "non-string origin",
+            { id: "tongflow-api-gemini", origin: 7 },
+            "origin",
+        ],
+        ["empty origin", { id: "tongflow-api-gemini", origin: "" }, "origin"],
+        ["entry is an array", [], "entry"],
+        ["entry is null", null, "entry"],
+        ["entry is a number", 7, "entry"],
+    ])("rejects %s", (_label, entry, needle) => {
+        expect(() =>
+            normalizeOfficialManifest({ org: DEFAULT_ORG, plugins: [entry] }),
+        ).toThrowError(new RegExp(needle as string, "i"));
+    });
+
+    it("names the offending entry rather than failing anonymously", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: [
+                    "tongflow-api-gemini",
+                    { id: "tongflow-api-openai", orgin: FORK_ORIGIN },
+                ],
+            }),
+        ).toThrowError(/entry 1/);
+    });
+
+    it("rejects a duplicate id and names it", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: ["tongflow-api-gemini", "tongflow-api-gemini"],
+            }),
+        ).toThrowError(/tongflow-api-gemini/);
+    });
+
+    it("rejects a duplicate across string and object forms", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: [
+                    "tongflow-api-gemini",
+                    { id: "tongflow-api-gemini", origin: FORK_ORIGIN },
+                ],
+            }),
+        ).toThrowError(/tongflow-api-gemini/);
+    });
+
+    it("rejects a missing or non-array plugins list", () => {
+        expect(() => normalizeOfficialManifest({ org: DEFAULT_ORG })).toThrow();
+        expect(() =>
+            normalizeOfficialManifest({ org: DEFAULT_ORG, plugins: {} }),
+        ).toThrow();
+    });
+
+    it("rejects a missing or non-string org", () => {
+        expect(() => normalizeOfficialManifest({ plugins: [] })).toThrow();
+        expect(() =>
+            normalizeOfficialManifest({ org: 7, plugins: [] }),
+        ).toThrow();
+    });
+
+    it("rejects a non-object root", () => {
+        expect(() => normalizeOfficialManifest(null)).toThrow();
+        expect(() => normalizeOfficialManifest("nope")).toThrow();
+        expect(() => normalizeOfficialManifest([])).toThrow();
+    });
+});
+
+describe("plugin ids are validated at load, not just origins (AC-4)", () => {
+    it.each([
+        "../escape",
+        "a/b",
+        "plugins/../../etc/passwd",
+        "not-a-vendor-prefix",
+        "oneflow-weird-foo",
+        "ONEFLOW-API-FOO",
+    ])("rejects the id %s", (id) => {
+        expect(() =>
+            normalizeOfficialManifest({ org: DEFAULT_ORG, plugins: [id] }),
+        ).toThrow();
+    });
+
+    it("names the offending entry when an id would traverse out of the plugins dir", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: ["tongflow-api-gemini", "../../etc"],
+            }),
+        ).toThrowError(/entry 1/);
+    });
+
+    it("applies the same rule to an object entry's id", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: [{ id: "../x", origin: FORK_ORIGIN }],
+            }),
+        ).toThrow();
+    });
+});
+
+describe("non-http(s) origins are rejected (AC-5)", () => {
+    it.each([
+        "git@github.com:phanlemanh/x",
+        "../etc",
+        "javascript:alert(1)",
+        "file:///tmp/x",
+        "ssh://git@github.com/x",
+        "notaurlatall",
+    ])("rejects %s as an entry origin", (origin) => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: [{ id: "tongflow-api-gemini", origin }],
+            }),
+        ).toThrowError(/http/i);
+    });
+
+    it("rejects a non-http(s) top-level org", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: "git@github.com:tong-io",
+                plugins: [],
+            }),
+        ).toThrowError(/http/i);
+    });
+
+    it.each([
+        [" https://github.com/x", "leading space"],
+        ["https://github.com/x ", "trailing space"],
+        ["https://github.com/x/ ", "trailing slash then space"],
+        ["https://git\nhub.com/x", "embedded newline"],
+        ["https://git\thub.com/x", "embedded tab"],
+        ["https://git\rhub.com/x", "embedded carriage return"],
+    ])(
+        "rejects an origin with %j (%s) instead of letting it reach git",
+        (origin) => {
+            // new URL() strips surrounding whitespace and removes embedded
+            // tab/CR/LF while parsing, so these all look valid to a protocol
+            // check and would then flow unchanged into the remote.
+            expect(() =>
+                normalizeOfficialManifest({
+                    org: DEFAULT_ORG,
+                    plugins: [{ id: "tongflow-api-gemini", origin }],
+                }),
+            ).toThrowError(/whitespace|control/i);
+        },
+    );
+
+    it("rejects a top-level org with whitespace", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: `${DEFAULT_ORG} `,
+                plugins: [],
+            }),
+        ).toThrowError(/whitespace|control/i);
+    });
+
+    it("strips a trailing slash rather than emitting a double slash", () => {
+        const manifest = normalizeOfficialManifest({
+            org: `${DEFAULT_ORG}/`,
+            plugins: [
+                "tongflow-api-gemini",
+                { id: "oneflow-api-openai", origin: `${FORK_ORIGIN}//` },
+            ],
+        });
+        expect(manifest.org).toBe(DEFAULT_ORG);
+        expect(urlOf(manifest, "tongflow-api-gemini")).toBe(
+            `${DEFAULT_ORG}/tongflow-api-gemini.git`,
+        );
+        expect(urlOf(manifest, "oneflow-api-openai")).toBe(
+            `${FORK_ORIGIN}/oneflow-api-openai.git`,
+        );
+    });
+
+    it("accepts a plain http origin", () => {
+        const manifest = normalizeOfficialManifest({
+            org: DEFAULT_ORG,
+            plugins: [
+                { id: "tongflow-api-gemini", origin: "http://git.local/x" },
+            ],
+        });
+        const entry = manifest.entries[0] as OfficialPluginEntry;
+        expect(officialGitUrl(entry)).toBe(
+            "http://git.local/x/tongflow-api-gemini.git",
+        );
+    });
+});
+
+describe("sameGitRemote — cosmetic differences are the same repository", () => {
+    const canonical = "https://github.com/tong-io/tongflow-api-gemini.git";
+
+    it.each([
+        [
+            "https://github.com/tong-io/tongflow-api-gemini",
+            "missing .git suffix",
+        ],
+        [
+            "https://github.com/tong-io/tongflow-api-gemini.git/",
+            "trailing slash",
+        ],
+        ["https://GitHub.com/tong-io/tongflow-api-gemini.git", "host casing"],
+        [
+            "https://github.com:443/tong-io/tongflow-api-gemini.git",
+            "explicit default port",
+        ],
+        [
+            " https://github.com/tong-io/tongflow-api-gemini.git ",
+            "surrounding whitespace",
+        ],
+    ])("treats %s as the same remote (%s)", (variant) => {
+        expect(sameGitRemote(variant, canonical)).toBe(true);
+    });
+
+    it.each([
+        [
+            "https://github.com/phanlemanh/tongflow-api-gemini.git",
+            "different owner",
+        ],
+        [
+            "https://gitlab.com/tong-io/tongflow-api-gemini.git",
+            "different host",
+        ],
+        [
+            "https://github.com/tong-io/tongflow-api-openai.git",
+            "different repo",
+        ],
+        [
+            "http://github.com/tong-io/tongflow-api-gemini.git",
+            "different protocol",
+        ],
+    ])("treats %s as a different remote (%s)", (variant) => {
+        expect(sameGitRemote(variant, canonical)).toBe(false);
+    });
+
+    it("is false when either side is missing", () => {
+        expect(sameGitRemote(undefined, canonical)).toBe(false);
+        expect(sameGitRemote(canonical, undefined)).toBe(false);
+        expect(sameGitRemote(undefined, undefined)).toBe(false);
+    });
+});

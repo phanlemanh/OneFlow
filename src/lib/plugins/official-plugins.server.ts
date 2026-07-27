@@ -5,18 +5,33 @@ import { join } from "node:path";
 import * as git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
 import { logger } from "@/lib/logger";
+import {
+    findOfficialEntry,
+    type NormalizedOfficialManifest,
+    normalizeOfficialManifest,
+    type OfficialPluginEntry,
+    officialGitUrl,
+    sameGitRemote,
+} from "@/lib/plugins/official-manifest";
 import { loadPluginMetaMap } from "@/lib/plugins/plugin-env-manifests.server";
 import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 /**
  * The canonical official-plugin manifest lives in config/official-plugins.json
- * and is shared with scripts/install-official-plugins.mjs — a single source of
+ * and is shared with scripts/install-official-plugins.ts — a single source of
  * truth for both the CLI installer and the in-app plugin manager.
+ *
+ * Its shape, validation, and URL rule live in official-manifest.ts, which is
+ * not server-only so the CLI installer and vitest can import it too. They are
+ * re-exported here for the existing importers of this module.
  */
-export interface OfficialPluginManifest {
-    org: string;
-    plugins: string[];
-}
+export {
+    findOfficialEntry,
+    type NormalizedOfficialManifest,
+    type OfficialPluginEntry,
+    officialGitUrl,
+    sameGitRemote,
+};
 
 export interface OfficialPluginInfo {
     id: string;
@@ -47,14 +62,9 @@ function publicIconPath(id: string): string | null {
     return null;
 }
 
-export function loadOfficialPluginManifest(): OfficialPluginManifest {
+export function loadOfficialPluginManifest(): NormalizedOfficialManifest {
     const raw = readFileSync(manifestPath(), "utf8");
-    return JSON.parse(raw) as OfficialPluginManifest;
-}
-
-/** Git remote URL for an official plugin id under the configured org. */
-export function officialGitUrl(org: string, id: string): string {
-    return `${org}/${id}.git`;
+    return normalizeOfficialManifest(JSON.parse(raw));
 }
 
 /**
@@ -76,7 +86,7 @@ export function listOfficialPlugins(): {
     const metaMap = loadPluginMetaMap();
     return {
         org: manifest.org,
-        plugins: manifest.plugins.map((id) => {
+        plugins: manifest.entries.map(({ id }) => {
             const meta = metaMap[id];
             // Manifest icon wins; otherwise fall back to the public convention
             // so even not-yet-installed plugins can show an icon.
@@ -97,7 +107,9 @@ export function listOfficialPlugins(): {
  * manifest — i.e. community plugins cloned from a custom git URL.
  */
 export function listInstalledCommunityPlugins(): string[] {
-    const official = new Set(loadOfficialPluginManifest().plugins);
+    const official = new Set(
+        loadOfficialPluginManifest().entries.map((entry) => entry.id),
+    );
     let entries: string[];
     try {
         entries = fs.readdirSync(pluginsDir());
@@ -115,7 +127,14 @@ export interface PluginUpdateInfo {
     id: string;
     localCommit: string | null;
     remoteCommit: string | null;
-    /** True only when both commits are known and differ. */
+    /**
+     * True only when both commits are known and the remote commit is not
+     * already in our history.
+     *
+     * Deliberately not "they differ": after a fork is adopted the local HEAD
+     * can legitimately be ahead of the new origin, and inequality would leave
+     * the badge lit forever with every click reporting success.
+     */
     hasUpdate: boolean;
 }
 
@@ -133,45 +152,95 @@ async function localHeadCommit(id: string): Promise<string | null> {
 }
 
 /** Remote default-branch HEAD commit (a single ls-remote, no clone). */
+async function remoteHeadCommitForUrl(url: string): Promise<string | null> {
+    const refs = await git.listServerRefs({
+        http,
+        url,
+        prefix: "HEAD",
+        symrefs: true,
+    });
+    return refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+}
+
 async function remoteHeadCommit(
-    org: string,
-    id: string,
+    entry: OfficialPluginEntry,
 ): Promise<string | null> {
     try {
-        const refs = await git.listServerRefs({
-            http,
-            url: officialGitUrl(org, id),
-            prefix: "HEAD",
-            symrefs: true,
-        });
-        return refs.find((r) => r.ref === "HEAD")?.oid ?? null;
+        return await remoteHeadCommitForUrl(officialGitUrl(entry));
     } catch (e) {
         // Network/auth failure: treat as "unknown" rather than surfacing an error
         // — the user can still pull manually.
-        logger.warn(`[plugins] update check failed for ${id}: ${String(e)}`);
+        logger.warn(
+            `[plugins] update check failed for ${entry.id}: ${String(e)}`,
+        );
         return null;
     }
 }
 
-/** Compare local vs remote HEAD for one plugin. Not-installed -> no update. */
+/**
+ * Is the remote holding something we do not have?
+ *
+ * Deliberately not `local !== remote`. After a fork is adopted the local HEAD
+ * can legitimately be *ahead* of the new origin, and plain inequality reads
+ * that as an available update — so the badge would never clear and every click
+ * would report success while changing nothing. The question is ancestry: an
+ * update exists only when the remote commit is not already in our history.
+ */
+async function remoteIsAhead(
+    dir: string,
+    localOid: string,
+    remoteOid: string,
+): Promise<boolean> {
+    if (localOid === remoteOid) return false;
+    try {
+        return !(await git.isDescendent({
+            fs,
+            dir,
+            oid: localOid,
+            ancestor: remoteOid,
+            depth: -1,
+        }));
+    } catch {
+        // The remote commit is not in the local object store at all, so it is
+        // genuinely new to us.
+        return true;
+    }
+}
+
+/**
+ * Compare local vs remote HEAD for one plugin. Not-installed -> no update.
+ *
+ * Takes the entry rather than an org: a forked plugin must be checked against
+ * the origin it was cloned from, not the manifest default. This function used
+ * to receive `manifest.org` for every plugin alike, which would have reported
+ * updates from upstream for a plugin that had moved.
+ */
 export async function checkPluginUpdate(
-    org: string,
-    id: string,
+    entry: OfficialPluginEntry,
 ): Promise<PluginUpdateInfo> {
-    if (!isPluginInstalled(id)) {
-        return { id, localCommit: null, remoteCommit: null, hasUpdate: false };
+    if (!isPluginInstalled(entry.id)) {
+        return {
+            id: entry.id,
+            localCommit: null,
+            remoteCommit: null,
+            hasUpdate: false,
+        };
     }
     const [localCommit, remoteCommit] = await Promise.all([
-        localHeadCommit(id),
-        remoteHeadCommit(org, id),
+        localHeadCommit(entry.id),
+        remoteHeadCommit(entry),
     ]);
     return {
-        id,
+        id: entry.id,
         localCommit,
         remoteCommit,
-        hasUpdate: Boolean(
-            localCommit && remoteCommit && localCommit !== remoteCommit,
-        ),
+        hasUpdate:
+            Boolean(localCommit && remoteCommit) &&
+            (await remoteIsAhead(
+                join(pluginsDir(), entry.id),
+                localCommit as string,
+                remoteCommit as string,
+            )),
     };
 }
 
@@ -180,8 +249,8 @@ export async function checkOfficialPluginUpdates(): Promise<
     PluginUpdateInfo[]
 > {
     const manifest = loadOfficialPluginManifest();
-    const installed = manifest.plugins.filter((id) => isPluginInstalled(id));
-    return Promise.all(
-        installed.map((id) => checkPluginUpdate(manifest.org, id)),
+    const installed = manifest.entries.filter((entry) =>
+        isPluginInstalled(entry.id),
     );
+    return Promise.all(installed.map((entry) => checkPluginUpdate(entry)));
 }
