@@ -1,69 +1,76 @@
-# Review Findings: per-plugin-origin (Round 4)
+# Review Findings: per-plugin-origin (Round 5)
 
 Informational only — not parsed by the acceptance-evidence-gate hook. These are
-adversarial-verified findings from reviewing the round-4 implementation, listed
+adversarial-verified findings from reviewing the round-5 implementation, listed
 most-severe first.
 
 ## Findings
 
-### 1. The new "Cannot move" guard throws a `PluginInstallError` inside the block whose catch re-wraps everything as `git failed: …` with status 500
+### 1. Plugin manager still builds each repo link from the default `org`, ignoring per-plugin `origin`
 
-- **File**: `src/lib/plugins/plugins-install.server.ts:137`
-- **Severity**: medium
-- **Source**: conventions
-- **Detail**: `cloneOrPull` throws `new PluginInstallError("Cannot move ${id} to ${gitUrl}: … Uninstall the plugin and install it again to pick up the new origin.")` at line 137, i.e. *inside* the `try` that starts at line 91. The catch at lines 161-171 does not special-case `PluginInstallError`: it unconditionally does `throw new PluginInstallError("git failed: " + msg, 500)`.
-
-  Consequences, both contrary to the pattern this file already established:
-  1. The status is wrong. `PluginInstallError` carries an intentional status — 400 by default for user-actionable input errors, 404/409 in `uninstallPlugin`, and 500 reserved for a genuine git failure. This is a deliberate, user-actionable refusal ("uninstall and reinstall"), and it reaches `/api/plugins/install` (route.ts:31-36) as HTTP 500.
-  2. The message is wrong. It is prefixed "git failed:" when git did not fail — the pull succeeded; the code refused to accept the move. The carefully-worded guidance the commit added (015d196 "confirm the move actually landed") is delivered to the user as a server-error string.
-
-  The sibling CLI path is unaffected (`scripts/install-official-plugins.ts:99` throws a plain Error that `main` prints verbatim), so the two paths that the feature explicitly set out to keep in lockstep now report the same condition differently.
-
-  Fix: re-throw untouched in the catch (`if (e instanceof PluginInstallError) throw e;`) before wrapping, or perform the move-confirmation outside the try. Note this is not covered by `check-installer-parity.ts`, which only asserts the literal presence of `url` and `fastForwardOnly: true` inside the `git.pull({…})` call text.
-
-### 2. The "Cannot move" origin-refusal error is swallowed by the outer catch and re-thrown as a generic 500 "git failed"
-
-- **File**: `src/lib/plugins/plugins-install.server.ts:137`
-- **Severity**: medium
+- **File**: `src/components/workspace/plugins-dialog.tsx:325`
+- **Severity**: high
 - **Source**: bugs
-- **Detail**: The new move-confirmation guard throws `new PluginInstallError("Cannot move ${id} to ${gitUrl}: … Uninstall the plugin and install it again …")` — a deliberate 400 with actionable text. But that throw sits INSIDE the `try` that opens at line 91. The catch at line 161 catches every throwable and unconditionally re-wraps it: `throw new PluginInstallError(\`git failed: ${msg}\`, 500)`.
+- **Detail**: The whole point of this diff is that a manifest entry may carry its own `origin`, and `check-installer-parity.ts:assertNoBareOrgUrlBuild()` exists to stop any consumer from building a URL out of the bare org. But that guard only scans `src/lib/plugins/official-plugins.server.ts` and `src/lib/plugins/plugins-install.server.ts` — it never looks at the UI.
 
-  Concrete consequence, verified end-to-end:
-  - `src/app/api/plugins/install/route.ts:31-35` returns `e.status`, so the response becomes **500** instead of **400** — a client/user error is reported as a server fault.
-  - The message becomes `git failed: Cannot move …` while git in fact *succeeded* (the pull fast-forwarded / reported alreadyMerged); the failing step was the ancestry check, not git. The prefix actively misdirects whoever reads it.
+  `plugins-dialog.tsx:325` renders the plugin title as `href={`${org}/${p.id}`}`, where `org` comes from `/api/plugins/official` -> `listOfficialPlugins()`, which returns `org: manifest.org` (the *default*) and maps entries with `manifest.entries.map(({ id }) => ...)` (`official-plugins.server.ts:86-87`) — the per-entry `origin` is dropped on the floor and never reaches the client at all.
 
-  Repro: an installed plugin whose manifest entry gains an `origin` pointing at a fork taken from an older upstream snapshot. `git.pull({fastForwardOnly: true})` returns `alreadyMerged` with no error (confirmed in isomorphic-git 1.40.0 `_merge`: `if (baseOid === theirOid) return { oid: ourOid, alreadyMerged: true }`), the `localHead !== remoteHead` branch fires, and the user gets a 500 "git failed".
+  Failure scenario: add `{ "id": "oneflow-api-openai", "origin": "https://github.com/phanlemanh" }` to config/official-plugins.json (exactly the fixture `check-installer-parity.ts` itself constructs). Install/update and the update checker correctly use `https://github.com/phanlemanh/oneflow-api-openai.git`, but the dialog's "open repo" link points at `https://github.com/tong-io/oneflow-api-openai` — the upstream repo the plugin no longer tracks. For the forked/renamed/private case that motivated the feature, this is a 404 or, worse, a live-but-wrong repo. This is the same class of bug the feature was built to eliminate, surviving in the one consumer the parity guard structurally cannot see. Fix: include the resolved `origin` per entry in `OfficialPluginInfo` and have the dialog use it.
 
-  Fix: hoist the guard out of the `try`, or make the catch re-throw `PluginInstallError` untouched (`if (e instanceof PluginInstallError) throw e;`) before wrapping. Note the same shape exists in the CLI mirror at scripts/install-official-plugins.ts:99, but there the throw is caught by `main()`'s per-entry handler, which prints the message verbatim — so only the server path is affected.
+### 2. Parity guard's "independent model" is not equivalent to the resolver — it will fail on a correct tree
 
-  This is the same underlying defect as finding 1 above, surfaced independently via a bug-hunt pass rather than a conventions pass; both are kept here since each documents a distinct verification angle (message/status correctness vs. control-flow placement) and both point at the same fix.
-
-### 3. `PluginUpdateInfo.hasUpdate` doc comment still documents the exact semantics this diff removed
-
-- **File**: `src/lib/plugins/official-plugins.server.ts:128`
+- **File**: `scripts/plugins/check-installer-parity.ts:41`
 - **Severity**: medium
 - **Source**: conventions
-- **Detail**: The exported interface still carries `/** True only when both commits are known and differ. */` on `hasUpdate`. This diff deliberately replaced that rule: `checkPluginUpdate` now computes `Boolean(localCommit && remoteCommit) && await remoteIsAhead(...)`, and `remoteIsAhead` (lines ~170-195) is documented as "Deliberately not `local !== remote`" — precisely because after a fork is adopted the local HEAD can legitimately be *ahead*, and plain inequality would leave the badge lit forever.
+- **Detail**: `expectedRemotes()` builds the expectation as `${base.replace(/\/+$/, "")}/${id}.git`, i.e. it mirrors only trailing-slash stripping. The resolver it checks (`requireHttpUrl` in `src/lib/plugins/official-manifest.ts`) returns `parsed.href.replace(/\/+$/, "")` — the WHATWG-normalized form, deliberately, per the comment "Return what was validated, not what was written". The two diverge for any origin that is not already canonical. Verified with Node:
+  ```
+  https://GitHub.com/tong-io      -> resolver https://github.com/tong-io   | model https://GitHub.com/tong-io
+  https://github.com:443/tong-io  -> resolver https://github.com/tong-io   | model https://github.com:443/tong-io
+  https://github.com/a/../b       -> resolver https://github.com/b         | model https://github.com/a/../b
+  backslash form                  -> resolver folds \\ to //               | model leaves it
+  ```
+  The guard's own doc comment (line 30) asserts the opposite: "It must still mirror every rule the resolver applies, trailing-slash stripping included: a model that is merely *different* rather than *equivalent* would fail on a correct tree the first time an origin is pasted with a trailing slash." That is precisely the failure mode, one normalization wider than the comment accounts for. It is latent today only because AC-6 keeps the shipped manifest at 38 plain strings; it fires on the very PR the guard exists for — the first fork, whose origin is pasted from a browser. Making the model equivalent without making it dependent is one line: `new URL(base).href.replace(/\/+$/, "")`.
 
-  So the surviving comment states the behaviour the change exists to eliminate, on an exported interface whose shape the client mirrors (`src/components/workspace/plugins-dialog.tsx:96-101`). In a codebase where comments are the load-bearing record of these invariants — and where round 3 of this feature's own review flagged "the invariant is documented as held when it is not" as a finding — this is the same defect re-introduced one file over. It should read something like "True only when both commits are known and the remote commit is not already in our history."
+### 3. Whitespace/control hardening applied to the trusted manifest boundary but not to the untrusted user-supplied git URL
 
-### 4. `requireHttpUrl` validates the parsed URL but returns the raw string, so what is checked is not what reaches git
+- **File**: `src/lib/plugins/plugins-install.server.ts:59`
+- **Severity**: low
+- **Source**: conventions
+- **Detail**: This change added `hasWhitespaceOrControl()` to the manifest path with an explicit rationale: `new URL()` strips surrounding whitespace and removes embedded tab/CR/LF while parsing, so a value that only looks valid would pass a protocol check and then "flow unchanged into git.clone". The same file's other entry point into the same `cloneOrPull` — `assertSafeGitUrl`, which handles `gitUrl` straight off the `POST /api/plugins/install` body — still does only `/^https?:\/\//i.test(gitUrl.trim())` followed by `.trim()`. Embedded tab/CR/LF/space survive both and reach `git.clone` unchanged. So the in-repo config file (fully trusted, reviewed in a PR) is now validated more strictly than the request body (fully untrusted), which inverts the usual boundary ordering and leaves two divergent notions of "a safe remote URL" ~40 lines apart in one file. The shared module already exports the predicate; routing `assertSafeGitUrl` through it would collapse both to one rule.
 
-- **File**: `src/lib/plugins/official-manifest.ts:87`
+### 4. `remoteIsAhead`'s catch swallows real repo errors into "update available", and its justifying comment is factually wrong
+
+- **File**: `src/lib/plugins/official-plugins.server.ts:203`
 - **Severity**: low
 - **Source**: bugs
-- **Detail**: `isHttpUrl(value)` decides via `new URL(value)`, but `requireHttpUrl` returns `value.replace(/\/+$/, "")` — the original input, never the parsed/normalized `href`. The previous review round flagged exactly this and the fix only closed the whitespace/control subset (`hasWhitespaceOrControl`). Other WHATWG normalizations still diverge; verified with Node:
+- **Detail**: The catch at `official-plugins.server.ts:203` returns `true` and justifies it with "The remote commit is not in the local object store at all, so it is genuinely new to us."
 
-  ```
-  "https:/github.com/x"          -> parses as https://github.com/x   (single slash typo accepted)
-  "https:\\evil.com\\x"          -> parses as https://evil.com//x    (backslashes folded to slashes)
-  "https://github.com/a/../../b" -> parses as https://github.com/b    (dot segments resolved)
-  ```
+  That is not how `git.isDescendent` behaves. In isomorphic-git 1.40.0, `_isDescendent` (index.js:12265-12322) walks the local history from `oid` looking for `ancestor` among commit parents; it never reads the ancestor object. When `ancestor` is absent from the local store it exhausts the queue and `return false` (index.js:12321) — no throw. With `depth: -1` the `MaxDepthError` branch is also unreachable (`searchdepth` starts at 0 and only increments). So the documented case is handled by the normal `!false` path, and the catch never fires for that reason.
 
-  In each case validation passes on the *parsed* form while `officialGitUrl()` emits the *raw* form into `git.clone` / `git.pull` / `git.listServerRefs`. The most likely real-world hit is the single-slash typo: it sails past the validator whose whole stated job is to "reject by name", then fails deep inside isomorphic-git with a URL-parse error that names no manifest entry.
+  What the catch actually swallows is genuine repository breakage encountered while traversing: `_readObject` throwing `NotFoundError` on a missing/corrupt object, or `ObjectTypeError` on a malformed one. Failure scenario: a plugin checkout with a corrupted object in its history — `/api/plugins/check-updates` reports `hasUpdate: true` forever, the badge stays lit, and every click on Update runs `cloneOrPull`, which either fails with an opaque "git failed" or reports "updated" without changing anything. The underlying corruption is never surfaced. At minimum the catch should log (like `remoteHeadCommit` at line 170 does) rather than silently coercing any error to "there is an update".
 
-  Fix: return the parsed value — e.g. have `isHttpUrl` hand back the `URL` object and return `parsed.href.replace(/\/+$/, "")` — so the string that was validated is the string that is used.
+### 5. Plugin manager's "open repo" link built from the bare default org is an accepted known limit, but invisible outside `_acceptance/`
+
+- **File**: `src/components/workspace/plugins-dialog.tsx:325`
+- **Severity**: low
+- **Source**: conventions
+- **Detail**: `listOfficialPlugins()` (`src/lib/plugins/official-plugins.server.ts:87`) destructures `manifest.entries.map(({ id }) => ...)` and drops `origin`, returning only the default `org` at the top level; the dialog then renders `href={`${org}/${p.id}`}`. This is the exact shape the feature removed everywhere else — the reason `officialGitUrl` was changed to take an entry was so "a caller holding only the default org cannot build a URL for a plugin that overrides it" — and neither guard catches it: `check-single-url-rule.sh`'s pattern requires a literal `.git`, and `check-installer-parity.ts` scans only the two server modules.
+
+  Reporting it not as a defect to fix here but as a documentation gap: it IS recorded in `_acceptance/per-plugin-origin/contract.md` "Known limits" (with a sound scope argument — fixing it changes the API response shape, a T3 path past what Gate 1 approved), yet the two places a future contributor will actually read say the opposite. `docs/plugins.md` §10 states "One resolver ... serves all three consumers: the in-app plugin manager, the CLI installer, and the update checker", and CLAUDE.md's new bullet points at "the one resolver". The same applies to the second recorded limit, `sdk/tongflow/engine/plugins.py:28-51`, which keeps its own `DEFAULT_ORG` and f-string URL rule. Consider carrying one sentence of the known limits into `docs/plugins.md` §10 so the first fork does not ship a link pointing at upstream.
 
 ## Chua adversarial-verify (refuter chet)
 
 None — all findings above completed adversarial verification this round.
+
+## Findings resolved since round 4
+
+Round 4's findings 1-4 (the "Cannot move" guard status/message mismatch in
+`plugins-install.server.ts:137`, the stale `hasUpdate` doc comment in
+`official-plugins.server.ts:128`, and `requireHttpUrl` returning the raw
+string instead of the parsed URL in `official-manifest.ts:87`) do not
+recur in this round's findings — the round-5 pass surfaced a different set
+(led by the plugins-dialog.tsx bare-org link, promoted here to high after
+confirming it survives the parity guard's scan scope). This section does
+not assert those round-4 items were fixed in code; it records only that
+this round's adversarial pass did not re-flag them, and the report writer
+did not independently re-verify their current status.
