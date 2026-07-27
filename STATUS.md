@@ -19,33 +19,16 @@
 | `sdk-distribution-rename` | T3 | 27/07 | Distribution `oneflow-sdk`, import package giữ `tongflow` |
 | `dependency-refresh-2026-07` | T2 | 26/07 | Gộp 5 PR dependabot; biome 2.5.5 |
 | `ci-actions-bump` | T2 | 26/07 | checkout v7, login-action v4, dry-run guard cho docker-publish |
-| `oneflow-plugin-prefix` | T3 | 27/07 | `oneflow-` là quy ước thư mục plugin, `tongflow-` legacy |
+| `oneflow-plugin-prefix` | T3 | 27/07 | `oneflow-` là quy ước thư mục plugin, `tongflow-` legacy. **Ký lại 27/07** cùng Cổng 2 của per-plugin-origin (nhánh đó sửa `plugin-id.test.ts` sang normaliser chung) |
+| `per-plugin-origin` | T2 | 27/07 | Entry manifest nhận `origin` riêng; 1 resolver cho 3 đường tải; installer CLI sang TS; manifest validate lúc nạp. Origin lệch → từ chối 409, KHÔNG tự di trú |
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Nhánh `feat/per-plugin-origin` đã push, đang chờ Gate 1.**
+**`per-plugin-origin` đã ký Cổng 2 (27/07), PR đang mở — việc còn lại là merge (merge commit, không squash), rồi việc lớn kế tiếp là 1.L0.**
 
-Contract đã viết đầy đủ (`_acceptance/per-plugin-origin/`, T2, 6 tiêu chí, 12 eval), khoá executor đã khai trong `_acceptance/config.yaml`. **Chưa viết một dòng code nào** — Gate 1 chưa được duyệt.
+Feature thứ 7: entry trong `config/official-plugins.json` nay nhận dạng `{"id", "origin"}` — fork lẻ từng plugin không phải chuyển cả 38. Một resolver (`src/lib/plugins/official-manifest.ts`, thuần, 57 test) phục vụ cả ba đường tải code; installer CLI chuyển sang TS; manifest được validate lúc nạp (kể cả tên plugin, chặn `../x` vào đường dẫn); 3 guard mới đều đã mutation-test. 8 round verify — round 8 sạch (0 HIGH/MEDIUM).
 
-Vấn đề nó giải: `officialGitUrl(org, id)` dựng **mọi** remote từ một chuỗi `org` duy nhất, nên fork một plugin là phải chuyển cả 38 hoặc không cái nào. Không có trạng thái ở giữa — mà đó chính là trạng thái nguyên tắc "fork tuần tự" cần.
-
-Hình dạng đề xuất, tương thích ngược:
-
-```json
-{
-  "org": "https://github.com/tong-io",
-  "plugins": [
-    "tongflow-api-gemini",
-    { "id": "oneflow-api-gemini", "origin": "https://github.com/phanlemanh" }
-  ]
-}
-```
-
-Hai thứ gộp cùng vì cùng một căn bệnh — **một luật viết ở hai chỗ**:
-1. Luật dựng URL tồn tại hai bản (`official-plugins.server.ts` và `scripts/install-official-plugins.mjs`). Sửa một bên quên bên kia → CLI và app tải plugin từ **hai nơi khác nhau**, im lặng. Script sẽ chuyển sang TS dùng chung resolver (như `gen:abi`, `verify:plugins` đã chạy dưới `tsx`).
-2. Manifest **không được validate** — gõ nhầm key hôm nay sẽ lặng lẽ rơi về origin mặc định và clone nhầm repo.
-
-Để tiếp: duyệt Gate 1 → implement → verify context sạch → ký → merge (merge commit, **không squash**).
+Bài học đắt ghi lại cho máy sau: **round 2→7 churn vì sửa hành vi "plugin đã cài dời origin" — thứ không có AC/eval nào phủ và AC-6 cấm xảy ra trong PR này.** Chốt cuối: origin lệch → từ chối 409 chỉ cách gỡ (so qua `sameGitRemote` đã chuẩn hoá, không xoá, không migrate). Di trú tự động thuộc contract của lần fork thật đầu tiên, xem Known limits của contract.
 
 ## Quyết định đã chốt (đừng mở lại)
 
@@ -65,6 +48,9 @@ Hai thứ gộp cùng vì cùng một căn bệnh — **một luật viết ở 
 - **Trùng tên "OneFlow"**: GitHub `oneflow` = OneFlow Systems Ltd; `Oneflow-Inc` = framework DL Trung Quốc, và framework đó **giữ tên `oneflow` trên PyPI**. Còn trống: `oneflow-io`, `oneflow-studio`, `oneflowhq`.
 - **Hai giới hạn guard đã ghi, chưa sửa** — xem mục "Known limits" trong `_acceptance/ci-actions-bump/contract.md` và `_acceptance/oneflow-plugin-prefix/contract.md`. Đều cần contract riêng vì sửa script eval sau khi verify là bắt đầu lại vòng.
 - **2 PR dependabot cũ (#1, #2) đã đóng thủ công** — commit của chúng không nằm trong PR #17 nên GitHub không tự đóng.
+- **Gói nợ "lần fork thật đầu tiên"** (từ 8 round review của per-plugin-origin, chi tiết ở Known limits contract đó): link "mở kho" trong plugins-dialog vẫn ghép từ org mặc định (sửa = đổi hình dạng phản hồi API, đường T3); bản sao luật URL thứ tư trong `sdk/tongflow/engine/plugins.py`; di trú tự động khi đổi origin (cần AC + eval git-fixture riêng); 3 LOW (query/fragment lọt qua `requireHttpUrl`, message CLI hardcode `plugins/`, catch trần trong `remoteIsAhead`); `assertSafeGitUrl` lỏng hơn biên manifest. **Lần fork đầu tiên phải mang cả gói này theo.**
+- **CI không chạy `pnpm test`** — phát hiện ở round 6: `.github/workflows/ci.yml` chạy lint/typecheck/build/sdk-pytest/pre-merge nhưng không vitest, nên 300+ test và 3 guard mới chỉ có hiệu lực khi chạy tay local. Sửa = chạm workflows = chạm evidence của `ci-actions-bump` — cần contract riêng.
+- **Môi trường dev macOS**: 3 executor `sdk_pytest*` nay chạy qua `uv` (PEP 668 chặn pip vào Homebrew Python — CI xanh nhưng máy dev đỏ với lệnh cũ); `uv` đã vào CONTRIBUTING prerequisites. pnpm 11 cần `pnpm-workspace.yaml` local với `allowBuilds` (trường `pnpm.onlyBuiltDependencies` trong package.json không còn được đọc) — file này untracked, lockfile committed có importer `packages/proprietary` không tồn tại trong repo public, cẩn thận đừng để pnpm prune nó.
 
 ## Kế hoạch 24 tuần (product-only)
 
