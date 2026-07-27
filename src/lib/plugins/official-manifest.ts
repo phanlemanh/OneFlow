@@ -212,6 +212,34 @@ export function officialGitUrl(entry: OfficialPluginEntry): string {
     return `${entry.origin}/${entry.id}.git`;
 }
 
+/**
+ * Do two git remote URLs name the same repository?
+ *
+ * Compared in normalised form — parsed href, trailing slashes and an optional
+ * `.git` suffix stripped — never as raw strings. A checkout cloned by hand from
+ * the address GitHub's UI offers has no `.git` suffix, while the resolver
+ * always appends one; a raw comparison would read that cosmetic difference as
+ * "a different repository", and the caller acts on this answer.
+ * A value that does not parse falls back to a trimmed string compare.
+ */
+export function sameGitRemote(
+    a: string | undefined,
+    b: string | undefined,
+): boolean {
+    if (!a || !b) return false;
+    const canon = (value: string): string => {
+        const stripped = value.trim().replace(/\/+$/, "");
+        try {
+            return new URL(stripped).href
+                .replace(/\/+$/, "")
+                .replace(/\.git$/i, "");
+        } catch {
+            return stripped.replace(/\.git$/i, "");
+        }
+    };
+    return canon(a) === canon(b);
+}
+
 export function findOfficialEntry(
     manifest: NormalizedOfficialManifest,
     id: string,

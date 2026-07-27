@@ -11,6 +11,7 @@ import {
     normalizeOfficialManifest,
     type OfficialPluginEntry,
     officialGitUrl,
+    sameGitRemote,
 } from "@/lib/plugins/official-manifest";
 import { loadPluginMetaMap } from "@/lib/plugins/plugin-env-manifests.server";
 import { pluginsDir, resourcesDir } from "@/lib/runtime/paths.server";
@@ -29,6 +30,7 @@ export {
     type NormalizedOfficialManifest,
     type OfficialPluginEntry,
     officialGitUrl,
+    sameGitRemote,
 };
 
 export interface OfficialPluginInfo {

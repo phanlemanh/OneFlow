@@ -175,15 +175,17 @@ function assertPullUsesResolvedUrl(): void {
 }
 
 /**
- * A moved origin must be re-cloned, not reconciled.
+ * A checkout whose remote differs from the resolved entry is REFUSED, not
+ * migrated.
  *
- * Three rounds of review found three separate silent failures in the
- * fast-forward-in-place approach — an ancestor tip returning "already merged",
- * a branch-name mismatch between what is pulled and what is verified, a config
- * re-pointed onto a tree that never fetched from it. The design answer is to
- * throw the checkout away, and it needs a guard or it will drift back.
+ * Both migration strategies were tried and each failed a review round:
+ * fast-forwarding in place produced silent wrong states, and
+ * delete-then-re-clone turned a failed clone into an uninstall and a cosmetic
+ * URL difference into data loss. Automatic migration has no acceptance
+ * criterion in this feature, so this guard pins the refusal until the first
+ * real fork brings its own contract.
  */
-function assertOriginMoveReclones(): void {
+function assertMovedOriginRefused(): void {
     const files = [
         "src/lib/plugins/plugins-install.server.ts",
         "scripts/install-official-plugins.ts",
@@ -195,16 +197,25 @@ function assertOriginMoveReclones(): void {
                 `${file}: does not read the stored remote, so it cannot notice that an origin moved`,
             );
         }
-        if (!/rmSync/.test(src)) {
+        // Raw !== comparison reads a cosmetic difference (a missing .git
+        // suffix, a trailing slash) as "a different repository" — and the
+        // hand-clone flow docs/plugins.md describes produces exactly that.
+        if (!/sameGitRemote\(/.test(src)) {
             throw new Error(
-                `${file}: does not remove the checkout, so a moved origin would be reconciled in place`,
+                `${file}: does not compare remotes through sameGitRemote, so a cosmetic URL difference would be treated as a moved origin`,
             );
         }
-        // Re-pointing the stored remote is the reconciliation approach that was
-        // removed; its return would mean the checkout is being kept.
+        // Re-pointing the stored remote is the in-place reconciliation that
+        // failed review; its return would mean a kept checkout being migrated.
         if (/setConfig/.test(src)) {
             throw new Error(
-                `${file}: calls git.setConfig — a moved origin is re-cloned, not re-pointed in place`,
+                `${file}: calls git.setConfig — a moved origin is refused, not re-pointed in place`,
+            );
+        }
+        // The refusal must tell the user the way out.
+        if (!/install it again|run again/.test(src)) {
+            throw new Error(
+                `${file}: the moved-origin refusal does not tell the user how to proceed`,
             );
         }
     }
@@ -255,8 +266,8 @@ function main(): void {
     // 4. Both pull paths must fetch from the resolved URL, not the stored one.
     assertPullUsesResolvedUrl();
 
-    // 5. A moved origin is re-cloned rather than reconciled in place.
-    assertOriginMoveReclones();
+    // 5. A moved origin is refused with a way out, never silently migrated.
+    assertMovedOriginRefused();
 
     console.log(
         "OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward",

@@ -6,6 +6,7 @@ import {
     normalizeOfficialManifest,
     type OfficialPluginEntry,
     officialGitUrl,
+    sameGitRemote,
 } from "@/lib/plugins/official-manifest";
 
 const DEFAULT_ORG = "https://github.com/tong-io";
@@ -297,5 +298,58 @@ describe("non-http(s) origins are rejected (AC-5)", () => {
         expect(officialGitUrl(entry)).toBe(
             "http://git.local/x/tongflow-api-gemini.git",
         );
+    });
+});
+
+describe("sameGitRemote — cosmetic differences are the same repository", () => {
+    const canonical = "https://github.com/tong-io/tongflow-api-gemini.git";
+
+    it.each([
+        [
+            "https://github.com/tong-io/tongflow-api-gemini",
+            "missing .git suffix",
+        ],
+        [
+            "https://github.com/tong-io/tongflow-api-gemini.git/",
+            "trailing slash",
+        ],
+        ["https://GitHub.com/tong-io/tongflow-api-gemini.git", "host casing"],
+        [
+            "https://github.com:443/tong-io/tongflow-api-gemini.git",
+            "explicit default port",
+        ],
+        [
+            " https://github.com/tong-io/tongflow-api-gemini.git ",
+            "surrounding whitespace",
+        ],
+    ])("treats %s as the same remote (%s)", (variant) => {
+        expect(sameGitRemote(variant, canonical)).toBe(true);
+    });
+
+    it.each([
+        [
+            "https://github.com/phanlemanh/tongflow-api-gemini.git",
+            "different owner",
+        ],
+        [
+            "https://gitlab.com/tong-io/tongflow-api-gemini.git",
+            "different host",
+        ],
+        [
+            "https://github.com/tong-io/tongflow-api-openai.git",
+            "different repo",
+        ],
+        [
+            "http://github.com/tong-io/tongflow-api-gemini.git",
+            "different protocol",
+        ],
+    ])("treats %s as a different remote (%s)", (variant) => {
+        expect(sameGitRemote(variant, canonical)).toBe(false);
+    });
+
+    it("is false when either side is missing", () => {
+        expect(sameGitRemote(undefined, canonical)).toBe(false);
+        expect(sameGitRemote(canonical, undefined)).toBe(false);
+        expect(sameGitRemote(undefined, undefined)).toBe(false);
     });
 });

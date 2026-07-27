@@ -5,7 +5,7 @@ slug: per-plugin-origin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-07-27
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -79,6 +79,18 @@ Source input: prompt (bắt đầu (a) luôn)
 
 Found by the S4 reviews, recorded rather than fixed because closing them would
 change files outside this feature's approved scope.
+
+- **An installed plugin whose entry moves origin is refused, not migrated.**
+  Both install paths detect the mismatch (through `sameGitRemote`, so a
+  cosmetic URL difference such as a hand-clone without the `.git` suffix is not
+  misread) and fail with instructions to uninstall and reinstall. Automatic
+  migration was implemented twice and withdrawn twice: fast-forwarding in place
+  produced silent wrong states across three review rounds, and
+  delete-then-re-clone turned a failed clone into an uninstall. The root cause
+  is that this behaviour has no acceptance criterion here — AC-6 guarantees the
+  shipped manifest cannot produce the state — so the automatic path belongs to
+  the first real fork's contract, with its own AC and an eval that exercises a
+  real git fixture.
 
 - **The plugin manager's "open repo" link ignores a per-entry origin.**
   `listOfficialPlugins()` returns only the default `org`, and

@@ -22,6 +22,7 @@ import {
     normalizeOfficialManifest,
     type OfficialPluginEntry,
     officialGitUrl,
+    sameGitRemote,
 } from "../src/lib/plugins/official-manifest";
 import { PLUGIN_GIT_AUTHOR } from "../src/lib/plugins/plugin-git";
 
@@ -57,20 +58,20 @@ async function installOne(entry: OfficialPluginEntry): Promise<string> {
     if (fs.existsSync(dir) && !fs.existsSync(path.join(dir, ".git"))) {
         fs.rmSync(dir, { recursive: true, force: true });
     }
-    // A moved origin is re-cloned rather than reconciled — see cloneOrPull in
-    // plugins-install.server.ts for why fast-forwarding onto a different
-    // repository has no answer that is both correct and quiet.
+    // A checkout whose remote names a different repository is refused, not
+    // migrated — see cloneOrPull in plugins-install.server.ts for why both
+    // migration strategies failed review. The comparison is normalised so a
+    // hand-cloned checkout without the .git suffix is not misread as moved.
     if (fs.existsSync(path.join(dir, ".git"))) {
         const storedUrl = await git.getConfig({
             fs,
             dir,
             path: "remote.origin.url",
         });
-        if (storedUrl !== url) {
-            console.log(
-                `[install-plugins] ${entry.id}: origin moved ${storedUrl} -> ${url}; re-cloning`,
+        if (!sameGitRemote(storedUrl, url)) {
+            throw new Error(
+                `checked out from ${storedUrl ?? "an unknown remote"}, but the manifest entry now resolves to ${url}. Delete plugins/${entry.id} and run again to pick up the new origin.`,
             );
-            fs.rmSync(dir, { recursive: true, force: true });
         }
     }
     if (fs.existsSync(dir)) {
