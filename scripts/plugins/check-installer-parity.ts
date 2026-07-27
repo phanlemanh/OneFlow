@@ -174,6 +174,42 @@ function assertPullUsesResolvedUrl(): void {
     }
 }
 
+/**
+ * A moved origin must be re-cloned, not reconciled.
+ *
+ * Three rounds of review found three separate silent failures in the
+ * fast-forward-in-place approach — an ancestor tip returning "already merged",
+ * a branch-name mismatch between what is pulled and what is verified, a config
+ * re-pointed onto a tree that never fetched from it. The design answer is to
+ * throw the checkout away, and it needs a guard or it will drift back.
+ */
+function assertOriginMoveReclones(): void {
+    const files = [
+        "src/lib/plugins/plugins-install.server.ts",
+        "scripts/install-official-plugins.ts",
+    ];
+    for (const file of files) {
+        const src = readFileSync(file, "utf8");
+        if (!/remote\.origin\.url/.test(src)) {
+            throw new Error(
+                `${file}: does not read the stored remote, so it cannot notice that an origin moved`,
+            );
+        }
+        if (!/rmSync/.test(src)) {
+            throw new Error(
+                `${file}: does not remove the checkout, so a moved origin would be reconciled in place`,
+            );
+        }
+        // Re-pointing the stored remote is the reconciliation approach that was
+        // removed; its return would mean the checkout is being kept.
+        if (/setConfig/.test(src)) {
+            throw new Error(
+                `${file}: calls git.setConfig — a moved origin is re-cloned, not re-pointed in place`,
+            );
+        }
+    }
+}
+
 function main(): void {
     // 1. The shipped manifest: 38 string entries, all on the default org.
     const shipped = JSON.parse(
@@ -218,6 +254,9 @@ function main(): void {
 
     // 4. Both pull paths must fetch from the resolved URL, not the stored one.
     assertPullUsesResolvedUrl();
+
+    // 5. A moved origin is re-cloned rather than reconciled in place.
+    assertOriginMoveReclones();
 
     console.log(
         "OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward",

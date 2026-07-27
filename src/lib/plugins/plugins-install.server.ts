@@ -12,7 +12,6 @@ import {
     isPluginInstalled,
     loadOfficialPluginManifest,
     officialGitUrl,
-    remoteHeadCommitForUrl,
 } from "@/lib/plugins/official-plugins.server";
 import { PLUGIN_GIT_AUTHOR } from "@/lib/plugins/plugin-git";
 import { isValidPluginId, pluginIdError } from "@/lib/plugins/plugin-id";
@@ -87,23 +86,36 @@ async function cloneOrPull(
     if (existsSync(dir) && !existsSync(join(dir, ".git"))) {
         fs.rmSync(dir, { recursive: true, force: true });
     }
+    // If the entry's origin has moved, discard the checkout instead of trying
+    // to reconcile it with a different repository.
+    //
+    // Fast-forwarding in place has to answer questions that have no good
+    // answer — which branch of the new remote corresponds to ours, what if its
+    // history is unrelated, what if its tip is behind ours — and every wrong
+    // answer is silent: a merge commit no remote has, a config claiming an
+    // origin the tree never fetched from, an update badge that never clears.
+    // Re-cloning asks none of them. It costs one download of a plugin that is
+    // typically a few files.
+    if (existsSync(join(dir, ".git"))) {
+        const storedUrl = await git.getConfig({
+            fs,
+            dir,
+            path: "remote.origin.url",
+        });
+        if (storedUrl !== gitUrl) {
+            logger.info(
+                `[plugins] ${id}: origin moved ${storedUrl} -> ${gitUrl}; re-cloning`,
+            );
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    }
     const cloning = !existsSync(dir);
     try {
         if (!cloning) {
-            // Pull from the resolved URL, not from whatever the checkout was
-            // originally cloned with. Without `url` isomorphic-git reads the
-            // remote out of .git/config, so an entry that gained its own
-            // `origin` would keep fast-forwarding from the old repository: the
-            // update checker (which does use the new origin) would report an
-            // update forever, and every click would "succeed" against the old
-            // remote. Re-point the stored remote only after the pull works, so
-            // a failed pull never leaves the config claiming an origin the
-            // checkout never fetched from.
-            const storedUrl = await git.getConfig({
-                fs,
-                dir,
-                path: "remote.origin.url",
-            });
+            // The origin cannot have moved by this point — a moved origin was
+            // re-cloned above — so this is an ordinary update against the same
+            // remote. `url` is still passed so the fetch never falls back to
+            // whatever .git/config happens to say.
             await git.pull({
                 fs,
                 http,
@@ -113,41 +125,12 @@ async function cloneOrPull(
                 fastForward: true,
                 // `fastForward` alone only *prefers* a fast-forward: on
                 // divergence isomorphic-git writes a merge commit and reports
-                // success. A re-pointed origin is exactly divergence — the fork
-                // branched before the tip we hold. The local HEAD would then be
-                // a merge commit that no remote has, so the update check would
-                // report an update forever and every click would "succeed"
-                // without changing anything. Fail loudly instead.
+                // success, leaving a local HEAD no remote has — so the update
+                // check would report an update forever and every click would
+                // "succeed" without changing anything. Fail loudly instead.
                 fastForwardOnly: true,
                 author: PLUGIN_GIT_AUTHOR,
             });
-            if (storedUrl !== gitUrl) {
-                // `fastForwardOnly` throws on divergence but NOT when the new
-                // origin's HEAD is an ancestor of ours — a fork taken from an
-                // older upstream snapshot. That case returns "already merged"
-                // with no error, so without this check we would re-point the
-                // config, log a move, and report "updated" while the working
-                // tree still held the OLD origin's code. Only accept the move
-                // once the checkout actually stands on the new remote's tip.
-                const [localHead, remoteHead] = await Promise.all([
-                    git.resolveRef({ fs, dir, ref: "HEAD" }),
-                    remoteHeadCommitForUrl(gitUrl),
-                ]);
-                if (!remoteHead || localHead !== remoteHead) {
-                    throw new PluginInstallError(
-                        `Cannot move ${id} to ${gitUrl}: a fast-forward from the current checkout does not reach that remote's HEAD (local ${localHead.slice(0, 8)}, remote ${remoteHead?.slice(0, 8) ?? "unknown"}). Uninstall the plugin and install it again to pick up the new origin.`,
-                    );
-                }
-                await git.setConfig({
-                    fs,
-                    dir,
-                    path: "remote.origin.url",
-                    value: gitUrl,
-                });
-                logger.info(
-                    `[plugins] ${id}: remote re-pointed ${storedUrl} -> ${gitUrl}`,
-                );
-            }
             return "updated";
         }
         await git.clone({
@@ -167,10 +150,9 @@ async function cloneOrPull(
             fs.rmSync(dir, { recursive: true, force: true });
         }
         // A PluginInstallError raised inside this block is a deliberate,
-        // user-actionable refusal carrying its own status and wording — the
-        // move-confirmation guard above is one. Re-wrapping it would relabel a
-        // 400 as a 500 and prefix "git failed" onto a case where git in fact
-        // succeeded, misdirecting whoever reads it.
+        // user-actionable refusal carrying its own status and wording.
+        // Re-wrapping it would relabel a 400 as a 500 and prefix "git failed"
+        // onto a case where git did not fail, misdirecting whoever reads it.
         if (e instanceof PluginInstallError) throw e;
         const msg = e instanceof Error ? e.message : String(e);
         throw new PluginInstallError(`git failed: ${msg}`, 500);

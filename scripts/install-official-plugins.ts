@@ -57,16 +57,23 @@ async function installOne(entry: OfficialPluginEntry): Promise<string> {
     if (fs.existsSync(dir) && !fs.existsSync(path.join(dir, ".git"))) {
         fs.rmSync(dir, { recursive: true, force: true });
     }
-    if (fs.existsSync(dir)) {
-        // Pull from the resolved URL rather than the one baked into
-        // .git/config at clone time, so an entry that gained its own `origin`
-        // actually moves. Re-point the stored remote only after a successful
-        // pull. Mirrors cloneOrPull in plugins-install.server.ts.
+    // A moved origin is re-cloned rather than reconciled — see cloneOrPull in
+    // plugins-install.server.ts for why fast-forwarding onto a different
+    // repository has no answer that is both correct and quiet.
+    if (fs.existsSync(path.join(dir, ".git"))) {
         const storedUrl = await git.getConfig({
             fs,
             dir,
             path: "remote.origin.url",
         });
+        if (storedUrl !== url) {
+            console.log(
+                `[install-plugins] ${entry.id}: origin moved ${storedUrl} -> ${url}; re-cloning`,
+            );
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
+    }
+    if (fs.existsSync(dir)) {
         await git.pull({
             fs,
             http,
@@ -74,42 +81,13 @@ async function installOne(entry: OfficialPluginEntry): Promise<string> {
             url,
             singleBranch: true,
             fastForward: true,
-            // See cloneOrPull: without this a divergent fork is merged
+            // See cloneOrPull: without this a divergent history is merged
             // silently and reported as a successful update. The author below
             // is consequently never used — a fast-forward writes no commit —
             // but isomorphic-git still requires the field.
             fastForwardOnly: true,
             author: PLUGIN_GIT_AUTHOR,
         });
-        if (storedUrl !== url) {
-            // See cloneOrPull: fastForwardOnly does not fire when the new
-            // origin's HEAD is an ancestor of ours, so the move must be
-            // confirmed against the remote tip rather than assumed.
-            const [localHead, refs] = await Promise.all([
-                git.resolveRef({ fs, dir, ref: "HEAD" }),
-                git.listServerRefs({
-                    http,
-                    url,
-                    prefix: "HEAD",
-                    symrefs: true,
-                }),
-            ]);
-            const remoteHead = refs.find((r) => r.ref === "HEAD")?.oid ?? null;
-            if (!remoteHead || localHead !== remoteHead) {
-                throw new Error(
-                    `cannot move to ${url}: a fast-forward does not reach that remote's HEAD (local ${localHead.slice(0, 8)}, remote ${remoteHead?.slice(0, 8) ?? "unknown"}). Delete plugins/${entry.id} and run again to pick up the new origin.`,
-                );
-            }
-            await git.setConfig({
-                fs,
-                dir,
-                path: "remote.origin.url",
-                value: url,
-            });
-            console.log(
-                `[install-plugins] ${entry.id}: remote re-pointed ${storedUrl} -> ${url}`,
-            );
-        }
         return "updated";
     }
     await git.clone({ fs, http, dir, url, singleBranch: true });

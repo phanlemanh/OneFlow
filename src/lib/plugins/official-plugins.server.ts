@@ -150,9 +150,7 @@ async function localHeadCommit(id: string): Promise<string | null> {
 }
 
 /** Remote default-branch HEAD commit (a single ls-remote, no clone). */
-export async function remoteHeadCommitForUrl(
-    url: string,
-): Promise<string | null> {
+async function remoteHeadCommitForUrl(url: string): Promise<string | null> {
     const refs = await git.listServerRefs({
         http,
         url,
