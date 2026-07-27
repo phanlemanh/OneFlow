@@ -91,6 +91,21 @@ change files outside this feature's approved scope.
   wrong today: AC-6 guarantees the shipped manifest is still 38 plain strings.
   The first real fork must land with this fix, in its own contract.
 
+- **`assertSafeGitUrl` is laxer than the manifest boundary.** The manifest now
+  refuses whitespace and control characters and returns the parsed URL, while
+  the custom-git-URL path — which takes its input straight from the
+  `POST /api/plugins/install` body — still only tests `^https?://` after a
+  `trim()`. The fully trusted, PR-reviewed config file is therefore validated
+  more strictly than the fully untrusted request body, which inverts the usual
+  ordering. Routing it through the shared predicate would collapse both to one
+  rule; that touches `src/app/api/**`'s caller and belongs with the UI fix.
+- **`remoteIsAhead`'s catch is broader than its comment.** The comment says the
+  catch handles "the remote commit is not in the local object store", but
+  `isDescendent` returns false rather than throwing in that case, so the normal
+  path already covers it. What the catch actually swallows is genuine
+  repository breakage during traversal, reported as "update available". The
+  behaviour is defensible — a broken checkout should not silently read as up to
+  date — but the comment describes the wrong reason.
 - **The SDK engine keeps a fourth copy of the URL rule.**
   `sdk/tongflow/engine/plugins.py` hardcodes its own `DEFAULT_ORG` and rebuilds
   the remote in `_git_url_for`. It never reads `config/official-plugins.json`,

@@ -27,10 +27,13 @@ interface RawManifest {
 /**
  * Independent expectation model — intentionally NOT the shared resolver.
  *
- * It must still mirror every rule the resolver applies, trailing-slash
- * stripping included: a model that is merely *different* rather than
- * *equivalent* would fail on a correct tree the first time an origin is pasted
- * with a trailing slash.
+ * It must still mirror every rule the resolver applies: a model that is merely
+ * *different* rather than *equivalent* fails on a correct tree the first time
+ * an origin is not already canonical. The resolver returns `parsed.href`, so
+ * the model parses too — WHATWG lowercases the host, drops a default port and
+ * resolves dot segments, none of which a trailing-slash strip reproduces.
+ * Parsing here is not the same as calling the resolver: the expectation is
+ * still derived independently, from the raw manifest.
  */
 function expectedRemotes(raw: RawManifest): Map<string, string> {
     const out = new Map<string, string>();
@@ -38,7 +41,7 @@ function expectedRemotes(raw: RawManifest): Map<string, string> {
         const id = typeof entry === "string" ? entry : entry.id;
         const base =
             typeof entry === "string" ? raw.org : (entry.origin ?? raw.org);
-        out.set(id, `${base.replace(/\/+$/, "")}/${id}.git`);
+        out.set(id, `${new URL(base).href.replace(/\/+$/, "")}/${id}.git`);
     }
     return out;
 }

@@ -436,12 +436,30 @@ appended, so the entry above resolves to
 omits `origin` is valid and falls back to the default.
 
 The manifest is validated when it loads. An unknown key, a missing or empty
-`id`, a duplicate id, or an origin that is not an `http(s)` URL fails with a
-message naming the offending entry — a typo must never fall back silently and
-clone the wrong repository. One resolver in
+`id`, a duplicate id, an id that breaks the directory convention, or an origin
+that is not an `http(s)` URL fails with a message naming the offending entry —
+a typo must never fall back silently and clone the wrong repository. One
+resolver in
 [`src/lib/plugins/official-manifest.ts`](../src/lib/plugins/official-manifest.ts)
-serves all three consumers: the in-app plugin manager, the CLI installer, and
-the update checker.
+serves the three consumers that fetch code: the in-app plugin manager, the CLI
+installer, and the update checker.
+
+**Two places still build a repo URL from the default `org` alone**, and both
+must be fixed before the first plugin is actually forked, or they will point at
+the upstream repo the plugin no longer tracks:
+
+- the plugin manager's "open repo" link
+  ([`plugins-dialog.tsx`](../src/components/workspace/plugins-dialog.tsx)) —
+  `listOfficialPlugins()` returns only the default `org` and drops each entry's
+  resolved origin, so fixing it changes the API response shape;
+- the standalone SDK engine
+  ([`sdk/tongflow/engine/plugins.py`](../sdk/tongflow/engine/plugins.py)), which
+  keeps its own `DEFAULT_ORG` and never reads this manifest.
+
+Neither can be wrong today: the shipped manifest still holds 38 plain string
+entries. See the "Known limits" section of
+`_acceptance/per-plugin-origin/contract.md` for why they were left out of that
+change's scope.
 
 ---
 
