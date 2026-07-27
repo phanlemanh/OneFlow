@@ -35,8 +35,12 @@ repo, đánh đổi ghi trong ADR) · COGS/render trong khung mô hình 3 tier �
 
 **Còn lại để qua G0 (27/07):** ba điều kiện, và cả ba cần đầu vào từ người vận hành —
 clip thực địa + bản chép tay (WER) · task chạy thật + hoá đơn (COGS) · quyết định ngách.
-Hạ tầng đã sẵn: tài khoản Modal đã tạo (điền `MODAL_TOKEN_ID`/`MODAL_TOKEN_SECRET` vào `.env`),
-corpus WER chờ ở [`measure/wer-corpus/`](../measure/wer-corpus/).
+Corpus WER chờ ở [`measure/wer-corpus/`](../measure/wer-corpus/).
+
+Theo [ADR-0010](adr/0010-mainstream-infra-and-models.md), "Whisper" trong DoD trên đọc là
+*bản Whisper sẽ ship*, không riêng bản GPU. Phép đo chạy cùng bộ clip qua các đường **phổ
+biến** — APIMart · OpenAI · ElevenLabs Scribe (đối chứng khác họ) — và Modal chỉ khi còn cân
+nhắc ship nó. Kết quả trả lời luôn câu "giữ hay bỏ Modal khỏi P0" bằng số thay vì phỏng đoán.
 
 ## Phase 1 — Năng lực P0 (T5–T10)
 

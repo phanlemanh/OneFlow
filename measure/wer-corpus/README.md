@@ -34,18 +34,41 @@ xuyên corpus, và ghi lại quy ước đó ở cuối file này.
 Giọng TTS tổng hợp **không dùng được** cho phép đo này: nó sạch, và WER trên nó sẽ đẹp mà
 vô nghĩa.
 
-## Sinh `.hyp.txt`
+## Sinh `.hyp.txt` — đo cả bốn đường
 
-Hai đường, chọn theo thứ bạn định ship:
+[ADR-0010](../../docs/adr/0010-mainstream-infra-and-models.md) đặt ưu tiên vào hạ tầng và
+model **phổ biến**, với Modal là một lựa chọn chứ không phải nền tảng. Nên phép đo này không
+chọn sẵn một nhà cung cấp — nó **xếp hạng** chúng trên cùng bộ clip.
 
-**A — Whisper trên Modal** (đúng thứ pipeline P0 đang dùng, `tongflow-modal-whisper`):
-điền `MODAL_TOKEN_ID` và `MODAL_TOKEN_SECRET` vào `.env`, cài plugin qua plugin manager
-hoặc `pnpm plugins:install tongflow-modal-whisper`, chạy node `transcribe-timestamp` trên
-từng clip, lưu output vào `<tên>.hyp.txt`.
+Chạy cùng corpus qua từng đường, lưu vào **thư mục con riêng** để so được:
 
-**B — ElevenLabs Scribe** (API, không cần GPU): dùng `speech_to_text`. Nếu chọn đường này
-thì DoD của G0 phải sửa — nó đang ghi đích danh "Whisper" — và nên có ADR ghi nhận, vì hệ
-quả là Modal biến mất khỏi pipeline P0 và COGS chuyển sang giá API.
+```
+measure/wer-corpus/
+  *.ref.txt              ← bản chép tay, dùng chung cho mọi đường
+  apimart/*.hyp.txt
+  openai/*.hyp.txt
+  scribe/*.hyp.txt
+  modal/*.hyp.txt        ← chỉ khi còn cân nhắc ship bản GPU
+```
+
+Bộ chấm đọc một thư mục phẳng, nên để chấm từng đường thì copy `*.ref.txt` vào thư mục con
+đó rồi trỏ script vào đấy.
+
+| Đường | Cần gì | Ghi chú |
+|---|---|---|
+| **APIMart Whisper** | key APIMart | `tongflow-api-apimart` — vị trí 5 trong manifest, gateway có model picker |
+| **OpenAI Whisper** | `OPENAI_API_KEY` | giá minh bạch nhất để quy ra COGS |
+| **ElevenLabs Scribe** | key ElevenLabs | không phải Whisper — đối chứng khác họ mô hình |
+| **Modal Whisper** | `MODAL_TOKEN_ID` + `MODAL_TOKEN_SECRET` | `tongflow-modal-whisper`, README thượng nguồn gọi là *"(alternative)"* |
+
+**"Whisper" không phải một thứ.** `whisper-1` của OpenAI, bản Whisper mà APIMart phục vụ, và
+bản mà `deploy.py` của plugin Modal ghim có thể khác trọng số và khác tham số giải mã
+(VAD, beam, chunking). Cùng họ, khác kết quả — và khác nhiều nhất đúng ở chỗ ta cần: tiếng
+Việt trong tiếng ồn. Đó là lý do đo cả bốn thay vì tin vào cái tên.
+
+**Cần kiểm trước khi thiết kế bước cắt:** API audio thường có giới hạn kích thước file, nên
+clip livestream dài phải chia nhỏ — và cắt ở đâu thì ảnh hưởng WER ngay tại mép cắt. Tra tài
+liệu hiện hành của từng nhà cung cấp; đừng tin số nhớ được.
 
 ## Chấm
 
