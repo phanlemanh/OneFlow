@@ -13,6 +13,8 @@
  * id and `.git` are still appended. It is not a finished clone URL.
  */
 
+import { isValidPluginId, pluginIdError } from "@/lib/plugins/plugin-id";
+
 /** One manifest entry with its origin already resolved. */
 export interface OfficialPluginEntry {
     id: string;
@@ -136,6 +138,18 @@ export function normalizeOfficialManifest(
         if (id.trim() === "") {
             throw new Error(
                 `official-plugins manifest: ${at} has an empty plugin id`,
+            );
+        }
+        // The id is not only a name: it is joined into a filesystem path under
+        // the plugins dir, and a failed clone removes that path recursively.
+        // The install path only asserted this convention on the custom-git-URL
+        // branch — the official branch trusted the manifest — so an id such as
+        // `../x` would have traversed out of the plugins dir. The rule already
+        // exists in plugin-id.ts; the manifest is where it has to be enforced,
+        // because that is where an id first enters the system.
+        if (!isValidPluginId(id)) {
+            throw new Error(
+                `official-plugins manifest: ${at} — ${pluginIdError(id)}`,
             );
         }
         if (seen.has(id)) {

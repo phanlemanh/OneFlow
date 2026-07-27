@@ -24,16 +24,39 @@ interface RawManifest {
     plugins: (string | { id: string; origin?: string })[];
 }
 
-/** Independent expectation model — intentionally NOT the shared resolver. */
+/**
+ * Independent expectation model — intentionally NOT the shared resolver.
+ *
+ * It must still mirror every rule the resolver applies, trailing-slash
+ * stripping included: a model that is merely *different* rather than
+ * *equivalent* would fail on a correct tree the first time an origin is pasted
+ * with a trailing slash.
+ */
 function expectedRemotes(raw: RawManifest): Map<string, string> {
     const out = new Map<string, string>();
     for (const entry of raw.plugins) {
         const id = typeof entry === "string" ? entry : entry.id;
         const base =
             typeof entry === "string" ? raw.org : (entry.origin ?? raw.org);
-        out.set(id, `${base}/${id}.git`);
+        out.set(id, `${base.replace(/\/+$/, "")}/${id}.git`);
     }
     return out;
+}
+
+/** The full `name({ ... })` call text, brace-matched rather than cut at the first `}`. */
+function callText(src: string, needle: string): string | null {
+    const start = src.indexOf(needle);
+    if (start === -1) return null;
+    let depth = 0;
+    for (let i = start; i < src.length; i++) {
+        const ch = src[i];
+        if (ch === "{") depth++;
+        else if (ch === "}") {
+            depth--;
+            if (depth === 0) return src.slice(start, i + 1);
+        }
+    }
+    return null;
 }
 
 /** What the CLI installer would actually clone from, via its own code path. */
@@ -123,13 +146,26 @@ function assertPullUsesResolvedUrl(): void {
     ];
     for (const file of files) {
         const src = readFileSync(file, "utf8");
-        const pullCall = src.match(/git\.pull\(\{[^}]*\}/);
+        // Brace-matched rather than regex-cut at the first `}`: the inline
+        // `author: { ... }` object closes early, so a naive match inspects only
+        // the keys that happen to precede it and turns a formatting reorder
+        // into a false failure on correct code.
+        const pullCall = callText(src, "git.pull({");
         if (!pullCall) {
             throw new Error(`${file}: no git.pull call found to check`);
         }
-        if (!/\burl\b/.test(pullCall[0])) {
+        if (!/(^|[\s,{])url\s*[,:]/.test(pullCall)) {
             throw new Error(
                 `${file}: git.pull does not pass \`url\`, so it fetches from the checkout's stored remote rather than the entry's resolved origin — an override would never reach an already-installed plugin.`,
+            );
+        }
+        // Same silent outcome reached from the other side: without
+        // fastForwardOnly a divergent fork is merged into a local commit no
+        // remote has, so the update check reports an update forever and every
+        // click reports success while changing nothing.
+        if (!/fastForwardOnly\s*:\s*true/.test(pullCall)) {
+            throw new Error(
+                `${file}: git.pull does not set \`fastForwardOnly: true\`, so a divergent origin is merged silently and reported as a successful update, leaving the plugin permanently "update available".`,
             );
         }
     }
@@ -181,7 +217,7 @@ function main(): void {
     assertPullUsesResolvedUrl();
 
     console.log(
-        "OK: the CLI installer, the in-app install path and the update checker agree, and both pull paths use the resolved origin",
+        "OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward",
     );
 }
 

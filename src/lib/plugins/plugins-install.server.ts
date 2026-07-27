@@ -110,6 +110,14 @@ async function cloneOrPull(
                 url: gitUrl,
                 singleBranch: true,
                 fastForward: true,
+                // `fastForward` alone only *prefers* a fast-forward: on
+                // divergence isomorphic-git writes a merge commit and reports
+                // success. A re-pointed origin is exactly divergence — the fork
+                // branched before the tip we hold. The local HEAD would then be
+                // a merge commit that no remote has, so the update check would
+                // report an update forever and every click would "succeed"
+                // without changing anything. Fail loudly instead.
+                fastForwardOnly: true,
                 author: PLUGIN_GIT_AUTHOR,
             });
             if (storedUrl !== gitUrl) {

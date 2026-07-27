@@ -179,6 +179,39 @@ describe("malformed entries are rejected by name (AC-4)", () => {
     });
 });
 
+describe("plugin ids are validated at load, not just origins (AC-4)", () => {
+    it.each([
+        "../escape",
+        "a/b",
+        "plugins/../../etc/passwd",
+        "not-a-vendor-prefix",
+        "oneflow-weird-foo",
+        "ONEFLOW-API-FOO",
+    ])("rejects the id %s", (id) => {
+        expect(() =>
+            normalizeOfficialManifest({ org: DEFAULT_ORG, plugins: [id] }),
+        ).toThrow();
+    });
+
+    it("names the offending entry when an id would traverse out of the plugins dir", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: ["tongflow-api-gemini", "../../etc"],
+            }),
+        ).toThrowError(/entry 1/);
+    });
+
+    it("applies the same rule to an object entry's id", () => {
+        expect(() =>
+            normalizeOfficialManifest({
+                org: DEFAULT_ORG,
+                plugins: [{ id: "../x", origin: FORK_ORIGIN }],
+            }),
+        ).toThrow();
+    });
+});
+
 describe("non-http(s) origins are rejected (AC-5)", () => {
     it.each([
         "git@github.com:phanlemanh/x",

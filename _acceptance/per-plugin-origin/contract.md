@@ -5,7 +5,7 @@ slug: per-plugin-origin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-07-27
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -77,8 +77,19 @@ Source input: prompt (bắt đầu (a) luôn)
 
 ## Known limits
 
-Found by the S4 round-1 review, recorded rather than fixed because closing them
-would change files outside this feature's approved scope.
+Found by the S4 reviews, recorded rather than fixed because closing them would
+change files outside this feature's approved scope.
+
+- **The plugin manager's "open repo" link ignores a per-entry origin.**
+  `listOfficialPlugins()` returns only the default `org`, and
+  `plugins-dialog.tsx` renders `${org}/${p.id}`. Once an entry carries its own
+  `origin`, the app would clone and update-check against the fork while the
+  visible link still points upstream. Fixing it means returning a resolved
+  origin (or a `repoUrl`) per plugin, which changes the API response shape —
+  explicitly listed under Out of scope above, and `src/app/api/**` is a T3 path,
+  so it would raise this feature's tier past what Gate 1 approved. It cannot be
+  wrong today: AC-6 guarantees the shipped manifest is still 38 plain strings.
+  The first real fork must land with this fix, in its own contract.
 
 - **The SDK engine keeps a fourth copy of the URL rule.**
   `sdk/tongflow/engine/plugins.py` hardcodes its own `DEFAULT_ORG` and rebuilds

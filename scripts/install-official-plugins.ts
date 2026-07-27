@@ -49,6 +49,13 @@ function pluginsDir(): string {
 async function installOne(entry: OfficialPluginEntry): Promise<string> {
     const dir = path.join(pluginsDir(), entry.id);
     const url = officialGitUrl(entry);
+    // A directory without a .git is the corpse of an interrupted clone: it can
+    // never be pulled and the scanner ignores it, so every later run would fail
+    // on it forever. cloneOrPull in plugins-install.server.ts wipes it; this
+    // path inherited the omission from the .mjs it replaced.
+    if (fs.existsSync(dir) && !fs.existsSync(path.join(dir, ".git"))) {
+        fs.rmSync(dir, { recursive: true, force: true });
+    }
     if (fs.existsSync(dir)) {
         // Pull from the resolved URL rather than the one baked into
         // .git/config at clone time, so an entry that gained its own `origin`
@@ -66,6 +73,11 @@ async function installOne(entry: OfficialPluginEntry): Promise<string> {
             url,
             singleBranch: true,
             fastForward: true,
+            // See cloneOrPull: without this a divergent fork is merged
+            // silently and reported as a successful update. The author below
+            // is consequently never used — a fast-forward writes no commit —
+            // but isomorphic-git still requires the field.
+            fastForwardOnly: true,
             author: { name: "oneflow", email: "oneflow@local" },
         });
         if (storedUrl !== url) {
