@@ -45,14 +45,17 @@ function hasWhitespaceOrControl(value: string): boolean {
     return false;
 }
 
-function isHttpUrl(value: string): boolean {
+/** The parsed URL when it is http(s), else null. */
+function parseHttpUrl(value: string): URL | null {
     let parsed: URL;
     try {
         parsed = new URL(value);
     } catch {
-        return false;
+        return null;
     }
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+        ? parsed
+        : null;
 }
 
 /**
@@ -79,12 +82,19 @@ function requireHttpUrl(value: string, label: string): string {
             `official-plugins manifest: ${label} must not contain whitespace or control characters, got ${JSON.stringify(value)}`,
         );
     }
-    if (!isHttpUrl(value)) {
+    const parsed = parseHttpUrl(value);
+    if (!parsed) {
         throw new Error(
             `official-plugins manifest: ${label} must be an http(s) URL, got ${JSON.stringify(value)}`,
         );
     }
-    return value.replace(/\/+$/, "");
+    // Return what was validated, not what was written. The check runs on the
+    // parsed form, and WHATWG parsing rewrites more than whitespace: it folds
+    // backslashes into slashes, resolves dot segments, and accepts a
+    // single-slash `https:/host/x`. Returning the raw string would validate one
+    // string and hand a different one to git, where the failure surfaces as an
+    // opaque parse error naming no manifest entry.
+    return parsed.href.replace(/\/+$/, "");
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

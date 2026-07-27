@@ -166,6 +166,12 @@ async function cloneOrPull(
         if (cloning) {
             fs.rmSync(dir, { recursive: true, force: true });
         }
+        // A PluginInstallError raised inside this block is a deliberate,
+        // user-actionable refusal carrying its own status and wording — the
+        // move-confirmation guard above is one. Re-wrapping it would relabel a
+        // 400 as a 500 and prefix "git failed" onto a case where git in fact
+        // succeeded, misdirecting whoever reads it.
+        if (e instanceof PluginInstallError) throw e;
         const msg = e instanceof Error ? e.message : String(e);
         throw new PluginInstallError(`git failed: ${msg}`, 500);
     }

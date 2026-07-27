@@ -125,7 +125,14 @@ export interface PluginUpdateInfo {
     id: string;
     localCommit: string | null;
     remoteCommit: string | null;
-    /** True only when both commits are known and differ. */
+    /**
+     * True only when both commits are known and the remote commit is not
+     * already in our history.
+     *
+     * Deliberately not "they differ": after a fork is adopted the local HEAD
+     * can legitimately be ahead of the new origin, and inequality would leave
+     * the badge lit forever with every click reporting success.
+     */
     hasUpdate: boolean;
 }
 
