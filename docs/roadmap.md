@@ -22,14 +22,21 @@
 
 | # | Hạng mục | DoD | Trạng thái |
 |---|---|---|---|
-| 0.1 | Độc lập upstream: SDK distribution riêng; plugin fork tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md), [ADR-0008](adr/0008-naming-and-distribution.md)); dừng build desktop tới khi tách khỏi `app.tongflow.com` | CI xanh trên SDK mới; scanner nhận diện đủ plugin | ◐ `oneflow-sdk` 0.2.17 đã publish; per-plugin-origin chờ Gate 1; desktop chưa tách |
+| 0.1 | Độc lập upstream: SDK distribution riêng; plugin fork tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md), [ADR-0008](adr/0008-naming-and-distribution.md)); dừng build desktop tới khi tách khỏi `app.tongflow.com` | CI xanh trên SDK mới; scanner nhận diện đủ plugin | ◐ `oneflow-sdk` 0.2.17 đã publish; `per-plugin-origin` ký & merge 27/07 (PR #20); **desktop chưa tách** — chờ quyết định URL cloud |
 | 0.2 | Metering + móng provenance: `cost_usd`, `duration_ms`, `gpu_type` vào bảng tasks | Mỗi task ghi đủ 3 cột | ✅ `task-metering` đã ký 25/07 |
-| 0.3 | Bộ đo chuẩn tái chạy được: WER Whisper-vi thực địa; MOS TTS-vi mù; COGS pipeline P0 + ma trận 20 video | Script + báo cáo số trong repo | ◐ script đã ký (`measure-harness`, 26/07); *chạy* còn cần clip thật + API key + tài khoản Modal |
+| 0.3 | Bộ đo chuẩn tái chạy được: WER Whisper-vi thực địa; ~~MOS TTS-vi mù~~ ([ADR-0009](adr/0009-tts-vi-eleven-v3.md) đóng bằng phán quyết); COGS pipeline P0 + ma trận 20 video | Script + báo cáo số trong repo | ◐ script đã ký (`measure-harness`, 26/07) · MOS **đóng** 27/07 · WER chờ **clip thực địa + ref chép tay** · COGS chờ task chạy thật + hoá đơn |
 | 0.4 | Spec cache content-addressed + partial re-render | Spec duyệt: khoá hash, dirty-propagation, API "chạy từ node X" | ◐ spec xong (PR #11): [engine-cache-partial-rerender](spec/prd/engine-cache-partial-rerender.md) — 3 câu hỏi mở (§7) chưa chốt |
 
-**Gate G0:** WER ≤ ngưỡng phụ đề bán tự động · MOS TTS-vi đạt ngưỡng chấp nhận · COGS/render
-trong khung mô hình 3 tier · spec cache duyệt · **chốt ngách** (bộ thực thể KG v0).
+**Gate G0:** WER ≤ ngưỡng phụ đề bán tự động · ~~MOS TTS-vi~~ **đóng 27/07** bằng
+[ADR-0009](adr/0009-tts-vi-eleven-v3.md) (`eleven_v3`, phán quyết vận hành — không có số trong
+repo, đánh đổi ghi trong ADR) · COGS/render trong khung mô hình 3 tier · spec cache duyệt ·
+**chốt ngách** (bộ thực thể KG v0).
 *Trượt WER → wedge chuyển sang phụ đề có bước sửa tay (đổi thiết kế skill, không đổi lộ trình).*
+
+**Còn lại để qua G0 (27/07):** ba điều kiện, và cả ba cần đầu vào từ người vận hành —
+clip thực địa + bản chép tay (WER) · task chạy thật + hoá đơn (COGS) · quyết định ngách.
+Hạ tầng đã sẵn: tài khoản Modal đã tạo (điền `MODAL_TOKEN_ID`/`MODAL_TOKEN_SECRET` vào `.env`),
+corpus WER chờ ở [`measure/wer-corpus/`](../measure/wer-corpus/).
 
 ## Phase 1 — Năng lực P0 (T5–T10)
 
