@@ -5,7 +5,7 @@ slug: per-plugin-origin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins]
-status: implemented
+status: verified
 approved_by: Manh
 approved_at: 2026-07-27
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -102,6 +102,17 @@ change files outside this feature's approved scope.
   so it would raise this feature's tier past what Gate 1 approved. It cannot be
   wrong today: AC-6 guarantees the shipped manifest is still 38 plain strings.
   The first real fork must land with this fix, in its own contract.
+
+- **Three LOW items from the round-8 review, recorded as debt.**
+  `requireHttpUrl` still admits a query, fragment, or userinfo in a base URL
+  (`https://github.com/org#readme` builds a malformed remote later instead of
+  failing at load with the entry named); the CLI refusal message says
+  `Delete plugins/<id>` where the checkout actually lives under
+  `TONGFLOW_PLUGINS_DIR` when that is set; and `remoteIsAhead`'s bare catch
+  converts any traversal error into "update available" without logging it.
+  All three are one-place fixes in files this feature owns, left unfixed only
+  to keep the round-8 evidence pin valid; they belong to the same cleanup
+  contract as the `assertSafeGitUrl` item below.
 
 - **`assertSafeGitUrl` is laxer than the manifest boundary.** The manifest now
   refuses whitespace and control characters and returns the parsed URL, while
