@@ -6,7 +6,7 @@
 
 - **Nền tảng:** fork TongFlow (AGPL-3.0, không CLA, không dual-license — README §License). Đã rebrand OneFlow: logo pixel (`public/logo.svg`, `logo_icon.svg`), xoá COMMERCIAL-LICENSE.md/CLA.md.
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
-- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **6 feature đã ký**. CI 5 job, gate là job thứ 5.
+- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **7 feature đã ký**. CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
 - **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (8 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
@@ -24,7 +24,7 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**`per-plugin-origin` đã ký Cổng 2 (27/07), PR đang mở — việc còn lại là merge (merge commit, không squash), rồi việc lớn kế tiếp là 1.L0.**
+**Không còn feature nào dở. `per-plugin-origin` đã merge (PR #20, merge commit `6461d2b`, 27/07); `pre-merge-check` trên `main` sạch. Việc lớn kế tiếp: 1.L0.**
 
 Feature thứ 7: entry trong `config/official-plugins.json` nay nhận dạng `{"id", "origin"}` — fork lẻ từng plugin không phải chuyển cả 38. Một resolver (`src/lib/plugins/official-manifest.ts`, thuần, 57 test) phục vụ cả ba đường tải code; installer CLI chuyển sang TS; manifest được validate lúc nạp (kể cả tên plugin, chặn `../x` vào đường dẫn); 3 guard mới đều đã mutation-test. 8 round verify — round 8 sạch (0 HIGH/MEDIUM).
 
@@ -61,7 +61,7 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 |---|---|---|
 | 0.1a | Tiền tố `oneflow-` (2 tầng ép buộc) | ✅ **xong** — PR #18 |
 | 0.1b | Publish `oneflow-sdk` lên PyPI | ✅ **xong** — 0.2.17 |
-| 0.1c | Origin theo từng plugin trong manifest | 🔵 **đang dở** — `feat/per-plugin-origin`, chờ Gate 1 |
+| 0.1c | Origin theo từng plugin trong manifest | ✅ **xong** — PR #20, ký 27/07 |
 | 0.1d | Tách desktop khỏi `app.tongflow.com` | ⏸ chặn — chờ quyết định URL cloud |
 | 0.2 | 3 cột metering | ✅ xong — PR #12 |
 | 0.3 | Bộ đo WER/TTS-vi/COGS | ✅ script xong — PR #14. *Chạy* vẫn cần clip thật + API key + tài khoản Modal |
