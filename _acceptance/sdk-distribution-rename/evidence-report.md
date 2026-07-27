@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 13)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
+verified_commit: e657d56ea07675e2f887048e01e73724f400226a
 human_signoff: Manh 2026-07-27
 ---
 
@@ -61,11 +61,11 @@ eleven evals credited here. The mapping survived the round-4 edit — that commi
 touched only the module's import preamble, not any test body or docstring.
 
 - eval: E1
-  run_id: sdk-distribution-rename-r13-E1-20260726154114
+  run_id: sdk-distribution-rename-r14-E1-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P1 (project.name reverted to `tongflow`) kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_distribution_name_is_oneflow_sdk PASSED    [  9%]
 
@@ -74,11 +74,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E2
-  run_id: sdk-distribution-rename-r13-E2-20260726154114
+  run_id: sdk-distribution-rename-r14-E2-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P2 (`packages.find.include` renamed to `oneflow*`, which would ship an empty package) kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_import_package_is_untouched PASSED         [ 18%]
 
@@ -87,11 +87,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E3
-  run_id: sdk-distribution-rename-r13-E3-20260726154114
+  run_id: sdk-distribution-rename-r14-E3-20260727105026
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_import_still_works_and_exposes_the_public_api PASSED [ 27%]
 
@@ -100,11 +100,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E4
-  run_id: sdk-distribution-rename-r13-E4-20260726154114
+  run_id: sdk-distribution-rename-r14-E4-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P3 (version drift between pyproject and `__init__`) kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_version_is_declared_once_in_effect PASSED  [ 36%]
 
@@ -113,11 +113,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E5
-  run_id: sdk-distribution-rename-r13-E5-20260726154114
+  run_id: sdk-distribution-rename-r14-E5-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P6 (a project URL repointed at upstream) kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_project_urls_do_not_point_at_upstream PASSED [ 45%]
 
@@ -126,11 +126,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E6
-  run_id: sdk-distribution-rename-r13-E6-20260726154114
+  run_id: sdk-distribution-rename-r14-E6-20260727105026
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_publish_script_uses_normalised_artifact_names PASSED [ 54%]
 
@@ -139,11 +139,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E7
-  run_id: sdk-distribution-rename-r13-E7-20260726154114
+  run_id: sdk-distribution-rename-r14-E7-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P5 (publish hint reverted to the upstream package) kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_publish_script_tells_operators_the_right_package PASSED [ 63%]
 
@@ -152,11 +152,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E8
-  run_id: sdk-distribution-rename-r13-E8-20260726154114
+  run_id: sdk-distribution-rename-r14-E8-20260727105026
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_author_facing_docs_name_the_distribution PASSED [ 72%]
 
@@ -165,11 +165,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E9
-  run_id: sdk-distribution-rename-r13-E9-20260726154114
+  run_id: sdk-distribution-rename-r14-E9-20260727105026
   exit_code: 0
   baseline: red — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_npm_publish_script_renamed_and_no_dangling_references PASSED [ 81%]
 
@@ -178,11 +178,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E10
-  run_id: sdk-distribution-rename-r13-E10-20260726154114
+  run_id: sdk-distribution-rename-r14-E10-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P5 (publish hint reverted to the upstream package) also kills this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_no_surviving_distribution_name_usage PASSED [ 90%]
 
@@ -191,11 +191,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E14
-  run_id: sdk-distribution-rename-r13-E14-20260726154114
+  run_id: sdk-distribution-rename-r14-E14-20260727105026
   exit_code: 0
   baseline: red — RE-MEASURED this round: P1 and P4 (`__distribution__` drifting from `project.name`) each kill this test
   verifier: config:executors.test.sdk_pytest_packaging
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_packaging.py::test_engine_installs_the_distribution_from_a_single_source PASSED [100%]
 
@@ -204,11 +204,11 @@ touched only the module's import preamble, not any test body or docstring.
     Re-run this round on commit 66f80430; the named test line above and the suite total are this round's actual output, re-matched against this round's verbose run rather than copied forward. Round 13 is a FULL re-verify, not a carry-forward re-pin: `sdk/**` changed on this branch, so the signature does not carry and every claim was re-established on this tree. The exit status came from the resolved command verbatim; the per-test line was read from a second invocation of the same selection with a verbose reporter (a reporter flag changes neither selection nor outcome).
 
 - eval: E11
-  run_id: sdk-distribution-rename-r13-E11-20260726154117
+  run_id: sdk-distribution-rename-r14-E11-20260727105026
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T15:41:17Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ........................................................................ [ 80%]
     .................                                                        [100%]
@@ -217,11 +217,11 @@ touched only the module's import preamble, not any test body or docstring.
     Shared standing check: the resolved command was executed ONCE for this PR, at 2026-07-26T15:41:17Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E12
-  run_id: sdk-distribution-rename-r13-E12-20260726154213
+  run_id: sdk-distribution-rename-r14-E12-20260727105026
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T15:42:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -236,11 +236,11 @@ touched only the module's import preamble, not any test body or docstring.
     Shared standing check: the resolved command was executed ONCE for this PR, at 2026-07-26T15:42:13Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E13
-  run_id: sdk-distribution-rename-r13-E13-20260726154123
+  run_id: sdk-distribution-rename-r14-E13-20260727105026
   exit_code: 0
   baseline: green — round 1, carried forward; NOT re-measured this round
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T15:41:23Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 9)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
+verified_commit: e657d56ea07675e2f887048e01e73724f400226a
 human_signoff: Manh 2026-07-26
 ---
 
@@ -50,11 +50,11 @@ reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-r9-E1-20260726154143
+  run_id: ci-actions-bump-r10-E1-20260727105026
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-07-26T15:41:43Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ok actions/checkout: 7 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
@@ -95,11 +95,11 @@ reports them.
     Re-derived from the run object: the four named jobs each carry conclusion `success` at this head SHA under the node24 runtime. The run as a whole concluded otherwise because of the Acceptance Gate job, which this eval deliberately does not depend on — `assert_run_finished`, not `assert_run_complete`.
 
 - eval: E4
-  run_id: ci-actions-bump-r9-E4-20260726154152
+  run_id: ci-actions-bump-r10-E4-20260727105026
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-07-26T15:41:52Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
@@ -172,11 +172,11 @@ reports them.
     Both matrix legs ran and both uploaded an artifact; the tag-only `prepare` and `publish` jobs were skipped, and the release-upload step was not taken in either leg. That is the dry run working, and it covers the cache@v6 debt from #16 on the two runner OSes ci.yml never touches.
 
 - eval: E8
-  run_id: ci-actions-bump-r9-E8-20260726154152
+  run_id: ci-actions-bump-r10-E8-20260727105026
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-07-26T15:41:52Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     no workflow changes vs origin/main
 

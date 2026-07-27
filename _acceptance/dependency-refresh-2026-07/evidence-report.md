@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 10)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
+verified_commit: e657d56ea07675e2f887048e01e73724f400226a
 human_signoff: Manh 2026-07-26
 ---
 
@@ -39,11 +39,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r10-E1-20260726154142
+  run_id: dependency-refresh-2026-07-r11-E1-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-26T15:41:42Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
@@ -53,11 +53,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-r10-E2-20260726154142
+  run_id: dependency-refresh-2026-07-r11-E2-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-26T15:41:42Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     Lockfile is up to date, resolution step is skipped
     Progress: resolved 2, reused 2, downloaded 0, added 0, done
@@ -66,11 +66,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified.
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r10-E3-20260726154123
+  run_id: dependency-refresh-2026-07-r11-E3-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T15:41:23Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
@@ -80,11 +80,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:17Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r10-E4-20260726154122
+  run_id: dependency-refresh-2026-07-r11-E4-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T15:41:22Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
@@ -96,11 +96,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:24Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r10-E5-20260726154117
+  run_id: dependency-refresh-2026-07-r11-E5-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T15:41:17Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ........................................................................ [ 83%]
     ..............                                                           [100%]
@@ -109,11 +109,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:28Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r10-E6-20260726154213
+  run_id: dependency-refresh-2026-07-r11-E6-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T15:42:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
     > next build --turbopack
@@ -128,11 +128,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:54:32Z, and this eval is credited to it with its own run_id — see `## Iterations`.
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-r10-E7-20260726154141
+  run_id: dependency-refresh-2026-07-r11-E7-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-26T15:41:41Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-AekjfC/good.db (status: completed, failed) — 5 task(s)
 
@@ -152,11 +152,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Re-run this round on commit 8254c0bd; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-r10-E8-20260726154142
+  run_id: dependency-refresh-2026-07-r11-E8-20260727105026
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-26T15:41:42Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs origin/main
 

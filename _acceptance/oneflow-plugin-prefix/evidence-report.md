@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 3)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 66f804306fb83fc12d5ed32e37031dac406068d6
+verified_commit: e657d56ea07675e2f887048e01e73724f400226a
 human_signoff: Manh 2026-07-27
 ---
 
@@ -69,12 +69,12 @@ table has one live assertion per manifest entry.
 ## Evidence
 
 - eval: E1
-  run_id: oneflow-plugin-prefix-r3-E1-20260726154113
+  run_id: oneflow-plugin-prefix-r4-E1-20260727105026
   exit_code: 0
   baseline: red — mutation M1 (regex reverted to the tongflow-only form) kills
     exactly this block's 7 tests; see "Failure-branch drive"
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-26T15:41:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — oneflow convention (AC-1) > accepts oneflow-modal-foo 1ms
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — oneflow convention (AC-1) > accepts oneflow-api-foo 0ms
@@ -87,12 +87,12 @@ table has one live assertion per manifest entry.
     AC-1 asks whether the new convention works end to end, not merely whether the validator accepts a name — that is the question round 1 answered against this feature. It is answered by E10 and by the independent re-derivation below: the same `oneflow-modal-*` name this block accepts at install time also registers in the scanner, with a record identical to its `tongflow-` twin.
 
 - eval: E2
-  run_id: oneflow-plugin-prefix-r3-E2-20260726154113
+  run_id: oneflow-plugin-prefix-r4-E2-20260727105026
   exit_code: 0
   baseline: red — mutation M2 (regex tightened to the oneflow-only form) kills
     exactly the 38 per-plugin cases and nothing else
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-26T15:41:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ✓ plugin id — tongflow stays installable (AC-2) > the manifest still points at the upstream org we do not control 0ms
     ✓ plugin id — tongflow stays installable (AC-2) > has a non-trivial number of official plugins 0ms
@@ -107,12 +107,12 @@ table has one live assertion per manifest entry.
     AC-2 is not vacuous, checked three ways this round: the test reads `config/official-plugins.json` with `readFileSync` at run time rather than from a fixture; the verbose log carries exactly 38 per-id cases against a manifest of exactly 38 entries; and two guards (`org` must equal the upstream URL, `plugins.length` must exceed 30) make the table impossible to empty silently.
 
 - eval: E3
-  run_id: oneflow-plugin-prefix-r3-E3-20260726154113
+  run_id: oneflow-plugin-prefix-r4-E3-20260727105026
   exit_code: 0
   baseline: red — M3 (runner segment widened) kills the three runner cases and
     M4 (anchors dropped) kills the five shape cases; neither touches the other's
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-26T15:41:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ✓ plugin id — everything else is still rejected (AC-3) > rejects foo-modal-bar (unrelated prefix) 0ms
     ✓ plugin id — everything else is still rejected (AC-3) > rejects flow-modal-bar (prefix substring only) 0ms
@@ -130,12 +130,12 @@ table has one live assertion per manifest entry.
     The suppression half is real: the anchors are genuine — JavaScript's `$` matches only at end of input without the `m` flag, and the suite pins that with an explicit `"oneflow-modal-foo\nevil"` case rather than relying on it.
 
 - eval: E4
-  run_id: oneflow-plugin-prefix-r3-E4-20260726154113
+  run_id: oneflow-plugin-prefix-r4-E4-20260727105026
   exit_code: 0
   baseline: red — three separate message mutations (drop "legacy", name tongflow
     first, drop the `oneflow-api-*` token) each kill their own assertion
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-26T15:41:13Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ✓ plugin id — the error teaches the current convention (AC-4) > quotes the offending name 0ms
     ✓ plugin id — the error teaches the current convention (AC-4) > names oneflow before tongflow 0ms
@@ -145,12 +145,12 @@ table has one live assertion per manifest entry.
     The scanner's own rejection hint is held to the same rule by a separate test in the SDK suite (`test_unknown_prefix_hint_leads_with_oneflow`), so both enforcement layers teach the current convention, not only the installer.
 
 - eval: E5
-  run_id: oneflow-plugin-prefix-r3-E5-20260726154114
+  run_id: oneflow-plugin-prefix-r4-E5-20260727105026
   exit_code: 0
   baseline: red — nine branches driven this round, seven rule deletions plus the
     cannot-look path plus the round-2 bypass replay; see "Failure-branch drive"
   verifier: config:executors.script.docs_plugin_prefix
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     ok  state the oneflow-api convention
     ok  state the oneflow-modal convention
@@ -164,11 +164,11 @@ table has one live assertion per manifest entry.
     Read independently of the guard: `docs/plugins.md` §3 is headed "The naming convention the scanner enforces:", its first bullet names `oneflow-api-…` / `oneflow-modal-…`, and the legacy bullet states that the official plugins "are upstream repos under an org this fork does not control" and that "The rule lives in two places that must agree: the installer's id check and `_detect_runner` in the scanner". AC-5 holds on a direct read, not only on the guard's word.
 
 - eval: E6
-  run_id: oneflow-plugin-prefix-r3-E6-20260726154114
+  run_id: oneflow-plugin-prefix-r4-E6-20260727105026
   exit_code: 0
   baseline: red — eleven branches driven, including all five cannot-look paths
   verifier: config:executors.script.prefix_no_config_drift
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     no drift vs origin/main: config src/lib/plugins/plugins-registry-schema.ts src/lib/plugins/plugins-registry.server.ts src/db untouched
     manifest intact: 38 plugins, org still https://github.com/tong-io
@@ -176,39 +176,39 @@ table has one live assertion per manifest entry.
     Re-derived from the diff itself rather than from the guard: `git diff --name-only origin/main...HEAD` outside `_acceptance/` lists sixteen files — `docs/plugins.md`, the two scripts under `scripts/plugins/`, `sdk/tongflow/scan.py`, `sdk/tests/test_scan_prefix.py`, three under `src/components/workspace/`, the five locale files under `src/i18n/messages/`, and three under `src/lib/plugins/` (`plugin-id.ts`, `plugin-id.test.ts`, `plugins-install.server.ts`). None is under `config/`, none matches `plugins-registry*`, none is under `src/db/`.
 
 - eval: E7
-  run_id: oneflow-plugin-prefix-r3-E7-20260726154213
+  run_id: oneflow-plugin-prefix-r4-E7-20260727105026
   exit_code: 0
   baseline: n/a — a compile gate; it is red by construction on a type error
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-26T15:42:13Z
+  verified_at: 2026-07-27T10:50:26Z
 
 - eval: E8
-  run_id: oneflow-plugin-prefix-r3-E8-20260726154122
+  run_id: oneflow-plugin-prefix-r4-E8-20260727105026
   exit_code: 0
   baseline: red — every regex mutation below is caught by this suite as well as
     by the targeted file
   verifier: config:executors.test.unit
-  verified_at: 2026-07-26T15:41:22Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     Test Files  22 passed (22)
          Tests  272 passed (272)
 
 - eval: E9
-  run_id: oneflow-plugin-prefix-r3-E9-20260726154123
+  run_id: oneflow-plugin-prefix-r4-E9-20260727105026
   exit_code: 0
   baseline: n/a — a lint gate, red by construction on a violation
   verifier: config:executors.test.lint
-  verified_at: 2026-07-26T15:41:23Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     Checked 398 files in 68ms. No fixes applied.
 
 - eval: E10
-  run_id: oneflow-plugin-prefix-r3-E10-20260726154114
+  run_id: oneflow-plugin-prefix-r4-E10-20260727105026
   exit_code: 0
   baseline: red — six mutations of the scanner's prefix logic were driven and
     all six are caught, including the one that survived round 2
   verifier: config:executors.test.sdk_pytest_scan_prefix
-  verified_at: 2026-07-26T15:41:14Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     tests/test_scan_prefix.py::test_both_conventions_register[oneflow-modal-foo] PASSED
     tests/test_scan_prefix.py::test_both_conventions_register[oneflow-api-foo] PASSED
@@ -237,12 +237,12 @@ table has one live assertion per manifest entry.
     23 passed. `-v` is a reporter flag; the config key resolves to `cd sdk && python3 -m pytest -q tests/test_scan_prefix.py` and was also run in that exact form, with the same outcome. The suite grew from 20 to 23 this round: `modal-foo`, `api-foo` and `foo` are the prefix-less cases round 2 found missing. These tests call `tongflow.scan.scan()` directly — the same function `python3 -m tongflow` invokes — over fixtures they build in `tmp_path`, so they exercise the production code path rather than a re-implementation.
 
 - eval: E11
-  run_id: oneflow-plugin-prefix-r3-E11-20260726154117
+  run_id: oneflow-plugin-prefix-r4-E11-20260727105026
   exit_code: 0
   baseline: red — the scan.py revert leaves the rest of the SDK suite green and
     kills only the prefix tests, so widening the gate broke nothing
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-26T15:41:17Z
+  verified_at: 2026-07-27T10:50:26Z
   output: |
     89 passed in 4.15s
 
