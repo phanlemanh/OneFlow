@@ -5,7 +5,7 @@ slug: conformance-l0
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [engine, plugins, workflow]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-07-28
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -93,3 +93,28 @@ one further cell was surfaced afterwards by the clean-context gap-probe.
 
 - Suite kiểm **ngữ nghĩa fan-out**, không kiểm mọi khác biệt TS↔Python. Các trục lệch khác (ép kiểu, thứ tự trường, xử lý null ở tầng sâu hơn call-log) chưa có ca — thêm khi gặp.
 - Fixture viết tay. Đó là chủ ý (golden sinh tự động thì regenerate là cách rẻ nhất để giấu drift), nhưng đổi lại thêm ca mới tốn công hơn.
+
+### Hoãn ở Cổng 2 vòng verify 2 (Manh quyết 28/07)
+
+Ba finding của review round 2 được nhận làm nợ thay vì sửa trong lát này. Hai
+cái đầu là nợ thường; cái thứ ba **chặn L1**.
+
+- **`pluginRev` mù với sửa đổi chưa commit** — `git rev-parse HEAD` không thấy
+  working tree, nên một plugin sửa tay giữ nguyên rev. Không sửa được ở đây:
+  AC-8 viết đen trắng "bằng `git rev-parse HEAD`", nên đổi = đổi hợp đồng =
+  quay lại Cổng 1. **Điều kiện chặn L1**: lát đưa rev vào khoá cache phải đóng
+  cái này trước (thêm `git status --porcelain` hoặc băm nội dung), nếu không
+  một plugin sửa tay sẽ phục vụ kết quả cũ vĩnh viễn — đúng thứ field này sinh
+  ra để chặn.
+- **Lô rỗng: engine xoá state node hạ nguồn, canvas thì không.** Engine đặt
+  `slot_state = []` còn `applyResolvedOutputRoutes` bỏ qua field vắng nên giao
+  diện giữ nội dung cũ. Là một lệch canvas↔engine **mới** do chính diff này
+  sinh ra, cùng họ với thứ lát này xoá; AC-11 chỉ ghim nửa engine. Sửa = đổi
+  cách giao diện dựng kết quả node → bán kính rủi ro rộng, cần contract riêng.
+- **Hình dạng `outputs` của SDK đổi cho node chia lô mà chưa bump phiên bản.**
+  `run_workflow(...)["outputs"][nodeId]` chuyển từ dict sang list cho ~30 slot
+  dùng `batchOn()`. Checklist CLAUDE.md đòi bump `sdk/pyproject.toml` +
+  `sdk/tongflow/__init__.py` khớp nhau; làm cùng lần publish SDK kế tiếp.
+- **`sdk/uv.lock` lệch với `pyproject.toml`** (phát hiện lúc chạy round 2, đã
+  revert vì ngoài phạm vi): bản committed còn ghi `tongflow 0.1.1` — tàn dư của
+  `sdk-distribution-rename`. Regenerate cùng lần bump phiên bản ở trên.

@@ -74,6 +74,10 @@ export function ExecutionStatusLine() {
                     break;
 
                 case NodeStatus.NODE_COMPLETED:
+                // A reused result still finishes a node. Counting only real
+                // runs would leave the progress line stuck below total for the
+                // rest of a run that used the cache.
+                case NodeStatus.NODE_CACHED:
                     setState((prev) => ({
                         ...prev,
                         completed: prev.completed + 1,

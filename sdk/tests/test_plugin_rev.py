@@ -65,6 +65,30 @@ def test_git_directory_with_unreadable_rev_raises_a_named_error(tmp_path: Path) 
         read_plugin_rev(d)
 
 
+def test_a_rev_that_is_not_a_forty_character_sha_is_a_named_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An out-of-format rev must not reach the TypeScript consumer.
+
+    `PluginsRegistrySchema` declares `pluginRev` as exactly 40 characters and
+    the scanner's output is parsed un-guarded, so one bad value does not
+    degrade a single entry — it throws and the app ends up with no plugins at
+    all. Failing here names the offending plugin and becomes one scan error.
+    """
+    d, _ = _git_repo(tmp_path)
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    git = fake_bin / "git"
+    # An abbreviated sha is the realistic trigger: `core.abbrev` in a user's
+    # global gitconfig is enough, and it exits 0 like a healthy read.
+    git.write_text("#!/bin/sh\necho 1a2b3c4\n", encoding="utf-8")
+    git.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
+
+    with pytest.raises(RuntimeError, match="oneflow-fixture-plugin"):
+        read_plugin_rev(d)
+
+
 def test_checkout_on_a_host_without_git_yields_none(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -312,7 +312,19 @@ def read_plugin_rev(plugin_dir: Path) -> Optional[str]:
             f"cannot read plugin rev for {plugin_dir.name}: "
             f"{r.stderr.strip() or r.stdout.strip()}"
         )
-    return r.stdout.strip()
+    rev = r.stdout.strip()
+    # The consumer declares `pluginRev: z.string().length(40)` and parses the
+    # manifest un-guarded, so an out-of-format value does not degrade one entry
+    # — it throws and leaves the app with no plugins at all. Fail here instead,
+    # where the error names the plugin and the caller turns it into one scan
+    # error. (A short sha, an abbreviated `core.abbrev`, or a ref name rather
+    # than a sha would all get through otherwise.)
+    if len(rev) != 40 or any(c not in "0123456789abcdef" for c in rev):
+        raise RuntimeError(
+            f"cannot read plugin rev for {plugin_dir.name}: "
+            f"git returned {rev!r}, not a 40-character sha"
+        )
+    return rev
 
 
 def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:

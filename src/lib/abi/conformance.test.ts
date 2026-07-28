@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -15,7 +15,26 @@ import {
 const FIXTURES =
     process.env.CONFORMANCE_FIXTURES ??
     join(process.cwd(), "sdk/tests/conformance/fixtures");
-const CASES = ["batch-basic", "batch-empty", "no-batch", "batch-collect"];
+/**
+ * Every fixture on disk is a case, on both sides. A hand-written list is the
+ * mirror image of the missing-fixture failure guarded against below: a fixture
+ * that is present but unlisted runs on one runtime only, and a case running on
+ * one side reports nothing about agreement while looking like it does. Both
+ * halves glob this same directory, so adding a file is the whole of adding a
+ * case.
+ */
+function discoverCases(): string[] {
+    const names = readdirSync(FIXTURES)
+        .filter((f) => f.endsWith(".json") && !f.startsWith("baseline-"))
+        .map((f) => f.slice(0, -".json".length))
+        .sort();
+    if (names.length === 0) {
+        throw new Error(`no conformance fixtures found under ${FIXTURES}`);
+    }
+    return names;
+}
+
+const CASES = discoverCases();
 
 function loadFixture(name: string): ConformanceFixture {
     // Fail loudly rather than skipping: a silently absent fixture shrinks the

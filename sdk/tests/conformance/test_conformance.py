@@ -19,7 +19,24 @@ import pytest
 
 from tests.conformance.harness import FIXTURES, call_log, load_fixture
 
-CASES = ["batch-basic", "batch-empty", "no-batch", "batch-collect"]
+def _discover_cases() -> list[str]:
+    """Every fixture on disk is a case, on both sides.
+
+    A hand-written list is the mirror-image of the missing-fixture failure the
+    module docstring guards against: a fixture that is present but unlisted
+    runs on one runtime only, and a case that runs on one side reports nothing
+    about agreement while looking like it does. Both halves glob the same
+    directory, so adding a file is the whole of adding a case.
+    """
+    names = sorted(
+        p.stem for p in FIXTURES.glob("*.json") if not p.name.startswith("baseline-")
+    )
+    if not names:
+        raise RuntimeError(f"no conformance fixtures found under {FIXTURES}")
+    return names
+
+
+CASES = _discover_cases()
 
 
 @pytest.mark.parametrize("case", CASES)

@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { mapSSEStatusToTaskStatus, NodeStatus } from "@/constants/task-status";
 import { mapEngineEvent } from "@/lib/task/engine-events";
@@ -16,6 +18,7 @@ import type { SSEMessage } from "@/types/sse";
  */
 
 const FINGERPRINT = "f".repeat(64);
+const THIS_FILE = "src/lib/task/node-cached.test.ts";
 
 function engineEvent(): Record<string, unknown> {
     return {
@@ -58,6 +61,47 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
         expect(mapSSEStatusToTaskStatus(NodeStatus.NODE_CACHED)).toBe(
             "COMPLETED",
         );
+    });
+
+    it("every consumer that handles NODE_COMPLETED also handles NODE_CACHED", () => {
+        // Three separate client switches read this stream — the live run, the
+        // reconnect replay, and the progress line — and none has a `default:`
+        // arm, so a missing case falls through in silence. `message.status` is
+        // a plain string, so TypeScript offers no exhaustiveness check either.
+        // Only two of the three were wired at first; this pins the third and
+        // any future fourth. A static read is the only option here: the vitest
+        // environment is `node` and the repo has no React testing library.
+        const files: string[] = [];
+        const walk = (dir: string): void => {
+            for (const e of readdirSync(dir, { withFileTypes: true })) {
+                const p = join(dir, e.name);
+                if (e.isDirectory()) walk(p);
+                // This file quotes both case labels as string literals, so it
+                // would count itself as a consumer.
+                else if (/\.tsx?$/.test(e.name) && p !== THIS_FILE)
+                    files.push(p);
+            }
+        };
+        walk("src");
+
+        const consumers = files.filter((f) =>
+            readFileSync(f, "utf-8").includes(
+                "case NodeStatus.NODE_COMPLETED:",
+            ),
+        );
+        const missing = consumers.filter(
+            (f) =>
+                !readFileSync(f, "utf-8").includes(
+                    "case NodeStatus.NODE_CACHED:",
+                ),
+        );
+        expect(missing).toEqual([]);
+
+        // Guard the guard: if the switches are ever rewritten into a shape this
+        // string match misses, `consumers` empties out and the check above
+        // passes vacuously. Four sites today: the three SSE switches plus
+        // `mapSSEStatusToTaskStatus`.
+        expect(consumers.length).toBe(4);
     });
 
     it("an unrecognized event type maps to nothing and does not throw", () => {
