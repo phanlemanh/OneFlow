@@ -152,6 +152,22 @@ if [ -f "$ACC/config.yaml" ]; then
   fi
 fi
 
+# BASE_SHA is resolved here rather than at the T1-escape backstop below because
+# the coverage set (BASE_SHA...HEAD, per PR) is needed inside the feature loop
+# for the paths cross-check. Empty means "no usable base": every consumer must
+# then fall back to the strict behaviour, never to narrow scope.
+BASE_SHA=""
+BASE_NOTE=""
+if [ -z "$BASE" ]; then
+  BASE_NOTE="T1-escape backstop skipped — no PR base given (pass --base <ref> or set PRE_MERGE_BASE; GitHub Actions: --base \"origin/\$GITHUB_BASE_REF\")"
+elif ! command -v git >/dev/null 2>&1 || ! git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+  BASE_NOTE="T1-escape backstop skipped — $ROOT is not a git repo here"
+else
+  BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "$BASE^{commit}" 2>/dev/null || true)"
+  [ -z "$BASE_SHA" ] && BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "origin/$BASE^{commit}" 2>/dev/null || true)"
+  [ -z "$BASE_SHA" ] && BASE_NOTE="T1-escape backstop skipped — base \"$BASE\" not resolvable in this clone"
+fi
+
 for dir in "$ACC"/*/; do
   [ -d "$dir" ] || continue
   slug="$(basename "$dir")"
@@ -328,39 +344,31 @@ done
 # gated PR re-verifies, so its diff always includes gate artifacts.) There is
 # no path→slug mapping, so "carries artifacts" means any _acceptance/ change;
 # the per-slug checks above judge their quality.
-if [ -z "$BASE" ]; then
-  echo "NOTE: T1-escape backstop skipped — no PR base given (pass --base <ref> or set PRE_MERGE_BASE; GitHub Actions: --base \"origin/\$GITHUB_BASE_REF\")"
-elif ! command -v git >/dev/null 2>&1 || ! git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
-  echo "NOTE: T1-escape backstop skipped — $ROOT is not a git repo here"
+if [ -z "$BASE_SHA" ]; then
+  echo "NOTE: $BASE_NOTE"
 else
-  BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "$BASE^{commit}" 2>/dev/null || true)"
-  [ -z "$BASE_SHA" ] && BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "origin/$BASE^{commit}" 2>/dev/null || true)"
-  if [ -z "$BASE_SHA" ]; then
-    echo "NOTE: T1-escape backstop skipped — base \"$BASE\" not resolvable in this clone"
-  else
-    changed="$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"
-    gate_touched=0; t3_hits=""; nont1_hits=""
-    while IFS= read -r f; do
-      [ -n "$f" ] || continue
-      case "$f" in _acceptance/*|*/_acceptance/*) gate_touched=1; continue ;; esac
-      if [ -n "$T3_PATHS" ] && match_globs "$f" "$T3_PATHS"; then
-        t3_hits="${t3_hits}${f}"$'\n'
-      elif ! match_globs "$f" "$T1_GLOBS"; then
-        nont1_hits="${nont1_hits}${f}"$'\n'
-      fi
-    done <<CHANGED
+  changed="$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"
+  gate_touched=0; t3_hits=""; nont1_hits=""
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in _acceptance/*|*/_acceptance/*) gate_touched=1; continue ;; esac
+    if [ -n "$T3_PATHS" ] && match_globs "$f" "$T3_PATHS"; then
+      t3_hits="${t3_hits}${f}"$'\n'
+    elif ! match_globs "$f" "$T1_GLOBS"; then
+      nont1_hits="${nont1_hits}${f}"$'\n'
+    fi
+  done <<CHANGED
 $changed
 CHANGED
-    if [ "$gate_touched" -eq 0 ]; then
-      if [ -n "$t3_hits" ]; then
-        echo "VIOLATION [PR]: T3 paths (t3_paths) changed but the PR carries NO _acceptance/<slug>/ artifacts — critical code changed without the gate. Changed:"
-        printf '%s' "$t3_hits" | head -10 | sed 's/^/    /'
-        violations=$((violations+1))
-      elif [ -n "$nont1_hits" ]; then
-        echo "VIOLATION [PR]: non-T1 files changed (outside t1_skip_globs) but the PR carries NO _acceptance/<slug>/ artifacts — declare T1 honestly (t1_skip_globs) or run the gate. Changed:"
-        printf '%s' "$nont1_hits" | head -10 | sed 's/^/    /'
-        violations=$((violations+1))
-      fi
+  if [ "$gate_touched" -eq 0 ]; then
+    if [ -n "$t3_hits" ]; then
+      echo "VIOLATION [PR]: T3 paths (t3_paths) changed but the PR carries NO _acceptance/<slug>/ artifacts — critical code changed without the gate. Changed:"
+      printf '%s' "$t3_hits" | head -10 | sed 's/^/    /'
+      violations=$((violations+1))
+    elif [ -n "$nont1_hits" ]; then
+      echo "VIOLATION [PR]: non-T1 files changed (outside t1_skip_globs) but the PR carries NO _acceptance/<slug>/ artifacts — declare T1 honestly (t1_skip_globs) or run the gate. Changed:"
+      printf '%s' "$nont1_hits" | head -10 | sed 's/^/    /'
+      violations=$((violations+1))
     fi
   fi
 fi
