@@ -88,6 +88,7 @@ executors:
     stale_scope_partial: bash scripts/acceptance/check-stale-scoping.sh --case partial
     stale_scope_under_declared: bash scripts/acceptance/check-stale-scoping.sh --case under-declared
     stale_scope_malformed: bash scripts/acceptance/check-stale-scoping.sh --case malformed
+    stale_scope_indent_drift: bash scripts/acceptance/check-stale-scoping.sh --case indent-drift
     stale_scope_merged_halves: bash scripts/acceptance/check-stale-scoping.sh --case merged-halves
     stale_scope_suppression: bash scripts/acceptance/check-stale-scoping.sh --case suppression
     stale_scope_two_bases: bash scripts/acceptance/check-stale-scoping.sh --case two-bases

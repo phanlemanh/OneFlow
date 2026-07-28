@@ -48,6 +48,16 @@ case_case_completeness() {
   if bash "$0" --case definitely-not-a-case >/dev/null 2>&1; then
     fail case-completeness "unknown case name exited 0"
   fi
+  # A case can exist here and still never RUN anywhere: exactly what happened
+  # to indent-drift, which shipped a working function with no
+  # _acceptance/config.yaml executors.script key pointing `--case
+  # indent-drift` at it, so nothing at verify time or in CI ever invoked it.
+  # Every name in KNOWN_CASES must appear as a literal `--case <name>` inside
+  # _acceptance/config.yaml (moved to fixtures.sh's
+  # assert_cases_wired_in_config() purely for this file's 800-line cap).
+  missing_cfg="$(assert_cases_wired_in_config "$ROOT/_acceptance/config.yaml")"
+  [ -z "$missing_cfg" ] \
+    || fail case-completeness "cases with no --case <name> wired into _acceptance/config.yaml executors.script:$missing_cfg"
   pass case-completeness
 }
 
@@ -131,373 +141,7 @@ case_malformed() {
   pass malformed
 }
 
-case_indent_drift() {
-  # E-indent-drift: an eval whose leading whitespace drifts from the canonical
-  # 2/4-space indent (an ordinary typo, or a literal tab) must not become
-  # invisible to BOTH feature_scope() counters at once — that lets n_evals and
-  # n_paths coincide by accident, feature_scope returns 0 ("complete"), and the
-  # drifted eval's total absence of a `paths` declaration goes unnoticed.
-  #
-  # Reuse feature_scope() from the gate instead of hand-rolling a second
-  # parser, the same way case_guard_not_exempt reuses match_globs(): a private
-  # copy would silently drift from what the gate actually does. Extracting
-  # only the function body (not sourcing/executing the whole gate script,
-  # which has side effects and calls exit) keeps this guard tested against the
-  # exact parser the gate ships.
-  feature_scope_src="$(sed -n '/^feature_scope()/,/^}/p' "$GATE")"
-  [ -n "$feature_scope_src" ] || fail indent-drift "could not extract feature_scope() from $GATE"
-  eval "$feature_scope_src"
-
-  d="$(new_case_tmpdir)"
-
-  # Space-drift variant: E1 canonically indented and declares paths; E2
-  # drifted to a 3-space "- id:" / "criterion:" pair and declares none.
-  cat > "$d/space-drift.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    paths: ["src/covered/**"]
-   - id: E2
-     criterion: AC-2
-YAML
-  out="$(feature_scope "$d/space-drift.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "space-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
-
-  # Tab-drift variant: same shape, drifted line prefixed with a literal tab
-  # instead of an odd space count.
-  printf 'schema_version: 1\nfeature_slug: fx\nevals:\n  - id: E1\n    paths: ["src/covered/**"]\n\t- id: E2\n\tcriterion: AC-2\n' \
-    > "$d/tab-drift.yaml"
-  out="$(feature_scope "$d/tab-drift.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "tab-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
-
-  # Block-scalar decoy: E2 declares no `paths`, but its `expected: |` block
-  # scalar contains a prose line that reads "paths: [...]" at the SAME
-  # indentation an eval-level declaration would use. A parser that counts
-  # `paths:` occurrences without excluding block-scalar bodies mistakes that
-  # prose for a declaration and folds its glob into the union.
-  cat > "$d/block-scalar-decoy.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    expected: |
-    exit 0; decoy prose at eval-key indentation:
-    paths: ["src/decoy/**"]
-    must not be read as a declaration
-YAML
-  out="$(feature_scope "$d/block-scalar-decoy.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "block-scalar decoy 'paths:' prose was counted as a declaration — feature_scope returned 0 (globs: $out)"
-
-  # Top-level-key decoy: a feature-level `paths:` key that is a sibling of
-  # `evals:` (not under any eval item) must not be counted toward
-  # completeness or joined into the union — E2 below declares no `paths` of
-  # its own.
-  cat > "$d/toplevel-key-decoy.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-paths: ["src/decoy/**"]
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-YAML
-  out="$(feature_scope "$d/toplevel-key-decoy.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "feature-level top-level 'paths:' key was counted as an eval declaration — feature_scope returned 0 (globs: $out)"
-
-  # Multi-line array: E2's `paths:` opens a bracket array but its globs
-  # continue on following lines, closing on a THIRD line. A line-based
-  # extractor cannot read continuation lines, so a parser that counts this
-  # opening line toward completeness (matching only the prefix, not
-  # requiring the closing `]` on the same line) reaches a false "complete"
-  # reading while contributing zero globs for E2 — the exact defect this
-  # case guards against regressing.
-  cat > "$d/multiline-array.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    paths: [
-      "src/extra/**",
-      "src/more/**"
-    ]
-YAML
-  out="$(feature_scope "$d/multiline-array.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "multi-line 'paths:' array was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
-
-  # Same shape, but the multi-line array is the ONLY eval in the file — this
-  # used to return non-zero already, but for the wrong reason (the union
-  # came out empty, tripping the LAST-resort "zero globs" check). Assert the
-  # actual completeness check (n_evals vs n_paths) is what refuses it, not
-  # an accidental empty union: a file with a real second declared eval whose
-  # globs happened to overlap would otherwise slip through.
-  cat > "$d/multiline-array-only.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: [
-      "src/extra/**",
-      "src/more/**"
-    ]
-YAML
-  out="$(feature_scope "$d/multiline-array-only.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "multi-line 'paths:' array as the only eval was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
-
-  # Trailing inline comment: `paths: [...] # note` must yield the clean glob
-  # with the comment stripped, not a garbage glob with "# note" appended.
-  # This is the success-path counterpart to the two cases above: the file IS
-  # a complete, single-line declaration, so feature_scope must accept it
-  # (rc 0) and the emitted union must contain no "#" fragment.
-  cat > "$d/trailing-comment.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"] # note
-  - id: E2
-    criterion: AC-2
-    paths: ["src/more/**"]
-YAML
-  out="$(feature_scope "$d/trailing-comment.yaml")"; rc=$?
-  [ "$rc" -eq 0 ] \
-    || fail indent-drift "single-line 'paths:' array with a trailing comment was refused — feature_scope returned $rc"
-  printf '%s\n' "$out" | grep -q '#' \
-    && fail indent-drift "trailing comment leaked into the emitted glob union: $out"
-  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
-    || fail indent-drift "expected clean glob 'src/covered/**' missing from union: $out"
-
-  # Bracket-class glob: a glob containing `]` (from a character class like
-  # `foo[0-9]`) must survive intact — this is the defect that shipped four
-  # rounds in a row: `[^]]*` (or any bracket-splitting extractor) stops at the
-  # FIRST `]`, truncating the glob and dropping every sibling after it.
-  cat > "$d/bracket-glob.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/foo[0-9]/**", "src/bar/**"]
-  - id: E2
-    criterion: AC-2
-    paths: ["src/more/**"]
-YAML
-  out="$(feature_scope "$d/bracket-glob.yaml")"; rc=$?
-  [ "$rc" -eq 0 ] \
-    || fail indent-drift "bracket-class glob declaration was refused — feature_scope returned $rc"
-  printf '%s\n' "$out" | grep -qx 'src/foo\[0-9\]/\*\*' \
-    || fail indent-drift "bracket-class glob truncated or missing from union: $out"
-  printf '%s\n' "$out" | grep -qx 'src/bar/\*\*' \
-    || fail indent-drift "sibling glob after a bracket-class glob was dropped from union: $out"
-
-  # Single-quoted items: not the accepted grammar — refused, not tolerated.
-  cat > "$d/single-quoted.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ['src/a/**']
-YAML
-  out="$(feature_scope "$d/single-quoted.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "single-quoted paths items were accepted — feature_scope returned 0 (globs: $out)"
-
-  # Nested array: not the accepted grammar — refused, not tolerated.
-  cat > "$d/nested-array.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: [["a"], "b"]
-YAML
-  out="$(feature_scope "$d/nested-array.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "nested array paths was accepted — feature_scope returned 0 (globs: $out)"
-
-  # Trailing non-comment suffix: anything after `]` that is not a `#`
-  # comment must be refused, not silently ignored.
-  cat > "$d/trailing-junk.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["a"] junk
-YAML
-  out="$(feature_scope "$d/trailing-junk.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "trailing non-comment suffix after ']' was accepted — feature_scope returned 0 (globs: $out)"
-
-  # Hyphenated-key block-scalar decoy: a key-name allow-list (e.g.
-  # `[a-zA-Z_]*:`) never matches `expected-output:`, so its block-scalar body
-  # is read as ordinary content and a decoy `paths:` line inside it is
-  # mistaken for a real declaration. The guard must refuse the whole file
-  # structurally (by "value starts with `|`/`>`"), regardless of the key
-  # spelling.
-  cat > "$d/hyphen-key-block-scalar.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    expected-output: |
-    decoy prose:
-    paths: ["src/decoy/**"]
-YAML
-  out="$(feature_scope "$d/hyphen-key-block-scalar.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "hyphenated-key ('expected-output:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
-
-  # Digit-suffixed-key variant of the same bypass: `note2:` is equally
-  # outside any letter-only allow-list.
-  cat > "$d/digit-key-block-scalar.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    note2: |
-    decoy prose:
-    paths: ["src/decoy/**"]
-YAML
-  out="$(feature_scope "$d/digit-key-block-scalar.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "digit-suffixed-key ('note2:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
-
-  # Single-line value containing `>` after the colon, but NOT as the first
-  # character of the value: must NOT be refused. This is the other direction
-  # of the same check — the block-scalar guard must key off the indicator
-  # being the START of the value, not merely present somewhere on the line.
-  cat > "$d/value-contains-gt.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    expected: "exit 0; a > b"
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    paths: ["src/more/**"]
-YAML
-  out="$(feature_scope "$d/value-contains-gt.yaml")"; rc=$?
-  [ "$rc" -eq 0 ] \
-    || fail indent-drift "a single-line value merely containing '>' after the colon was wrongly refused — feature_scope returned $rc"
-  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
-    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
-  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
-    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
-
-  # Colon-in-key decoy (the live Critical this round closes): a quoted key
-  # whose OWN text contains a colon (`"note: x":`) defeats an extractor that
-  # anchors the block-scalar guard on the FIRST colon in the line — it lands
-  # mid-key instead of at the key's true end, reads the rest of the line as
-  # if it were the value, and never recognizes the `|` that follows as a
-  # block-scalar indicator. The prose beneath it (including a decoy
-  # `paths:` line) then leaks straight into either counter.
-  cat > "$d/colon-in-key.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    paths: ["src/covered/**"]
-  - id: E2
-    "note: x": |
-    decoy:
-    paths: ["src/decoy/**"]
-YAML
-  out="$(feature_scope "$d/colon-in-key.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "colon-in-key decoy ('\"note: x\":') was not refused — feature_scope returned 0 (globs: $out)"
-
-  # Quoted key: not a shape this line-based parser can read reliably (is the
-  # key `expected`, or is the key `"expected"` — a different string?) — must
-  # be refused structurally, not tolerated as if unquoting were free.
-  cat > "$d/quoted-key.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    paths: ["src/covered/**"]
-  - id: E2
-    "expected": |
-    decoy prose:
-    paths: ["src/decoy/**"]
-YAML
-  out="$(feature_scope "$d/quoted-key.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "quoted key ('\"expected\":') was not refused — feature_scope returned 0 (globs: $out)"
-
-  # Key with an embedded space: `my key: |` is not `[A-Za-z_][A-Za-z0-9_-]*:`
-  # and must be refused rather than treated as some normalized key name.
-  cat > "$d/space-in-key.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    paths: ["src/covered/**"]
-  - id: E2
-    my key: |
-    decoy prose:
-    paths: ["src/decoy/**"]
-YAML
-  out="$(feature_scope "$d/space-in-key.yaml")"; rc=$?
-  [ "$rc" -ne 0 ] \
-    || fail indent-drift "key with an embedded space ('my key:') was not refused — feature_scope returned 0 (globs: $out)"
-
-  # Hyphenated key with a single-line (non-block-scalar) value: must NOT be
-  # refused. This is the positive counterpart to the key-grammar checks
-  # above — a legal, ordinary eval-level key that merely happens to be
-  # kebab-case, with every eval in the file declaring real `paths`, must
-  # still be accepted and its `paths` still joined into the union.
-  cat > "$d/hyphen-key-singleline.yaml" <<'YAML'
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    extra-note: "hello"
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    paths: ["src/more/**"]
-YAML
-  out="$(feature_scope "$d/hyphen-key-singleline.yaml")"; rc=$?
-  [ "$rc" -eq 0 ] \
-    || fail indent-drift "hyphenated key with a single-line value ('extra-note: \"hello\"') was wrongly refused — feature_scope returned $rc"
-  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
-    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
-  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
-    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
-
-  pass indent-drift
-}
+case_indent_drift() { run_indent_drift_case; } # E-indent-drift/AC-6 — real body (27 assertions on feature_scope()'s YAML-shape handling) is run_indent_drift_case() in fixtures.sh, moved there only for this file's 800-line cap
 
 case_in_scope() {
   # E1 / AC-1: THE load-bearing case. Narrow scope must still catch a change
@@ -511,6 +155,21 @@ case_in_scope() {
   out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
   printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail in-scope "in-union change did NOT stale the feature: $out"
+
+  # Non-ASCII path inside the declared union: `git diff --name-only` quotes
+  # and octal-escapes a non-ASCII path by default (core.quotePath), so it
+  # arrives as a literal string like "caf\303\251.txt" that can never match a
+  # plain-ASCII glob. Isolated from the cross-check (report committed in its
+  # own commit, base taken AFTER it, same shape case_out_of_scope uses) so
+  # only stale_files()'s own quotePath handling is under test here.
+  d2="$(new_case_tmpdir)"
+  base2="$(mk_committed_report_fixture "$d2" fx all)"
+  ( cd "$d2" && printf 'x' > "src/covered/café.txt" && git add -A && git commit -q -m "non-ascii file in scope" )
+  out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
+  printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail in-scope "non-ASCII in-union path did NOT stale the feature (quoted-path dropped from narrow scope): $out2"
+  printf '%s\n' "$out2" | grep -qF 'café.txt' \
+    || fail in-scope "non-ASCII in-union path was staled but not named cleanly (still quoted/escaped): $out2"
   pass in-scope
 }
 
@@ -653,6 +312,25 @@ merged_halves_cd() {
     || fail merged-halves "half D: unresolvable PR base did not fall back to whole-tree staleness: $outD"
   printf '%s\n' "$outD" | grep -q 'OK \[fx\]' \
     && fail merged-halves "half D: unresolvable PR base wrongly reported OK: $outD"
+
+  # Half D2: a --base that DOES resolve to a real commit, but shares NO merge
+  # base with HEAD (two disjoint histories) — `git diff A...B` exits 128 in
+  # this case ("no merge base"). `2>/dev/null` alone makes that failure read
+  # as an empty, silently EMPTY diff — "no gaps found" — which used to grant
+  # narrow scope on a doubt exactly like an unresolvable ref, just with a rc
+  # instead of an empty rev-parse. Must fail closed the same way as Half D.
+  orig_branch="$(git -C "$d" symbolic-ref --short HEAD)"
+  ( cd "$d" && git checkout -q --orphan no-merge-base-branch \
+      && git rm -rf --cached . -q >/dev/null 2>&1 \
+      && echo unrelated > unrelated-history.txt && git add -A \
+      && git commit -q -m "disjoint history, no common ancestor with $orig_branch" )
+  nomb_ref="$(git -C "$d" rev-parse HEAD)"
+  ( cd "$d" && git checkout -q "$orig_branch" )
+  outD2="$(bash "$GATE" "$d" --base "$nomb_ref" 2>&1)"
+  printf '%s\n' "$outD2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail merged-halves "half D2: a base sharing no merge base with HEAD did not fall back to whole-tree staleness: $outD2"
+  printf '%s\n' "$outD2" | grep -q 'OK \[fx\]' \
+    && fail merged-halves "half D2: a base sharing no merge base with HEAD wrongly reported OK: $outD2"
 }
 
 # assert_cross_check_isolation <label> <desc> <slug1> <slug2> — shared shape
@@ -724,12 +402,19 @@ merged_halves_g() {
 
   # PR1: base is BEFORE fx existed at all — the coverage set (hbase0...HEAD)
   # is only _acceptance/fx/* (excluded from scope_gaps by construction), so
-  # it is empty and the cross-check passes vacuously. This mirrors the
-  # reported repro exactly: "a PR touching only the feature's own
-  # _acceptance/<slug>/ → OK [fx]".
+  # it is empty. Post-fix: an empty coverage set at the moment the
+  # declaration is introduced is refused outright (its own NOTE), rather than
+  # passing the cross-check vacuously and being silently granted — the
+  # feature must still report OK (nothing gated changed in this PR either
+  # way), but the "narrow scope applied" wording must NOT appear, because no
+  # scope was actually granted.
   outG1="$(bash "$GATE" "$h" --base "$hbase0" 2>&1)"
   printf '%s\n' "$outG1" | grep -q 'OK \[fx\]' \
     || fail merged-halves "half G: vacuous-pass setup: PR introducing a match-nothing declaration was not reported OK: $outG1"
+  printf '%s\n' "$outG1" | grep -qF 'NOTE [fx]: this PR'"'"'s gated coverage set is empty' \
+    || fail merged-halves "half G: empty coverage set at declaration time was not refused with the dedicated NOTE: $outG1"
+  printf '%s\n' "$outG1" | grep -q 'narrow staleness scope applied' \
+    && fail merged-halves "half G: an empty-coverage-set declaration was still announced as a GRANTED narrow scope: $outG1"
 
   # PR2: real code change, feature artifacts UNTOUCHED — the cross-check does
   # not even run here (declaration unchanged since hpr1), so only a guard
@@ -742,6 +427,66 @@ merged_halves_g() {
     || fail merged-halves "half G: match-nothing declaration: stale file not named: $outG2"
 }
 
+# merged_halves_h — Half H / the CRITICAL finding this round closes: unlike
+# Half G above (a match-nothing declaration, already caught independently by
+# scope_has_any_match), this uses a REAL declaration whose globs DO match
+# tracked files elsewhere in the repo ("src/covered/**") — isolating the
+# defect from that other guard. The PR that introduces fx touches nothing
+# gated besides its own _acceptance/fx/ (an honest "just wiring up the
+# feature" commit), so the coverage set is empty and the cross-check used to
+# pass VACUOUSLY, silently granting narrow scope to a declaration that was
+# NEVER actually checked against anything. Post-fix this must be refused with
+# its own NOTE at THIS PR's own gate run.
+#
+# A SEPARATE, later PR that changes real code outside the declared union
+# WITHOUT touching _acceptance/fx again does NOT retrigger the cross-check —
+# by design (AC-7: re-running it against every unrelated PR's diff would
+# refuse narrow scope for every already-merged feature forever). That is a
+# real, acknowledged residual (see contract.md "Known limits"), not something
+# this fix claims to close — pinned here as a boundary on AC-7, not a defect.
+merged_halves_h() {
+  hh="$(new_case_tmpdir)"
+  mkdir -p "$hh/src/covered" "$hh/src/other" "$hh/_acceptance"
+  git_init_fixture_repo "$hh"
+  write_config "$hh"
+  ( cd "$hh" && echo seed > src/covered/seed.txt && echo seed > src/other/seed.txt \
+      && git add -A && git commit -q -m "repo base, no feature yet" )
+  hhbase0="$(git -C "$hh" rev-parse HEAD)"
+
+  mkdir -p "$hh/_acceptance/fx"
+  write_contract "$hh" fx
+  # Real, matching declaration — deliberately NOT match-nothing, to isolate
+  # this from scope_has_any_match's guard.
+  write_evals_yaml "$hh" fx '    paths: ["src/covered/**"]' '    paths: ["src/covered/**"]'
+  echo '{}' > "$hh/_acceptance/fx/run-log.jsonl"
+  ( cd "$hh" && git add -A && git commit -q -m "introduce fx with a real, matching declaration, nothing else" )
+  hhvc="$(git -C "$hh" rev-parse HEAD)"
+  write_report "$hh" fx "$hhvc"
+  ( cd "$hh" && git add -A && git commit -q -m "evidence report" )
+  hhpr1="$(git -C "$hh" rev-parse HEAD)"
+
+  # PR1 (the declaring PR): coverage set (hhbase0...HEAD) is only
+  # _acceptance/fx/* — empty. Must be refused, not silently granted.
+  outH1="$(bash "$GATE" "$hh" --base "$hhbase0" 2>&1)"
+  printf '%s\n' "$outH1" | grep -q 'OK \[fx\]' \
+    || fail merged-halves "half H: declaring PR was not reported OK: $outH1"
+  printf '%s\n' "$outH1" | grep -qF 'NOTE [fx]: this PR'"'"'s gated coverage set is empty' \
+    || fail merged-halves "half H: a real, matching declaration introduced with an empty coverage set was not refused: $outH1"
+  printf '%s\n' "$outH1" | grep -q 'narrow staleness scope applied' \
+    && fail merged-halves "half H: a declaration never actually cross-checked was still announced as a GRANTED narrow scope: $outH1"
+
+  # PR2: real code OUTSIDE the declared union, artifacts left untouched — the
+  # acknowledged residual. Documented, not asserted as fixed: the cross-check
+  # correctly does NOT run (AC-7), so this still reports OK. If a future
+  # change makes this start failing, that is AC-7 being violated (the
+  # cross-check running against every unrelated PR), not a bug being
+  # reintroduced — check contract.md "Known limits" before touching this.
+  ( cd "$hh" && echo drift > src/other/new.txt && git add -A && git commit -q -m "real code outside declared paths" )
+  outH2="$(bash "$GATE" "$hh" --base "$hhpr1" 2>&1)"
+  printf '%s\n' "$outH2" | grep -qi 'do not cover' \
+    && fail merged-halves "half H: cross-check ran for a PR that never touched _acceptance/fx — AC-7 regressed: $outH2"
+}
+
 case_merged_halves() {
   # E7 / AC-7: cross-check fires only when the declaration is new or changed.
   d="$(new_case_tmpdir)"
@@ -749,6 +494,7 @@ case_merged_halves() {
   merged_halves_cd
   assert_cross_check_isolation "half E" "regex-slug" a.b axb
   assert_cross_check_isolation "half F" "trailing-slash" fx fx-extra
+  merged_halves_h
   merged_halves_g
   pass merged-halves
 }

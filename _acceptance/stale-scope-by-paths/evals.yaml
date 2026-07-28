@@ -129,3 +129,11 @@ evals:
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
     expected: "exit 0; output contains `CASE announce: PASS`. Three assertions: a feature granted narrow scope produces ONE line naming it and the globs that scoped it; when that narrow scope suppressed a staleness whole-tree would have reported, the line says so explicitly; and an undeclared feature produces NO such line, so AC-3's silence still holds"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.stale_scope_indent_drift
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE indent-drift: PASS`. feature_scope() refuses every YAML form it cannot read cleanly: indentation drift (both a space-count drift and a literal-tab drift on an eval-item line), block-scalar decoys — including hyphenated-key, digit-suffixed-key, colon-in-key, and quoted-key variants — a feature-level top-level `paths:` key sibling to `evals:`, a multi-line array (both alongside a complete sibling eval and as the file's only eval), single-quoted items, a nested array, and trailing non-comment junk after the closing `]`. It still ACCEPTS, and joins into the union: a single-line value that merely contains `>` after its colon, a hyphenated key with an ordinary single-line value, a trailing inline `#` comment (stripped clean, not leaked into the glob), and a glob containing `]` from a bracket character class (with a sibling glob after it not dropped)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

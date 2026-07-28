@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # Fixture-construction helpers for scripts/acceptance/check-stale-scoping.sh
-# — PLUS one full case body: run_mutation_case() (backing case_mutation / E9
-# / AC-9), complete with its perturbation sed patches and every assertion
-# `--case mutation` makes. That is not a thin wrapper hiding here — it is
-# the actual substance of the mutation case. It lives in this file, rather
-# than beside the other case_* functions in check-stale-scoping.sh, purely
-# because that file was already sitting at this repo's 800-line-per-file cap
-# (CLAUDE.md) when the mutation case was added. See case_mutation()'s own
-# comment in that file for the pointer back to here.
+# — PLUS two full case bodies:
+#   - run_mutation_case() (backing case_mutation / E9 / AC-9), complete with
+#     its perturbation sed patches and every assertion `--case mutation` makes.
+#   - run_indent_drift_case() (backing case_indent_drift / E-indent-drift /
+#     AC-6), the 27 assertions pinning every YAML shape feature_scope() must
+#     refuse or accept (indentation drift, block-scalar decoys, multi-line
+#     arrays, quoting variants, bracket-class globs, trailing comments/junk).
+# Neither is a thin wrapper hiding here — each is the actual substance of its
+# case. They live in this file, rather than beside the other case_* functions
+# in check-stale-scoping.sh, purely because that file was already sitting at
+# this repo's 800-line-per-file cap (CLAUDE.md) when each was added. See
+# case_mutation()'s and case_indent_drift()'s own comments in that file for
+# the pointer back to here.
 #
 # Everything else in this file — write_config, write_contract,
 # write_evals_yaml, mk_fixture, mk_pair_fixture, mk_committed_report_fixture,
@@ -65,6 +70,26 @@ cleanup_case_tmpdirs() {
     done < "$CASE_TMPDIR_REGISTRY"
     rm -f "$CASE_TMPDIR_REGISTRY"
   fi
+}
+
+# assert_cases_wired_in_config <config.yaml-path> — for every name in
+# KNOWN_CASES (check-stale-scoping.sh global), checks that a literal
+# `--case <name>` string appears in the given _acceptance/config.yaml.
+# Prints the space-prefixed list of any case names not found there (empty
+# string if all are wired). A case function can exist and still never run
+# anywhere — exactly what happened to indent-drift, which shipped a working
+# case_indent_drift() with no executors.script key pointing `--case
+# indent-drift` at it — so this is what case_case_completeness (in
+# check-stale-scoping.sh) uses to catch that class of gap. Moved here purely
+# for that file's 800-line cap.
+assert_cases_wired_in_config() {
+  acw_cfg="$1"
+  acw_missing=""
+  for acw_c in $KNOWN_CASES; do
+    grep -qE -- "--case ${acw_c}([[:space:]]|\$)" "$acw_cfg" 2>/dev/null \
+      || acw_missing="$acw_missing $acw_c"
+  done
+  printf '%s' "$acw_missing"
 }
 
 # write_config <dir> — canonical _acceptance/config.yaml fixture content: the
@@ -306,4 +331,378 @@ run_mutation_case() {
   printf '%s\n' "$r2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail mutation "revert: partial declaration no longer falls back"
   pass mutation
+}
+
+# run_indent_drift_case — full body of check-stale-scoping.sh's
+# case_indent_drift (E-indent-drift / AC-6); kept here (rather than in
+# check-stale-scoping.sh, which is already at the repo's 800-line-per-file
+# cap) purely for line budget. Relies on $GATE and pass()/fail() from the
+# caller's shell — this file is always sourced into check-stale-scoping.sh,
+# never executed standalone.
+run_indent_drift_case() {
+  # E-indent-drift: an eval whose leading whitespace drifts from the canonical
+  # 2/4-space indent (an ordinary typo, or a literal tab) must not become
+  # invisible to BOTH feature_scope() counters at once — that lets n_evals and
+  # n_paths coincide by accident, feature_scope returns 0 ("complete"), and the
+  # drifted eval's total absence of a `paths` declaration goes unnoticed.
+  #
+  # Reuse feature_scope() from the gate instead of hand-rolling a second
+  # parser, the same way case_guard_not_exempt reuses match_globs(): a private
+  # copy would silently drift from what the gate actually does. Extracting
+  # only the function body (not sourcing/executing the whole gate script,
+  # which has side effects and calls exit) keeps this guard tested against the
+  # exact parser the gate ships.
+  feature_scope_src="$(sed -n '/^feature_scope()/,/^}/p' "$GATE")"
+  [ -n "$feature_scope_src" ] || fail indent-drift "could not extract feature_scope() from $GATE"
+  eval "$feature_scope_src"
+
+  d="$(new_case_tmpdir)"
+
+  # Space-drift variant: E1 canonically indented and declares paths; E2
+  # drifted to a 3-space "- id:" / "criterion:" pair and declares none.
+  cat > "$d/space-drift.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+   - id: E2
+     criterion: AC-2
+YAML
+  out="$(feature_scope "$d/space-drift.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "space-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
+
+  # Tab-drift variant: same shape, drifted line prefixed with a literal tab
+  # instead of an odd space count.
+  printf 'schema_version: 1\nfeature_slug: fx\nevals:\n  - id: E1\n    paths: ["src/covered/**"]\n\t- id: E2\n\tcriterion: AC-2\n' \
+    > "$d/tab-drift.yaml"
+  out="$(feature_scope "$d/tab-drift.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "tab-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
+
+  # Block-scalar decoy: E2 declares no `paths`, but its `expected: |` block
+  # scalar contains a prose line that reads "paths: [...]" at the SAME
+  # indentation an eval-level declaration would use. A parser that counts
+  # `paths:` occurrences without excluding block-scalar bodies mistakes that
+  # prose for a declaration and folds its glob into the union.
+  cat > "$d/block-scalar-decoy.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    expected: |
+    exit 0; decoy prose at eval-key indentation:
+    paths: ["src/decoy/**"]
+    must not be read as a declaration
+YAML
+  out="$(feature_scope "$d/block-scalar-decoy.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "block-scalar decoy 'paths:' prose was counted as a declaration — feature_scope returned 0 (globs: $out)"
+
+  # Top-level-key decoy: a feature-level `paths:` key that is a sibling of
+  # `evals:` (not under any eval item) must not be counted toward
+  # completeness or joined into the union — E2 below declares no `paths` of
+  # its own.
+  cat > "$d/toplevel-key-decoy.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+paths: ["src/decoy/**"]
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+YAML
+  out="$(feature_scope "$d/toplevel-key-decoy.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "feature-level top-level 'paths:' key was counted as an eval declaration — feature_scope returned 0 (globs: $out)"
+
+  # Multi-line array: E2's `paths:` opens a bracket array but its globs
+  # continue on following lines, closing on a THIRD line. A line-based
+  # extractor cannot read continuation lines, so a parser that counts this
+  # opening line toward completeness (matching only the prefix, not
+  # requiring the closing `]` on the same line) reaches a false "complete"
+  # reading while contributing zero globs for E2 — the exact defect this
+  # case guards against regressing.
+  cat > "$d/multiline-array.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: [
+      "src/extra/**",
+      "src/more/**"
+    ]
+YAML
+  out="$(feature_scope "$d/multiline-array.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "multi-line 'paths:' array was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
+
+  # Same shape, but the multi-line array is the ONLY eval in the file — this
+  # used to return non-zero already, but for the wrong reason (the union
+  # came out empty, tripping the LAST-resort "zero globs" check). Assert the
+  # actual completeness check (n_evals vs n_paths) is what refuses it, not
+  # an accidental empty union: a file with a real second declared eval whose
+  # globs happened to overlap would otherwise slip through.
+  cat > "$d/multiline-array-only.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: [
+      "src/extra/**",
+      "src/more/**"
+    ]
+YAML
+  out="$(feature_scope "$d/multiline-array-only.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "multi-line 'paths:' array as the only eval was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
+
+  # Trailing inline comment: `paths: [...] # note` must yield the clean glob
+  # with the comment stripped, not a garbage glob with "# note" appended.
+  # This is the success-path counterpart to the two cases above: the file IS
+  # a complete, single-line declaration, so feature_scope must accept it
+  # (rc 0) and the emitted union must contain no "#" fragment.
+  cat > "$d/trailing-comment.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"] # note
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/trailing-comment.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "single-line 'paths:' array with a trailing comment was refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -q '#' \
+    && fail indent-drift "trailing comment leaked into the emitted glob union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected clean glob 'src/covered/**' missing from union: $out"
+
+  # Bracket-class glob: a glob containing `]` (from a character class like
+  # `foo[0-9]`) must survive intact — this is the defect that shipped four
+  # rounds in a row: `[^]]*` (or any bracket-splitting extractor) stops at the
+  # FIRST `]`, truncating the glob and dropping every sibling after it.
+  cat > "$d/bracket-glob.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/foo[0-9]/**", "src/bar/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/bracket-glob.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "bracket-class glob declaration was refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/foo\[0-9\]/\*\*' \
+    || fail indent-drift "bracket-class glob truncated or missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/bar/\*\*' \
+    || fail indent-drift "sibling glob after a bracket-class glob was dropped from union: $out"
+
+  # Single-quoted items: not the accepted grammar — refused, not tolerated.
+  cat > "$d/single-quoted.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ['src/a/**']
+YAML
+  out="$(feature_scope "$d/single-quoted.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "single-quoted paths items were accepted — feature_scope returned 0 (globs: $out)"
+
+  # Nested array: not the accepted grammar — refused, not tolerated.
+  cat > "$d/nested-array.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: [["a"], "b"]
+YAML
+  out="$(feature_scope "$d/nested-array.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "nested array paths was accepted — feature_scope returned 0 (globs: $out)"
+
+  # Trailing non-comment suffix: anything after `]` that is not a `#`
+  # comment must be refused, not silently ignored.
+  cat > "$d/trailing-junk.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["a"] junk
+YAML
+  out="$(feature_scope "$d/trailing-junk.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "trailing non-comment suffix after ']' was accepted — feature_scope returned 0 (globs: $out)"
+
+  # Hyphenated-key block-scalar decoy: a key-name allow-list (e.g.
+  # `[a-zA-Z_]*:`) never matches `expected-output:`, so its block-scalar body
+  # is read as ordinary content and a decoy `paths:` line inside it is
+  # mistaken for a real declaration. The guard must refuse the whole file
+  # structurally (by "value starts with `|`/`>`"), regardless of the key
+  # spelling.
+  cat > "$d/hyphen-key-block-scalar.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    expected-output: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/hyphen-key-block-scalar.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "hyphenated-key ('expected-output:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Digit-suffixed-key variant of the same bypass: `note2:` is equally
+  # outside any letter-only allow-list.
+  cat > "$d/digit-key-block-scalar.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    note2: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/digit-key-block-scalar.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "digit-suffixed-key ('note2:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Single-line value containing `>` after the colon, but NOT as the first
+  # character of the value: must NOT be refused. This is the other direction
+  # of the same check — the block-scalar guard must key off the indicator
+  # being the START of the value, not merely present somewhere on the line.
+  cat > "$d/value-contains-gt.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    expected: "exit 0; a > b"
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/value-contains-gt.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "a single-line value merely containing '>' after the colon was wrongly refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
+    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
+
+  # Colon-in-key decoy (the live Critical this round closes): a quoted key
+  # whose OWN text contains a colon (`"note: x":`) defeats an extractor that
+  # anchors the block-scalar guard on the FIRST colon in the line — it lands
+  # mid-key instead of at the key's true end, reads the rest of the line as
+  # if it were the value, and never recognizes the `|` that follows as a
+  # block-scalar indicator. The prose beneath it (including a decoy
+  # `paths:` line) then leaks straight into either counter.
+  cat > "$d/colon-in-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    "note: x": |
+    decoy:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/colon-in-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "colon-in-key decoy ('\"note: x\":') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Quoted key: not a shape this line-based parser can read reliably (is the
+  # key `expected`, or is the key `"expected"` — a different string?) — must
+  # be refused structurally, not tolerated as if unquoting were free.
+  cat > "$d/quoted-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    "expected": |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/quoted-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "quoted key ('\"expected\":') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Key with an embedded space: `my key: |` is not `[A-Za-z_][A-Za-z0-9_-]*:`
+  # and must be refused rather than treated as some normalized key name.
+  cat > "$d/space-in-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    my key: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/space-in-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "key with an embedded space ('my key:') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Hyphenated key with a single-line (non-block-scalar) value: must NOT be
+  # refused. This is the positive counterpart to the key-grammar checks
+  # above — a legal, ordinary eval-level key that merely happens to be
+  # kebab-case, with every eval in the file declaring real `paths`, must
+  # still be accepted and its `paths` still joined into the union.
+  cat > "$d/hyphen-key-singleline.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    extra-note: "hello"
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/hyphen-key-singleline.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "hyphenated key with a single-line value ('extra-note: \"hello\"') was wrongly refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
+    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
+
+  pass indent-drift
 }
