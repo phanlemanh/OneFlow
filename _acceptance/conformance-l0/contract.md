@@ -5,7 +5,7 @@ slug: conformance-l0
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [engine, plugins, workflow]
-status: implemented
+status: verified
 approved_by: Manh
 approved_at: 2026-07-28
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -93,6 +93,47 @@ one further cell was surfaced afterwards by the clean-context gap-probe.
 
 - Suite kiểm **ngữ nghĩa fan-out**, không kiểm mọi khác biệt TS↔Python. Các trục lệch khác (ép kiểu, thứ tự trường, xử lý null ở tầng sâu hơn call-log) chưa có ca — thêm khi gặp.
 - Fixture viết tay. Đó là chủ ý (golden sinh tự động thì regenerate là cách rẻ nhất để giấu drift), nhưng đổi lại thêm ca mới tốn công hơn.
+
+### Hoãn ở vòng verify 4 — vòng CUỐI đã chốt trước (Manh quyết 28/07)
+
+Bốn round, bốn lần PASS, **0 eval đỏ suốt cả bốn**. Reviewer context-sạch ra
+finding mới mỗi vòng (7 → 6 → 9 → 8) vì mỗi vòng soi một tree khác và không bị
+neo bởi vòng trước; Manh chốt dừng ở round 4, mọi finding round này thành nợ.
+
+- **`src/lib/abi/conformance.ts` là adapter test nằm trong tầng nghiệp vụ, dùng
+  `node:crypto` + `Buffer`, thiếu cả hậu tố `.server.ts` lẫn `import
+  "server-only"`** (HIGH). Các module server không-hậu-tố khác dưới `src/lib/`
+  dùng `import "server-only"` ([`python-lite.ts`](../../src/lib/plugins/python-lite.ts),
+  [`generic.ts`](../../src/lib/plugin-executor/runners/generic.ts)); file này
+  không. Nó ngồi cạnh `resolve.ts` / `node-feature-registry.ts` — thứ ~20 node
+  component client import trực tiếp. Hôm nay chỉ `conformance.test.ts` import
+  nó nên build xanh; một import từ node component sẽ lặng lẽ kéo `node:crypto`
+  vào bundle browser. Sửa = đổi tên `.server.ts` hoặc dời cạnh test (thêm
+  `server-only` KHÔNG được: test không nạp được module server-only).
+- **Lô rỗng: engine xoá state node hạ nguồn, canvas giữ nội dung cũ** (HIGH ở
+  round 4, MEDIUM ở round 2 và 3 — ba reviewer độc lập cùng nêu). `merge_fanout_results([])`
+  trả `{}`, client thấy `{}` là truthy nên gọi `applyNodeOutput`, rồi
+  `applyResolvedOutputRoutes` bỏ qua mọi route vì không field nào có mặt. Trước
+  diff này cả hai phía đều giữ state cũ nên **khớp nhau**; bất đối xứng là do
+  lát này sinh ra. Cần contract riêng: sửa = đổi cách canvas dựng kết quả node.
+- **`fingerprint` / `tier` không được khai trong `SSEMessageData`** (MEDIUM) —
+  chúng typecheck nhờ escape hatch `[key: string]: unknown`, tức đổi tên phía
+  engine thì `tsc` không bắt ở đâu cả. `MappedEngineEvent.status` cũng đang là
+  `string` thay vì union `NodeStatusType`.
+- **CI không chạy vitest** (MEDIUM) — nợ cũ đã ghi ở STATUS.md, review tìm ra
+  độc lập. Nửa TypeScript của bộ conformance chỉ có hiệu lực khi chạy tay. Sửa =
+  chạm `.github/workflows/` = chạm evidence của `ci-actions-bump`, cần contract
+  riêng.
+- **`pluginRev`: producer bắt 40 hex, consumer chỉ bắt length 40** (LOW) — một
+  tên nhánh dài 40 ký tự lọt qua phía TS. `z.string().regex(/^[0-9a-f]{40}$/)`.
+- **`check-rev-joined-path.ts` hardcode `python3`** (LOW) — script chị em
+  `verify-plugins-scan.ts` có `pickPython()` đọc `PYTHON`/`PYTHON3`. Chạy được
+  hôm nay, nhưng là lệnh Python duy nhất trong config không qua `uv` và không
+  nhận override.
+- **Adapter TS mô hình ít hình dạng binding hơn nửa Python** (LOW) — không có
+  `inputs`, `kind: "input"`, hay chuỗi executable→executable. Cả 4 fixture hiện
+  tại không chạm, và lệch sẽ ra ĐỎ chứ không xanh — nhưng nó sẽ đọc như lỗi
+  engine chứ không như lỗ adapter. Nên throw "adapter does not model X".
 
 ### Hoãn ở Cổng 2 vòng verify 2 (Manh quyết 28/07)
 
