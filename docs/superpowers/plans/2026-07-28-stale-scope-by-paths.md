@@ -46,10 +46,29 @@ All tasks touch one of the two scripts, so every task is `independent: false` �
 
 **This task MUST land before Task 3.** "Identical to today's behaviour" becomes unverifiable the moment today's behaviour is gone. The same constraint bit `conformance-l0` (its AC-3 required a pre-change capture) and it is a hard ordering constraint, not a preference.
 
-- [ ] **Step 1: Capture the baseline from the untouched gate**
+**Step order inside this task is also load-bearing.** On this branch every changed file so far is `_acceptance/**` or `docs/**` — all `t1_skip_globs` — so the gate is currently **clean** and the staleness path never executes. A baseline captured now would pin seven `OK` lines and could not catch a regression in the very code Tasks 3–7 change. So the gated file lands **first** (it is what makes staleness fire), and the capture happens after it — with the gate itself still untouched, which is the invariant that actually matters.
+
+- [ ] **Step 1: Write the golden comparator and commit it — this is the gated file**
+
+Write `scripts/acceptance/check-stale-golden.sh` exactly as in Step 2 below, then:
 
 ```bash
 mkdir -p scripts/acceptance/fixtures
+chmod +x scripts/acceptance/check-stale-golden.sh
+git add scripts/acceptance/check-stale-golden.sh
+git commit -m "test(acceptance): golden comparator for undeclared-feature gate output"
+```
+
+Verify the gate now reports the seven as stale — `scripts/acceptance/**` matches no `t1_skip_globs` entry, so it is gated and predates none of their `verified_commit` pins:
+
+```bash
+bash scripts/pre-merge-check.sh --base main 2>&1 | grep -c 'evidence is stale'
+```
+Expected: `7`. If it prints `0`, the file was not committed (untracked files are invisible to `git diff`, which `stale_files` documents) — commit it and re-check before capturing anything.
+
+- [ ] **Step 2: Capture the baseline from the still-untouched gate**
+
+```bash
 bash scripts/pre-merge-check.sh --base main 2>&1 \
   | grep -E '^(VIOLATION|OK|NOTE) \[(ci-actions-bump|dependency-refresh-2026-07|measure-harness|oneflow-plugin-prefix|per-plugin-origin|sdk-distribution-rename|task-metering)\]' \
   | sed -E 's/verified_commit [0-9a-f]{40}/verified_commit <SHA>/' \
@@ -60,7 +79,7 @@ wc -l scripts/acceptance/fixtures/baseline-gate-output.txt
 Expected: 7 lines, one per feature, each starting `VIOLATION [<slug>]: evidence is stale`.
 The `sed` normalises the SHA because `verified_commit` values move when those features are re-verified later; the *behaviour* being pinned is the message and the set of features, not the SHA.
 
-- [ ] **Step 2: Write the golden comparator**
+- [ ] **Step 2b: The golden comparator, for reference (written in Step 1)**
 
 ```bash
 cat > scripts/acceptance/check-stale-golden.sh <<'EOF'
@@ -98,10 +117,10 @@ chmod +x scripts/acceptance/check-stale-golden.sh
 Run: `bash scripts/acceptance/check-stale-golden.sh`
 Expected: `OK: undeclared features keep byte-identical gate output`, exit 0.
 
-- [ ] **Step 4: Commit, recording that the capture predates any gate edit**
+- [ ] **Step 4: Commit the fixture, recording that the capture predates any gate edit**
 
 ```bash
-git add scripts/acceptance/check-stale-golden.sh scripts/acceptance/fixtures/baseline-gate-output.txt
+git add scripts/acceptance/fixtures/baseline-gate-output.txt
 git commit -m "test(acceptance): capture gate output baseline before scoping change
 
 Captured while pre-merge-check.sh is still untouched. AC-3 asks that the seven
