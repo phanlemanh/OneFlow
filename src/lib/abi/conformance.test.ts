@@ -12,7 +12,9 @@ import {
  * mirror under `src/` would drift, and a drifting fixture reports agreement
  * between two files nobody compares.
  */
-const FIXTURES = join(process.cwd(), "sdk/tests/conformance/fixtures");
+const FIXTURES =
+    process.env.CONFORMANCE_FIXTURES ??
+    join(process.cwd(), "sdk/tests/conformance/fixtures");
 const CASES = ["batch-basic", "batch-empty", "no-batch", "batch-collect"];
 
 function loadFixture(name: string): ConformanceFixture {
