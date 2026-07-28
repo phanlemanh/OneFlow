@@ -129,13 +129,21 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # back to whole-tree rather than to a narrower scope.
   f="$1"
   [ -f "$f" ] || return 1
-  n_evals="$(grep -c '^  - id:' "$f" 2>/dev/null || true)"
-  n_paths="$(grep -c '^    paths:' "$f" 2>/dev/null || true)"
+  # Leading whitespace matched as a CLASS ([[:space:]]*), not a fixed 2/4-space
+  # literal: a drifted indent (odd space count, or a literal tab) must still be
+  # seen by BOTH counters. Matching only one of them would let n_evals and
+  # n_paths coincide by accident and return 0 ("complete") while an eval with
+  # no paths at all goes uncounted on both sides. Over-counting in either
+  # direction only trips the n_evals != n_paths guard below (rc=1, whole-tree
+  # fallback) — never a narrower scope, which is the one outcome that must
+  # never occur here.
+  n_evals="$(grep -c '^[[:space:]]*- id:' "$f" 2>/dev/null || true)"
+  n_paths="$(grep -c '^[[:space:]]*paths:' "$f" 2>/dev/null || true)"
   n_evals="${n_evals:-0}"
   n_paths="${n_paths:-0}"
   [ "$n_evals" -gt 0 ] || return 1
   [ "$n_evals" -eq "$n_paths" ] || return 1
-  globs="$(sed -n 's/^    paths:[[:space:]]*\[//p' "$f" \
+  globs="$(sed -n 's/^[[:space:]]*paths:[[:space:]]*\[//p' "$f" \
     | tr -d '"]' | tr ',' '\n' \
     | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
     | grep -v '^$' | sort -u)"

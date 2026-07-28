@@ -13,7 +13,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 GATE="$ROOT/scripts/pre-merge-check.sh"
 
-KNOWN_CASES="in-scope out-of-scope partial under-declared malformed merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
+KNOWN_CASES="in-scope out-of-scope partial under-declared malformed indent-drift merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
 
 # Perturbation knob names. Referenced here and asserted ABSENT from the shipped
 # gate by the no-kill-switch case: an env var in the gate itself would be a
@@ -203,6 +203,51 @@ case_malformed() {
   printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail malformed "empty paths array did not fall back to whole-tree: $out"
   pass malformed
+}
+
+case_indent_drift() {
+  # E-indent-drift: an eval whose leading whitespace drifts from the canonical
+  # 2/4-space indent (an ordinary typo, or a literal tab) must not become
+  # invisible to BOTH feature_scope() counters at once — that lets n_evals and
+  # n_paths coincide by accident, feature_scope returns 0 ("complete"), and the
+  # drifted eval's total absence of a `paths` declaration goes unnoticed.
+  #
+  # Reuse feature_scope() from the gate instead of hand-rolling a second
+  # parser, the same way case_guard_not_exempt reuses match_globs(): a private
+  # copy would silently drift from what the gate actually does. Extracting
+  # only the function body (not sourcing/executing the whole gate script,
+  # which has side effects and calls exit) keeps this guard tested against the
+  # exact parser the gate ships.
+  feature_scope_src="$(sed -n '/^feature_scope()/,/^}/p' "$GATE")"
+  [ -n "$feature_scope_src" ] || fail indent-drift "could not extract feature_scope() from $GATE"
+  eval "$feature_scope_src"
+
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+
+  # Space-drift variant: E1 canonically indented and declares paths; E2
+  # drifted to a 3-space "- id:" / "criterion:" pair and declares none.
+  cat > "$d/space-drift.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+   - id: E2
+     criterion: AC-2
+YAML
+  out="$(feature_scope "$d/space-drift.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "space-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
+
+  # Tab-drift variant: same shape, drifted line prefixed with a literal tab
+  # instead of an odd space count.
+  printf 'schema_version: 1\nfeature_slug: fx\nevals:\n  - id: E1\n    paths: ["src/covered/**"]\n\t- id: E2\n\tcriterion: AC-2\n' \
+    > "$d/tab-drift.yaml"
+  out="$(feature_scope "$d/tab-drift.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "tab-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
+
+  pass indent-drift
 }
 
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
