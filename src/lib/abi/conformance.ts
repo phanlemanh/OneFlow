@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { NodeSlot } from "@/generated/abi";
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { buildPrompts, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
 
@@ -93,18 +94,66 @@ interface FixtureDataNode {
 
 interface FixtureExecutableNode {
     id: string;
+    /** RF node type — the key into NODE_TYPE_SOURCE_SPEC. */
+    type: string;
     feature: string;
     bindings: Record<string, FixtureBinding>;
 }
 
 export interface ConformanceFixture {
     slot: string;
-    sourceSpec: Record<string, FieldSourceOverride>;
+    /**
+     * Only for combinations no shipped node mounts — `batch-collect` pairs
+     * `batchOn` with `collectAll`, which `resolveSpec` supports and no entry in
+     * `NODE_TYPE_SOURCE_SPEC` uses. Every other fixture omits this and gets its
+     * spec from the registry, so remounting a node moves the fixtures with it.
+     */
+    sourceSpec?: Record<string, FieldSourceOverride>;
     workflow: {
         dataNodes: FixtureDataNode[];
         executableNodes: FixtureExecutableNode[];
     };
     expectedCalls: NormalizedCall[];
+}
+
+/**
+ * The spec a fixture's node resolves against.
+ *
+ * Prefer `NODE_TYPE_SOURCE_SPEC` — CLAUDE.md and the registry's own comment
+ * both call it the single declaration site for field classification, and a
+ * hand-copied duplicate defeats the suite in a specific way: remount
+ * `genTextNode` from `textBatch()` to a scalar handle and the canvas changes
+ * while all four fixtures stay green, certifying agreement about a mount that
+ * no longer exists.
+ *
+ * A fixture may still declare its own spec, but only to reach a combination the
+ * registry does not contain.
+ */
+function specForFixtureNode(
+    fixture: ConformanceFixture,
+    node: FixtureExecutableNode,
+) {
+    const mounted = (
+        NODE_TYPE_SOURCE_SPEC as Record<
+            string,
+            Record<string, FieldSourceOverride> | undefined
+        >
+    )[node.type];
+    if (mounted && fixture.sourceSpec) {
+        throw new Error(
+            `fixture node ${node.id}: "${node.type}" is mounted in NODE_TYPE_SOURCE_SPEC, ` +
+                "so the fixture's own sourceSpec would shadow it — remove the fixture copy, " +
+                "or use a node type the registry does not mount if the combination is synthetic",
+        );
+    }
+    const override = mounted ?? fixture.sourceSpec;
+    if (!override) {
+        throw new Error(
+            `fixture node ${node.id}: node type "${node.type}" is not in NODE_TYPE_SOURCE_SPEC ` +
+                "and the fixture declares no sourceSpec of its own",
+        );
+    }
+    return resolveSpec(node.feature as NodeSlot, override);
 }
 
 /**
@@ -143,7 +192,7 @@ export function callLogForFixture(
     const log: NormalizedCall[] = [];
 
     for (const node of fixture.workflow.executableNodes) {
-        const spec = resolveSpec(node.feature as NodeSlot, fixture.sourceSpec);
+        const spec = specForFixtureNode(fixture, node);
         const handleValues: Record<string, unknown> = {};
         const configValues: Record<string, unknown> = {};
 

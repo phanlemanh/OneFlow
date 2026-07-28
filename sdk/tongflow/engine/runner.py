@@ -25,7 +25,12 @@ from typing import Any, Callable, Optional, Union
 
 from .abi_schema import load_abi_schema, resolve_abi_path
 from .assets import convert_asset_outputs_to_file_refs, materialize_asset_inputs
-from .batch import fan_out_inputs, merge_fanout_views
+from .batch import (
+    batch_field_of,
+    fan_out_inputs,
+    merge_fanout_results,
+    merge_fanout_views,
+)
 from .bindings import resolve_node_params
 from .invoker import invoke_plugin
 from .paths import resolve_data_dir, resolve_plugins_dir
@@ -372,7 +377,7 @@ def run_workflow(
                 # unbatched one keeps the single dict it has always been, so
                 # `outputs[nodeId]` stays what existing consumers expect.
                 node_outputs[node_id] = (
-                    results[0] if node.get("batchField") is None else results
+                    results[0] if batch_field_of(node) is None else results
                 )
 
                 routes = node.get("outputs") or []
@@ -402,7 +407,12 @@ def run_workflow(
                     {
                         "type": "node_completed",
                         "nodeId": node_id,
-                        "output": results[-1] if results else {},
+                        # Every result, not the last one: this event is the only
+                        # path an executable's output takes to the canvas, so
+                        # emitting one of N would render a five-item batch as a
+                        # single item while the engine's own downstream nodes
+                        # saw all five.
+                        "output": merge_fanout_results(results),
                         "label": label,
                     }
                 )

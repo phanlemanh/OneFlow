@@ -2,15 +2,10 @@
     "case": "batch-empty",
     "note": "Same mount as batch-basic with nothing upstream. buildPrompts returns [], so the engine must issue zero calls — not one call holding an empty array, which is what it used to do and which hands the plugin garbage it then reports as a result.",
     "slot": "gen-text",
-    "sourceSpec": {
-        "text": {
-            "kind": "handle",
-            "nodeType": "textNode",
-            "path": "texts",
-            "batch": true
-        }
+    "stubOutput": {
+        "success": true,
+        "text": "stub"
     },
-    "stubOutput": { "success": true, "text": "stub" },
     "workflow": {
         "name": "conformance-batch-empty",
         "version": "1.0",
@@ -23,7 +18,9 @@
                 "type": "addTextNode",
                 "dataType": "text",
                 "isInput": false,
-                "staticData": { "texts": [] },
+                "staticData": {
+                    "texts": []
+                },
                 "level": 0
             }
         ],
@@ -39,7 +36,10 @@
                         "kind": "handle",
                         "consumerShape": "scalar",
                         "sources": [
-                            { "fromNodeId": "dn-src", "fromField": "texts" }
+                            {
+                                "fromNodeId": "dn-src",
+                                "fromField": "texts"
+                            }
                         ],
                         "targetHandle": "in:text"
                     },

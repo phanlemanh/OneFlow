@@ -1,6 +1,6 @@
 {
     "case": "batch-collect",
-    "note": "A batch field and a collectAll field on the same node. No shipped mount combines them today — resolveSpec supports it and the rule needs pinning before one does: the collected field keeps its whole array in every call while the batched field varies. This is why fixtures declare their own sourceSpec instead of reading the registry.",
+    "note": "A batch field and a collectAll field on the same node. No shipped mount combines them today, so the node type here is deliberately one the registry does not mount — resolveSpec supports it and the rule needs pinning before one does: the collected field keeps its whole array in every call while the batched field varies. This is why fixtures declare their own sourceSpec instead of reading the registry.",
     "slot": "combine-text",
     "sourceSpec": {
         "texts": {
@@ -44,7 +44,7 @@
         "executableNodes": [
             {
                 "id": "exec-combine",
-                "type": "textsGenTextNode",
+                "type": "conformanceSyntheticBatchCollectNode",
                 "feature": "combine-text",
                 "pluginId": "oneflow-conformance-stub",
                 "batchField": "userPrompt",

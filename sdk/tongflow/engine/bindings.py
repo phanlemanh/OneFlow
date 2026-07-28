@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .batch import batch_field_of
+
 
 def resolve_node_params(
     node: dict[str, Any],
@@ -59,7 +61,7 @@ def resolve_node_params(
                 return [supplied]
         return []
 
-    batch_field = node.get("batchField")
+    batch_field = batch_field_of(node)
 
     for field, binding in bindings.items():
         kind = binding.get("kind")

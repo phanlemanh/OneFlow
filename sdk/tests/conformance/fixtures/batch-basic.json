@@ -2,15 +2,10 @@
     "case": "batch-basic",
     "note": "gen-text mounted as genTextNode: sourceSpec { text: textBatch() }. Three upstream strings must become three plugin calls, each carrying one of them as a scalar.",
     "slot": "gen-text",
-    "sourceSpec": {
-        "text": {
-            "kind": "handle",
-            "nodeType": "textNode",
-            "path": "texts",
-            "batch": true
-        }
+    "stubOutput": {
+        "success": true,
+        "text": "stub"
     },
-    "stubOutput": { "success": true, "text": "stub" },
     "workflow": {
         "name": "conformance-batch-basic",
         "version": "1.0",
@@ -23,7 +18,9 @@
                 "type": "addTextNode",
                 "dataType": "text",
                 "isInput": false,
-                "staticData": { "texts": ["một", "hai", "ba"] },
+                "staticData": {
+                    "texts": ["một", "hai", "ba"]
+                },
                 "level": 0
             }
         ],
@@ -39,7 +36,10 @@
                         "kind": "handle",
                         "consumerShape": "scalar",
                         "sources": [
-                            { "fromNodeId": "dn-src", "fromField": "texts" }
+                            {
+                                "fromNodeId": "dn-src",
+                                "fromField": "texts"
+                            }
                         ],
                         "targetHandle": "in:text"
                     },
@@ -66,15 +66,24 @@
     "expectedCalls": [
         {
             "slot": "gen-text",
-            "input": { "text": "một", "userPrompt": "viết lại cho gọn" }
+            "input": {
+                "text": "một",
+                "userPrompt": "viết lại cho gọn"
+            }
         },
         {
             "slot": "gen-text",
-            "input": { "text": "hai", "userPrompt": "viết lại cho gọn" }
+            "input": {
+                "text": "hai",
+                "userPrompt": "viết lại cho gọn"
+            }
         },
         {
             "slot": "gen-text",
-            "input": { "text": "ba", "userPrompt": "viết lại cho gọn" }
+            "input": {
+                "text": "ba",
+                "userPrompt": "viết lại cho gọn"
+            }
         }
     ]
 }

@@ -52,14 +52,77 @@ def test_non_git_directory_yields_none(tmp_path: Path) -> None:
 
 
 def test_git_directory_with_unreadable_rev_raises_a_named_error(tmp_path: Path) -> None:
-    """A checkout whose rev cannot be read is a failure, not a valid config.
+    """A corrupt checkout is a failure, not a valid config.
 
-    Collapsing this into the None case is how a real breakage — no git binary
-    on a desktop build, a corrupt checkout — disguises itself as the ordinary
-    hand-copied plugin and reaches L1 as a silently missing cache key.
+    Collapsing this into the None case is how a real breakage disguises itself
+    as the ordinary hand-copied plugin and reaches L1 as a silently missing
+    cache key.
     """
     d, _ = _git_repo(tmp_path)
     (d / ".git" / "HEAD").write_text("garbage\n", encoding="utf-8")
 
     with pytest.raises(RuntimeError, match="oneflow-fixture-plugin"):
         read_plugin_rev(d)
+
+
+def test_checkout_on_a_host_without_git_yields_none(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No git binary is an ordinary state, not a failure.
+
+    The in-app installer clones with isomorphic-git specifically so the host
+    does not need git, so a real .git directory on a machine without git is
+    expected — a Windows desktop build being the obvious case. `subprocess.run`
+    raises FileNotFoundError here rather than returning non-zero, so a guard
+    that only checks the return code lets the exception escape and abort the
+    scan of every plugin, not just this one.
+    """
+    d, _ = _git_repo(tmp_path)
+    monkeypatch.setenv("PATH", str(tmp_path / "no-binaries-here"))
+
+    assert read_plugin_rev(d) is None
+
+
+def test_one_unreadable_checkout_does_not_take_down_the_whole_scan(
+    tmp_path: Path,
+) -> None:
+    """A broken plugin costs itself, never the rest of the registry.
+
+    Every other per-plugin failure in `scan()` is reported through `errors` and
+    skipped. An unreadable rev raising out of the loop would be strictly worse
+    than the silence it guards against: no registry at all, rather than one
+    plugin flagged.
+    """
+    from tongflow.scan import scan
+
+    plugins_root = tmp_path / "plugins"
+    plugins_root.mkdir()
+
+    handlers = (
+        "from tongflow.slots import node_slot, NodeSlots\n"
+        "from tongflow.models.gen_text import GenTextInput, GenTextOutput\n"
+        "\n"
+        "@node_slot(NodeSlots.GEN_TEXT)\n"
+        "def gen_text(input: GenTextInput) -> GenTextOutput:\n"
+        "    ...\n"
+    )
+
+    healthy, healthy_sha = _git_repo(plugins_root, "oneflow-api-healthy")
+    (healthy / "entry.py").write_text(handlers, encoding="utf-8")
+
+    broken, _ = _git_repo(plugins_root, "oneflow-api-broken")
+    (broken / "entry.py").write_text(handlers, encoding="utf-8")
+    (broken / ".git" / "HEAD").write_text("garbage\n", encoding="utf-8")
+
+    abi_path = Path(__file__).resolve().parents[1] / "tongflow" / "_data" / "tongflow.abi.json"
+    payload = scan(plugins_root, abi_path)
+
+    plugins = payload["plugins"]
+    assert "oneflow-api-healthy" in plugins
+    assert "oneflow-api-broken" in plugins
+    assert plugins["oneflow-api-healthy"]["pluginRev"] == healthy_sha
+    assert "pluginRev" not in plugins["oneflow-api-broken"]
+    assert any(
+        e["pluginId"] == "oneflow-api-broken" and "rev" in e["message"]
+        for e in payload["errors"]
+    )

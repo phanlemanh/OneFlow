@@ -2,19 +2,10 @@
     "case": "no-batch",
     "note": "gen-music mounted as textGenMusicNode: two scalar text handles, no batchOn anywhere. This is the regression case — the non-batch path must be byte-identical before and after fan-out lands, and baseline-no-batch.json pins what 'before' was.",
     "slot": "gen-music",
-    "sourceSpec": {
-        "tags": {
-            "kind": "handle",
-            "nodeType": "textNode",
-            "path": "texts[0]"
-        },
-        "lyrics": {
-            "kind": "handle",
-            "nodeType": "textNode",
-            "path": "texts[0]"
-        }
+    "stubOutput": {
+        "success": true,
+        "text": "stub"
     },
-    "stubOutput": { "success": true, "text": "stub" },
     "workflow": {
         "name": "conformance-no-batch",
         "version": "1.0",
@@ -27,7 +18,9 @@
                 "type": "addTextNode",
                 "dataType": "text",
                 "isInput": false,
-                "staticData": { "texts": ["lo-fi, mellow"] },
+                "staticData": {
+                    "texts": ["lo-fi, mellow"]
+                },
                 "level": 0
             },
             {
@@ -35,7 +28,9 @@
                 "type": "addTextNode",
                 "dataType": "text",
                 "isInput": false,
-                "staticData": { "texts": ["một câu hát"] },
+                "staticData": {
+                    "texts": ["một câu hát"]
+                },
                 "level": 0
             }
         ],
@@ -50,7 +45,10 @@
                         "kind": "handle",
                         "consumerShape": "scalar",
                         "sources": [
-                            { "fromNodeId": "dn-tags", "fromField": "texts" }
+                            {
+                                "fromNodeId": "dn-tags",
+                                "fromField": "texts"
+                            }
                         ],
                         "targetHandle": "in:tags"
                     },
@@ -58,11 +56,17 @@
                         "kind": "handle",
                         "consumerShape": "scalar",
                         "sources": [
-                            { "fromNodeId": "dn-lyrics", "fromField": "texts" }
+                            {
+                                "fromNodeId": "dn-lyrics",
+                                "fromField": "texts"
+                            }
                         ],
                         "targetHandle": "in:lyrics"
                     },
-                    "duration": { "kind": "config", "value": 30 }
+                    "duration": {
+                        "kind": "config",
+                        "value": 30
+                    }
                 },
                 "outputs": [
                     {

@@ -13,9 +13,20 @@ a workflow, a plugin, or a store.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from .output_view import compute_output_view
+
+
+def batch_field_of(node: dict[str, Any]) -> Optional[str]:
+    """The node's batch field, or None when it does not batch.
+
+    One definition, because three places used to decide this independently and
+    an empty-string `batchField` would have meant "no batching" in one of them
+    and "batch on the field named ''" in another.
+    """
+    field = node.get("batchField")
+    return field if isinstance(field, str) and field else None
 
 
 def fan_out_inputs(
@@ -28,8 +39,8 @@ def fan_out_inputs(
     empty array — hands the plugin nothing to work on and reads its reply as a
     real result.
     """
-    field = node.get("batchField")
-    if not field:
+    field = batch_field_of(node)
+    if field is None:
         return [params]
 
     value = params.get(field)
@@ -51,14 +62,21 @@ def merge_fanout_views(
     keeping only the last result would silently drop four fifths of a five-item
     batch, and nothing anywhere would raise.
 
-    ``N == 0`` is its own branch rather than a degenerate case of the loop. The
-    route metadata comes from the route, which is static node data and always
-    present; deriving it from ``results[0]`` would raise ``IndexError``, and
-    omitting the node would leave ``output_views`` without the key so the
-    downstream node fails on lookup instead. Note the deliberate difference from
-    ``compute_output_view``, which drops an empty channel: here the key must
-    exist even when empty, because an empty batch still has to leave its
-    consumers something well-formed to read.
+    Two kinds of "this route produced nothing" look alike and must not be
+    treated alike:
+
+    * **The node ran and simply did not populate this output.** The exporter
+      emits a route for *every* ABI output field of the slot whether or not it
+      is connected, and several slots declare six. A ``link`` node returning
+      only ``mainText`` must leave the image channel alone, exactly as
+      ``compute_output_view`` does by dropping it — writing an empty channel
+      would reset a downstream data node that is holding perfectly good content.
+    * **There were no calls at all** (an empty batch). Here the emptiness is the
+      result: whatever the downstream data node still holds is from an earlier
+      run, and leaving it makes a re-run serve stale output as if it were fresh.
+      So the channel is emitted, empty, built from the route itself — route
+      metadata is static node data and always available, whereas deriving it
+      from ``results[0]`` would raise ``IndexError``.
     """
     merged: dict[str, dict[str, Any]] = {}
     for route in routes:
@@ -70,6 +88,9 @@ def merge_fanout_views(
             channel = compute_output_view([route], result).get(source_field)
             if channel:
                 values.extend(channel["values"])
+        if not values and results:
+            # The node ran; this output just was not part of what it returned.
+            continue
         merged[source_field] = {
             "sourceField": source_field,
             "nodeType": route.get("nodeType"),
@@ -77,4 +98,38 @@ def merge_fanout_views(
             "expandEach": bool(route.get("expandEach", False)),
             "values": values,
         }
+    return merged
+
+
+# Output fields that describe the call rather than its product. Concatenating
+# these across a fan-out would turn `success: True` into `[True, True, True]`.
+_META_OUTPUT_FIELDS = frozenset({"success", "error"})
+
+
+def merge_fanout_results(results: list[dict[str, Any]]) -> dict[str, Any]:
+    """Collapse N raw plugin results into the single payload the canvas reads.
+
+    ``node_completed`` carries this, and it is the *only* channel by which an
+    executable node's own output reaches the browser — the canvas projects it
+    through ``applyResolvedOutputRoutes``. Emitting one result out of N would
+    render one image from a five-item batch while the engine's own downstream
+    nodes saw all five: precisely the canvas/engine disagreement this slice
+    exists to remove.
+
+    A single result passes through untouched, so nothing changes for the
+    unbatched path.
+    """
+    if not results:
+        return {}
+    if len(results) == 1:
+        return results[0]
+
+    merged: dict[str, Any] = {"success": True}
+    for result in results:
+        for key, value in result.items():
+            if key in _META_OUTPUT_FIELDS:
+                continue
+            bucket = merged.setdefault(key, [])
+            if isinstance(bucket, list):
+                bucket.extend(value if isinstance(value, list) else [value])
     return merged

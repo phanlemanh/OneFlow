@@ -8,7 +8,11 @@ node even means. These tests pin the engine to the canvas's answer.
 
 from __future__ import annotations
 
-from tongflow.engine.batch import fan_out_inputs, merge_fanout_views
+from tongflow.engine.batch import (
+    fan_out_inputs,
+    merge_fanout_results,
+    merge_fanout_views,
+)
 from tongflow.engine.output_view import compute_output_view
 
 ROUTES = [
@@ -254,3 +258,83 @@ def test_empty_batch_leaves_a_usable_view_and_the_next_node_still_runs(tmp_path)
     # raised IndexError; dropping the empty channel would have left
     # output_views without the key and killed the last node on lookup.
     assert result["status"] == "success"
+
+
+MULTI_ROUTES = [
+    {
+        "sourceField": "image",
+        "nodeType": "imageNode",
+        "dataField": "fileKeys",
+        "expandEach": False,
+        "itemValuePath": "file_key",
+    },
+    {
+        "sourceField": "mainText",
+        "nodeType": "textNode",
+        "dataField": "texts",
+        "expandEach": False,
+    },
+]
+
+
+def test_an_unpopulated_output_channel_is_left_alone() -> None:
+    """The exporter emits a route for EVERY ABI output field of the slot,
+    connected or not — `link` declares six. A node returning only text must not
+    reset the image channel: whatever the downstream data node holds is still
+    valid content, and writing an empty channel would wipe it mid-run.
+    """
+    view = merge_fanout_views(MULTI_ROUTES, [{"success": True, "mainText": "hello"}])
+
+    assert view["mainText"]["values"] == ["hello"]
+    assert "image" not in view
+    # The same shape compute_output_view produced before the merge existed.
+    assert view == compute_output_view(
+        MULTI_ROUTES, {"success": True, "mainText": "hello"}
+    )
+
+
+def test_zero_results_still_emit_every_channel_empty() -> None:
+    """An empty batch is different: emptiness IS the result, so stale
+    downstream values must be cleared rather than preserved.
+    """
+    view = merge_fanout_views(MULTI_ROUTES, [])
+
+    assert view["image"]["values"] == []
+    assert view["mainText"]["values"] == []
+
+
+def test_merged_result_carries_every_fanned_out_output() -> None:
+    """`node_completed` is the only path an executable's output takes to the
+    canvas, so emitting one result out of N would render a five-item batch as a
+    single item — reintroducing the exact canvas/engine disagreement this slice
+    removes.
+    """
+    results = [
+        {"success": True, "image": [{"file_key": "a.png"}]},
+        {"success": True, "image": [{"file_key": "b.png"}]},
+        {"success": True, "image": [{"file_key": "c.png"}]},
+    ]
+
+    merged = merge_fanout_results(results)
+
+    assert merged["success"] is True
+    assert merged["image"] == [
+        {"file_key": "a.png"},
+        {"file_key": "b.png"},
+        {"file_key": "c.png"},
+    ]
+
+
+def test_merged_result_of_one_call_is_the_call_itself() -> None:
+    # The unbatched path must not change shape at all.
+    one = {"success": True, "text": "only", "error": None}
+    assert merge_fanout_results([one]) is one
+
+
+def test_merged_result_does_not_concatenate_meta_fields() -> None:
+    # `success: [True, True]` would be nonsense to every consumer.
+    merged = merge_fanout_results(
+        [{"success": True, "text": "a"}, {"success": True, "text": "b"}]
+    )
+    assert merged["success"] is True
+    assert merged["text"] == ["a", "b"]
