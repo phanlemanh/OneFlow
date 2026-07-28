@@ -135,29 +135,32 @@ case_case_completeness() {
 case_guard_not_exempt() {
   # E11 / AC-11: this guard's own path must match NO glob in t1_skip_globs, or
   # the gate would exempt the change that alters the gate.
+  #
+  # Reuse match_globs() from the gate instead of hand-rolling a second glob
+  # matcher: `case` pattern semantics differ between shells, and a private
+  # copy would silently drift from what the gate actually does. Extracting
+  # only the function body (not sourcing/executing the whole gate script,
+  # which has side effects and calls exit) keeps this guard tested against
+  # the exact matcher the gate ships.
+  match_globs_src="$(sed -n '/^match_globs()/,/^}/p' "$GATE")"
+  [ -n "$match_globs_src" ] || fail guard-not-exempt "could not extract match_globs() from $GATE"
+  eval "$match_globs_src"
+
   globs="$(sed -n '/^  t1_skip_globs:/,/^  [a-zA-Z0-9_-]*:/p' "$ROOT/_acceptance/config.yaml" \
     | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
     | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//")"
   [ -n "$globs" ] || fail guard-not-exempt "could not read t1_skip_globs"
+
   self="scripts/acceptance/check-stale-scoping.sh"
-  hit=""
-  while IFS= read -r g; do
-    [ -n "$g" ] || continue
-    case "$self" in $g) hit="$g" ;; esac
-  done <<GLOBS
-$globs
-GLOBS
-  [ -z "$hit" ] || fail guard-not-exempt "$self is exempt via \"$hit\""
-  # Sanity: the matcher must actually match something, or the loop above proves
-  # nothing. A path that IS exempt has to be seen as exempt.
-  known_exempt="scripts/pre-merge-check.sh"; hit2=""
-  while IFS= read -r g; do
-    [ -n "$g" ] || continue
-    case "$known_exempt" in $g) hit2="$g" ;; esac
-  done <<GLOBS2
-$globs
-GLOBS2
-  [ -n "$hit2" ] || fail guard-not-exempt "matcher matched nothing — check is vacuous"
+  if match_globs "$self" "$globs"; then
+    fail guard-not-exempt "$self is exempt via a t1_skip_globs entry"
+  fi
+  # Sanity: the matcher must actually match something, or the check above
+  # proves nothing. A path that IS exempt has to be seen as exempt.
+  known_exempt="scripts/pre-merge-check.sh"
+  if ! match_globs "$known_exempt" "$globs"; then
+    fail guard-not-exempt "matcher matched nothing — check is vacuous"
+  fi
   pass guard-not-exempt
 }
 
