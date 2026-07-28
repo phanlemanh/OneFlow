@@ -1123,7 +1123,7 @@ chmod +x scripts/acceptance/check-stale-real-repo.sh
 Run: `bash scripts/acceptance/check-stale-real-repo.sh`
 Expected: `OK: conformance-l0 refused narrow scope for exactly the six declared-but-missing files`, exit 0.
 
-If the list has seven entries, a gated file was added to the branch after `5986bb2`. Do **not** loosen the comparison to a subset — that deletes the only eval anchoring the mechanism to a real declaration. Re-pin `HEAD_SHA` and update both the script and E14's text together.
+If the list has seven entries, a gated file was added to the branch after `5986bb2`. Do **not** loosen the comparison to a subset — that deletes the only eval anchoring the mechanism to a real declaration. Re-pin `HEAD_SHA` and update all three copies of the six-file list together: the script (`scripts/acceptance/check-stale-real-repo.sh`), E14's text (`_acceptance/stale-scope-by-paths/evals.yaml`), and contract AC-10 (`_acceptance/stale-scope-by-paths/contract.md`).
 
 - [ ] **Step 3: Full sweep**
 

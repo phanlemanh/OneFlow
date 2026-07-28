@@ -96,7 +96,7 @@ rather than the full Cartesian product.
 
 ## Out of scope
 
-- **Gỡ đỏ cho 7 feature hiện tại.** Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill, và cross-check sẽ ép khai đúng thay vì khai cho qua.
+- **Gỡ đỏ cho 7 feature hiện tại.** Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill — và PR đó phải mang theo code gated mà `paths` của chính nó phủ, vì một PR chỉ khai báo (không đụng gì gated khác) không còn gì để cross-check đối chiếu và bị từ chối scope hẹp thẳng thừng (xem "Known limits").
 - **Backfill 6 `paths` thiếu của `conformance-l0`.** Nó giữ whole-tree tới khi ai đó khai — đó là hành vi đúng theo AC-10, không phải lỗ hổng.
 - **Suy diff-lúc-landing từ lịch sử git** (`--first-parent`, tìm merge cũ nhất mà `^2` chứa `verified_commit`). Đã prototype và **chạy đúng** — trên `per-plugin-origin` tìm ra `6461d2b`, 41 file — nhưng loại vì thêm khảo cổ git vào script `sh` và phụ thuộc luật never-squash đúng cho **toàn bộ lịch sử cũ** chứ không chỉ từ nay. Lý do đầy đủ ở design doc.
 - **Suy affected từ đồ thị phụ thuộc** (hướng Nx/Bazel). Đúng hơn về bản chất, nhưng cần dựng graph cho cả TS và Python — một feature riêng, không phải một nhánh của cái này.
@@ -106,5 +106,6 @@ rather than the full Cartesian product.
 ## Known limits
 
 - Backfill cho feature cũ phải nằm trong PR mà gated diff được `paths` của chính nó phủ. PR trộn backfill với code khác sẽ bị từ chối scope hẹp. Ràng buộc cố ý, nhưng sẽ làm ai đó bất ngờ.
+- Cross-check chỉ xác thực một khai báo tại ĐÚNG thời điểm nó mới xuất hiện hoặc bị sửa (khi `_acceptance/<slug>/` nằm trong PR diff) — không có PR nào sau đó re-check lại nó. Một khai báo trung thực tại thời điểm viết có thể trôi dần khi codebase phình ra xung quanh nó (thư mục mới, file mới ngoài `paths` đã khai) mà không có PR nào từng chạm lại `_acceptance/<slug>/` để trigger cross-check lần nữa. Bản vá cho lỗ hổng "PR chỉ khai báo, coverage set rỗng, cross-check pass vô nghĩa" (xem repro ở đầu tài liệu review) đóng đúng lỗ đó — một PR chỉ đụng `_acceptance/<slug>/` mà không đụng gì gated khác giờ bị từ chối scope hẹp thẳng, thay vì được cấp miễn phí — nhưng KHÔNG đóng phần dư này: một khai báo từng đúng, đứng yên không đổi, vẫn có thể trôi so với code thật mà không ai biết cho tới lần cross-check kế tiếp (nếu có).
 - Cross-check đối chiếu `paths` với **diff của PR**, không với thứ eval thật sự chạy. Khai `paths: ["**"]` sẽ pass mà chẳng thu hẹp gì. Không cơ chế nào chặn một khai báo trung thực với diff nhưng sai với eval — chỗ đó chỉ review bắt được.
 - Feature bị sửa `paths` ở một PR muộn hơn sẽ được cross-check với diff của PR đó, không phải diff lúc landing. Kết quả gần như chắc chắn là từ chối scope hẹp (hướng an toàn), nhưng thông báo sẽ gây bối rối.
