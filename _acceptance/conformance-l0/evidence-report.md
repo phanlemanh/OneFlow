@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 953a2057b401e71dec7def57382b836e942ba8e5
+verified_commit: 153fcb486e1a3400e7345c8462a18b718e630883
 human_signoff:
 ---
 
@@ -33,162 +33,162 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: minted-conformance-l0-E1-r1
+  run_id: minted-conformance-l0-E1-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 0.03s
+    ................                                                         [100%]
+    16 passed in 0.06s
 
 - eval: E2
-  run_id: minted-conformance-l0-E2-r1
+  run_id: minted-conformance-l0-E2-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 0.03s
+    ................                                                         [100%]
+    16 passed in 0.06s
 
 - eval: E3
-  run_id: minted-conformance-l0-E3-r1
+  run_id: minted-conformance-l0-E3-r2
   exit_code: 0
-  baseline: green
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    ........................................................................ [ 66%]
-    ....................................                                     [100%]
-    108 passed in 2.48s
+    ........................................................................ [ 62%]
+    ...........................................                              [100%]
+    115 passed in 2.98s
 
 - eval: E4
-  run_id: minted-conformance-l0-E4-r1
+  run_id: minted-conformance-l0-E4-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 0.03s
+    ................                                                         [100%]
+    16 passed in 0.06s
 
 - eval: E5
-  run_id: minted-conformance-l0-E5-r1
+  run_id: minted-conformance-l0-E5-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    ...........                                                              [100%]
-    11 passed in 0.03s
+    ................                                                         [100%]
+    16 passed in 0.06s
 
 - eval: E6
-  run_id: minted-conformance-l0-E6-r1
+  run_id: minted-conformance-l0-E6-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    .....                                                                    [100%]
-    5 passed in 0.03s
+    5 passed in 0.06s
 
 - eval: E7
-  run_id: minted-conformance-l0-E7-r1
+  run_id: minted-conformance-l0-E7-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
           Tests  8 passed (8)
-       Start at  09:25:19
-       Duration  178ms (transform 55ms, setup 0ms, import 73ms, tests 3ms, environment 0ms)
+       Start at  10:55:34
+       Duration  173ms (transform 53ms, setup 0ms, import 70ms, tests 3ms, environment 0ms)
 
 - eval: E8
-  run_id: minted-conformance-l0-E8-r1
+  run_id: minted-conformance-l0-E8-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.script.conformance_discriminating
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
     ==> revert: both halves must be GREEN again
         green
     OK: the conformance suite discriminates on all three perturbation kinds
 
 - eval: E9
-  run_id: minted-conformance-l0-E9-r1
+  run_id: minted-conformance-l0-E9-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-07-28T02:23:27Z
-  output: |
-    ...                                                                      [100%]
-    3 passed in 0.22s
-
-- eval: E10
-  run_id: minted-conformance-l0-E10-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-07-28T02:23:27Z
-  output: |
-    ...                                                                      [100%]
-    3 passed in 0.22s
-
-- eval: E11
-  run_id: minted-conformance-l0-E11-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.unit_plugin_rev
-  verified_at: 2026-07-28T02:23:27Z
-  output: |
-          Tests  3 passed (3)
-       Start at  09:25:21
-       Duration  215ms (transform 15ms, setup 0ms, import 51ms, tests 6ms, environment 0ms)
-
-- eval: E12
-  run_id: minted-conformance-l0-E12-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.unit_node_cached
-  verified_at: 2026-07-28T02:23:27Z
-  output: |
-          Tests  4 passed (4)
-       Start at  09:25:21
-       Duration  135ms (transform 20ms, setup 0ms, import 27ms, tests 3ms, environment 0ms)
-
-- eval: E13
-  run_id: minted-conformance-l0-E13-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-07-28T02:23:27Z
-  output: |
-    ...........                                                              [100%]
-    11 passed in 0.03s
-
-- eval: E14
-  run_id: minted-conformance-l0-E14-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
     .....                                                                    [100%]
-    5 passed in 0.03s
+    5 passed in 0.38s
+
+- eval: E10
+  run_id: minted-conformance-l0-E10-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_plugin_rev
+  verified_at: 2026-07-28T03:54:42Z
+  output: |
+    .....                                                                    [100%]
+    5 passed in 0.38s
+
+- eval: E11
+  run_id: minted-conformance-l0-E11-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.unit_plugin_rev
+  verified_at: 2026-07-28T03:54:42Z
+  output: |
+         Tests  3 passed (3)
+      Start at  10:55:33
+      Duration  148ms (transform 15ms, setup 0ms, import 46ms, tests 3ms, environment 0ms)
+
+- eval: E12
+  run_id: minted-conformance-l0-E12-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.unit_node_cached
+  verified_at: 2026-07-28T03:54:42Z
+  output: |
+          Tests  6 passed (6)
+       Start at  10:55:34
+       Duration  123ms (transform 17ms, setup 0ms, import 24ms, tests 3ms, environment 0ms)
+
+- eval: E13
+  run_id: minted-conformance-l0-E13-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_batch
+  verified_at: 2026-07-28T03:54:42Z
+  output: |
+    ................                                                         [100%]
+    16 passed in 0.06s
+
+- eval: E14
+  run_id: minted-conformance-l0-E14-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_conformance
+  verified_at: 2026-07-28T03:54:42Z
+  output: |
+    5 passed in 0.06s
 
 - eval: E15
-  run_id: minted-conformance-l0-E15-r1
+  run_id: minted-conformance-l0-E15-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.script.plugin_rev_joined_path
-  verified_at: 2026-07-28T02:23:27Z
+  verified_at: 2026-07-28T03:54:42Z
   output: |
-    OK: TypeScript install -> Python scan preserved pluginRev d4046116a903e6d239aeb310e79f3f947f0ff0a1
+    OK: TypeScript install -> Python scan preserved pluginRev 6068ca7db0287e9c4ab6702a300213cb102425f8
 
 ## Analyst
 
-- E3 (AC-3, `cd sdk && ... pytest -q` — the full sdk suite) is non-discriminating: it passes on both HEAD and the diffBase baseline. This is the expected shape for E3 — its stated purpose is a regression guard ("the pre-existing engine suite passes with NO edits to those files"), not a probe for new fan-out behaviour, so a green-on-both result confirms the guard rather than indicating a vacuous eval. No rewrite needed; E1/E2/E4/E5/E13 (sdk_pytest_batch) and E14/E6 (conformance fixtures) are the evals that actually exercise the new batch/fan-out behaviour and all show `baseline: red` (discriminate correctly).
+carried tu round 1 — baseline khong do lai round nay.
+
+- E3 (AC-3, `cd sdk && ... pytest -q` — the full sdk suite) is non-discriminating: per the round-1 A/B baseline it passes on both HEAD and the diffBase. This is the expected shape for E3 — its stated purpose is a regression guard ("the pre-existing engine suite passes with NO edits to those files"), not a probe for the new fan-out behaviour, so a green-on-both result confirms the guard rather than indicating a vacuous eval. No rewrite needed; E1/E2/E4/E5/E13 (sdk_pytest_batch) and E14/E6 (conformance fixtures) are the evals that actually exercise the new batch/fan-out behaviour and showed `baseline: red` in round 1 (discriminate correctly). Not re-measured this round because `evals.yaml` did not change since the round-1 baseline capture.
 
 ## Variance
 
@@ -196,7 +196,9 @@ none — every multi-run eval is uniform (all evals ran with `runs: 1`, `passes:
 
 ## Iterations
 
-Round 1: All 15 machine evals (E1-E15) passed on the first verification pass; no failures, no BLOCKED evals, no judgment items pending. Supporting whole-repo checks (`pnpm build`, `pnpm typecheck`, `pnpm lint:check`, `pnpm test`, `pnpm verify:plugins`, `pnpm gen:abi` + diff-check) also passed clean.
+Round 1: All 15 machine evals (E1-E15) passed on the first verification pass; no failures, no BLOCKED evals, no judgment items pending. Supporting whole-repo checks (`pnpm build`, `pnpm typecheck`, `pnpm lint:check`, `pnpm test`, `pnpm verify:plugins`, `pnpm gen:abi` + diff-check) also passed clean. Round-1 code review surfaced 7 findings (3 high severity: `read_plugin_rev` crashing the scan when git is absent, `merge_fanout_views` wiping downstream state on unpopulated multi-output channels, and `node_completed` emitting only the last fan-out result to the canvas).
+
+Round 2: Commit `bff647b` ("fix: three review findings from verification round 1") addressed the three high-severity round-1 findings. Re-ran all 15 machine evals (E1-E15) plus the full supporting suite (`pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test`, `pnpm verify:plugins`, `pnpm gen:abi` + diff-check) against `verified_commit: 153fcb486e1a3400e7345c8462a18b718e630883` — all green, no failures, no BLOCKED evals, no judgment items pending. `evals.yaml` did not change since round 1, so the A/B baseline was not re-measured this round (`baseline:` recorded as `n-a` on every block per the round-2 provenance instruction); round-1 baseline results (E1/E2/E4/E5/E6/E13/E14 discriminate red-on-old-code, E3 is an intended non-discriminating regression guard) still apply and are carried forward in `## Analyst` above. Fresh adversarial code review of the round-2 tree surfaced 6 new findings (1 high, 2 medium, 3 low — the high one being `NODE_CACHED` handled in only one of three client-side `NodeStatus` switches) — see `review-findings.md`; none block this PASS as none map to a failing eval, but the high finding is a gap in AC-10's own stated invariant and is carried to Gate 2 as a human decision.
 
 ## Gate 2 checklist (human)
 
