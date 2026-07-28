@@ -40,6 +40,11 @@ export const NodeStatus = {
     NODE_STARTED: "NODE_STARTED", // Node started executing
     NODE_RUNNING: "NODE_RUNNING", // Node executing (with progress)
     NODE_COMPLETED: "NODE_COMPLETED", // Node execution completed
+    // Node reused a cached result instead of running. No source emits this yet
+    // — the cache slice (L2) supplies one; the path is wired first so that
+    // slice adds a call to emit() rather than plumbing across three layers
+    // while solving the hard part.
+    NODE_CACHED: "NODE_CACHED",
     NODE_FAILED: "NODE_FAILED", // Node execution failed
 } as const;
 
@@ -118,6 +123,10 @@ export function mapSSEStatusToTaskStatus(
         case TaskStatus.COMPLETED:
         case WorkflowStatus.WORKFLOW_COMPLETED:
         case NodeStatus.NODE_COMPLETED:
+        // A cached node is a completed node from the task's point of view.
+        // Anything else leaves the canvas spinning on a node that already has
+        // its answer.
+        case NodeStatus.NODE_CACHED:
             return "COMPLETED";
 
         case TaskStatus.CANCELLED:

@@ -242,6 +242,9 @@ export function useWorkflowExecution(
                                 break;
 
                             case NodeStatus.NODE_COMPLETED:
+                            // A cache hit produces the same canvas state as a
+                            // run: the node is done and its output applies.
+                            case NodeStatus.NODE_CACHED:
                                 if (message.nodeId) {
                                     setNodeExecutionStatus(
                                         message.nodeId,

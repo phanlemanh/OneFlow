@@ -235,6 +235,14 @@ def run_workflow(
     else:
         store = DiskStore(out_path, fk_base)
 
+    # Event shapes this loop emits. `node_cached` is declared here while there
+    # is still no cache to hit: adding fields to an event already running in
+    # production costs far more than declaring them up front, and the host side
+    # (engine-events.ts -> SSE -> canvas) is wired for it as of L0. L2 fills in
+    # fingerprint/tier and calls emit() with exactly this shape.
+    #
+    #   {"type": "node_cached", "nodeId": str, "feature": str,
+    #    "label": str, "fingerprint": str, "tier": "A" | "B"}
     def emit(event: dict[str, Any]) -> None:
         if on_progress is not None:
             on_progress(event)
