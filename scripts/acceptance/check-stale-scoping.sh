@@ -116,6 +116,78 @@ human_signoff: Fixture 2026-07-28
 REP
 }
 
+# mk_pair_fixture <dir> <slug1> <slug2>
+# Two independently narrow-scoped features (paths cover src/covered/** only)
+# sharing ONE repo — for guards that assert one feature's cross-check cannot
+# be tripped by a change confined to the OTHER feature's artifacts (regex-slug
+# confusion, trailing-slash anchoring).
+#
+# Deliberately does NOT bind its first parameter to a variable named "d" —
+# callers that already hold their own fixture dir in "$d" (with a
+# `trap 'rm -rf "$d"' RETURN` registered against it) would have that trap
+# silently retargeted to whatever this function's "d" is reassigned to,
+# since the trap's "$d" is expanded at RETURN time, not at registration time.
+mk_pair_fixture() {
+  pf_dir="$1"; s1="$2"; s2="$3"
+  mkdir -p "$pf_dir/_acceptance/$s1" "$pf_dir/_acceptance/$s2" "$pf_dir/src/covered" "$pf_dir/src/uncovered"
+  cat > "$pf_dir/_acceptance/config.yaml" <<CFG
+schema_version: 1
+enforcement: strict
+recheck: off
+executors:
+  test:
+    unit: "true"
+risk_tiers:
+  t1_skip_globs:
+    - "docs/**"
+    - "**/*.md"
+    - "_acceptance/**"
+  t3_paths:
+    - "src/critical/**"
+signoff:
+  required_for: [T2, T3]
+CFG
+  for s in "$s1" "$s2"; do
+    cat > "$pf_dir/_acceptance/$s/contract.md" <<CON
+---
+schema_version: 1
+feature: fixture
+slug: $s
+risk_tier: T2
+status: signed-off
+approved_by: Fixture
+---
+# Acceptance Contract: $s
+CON
+    cat > "$pf_dir/_acceptance/$s/evals.yaml" <<EV
+schema_version: 1
+feature_slug: $s
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit
+    paths: ["src/covered/**"]
+EV
+    echo '{}' > "$pf_dir/_acceptance/$s/run-log.jsonl"
+  done
+  (
+    cd "$pf_dir"
+    git init -q .
+    git config user.email fixture@example.com
+    git config user.name Fixture
+    echo seed > src/covered/seed.txt
+    echo seed > src/uncovered/seed.txt
+    git add -A
+    git commit -q -m "fixture base"
+  )
+}
+
 case_case_completeness() {
   # E10: a case that was never implemented must be loud, not absent. Every name
   # in KNOWN_CASES must dispatch to a function that exists.
@@ -677,6 +749,78 @@ case_merged_halves() {
   outB="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$outB" | grep -qi 'do not cover' \
     || fail merged-halves "half B: cross-check did not run with artifacts in the PR diff: $outB"
+
+  # Half C: no PR base at all. There is no coverage set to cross-check the
+  # declaration against — an empty BASE_SHA must NEVER be read as
+  # "declaration covers everything"; it must fall back to whole-tree
+  # staleness (the working tree still carries the Half-A drift file, which
+  # sits outside this feature's declared "narrow" scope) rather than
+  # silently reporting OK.
+  outC="$(bash "$GATE" "$d" 2>&1)"
+  printf '%s\n' "$outC" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail merged-halves "half C: no PR base did not fall back to whole-tree staleness: $outC"
+  printf '%s\n' "$outC" | grep -q 'OK \[fx\]' \
+    && fail merged-halves "half C: no PR base wrongly reported OK: $outC"
+
+  # Half D: same as Half C but with an UNRESOLVABLE --base — must fail closed
+  # exactly like the missing-base case, not be treated any more permissively
+  # just because a ref string was supplied.
+  outD="$(bash "$GATE" "$d" --base bogus-ref-xyz-does-not-exist 2>&1)"
+  printf '%s\n' "$outD" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail merged-halves "half D: unresolvable PR base did not fall back to whole-tree staleness: $outD"
+  printf '%s\n' "$outD" | grep -q 'OK \[fx\]' \
+    && fail merged-halves "half D: unresolvable PR base wrongly reported OK: $outD"
+
+  # Half E / regex-slug isolation: two features whose slugs are
+  # regex-metacharacter look-alikes — "a.b" (where "." is a wildcard) and
+  # "axb" (a string the wildcard would match against) — share one repo.
+  # Touching only axb's artifacts must not trip a.b's cross-check: a slug
+  # interpolated unescaped into a grep PATTERN lets "." match any character,
+  # so "^_acceptance/a.b/" would also match "_acceptance/axb/". A git
+  # pathspec is a literal path, not a pattern, and cannot be confused this way.
+  e="$(mktemp -d)"
+  mk_pair_fixture "$e" a.b axb
+  evc="$(git -C "$e" rev-parse HEAD)"
+  write_report "$e" a.b "$evc"
+  write_report "$e" axb "$evc"
+  ( cd "$e" && git add -A && git commit -q -m report )
+  ebase="$(git -C "$e" rev-parse HEAD)"
+  # The PR touches only axb's artifacts, plus a code change outside declared
+  # scope so the cross-check — if it wrongly ran for a.b too — would have
+  # something to flag as "not covered".
+  ( cd "$e" && echo touched >> _acceptance/axb/run-log.jsonl && echo drift > src/uncovered/new.txt \
+      && git add -A && git commit -q -m "pr touches axb only" )
+  outE="$(bash "$GATE" "$e" --base "$ebase" 2>&1)"
+  rm -rf "$e"
+  printf '%s\n' "$outE" | grep -q 'NOTE \[a\.b\]: declared eval paths' \
+    && fail merged-halves "regex-slug: touching only axb's artifacts tripped a.b's cross-check: $outE"
+  printf '%s\n' "$outE" | grep -q 'OK \[a\.b\]' \
+    || fail merged-halves "regex-slug: a.b was not reported OK despite its own artifacts being untouched: $outE"
+  printf '%s\n' "$outE" | grep -q 'NOTE \[axb\]: declared eval paths' \
+    || fail merged-halves "regex-slug: axb's own cross-check did not run: $outE"
+
+  # Half F / trailing-slash anchoring: "fx" vs "fx-extra" — the anchoring the
+  # old grep pattern relied on (`^_acceptance/$slug/`, trailing slash) must
+  # still hold now that the check uses a pathspec instead. Touching only
+  # fx-extra's artifacts must not trip fx's cross-check.
+  g="$(mktemp -d)"
+  mk_pair_fixture "$g" fx fx-extra
+  gvc="$(git -C "$g" rev-parse HEAD)"
+  write_report "$g" fx "$gvc"
+  write_report "$g" fx-extra "$gvc"
+  ( cd "$g" && git add -A && git commit -q -m report )
+  gbase="$(git -C "$g" rev-parse HEAD)"
+  ( cd "$g" && echo touched >> _acceptance/fx-extra/run-log.jsonl && echo drift > src/uncovered/new.txt \
+      && git add -A && git commit -q -m "pr touches fx-extra only" )
+  outF="$(bash "$GATE" "$g" --base "$gbase" 2>&1)"
+  rm -rf "$g"
+  printf '%s\n' "$outF" | grep -q 'NOTE \[fx\]: declared eval paths' \
+    && fail merged-halves "trailing-slash: touching only fx-extra's artifacts tripped fx's cross-check: $outF"
+  printf '%s\n' "$outF" | grep -q 'OK \[fx\]' \
+    || fail merged-halves "trailing-slash: fx was not reported OK despite its own artifacts being untouched: $outF"
+  printf '%s\n' "$outF" | grep -q 'NOTE \[fx-extra\]: declared eval paths' \
+    || fail merged-halves "trailing-slash: fx-extra's own cross-check did not run: $outF"
+
   pass merged-halves
 }
 

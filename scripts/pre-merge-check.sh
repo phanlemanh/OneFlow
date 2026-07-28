@@ -484,17 +484,29 @@ GLOBS2
     # this PR's own gated diff (the coverage set, BASE_SHA...HEAD) — and that
     # check only runs at the one moment the declaration is new or changed: when
     # this feature's own _acceptance/<slug>/ is part of the PR diff. Without a
-    # resolvable BASE_SHA there is no coverage set to check against, so an empty
-    # BASE_SHA must never be read as "declaration covers everything" — narrow
-    # scope stays refused, whole-tree applies.
-    if [ -n "$scope" ] && [ -n "$BASE_SHA" ] \
-       && git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null \
-          | grep -q "^_acceptance/$slug/"; then
-      gaps="$(scope_gaps "$ROOT" "$BASE_SHA" "$scope")"
-      if [ -n "$gaps" ]; then
-        echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
-        printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+    # resolvable BASE_SHA there is no coverage set to check against at all, so
+    # "cannot cross-check" must unconditionally fall back to whole-tree — an
+    # empty/unresolvable BASE_SHA is never read as "declaration covers
+    # everything". This only speaks up for a feature that actually HAD a scope
+    # to refuse (the outer `[ -n "$scope" ]`); an undeclared feature (scope
+    # already empty) stays completely silent here, same as before.
+    if [ -n "$scope" ]; then
+      if [ -z "$BASE_SHA" ]; then
+        echo "NOTE [$slug]: no usable PR base (BASE_SHA empty) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
         scope=""
+      # A pathspec is a literal path, not a pattern: unlike a grep regex over
+      # `git diff --name-only` output, "_acceptance/$slug" cannot have its
+      # directory boundary defeated by a slug containing a regex metacharacter
+      # (e.g. slug "a.b" matching an unrelated "_acceptance/axb/" via the "."
+      # wildcard). Git itself anchors this at the path-segment boundary, so
+      # "fx" still never matches "fx-extra".
+      elif [ -n "$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- "_acceptance/$slug" 2>/dev/null)" ]; then
+        gaps="$(scope_gaps "$ROOT" "$BASE_SHA" "$scope")"
+        if [ -n "$gaps" ]; then
+          echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
+          printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+          scope=""
+        fi
       fi
     fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"
