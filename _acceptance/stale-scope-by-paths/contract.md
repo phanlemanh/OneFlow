@@ -106,6 +106,19 @@ rather than the full Cartesian product.
 ## Known limits
 
 - Backfill cho feature cũ phải nằm trong PR mà gated diff được `paths` của chính nó phủ. PR trộn backfill với code khác sẽ bị từ chối scope hẹp. Ràng buộc cố ý, nhưng sẽ làm ai đó bất ngờ.
-- Cross-check chỉ xác thực một khai báo tại ĐÚNG thời điểm nó mới xuất hiện hoặc bị sửa (khi `_acceptance/<slug>/` nằm trong PR diff) — không có PR nào sau đó re-check lại nó. Một khai báo trung thực tại thời điểm viết có thể trôi dần khi codebase phình ra xung quanh nó (thư mục mới, file mới ngoài `paths` đã khai) mà không có PR nào từng chạm lại `_acceptance/<slug>/` để trigger cross-check lần nữa. Bản vá cho lỗ hổng "PR chỉ khai báo, coverage set rỗng, cross-check pass vô nghĩa" (xem repro ở đầu tài liệu review) đóng đúng lỗ đó — một PR chỉ đụng `_acceptance/<slug>/` mà không đụng gì gated khác giờ bị từ chối scope hẹp thẳng, thay vì được cấp miễn phí — nhưng KHÔNG đóng phần dư này: một khai báo từng đúng, đứng yên không đổi, vẫn có thể trôi so với code thật mà không ai biết cho tới lần cross-check kế tiếp (nếu có).
+- **Cross-check chỉ chạy ở thời điểm khai báo mới xuất hiện hoặc bị sửa** (khi `_acceptance/<slug>/` nằm trong PR diff). Không PR nào sau đó kiểm lại. Phần dư này lớn hơn "khai báo trôi dần theo thời gian", và cần nói thẳng vì nó là giới hạn của chính cam kết trung tâm:
+
+  **Một khai báo có thể có hiệu lực mà chưa từng được cross-check lần nào.** Bản vá cho lỗ "PR chỉ khai báo" từ chối scope hẹp khi coverage set rỗng — nhưng *từ chối* không có nghĩa là *chặn merge*. Nếu PR đó vẫn merge, PR kế tiếp không đụng `_acceptance/<slug>/` nữa, nên cross-check không chạy, và khai báo chưa từng kiểm ấy được dùng để thu hẹp bình thường. Tái hiện được:
+
+  ```
+  PR1 (chỉ chạm _acceptance/fx/)  → NOTE: coverage set rỗng, từ chối scope hẹp → OK
+  PR2 (code thật ở src/real/**)   → NOTE: narrow scope applied — suppressed 1  → OK
+  ```
+
+  `src/real/**` chưa bao giờ nằm trong `paths` và chưa bao giờ bị đối chiếu, nhưng bị che từ PR2 trở đi.
+
+  Đây là hệ quả trực tiếp của AC-7, không phải lỗi cài đặt: nếu cross-check chạy ở mọi PR thì `paths` của một feature đã merge không bao giờ phủ diff của PR không liên quan, nên scope hẹp bị từ chối cho MỌI feature đã merge và tính năng thành vô dụng. Thứ đóng được lỗ này là **thủ tục** (PR backfill phải mang theo code gated mà `paths` của nó phủ — xem Out of scope), không phải cơ chế. Ai bỏ qua thủ tục đó vẫn qua được.
+
+  Trường hợp nhẹ hơn cùng gốc: một khai báo trung thực lúc viết trôi dần khi codebase phình ra quanh nó (thư mục mới, file mới ngoài `paths`), không PR nào chạm lại `_acceptance/<slug>/` để kích hoạt cross-check.
 - Cross-check đối chiếu `paths` với **diff của PR**, không với thứ eval thật sự chạy. Khai `paths: ["**"]` sẽ pass mà chẳng thu hẹp gì. Không cơ chế nào chặn một khai báo trung thực với diff nhưng sai với eval — chỗ đó chỉ review bắt được.
 - Feature bị sửa `paths` ở một PR muộn hơn sẽ được cross-check với diff của PR đó, không phải diff lúc landing. Kết quả gần như chắc chắn là từ chối scope hẹp (hướng an toàn), nhưng thông báo sẽ gây bối rối.
