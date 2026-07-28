@@ -5,7 +5,7 @@ slug: stale-scope-by-paths
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: approved
+status: implemented
 approved_by: Manh
 approved_at: 2026-07-28
 time_human_minutes: {gate1: 10, gate2: 0}
