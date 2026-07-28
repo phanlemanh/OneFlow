@@ -283,6 +283,19 @@ DECLS
   return 0
 }
 
+scope_gaps() { # <root> <base_sha> <scope-globs> — coverage-set files the union
+  # misses. COVERAGE SET is BASE_SHA...HEAD (per PR), never the per-feature
+  # verified_commit range: cross-checking a merged feature against its own range
+  # spans every unrelated merge since sign-off, so no honest declaration ever
+  # covers it and narrow scope would be refused forever.
+  git -C "$1" diff --name-only "$2...HEAD" -- 2>/dev/null | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
+    match_globs "$f" "$T1_GLOBS" && continue
+    match_globs "$f" "$3" || printf '%s\n' "$f"
+  done
+}
+
 stale_files() { # <root> <commit> [scope-globs] — gated files changed since
   # <commit> (incl. working tree). Gate artifacts (_acceptance/) and
   # t1_skip_globs never count. With a non-empty third argument, only files
@@ -467,6 +480,23 @@ GLOBS2
     # abort the script or leak stderr; scope simply stays empty (whole-tree).
     scope=""
     if scope="$(feature_scope "$dir/evals.yaml")"; then :; else scope=""; fi
+    # A feature earns narrow scope only when its declaration is CHECKED against
+    # this PR's own gated diff (the coverage set, BASE_SHA...HEAD) — and that
+    # check only runs at the one moment the declaration is new or changed: when
+    # this feature's own _acceptance/<slug>/ is part of the PR diff. Without a
+    # resolvable BASE_SHA there is no coverage set to check against, so an empty
+    # BASE_SHA must never be read as "declaration covers everything" — narrow
+    # scope stays refused, whole-tree applies.
+    if [ -n "$scope" ] && [ -n "$BASE_SHA" ] \
+       && git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null \
+          | grep -q "^_acceptance/$slug/"; then
+      gaps="$(scope_gaps "$ROOT" "$BASE_SHA" "$scope")"
+      if [ -n "$gaps" ]; then
+        echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
+        printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+        scope=""
+      fi
+    fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"
     if [ -n "$stale" ]; then
       echo "VIOLATION [$slug]: evidence is stale — code changed after verify (verified_commit $vc); re-run verify before merge. Changed:"

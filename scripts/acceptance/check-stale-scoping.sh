@@ -590,12 +590,22 @@ case_in_scope() {
 
 case_out_of_scope() {
   # E2 / AC-2: the behaviour the feature exists to produce.
+  #
+  # The report is committed on its own, and --base is taken AFTER that commit
+  # (not at the same commit the report's own verified_commit points to), so
+  # this feature's _acceptance/fx/ is NOT part of the PR diff the Task-6
+  # cross-check inspects (case_merged_halves' "half A" shape). That isolates
+  # what this case exists to prove — an out-of-declared-scope change alone
+  # does not stale the feature — from the cross-check, which is a separate
+  # concern exercised by case_under_declared / case_merged_halves / case_two_bases.
   d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
   mk_fixture "$d" fx narrow
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
+  ( cd "$d" && git add -A && git commit -q -m report )
+  base="$(git -C "$d" rev-parse HEAD)"
   ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
-  out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     && fail out-of-scope "out-of-union change still staled the feature: $out"
   printf '%s\n' "$out" | grep -q 'OK \[fx\]' \
@@ -619,6 +629,80 @@ case_suppression() {
     rm -rf "$d"
   done
   pass suppression
+}
+
+case_under_declared() {
+  # E5 / AC-5: complete paths that miss part of the COVERAGE SET, with the
+  # feature's artifacts in the PR diff → refuse narrow scope and NAME the files.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx narrow
+  base="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$base"
+  ( cd "$d" && echo drift > src/uncovered/new.txt \
+      && echo touched >> _acceptance/fx/run-log.jsonl \
+      && git add -A && git commit -q -m "pr" )
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && git add -A && git commit -q -m "repin" )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'src/uncovered/new.txt' \
+    || fail under-declared "uncovered file not named in output: $out"
+  printf '%s\n' "$out" | grep -qi 'not covered\|uncovered' \
+    || fail under-declared "no under-declaration message: $out"
+  pass under-declared
+}
+
+case_merged_halves() {
+  # E7 / AC-7: cross-check fires only when the declaration is new or changed.
+  # Half A: artifacts NOT in the PR diff → narrow scope, no cross-check.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx narrow
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && git add -A && git commit -q -m report )
+  base="$(git -C "$d" rev-parse HEAD)"
+  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m "code only" )
+  outA="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$outA" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    && fail merged-halves "half A: narrow scope was not granted: $outA"
+  # Match the cross-check's OWN wording ("do not cover"), not a bare
+  # "uncovered" substring — half A's own drift file lives under
+  # src/uncovered/, so a path-name match would misfire on that filename
+  # inside the (unrelated) T1-escape PR-level NOTE/VIOLATION, not on
+  # whether the cross-check itself actually ran.
+  printf '%s\n' "$outA" | grep -qi 'do not cover' \
+    && fail merged-halves "half A: cross-check ran despite artifacts absent from the PR diff: $outA"
+  # Half B: same feature, artifacts IN the PR diff → cross-check runs.
+  ( cd "$d" && echo touched >> _acceptance/fx/run-log.jsonl && git add -A && git commit -q -m "artifact touch" )
+  outB="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$outB" | grep -qi 'do not cover' \
+    || fail merged-halves "half B: cross-check did not run with artifacts in the PR diff: $outB"
+  pass merged-halves
+}
+
+case_two_bases() {
+  # E12 / AC-12: the fixture that tells the two ranges apart. paths cover the
+  # COVERAGE SET but NOT everything changed since verified_commit. Cross-checked
+  # against the per-feature range instead, no honest declaration ever covers it
+  # and narrow scope is refused for every merged feature forever.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx narrow
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && git add -A && git commit -q -m report )
+  # Unrelated history AFTER verified_commit and BEFORE the PR base.
+  ( cd "$d" && echo old > src/uncovered/unrelated.txt && git add -A && git commit -q -m "unrelated merge" )
+  base="$(git -C "$d" rev-parse HEAD)"
+  # The PR itself touches only covered code plus the feature's artifacts.
+  ( cd "$d" && echo new > src/covered/pr.txt \
+      && echo touched >> _acceptance/fx/run-log.jsonl \
+      && git add -A && git commit -q -m pr )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'src/uncovered/unrelated.txt' \
+    && fail two-bases "cross-check used the per-feature range, not the coverage set: $out"
+  printf '%s\n' "$out" | grep -qi 'uncovered' \
+    && fail two-bases "narrow scope refused although the coverage set is covered: $out"
+  pass two-bases
 }
 
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
