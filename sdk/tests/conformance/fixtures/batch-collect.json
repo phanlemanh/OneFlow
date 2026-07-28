@@ -1,74 +1,97 @@
 {
-  "case": "batch-collect",
-  "note": "A batch field and a collectAll field on the same node. No shipped mount combines them today — resolveSpec supports it and the rule needs pinning before one does: the collected field keeps its whole array in every call while the batched field varies. This is why fixtures declare their own sourceSpec instead of reading the registry.",
-  "slot": "combine-text",
-  "sourceSpec": {
-    "texts": { "kind": "handle", "nodeType": "textNode", "path": "texts", "collect": true },
-    "userPrompt": { "kind": "handle", "nodeType": "textNode", "path": "texts", "batch": true }
-  },
-  "stubOutput": { "success": true, "text": "stub" },
-  "workflow": {
-    "name": "conformance-batch-collect",
-    "version": "1.0",
-    "exportedAt": "2026-07-28T00:00:00Z",
-    "inputs": [],
-    "outputs": [],
-    "dataNodes": [
-      {
-        "id": "dn-corpus",
-        "type": "addTextNode",
-        "dataType": "text",
-        "isInput": false,
-        "staticData": { "texts": ["câu A", "câu B"] },
-        "level": 0
-      },
-      {
-        "id": "dn-styles",
-        "type": "addTextNode",
-        "dataType": "text",
-        "isInput": false,
-        "staticData": { "texts": ["trang trọng", "thân mật"] },
-        "level": 0
-      }
-    ],
-    "executableNodes": [
-      {
-        "id": "exec-combine",
-        "type": "textsGenTextNode",
-        "feature": "combine-text",
-        "pluginId": "oneflow-conformance-stub",
-        "batchField": "userPrompt",
-        "bindings": {
-          "texts": {
+    "case": "batch-collect",
+    "note": "A batch field and a collectAll field on the same node. No shipped mount combines them today — resolveSpec supports it and the rule needs pinning before one does: the collected field keeps its whole array in every call while the batched field varies. This is why fixtures declare their own sourceSpec instead of reading the registry.",
+    "slot": "combine-text",
+    "sourceSpec": {
+        "texts": {
             "kind": "handle",
-            "consumerShape": "array",
-            "sources": [{ "fromNodeId": "dn-corpus", "fromField": "texts" }],
-            "targetHandle": "in:texts"
-          },
-          "userPrompt": {
-            "kind": "handle",
-            "consumerShape": "scalar",
-            "sources": [{ "fromNodeId": "dn-styles", "fromField": "texts" }],
-            "targetHandle": "in:userPrompt"
-          }
-        },
-        "outputs": [
-          {
-            "sourceField": "text",
             "nodeType": "textNode",
-            "dataField": "texts",
-            "expandEach": false
-          }
+            "path": "texts",
+            "collect": true
+        },
+        "userPrompt": {
+            "kind": "handle",
+            "nodeType": "textNode",
+            "path": "texts",
+            "batch": true
+        }
+    },
+    "stubOutput": { "success": true, "text": "stub" },
+    "workflow": {
+        "name": "conformance-batch-collect",
+        "version": "1.0",
+        "exportedAt": "2026-07-28T00:00:00Z",
+        "inputs": [],
+        "outputs": [],
+        "dataNodes": [
+            {
+                "id": "dn-corpus",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": { "texts": ["câu A", "câu B"] },
+                "level": 0
+            },
+            {
+                "id": "dn-styles",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": { "texts": ["trang trọng", "thân mật"] },
+                "level": 0
+            }
         ],
-        "dependencies": ["dn-corpus", "dn-styles"],
-        "level": 1
-      }
-    ],
-    "executionLevels": [["dn-corpus", "dn-styles"], ["exec-combine"]],
-    "dataNodeEdges": []
-  },
-  "expectedCalls": [
-    { "slot": "combine-text", "input": { "texts": ["câu A", "câu B"], "userPrompt": "trang trọng" } },
-    { "slot": "combine-text", "input": { "texts": ["câu A", "câu B"], "userPrompt": "thân mật" } }
-  ]
+        "executableNodes": [
+            {
+                "id": "exec-combine",
+                "type": "textsGenTextNode",
+                "feature": "combine-text",
+                "pluginId": "oneflow-conformance-stub",
+                "batchField": "userPrompt",
+                "bindings": {
+                    "texts": {
+                        "kind": "handle",
+                        "consumerShape": "array",
+                        "sources": [
+                            { "fromNodeId": "dn-corpus", "fromField": "texts" }
+                        ],
+                        "targetHandle": "in:texts"
+                    },
+                    "userPrompt": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            { "fromNodeId": "dn-styles", "fromField": "texts" }
+                        ],
+                        "targetHandle": "in:userPrompt"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false
+                    }
+                ],
+                "dependencies": ["dn-corpus", "dn-styles"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["dn-corpus", "dn-styles"], ["exec-combine"]],
+        "dataNodeEdges": []
+    },
+    "expectedCalls": [
+        {
+            "slot": "combine-text",
+            "input": {
+                "texts": ["câu A", "câu B"],
+                "userPrompt": "trang trọng"
+            }
+        },
+        {
+            "slot": "combine-text",
+            "input": { "texts": ["câu A", "câu B"], "userPrompt": "thân mật" }
+        }
+    ]
 }
