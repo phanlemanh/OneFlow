@@ -375,11 +375,13 @@ def run_workflow(
                     if not target:
                         continue
                     channel = view.get(route.get("sourceField"))
-                    # `is None` rather than falsy: an empty channel must still
-                    # refresh downstream state to an empty list. Leaving stale
-                    # values behind is how a re-run silently reuses last run's
-                    # data.
-                    if channel is None:
+                    # What keeps stale downstream data from surviving an empty
+                    # batch is `merge_fanout_views` always emitting the channel
+                    # — with `values: []` when there were no results — so this
+                    # guard sees a real channel and refreshes state to empty.
+                    # It used to be reached with the channel missing, which left
+                    # the previous run's values in place.
+                    if not channel:
                         continue
                     slot_state = data_node_state.get(target, {})
                     if route.get("dataField") == "texts":
