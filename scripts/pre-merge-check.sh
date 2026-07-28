@@ -129,10 +129,13 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # back to whole-tree rather than to a narrower scope.
   #
   # This is a grep-based parser, not a YAML parser — it cannot afford to guess.
-  # Ambiguity (a drifted indent, a block scalar whose prose can contain
-  # anything, ANY declaration this file cannot read cleanly) returns non-zero
-  # rather than silently tolerating it: a wider whole-tree fallback is always
-  # safe, a narrower wrong scope never is.
+  # It recognizes exactly one declaration shape: a single physical line of the
+  # form `<EI>  paths: [...]` whose opening AND closing bracket both land on
+  # that same line. Anything else — a drifted indent, a block scalar whose
+  # prose can contain anything, a bracket array whose `]` is on a later line,
+  # an unclosed `[` — is refused, not guessed at: returns non-zero rather
+  # than silently tolerating it. A wider whole-tree fallback is always safe,
+  # a narrower wrong scope never is.
   f="$1"
   [ -f "$f" ] || return 1
 
@@ -162,20 +165,34 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
     return 1
   fi
 
-  # Declarations: the eval-key indentation (EI plus two spaces) AND the
-  # bracket-array form — one pattern drives both the counter and the
-  # extractor below, so they cannot disagree. A `paths:` whose value is not a
-  # bracket array (e.g. `paths: >`) is not a declaration at all: it can never
-  # count toward completeness while contributing zero globs. A stray
-  # feature-level top-level `paths:` key (indented differently, not under any
-  # eval) is excluded by the same exact-indentation anchor.
-  paths_re="^${ei}  paths:[[:space:]]*\["
+  # Declarations: the eval-key indentation (EI plus two spaces), the
+  # bracket-array form, AND the closing bracket on the SAME physical line —
+  # one pattern drives both the counter and the extractor below, so they
+  # cannot disagree. Requiring the closing `]` here is what rules out a
+  # multi-line array: `paths: [` opening a line with the globs continuing on
+  # following lines matches the counter's old prefix-only pattern (so it used
+  # to count toward completeness) while the line-based extractor finds no
+  # globs after the `[` on that one line (so it contributed none) — a false
+  # "complete" reading that silently dropped every glob the multi-line eval
+  # declared. Requiring `]` on the same line makes such a line fail to match
+  # at all, so it falls short of n_evals and the function refuses instead. A
+  # `paths:` whose value is not a complete single-line bracket array (e.g.
+  # `paths: >`) is not a declaration at all: it can never count toward
+  # completeness while contributing zero globs. A stray feature-level
+  # top-level `paths:` key (indented differently, not under any eval) is
+  # excluded by the same exact-indentation anchor.
+  paths_re="^${ei}  paths:[[:space:]]*\[[^]]*\]"
   n_paths="$(grep -c "$paths_re" "$f" 2>/dev/null || true)"
   n_paths="${n_paths:-0}"
   [ "$n_evals" -eq "$n_paths" ] || return 1
 
-  globs="$(sed -n "s/$paths_re//p" "$f" \
-    | tr -d '"]' | tr ',' '\n' \
+  # Extract via the SAME pattern used for the count, using `grep -o` so only
+  # the matched declaration text (through the closing `]`) is captured —
+  # anything past `]` on the line, such as a trailing `# comment`, falls
+  # outside the match and is never fed into the glob list.
+  globs="$(grep -o "$paths_re" "$f" \
+    | sed -e "s/^${ei}  paths:[[:space:]]*\[//" -e 's/\]$//' \
+    | tr -d '"' | tr ',' '\n' \
     | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
     | grep -v '^$' | sort -u)"
   # An empty array parses to zero globs. A zero-glob scope matches nothing,

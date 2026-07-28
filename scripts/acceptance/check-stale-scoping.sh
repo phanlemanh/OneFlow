@@ -289,6 +289,76 @@ YAML
   [ "$rc" -ne 0 ] \
     || fail indent-drift "feature-level top-level 'paths:' key was counted as an eval declaration — feature_scope returned 0 (globs: $out)"
 
+  # Multi-line array: E2's `paths:` opens a bracket array but its globs
+  # continue on following lines, closing on a THIRD line. A line-based
+  # extractor cannot read continuation lines, so a parser that counts this
+  # opening line toward completeness (matching only the prefix, not
+  # requiring the closing `]` on the same line) reaches a false "complete"
+  # reading while contributing zero globs for E2 — the exact defect this
+  # case guards against regressing.
+  cat > "$d/multiline-array.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: [
+      "src/extra/**",
+      "src/more/**"
+    ]
+YAML
+  out="$(feature_scope "$d/multiline-array.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "multi-line 'paths:' array was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
+
+  # Same shape, but the multi-line array is the ONLY eval in the file — this
+  # used to return non-zero already, but for the wrong reason (the union
+  # came out empty, tripping the LAST-resort "zero globs" check). Assert the
+  # actual completeness check (n_evals vs n_paths) is what refuses it, not
+  # an accidental empty union: a file with a real second declared eval whose
+  # globs happened to overlap would otherwise slip through.
+  cat > "$d/multiline-array-only.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: [
+      "src/extra/**",
+      "src/more/**"
+    ]
+YAML
+  out="$(feature_scope "$d/multiline-array-only.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "multi-line 'paths:' array as the only eval was counted as a complete declaration — feature_scope returned 0 (globs: $out)"
+
+  # Trailing inline comment: `paths: [...] # note` must yield the clean glob
+  # with the comment stripped, not a garbage glob with "# note" appended.
+  # This is the success-path counterpart to the two cases above: the file IS
+  # a complete, single-line declaration, so feature_scope must accept it
+  # (rc 0) and the emitted union must contain no "#" fragment.
+  cat > "$d/trailing-comment.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"] # note
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/trailing-comment.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "single-line 'paths:' array with a trailing comment was refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -q '#' \
+    && fail indent-drift "trailing comment leaked into the emitted glob union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected clean glob 'src/covered/**' missing from union: $out"
+
   pass indent-drift
 }
 
