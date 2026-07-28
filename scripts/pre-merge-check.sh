@@ -283,13 +283,20 @@ DECLS
   return 0
 }
 
-stale_files() { # <root> <commit> — files changed since <commit> (incl. working
-  # tree) that are neither gate artifacts (_acceptance/) nor t1_skip_globs:
-  # i.e. code the pinned evidence no longer covers. Untracked files are
-  # invisible to git diff — CI runs on a committed tree, so that is moot there.
+stale_files() { # <root> <commit> [scope-globs] — gated files changed since
+  # <commit> (incl. working tree). Gate artifacts (_acceptance/) and
+  # t1_skip_globs never count. With a non-empty third argument, only files
+  # matching it count: that is the STALENESS SET narrowed to what the feature's
+  # evals declare they exercise. Untracked files are invisible to git diff — CI
+  # runs on a committed tree, so that is moot there.
+  scope="${3:-}"
   git -C "$1" diff --name-only "$2" -- 2>/dev/null | while IFS= read -r f; do
     case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
-    match_globs "$f" "$T1_GLOBS" || printf '%s\n' "$f"
+    match_globs "$f" "$T1_GLOBS" && continue
+    if [ -n "$scope" ]; then
+      match_globs "$f" "$scope" || continue
+    fi
+    printf '%s\n' "$f"
   done
 }
 
@@ -455,7 +462,12 @@ GLOBS2
   elif ! git -C "$ROOT" rev-parse --quiet --verify "$vc^{commit}" >/dev/null 2>&1; then
     echo "NOTE [$slug]: verified_commit $vc not found in this clone (rebase/squash or shallow fetch?) — staleness unverifiable; re-verify to re-pin"
   else
-    stale="$(stale_files "$ROOT" "$vc")"
+    # feature_scope's non-zero return means "not declared" (partial/malformed/
+    # absent paths) — the normal fallback path, not an error, so it must not
+    # abort the script or leak stderr; scope simply stays empty (whole-tree).
+    scope=""
+    if scope="$(feature_scope "$dir/evals.yaml")"; then :; else scope=""; fi
+    stale="$(stale_files "$ROOT" "$vc" "$scope")"
     if [ -n "$stale" ]; then
       echo "VIOLATION [$slug]: evidence is stale — code changed after verify (verified_commit $vc); re-run verify before merge. Changed:"
       printf '%s\n' "$stale" | head -10 | sed 's/^/    /'

@@ -573,6 +573,54 @@ YAML
   pass indent-drift
 }
 
+case_in_scope() {
+  # E1 / AC-1: THE load-bearing case. Narrow scope must still catch a change
+  # inside the declared union — a mechanism degraded into "never stale" passes
+  # every other criterion in this guard.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx all
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && echo drift > src/covered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail in-scope "in-union change did NOT stale the feature: $out"
+  pass in-scope
+}
+
+case_out_of_scope() {
+  # E2 / AC-2: the behaviour the feature exists to produce.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx narrow
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    && fail out-of-scope "out-of-union change still staled the feature: $out"
+  printf '%s\n' "$out" | grep -q 'OK \[fx\]' \
+    || fail out-of-scope "feature not reported OK: $out"
+  pass out-of-scope
+}
+
+case_suppression() {
+  # E8 / AC-8: the pre-existing exclusions must survive refactoring the
+  # function that applies them — for declared and undeclared features alike.
+  for mode in all none; do
+    d="$(mktemp -d)"
+    mk_fixture "$d" fx "$mode"
+    vc="$(git -C "$d" rev-parse HEAD)"
+    write_report "$d" fx "$vc"
+    ( cd "$d" && echo x > docs/note.md && echo y >> _acceptance/fx/run-log.jsonl && git add -A && git commit -q -m docs )
+    out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+    if printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale'; then
+      rm -rf "$d"; fail suppression "docs/_acceptance-only change staled a $mode-paths feature: $out"
+    fi
+    rm -rf "$d"
+  done
+  pass suppression
+}
+
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
 
 CASE=""
