@@ -129,8 +129,10 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # back to whole-tree rather than to a narrower scope.
   f="$1"
   [ -f "$f" ] || return 1
-  n_evals="$(grep -c '^  - id:' "$f" 2>/dev/null || echo 0)"
-  n_paths="$(grep -c '^    paths:' "$f" 2>/dev/null || echo 0)"
+  n_evals="$(grep -c '^  - id:' "$f" 2>/dev/null || true)"
+  n_paths="$(grep -c '^    paths:' "$f" 2>/dev/null || true)"
+  n_evals="${n_evals:-0}"
+  n_paths="${n_paths:-0}"
   [ "$n_evals" -gt 0 ] || return 1
   [ "$n_evals" -eq "$n_paths" ] || return 1
   globs="$(sed -n 's/^    paths:[[:space:]]*\[//p' "$f" \
