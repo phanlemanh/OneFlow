@@ -1,0 +1,57 @@
+{
+  "case": "batch-empty",
+  "note": "Same mount as batch-basic with nothing upstream. buildPrompts returns [], so the engine must issue zero calls — not one call holding an empty array, which is what it used to do and which hands the plugin garbage it then reports as a result.",
+  "slot": "gen-text",
+  "sourceSpec": {
+    "text": { "kind": "handle", "nodeType": "textNode", "path": "texts", "batch": true }
+  },
+  "stubOutput": { "success": true, "text": "stub" },
+  "workflow": {
+    "name": "conformance-batch-empty",
+    "version": "1.0",
+    "exportedAt": "2026-07-28T00:00:00Z",
+    "inputs": [],
+    "outputs": [],
+    "dataNodes": [
+      {
+        "id": "dn-src",
+        "type": "addTextNode",
+        "dataType": "text",
+        "isInput": false,
+        "staticData": { "texts": [] },
+        "level": 0
+      }
+    ],
+    "executableNodes": [
+      {
+        "id": "exec-gen",
+        "type": "genTextNode",
+        "feature": "gen-text",
+        "pluginId": "oneflow-conformance-stub",
+        "batchField": "text",
+        "bindings": {
+          "text": {
+            "kind": "handle",
+            "consumerShape": "scalar",
+            "sources": [{ "fromNodeId": "dn-src", "fromField": "texts" }],
+            "targetHandle": "in:text"
+          },
+          "userPrompt": { "kind": "config", "value": "viết lại cho gọn" }
+        },
+        "outputs": [
+          {
+            "sourceField": "text",
+            "nodeType": "textNode",
+            "dataField": "texts",
+            "expandEach": false
+          }
+        ],
+        "dependencies": ["dn-src"],
+        "level": 1
+      }
+    ],
+    "executionLevels": [["dn-src"], ["exec-gen"]],
+    "dataNodeEdges": []
+  },
+  "expectedCalls": []
+}

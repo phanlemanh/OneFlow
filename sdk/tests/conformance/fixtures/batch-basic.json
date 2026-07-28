@@ -1,0 +1,61 @@
+{
+  "case": "batch-basic",
+  "note": "gen-text mounted as genTextNode: sourceSpec { text: textBatch() }. Three upstream strings must become three plugin calls, each carrying one of them as a scalar.",
+  "slot": "gen-text",
+  "sourceSpec": {
+    "text": { "kind": "handle", "nodeType": "textNode", "path": "texts", "batch": true }
+  },
+  "stubOutput": { "success": true, "text": "stub" },
+  "workflow": {
+    "name": "conformance-batch-basic",
+    "version": "1.0",
+    "exportedAt": "2026-07-28T00:00:00Z",
+    "inputs": [],
+    "outputs": [],
+    "dataNodes": [
+      {
+        "id": "dn-src",
+        "type": "addTextNode",
+        "dataType": "text",
+        "isInput": false,
+        "staticData": { "texts": ["một", "hai", "ba"] },
+        "level": 0
+      }
+    ],
+    "executableNodes": [
+      {
+        "id": "exec-gen",
+        "type": "genTextNode",
+        "feature": "gen-text",
+        "pluginId": "oneflow-conformance-stub",
+        "batchField": "text",
+        "bindings": {
+          "text": {
+            "kind": "handle",
+            "consumerShape": "scalar",
+            "sources": [{ "fromNodeId": "dn-src", "fromField": "texts" }],
+            "targetHandle": "in:text"
+          },
+          "userPrompt": { "kind": "config", "value": "viết lại cho gọn" }
+        },
+        "outputs": [
+          {
+            "sourceField": "text",
+            "nodeType": "textNode",
+            "dataField": "texts",
+            "expandEach": false
+          }
+        ],
+        "dependencies": ["dn-src"],
+        "level": 1
+      }
+    ],
+    "executionLevels": [["dn-src"], ["exec-gen"]],
+    "dataNodeEdges": []
+  },
+  "expectedCalls": [
+    { "slot": "gen-text", "input": { "text": "một", "userPrompt": "viết lại cho gọn" } },
+    { "slot": "gen-text", "input": { "text": "hai", "userPrompt": "viết lại cho gọn" } },
+    { "slot": "gen-text", "input": { "text": "ba", "userPrompt": "viết lại cho gọn" } }
+  ]
+}
