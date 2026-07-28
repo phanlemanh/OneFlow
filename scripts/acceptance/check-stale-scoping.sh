@@ -19,6 +19,10 @@ GATE="$ROOT/scripts/pre-merge-check.sh"
 # resolves above, so it works regardless of the caller's working directory.
 . "$HERE/fixtures.sh"
 
+# Cases use new_case_tmpdir() (fixtures.sh) for temp dirs; this one EXIT trap
+# cleans them all up on pass, on fail()'s exit, and on interrupt alike.
+trap cleanup_case_tmpdirs EXIT
+
 KNOWN_CASES="in-scope out-of-scope partial under-declared malformed indent-drift merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
 
 # Perturbation knob names. Referenced here and asserted ABSENT from the shipped
@@ -100,7 +104,7 @@ case_no_kill_switch() {
 case_partial() {
   # E4 / AC-4: paths on some evals but not all is the state a half-finished
   # backfill leaves behind. Scoping by a partial list is worse than not scoping.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx partial
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -116,7 +120,7 @@ case_partial() {
 case_malformed() {
   # E6 / AC-6: `paths: []` must read as not-declared. Read as "declared with an
   # empty scope" it matches nothing, i.e. never stale — the worst misreading.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx empty
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -144,7 +148,7 @@ case_indent_drift() {
   [ -n "$feature_scope_src" ] || fail indent-drift "could not extract feature_scope() from $GATE"
   eval "$feature_scope_src"
 
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
 
   # Space-drift variant: E1 canonically indented and declares paths; E2
   # drifted to a 3-space "- id:" / "criterion:" pair and declares none.
@@ -499,7 +503,7 @@ case_in_scope() {
   # E1 / AC-1: THE load-bearing case. Narrow scope must still catch a change
   # inside the declared union — a mechanism degraded into "never stale" passes
   # every other criterion in this guard.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx all
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -520,7 +524,7 @@ case_out_of_scope() {
   # what this case exists to prove — an out-of-declared-scope change alone
   # does not stale the feature — from the cross-check, which is a separate
   # concern exercised by case_under_declared / case_merged_halves / case_two_bases.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx narrow
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -545,16 +549,15 @@ case_suppression() {
   # E8 / AC-8: the pre-existing exclusions must survive refactoring the
   # function that applies them — for declared and undeclared features alike.
   for mode in all none; do
-    d="$(mktemp -d)"
+    d="$(new_case_tmpdir)"
     mk_fixture "$d" fx "$mode"
     vc="$(git -C "$d" rev-parse HEAD)"
     write_report "$d" fx "$vc"
     ( cd "$d" && echo x > docs/note.md && echo y >> _acceptance/fx/run-log.jsonl && git add -A && git commit -q -m docs )
     out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
     if printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale'; then
-      rm -rf "$d"; fail suppression "docs/_acceptance-only change staled a $mode-paths feature: $out"
+      fail suppression "docs/_acceptance-only change staled a $mode-paths feature: $out"
     fi
-    rm -rf "$d"
   done
   pass suppression
 }
@@ -562,7 +565,7 @@ case_suppression() {
 case_announce() {
   # E15 / AC-14: the only path that WEAKENS the gate had no output at all;
   # mk_committed_report_fixture dodges Task 6's cross-check. Undeclared (below) must still stay silent, or AC-3 breaks.
-  d="$(mktemp -d)"; d2="$(mktemp -d)"; trap 'rm -rf "$d" "$d2"' RETURN
+  d="$(new_case_tmpdir)"; d2="$(new_case_tmpdir)"
   base="$(mk_committed_report_fixture "$d" fx narrow)"
   ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift ); out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' || fail announce "no announcement for a granted narrow scope: $out"
@@ -577,7 +580,7 @@ case_announce() {
 case_under_declared() {
   # E5 / AC-5: complete paths that miss part of the COVERAGE SET, with the
   # feature's artifacts in the PR diff → refuse narrow scope and NAME the files.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx narrow
   base="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$base"
@@ -671,7 +674,7 @@ merged_halves_cd() {
 # the check uses a pathspec instead.
 assert_cross_check_isolation() {
   ah_label="$1"; ah_desc="$2"; ah_s1="$3"; ah_s2="$4"
-  ah_dir="$(mktemp -d)"
+  ah_dir="$(new_case_tmpdir)"
   mk_pair_fixture "$ah_dir" "$ah_s1" "$ah_s2"
   ah_vc="$(git -C "$ah_dir" rev-parse HEAD)"
   write_report "$ah_dir" "$ah_s1" "$ah_vc"
@@ -681,7 +684,6 @@ assert_cross_check_isolation() {
   ( cd "$ah_dir" && echo touched >> "_acceptance/$ah_s2/run-log.jsonl" && echo drift > src/uncovered/new.txt \
       && git add -A && git commit -q -m "pr touches $ah_s2 only" )
   ah_out="$(bash "$GATE" "$ah_dir" --base "$ah_base" 2>&1)"
-  rm -rf "$ah_dir"
   printf '%s\n' "$ah_out" | grep -qF "NOTE [$ah_s1]: declared eval paths" \
     && fail merged-halves "$ah_label ($ah_desc): touching only $ah_s2's artifacts tripped ${ah_s1}'s cross-check: $ah_out"
   printf '%s\n' "$ah_out" | grep -qF "OK [$ah_s1]" \
@@ -701,7 +703,7 @@ assert_cross_check_isolation() {
 # cross-check entirely and stale_files() scoped to a match-nothing glob
 # filters the real change straight out.
 merged_halves_g() {
-  h="$(mktemp -d)"
+  h="$(new_case_tmpdir)"
   mkdir -p "$h/src/covered" "$h/_acceptance"
   git_init_fixture_repo "$h"
   write_config "$h"
@@ -734,7 +736,6 @@ merged_halves_g() {
   # that applies regardless of whether the cross-check ran can catch this.
   ( cd "$h" && echo drift > src/covered/new.txt && git add -A && git commit -q -m "real code change" )
   outG2="$(bash "$GATE" "$h" --base "$hpr1" 2>&1)"
-  rm -rf "$h"
   printf '%s\n' "$outG2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail merged-halves "half G: match-nothing declaration hid a later real code change from staleness: $outG2"
   printf '%s\n' "$outG2" | grep -q 'src/covered/new.txt' \
@@ -743,7 +744,7 @@ merged_halves_g() {
 
 case_merged_halves() {
   # E7 / AC-7: cross-check fires only when the declaration is new or changed.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   merged_halves_ab
   merged_halves_cd
   assert_cross_check_isolation "half E" "regex-slug" a.b axb
@@ -757,7 +758,7 @@ case_two_bases() {
   # COVERAGE SET but NOT everything changed since verified_commit. Cross-checked
   # against the per-feature range instead, no honest declaration ever covers it
   # and narrow scope is refused for every merged feature forever.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  d="$(new_case_tmpdir)"
   mk_fixture "$d" fx narrow
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -780,7 +781,7 @@ case_two_bases() {
     && fail two-bases "narrow scope refused although the coverage set is covered: $out"
   pass two-bases
 }
-case_mutation() { run_mutation_case; } # E9/AC-9 — body in fixtures.sh (800-line cap)
+case_mutation() { run_mutation_case; } # E9/AC-9 — real body (incl. sed patches + assertions) is run_mutation_case() in fixtures.sh, moved there only for this file's 800-line cap
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
 
 CASE=""

@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
-# Fixture-construction helpers for scripts/acceptance/check-stale-scoping.sh.
+# Fixture-construction helpers for scripts/acceptance/check-stale-scoping.sh
+# — PLUS one full case body: run_mutation_case() (backing case_mutation / E9
+# / AC-9), complete with its perturbation sed patches and every assertion
+# `--case mutation` makes. That is not a thin wrapper hiding here — it is
+# the actual substance of the mutation case. It lives in this file, rather
+# than beside the other case_* functions in check-stale-scoping.sh, purely
+# because that file was already sitting at this repo's 800-line-per-file cap
+# (CLAUDE.md) when the mutation case was added. See case_mutation()'s own
+# comment in that file for the pointer back to here.
 #
-# Split out of that file purely to keep both under this repo's 800-line-per-
-# file convention (CLAUDE.md) — this file has no case_* entry points and no
-# CLI of its own; it is only ever sourced.
+# Everything else in this file — write_config, write_contract,
+# write_evals_yaml, mk_fixture, mk_pair_fixture, mk_committed_report_fixture,
+# run_gate_with_drift, and the new_case_tmpdir/cleanup_case_tmpdirs pair
+# below — is ordinary fixture construction with no case_* entry points and
+# no CLI of its own; it is only ever sourced.
 #
 # check-stale-scoping.sh sources this via `. "$HERE/fixtures.sh"`, where HERE
 # is resolved with `cd "$(dirname "$0")"` — that cd-based resolution already
@@ -14,6 +24,48 @@
 # file ends up doing the resolving.
 set -u
 FIXTURES_HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# ── Temp-directory tracking ─────────────────────────────────────────────────
+# Every case_* in check-stale-scoping.sh builds one or more throwaway fixture
+# repos under mktemp -d. fail() calls `exit`, which bypasses a per-function
+# `trap ... RETURN` — so any case that fails via fail() used to leave its
+# directories behind. Routing every `mktemp -d` through new_case_tmpdir()
+# instead records the path in a registry FILE (see below); check-stale-
+# scoping.sh installs ONE script-level `trap cleanup_case_tmpdirs EXIT`, so
+# cleanup runs on the pass path, the fail() exit path, and an interrupt
+# (INT/TERM, which also reach EXIT in bash) alike — regardless of which case
+# or helper created the dir.
+#
+# A registry FILE, not a shell variable, is required here: every call site is
+# `d="$(new_case_tmpdir)"`, and bash runs the right-hand side of `$(...)` in a
+# subshell — a subshell mutating a global variable does not propagate that
+# mutation back to the parent shell once the subshell exits, so an in-memory
+# list would silently discard every recorded path. Appending to a file is a
+# real filesystem write, which does survive the subshell exiting.
+CASE_TMPDIR_REGISTRY="$(mktemp)"
+
+# new_case_tmpdir — mktemp -d wrapper: creates the directory, appends it to
+# CASE_TMPDIR_REGISTRY for the caller's script-level EXIT trap, and echoes
+# the path — same call shape as `d="$(mktemp -d)"`, so every existing call
+# site is a drop-in `d="$(new_case_tmpdir)"` replacement.
+new_case_tmpdir() {
+  nct_dir="$(mktemp -d)"
+  printf '%s\n' "$nct_dir" >> "$CASE_TMPDIR_REGISTRY"
+  printf '%s\n' "$nct_dir"
+}
+
+# cleanup_case_tmpdirs — remove every directory new_case_tmpdir has recorded
+# so far, then the registry file itself. Meant to be installed once as
+# `trap cleanup_case_tmpdirs EXIT` by the caller script, not called directly
+# by any case.
+cleanup_case_tmpdirs() {
+  if [ -f "$CASE_TMPDIR_REGISTRY" ]; then
+    while IFS= read -r ctr_dir; do
+      [ -n "$ctr_dir" ] && rm -rf "$ctr_dir"
+    done < "$CASE_TMPDIR_REGISTRY"
+    rm -f "$CASE_TMPDIR_REGISTRY"
+  fi
+}
 
 # write_config <dir> — canonical _acceptance/config.yaml fixture content: the
 # same risk_tiers/executors/signoff shape every fixture in this guard needs.
@@ -157,10 +209,10 @@ mk_committed_report_fixture() {
 # confusion, trailing-slash anchoring).
 #
 # Deliberately does NOT bind its first parameter to a variable named "d" —
-# callers that already hold their own fixture dir in "$d" (with a
-# `trap 'rm -rf "$d"' RETURN` registered against it) would have that trap
-# silently retargeted to whatever this function's "d" is reassigned to,
-# since the trap's "$d" is expanded at RETURN time, not at registration time.
+# this file has no `local`, so every parameter assignment here is a plain
+# global. A caller that still holds its own fixture dir in "$d" after calling
+# this function would have that "$d" silently clobbered by this function's
+# own reassignment of it, corrupting any use of "$d" the caller makes later.
 mk_pair_fixture() {
   pf_dir="$1"; s1="$2"; s2="$3"
   mkdir -p "$pf_dir/_acceptance/$s1" "$pf_dir/_acceptance/$s2" "$pf_dir/src/covered" "$pf_dir/src/uncovered"
@@ -188,11 +240,10 @@ mk_pair_fixture() {
 # actually trying to observe. Echoes the gate's combined stdout+stderr.
 run_gate_with_drift() {
   rgw_gate="$1"; rgw_mode="$2"; rgw_drift="$3"
-  rgw_dir="$(mktemp -d)"
+  rgw_dir="$(new_case_tmpdir)"
   rgw_base="$(mk_committed_report_fixture "$rgw_dir" fx "$rgw_mode")"
   ( cd "$rgw_dir" && echo drift > "$rgw_drift" && git add -A && git commit -q -m drift )
   bash "$rgw_gate" "$rgw_dir" --base "$rgw_base" 2>&1
-  rm -rf "$rgw_dir"
 }
 
 # run_mutation_case — full body of check-stale-scoping.sh's case_mutation
@@ -209,9 +260,13 @@ run_gate_with_drift() {
 # sed whose target text has moved patches nothing, the "mutation" then runs
 # the unmodified gate, and the case would pass while proving nothing.
 run_mutation_case() {
-  work="$(mktemp -d)"; trap 'rm -rf "$work"' RETURN
+  work="$(new_case_tmpdir)"
   cp "$GATE" "$work/gate.sh"
-  cp "$(dirname "$GATE")/recheck-evidence.js" "$work/" 2>/dev/null || true
+  # recheck-evidence.js is deliberately NOT copied here: every fixture this
+  # case runs through write_config() sets `recheck: off` (fixtures.sh's
+  # write_config), and pre-merge-check.sh only invokes recheck-evidence.js
+  # when RECHECK_MODE is "strict" or "warn" — never "off". A copy would sit
+  # unused in $work on every run.
 
   # Baseline: the unpatched temp copy must reproduce the real gate's in-scope
   # catch, or nothing below proves anything about the mutations.
