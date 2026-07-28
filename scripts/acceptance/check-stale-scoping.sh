@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+# Guard for the paths-scoped staleness mechanism in pre-merge-check.sh.
+#
+# Lives under scripts/acceptance/ on purpose: risk_tiers.t1_skip_globs exempts
+# the gate tooling by EXACT path, so this file is gated and the gate applies to
+# the change that alters the gate (AC-11).
+#
+# One case per criterion, each with its own exit code. Nine criteria behind one
+# command would mean a case that was never implemented looks identical to a case
+# that passed.
+set -u
+HERE="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$HERE/../.." && pwd)"
+GATE="$ROOT/scripts/pre-merge-check.sh"
+
+KNOWN_CASES="in-scope out-of-scope partial under-declared malformed merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
+
+# Perturbation knob names. Referenced here and asserted ABSENT from the shipped
+# gate by the no-kill-switch case: an env var in the gate itself would be a
+# production kill switch (set it, every declared feature gets a match-nothing
+# scope, the gate exits clean).
+KNOB_NO_MATCH="STALE_SCOPE_FORCE_NO_MATCH"
+KNOB_ALWAYS_COMPLETE="STALE_SCOPE_FORCE_COMPLETE"
+
+pass() { echo "CASE $1: PASS"; }
+fail() { echo "CASE $1: FAIL $2"; exit 1; }
+
+# mk_fixture <dir> <slug> <paths-mode>
+# Builds a throwaway git repo with one signed feature. paths-mode:
+#   all      — every eval declares paths covering src/covered/**
+#   none     — no eval declares paths
+#   partial  — first eval declares, second does not
+#   empty    — every eval declares `paths: []`
+#   narrow   — every eval declares paths that do NOT cover src/uncovered/**
+mk_fixture() {
+  d="$1"; slug="$2"; mode="$3"
+  mkdir -p "$d/_acceptance/$slug" "$d/src/covered" "$d/src/uncovered" "$d/docs"
+  cat > "$d/_acceptance/config.yaml" <<CFG
+schema_version: 1
+enforcement: strict
+recheck: off
+executors:
+  test:
+    unit: "true"
+risk_tiers:
+  t1_skip_globs:
+    - "docs/**"
+    - "**/*.md"
+    - "_acceptance/**"
+  t3_paths:
+    - "src/critical/**"
+signoff:
+  required_for: [T2, T3]
+CFG
+  cat > "$d/_acceptance/$slug/contract.md" <<CON
+---
+schema_version: 1
+feature: fixture
+slug: $slug
+risk_tier: T2
+status: signed-off
+approved_by: Fixture
+---
+# Acceptance Contract: $slug
+CON
+  case "$mode" in
+    none)    p1=""; p2="" ;;
+    partial) p1='    paths: ["src/covered/**"]'; p2="" ;;
+    empty)   p1='    paths: []'; p2='    paths: []' ;;
+    narrow)  p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**"]' ;;
+    all|*)   p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**", "src/uncovered/**"]' ;;
+  esac
+  {
+    echo "schema_version: 1"
+    echo "feature_slug: $slug"
+    echo "evals:"
+    echo "  - id: E1"
+    echo "    criterion: AC-1"
+    echo "    executor: test"
+    echo "    cmd: config:executors.test.unit"
+    [ -n "$p1" ] && echo "$p1"
+    echo "  - id: E2"
+    echo "    criterion: AC-2"
+    echo "    executor: test"
+    echo "    cmd: config:executors.test.unit"
+    [ -n "$p2" ] && echo "$p2"
+  } > "$d/_acceptance/$slug/evals.yaml"
+  echo '{}' > "$d/_acceptance/$slug/run-log.jsonl"
+  (
+    cd "$d"
+    git init -q .
+    git config user.email fixture@example.com
+    git config user.name Fixture
+    echo seed > src/covered/seed.txt
+    echo seed > src/uncovered/seed.txt
+    git add -A
+    git commit -q -m "fixture base"
+  )
+}
+
+# write_report <dir> <slug> <verified_commit>
+write_report() {
+  cat > "$1/_acceptance/$2/evidence-report.md" <<REP
+---
+schema_version: 2
+feature_slug: $2
+verdict: PASS
+failed_evals: []
+verified_by: fixture
+enforcement_mode: strict
+bypass_used: false
+verified_commit: $3
+human_signoff: Fixture 2026-07-28
+---
+# Evidence Report: $2
+REP
+}
+
+case_case_completeness() {
+  # E10: a case that was never implemented must be loud, not absent. Every name
+  # in KNOWN_CASES must dispatch to a function that exists.
+  missing=""
+  for c in $KNOWN_CASES; do
+    fn="case_$(printf '%s' "$c" | tr '-' '_')"
+    command -v "$fn" >/dev/null 2>&1 || missing="$missing $c"
+  done
+  [ -z "$missing" ] || fail case-completeness "unimplemented cases:$missing"
+  # And an unknown case name must be rejected rather than silently succeeding.
+  if bash "$0" --case definitely-not-a-case >/dev/null 2>&1; then
+    fail case-completeness "unknown case name exited 0"
+  fi
+  pass case-completeness
+}
+
+case_guard_not_exempt() {
+  # E11 / AC-11: this guard's own path must match NO glob in t1_skip_globs, or
+  # the gate would exempt the change that alters the gate.
+  globs="$(sed -n '/^  t1_skip_globs:/,/^  [a-zA-Z0-9_-]*:/p' "$ROOT/_acceptance/config.yaml" \
+    | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
+    | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//")"
+  [ -n "$globs" ] || fail guard-not-exempt "could not read t1_skip_globs"
+  self="scripts/acceptance/check-stale-scoping.sh"
+  hit=""
+  while IFS= read -r g; do
+    [ -n "$g" ] || continue
+    case "$self" in $g) hit="$g" ;; esac
+  done <<GLOBS
+$globs
+GLOBS
+  [ -z "$hit" ] || fail guard-not-exempt "$self is exempt via \"$hit\""
+  # Sanity: the matcher must actually match something, or the loop above proves
+  # nothing. A path that IS exempt has to be seen as exempt.
+  known_exempt="scripts/pre-merge-check.sh"; hit2=""
+  while IFS= read -r g; do
+    [ -n "$g" ] || continue
+    case "$known_exempt" in $g) hit2="$g" ;; esac
+  done <<GLOBS2
+$globs
+GLOBS2
+  [ -n "$hit2" ] || fail guard-not-exempt "matcher matched nothing — check is vacuous"
+  pass guard-not-exempt
+}
+
+case_no_kill_switch() {
+  # E13 / AC-13: the perturbation knobs must exist only in this guard's temp
+  # copy, never in the shipped gate.
+  for k in "$KNOB_NO_MATCH" "$KNOB_ALWAYS_COMPLETE"; do
+    if grep -q "$k" "$GATE"; then
+      fail no-kill-switch "shipped gate references perturbation knob $k"
+    fi
+  done
+  pass no-kill-switch
+}
+
+usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
+
+CASE=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --case) [ $# -ge 2 ] || usage; CASE="$2"; shift 2 ;;
+    *) usage ;;
+  esac
+done
+[ -n "$CASE" ] || usage
+
+known=0
+for c in $KNOWN_CASES; do [ "$c" = "$CASE" ] && known=1; done
+[ "$known" -eq 1 ] || { echo "unknown case: $CASE" >&2; exit 2; }
+
+"case_$(printf '%s' "$CASE" | tr '-' '_')"
