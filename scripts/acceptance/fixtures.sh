@@ -136,6 +136,20 @@ human_signoff: Fixture 2026-07-28
 REP
 }
 
+# mk_committed_report_fixture <dir> <slug> <paths-mode> — mk_fixture() plus a
+# report committed in its OWN commit (prints the post-report commit SHA on
+# stdout, for the caller's --base). Any case that needs "this feature's
+# _acceptance/<slug>/ is NOT part of the PR diff" (case_out_of_scope's shape)
+# instead of re-deriving that three-step dance inline.
+mk_committed_report_fixture() {
+  mcf_dir="$1"; mcf_slug="$2"; mcf_mode="$3"
+  mk_fixture "$mcf_dir" "$mcf_slug" "$mcf_mode"
+  mcf_vc="$(git -C "$mcf_dir" rev-parse HEAD)"
+  write_report "$mcf_dir" "$mcf_slug" "$mcf_vc"
+  ( cd "$mcf_dir" && git add -A && git commit -q -m report )
+  git -C "$mcf_dir" rev-parse HEAD
+}
+
 # mk_pair_fixture <dir> <slug1> <slug2>
 # Two independently narrow-scoped features (paths cover src/covered/** only)
 # sharing ONE repo — for guards that assert one feature's cross-check cannot

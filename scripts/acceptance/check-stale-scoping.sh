@@ -559,6 +559,21 @@ case_suppression() {
   pass suppression
 }
 
+case_announce() {
+  # E15 / AC-14: the only path that WEAKENS the gate had no output at all;
+  # mk_committed_report_fixture dodges Task 6's cross-check. Undeclared (below) must still stay silent, or AC-3 breaks.
+  d="$(mktemp -d)"; d2="$(mktemp -d)"; trap 'rm -rf "$d" "$d2"' RETURN
+  base="$(mk_committed_report_fixture "$d" fx narrow)"
+  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift ); out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' || fail announce "no announcement for a granted narrow scope: $out"
+  printf '%s\n' "$out" | grep -q 'suppressed' || fail announce "announcement does not say the narrowing suppressed a whole-tree change: $out"
+  base2="$(mk_committed_report_fixture "$d2" fx none)"
+  ( cd "$d2" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
+  printf '%s\n' "$out2" | grep -q 'narrow staleness scope applied' && fail announce "undeclared feature produced an announcement: $out2"
+  pass announce
+}
+
 case_under_declared() {
   # E5 / AC-5: complete paths that miss part of the COVERAGE SET, with the
   # feature's artifacts in the PR diff → refuse narrow scope and NAME the files.

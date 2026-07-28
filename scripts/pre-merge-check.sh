@@ -560,6 +560,25 @@ GLOBS2
       scope=""
     fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"
+    # A granted narrow scope is the only path that WEAKENS the gate (it can
+    # only shrink the staleness set stale_files reports), and until now it was
+    # the only path with no output at all — leaving "this feature is genuinely
+    # unaffected" indistinguishable from "this feature's declaration has
+    # drifted and no longer names the code this PR touched". Announce it, and
+    # say explicitly when the narrowing suppressed a change whole-tree would
+    # have reported. Every refusal branch above already clears scope back to
+    # "", so this only fires when scope survived all three checks; an
+    # undeclared feature never sets scope in the first place and stays silent
+    # (the golden baseline pins this for the seven undeclared features).
+    if [ -n "$scope" ]; then
+      wide="$(stale_files "$ROOT" "$vc")"
+      n_wide="$(printf '%s' "$wide" | grep -c . || true)"
+      n_narrow="$(printf '%s' "$stale" | grep -c . || true)"
+      suppressed=$((n_wide - n_narrow))
+      msg="NOTE [$slug]: narrow staleness scope applied ($(printf '%s' "$scope" | tr '\n' ' ' | sed 's/[[:space:]]*$//'))"
+      [ "$suppressed" -gt 0 ] && msg="$msg — suppressed $suppressed whole-tree change(s)"
+      echo "$msg"
+    fi
     if [ -n "$stale" ]; then
       echo "VIOLATION [$slug]: evidence is stale — code changed after verify (verified_commit $vc); re-run verify before merge. Changed:"
       printf '%s\n' "$stale" | head -10 | sed 's/^/    /'
