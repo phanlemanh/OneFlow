@@ -359,6 +359,69 @@ YAML
   printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
     || fail indent-drift "expected clean glob 'src/covered/**' missing from union: $out"
 
+  # Bracket-class glob: a glob containing `]` (from a character class like
+  # `foo[0-9]`) must survive intact — this is the defect that shipped four
+  # rounds in a row: `[^]]*` (or any bracket-splitting extractor) stops at the
+  # FIRST `]`, truncating the glob and dropping every sibling after it.
+  cat > "$d/bracket-glob.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/foo[0-9]/**", "src/bar/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/bracket-glob.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "bracket-class glob declaration was refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/foo\[0-9\]/\*\*' \
+    || fail indent-drift "bracket-class glob truncated or missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/bar/\*\*' \
+    || fail indent-drift "sibling glob after a bracket-class glob was dropped from union: $out"
+
+  # Single-quoted items: not the accepted grammar — refused, not tolerated.
+  cat > "$d/single-quoted.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ['src/a/**']
+YAML
+  out="$(feature_scope "$d/single-quoted.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "single-quoted paths items were accepted — feature_scope returned 0 (globs: $out)"
+
+  # Nested array: not the accepted grammar — refused, not tolerated.
+  cat > "$d/nested-array.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: [["a"], "b"]
+YAML
+  out="$(feature_scope "$d/nested-array.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "nested array paths was accepted — feature_scope returned 0 (globs: $out)"
+
+  # Trailing non-comment suffix: anything after `]` that is not a `#`
+  # comment must be refused, not silently ignored.
+  cat > "$d/trailing-junk.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["a"] junk
+YAML
+  out="$(feature_scope "$d/trailing-junk.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "trailing non-comment suffix after ']' was accepted — feature_scope returned 0 (globs: $out)"
+
   pass indent-drift
 }
 

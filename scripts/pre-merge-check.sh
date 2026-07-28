@@ -129,13 +129,25 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # back to whole-tree rather than to a narrower scope.
   #
   # This is a grep-based parser, not a YAML parser — it cannot afford to guess.
-  # It recognizes exactly one declaration shape: a single physical line of the
-  # form `<EI>  paths: [...]` whose opening AND closing bracket both land on
-  # that same line. Anything else — a drifted indent, a block scalar whose
-  # prose can contain anything, a bracket array whose `]` is on a later line,
-  # an unclosed `[` — is refused, not guessed at: returns non-zero rather
-  # than silently tolerating it. A wider whole-tree fallback is always safe,
-  # a narrower wrong scope never is.
+  # Four earlier rounds each tried to enumerate the bad forms one at a time
+  # (multi-line arrays, then indent drift, then fixed-indent false matches,
+  # then multi-line paths dropping globs) and each round left another
+  # mis-reading of the SAME construct standing, because "reject the forms I
+  # thought of" can never enumerate every form. This version instead accepts
+  # exactly ONE good form and refuses everything else by construction:
+  #
+  #   <EI>  paths: ["glob", "glob", ...][optional trailing # comment]
+  #
+  # anchored at both ends of the physical line, where EI is the derived
+  # eval-item indent and each glob is a double-quoted string with no `"`
+  # inside it. A `]`, `,`, or `#` inside a quoted glob is harmless BECAUSE the
+  # whole line matched this grammar first — only then is the true closing `]`
+  # known, and globs are pulled out as quoted spans, never by splitting on `,`
+  # or `]`. Everything else is refused, not guessed at: multi-line arrays,
+  # single- or un-quoted items, nested arrays, `paths: []`, `paths:` with no
+  # value, block scalars, or any trailing content after `]` that is not a
+  # `#` comment. A wider whole-tree fallback is always safe, a narrower wrong
+  # scope never is.
   f="$1"
   [ -f "$f" ] || return 1
 
@@ -165,38 +177,57 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
     return 1
   fi
 
-  # Declarations: the eval-key indentation (EI plus two spaces), the
-  # bracket-array form, AND the closing bracket on the SAME physical line —
-  # one pattern drives both the counter and the extractor below, so they
-  # cannot disagree. Requiring the closing `]` here is what rules out a
-  # multi-line array: `paths: [` opening a line with the globs continuing on
-  # following lines matches the counter's old prefix-only pattern (so it used
-  # to count toward completeness) while the line-based extractor finds no
-  # globs after the `[` on that one line (so it contributed none) — a false
-  # "complete" reading that silently dropped every glob the multi-line eval
-  # declared. Requiring `]` on the same line makes such a line fail to match
-  # at all, so it falls short of n_evals and the function refuses instead. A
-  # `paths:` whose value is not a complete single-line bracket array (e.g.
-  # `paths: >`) is not a declaration at all: it can never count toward
-  # completeness while contributing zero globs. A stray feature-level
-  # top-level `paths:` key (indented differently, not under any eval) is
-  # excluded by the same exact-indentation anchor.
-  paths_re="^${ei}  paths:[[:space:]]*\[[^]]*\]"
-  n_paths="$(grep -c "$paths_re" "$f" 2>/dev/null || true)"
+  # Declarations: ONE pattern, anchored at both `^` and `$` of the physical
+  # line, drives both the counter and the extractor below, so they cannot
+  # disagree. Requiring the closing `]` (and nothing but an optional comment)
+  # on the SAME line is what rules out a multi-line array — a `paths: [`
+  # opening a line whose globs continue on following lines simply fails to
+  # match this pattern at all, so it falls short of n_evals and the function
+  # refuses. Each item must be `"..."` (double-quoted, no embedded `"`); a
+  # single-quoted, unquoted, or nested-array item likewise fails to match. A
+  # `paths:` whose value is not exactly this shape (e.g. `paths: []`,
+  # `paths:` with no value, `paths: >`) is not a declaration at all: it can
+  # never count toward completeness while contributing zero globs. A stray
+  # feature-level top-level `paths:` key (indented differently, not under any
+  # eval) is excluded by the same exact-indentation anchor.
+  paths_re="^${ei}  paths:[[:space:]]*\\[\"[^\"]*\"(,[[:space:]]*\"[^\"]*\")*\\][[:space:]]*(#.*)?\$"
+  n_paths="$(grep -E -c "$paths_re" "$f" 2>/dev/null || true)"
   n_paths="${n_paths:-0}"
   [ "$n_evals" -eq "$n_paths" ] || return 1
 
-  # Extract via the SAME pattern used for the count, using `grep -o` so only
-  # the matched declaration text (through the closing `]`) is captured —
-  # anything past `]` on the line, such as a trailing `# comment`, falls
-  # outside the match and is never fed into the glob list.
-  globs="$(grep -o "$paths_re" "$f" \
-    | sed -e "s/^${ei}  paths:[[:space:]]*\[//" -e 's/\]$//' \
-    | tr -d '"' | tr ',' '\n' \
+  # Extract by pulling the quoted spans out of each matched line's array
+  # body, never by splitting on `,` or `]` — those characters are meaningless
+  # once they can appear inside a glob. Because the whole line already proved
+  # it matches the grammar above, the prefix up to the array's `[` and the
+  # suffix from the array's `]` (plus optional trailing comment) can be
+  # stripped safely, leaving only the array body to scan for `"..."` spans.
+  decls="$(grep -E "$paths_re" "$f" 2>/dev/null || true)"
+  globs=""
+  n_lines=0
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    n_lines=$((n_lines + 1))
+    body="$(printf '%s\n' "$line" \
+      | sed -E "s/^${ei}  paths:[[:space:]]*\[//" \
+      | sed -E 's/\][[:space:]]*(#.*)?$//')"
+    line_globs="$(printf '%s\n' "$body" | grep -o '"[^"]*"' | sed -e 's/^"//' -e 's/"$//')"
+    # The grammar guarantees at least one item per matched line; if
+    # extraction still comes up empty, the counter and extractor have
+    # silently diverged — refuse rather than emit a union short of the truth.
+    [ -n "$line_globs" ] || return 1
+    globs="${globs}${line_globs}
+"
+  done <<DECLS
+$decls
+DECLS
+  [ "$n_lines" -eq "$n_paths" ] || return 1
+
+  globs="$(printf '%s\n' "$globs" \
     | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
     | grep -v '^$' | sort -u)"
-  # An empty array parses to zero globs. A zero-glob scope matches nothing,
-  # which would read as "never stale" — treat it as not declared.
+  # An empty array parses to zero globs (never matched by this grammar, but
+  # kept as a last-resort guard). A zero-glob scope matches nothing, which
+  # would read as "never stale" — treat it as not declared.
   [ -n "$globs" ] || return 1
   printf '%s\n' "$globs"
   return 0
