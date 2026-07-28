@@ -127,23 +127,54 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # carry-forward performance knob, where under-declaring is safe; here it gates
   # correctness, so anything less than a complete, parseable declaration falls
   # back to whole-tree rather than to a narrower scope.
+  #
+  # This is a grep-based parser, not a YAML parser — it cannot afford to guess.
+  # Ambiguity (a drifted indent, a block scalar whose prose can contain
+  # anything, ANY declaration this file cannot read cleanly) returns non-zero
+  # rather than silently tolerating it: a wider whole-tree fallback is always
+  # safe, a narrower wrong scope never is.
   f="$1"
   [ -f "$f" ] || return 1
-  # Leading whitespace matched as a CLASS ([[:space:]]*), not a fixed 2/4-space
-  # literal: a drifted indent (odd space count, or a literal tab) must still be
-  # seen by BOTH counters. Matching only one of them would let n_evals and
-  # n_paths coincide by accident and return 0 ("complete") while an eval with
-  # no paths at all goes uncounted on both sides. Over-counting in either
-  # direction only trips the n_evals != n_paths guard below (rc=1, whole-tree
-  # fallback) — never a narrower scope, which is the one outcome that must
-  # never occur here.
-  n_evals="$(grep -c '^[[:space:]]*- id:' "$f" 2>/dev/null || true)"
-  n_paths="$(grep -c '^[[:space:]]*paths:' "$f" 2>/dev/null || true)"
-  n_evals="${n_evals:-0}"
-  n_paths="${n_paths:-0}"
+
+  # Derive the eval-item indentation from the FIRST "- id:" line, LITERALLY
+  # (the exact leading whitespace captured, not a whitespace class) — every
+  # pattern below is anchored to this exact string.
+  ei="$(grep -m1 '^[[:space:]]*- id:' "$f" 2>/dev/null | sed 's/- id:.*$//')"
+
+  # Indentation consistency: every "- id:" line (loosely matched, any leading
+  # whitespace) must equal EI exactly. If some drift to a different
+  # indentation (odd space count, or a literal tab alongside spaces), this
+  # parser cannot read the file reliably — return non-zero rather than guess.
+  loose_n="$(grep -c '^[[:space:]]*- id:' "$f" 2>/dev/null || true)"
+  exact_n="$(grep -c "^${ei}- id:" "$f" 2>/dev/null || true)"
+  loose_n="${loose_n:-0}"
+  exact_n="${exact_n:-0}"
+  [ "$loose_n" -eq "$exact_n" ] || return 1
+
+  n_evals="$exact_n"
   [ "$n_evals" -gt 0 ] || return 1
+
+  # This parser cannot read YAML block scalars. A `|`/`>` indicator on ANY
+  # eval-level key (EI plus two spaces) means the following lines are opaque
+  # prose that can look like anything, including a decoy `paths:` line —
+  # refuse rather than let that prose feed either counter below.
+  if grep -q "^${ei}  [a-zA-Z_]*:[[:space:]]*[|>]" "$f" 2>/dev/null; then
+    return 1
+  fi
+
+  # Declarations: the eval-key indentation (EI plus two spaces) AND the
+  # bracket-array form — one pattern drives both the counter and the
+  # extractor below, so they cannot disagree. A `paths:` whose value is not a
+  # bracket array (e.g. `paths: >`) is not a declaration at all: it can never
+  # count toward completeness while contributing zero globs. A stray
+  # feature-level top-level `paths:` key (indented differently, not under any
+  # eval) is excluded by the same exact-indentation anchor.
+  paths_re="^${ei}  paths:[[:space:]]*\["
+  n_paths="$(grep -c "$paths_re" "$f" 2>/dev/null || true)"
+  n_paths="${n_paths:-0}"
   [ "$n_evals" -eq "$n_paths" ] || return 1
-  globs="$(sed -n 's/^[[:space:]]*paths:[[:space:]]*\[//p' "$f" \
+
+  globs="$(sed -n "s/$paths_re//p" "$f" \
     | tr -d '"]' | tr ',' '\n' \
     | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
     | grep -v '^$' | sort -u)"

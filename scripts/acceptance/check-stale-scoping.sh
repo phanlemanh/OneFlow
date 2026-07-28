@@ -247,6 +247,48 @@ YAML
   [ "$rc" -ne 0 ] \
     || fail indent-drift "tab-drifted eval was invisible to both counters — feature_scope returned 0 (globs: $out)"
 
+  # Block-scalar decoy: E2 declares no `paths`, but its `expected: |` block
+  # scalar contains a prose line that reads "paths: [...]" at the SAME
+  # indentation an eval-level declaration would use. A parser that counts
+  # `paths:` occurrences without excluding block-scalar bodies mistakes that
+  # prose for a declaration and folds its glob into the union.
+  cat > "$d/block-scalar-decoy.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    expected: |
+    exit 0; decoy prose at eval-key indentation:
+    paths: ["src/decoy/**"]
+    must not be read as a declaration
+YAML
+  out="$(feature_scope "$d/block-scalar-decoy.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "block-scalar decoy 'paths:' prose was counted as a declaration — feature_scope returned 0 (globs: $out)"
+
+  # Top-level-key decoy: a feature-level `paths:` key that is a sibling of
+  # `evals:` (not under any eval item) must not be counted toward
+  # completeness or joined into the union — E2 below declares no `paths` of
+  # its own.
+  cat > "$d/toplevel-key-decoy.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+paths: ["src/decoy/**"]
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+YAML
+  out="$(feature_scope "$d/toplevel-key-decoy.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "feature-level top-level 'paths:' key was counted as an eval declaration — feature_scope returned 0 (globs: $out)"
+
   pass indent-drift
 }
 
