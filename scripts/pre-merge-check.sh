@@ -296,6 +296,37 @@ scope_gaps() { # <root> <base_sha> <scope-globs> — coverage-set files the unio
   done
 }
 
+scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
+  # tracked by git matches the union; rc 1 otherwise. A declared union that
+  # matches NO file in the repository is a typo or a stale/renamed path, not a
+  # scope — and unlike scope_gaps() above (which only runs the moment this
+  # feature's own _acceptance/<slug>/ changes, and can pass VACUOUSLY when
+  # that PR's coverage set happens to be empty), this must hold independent of
+  # any PR diff: a match-nothing glob accepted once at declaration time would
+  # otherwise filter out every real change forever, on every later PR, silently.
+  #
+  # Uses match_globs() — the same `case`-pattern matcher scope_gaps()/
+  # stale_files() use — rather than handing globs to `git ls-files` as
+  # pathspecs, whose `*` semantics differ from shell `case` globbing.
+  #
+  # Any doubt (git missing, not a repo, ls-files unusable) is "cannot verify"
+  # and returns rc 1 — refuse narrow scope, same as every other doubt in this
+  # function. Stops at the first match rather than scanning every tracked file.
+  command -v git >/dev/null 2>&1 || return 1
+  git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
+  git -C "$1" ls-files 2>/dev/null | {
+    hit=1
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      if match_globs "$f" "$2"; then
+        hit=0
+        break
+      fi
+    done
+    exit "$hit"
+  }
+}
+
 stale_files() { # <root> <commit> [scope-globs] — gated files changed since
   # <commit> (incl. working tree). Gate artifacts (_acceptance/) and
   # t1_skip_globs never count. With a non-empty third argument, only files
@@ -508,6 +539,25 @@ GLOBS2
           scope=""
         fi
       fi
+    fi
+    # A declared union that matches no tracked file at all is a typo or a
+    # rotted/renamed path, not a scope. This is deliberately OUTSIDE the
+    # cross-check branch above and applies whenever scope is still non-empty
+    # here, regardless of whether that cross-check ran: the cross-check only
+    # fires the moment this feature's own _acceptance/<slug>/ is part of the
+    # PR diff, i.e. when the declaration is new or changed. A PR that
+    # introduces a match-nothing declaration while touching only its own gate
+    # artifacts has an EMPTY coverage set, so the cross-check passes
+    # vacuously and narrow scope is granted; every later PR that changes real
+    # code without touching this feature's _acceptance/<slug>/ then skips the
+    # cross-check entirely, and stale_files scoped to a match-nothing glob
+    # filters out every real change forever. Governing rule: narrow scope is
+    # never granted on a guess — a scope that provably matches nothing
+    # tracked in the repo is exactly that. Silent for an undeclared feature:
+    # scope is already empty there, so this guard never fires (AC-3).
+    if [ -n "$scope" ] && ! scope_has_any_match "$ROOT" "$scope"; then
+      echo "NOTE [$slug]: declared eval paths match no tracked file in the repository — treating the declaration as a typo/stale path; narrow staleness scope refused, whole-tree applied"
+      scope=""
     fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"
     if [ -n "$stale" ]; then

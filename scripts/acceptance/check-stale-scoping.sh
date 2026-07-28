@@ -682,6 +682,12 @@ case_out_of_scope() {
     && fail out-of-scope "out-of-union change still staled the feature: $out"
   printf '%s\n' "$out" | grep -q 'OK \[fx\]' \
     || fail out-of-scope "feature not reported OK: $out"
+  # No over-refusal (Task 6): "narrow" mode's paths ("src/covered/**") DO
+  # match a tracked file (src/covered/seed.txt, seeded by mk_fixture) — the
+  # match-nothing guard must not misfire on a legitimately-matching
+  # declaration and fall back to whole-tree scope.
+  printf '%s\n' "$out" | grep -q 'match no tracked file' \
+    && fail out-of-scope "match-nothing guard wrongly refused a declaration whose globs DO match a tracked file: $out"
   pass out-of-scope
 }
 
@@ -820,6 +826,102 @@ case_merged_halves() {
     || fail merged-halves "trailing-slash: fx was not reported OK despite its own artifacts being untouched: $outF"
   printf '%s\n' "$outF" | grep -q 'NOTE \[fx-extra\]: declared eval paths' \
     || fail merged-halves "trailing-slash: fx-extra's own cross-check did not run: $outF"
+
+  # Half G / vacuous cross-check (Task 6 finding): a declaration whose globs
+  # match NO tracked file must never earn narrow scope permanently just
+  # because the PR that introduces it happens to touch nothing but its own
+  # _acceptance/<slug>/ — an empty coverage set makes scope_gaps() pass
+  # VACUOUSLY (nothing in the diff to flag as "not covered"), so without a
+  # separate match-nothing check the declaration is accepted once and then
+  # silently hides every future change forever, because every later PR that
+  # changes real code without touching _acceptance/<slug>/ skips the
+  # cross-check entirely and stale_files() scoped to a match-nothing glob
+  # filters the real change straight out.
+  h="$(mktemp -d)"
+  mkdir -p "$h/src/covered"
+  (
+    cd "$h"
+    git init -q .
+    git config user.email fixture@example.com
+    git config user.name Fixture
+    mkdir -p _acceptance
+    cat > _acceptance/config.yaml <<CFG
+schema_version: 1
+enforcement: strict
+recheck: off
+executors:
+  test:
+    unit: "true"
+risk_tiers:
+  t1_skip_globs:
+    - "docs/**"
+    - "**/*.md"
+    - "_acceptance/**"
+  t3_paths:
+    - "src/critical/**"
+signoff:
+  required_for: [T2, T3]
+CFG
+    echo seed > src/covered/seed.txt
+    git add -A
+    git commit -q -m "repo base, no feature yet"
+  )
+  hbase0="$(git -C "$h" rev-parse HEAD)"
+  mkdir -p "$h/_acceptance/fx"
+  cat > "$h/_acceptance/fx/contract.md" <<CON
+---
+schema_version: 1
+feature: fixture
+slug: fx
+risk_tier: T2
+status: signed-off
+approved_by: Fixture
+---
+# Acceptance Contract: fx
+CON
+  # Match-nothing declaration: "nonexistent-dir/**" cannot match anything
+  # tracked in this fixture repo (only src/covered/** and _acceptance/** exist).
+  cat > "$h/_acceptance/fx/evals.yaml" <<YAML
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit
+    paths: ["nonexistent-dir/**"]
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit
+    paths: ["nonexistent-dir/**"]
+YAML
+  echo '{}' > "$h/_acceptance/fx/run-log.jsonl"
+  ( cd "$h" && git add -A && git commit -q -m "introduce fx with match-nothing paths" )
+  hvc="$(git -C "$h" rev-parse HEAD)"
+  write_report "$h" fx "$hvc"
+  ( cd "$h" && git add -A && git commit -q -m "evidence report" )
+  hpr1="$(git -C "$h" rev-parse HEAD)"
+
+  # PR1: base is BEFORE fx existed at all — the coverage set (hbase0...HEAD)
+  # is only _acceptance/fx/* (excluded from scope_gaps by construction), so
+  # it is empty and the cross-check passes vacuously. This mirrors the
+  # reported repro exactly: "a PR touching only the feature's own
+  # _acceptance/<slug>/ → OK [fx]".
+  outG1="$(bash "$GATE" "$h" --base "$hbase0" 2>&1)"
+  printf '%s\n' "$outG1" | grep -q 'OK \[fx\]' \
+    || fail merged-halves "vacuous-pass setup: PR introducing a match-nothing declaration was not reported OK: $outG1"
+
+  # PR2: real code change, feature artifacts UNTOUCHED — the cross-check does
+  # not even run here (declaration unchanged since hpr1), so only a guard
+  # that applies regardless of whether the cross-check ran can catch this.
+  ( cd "$h" && echo drift > src/covered/new.txt && git add -A && git commit -q -m "real code change" )
+  outG2="$(bash "$GATE" "$h" --base "$hpr1" 2>&1)"
+  rm -rf "$h"
+  printf '%s\n' "$outG2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail merged-halves "match-nothing declaration hid a later real code change from staleness: $outG2"
+  printf '%s\n' "$outG2" | grep -q 'src/covered/new.txt' \
+    || fail merged-halves "match-nothing declaration: stale file not named: $outG2"
 
   pass merged-halves
 }
