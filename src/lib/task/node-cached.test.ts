@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { mapSSEStatusToTaskStatus, NodeStatus } from "@/constants/task-status";
 import { mapEngineEvent } from "@/lib/task/engine-events";
@@ -18,7 +18,18 @@ import type { SSEMessage } from "@/types/sse";
  */
 
 const FINGERPRINT = "f".repeat(64);
-const THIS_FILE = "src/lib/task/node-cached.test.ts";
+
+// Resolved from this file, not from cwd: a cwd-relative walk makes the switch
+// guard below pass or throw depending on where vitest was invoked from.
+const SRC_ROOT = resolve(import.meta.dirname, "../..");
+const THIS_FILE = join(SRC_ROOT, "lib/task/node-cached.test.ts");
+/** Every switch that must keep NODE_COMPLETED and NODE_CACHED together. */
+const KNOWN_SWITCH_SITES = [
+    join(SRC_ROOT, "components/workspace/execution-status-line.tsx"),
+    join(SRC_ROOT, "constants/task-status.ts"),
+    join(SRC_ROOT, "hooks/use-workflow-execution.ts"),
+    join(SRC_ROOT, "hooks/use-workflow-recovery.ts"),
+].sort();
 
 function engineEvent(): Record<string, unknown> {
     return {
@@ -82,7 +93,7 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
                     files.push(p);
             }
         };
-        walk("src");
+        walk(SRC_ROOT);
 
         const consumers = files.filter((f) =>
             readFileSync(f, "utf-8").includes(
@@ -99,9 +110,13 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
 
         // Guard the guard: if the switches are ever rewritten into a shape this
         // string match misses, `consumers` empties out and the check above
-        // passes vacuously. Four sites today: the three SSE switches plus
-        // `mapSSEStatusToTaskStatus`.
-        expect(consumers.length).toBe(4);
+        // passes vacuously. Named sites rather than a count — a bare
+        // `toBe(<n>)` is the `expected_count` shape CLAUDE.md calls out as a
+        // snapshot that reddens unrelated PRs, and adding a fifth consumer is
+        // exactly the case this test should welcome, not block.
+        expect(consumers.sort()).toEqual(
+            expect.arrayContaining(KNOWN_SWITCH_SITES),
+        );
     });
 
     it("an unrecognized event type maps to nothing and does not throw", () => {

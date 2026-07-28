@@ -1,31 +1,16 @@
-"""Subprocess helpers shared across the engine.
+"""Re-export of the package-level subprocess helpers.
 
-Force UTF-8 I/O on spawned child processes (plugin entries, pip, git). On a
-non-UTF-8 system locale — e.g. Windows Simplified-Chinese, whose ANSI code page
-is GBK / cp936 — a child Python's stdout/stderr default to that locale encoding,
-so printing a non-ASCII character such as the "✓" (U+2713) many libraries emit
-while downloading model weights crashes with
-``UnicodeEncodeError: 'gbk' codec can't encode character``.
+The helper moved up to ``tongflow._subproc`` because ``tongflow.scan`` needs it
+too, and ``tongflow.engine.plugins`` imports ``tongflow.scan`` — so a scanner
+that reached into the engine for it closed an import cycle. That cycle only
+stayed invisible because ``tongflow/__init__`` happens to pull the engine in
+first; trimming or reordering that file broke the whole plugin scanner.
 
-``PYTHONUTF8=1`` enables Python's UTF-8 Mode (3.7+), which makes the standard
-streams and the default text encoding UTF-8 regardless of locale;
-``PYTHONIOENCODING`` is a belt-and-suspenders fallback for older interpreters.
+This shim keeps ``from ._subproc import utf8_env`` working for engine modules.
 """
 
 from __future__ import annotations
 
-import os
-from typing import Optional
+from .._subproc import utf8_env
 
-
-def utf8_env(base: Optional[dict[str, str]] = None) -> dict[str, str]:
-    """Return an environment dict with Python UTF-8 mode forced on.
-
-    Copies ``base`` (or the current process environment) and sets the UTF-8
-    knobs. Use for every spawned Python/pip subprocess so a non-UTF-8 locale
-    does not break non-ASCII output.
-    """
-    env = dict(base) if base is not None else os.environ.copy()
-    env["PYTHONUTF8"] = "1"
-    env["PYTHONIOENCODING"] = "utf-8"
-    return env
+__all__ = ["utf8_env"]

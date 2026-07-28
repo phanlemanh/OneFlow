@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from .abi import load_abi
-from .engine._subproc import utf8_env
+from ._subproc import utf8_env
 from ._ast_utils import (
     DEFAULT_SLOTS_CONST,
     SLOT_MODELS_CONST,

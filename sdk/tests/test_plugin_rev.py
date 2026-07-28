@@ -7,12 +7,47 @@ not would serve the previous version's output forever.
 
 from __future__ import annotations
 
+import ast
 import subprocess
 from pathlib import Path
 
 import pytest
 
+import tongflow.scan
 from tongflow.scan import read_plugin_rev
+
+
+def test_scan_does_not_import_from_the_engine_package() -> None:
+    """`scan` is the lower layer; reaching up into `engine` closes a cycle.
+
+    `tongflow.engine.plugins` imports `tongflow.scan`, so an import in the
+    other direction makes the two mutually dependent. Python does not
+    necessarily complain: today `tongflow/__init__` pulls the engine in before
+    anything reaches `.scan`, which masks it entirely — right up until someone
+    trims or reorders that file, at which point `python -m tongflow`,
+    `scan_manifest` and `pnpm verify:plugins` all die with a partially
+    initialized module. An import-time assertion is the only kind that catches
+    this, because the working import order is what hides it.
+    """
+    tree = ast.parse(Path(tongflow.scan.__file__).read_text(encoding="utf-8"))
+    reaching_up = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ImportFrom)
+        and (node.module or "").split(".")[0] == "engine"
+        and node.level > 0
+    ] + [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        and any(a.name.startswith("tongflow.engine") for a in node.names)
+    ]
+
+    assert reaching_up == [], (
+        "tongflow/scan.py imports from tongflow.engine, which imports "
+        "tongflow.scan — move the shared helper to a package-level module "
+        "instead (see tongflow/_subproc.py)"
+    )
 
 
 def _git_repo(tmp_path: Path, name: str = "oneflow-fixture-plugin") -> tuple[Path, str]:
