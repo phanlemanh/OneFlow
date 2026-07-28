@@ -13,6 +13,12 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 GATE="$ROOT/scripts/pre-merge-check.sh"
 
+# Fixture-construction helpers (mk_fixture, write_report, mk_pair_fixture,
+# etc.) live in a sibling file purely to keep this one under the repo's
+# 800-line convention. Sourced via the same cd-based HERE this file already
+# resolves above, so it works regardless of the caller's working directory.
+. "$HERE/fixtures.sh"
+
 KNOWN_CASES="in-scope out-of-scope partial under-declared malformed indent-drift merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
 
 # Perturbation knob names. Referenced here and asserted ABSENT from the shipped
@@ -24,169 +30,6 @@ KNOB_ALWAYS_COMPLETE="STALE_SCOPE_FORCE_COMPLETE"
 
 pass() { echo "CASE $1: PASS"; }
 fail() { echo "CASE $1: FAIL $2"; exit 1; }
-
-# mk_fixture <dir> <slug> <paths-mode>
-# Builds a throwaway git repo with one signed feature. paths-mode:
-#   all      — every eval declares paths covering src/covered/**
-#   none     — no eval declares paths
-#   partial  — first eval declares, second does not
-#   empty    — every eval declares `paths: []`
-#   narrow   — every eval declares paths that do NOT cover src/uncovered/**
-mk_fixture() {
-  d="$1"; slug="$2"; mode="$3"
-  mkdir -p "$d/_acceptance/$slug" "$d/src/covered" "$d/src/uncovered" "$d/docs"
-  cat > "$d/_acceptance/config.yaml" <<CFG
-schema_version: 1
-enforcement: strict
-recheck: off
-executors:
-  test:
-    unit: "true"
-risk_tiers:
-  t1_skip_globs:
-    - "docs/**"
-    - "**/*.md"
-    - "_acceptance/**"
-  t3_paths:
-    - "src/critical/**"
-signoff:
-  required_for: [T2, T3]
-CFG
-  cat > "$d/_acceptance/$slug/contract.md" <<CON
----
-schema_version: 1
-feature: fixture
-slug: $slug
-risk_tier: T2
-status: signed-off
-approved_by: Fixture
----
-# Acceptance Contract: $slug
-CON
-  case "$mode" in
-    none)    p1=""; p2="" ;;
-    partial) p1='    paths: ["src/covered/**"]'; p2="" ;;
-    empty)   p1='    paths: []'; p2='    paths: []' ;;
-    narrow)  p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**"]' ;;
-    all|*)   p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**", "src/uncovered/**"]' ;;
-  esac
-  {
-    echo "schema_version: 1"
-    echo "feature_slug: $slug"
-    echo "evals:"
-    echo "  - id: E1"
-    echo "    criterion: AC-1"
-    echo "    executor: test"
-    echo "    cmd: config:executors.test.unit"
-    [ -n "$p1" ] && echo "$p1"
-    echo "  - id: E2"
-    echo "    criterion: AC-2"
-    echo "    executor: test"
-    echo "    cmd: config:executors.test.unit"
-    [ -n "$p2" ] && echo "$p2"
-  } > "$d/_acceptance/$slug/evals.yaml"
-  echo '{}' > "$d/_acceptance/$slug/run-log.jsonl"
-  (
-    cd "$d"
-    git init -q .
-    git config user.email fixture@example.com
-    git config user.name Fixture
-    echo seed > src/covered/seed.txt
-    echo seed > src/uncovered/seed.txt
-    git add -A
-    git commit -q -m "fixture base"
-  )
-}
-
-# write_report <dir> <slug> <verified_commit>
-write_report() {
-  cat > "$1/_acceptance/$2/evidence-report.md" <<REP
----
-schema_version: 2
-feature_slug: $2
-verdict: PASS
-failed_evals: []
-verified_by: fixture
-enforcement_mode: strict
-bypass_used: false
-verified_commit: $3
-human_signoff: Fixture 2026-07-28
----
-# Evidence Report: $2
-REP
-}
-
-# mk_pair_fixture <dir> <slug1> <slug2>
-# Two independently narrow-scoped features (paths cover src/covered/** only)
-# sharing ONE repo — for guards that assert one feature's cross-check cannot
-# be tripped by a change confined to the OTHER feature's artifacts (regex-slug
-# confusion, trailing-slash anchoring).
-#
-# Deliberately does NOT bind its first parameter to a variable named "d" —
-# callers that already hold their own fixture dir in "$d" (with a
-# `trap 'rm -rf "$d"' RETURN` registered against it) would have that trap
-# silently retargeted to whatever this function's "d" is reassigned to,
-# since the trap's "$d" is expanded at RETURN time, not at registration time.
-mk_pair_fixture() {
-  pf_dir="$1"; s1="$2"; s2="$3"
-  mkdir -p "$pf_dir/_acceptance/$s1" "$pf_dir/_acceptance/$s2" "$pf_dir/src/covered" "$pf_dir/src/uncovered"
-  cat > "$pf_dir/_acceptance/config.yaml" <<CFG
-schema_version: 1
-enforcement: strict
-recheck: off
-executors:
-  test:
-    unit: "true"
-risk_tiers:
-  t1_skip_globs:
-    - "docs/**"
-    - "**/*.md"
-    - "_acceptance/**"
-  t3_paths:
-    - "src/critical/**"
-signoff:
-  required_for: [T2, T3]
-CFG
-  for s in "$s1" "$s2"; do
-    cat > "$pf_dir/_acceptance/$s/contract.md" <<CON
----
-schema_version: 1
-feature: fixture
-slug: $s
-risk_tier: T2
-status: signed-off
-approved_by: Fixture
----
-# Acceptance Contract: $s
-CON
-    cat > "$pf_dir/_acceptance/$s/evals.yaml" <<EV
-schema_version: 1
-feature_slug: $s
-evals:
-  - id: E1
-    criterion: AC-1
-    executor: test
-    cmd: config:executors.test.unit
-    paths: ["src/covered/**"]
-  - id: E2
-    criterion: AC-2
-    executor: test
-    cmd: config:executors.test.unit
-    paths: ["src/covered/**"]
-EV
-    echo '{}' > "$pf_dir/_acceptance/$s/run-log.jsonl"
-  done
-  (
-    cd "$pf_dir"
-    git init -q .
-    git config user.email fixture@example.com
-    git config user.name Fixture
-    echo seed > src/covered/seed.txt
-    echo seed > src/uncovered/seed.txt
-    git add -A
-    git commit -q -m "fixture base"
-  )
-}
 
 case_case_completeness() {
   # E10: a case that was never implemented must be loud, not absent. Every name
@@ -226,6 +69,13 @@ case_guard_not_exempt() {
   self="scripts/acceptance/check-stale-scoping.sh"
   if match_globs "$self" "$globs"; then
     fail guard-not-exempt "$self is exempt via a t1_skip_globs entry"
+  fi
+  # Same check for the fixture-construction helpers this guard sources
+  # (scripts/acceptance/fixtures.sh): a helper the gate exempts would be a
+  # hole in the same way $self being exempt would be.
+  helper="scripts/acceptance/fixtures.sh"
+  if match_globs "$helper" "$globs"; then
+    fail guard-not-exempt "$helper is exempt via a t1_skip_globs entry"
   fi
   # Sanity: the matcher must actually match something, or the check above
   # proves nothing. A path that IS exempt has to be seen as exempt.
@@ -730,10 +580,18 @@ case_under_declared() {
   pass under-declared
 }
 
-case_merged_halves() {
-  # E7 / AC-7: cross-check fires only when the declaration is new or changed.
-  # Half A: artifacts NOT in the PR diff → narrow scope, no cross-check.
-  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+# ── case_merged_halves helpers ───────────────────────────────────────────────
+# E7 / AC-7 covers seven distinct sub-scenarios (A-G). They stay behind this
+# ONE case (see the KNOWN_CASES note at the top of this file for why they are
+# not split into separate --case entries), but each sub-scenario gets its own
+# helper function below so the top-level case_merged_halves body stays a short
+# list of calls instead of one long function.
+
+# merged_halves_ab — Half A: artifacts NOT in the PR diff → narrow scope, no
+# cross-check. Half B: same feature, artifacts IN the PR diff → cross-check
+# runs. Operates on the shared "$d"/"$base" globals case_merged_halves sets up
+# (Half C/D below reuse the same fixture and PR history).
+merged_halves_ab() {
   mk_fixture "$d" fx narrow
   vc="$(git -C "$d" rev-parse HEAD)"
   write_report "$d" fx "$vc"
@@ -750,152 +608,96 @@ case_merged_halves() {
   # whether the cross-check itself actually ran.
   printf '%s\n' "$outA" | grep -qi 'do not cover' \
     && fail merged-halves "half A: cross-check ran despite artifacts absent from the PR diff: $outA"
-  # Half B: same feature, artifacts IN the PR diff → cross-check runs.
   ( cd "$d" && echo touched >> _acceptance/fx/run-log.jsonl && git add -A && git commit -q -m "artifact touch" )
   outB="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$outB" | grep -qi 'do not cover' \
     || fail merged-halves "half B: cross-check did not run with artifacts in the PR diff: $outB"
+}
 
-  # Half C: no PR base at all. There is no coverage set to cross-check the
-  # declaration against — an empty BASE_SHA must NEVER be read as
-  # "declaration covers everything"; it must fall back to whole-tree
-  # staleness (the working tree still carries the Half-A drift file, which
-  # sits outside this feature's declared "narrow" scope) rather than
-  # silently reporting OK.
+# merged_halves_cd — Half C: no PR base at all. There is no coverage set to
+# cross-check the declaration against — an empty BASE_SHA must NEVER be read
+# as "declaration covers everything"; it must fall back to whole-tree
+# staleness (the working tree still carries the Half-A drift file, which sits
+# outside this feature's declared "narrow" scope) rather than silently
+# reporting OK. Half D: same as Half C but with an UNRESOLVABLE --base — must
+# fail closed exactly like the missing-base case, not be treated any more
+# permissively just because a ref string was supplied. Reuses the "$d" that
+# merged_halves_ab left behind.
+merged_halves_cd() {
   outC="$(bash "$GATE" "$d" 2>&1)"
   printf '%s\n' "$outC" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail merged-halves "half C: no PR base did not fall back to whole-tree staleness: $outC"
   printf '%s\n' "$outC" | grep -q 'OK \[fx\]' \
     && fail merged-halves "half C: no PR base wrongly reported OK: $outC"
 
-  # Half D: same as Half C but with an UNRESOLVABLE --base — must fail closed
-  # exactly like the missing-base case, not be treated any more permissively
-  # just because a ref string was supplied.
   outD="$(bash "$GATE" "$d" --base bogus-ref-xyz-does-not-exist 2>&1)"
   printf '%s\n' "$outD" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail merged-halves "half D: unresolvable PR base did not fall back to whole-tree staleness: $outD"
   printf '%s\n' "$outD" | grep -q 'OK \[fx\]' \
     && fail merged-halves "half D: unresolvable PR base wrongly reported OK: $outD"
+}
 
-  # Half E / regex-slug isolation: two features whose slugs are
-  # regex-metacharacter look-alikes — "a.b" (where "." is a wildcard) and
-  # "axb" (a string the wildcard would match against) — share one repo.
-  # Touching only axb's artifacts must not trip a.b's cross-check: a slug
-  # interpolated unescaped into a grep PATTERN lets "." match any character,
-  # so "^_acceptance/a.b/" would also match "_acceptance/axb/". A git
-  # pathspec is a literal path, not a pattern, and cannot be confused this way.
-  e="$(mktemp -d)"
-  mk_pair_fixture "$e" a.b axb
-  evc="$(git -C "$e" rev-parse HEAD)"
-  write_report "$e" a.b "$evc"
-  write_report "$e" axb "$evc"
-  ( cd "$e" && git add -A && git commit -q -m report )
-  ebase="$(git -C "$e" rev-parse HEAD)"
-  # The PR touches only axb's artifacts, plus a code change outside declared
-  # scope so the cross-check — if it wrongly ran for a.b too — would have
-  # something to flag as "not covered".
-  ( cd "$e" && echo touched >> _acceptance/axb/run-log.jsonl && echo drift > src/uncovered/new.txt \
-      && git add -A && git commit -q -m "pr touches axb only" )
-  outE="$(bash "$GATE" "$e" --base "$ebase" 2>&1)"
-  rm -rf "$e"
-  printf '%s\n' "$outE" | grep -q 'NOTE \[a\.b\]: declared eval paths' \
-    && fail merged-halves "regex-slug: touching only axb's artifacts tripped a.b's cross-check: $outE"
-  printf '%s\n' "$outE" | grep -q 'OK \[a\.b\]' \
-    || fail merged-halves "regex-slug: a.b was not reported OK despite its own artifacts being untouched: $outE"
-  printf '%s\n' "$outE" | grep -q 'NOTE \[axb\]: declared eval paths' \
-    || fail merged-halves "regex-slug: axb's own cross-check did not run: $outE"
+# assert_cross_check_isolation <label> <desc> <slug1> <slug2> — shared shape
+# behind Half E (regex-slug isolation) and Half F (trailing-slash anchoring):
+# two independently narrow-scoped features share one repo (mk_pair_fixture);
+# the PR touches ONLY slug2's artifacts, plus a code change outside declared
+# scope so a wrongly-run cross-check for slug1 would have something to flag
+# as "not covered". Asserts slug1's own cross-check does NOT fire while
+# slug2's does. Uses its own throwaway dir, torn down before returning.
+#
+# Half E: slugs "a.b" (where "." is a regex wildcard) and "axb" (a string the
+# wildcard would match against) — a slug interpolated unescaped into a grep
+# PATTERN lets "." match any character, so "^_acceptance/a.b/" would also
+# match "_acceptance/axb/". A git pathspec is a literal path, not a pattern,
+# and cannot be confused this way.
+#
+# Half F: slugs "fx" and "fx-extra" — the anchoring the old grep pattern
+# relied on (`^_acceptance/$slug/`, trailing slash) must still hold now that
+# the check uses a pathspec instead.
+assert_cross_check_isolation() {
+  ah_label="$1"; ah_desc="$2"; ah_s1="$3"; ah_s2="$4"
+  ah_dir="$(mktemp -d)"
+  mk_pair_fixture "$ah_dir" "$ah_s1" "$ah_s2"
+  ah_vc="$(git -C "$ah_dir" rev-parse HEAD)"
+  write_report "$ah_dir" "$ah_s1" "$ah_vc"
+  write_report "$ah_dir" "$ah_s2" "$ah_vc"
+  ( cd "$ah_dir" && git add -A && git commit -q -m report )
+  ah_base="$(git -C "$ah_dir" rev-parse HEAD)"
+  ( cd "$ah_dir" && echo touched >> "_acceptance/$ah_s2/run-log.jsonl" && echo drift > src/uncovered/new.txt \
+      && git add -A && git commit -q -m "pr touches $ah_s2 only" )
+  ah_out="$(bash "$GATE" "$ah_dir" --base "$ah_base" 2>&1)"
+  rm -rf "$ah_dir"
+  printf '%s\n' "$ah_out" | grep -qF "NOTE [$ah_s1]: declared eval paths" \
+    && fail merged-halves "$ah_label ($ah_desc): touching only $ah_s2's artifacts tripped ${ah_s1}'s cross-check: $ah_out"
+  printf '%s\n' "$ah_out" | grep -qF "OK [$ah_s1]" \
+    || fail merged-halves "$ah_label ($ah_desc): $ah_s1 was not reported OK despite its own artifacts being untouched: $ah_out"
+  printf '%s\n' "$ah_out" | grep -qF "NOTE [$ah_s2]: declared eval paths" \
+    || fail merged-halves "$ah_label ($ah_desc): ${ah_s2}'s own cross-check did not run: $ah_out"
+}
 
-  # Half F / trailing-slash anchoring: "fx" vs "fx-extra" — the anchoring the
-  # old grep pattern relied on (`^_acceptance/$slug/`, trailing slash) must
-  # still hold now that the check uses a pathspec instead. Touching only
-  # fx-extra's artifacts must not trip fx's cross-check.
-  g="$(mktemp -d)"
-  mk_pair_fixture "$g" fx fx-extra
-  gvc="$(git -C "$g" rev-parse HEAD)"
-  write_report "$g" fx "$gvc"
-  write_report "$g" fx-extra "$gvc"
-  ( cd "$g" && git add -A && git commit -q -m report )
-  gbase="$(git -C "$g" rev-parse HEAD)"
-  ( cd "$g" && echo touched >> _acceptance/fx-extra/run-log.jsonl && echo drift > src/uncovered/new.txt \
-      && git add -A && git commit -q -m "pr touches fx-extra only" )
-  outF="$(bash "$GATE" "$g" --base "$gbase" 2>&1)"
-  rm -rf "$g"
-  printf '%s\n' "$outF" | grep -q 'NOTE \[fx\]: declared eval paths' \
-    && fail merged-halves "trailing-slash: touching only fx-extra's artifacts tripped fx's cross-check: $outF"
-  printf '%s\n' "$outF" | grep -q 'OK \[fx\]' \
-    || fail merged-halves "trailing-slash: fx was not reported OK despite its own artifacts being untouched: $outF"
-  printf '%s\n' "$outF" | grep -q 'NOTE \[fx-extra\]: declared eval paths' \
-    || fail merged-halves "trailing-slash: fx-extra's own cross-check did not run: $outF"
-
-  # Half G / vacuous cross-check (Task 6 finding): a declaration whose globs
-  # match NO tracked file must never earn narrow scope permanently just
-  # because the PR that introduces it happens to touch nothing but its own
-  # _acceptance/<slug>/ — an empty coverage set makes scope_gaps() pass
-  # VACUOUSLY (nothing in the diff to flag as "not covered"), so without a
-  # separate match-nothing check the declaration is accepted once and then
-  # silently hides every future change forever, because every later PR that
-  # changes real code without touching _acceptance/<slug>/ skips the
-  # cross-check entirely and stale_files() scoped to a match-nothing glob
-  # filters the real change straight out.
+# merged_halves_g — Half G / vacuous cross-check (Task 6 finding): a
+# declaration whose globs match NO tracked file must never earn narrow scope
+# permanently just because the PR that introduces it happens to touch nothing
+# but its own _acceptance/<slug>/ — an empty coverage set makes scope_gaps()
+# pass VACUOUSLY (nothing in the diff to flag as "not covered"), so without a
+# separate match-nothing check the declaration is accepted once and then
+# silently hides every future change forever, because every later PR that
+# changes real code without touching _acceptance/<slug>/ skips the
+# cross-check entirely and stale_files() scoped to a match-nothing glob
+# filters the real change straight out.
+merged_halves_g() {
   h="$(mktemp -d)"
-  mkdir -p "$h/src/covered"
-  (
-    cd "$h"
-    git init -q .
-    git config user.email fixture@example.com
-    git config user.name Fixture
-    mkdir -p _acceptance
-    cat > _acceptance/config.yaml <<CFG
-schema_version: 1
-enforcement: strict
-recheck: off
-executors:
-  test:
-    unit: "true"
-risk_tiers:
-  t1_skip_globs:
-    - "docs/**"
-    - "**/*.md"
-    - "_acceptance/**"
-  t3_paths:
-    - "src/critical/**"
-signoff:
-  required_for: [T2, T3]
-CFG
-    echo seed > src/covered/seed.txt
-    git add -A
-    git commit -q -m "repo base, no feature yet"
-  )
+  mkdir -p "$h/src/covered" "$h/_acceptance"
+  git_init_fixture_repo "$h"
+  write_config "$h"
+  ( cd "$h" && echo seed > src/covered/seed.txt && git add -A && git commit -q -m "repo base, no feature yet" )
   hbase0="$(git -C "$h" rev-parse HEAD)"
+
   mkdir -p "$h/_acceptance/fx"
-  cat > "$h/_acceptance/fx/contract.md" <<CON
----
-schema_version: 1
-feature: fixture
-slug: fx
-risk_tier: T2
-status: signed-off
-approved_by: Fixture
----
-# Acceptance Contract: fx
-CON
+  write_contract "$h" fx
   # Match-nothing declaration: "nonexistent-dir/**" cannot match anything
   # tracked in this fixture repo (only src/covered/** and _acceptance/** exist).
-  cat > "$h/_acceptance/fx/evals.yaml" <<YAML
-schema_version: 1
-feature_slug: fx
-evals:
-  - id: E1
-    criterion: AC-1
-    executor: test
-    cmd: config:executors.test.unit
-    paths: ["nonexistent-dir/**"]
-  - id: E2
-    criterion: AC-2
-    executor: test
-    cmd: config:executors.test.unit
-    paths: ["nonexistent-dir/**"]
-YAML
+  write_evals_yaml "$h" fx '    paths: ["nonexistent-dir/**"]' '    paths: ["nonexistent-dir/**"]'
   echo '{}' > "$h/_acceptance/fx/run-log.jsonl"
   ( cd "$h" && git add -A && git commit -q -m "introduce fx with match-nothing paths" )
   hvc="$(git -C "$h" rev-parse HEAD)"
@@ -910,7 +712,7 @@ YAML
   # _acceptance/<slug>/ → OK [fx]".
   outG1="$(bash "$GATE" "$h" --base "$hbase0" 2>&1)"
   printf '%s\n' "$outG1" | grep -q 'OK \[fx\]' \
-    || fail merged-halves "vacuous-pass setup: PR introducing a match-nothing declaration was not reported OK: $outG1"
+    || fail merged-halves "half G: vacuous-pass setup: PR introducing a match-nothing declaration was not reported OK: $outG1"
 
   # PR2: real code change, feature artifacts UNTOUCHED — the cross-check does
   # not even run here (declaration unchanged since hpr1), so only a guard
@@ -919,10 +721,19 @@ YAML
   outG2="$(bash "$GATE" "$h" --base "$hpr1" 2>&1)"
   rm -rf "$h"
   printf '%s\n' "$outG2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
-    || fail merged-halves "match-nothing declaration hid a later real code change from staleness: $outG2"
+    || fail merged-halves "half G: match-nothing declaration hid a later real code change from staleness: $outG2"
   printf '%s\n' "$outG2" | grep -q 'src/covered/new.txt' \
-    || fail merged-halves "match-nothing declaration: stale file not named: $outG2"
+    || fail merged-halves "half G: match-nothing declaration: stale file not named: $outG2"
+}
 
+case_merged_halves() {
+  # E7 / AC-7: cross-check fires only when the declaration is new or changed.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  merged_halves_ab
+  merged_halves_cd
+  assert_cross_check_isolation "half E" "regex-slug" a.b axb
+  assert_cross_check_isolation "half F" "trailing-slash" fx fx-extra
+  merged_halves_g
   pass merged-halves
 }
 
@@ -946,7 +757,11 @@ case_two_bases() {
   out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$out" | grep -q 'src/uncovered/unrelated.txt' \
     && fail two-bases "cross-check used the per-feature range, not the coverage set: $out"
-  printf '%s\n' "$out" | grep -qi 'uncovered' \
+  # Match the cross-check's OWN wording ("do not cover"), not a bare
+  # "uncovered" substring — this fixture's src/uncovered/unrelated.txt (seeded
+  # above) would otherwise satisfy a path-name match on its own filename,
+  # independent of whether the cross-check actually refused narrow scope.
+  printf '%s\n' "$out" | grep -qi 'do not cover' \
     && fail two-bases "narrow scope refused although the coverage set is covered: $out"
   pass two-bases
 }
