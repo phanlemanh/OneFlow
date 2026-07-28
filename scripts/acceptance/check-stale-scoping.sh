@@ -488,6 +488,88 @@ YAML
   printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
     || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
 
+  # Colon-in-key decoy (the live Critical this round closes): a quoted key
+  # whose OWN text contains a colon (`"note: x":`) defeats an extractor that
+  # anchors the block-scalar guard on the FIRST colon in the line — it lands
+  # mid-key instead of at the key's true end, reads the rest of the line as
+  # if it were the value, and never recognizes the `|` that follows as a
+  # block-scalar indicator. The prose beneath it (including a decoy
+  # `paths:` line) then leaks straight into either counter.
+  cat > "$d/colon-in-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    "note: x": |
+    decoy:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/colon-in-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "colon-in-key decoy ('\"note: x\":') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Quoted key: not a shape this line-based parser can read reliably (is the
+  # key `expected`, or is the key `"expected"` — a different string?) — must
+  # be refused structurally, not tolerated as if unquoting were free.
+  cat > "$d/quoted-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    "expected": |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/quoted-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "quoted key ('\"expected\":') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Key with an embedded space: `my key: |` is not `[A-Za-z_][A-Za-z0-9_-]*:`
+  # and must be refused rather than treated as some normalized key name.
+  cat > "$d/space-in-key.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    paths: ["src/covered/**"]
+  - id: E2
+    my key: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/space-in-key.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "key with an embedded space ('my key:') was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Hyphenated key with a single-line (non-block-scalar) value: must NOT be
+  # refused. This is the positive counterpart to the key-grammar checks
+  # above — a legal, ordinary eval-level key that merely happens to be
+  # kebab-case, with every eval in the file declaring real `paths`, must
+  # still be accepted and its `paths` still joined into the union.
+  cat > "$d/hyphen-key-singleline.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    extra-note: "hello"
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/hyphen-key-singleline.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "hyphenated key with a single-line value ('extra-note: \"hello\"') was wrongly refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
+    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
+
   pass indent-drift
 }
 

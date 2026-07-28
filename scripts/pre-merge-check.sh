@@ -129,24 +129,31 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # back to whole-tree rather than to a narrower scope.
   #
   # This is a grep-based parser, not a YAML parser — it cannot afford to guess.
-  # Four earlier rounds each tried to enumerate the bad forms one at a time
-  # (multi-line arrays, then indent drift, then fixed-indent false matches,
-  # then multi-line paths dropping globs) and each round left another
-  # mis-reading of the SAME construct standing, because "reject the forms I
-  # thought of" can never enumerate every form. This version instead accepts
-  # exactly ONE good form and refuses everything else by construction:
+  # Six rounds in a row each patched one bad FORM of the same construct while
+  # a sibling form of that same construct survived (fixed-literal indentation,
+  # then a whitespace class, then multi-line arrays, then the first `]`, then
+  # a key-name alphabet that still let a quoted, spaced, or colon-bearing key
+  # through), because "reject the forms I thought of" can never enumerate
+  # every form. This version instead whitelists exactly what is understood —
+  # for BOTH the key and the value — and refuses everything else by
+  # construction:
   #
-  #   <EI>  paths: ["glob", "glob", ...][optional trailing # comment]
+  #   <EI>  <simple-key>: ["glob", "glob", ...][optional trailing # comment]
   #
   # anchored at both ends of the physical line, where EI is the derived
-  # eval-item indent and each glob is a double-quoted string with no `"`
-  # inside it. A `]`, `,`, or `#` inside a quoted glob is harmless BECAUSE the
-  # whole line matched this grammar first — only then is the true closing `]`
-  # known, and globs are pulled out as quoted spans, never by splitting on `,`
-  # or `]`. Everything else is refused, not guessed at: multi-line arrays,
-  # single- or un-quoted items, nested arrays, `paths: []`, `paths:` with no
-  # value, block scalars, or any trailing content after `]` that is not a
-  # `#` comment. A wider whole-tree fallback is always safe, a narrower wrong
+  # eval-item indent, <simple-key> matches `[A-Za-z_][A-Za-z0-9_-]*` — no
+  # quotes, no embedded space, no embedded colon (enforced up front by the
+  # key-grammar check below, on EVERY line at eval-key indentation, not just
+  # `paths:` lines) — and, when that key is `paths`, each glob is a
+  # double-quoted string with no `"` inside it. A `]`, `,`, or `#` inside a
+  # quoted glob is harmless BECAUSE the whole line matched this grammar
+  # first — only then is the true closing `]` known, and globs are pulled out
+  # as quoted spans, never by splitting on `,` or `]`. Everything else is
+  # refused, not guessed at: a quoted, spaced, or colon-bearing key, an empty
+  # key, a list item at eval-key indent, multi-line arrays, single- or
+  # un-quoted items, nested arrays, `paths: []`, `paths:` with no value,
+  # block scalars, or any trailing content after `]` that is not a `#`
+  # comment. A wider whole-tree fallback is always safe, a narrower wrong
   # scope never is.
   f="$1"
   [ -f "$f" ] || return 1
@@ -169,28 +176,48 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   n_evals="$exact_n"
   [ "$n_evals" -gt 0 ] || return 1
 
+  # Eval-key line shape: every line indented to EXACTLY the eval-key
+  # indentation (EI plus two literal spaces — the column a `- ` marker lines
+  # sibling keys up with) must be a simple, unquoted `key:` —
+  # `[A-Za-z_][A-Za-z0-9_-]*:`. The key name is deliberately NOT enumerated
+  # as "the key names I expect" (kebab-case `expected-output:`, digit-suffixed
+  # `note2:`, etc. are all legal); what is refused is any key shape this
+  # line-based parser cannot read reliably at all: a quoted key
+  # (`"note: x":`), a key with an embedded colon (`"note: x":` again — the
+  # colon inside the quotes, not just the one ending it), a key with a
+  # space (`my key:`), an empty key (`: `), or a list item sitting at this
+  # same indent (`- foo:`). None of those are things this parser can
+  # disambiguate from a real key, so the whole file is refused rather than
+  # guessed at. Loose vs strict counts at the SAME indentation (mirroring the
+  # "- id:" indentation check above) catch every one of them: a line
+  # matching the loose "something non-blank sits here" selector that does
+  # NOT also match the strict key grammar means this file has a line this
+  # parser cannot read.
+  key_loose_n="$(grep -c "^${ei}  [^[:space:]]" "$f" 2>/dev/null || true)"
+  key_strict_n="$(grep -Ec "^${ei}  [A-Za-z_][A-Za-z0-9_-]*:" "$f" 2>/dev/null || true)"
+  key_loose_n="${key_loose_n:-0}"
+  key_strict_n="${key_strict_n:-0}"
+  [ "$key_loose_n" -eq "$key_strict_n" ] || return 1
+
   # This parser cannot read YAML block scalars. A `|`/`>` indicator as the
   # VALUE of ANY eval-level key (EI plus two spaces) means the following
   # lines are opaque prose that can look like anything, including a decoy
   # `paths:` line — refuse rather than let that prose feed either counter
-  # below.
+  # below. Because the check above has already proven every eval-key-indent
+  # line is a simple `<key>:`, the value begins immediately after THAT key's
+  # single colon — so this is expressed in the SAME key grammar rather than a
+  # fresh, unconstrained `[^:]*` that would anchor on the wrong colon when a
+  # key contains one of its own (the exact bypass this round closes: a key
+  # like `"note: x":` has an embedded colon, and `[^:]*` stops at the first
+  # one, landing mid-key instead of at the key's true end).
   #
-  # The key name is deliberately NOT constrained to an alphabet (no
-  # `[a-zA-Z_]*`-style allow-list): a real eval key can be kebab-case
-  # (`expected-output:`) or digit-suffixed (`note2:`), and any character
-  # class enumerating "the key names I expect" is exactly the enumerate-the
-  # -bad-forms mistake this function's own comment above warns about — it
-  # only takes one unanticipated key spelling to make the guard invisible to
-  # the block scalar it exists to catch. Instead this matches on STRUCTURE:
-  # `<EI+2sp> <anything-not-a-colon> : <optional space> <| or >>` where the
-  # indicator is followed by nothing but an optional YAML chomping/indent
-  # suffix (`-`, `+`, a digit) and then end-of-line or a trailing comment.
-  # That anchors the indicator to be the START of the value, so a legitimate
-  # single-line value that merely CONTAINS `|` or `>` later on — e.g.
-  # `expected: "exit 0; a > b"` or a glob with a literal `|` in it — still
-  # has its own first non-space character (here `"`) right after the colon,
-  # never matches, and is left alone.
-  if grep -E -q "^${ei}  [^:]*:[[:space:]]*[|>][-+0-9]*[[:space:]]*(#.*)?\$" "$f" 2>/dev/null; then
+  # The indicator must be followed by nothing but an optional YAML
+  # chomping/indent suffix (`-`, `+`, a digit) and then end-of-line or a
+  # trailing comment, anchoring it to be the START of the value — a
+  # legitimate single-line value that merely CONTAINS `|` or `>` later on —
+  # e.g. `expected: "exit 0; a > b"` — has its own first non-space character
+  # (here `"`) right after the colon, never matches, and is left alone.
+  if grep -E -q "^${ei}  [A-Za-z_][A-Za-z0-9_-]*:[[:space:]]*[|>][-+0-9]*[[:space:]]*(#.*)?\$" "$f" 2>/dev/null; then
     return 1
   fi
 
