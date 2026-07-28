@@ -24,7 +24,17 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Không còn feature nào dở. `per-plugin-origin` đã merge (PR #20, merge commit `6461d2b`, 27/07); `pre-merge-check` trên `main` sạch. Việc lớn kế tiếp: 1.L0.**
+**`conformance-l0` (1.L0) đang ở S4 VERIFY** trên nhánh `feat/conformance-l0`. Cổng 1 đã ký (Manh, 28/07); 11 AC / 15 eval; code xong, chờ phán quyết verify rồi tới Cổng 2.
+
+Ba điều chỉnh so với plan, đều đã ghi vào `decisions.jsonl` và đáng nhớ:
+
+1. **`resolve_node_params` phải giữ nguyên mảng cho field batch.** Exporter ghi `consumerShape: "scalar"` cho field có `batchOn` (đúng — mỗi lượt gọi nhận một phần tử), nên params bị thu về một giá trị *trước khi* engine kịp fan-out. Nếu không sửa, fan-out lặng lẽ quay về một lời gọi.
+2. **Không mount nào trong registry dùng cả `batchOn` lẫn `collectAll`.** Ca `batch-collect` do đó là tổ hợp tổng hợp; fixture tự khai `sourceSpec` thay vì tra registry theo nodeType.
+3. **`mapEngineEvent` phải nằm ngoài `engine-delegate.server.ts`** — `server-only` không nạp được dưới vitest, nên để nguyên thì test ba tầng bất khả thi.
+
+Một guard bị mutation test bác bỏ và đã gỡ: `channel is None` trong `runner.py` hoàn toàn tương đương `not channel` (vì `merge_fanout_views` luôn tạo key), nên nó chỉ là nhiễu kèm comment gợi ý một khác biệt không tồn tại.
+
+`per-plugin-origin` đã merge (PR #20, merge commit `6461d2b`, 27/07); `pre-merge-check` trên `main` sạch.
 
 Feature thứ 7: entry trong `config/official-plugins.json` nay nhận dạng `{"id", "origin"}` — fork lẻ từng plugin không phải chuyển cả 38. Một resolver (`src/lib/plugins/official-manifest.ts`, thuần, 57 test) phục vụ cả ba đường tải code; installer CLI chuyển sang TS; manifest được validate lúc nạp (kể cả tên plugin, chặn `../x` vào đường dẫn); 3 guard mới đều đã mutation-test. 8 round verify — round 8 sạch (0 HIGH/MEDIUM).
 
@@ -40,7 +50,7 @@ Bài học đắt ghi lại cho máy sau: **round 2→7 churn vì sửa hành vi
 
 ## Nợ & cảnh báo đang mở
 
-- **`batchField` drift** — exporter TS phát (`exporter.ts:648`), engine Python **không xử lý một dòng nào**; ~30 slot dùng `batchOn()`, nên canvas fan-out N lời gọi còn engine gọi một lần với cả mảng. Là ca kiểm thử **số 1** của conformance suite, và là điều kiện tiên quyết của cache (spec §5).
+- ~~**`batchField` drift**~~ — **đã xoá trong `conformance-l0`** (chờ Cổng 2). Engine nay fan-out N lời gọi khớp canvas, gộp kết quả theo đúng thứ tự batch, và suite conformance canh cho hai phía không lệch lại. Việc đưa batch về orchestrator để hợp nhất tận gốc vẫn nằm ở Phase 3.
 - **Desktop shell trỏ `app.tongflow.com`**, artifact tên `TongFlow-*.dmg` — không phát hành desktop tới khi tách. Chờ quyết định URL cloud.
 - **Token PyPI toàn tài khoản** đang nằm trong `.env` và đã hiện trong transcript phiên 26/07. **Nên thu hồi** và tạo lại loại project-scoped (`oneflow-sdk` đã tồn tại nên tuỳ chọn hẹp giờ có sẵn).
 - **Ghim SDK của 38 plugin chính thức** không sửa được — repo upstream, ta không sở hữu. Sẽ tự giải khi từng plugin được fork.
@@ -66,7 +76,8 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | 0.2 | 3 cột metering | ✅ xong — PR #12 |
 | 0.3 | Bộ đo WER/TTS-vi/COGS | ◐ script xong PR #14 · **MOS đóng 27/07** ([ADR-0009](docs/adr/0009-tts-vi-eleven-v3.md): `eleven_v3`, phán quyết vận hành) · **WER chờ clip thực địa + ref chép tay** → [`measure/wer-corpus/`](measure/wer-corpus/README.md) · COGS chờ task chạy thật + hoá đơn |
 | 0.4 | Spec cache + partial re-render | ✅ xong — PR #11. **3 câu hỏi mở (Q1–Q3, §7) chưa chốt** |
-| **1.L0** | `pluginRev` + sự kiện `node_cached` + **conformance suite TS↔Python** (ca đầu: `batchField`) | ⏭ **việc lớn kế tiếp**. Không phụ thuộc Q1–Q3 |
+| **1.L0** | `pluginRev` + sự kiện `node_cached` + **conformance suite TS↔Python** (ca đầu: `batchField`) | ◐ **đang làm** — Cổng 1 ký 28/07, code xong, đang S4 VERIFY trên `feat/conformance-l0` |
+| 1.1 | Cache engine hạ cánh trong `sdk/tongflow/engine/` (lát L1→L4) | ⏭ kế tiếp sau 1.L0. **Q1–Q3 của spec cache cần chốt trước L2** |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
