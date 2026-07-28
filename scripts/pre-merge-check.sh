@@ -122,6 +122,28 @@ GLOBS
   return 1
 }
 
+feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 only
+  # when EVERY eval declares a usable `paths`. `paths` was introduced as a
+  # carry-forward performance knob, where under-declaring is safe; here it gates
+  # correctness, so anything less than a complete, parseable declaration falls
+  # back to whole-tree rather than to a narrower scope.
+  f="$1"
+  [ -f "$f" ] || return 1
+  n_evals="$(grep -c '^  - id:' "$f" 2>/dev/null || echo 0)"
+  n_paths="$(grep -c '^    paths:' "$f" 2>/dev/null || echo 0)"
+  [ "$n_evals" -gt 0 ] || return 1
+  [ "$n_evals" -eq "$n_paths" ] || return 1
+  globs="$(sed -n 's/^    paths:[[:space:]]*\[//p' "$f" \
+    | tr -d '"]' | tr ',' '\n' \
+    | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+    | grep -v '^$' | sort -u)"
+  # An empty array parses to zero globs. A zero-glob scope matches nothing,
+  # which would read as "never stale" — treat it as not declared.
+  [ -n "$globs" ] || return 1
+  printf '%s\n' "$globs"
+  return 0
+}
+
 stale_files() { # <root> <commit> — files changed since <commit> (incl. working
   # tree) that are neither gate artifacts (_acceptance/) nor t1_skip_globs:
   # i.e. code the pinned evidence no longer covers. Untracked files are

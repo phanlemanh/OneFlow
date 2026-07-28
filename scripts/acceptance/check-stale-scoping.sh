@@ -175,6 +175,36 @@ case_no_kill_switch() {
   pass no-kill-switch
 }
 
+case_partial() {
+  # E4 / AC-4: paths on some evals but not all is the state a half-finished
+  # backfill leaves behind. Scoping by a partial list is worse than not scoping.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx partial
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail partial "partial declaration did not fall back to whole-tree: $out"
+  printf '%s\n' "$out" | grep -q 'narrow scope' \
+    && fail partial "partial declaration was granted narrow scope"
+  pass partial
+}
+
+case_malformed() {
+  # E6 / AC-6: `paths: []` must read as not-declared. Read as "declared with an
+  # empty scope" it matches nothing, i.e. never stale — the worst misreading.
+  d="$(mktemp -d)"; trap 'rm -rf "$d"' RETURN
+  mk_fixture "$d" fx empty
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$vc" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail malformed "empty paths array did not fall back to whole-tree: $out"
+  pass malformed
+}
+
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
 
 CASE=""
