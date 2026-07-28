@@ -39,6 +39,13 @@ executors:
     sdk_pytest_scan_prefix: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_prefix.py"
     # per-plugin-origin Gate 1 (2026-07-27): file lands during implementation.
     unit_official_manifest: "pnpm vitest run src/lib/plugins/official-manifest.test.ts"
+    # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
+    sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
+    sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
+    sdk_pytest_plugin_rev: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_plugin_rev.py
+    unit_conformance: pnpm vitest run src/lib/abi/conformance.test.ts
+    unit_plugin_rev: pnpm vitest run src/lib/plugins/plugin-rev.test.ts
+    unit_node_cached: pnpm vitest run src/lib/task/node-cached.test.ts
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -76,6 +83,8 @@ executors:
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
+    conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
+    plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

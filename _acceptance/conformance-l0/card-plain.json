@@ -1,0 +1,26 @@
+{
+  "feature_plain": "Làm cho hai cỗ máy chạy workflow — canvas và engine — hiểu cùng một nghĩa khi một node phải xử lý nhiều thứ cùng lúc, rồi dựng phép kiểm tự động canh cho chúng không lệch nữa. Đây là điều kiện bắt buộc trước khi bật cache 'sửa miễn phí'.",
+  "will_do": [
+    { "id": "AC-1", "p": "Sẽ cho engine chạy một node có danh sách 3 mục thành đúng 3 lượt xử lý riêng, giống hệt cách canvas đang làm — hôm nay engine gộp cả 3 vào một lượt." },
+    { "id": "AC-2", "p": "Sẽ xử lý danh sách rỗng bằng cách không chạy lượt nào, thay vì chạy một lượt với danh sách trống rồi nhận về kết quả rác." },
+    { "id": "AC-5", "p": "Sẽ đảm bảo node phía sau nhận đủ cả 3 kết quả của node phía trước, không phải chỉ kết quả cuối cùng." },
+    { "id": "AC-6", "p": "Sẽ có một bộ phép kiểm chạy cùng một bộ dữ liệu mẫu qua cả hai cỗ máy và so từng lượt gọi — bốn tình huống: danh sách thường, danh sách rỗng, không có danh sách, và danh sách đi kèm gom nhóm." },
+    { "id": "AC-7", "p": "Sẽ tự chứng minh phép kiểm không mù: cố tình làm lệch một bên rồi khẳng định phép kiểm phải báo đỏ — cả khi lệch số lượt gọi lẫn khi lệch một thông tin khác." },
+    { "id": "AC-8", "p": "Sẽ ghi lại phiên bản chính xác của từng plugin lúc cài, kiểm qua đúng đường mà người dùng thật đi (cài từ giao diện app rồi được máy quét đọc lại)." },
+    { "id": "AC-9", "p": "Sẽ phân biệt plugin cài tay không có thông tin phiên bản (chấp nhận được) với plugin có mà đọc hỏng (phải báo lỗi có tên) — và bản ghi cũ vẫn đọc được như thường." },
+    { "id": "AC-10", "p": "Sẽ chốt hình dạng tín hiệu 'node này lấy lại kết quả cũ' và nối thông đường từ engine ra tới màn hình, kiểm xuyên cả ba tầng." }
+  ],
+  "wont_do": [
+    { "id": "AC-3", "p": "Sẽ KHÔNG làm đổi dù một chi tiết nào ở các workflow không dùng danh sách — chụp ảnh hành vi hiện tại trước khi sửa rồi so lại, phải khớp tuyệt đối." },
+    { "id": "AC-4", "p": "Chặn kiểu hỏng âm thầm nguy hiểm nhất: gộp 5 kết quả mà chỉ giữ lại 1 — bắt buộc nối đủ và đúng thứ tự." },
+    { "id": "AC-11", "p": "Chặn trường hợp danh sách rỗng làm nổ node phía sau — nơi lỗi thật sự phát tác, chứ không phải ở node có danh sách." }
+  ],
+  "scope_plain": "Chưa xây cache thật, chưa dùng phiên bản plugin để tra cache, chưa gộp phép chia-nhóm về một chỗ duy nhất — tất cả thuộc các lát sau (L1, L2, và Phase 3).",
+  "decisions_plain": [
+    { "id": "d-20260728T000001Z-4471", "p": "Chọn so hai cách hiểu của cùng một phép tính trên bộ dữ liệu mẫu chung, thay vì dựng thêm một cỗ máy chạy workflow thứ hai — đổi lại phép kiểm chỉ phủ phần chia-nhóm, chưa phủ mọi khác biệt giữa hai bên." },
+    { "id": "d-20260728T000002Z-8823", "p": "Chọn sửa engine cho khớp ngay bây giờ thay vì ghi nhận 'đã biết lệch' rồi để đó — đổi lại phần việc này phồng thêm và có rủi ro chạm vào đường workflow đang chạy được." },
+    { "id": "d-20260728T000003Z-1902", "p": "KHÔNG làm tín hiệu 'lấy lại kết quả cũ' phát thật trong đợt này, chỉ chốt hình dạng và nối đường — đổi lại tín hiệu tồn tại nhưng im lặng cho tới khi cache ra đời, người đọc code có thể tưởng nó hỏng." },
+    { "id": "d-20260728T000004Z-5560", "p": "KHÔNG sinh dữ liệu mẫu tự động mà viết tay — vì nếu sinh tự động thì bấm nút tạo lại là cách rẻ nhất để giấu lệch; đổi lại thêm tình huống mới sẽ tốn công hơn." },
+    { "id": "d-20260728T000005Z-7314", "p": "KHÔNG dùng phiên bản plugin để tra cache trong đợt này, chỉ ghi lại — đổi lại thông tin đó nằm im chưa dùng cho tới lát sau." }
+  ]
+}
