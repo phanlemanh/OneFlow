@@ -169,11 +169,28 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   n_evals="$exact_n"
   [ "$n_evals" -gt 0 ] || return 1
 
-  # This parser cannot read YAML block scalars. A `|`/`>` indicator on ANY
-  # eval-level key (EI plus two spaces) means the following lines are opaque
-  # prose that can look like anything, including a decoy `paths:` line —
-  # refuse rather than let that prose feed either counter below.
-  if grep -q "^${ei}  [a-zA-Z_]*:[[:space:]]*[|>]" "$f" 2>/dev/null; then
+  # This parser cannot read YAML block scalars. A `|`/`>` indicator as the
+  # VALUE of ANY eval-level key (EI plus two spaces) means the following
+  # lines are opaque prose that can look like anything, including a decoy
+  # `paths:` line — refuse rather than let that prose feed either counter
+  # below.
+  #
+  # The key name is deliberately NOT constrained to an alphabet (no
+  # `[a-zA-Z_]*`-style allow-list): a real eval key can be kebab-case
+  # (`expected-output:`) or digit-suffixed (`note2:`), and any character
+  # class enumerating "the key names I expect" is exactly the enumerate-the
+  # -bad-forms mistake this function's own comment above warns about — it
+  # only takes one unanticipated key spelling to make the guard invisible to
+  # the block scalar it exists to catch. Instead this matches on STRUCTURE:
+  # `<EI+2sp> <anything-not-a-colon> : <optional space> <| or >>` where the
+  # indicator is followed by nothing but an optional YAML chomping/indent
+  # suffix (`-`, `+`, a digit) and then end-of-line or a trailing comment.
+  # That anchors the indicator to be the START of the value, so a legitimate
+  # single-line value that merely CONTAINS `|` or `>` later on — e.g.
+  # `expected: "exit 0; a > b"` or a glob with a literal `|` in it — still
+  # has its own first non-space character (here `"`) right after the colon,
+  # never matches, and is left alone.
+  if grep -E -q "^${ei}  [^:]*:[[:space:]]*[|>][-+0-9]*[[:space:]]*(#.*)?\$" "$f" 2>/dev/null; then
     return 1
   fi
 
@@ -190,7 +207,13 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # never count toward completeness while contributing zero globs. A stray
   # feature-level top-level `paths:` key (indented differently, not under any
   # eval) is excluded by the same exact-indentation anchor.
-  paths_re="^${ei}  paths:[[:space:]]*\\[\"[^\"]*\"(,[[:space:]]*\"[^\"]*\")*\\][[:space:]]*(#.*)?\$"
+  #
+  # The grammar permits optional whitespace right inside the brackets
+  # (`[ "a" ]`) and an optional trailing comma before the close (`["a",]`) —
+  # both unremarkable YAML a maintainer would expect to work — while every
+  # other refusal (single-line only, double-quoted only, no nested arrays, no
+  # trailing non-comment suffix) stays exactly as strict.
+  paths_re="^${ei}  paths:[[:space:]]*\\[[[:space:]]*\"[^\"]*\"(,[[:space:]]*\"[^\"]*\")*,?[[:space:]]*\\][[:space:]]*(#.*)?\$"
   n_paths="$(grep -E -c "$paths_re" "$f" 2>/dev/null || true)"
   n_paths="${n_paths:-0}"
   [ "$n_evals" -eq "$n_paths" ] || return 1

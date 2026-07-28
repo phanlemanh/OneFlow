@@ -422,6 +422,72 @@ YAML
   [ "$rc" -ne 0 ] \
     || fail indent-drift "trailing non-comment suffix after ']' was accepted — feature_scope returned 0 (globs: $out)"
 
+  # Hyphenated-key block-scalar decoy: a key-name allow-list (e.g.
+  # `[a-zA-Z_]*:`) never matches `expected-output:`, so its block-scalar body
+  # is read as ordinary content and a decoy `paths:` line inside it is
+  # mistaken for a real declaration. The guard must refuse the whole file
+  # structurally (by "value starts with `|`/`>`"), regardless of the key
+  # spelling.
+  cat > "$d/hyphen-key-block-scalar.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    expected-output: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/hyphen-key-block-scalar.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "hyphenated-key ('expected-output:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Digit-suffixed-key variant of the same bypass: `note2:` is equally
+  # outside any letter-only allow-list.
+  cat > "$d/digit-key-block-scalar.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    note2: |
+    decoy prose:
+    paths: ["src/decoy/**"]
+YAML
+  out="$(feature_scope "$d/digit-key-block-scalar.yaml")"; rc=$?
+  [ "$rc" -ne 0 ] \
+    || fail indent-drift "digit-suffixed-key ('note2:') block-scalar decoy was not refused — feature_scope returned 0 (globs: $out)"
+
+  # Single-line value containing `>` after the colon, but NOT as the first
+  # character of the value: must NOT be refused. This is the other direction
+  # of the same check — the block-scalar guard must key off the indicator
+  # being the START of the value, not merely present somewhere on the line.
+  cat > "$d/value-contains-gt.yaml" <<'YAML'
+schema_version: 1
+feature_slug: fx
+evals:
+  - id: E1
+    criterion: AC-1
+    expected: "exit 0; a > b"
+    paths: ["src/covered/**"]
+  - id: E2
+    criterion: AC-2
+    paths: ["src/more/**"]
+YAML
+  out="$(feature_scope "$d/value-contains-gt.yaml")"; rc=$?
+  [ "$rc" -eq 0 ] \
+    || fail indent-drift "a single-line value merely containing '>' after the colon was wrongly refused — feature_scope returned $rc"
+  printf '%s\n' "$out" | grep -qx 'src/covered/\*\*' \
+    || fail indent-drift "expected glob 'src/covered/**' missing from union: $out"
+  printf '%s\n' "$out" | grep -qx 'src/more/\*\*' \
+    || fail indent-drift "expected glob 'src/more/**' missing from union: $out"
+
   pass indent-drift
 }
 
