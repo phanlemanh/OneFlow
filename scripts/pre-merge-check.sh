@@ -283,16 +283,31 @@ DECLS
   return 0
 }
 
-scope_gaps() { # <root> <base_sha> <scope-globs> — coverage-set files the union
-  # misses. COVERAGE SET is BASE_SHA...HEAD (per PR), never the per-feature
-  # verified_commit range: cross-checking a merged feature against its own range
-  # spans every unrelated merge since sign-off, so no honest declaration ever
-  # covers it and narrow scope would be refused forever.
-  git -C "$1" diff --name-only "$2...HEAD" -- 2>/dev/null | while IFS= read -r f; do
+gated_coverage() { # <changed-list> — the newline-separated changed-file list
+  # (already BASE_SHA...HEAD, computed ONCE above the feature loop) filtered
+  # down to gated files: excludes _acceptance/** and anything matching
+  # T1_GLOBS. This is the COVERAGE SET a declaration's `paths` must cover, and
+  # it is shared by the "is the coverage set even non-empty" check and
+  # scope_gaps() below — both need the identical filter, and computing it once
+  # here (rather than once per feature, or via a second git invocation) is
+  # what removes a `git diff` call per feature.
+  printf '%s\n' "$1" | while IFS= read -r f; do
     [ -n "$f" ] || continue
     case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
     match_globs "$f" "$T1_GLOBS" && continue
-    match_globs "$f" "$3" || printf '%s\n' "$f"
+    printf '%s\n' "$f"
+  done
+}
+
+scope_gaps() { # <gated-coverage-list> <scope-globs> — gated-coverage files
+  # (see gated_coverage() above) the union misses. COVERAGE SET is
+  # BASE_SHA...HEAD (per PR), never the per-feature verified_commit range:
+  # cross-checking a merged feature against its own range spans every
+  # unrelated merge since sign-off, so no honest declaration ever covers it
+  # and narrow scope would be refused forever.
+  printf '%s\n' "$1" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    match_globs "$f" "$2" || printf '%s\n' "$f"
   done
 }
 
@@ -333,15 +348,45 @@ stale_files() { # <root> <commit> [scope-globs] — gated files changed since
   # matching it count: that is the STALENESS SET narrowed to what the feature's
   # evals declare they exercise. Untracked files are invisible to git diff — CI
   # runs on a committed tree, so that is moot there.
+  #
+  # `-c core.quotePath=false` disables git's default quoting/octal-escaping of
+  # non-ASCII and control-byte paths (core.quotePath defaults on) — without
+  # it, a path like café.txt arrives as the literal string
+  # "caf\303\251.txt", which can never match a plain-ASCII glob. Before
+  # `scope` existed that only meant the whole-tree set carried the quoted
+  # string (a safe over-report); scoping inverts that into a silent
+  # under-refusal, dropping the file from a narrow staleness set entirely. Any
+  # path that STILL arrives quoted despite the setting (a literal `"` or a
+  # backslash escape the setting cannot unquote) is treated as stale
+  # unconditionally, bypassing the scope filter — a name this parser cannot
+  # read cleanly is exactly the doubt the governing rule (any ambiguity keeps
+  # whole-tree staleness) exists for.
   scope="${3:-}"
-  git -C "$1" diff --name-only "$2" -- 2>/dev/null | while IFS= read -r f; do
+  git -c core.quotePath=false -C "$1" diff --name-only "$2" -- 2>/dev/null | while IFS= read -r f; do
     case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
     match_globs "$f" "$T1_GLOBS" && continue
+    case "$f" in \"*) printf '%s\n' "$f"; continue ;; esac
     if [ -n "$scope" ]; then
       match_globs "$f" "$scope" || continue
     fi
     printf '%s\n' "$f"
   done
+}
+
+slug_acceptance_touched() { # <slug> — rc 0 iff the shared $ALL_CHANGED list
+  # (BASE_SHA...HEAD, set once above the feature loop) contains any path under
+  # _acceptance/<slug>/. The prefix "_acceptance/$1/" is QUOTED in the `case`
+  # pattern below, so it is matched literally — only the trailing unquoted `*`
+  # is a wildcard — which is what keeps a slug containing a glob/regex
+  # metacharacter (e.g. "a.b") from spuriously matching a sibling slug
+  # ("axb"). Reads $ALL_CHANGED instead of a second per-feature git diff call.
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in "_acceptance/$1/"*) return 0 ;; esac
+  done <<CHANGEDLIST
+$ALL_CHANGED
+CHANGEDLIST
+  return 1
 }
 
 violations=0
@@ -370,6 +415,19 @@ fi
 # then fall back to the strict behaviour, never to narrow scope.
 BASE_SHA=""
 BASE_NOTE=""
+# ALL_CHANGED / COVERAGE_OK: the gated-diff query (BASE_SHA...HEAD) computed
+# ONCE here, then shared by the per-feature _acceptance/<slug> probe, the
+# paths cross-check (scope_gaps via gated_coverage), and the T1-escape
+# backstop below — instead of one `git diff` per feature plus one more for the
+# backstop. COVERAGE_OK=1 iff that computation actually succeeded; on `git
+# diff`'s failure (e.g. exit 128, "no merge base" between two unrelated
+# histories) `2>/dev/null` used to make the output read as an empty, silently
+# EMPTY diff — "no gaps" — granting narrow scope on a guess. Any consumer that
+# needs the coverage set must now treat COVERAGE_OK!=1 exactly like an
+# unresolvable BASE_SHA: no usable coverage set, never narrow scope.
+ALL_CHANGED=""
+COVERAGE_OK=0
+GATED_COVERAGE=""
 if [ -z "$BASE" ]; then
   BASE_NOTE="T1-escape backstop skipped — no PR base given (pass --base <ref> or set PRE_MERGE_BASE; GitHub Actions: --base \"origin/\$GITHUB_BASE_REF\")"
 elif ! command -v git >/dev/null 2>&1 || ! git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
@@ -377,7 +435,18 @@ elif ! command -v git >/dev/null 2>&1 || ! git -C "$ROOT" rev-parse --git-dir >/
 else
   BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "$BASE^{commit}" 2>/dev/null || true)"
   [ -z "$BASE_SHA" ] && BASE_SHA="$(git -C "$ROOT" rev-parse --quiet --verify "origin/$BASE^{commit}" 2>/dev/null || true)"
-  [ -z "$BASE_SHA" ] && BASE_NOTE="T1-escape backstop skipped — base \"$BASE\" not resolvable in this clone"
+  if [ -z "$BASE_SHA" ]; then
+    BASE_NOTE="T1-escape backstop skipped — base \"$BASE\" not resolvable in this clone"
+  else
+    ALL_CHANGED="$(git -c core.quotePath=false -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"
+    gd_rc=$?
+    if [ "$gd_rc" -eq 0 ]; then
+      COVERAGE_OK=1
+      GATED_COVERAGE="$(gated_coverage "$ALL_CHANGED")"
+    else
+      BASE_NOTE="T1-escape backstop skipped — git diff \"$BASE_SHA...HEAD\" could not be computed (exit $gd_rc) — base and HEAD may share no merge base; no usable coverage set"
+    fi
+  fi
 fi
 
 for dir in "$ACC"/*/; do
@@ -515,28 +584,50 @@ GLOBS2
     # this PR's own gated diff (the coverage set, BASE_SHA...HEAD) — and that
     # check only runs at the one moment the declaration is new or changed: when
     # this feature's own _acceptance/<slug>/ is part of the PR diff. Without a
-    # resolvable BASE_SHA there is no coverage set to check against at all, so
-    # "cannot cross-check" must unconditionally fall back to whole-tree — an
-    # empty/unresolvable BASE_SHA is never read as "declaration covers
-    # everything". This only speaks up for a feature that actually HAD a scope
-    # to refuse (the outer `[ -n "$scope" ]`); an undeclared feature (scope
-    # already empty) stays completely silent here, same as before.
+    # usable coverage set (BASE_SHA unresolvable, OR resolvable but its `git
+    # diff` could not be computed — COVERAGE_OK!=1 covers both) there is
+    # nothing to check the declaration against at all, so "cannot cross-check"
+    # must unconditionally fall back to whole-tree — never read as
+    # "declaration covers everything". This only speaks up for a feature that
+    # actually HAD a scope to refuse (the outer `[ -n "$scope" ]`); an
+    # undeclared feature (scope already empty) stays completely silent here,
+    # same as before.
     if [ -n "$scope" ]; then
-      if [ -z "$BASE_SHA" ]; then
-        echo "NOTE [$slug]: no usable PR base (BASE_SHA empty) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
+      if [ "$COVERAGE_OK" -ne 1 ]; then
+        if [ -z "$BASE_SHA" ]; then
+          echo "NOTE [$slug]: no usable PR base (BASE_SHA empty) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
+        else
+          echo "NOTE [$slug]: this PR's gated diff could not be computed (git diff \"$BASE_SHA...HEAD\" failed) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
+        fi
         scope=""
-      # A pathspec is a literal path, not a pattern: unlike a grep regex over
-      # `git diff --name-only` output, "_acceptance/$slug" cannot have its
-      # directory boundary defeated by a slug containing a regex metacharacter
-      # (e.g. slug "a.b" matching an unrelated "_acceptance/axb/" via the "."
-      # wildcard). Git itself anchors this at the path-segment boundary, so
-      # "fx" still never matches "fx-extra".
-      elif [ -n "$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- "_acceptance/$slug" 2>/dev/null)" ]; then
-        gaps="$(scope_gaps "$ROOT" "$BASE_SHA" "$scope")"
-        if [ -n "$gaps" ]; then
-          echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
-          printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+      # A literal-prefix `case` match against the shared $ALL_CHANGED list (see
+      # slug_acceptance_touched() below), not a grep regex: unlike a regex
+      # over `git diff --name-only` output, a quoted case-pattern prefix
+      # cannot have its directory boundary defeated by a slug containing a
+      # regex metacharacter (e.g. slug "a.b" matching an unrelated
+      # "_acceptance/axb/" via the "." wildcard) — the prefix segment is
+      # quoted, so only the trailing unquoted `*` acts as a wildcard. So "fx"
+      # still never matches "fx-extra".
+      elif slug_acceptance_touched "$slug"; then
+        # This feature's own _acceptance/<slug>/ IS part of the PR diff — the
+        # declaration is new or changed, so this is the one moment the
+        # cross-check must run. An EMPTY gated coverage set (this PR touches
+        # nothing gated besides its own _acceptance/<slug>/) is the exact
+        # defect this branch exists to close: scope_gaps() over an empty list
+        # returns no gaps, which used to read as "declaration checked out
+        # fine" when there was in fact NOTHING to check it against — the same
+        # class of doubt as "no usable base" above, and the governing rule
+        # says doubt keeps whole-tree, never narrow-on-a-guess.
+        if [ -z "$GATED_COVERAGE" ]; then
+          echo "NOTE [$slug]: this PR's gated coverage set is empty (only _acceptance/$slug/ changed) — nothing to cross-check declared eval paths against; narrow staleness scope refused, whole-tree applied"
           scope=""
+        else
+          gaps="$(scope_gaps "$GATED_COVERAGE" "$scope")"
+          if [ -n "$gaps" ]; then
+            echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
+            printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+            scope=""
+          fi
         fi
       fi
     fi
@@ -628,10 +719,14 @@ done
 # gated PR re-verifies, so its diff always includes gate artifacts.) There is
 # no path→slug mapping, so "carries artifacts" means any _acceptance/ change;
 # the per-slug checks above judge their quality.
-if [ -z "$BASE_SHA" ]; then
+# Reuses the shared $ALL_CHANGED / $COVERAGE_OK computed once above the
+# feature loop (same BASE_SHA...HEAD range) instead of a second `git diff`
+# here — COVERAGE_OK!=1 covers both "no usable base" and "base resolvable but
+# its diff could not be computed" (BASE_NOTE already carries the right
+# message for either case).
+if [ "$COVERAGE_OK" -ne 1 ]; then
   echo "NOTE: $BASE_NOTE"
 else
-  changed="$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"
   gate_touched=0; t3_hits=""; nont1_hits=""
   while IFS= read -r f; do
     [ -n "$f" ] || continue
@@ -642,7 +737,7 @@ else
       nont1_hits="${nont1_hits}${f}"$'\n'
     fi
   done <<CHANGED
-$changed
+$ALL_CHANGED
 CHANGED
   if [ "$gate_touched" -eq 0 ]; then
     if [ -n "$t3_hits" ]; then
