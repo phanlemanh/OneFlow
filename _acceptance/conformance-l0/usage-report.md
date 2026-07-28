@@ -36,3 +36,43 @@
 - **claude-sonnet-5**: 12 agent · 142 calls · out 101,397 · in 5,691 · cache_read 11,558,987 · cache_create 1,114,877
 - **claude-haiku-4-5-20251001**: 15 agent · 35 calls · out 10,591 · in 310 · cache_read 1,058,665 · cache_create 738,566
 
+### S4 round 3 — wf_07b2d993-b60 (31 agent, 154,753 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:bugs | claude-opus-5 | 47 | 31,721 | 89 | 6,309,333 | 648 |
+| review:conventions | claude-opus-5 | 45 | 31,363 | 3,812 | 5,880,651 | 604 |
+| refute:scan.py | claude-sonnet-5 | 20 | 17,081 | 40 | 2,030,385 | 328 |
+| refute:batch.py | claude-sonnet-5 | 31 | 7,795 | 62 | 2,803,423 | 257 |
+| refute:batch.py | claude-sonnet-5 | 18 | 6,895 | 36 | 1,499,774 | 148 |
+| refute:batch.py | claude-sonnet-5 | 13 | 6,641 | 1,619 | 1,066,654 | 150 |
+| refute:scan.py | claude-sonnet-5 | 13 | 6,273 | 26 | 1,023,712 | 139 |
+| refute:runner.py | claude-sonnet-5 | 29 | 6,037 | 58 | 2,545,488 | 235 |
+| refute:conformance.ts | claude-sonnet-5 | 10 | 5,550 | 20 | 772,385 | 140 |
+| refute:conformance.ts | claude-sonnet-5 | 14 | 5,097 | 28 | 1,099,975 | 141 |
+| refute:node-cached.test.ts | claude-sonnet-5 | 7 | 4,824 | 14 | 472,901 | 99 |
+| scribe:run-log | claude-haiku-4-5-20251001 | 5 | 4,195 | 42 | 219,121 | 48 |
+| refute:engine-delegate.server.ts | claude-sonnet-5 | 9 | 3,558 | 18 | 661,125 | 81 |
+| refute:runner.py | claude-sonnet-5 | 10 | 3,318 | 1,439 | 794,407 | 92 |
+| refute:conformance.ts | claude-sonnet-5 | 14 | 3,106 | 28 | 1,229,417 | 216 |
+| synthesize:report | claude-sonnet-5 | 11 | 1,867 | 22 | 1,040,403 | 164 |
+| machine:pnpm tsx scripts/plugins/check-rev-joine | claude-haiku-4-5-20251001 | 2 | 1,166 | 18 | 49,179 | 18 |
+| machine:bash scripts/conformance/check-suite-dis | claude-haiku-4-5-20251001 | 4 | 1,029 | 34 | 153,287 | 30 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 3 | 921 | 26 | 101,083 | 18 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 902 | 18 | 49,168 | 40 |
+| machine:pnpm vitest run src/lib/abi/conformance. | claude-haiku-4-5-20251001 | 2 | 681 | 18 | 49,182 | 14 |
+| machine:pnpm vitest run src/lib/task/node-cached | claude-haiku-4-5-20251001 | 2 | 662 | 18 | 49,182 | 13 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 605 | 18 | 66,472 | 17 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 597 | 18 | 49,213 | 11 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 580 | 18 | 66,435 | 10 |
+| capture:provenance | claude-sonnet-5 | 2 | 532 | 4 | 71,156 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 3 | 517 | 26 | 101,077 | 19 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 484 | 18 | 66,435 | 19 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 401 | 18 | 49,213 | 14 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 353 | 18 | 66,431 | 15 |
+| machine:pnpm vitest run src/lib/plugins/plugin-r | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 49,182 | 13 |
+
+- **claude-opus-5**: 2 agent · 92 calls · out 63,084 · in 3,901 · cache_read 12,189,984 · cache_create 308,219
+- **claude-sonnet-5**: 14 agent · 201 calls · out 78,574 · in 3,414 · cache_read 17,111,205 · cache_create 1,306,317
+- **claude-haiku-4-5-20251001**: 15 agent · 37 calls · out 13,095 · in 326 · cache_read 1,184,660 · cache_create 724,010
+

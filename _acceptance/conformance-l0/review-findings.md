@@ -1,64 +1,110 @@
-# Review Findings: conformance-l0 (round 2)
+# Review Findings: conformance-l0 (round 3)
 
-Informational — adversarial-verified findings from code review against `verified_commit: 153fcb486e1a3400e7345c8462a18b718e630883`. Not hook-enforced; does not gate the evidence-report verdict. All findings below were confirmed by direct reproduction/reading (adversarial-verify survived). Round-1 findings are in git history for this file; the three high-severity round-1 findings (`read_plugin_rev` crash on missing git, `merge_fanout_views` wiping downstream state, `node_completed` dropping N-1 fan-out results) were fixed in commit `bff647b` and are not repeated here.
+Informational — adversarial-verified findings from code review against `verified_commit: 43d2e3c37e1100db31db86a0618d9b5fc6705da4`. Not hook-enforced; does not gate the evidence-report verdict. All findings below were confirmed by direct reproduction/reading (adversarial-verify survived). Round-1 and round-2 findings are in git history for this file; the three high-severity round-1 findings and the round-2 findings (`NODE_CACHED` missing from two client switches, `pluginRev` blind to a dirty working tree) were fixed in commits `bff647b` and `43d2e3c` and are not repeated here.
 
-1. **NODE_CACHED wired into only one of the three client-side NodeStatus switches**
-   - file: `src/hooks/use-workflow-recovery.ts:111`
+1. **`scan.py` now closes an import cycle with the engine package (scanner breaks on any `__init__` reorder)**
+   - file: `sdk/tongflow/scan.py:11`
    - severity: high
    - source: conventions
-   - detail: The slice's stated invariant is that the engine → SSE → canvas path for `node_cached` is fully proven before L2 fills it in (comments in `src/constants/task-status.ts:43-47` and `src/lib/task/engine-events.ts:26-31` say exactly this). But only `use-workflow-execution.ts:244` got the new `case NodeStatus.NODE_CACHED:` fallthrough. Two other consumers of the same SSE stream were missed and neither has a `default:` clause, so the status silently falls through:
+   - detail: `from .engine._subproc import utf8_env` makes `tongflow.scan` depend on `tongflow.engine`. But `sdk/tongflow/engine/plugins.py:25` already does `from ..scan import scan` — scan is the *lower* layer. Importing `tongflow.engine._subproc` executes `tongflow/engine/__init__.py` -> `runner.py` -> `plugins.py` -> back into the half-initialised `tongflow.scan`.
 
-     - `src/hooks/use-workflow-recovery.ts:111` — the reconnect/replay path, wired in `src/components/workspace/workspace.tsx:194`. Its `NODE_COMPLETED` arm is what calls `setNodeExecutionStatus(nodeId, "completed")` and `onNodeDataUpdate(...)`. After a page reload mid-run, a cached node stays visually "running" forever and its reused output is never applied — the exact failure the new comment in `task-status.ts` claims to prevent ("Anything else leaves the canvas spinning on a node that already has its answer").
-     - `src/components/workspace/execution-status-line.tsx:76` — `NODE_COMPLETED` increments `completed`; a cache hit never counts, so the progress line reads e.g. "3/5" for the rest of the run.
+     It only works today by accident: `tongflow/__init__.py` imports `.serve`, which pulls in `tongflow.engine` before anything reaches `.scan`. Proved by removing that one import from a scratch copy of the SDK:
 
-     `mapSSEStatusToTaskStatus` returning "COMPLETED" does not help either site: both switch on `message.status` (the raw NodeStatus), not the mapped task status. `src/lib/task/node-cached.test.ts` stays green because it only exercises `mapEngineEvent`, JSON round-trip, and `mapSSEStatusToTaskStatus` — never the recovery hook or the status line. Since `message.status` is typed as a plain string, TypeScript gives no exhaustiveness signal; adding a new NodeStatus member is unguarded by design here.
-
-2. **pluginRev records HEAD only, so a locally modified plugin keeps the same rev — the exact hazard the field is documented to prevent**
-   - file: `sdk/tongflow/scan.py:274`
-   - severity: medium
-   - source: bugs
-   - detail: `read_plugin_rev` returns `git rev-parse HEAD`, which is blind to the working tree. `src/lib/plugins/plugins-registry-schema.ts:37-42` states the purpose as "L1 folds it into the cache key — a plugin whose code changed while its key did not would serve the old version's output forever", and `sdk/tests/test_plugin_rev.py` repeats it. Any uncommitted edit (dev iteration, a hand patch, a partially-applied update that left the checkout dirty) changes the code while `pluginRev` stays identical.
-
-     Verified on HEAD:
      ```
-     same rev after rewriting the plugin: True 294c21c0a1a35100ce70d3eda5d5b24e6faaf365
+     ImportError: cannot import name 'scan' from partially initialized module 'tongflow.scan'
+       (most likely due to a circular import) .../tongflow/scan.py
      ```
-     (entry.py fully rewritten and extra.py added after the commit; rev unchanged.)
 
-     The repo's own fixture demonstrates the gap without noticing it: `test_one_unreadable_checkout_does_not_take_down_the_whole_scan` writes `entry.py` with the `@node_slot` handler *after* `_git_repo` commits, then asserts `plugins["oneflow-api-healthy"]["pluginRev"] == healthy_sha` — i.e. the recorded rev describes a tree that does not contain the code the scanner just registered. `git rev-parse HEAD` needs to be combined with a dirty check (`git status --porcelain`) or a content hash for the field to mean what the docs claim.
+     So trimming/reordering `tongflow/__init__.py`, or any consumer that reaches `tongflow.scan` without the full package `__init__` having run, kills the entire plugin scanner (`python -m tongflow`, `scan_manifest`, `pnpm verify:plugins`) — not just the rev feature. All of this to reuse a 6-line env helper.
 
-3. **Empty batch clears downstream state in the engine but not on the canvas — a new engine/canvas divergence**
-   - file: `sdk/tongflow/engine/batch.py:91`
-   - severity: medium
-   - source: conventions
-   - detail: The round-1 fix made `merge_fanout_views` emit an empty channel only when there were no calls at all (`if not values and results: continue`). For an empty batch (`results == []`) the channel IS emitted with `values: []`, so `runner.py:400` passes the `if not channel` guard and sets `slot_state["texts"|"fileKeys"] = []` — the engine's downstream data node is refreshed to empty, which is what AC-11 asks for.
+     Fix: move `utf8_env` to a top-level `tongflow/_subproc.py` (engine can keep re-exporting it), or set the two env vars inline in `read_plugin_rev`.
 
-     The canvas is not. For the same run the engine emits `node_completed` with `output = merge_fanout_results([]) == {}` (`runner.py:424`). On the client, `use-workflow-execution.ts:255` does `if (output) applyNodeOutput(...)` — `{}` is truthy, so it proceeds — and `applyResolvedOutputRoutes` (`src/lib/task/payload.ts:88`) starts each route with `const raw = payload?.[route.sourceField]; if (raw == null) continue;`. Nothing is cleared. So after an empty-batch run the browser keeps showing the previous run's content in a downstream data node that the engine has just emptied, and every engine node downstream computed against `[]`.
-
-     This is the same class of canvas/engine disagreement the slice exists to remove, and it is introduced by this diff: before the fan-out change the empty batch produced one real plugin call whose result travelled to both sides. AC-11/E13 pin only the engine half, so no eval sees it.
-
-4. **Both conformance halves hardcode the fixture list instead of reading the fixtures directory**
-   - file: `sdk/tests/conformance/test_conformance.py:22`
-   - severity: low
-   - source: conventions
-   - detail: `CASES` is written out literally in two places: `sdk/tests/conformance/test_conformance.py:22` and `src/lib/abi/conformance.test.ts:18`. Adding a fifth fixture requires editing both by hand; editing only one leaves the new case running on a single runtime, and a suite that runs a fixture on one side only reports nothing about agreement while looking like it does.
-
-     This is the inverse of the failure both files explicitly guard against — `conformance.test.ts:20-24` and `harness.py:load_fixture` both go out of their way to fail loudly on a *missing* fixture, on the stated grounds that "a silently absent fixture shrinks the suite to whatever happens to be on disk." A present-but-unlisted fixture shrinks it the same way, silently. `scripts/conformance/check-suite-discriminating.sh` does not catch it either: its three perturbations all target cases that are already in both lists. Globbing `fixtures/*.json` on both sides (and asserting the two sides see the same set) removes the hand-sync.
-
-5. **run_workflow's public outputs shape changed for batched nodes without an SDK version bump**
+2. **`run_workflow`'s documented `outputs` shape is now a list for batched nodes, and disagrees with the `node_completed` payload**
    - file: `sdk/tongflow/engine/runner.py:388`
+   - severity: medium
+   - source: conventions
+   - detail: `node_outputs[node_id] = results[0] if batch_field_of(node) is None else results` makes `outputs[nodeId]` a `list[dict]` for every node with `batchField` — ~30 mounted slots (`node-feature-registry.ts:158-283`), i.e. the common case in real exported workflows.
+
+     Two problems:
+
+     1. The public docstring at `runner.py:220` still says `` outputs `` maps node id -> raw plugin output, and was not updated. `run_workflow` is the SDK's published entry point, so an embedder reading `result["outputs"][nodeId]["image"]` (exactly the pattern in `sdk/tests/test_engine.py:731,788`) now gets a `TypeError: list indices must be integers` the moment the node batches. No CHANGELOG entry, no version bump in `sdk/pyproject.toml`.
+     2. The same node's output is emitted in two different shapes on two channels: `node_completed` carries `merge_fanout_results(results)` (a merged dict) while `outputs[nodeId]` carries the raw list. The inline comment claims `outputs[nodeId]` stays what existing consumers expect, which is only true for the unbatched path.
+
+     Pick one shape (the merged dict is the one the canvas already consumes) or update the docstring and the comment to state the list contract explicitly.
+
+3. **Merged batch output no longer conforms to the slot's declared ABI output schema**
+   - file: `sdk/tongflow/engine/batch.py:122`
+   - severity: medium
+   - source: conventions
+   - detail: `merge_fanout_results` concatenates every non-meta output field across N calls: `bucket.extend(value if isinstance(value, list) else [value])`. For `gen-text`, `config/tongflow.abi.json` declares `outputs.properties.text = {"type": "string"}`, so a 3-item batch now emits `{"success": true, "text": ["a","b","c"]}` on `node_completed` — a scalar-typed ABI field carrying an array.
+
+     CLAUDE.md makes the ABI the contract and states enforcement is compile-time only with no runtime validator, so nothing catches this: the generated `GenTextOutput` Pydantic model and the generated TS types both describe `text` as a string, while the engine puts a `string[]` on the wire. It survives today only because `SSEMessageData.output` is typed `Record<string, unknown>` and `compute_output_view` happens to flatten lists.
+
+     Either the ABI needs a declared "batched output" shape, or the merge needs to stay inside the projected `output_views` (which is already array-shaped by design) rather than reshaping the raw slot payload.
+
+4. **Test-only adapter placed in the business layer with Node-only APIs and no `.server.ts` suffix**
+   - file: `src/lib/abi/conformance.ts:1`
+   - severity: medium
+   - source: conventions
+   - detail: This module exists solely to feed `conformance.test.ts`: it reads fixtures off disk from a `process.cwd()`-relative `sdk/tests/conformance/fixtures`, and uses `node:crypto` (`createHash`) plus `Buffer`.
+
+     CLAUDE.md: "Server-only files are suffixed `.server.ts`". This one is not, and it sits in `src/lib/abi/` alongside `resolve.ts` and `node-feature-registry.ts` — modules the canvas node components import directly on the client. An accidental import from any client component pulls `node:crypto` and a filesystem read into the browser bundle, and `pnpm build` is the only thing that would catch it.
+
+     Also note the fixture path is cwd-relative, so `pnpm vitest` run from anywhere but the repo root throws at module load rather than skipping.
+
+     Either suffix it `.server.ts`, or move it next to the test (e.g. `src/lib/abi/__tests__/`), which is the more honest home given nothing in production imports it.
+
+5. **Empty batch clears downstream state in the engine but leaves stale values on the canvas**
+   - file: `sdk/tongflow/engine/runner.py:424`
+   - severity: medium
+   - source: bugs
+   - detail: On a zero-call fan-out, `merge_fanout_views(routes, [])` deliberately emits every channel with `values: []`, so the engine resets `data_node_state[target]` to empty (runner.py ~line 400-412) — the docstring in `batch.py` explicitly calls this out as the point: "leaving it makes a re-run serve stale output as if it were fresh."
+
+     The canvas does not get the same treatment. The `node_completed` event carries `merge_fanout_results([])` == `{}`. In `use-workflow-execution.ts` `applyNodeOutput` the check is `if (!output) return;` — `{}` is truthy, so it proceeds — and `applyResolvedOutputRoutes` (`src/lib/task/payload.ts:91`) does `const raw = payload?.[route.sourceField]; if (raw == null) continue;` for every route. Nothing is written and nothing is cleared.
+
+     Failure scenario: empty-batch re-run. The engine's own downstream chain sees `[]`; the browser keeps rendering the previous run's images/texts in the downstream data nodes, and `mapSSEStatusToTaskStatus` marks the run COMPLETED. The user is shown stale artifacts as the fresh result of a successful run — the exact canvas/engine divergence this slice was written to remove, reintroduced on the other side.
+
+6. **New hardcoded magic count guard of the shape CLAUDE.md already flags as a recurring foot-gun**
+   - file: `src/lib/task/node-cached.test.ts:104`
    - severity: low
    - source: conventions
-   - detail: `node_outputs[node_id] = results[0] if batch_field_of(node) is None else results` changes the type of `run_workflow(...)["outputs"][nodeId]` from `dict` to `list[dict]` for every node mounted with `batchOn()` (roughly 30 slots per `src/lib/abi/node-feature-registry.ts`). That value is part of the SDK's published return contract, is re-emitted in the `workflow_completed` event, and is persisted verbatim into `tasks.result` by `src/lib/task/engine-delegate.server.ts:313`.
+   - detail: `expect(consumers.length).toBe(4)` asserts exactly four files in `src` contain the literal `case NodeStatus.NODE_COMPLETED:`. CLAUDE.md explicitly calls out `scripts/plugins/check-manifest-unmoved.sh`'s `expected_count` as a snapshot-not-invariant that "turns red" on unrelated PRs and wastes debugging time. This is the same construction, and it will fire on any PR that adds a fifth SSE consumer or reformats one of the existing switches.
 
-     `sdk/pyproject.toml` and `sdk/tongflow/__init__.py` both still read 0.2.17 and neither is touched by this diff, and `CHANGELOG.md` is unchanged. CLAUDE.md's release checklist requires bumping both files in lockstep whenever the SDK changes, and calls drift between them a recurring bug. The behaviour change is intentional and documented in the code comment; it is the version/changelog half that is missing, so a consumer pinned to `oneflow-sdk==0.2.17` can get either shape depending on when they installed.
+     Secondary: `walk("src")` and `THIS_FILE = "src/lib/task/node-cached.test.ts"` are cwd-relative — the test only passes when vitest runs from the repo root.
 
-6. **pluginRev format is unvalidated on the Python side but strictly length-checked on the TS side; a non-40-char rev empties the entire registry**
-   - file: `src/lib/plugins/plugins-registry-schema.ts:42`
+     If the count guard stays, add the same "bump this, don't debug it" note CLAUDE.md prescribes, and resolve the paths from `import.meta.dirname`.
+
+7. **`merge_fanout_results` discards per-call `error` and forces `success=True`**
+   - file: `sdk/tongflow/engine/batch.py:127`
    - severity: low
    - source: bugs
-   - detail: `scan.py:315` writes whatever `git rev-parse HEAD` prints, with no format guard. The consumer declares `pluginRev: z.string().length(40).optional()`, and `runPluginsScanner` (`src/lib/plugins/plugins-scanner.server.ts:56`) calls `PluginsRegistrySchema.parse(raw)` un-guarded — a single out-of-format value throws, `scanAndCache` (`src/ext-default/plugin-registry.ts:38-47`) catches it and returns `emptyRegistry(message)`, so *every* plugin disappears, not just the offending one.
+   - detail: For N>1 results, `merged` is seeded `{"success": True}` and `_META_OUTPUT_FIELDS = {"success", "error"}` are skipped for every result. Only `one.get("success") is False` raises in the runner (runner.py ~line 380), so a plugin that reports a soft failure any other way — `success: None`, `success` omitted, or `success: True` alongside a populated `error` string — has that signal dropped entirely from the `node_completed` payload the canvas receives.
 
-     Concrete trigger: a plugin checkout created with `git init --object-format=sha256` (or cloned from a SHA-256 repo) makes `rev-parse HEAD` return 64 hex chars. The Python side happily writes it; the TS side rejects the whole manifest. This is also inconsistent with `read_plugin_rev`'s own stated contract, which classifies problems as either "no rev, no complaint" or "raise and record a per-plugin error" — an out-of-format rev is neither.
+     Secondary effect in the same function: a scalar-declared ABI output (e.g. `mainText: string`, or a scalar `$ref` like `video: VideoRef`) is collapsed into a list of N values via `bucket.extend(...)`. `applyResolvedOutputRoutes` happens to tolerate arrays for scalar routes, so this is currently harmless on the canvas, but any consumer reading the field by its ABI-declared scalar shape gets an array instead.
 
-     Either validate/normalize in `read_plugin_rev` (only emit a 40-hex sha, otherwise treat as no-rev + scan error) or relax the Zod rule to `z.string().regex(/^[0-9a-f]{40,64}$/)` so one plugin cannot cost all of them.
+8. **TS conformance adapter silently models fewer binding shapes than the Python half**
+   - file: `src/lib/abi/conformance.ts:210`
+   - severity: low
+   - source: conventions
+   - detail: Two asymmetries between the two halves of a suite whose entire job is proving they agree:
+
+     1. `ConformanceFixture` (line 103) has no `inputs` field, but `sdk/tests/conformance/harness.py` passes `fixture.get("inputs")` into `run_workflow`. Any fixture using workflow inputs is honoured by Python and invisible to TS.
+     2. `callLogForFixture` treats every non-handle binding as config: `configValues[field] = binding.value`. For `kind: "input"` bindings the fixture carries `inputName`, not `value`, so the TS side produces `undefined` while `resolve_node_params` (`bindings.py`) resolves `inputs[binding["inputName"]]`.
+     3. `upstreamValues` (line 168) only looks in `fixture.workflow.dataNodes`, so an executable->executable chain yields empty values on the TS side while Python resolves the real `output_views`.
+
+     None of these bites today (all four fixtures are single-stage, data-node-fed, input-free) and a mismatch would go red rather than green — but it would read as an engine bug, not an adapter gap. Worth either supporting the shapes or throwing an explicit "adapter does not model X" error in `callLogForFixture` so the failure names itself.
+
+9. **Conformance TS adapter silently resolves unknown fixture sources to nothing**
+   - file: `src/lib/abi/conformance.ts:175`
+   - severity: low
+   - source: bugs
+   - detail: `upstreamValues` does `const dn = dataNodes.get(src.fromNodeId); if (!dn?.staticData) continue;` and then `src.fromField === "texts" ? dn.staticData.texts : dn.staticData.fileKeys`. Two silent fallbacks in a helper whose entire job is to feed the discrimination suite:
+
+     1. A `fromNodeId` that names an executable node (not a data node) or a typo'd id yields no values, with no error. The Python side's `read_source` also returns `[]` for an unknown id, so both halves quietly agree on nothing and the fixture goes green while proving nothing.
+     2. Any `fromField` other than `"texts"` is treated as `fileKeys`. An upstream executable's ABI source field (e.g. `images`) would be mis-read as `fileKeys` — undefined — rather than rejected.
+
+     All four current fixtures use only data-node sources with `fromField: "texts"`, so neither branch fires today; the exposure is the next fixture added. `specForFixtureNode` in the same file already throws loudly on an unresolvable spec — `upstreamValues` should throw on an unresolvable source for the same reason.
+
+## Chua adversarial-verify (refuter chet)
+
+None — every finding above completed adversarial verification (direct reproduction or source-level confirmation) before being listed.
