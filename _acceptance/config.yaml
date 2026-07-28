@@ -76,6 +76,28 @@ executors:
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
+    # stale-scope-by-paths Gate 1 (2026-07-28): every file below lands during
+    # implementation. These live under scripts/acceptance/ on purpose — the
+    # t1_skip_globs exemption for the gate tooling lists EXACT paths, so a guard
+    # in a new subdirectory is gated and the gate applies to itself.
+    # One key per eval, same guard with a different --case: nine evals behind one
+    # command collapse nine criteria into one exit code, and a case that was
+    # never implemented then looks identical to a case that passed.
+    stale_scope_in_scope: bash scripts/acceptance/check-stale-scoping.sh --case in-scope
+    stale_scope_out_of_scope: bash scripts/acceptance/check-stale-scoping.sh --case out-of-scope
+    stale_scope_partial: bash scripts/acceptance/check-stale-scoping.sh --case partial
+    stale_scope_under_declared: bash scripts/acceptance/check-stale-scoping.sh --case under-declared
+    stale_scope_malformed: bash scripts/acceptance/check-stale-scoping.sh --case malformed
+    stale_scope_merged_halves: bash scripts/acceptance/check-stale-scoping.sh --case merged-halves
+    stale_scope_suppression: bash scripts/acceptance/check-stale-scoping.sh --case suppression
+    stale_scope_two_bases: bash scripts/acceptance/check-stale-scoping.sh --case two-bases
+    stale_scope_announce: bash scripts/acceptance/check-stale-scoping.sh --case announce
+    stale_scope_mutation: bash scripts/acceptance/check-stale-scoping.sh --case mutation
+    stale_scope_case_completeness: bash scripts/acceptance/check-stale-scoping.sh --case case-completeness
+    stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
+    stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
+    stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
+    stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
