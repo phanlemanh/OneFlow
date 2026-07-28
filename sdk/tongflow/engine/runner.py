@@ -244,10 +244,19 @@ def run_workflow(
     # is still no cache to hit: adding fields to an event already running in
     # production costs far more than declaring them up front, and the host side
     # (engine-events.ts -> SSE -> canvas) is wired for it as of L0. L2 fills in
-    # fingerprint/tier and calls emit() with exactly this shape.
+    # fingerprint/tier/output and calls emit() with exactly this shape.
     #
     #   {"type": "node_cached", "nodeId": str, "feature": str,
-    #    "label": str, "fingerprint": str, "tier": "A" | "B"}
+    #    "label": str, "fingerprint": str, "tier": "A" | "B",
+    #    "output": dict | None}
+    #
+    # `output` is the reused artifact itself, and it is declared here for the
+    # same reason as the rest: the canvas applies a completed node's result from
+    # this payload alone (use-workflow-execution.ts -> applyNodeOutput), so an
+    # event without it would flip the node to "completed" showing nothing. It is
+    # optional because L0 has no cache to hit; omitting it costs nothing on the
+    # wire, whereas discovering the gap at L2 costs a second pass over three
+    # layers.
     def emit(event: dict[str, Any]) -> None:
         if on_progress is not None:
             on_progress(event)

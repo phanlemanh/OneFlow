@@ -79,7 +79,7 @@ def call_log(fixture: dict[str, Any], tmp_dir: Path) -> list[dict[str, Any]]:
         (pdir / "entry.py").write_text("# conformance stub\n", encoding="utf-8")
 
     with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: _manifest_for(fixture)):
-        run_workflow(
+        result = run_workflow(
             fixture["workflow"],
             fixture.get("inputs") or {},
             plugins_dir=plugins_dir,
@@ -87,5 +87,15 @@ def call_log(fixture: dict[str, Any], tmp_dir: Path) -> list[dict[str, Any]]:
             abi_path=ABI_PATH,
             auto_install=False,
             invoker=recording_invoker,
+        )
+    # `run_workflow` does not raise on node failure — it records the exception
+    # and returns status "failed". Without this check a crashed run and a
+    # fan-out to zero calls both produce `calls == []`, so `batch-empty`, whose
+    # entire purpose is pinning zero-call semantics, would certify an engine
+    # that exploded on the way there.
+    if result["status"] != "success":
+        raise AssertionError(
+            f"engine run did not succeed: status={result['status']} "
+            f"errors={result['errors']}"
         )
     return calls

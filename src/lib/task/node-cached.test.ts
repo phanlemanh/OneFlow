@@ -69,6 +69,28 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
         ).toBeNull();
     });
 
+    it("carries the reused artifact through all three layers", () => {
+        // The canvas applies a completed node's result from this payload alone,
+        // so a `node_cached` whose output is dropped in transit renders as a
+        // finished node showing nothing. L0 has no cache to hit, but the field
+        // has to survive the wire before L2 relies on it.
+        const ev = { ...engineEvent(), output: { texts: ["reused"] } };
+        const mapped = mapEngineEvent(ev);
+        const parsed = JSON.parse(
+            JSON.stringify({ status: mapped?.status, data: mapped?.data }),
+        ) as SSEMessage;
+        expect(parsed.data?.output?.texts).toEqual(["reused"]);
+    });
+
+    it("omits output entirely when the engine sends none", () => {
+        // `if (output)` on the client must not fire on an absent artifact —
+        // an empty object would clear whatever the node already shows.
+        const parsed = JSON.parse(
+            JSON.stringify({ data: mapEngineEvent(engineEvent())?.data }),
+        ) as SSEMessage;
+        expect(parsed.data).not.toHaveProperty("output");
+    });
+
     it("a node_cached missing its fingerprint yields an empty string, not undefined", () => {
         // The field stays present in the payload shape so a consumer reading it
         // sees "no fingerprint" rather than a key that vanished.
