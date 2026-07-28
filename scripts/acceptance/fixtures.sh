@@ -179,3 +179,76 @@ mk_pair_fixture() {
     git commit -q -m "fixture base"
   )
 }
+
+# run_gate_with_drift <gate-path> <fixture-mode> <drift-path> — build a signed
+# fx feature (mk_committed_report_fixture), commit one drifting file AFTER
+# that commit, then run <gate-path> with --base at the post-report commit —
+# the same "artifacts not in the PR diff" shape case_out_of_scope uses, so
+# Task 6's coverage cross-check never runs and never masks what the caller is
+# actually trying to observe. Echoes the gate's combined stdout+stderr.
+run_gate_with_drift() {
+  rgw_gate="$1"; rgw_mode="$2"; rgw_drift="$3"
+  rgw_dir="$(mktemp -d)"
+  rgw_base="$(mk_committed_report_fixture "$rgw_dir" fx "$rgw_mode")"
+  ( cd "$rgw_dir" && echo drift > "$rgw_drift" && git add -A && git commit -q -m drift )
+  bash "$rgw_gate" "$rgw_dir" --base "$rgw_base" 2>&1
+  rm -rf "$rgw_dir"
+}
+
+# run_mutation_case — full body of check-stale-scoping.sh's case_mutation
+# (E9 / AC-9); kept here (rather than in check-stale-scoping.sh, which is
+# already at the repo's 800-line-per-file cap) purely for line budget. Relies
+# on $GATE and pass()/fail() from the caller's shell — this file is always
+# sourced into check-stale-scoping.sh, never executed standalone.
+#
+# Two mutations, each applied to a TEMP COPY of the gate — the working tree
+# is never edited and the shipped gate carries no knob (AC-13):
+#   (a) narrow scope forced to match nothing → mechanism becomes "never stale"
+#   (b) completeness forced to always pass  → mechanism becomes blind trust
+# Each perturbation is verified to have actually changed the file (cmp) — a
+# sed whose target text has moved patches nothing, the "mutation" then runs
+# the unmodified gate, and the case would pass while proving nothing.
+run_mutation_case() {
+  work="$(mktemp -d)"; trap 'rm -rf "$work"' RETURN
+  cp "$GATE" "$work/gate.sh"
+  cp "$(dirname "$GATE")/recheck-evidence.js" "$work/" 2>/dev/null || true
+
+  # Baseline: the unpatched temp copy must reproduce the real gate's in-scope
+  # catch, or nothing below proves anything about the mutations.
+  base_out="$(run_gate_with_drift "$work/gate.sh" all src/covered/new.txt)"
+  printf '%s\n' "$base_out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail mutation "temp copy does not reproduce the real gate: $base_out"
+
+  # (a) neutralize the scope check inside stale_files() so a set scope always
+  # "continue"s — every changed file is skipped whenever narrow scope applies,
+  # i.e. a feature with a narrow scope is never reported stale again.
+  sed 's/match_globs "\$f" "\$scope" || continue/continue/' \
+    "$work/gate.sh" > "$work/gate_a.sh"
+  cmp -s "$work/gate.sh" "$work/gate_a.sh" \
+    && fail mutation "perturbation (a) patched nothing — the sed target moved"
+  a_out="$(run_gate_with_drift "$work/gate_a.sh" all src/covered/new.txt)"
+  printf '%s\n' "$a_out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    && fail mutation "perturbation (a) did not go RED — in-scope changes are not actually caught"
+
+  # (b) neutralize feature_scope's n_evals==n_paths completeness check: a
+  # "partial" declaration (one eval left undeclared) is then trusted as
+  # complete, scoping ONLY to what WAS declared and silently dropping the
+  # undeclared eval's implicit "everything" — drift outside that narrowed
+  # scope goes unreported.
+  sed 's/\[ "\$n_evals" -eq "\$n_paths" \] || return 1/:/' \
+    "$work/gate.sh" > "$work/gate_b.sh"
+  cmp -s "$work/gate.sh" "$work/gate_b.sh" \
+    && fail mutation "perturbation (b) patched nothing — the sed target moved"
+  b_out="$(run_gate_with_drift "$work/gate_b.sh" partial src/uncovered/new.txt)"
+  printf '%s\n' "$b_out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    && fail mutation "perturbation (b) did not go RED — a partial declaration is trusted"
+
+  # Revert: the unpatched copy is green again on both shapes.
+  r1="$(run_gate_with_drift "$work/gate.sh" all src/covered/new.txt)"
+  printf '%s\n' "$r1" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail mutation "revert: in-scope change no longer caught"
+  r2="$(run_gate_with_drift "$work/gate.sh" partial src/uncovered/new.txt)"
+  printf '%s\n' "$r2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail mutation "revert: partial declaration no longer falls back"
+  pass mutation
+}

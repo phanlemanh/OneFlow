@@ -780,7 +780,7 @@ case_two_bases() {
     && fail two-bases "narrow scope refused although the coverage set is covered: $out"
   pass two-bases
 }
-
+case_mutation() { run_mutation_case; } # E9/AC-9 — body in fixtures.sh (800-line cap)
 usage() { echo "usage: $0 --case <$(echo "$KNOWN_CASES" | tr ' ' '|')>" >&2; exit 2; }
 
 CASE=""
