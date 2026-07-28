@@ -3,9 +3,12 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import subprocess
 from pathlib import Path
+from typing import Optional
 
 from .abi import load_abi
+from .engine._subproc import utf8_env
 from ._ast_utils import (
     DEFAULT_SLOTS_CONST,
     SLOT_MODELS_CONST,
@@ -268,6 +271,35 @@ def _scan_default_slots_in_dir(plugin_dir: Path) -> tuple[list[str], list[str]]:
     return slots, problems
 
 
+def read_plugin_rev(plugin_dir: Path) -> Optional[str]:
+    """The installed commit of a plugin, or None when it is not a checkout.
+
+    Two states that look alike must not be conflated. A hand-copied directory
+    legitimately has no rev — dev environments do this all the time. A directory
+    that *is* a checkout whose rev cannot be read is a failure, and returning
+    None there would let it pass as an ordinary hand-copied plugin: L1 folds
+    this value into the cache key, so a silently missing rev means a plugin can
+    change while its key does not.
+    """
+    if not (plugin_dir / ".git").exists():
+        return None
+    r = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=plugin_dir,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=utf8_env(),
+    )
+    if r.returncode != 0:
+        raise RuntimeError(
+            f"cannot read plugin rev for {plugin_dir.name}: "
+            f"{r.stderr.strip() or r.stdout.strip()}"
+        )
+    return r.stdout.strip()
+
+
 def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
     abi = load_abi(abi_path)
     valid = abi.node_slots
@@ -408,6 +440,10 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
             "methodsByNodeSlot": llm_methods,
             "entryFile": "entry.py",
             "needsDeploy": needs_deploy,
+            # Optional on purpose: a hand-copied plugin has no rev, and a
+            # registry written before this field existed must still parse.
+            # L1 folds it into the cache key; L0 only records it.
+            **({"pluginRev": rev} if (rev := read_plugin_rev(pdir)) else {}),
         }
 
     # de-dupe lists, preserve order

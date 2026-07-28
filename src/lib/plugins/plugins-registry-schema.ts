@@ -33,6 +33,13 @@ export const PluginConfigSchema = z.object({
     /** Generic runner executes `python <entryFile>`; every plugin ships its
      * own entry.py. */
     entryFile: z.string().min(1).optional(),
+    /** Full 40-character commit sha of the installed plugin checkout, written
+     * by the scanner. Optional by necessity, not by laziness: a hand-copied
+     * plugin directory is not a checkout and legitimately has none, and every
+     * registry written before this field existed must still parse. L1 folds it
+     * into the cache key — a plugin whose code changed while its key did not
+     * would serve the old version's output forever. */
+    pluginRev: z.string().length(40).optional(),
     /** True when the plugin's class is marked `@deploy` (a deploy-first backend
      * such as Modal): its entry.py deploys once before invoking. Informational —
      * the deploy step lives inside the plugin's entry.py. */
