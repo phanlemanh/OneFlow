@@ -14,7 +14,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_hashseed_stable
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; node_fingerprint() called for the same (slot, pluginId, pluginRev, model, business_input) in two SEPARATE subprocesses launched with different PYTHONHASHSEED values returns the same key in both — two calls within one process do not satisfy this eval"
+    expected: "exit 0; node_fingerprint() called for the same (slot, pluginId, pluginRev, model, business_input) in two SEPARATE subprocesses launched with different PYTHONHASHSEED values returns the same key in both, and both keys are non-None strings of exactly 64 lowercase hex characters — two calls within one process do not satisfy this eval, and an assertion of only k1 == k2 does not satisfy this eval either, since None == None is also True in Python and an implementation that returns None unconditionally would otherwise pass"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2
@@ -30,7 +30,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_per_run_keys_stripped
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two business_input values differing ONLY in the per-run keys (_tongflow, taskId, outputs, level, dependencies) yield the SAME key — each of the five keys tested individually, not just one"
+    expected: "exit 0; two business_input values differing ONLY in the per-run keys (_tongflow, taskId, outputs, level, dependencies) yield the SAME key, and both keys are non-None strings of exactly 64 lowercase hex characters — each of the five keys tested individually, not just one; an assertion of only k1 == k2 does not satisfy this eval, since None == None is also True in Python and an implementation that returns None unconditionally would otherwise pass"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E4
@@ -38,7 +38,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_asset_bytes_same
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two assets with IDENTICAL bytes but different file_key values yield the SAME key — proving the hash hooks in after materialize_asset_inputs, not on the reference"
+    expected: "exit 0; two assets with IDENTICAL bytes but different file_key values yield the SAME key, and both keys are non-None strings of exactly 64 lowercase hex characters — proving the hash hooks in after materialize_asset_inputs, not on the reference; an assertion of only k1 == k2 does not satisfy this eval, since None == None is also True in Python and an implementation that returns None unconditionally would otherwise pass"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -102,7 +102,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_sdk_version
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; SDK versions differing only in PATCH (0.2.17 vs 0.2.18), injected via node_fingerprint()'s optional sdk_version parameter (not read from tongflow.__version__ by default), yield the SAME key; SDK versions differing in MINOR (0.2.17 vs 0.3.0) via the same parameter yield DIFFERENT keys, both non-None strings (an assertion of only k1 != k2 does not satisfy this half); AND calling node_fingerprint() WITHOUT sdk_version (default path) derives sdkMajor from tongflow.__version__ (currently '0.2.17') as '0.2', not a placeholder like '0.0' — all three halves asserted, not only the injected-parameter halves; a test that can only satisfy this by monkeypatching an already-derived sdkMajor value does not satisfy this eval"
+    expected: "exit 0; SDK versions differing only in PATCH (0.2.17 vs 0.2.18), injected via node_fingerprint()'s optional sdk_version parameter (not read from tongflow.__version__ by default), yield the SAME key, and both keys are non-None strings of exactly 64 lowercase hex characters (an assertion of only k1 == k2 does not satisfy this half, since None == None is also True in Python and an implementation that returns None unconditionally would otherwise pass); SDK versions differing in MINOR (0.2.17 vs 0.3.0) via the same parameter yield DIFFERENT keys, both non-None strings (an assertion of only k1 != k2 does not satisfy this half); AND calling node_fingerprint() WITHOUT sdk_version (default path) derives sdkMajor from tongflow.__version__ (currently '0.2.17') as '0.2', not a placeholder like '0.0' — all three halves asserted, not only the injected-parameter halves; a test that can only satisfy this by monkeypatching an already-derived sdkMajor value does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E13
@@ -134,5 +134,5 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_dict_order_stable
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two business_input dicts with identical content but different key insertion order (e.g. the same keys/values constructed in reverse order, or via two differently-ordered dict literals) yield the SAME key — proving the implementation normalizes serialization order (e.g. sort_keys) before hashing rather than hashing raw dict iteration order, which would make the key depend on caller-side construction order and cause permanent cache misses against L1's DoD 'fingerprint ổn định qua các lần chạy'; dict equality alone (which is order-insensitive in Python) does not satisfy this eval — the test must construct two genuinely differently-ordered dicts and compare the computed KEYS, not the dicts"
+    expected: "exit 0; two business_input dicts with identical content but different key insertion order (e.g. the same keys/values constructed in reverse order, or via two differently-ordered dict literals) yield the SAME key, and both keys are non-None strings of exactly 64 lowercase hex characters — proving the implementation normalizes serialization order (e.g. sort_keys) before hashing rather than hashing raw dict iteration order, which would make the key depend on caller-side construction order and cause permanent cache misses against L1's DoD 'fingerprint ổn định qua các lần chạy'; dict equality alone (which is order-insensitive in Python) does not satisfy this eval — the test must construct two genuinely differently-ordered dicts and compare the computed KEYS, not the dicts; an assertion of only k1 == k2 does not satisfy this eval either, since None == None is also True in Python and an implementation that returns None unconditionally would otherwise pass"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
