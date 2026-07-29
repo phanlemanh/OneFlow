@@ -61,7 +61,7 @@ evals:
     criterion: AC-6
     executor: test
     cmd: config:executors.test.unit_conformance
-    paths: ["sdk/tests/conformance/**", "src/lib/abi/resolve.ts", "src/lib/abi/conformance.test.ts"]
+    paths: ["sdk/tests/conformance/**", "src/lib/abi/resolve.ts", "src/lib/abi/conformance.ts", "src/lib/abi/conformance.test.ts"]
     expected: "exit 0; the TypeScript side reads the SAME fixture files from sdk/tests/conformance/fixtures/ (not a copy under src/) and its buildPrompts-derived call-log equals each fixture's expectedCalls under the same normalization rules as E6; a fixture whose file is missing fails loudly rather than being skipped"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -109,7 +109,7 @@ evals:
     criterion: AC-10
     executor: test
     cmd: config:executors.test.unit_node_cached
-    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/sse-events.ts", "src/app/api/**", "src/lib/task/node-cached.test.ts"]
+    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-events.ts", "src/lib/task/sse-events.ts", "src/app/api/**", "src/lib/task/node-cached.test.ts", "src/constants/task-status.ts", "src/hooks/use-workflow-execution.ts", "src/hooks/use-workflow-recovery.ts", "src/components/workspace/execution-status-line.tsx"]
     expected: "exit 0; ALL THREE LAYERS — a node_cached event is injected at the engine boundary, travels through engine-delegate.server.ts, is serialized as it would be on the SSE route, and is consumed by the client-side parser; the value the parser yields still carries fingerprint and tier. Asserting only the delegate's in-process notification does not satisfy this eval. SUPPRESSION half — an unrecognized event type produces no notification, does not throw, and leaves the stream alive"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
