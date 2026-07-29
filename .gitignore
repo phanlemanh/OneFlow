@@ -77,3 +77,6 @@ __pycache__/
 /.open-next/
 /.dev.vars*
 /.wrangler/
+
+# Local media scratch — sample clips dropped in during development, never shipped
+/video/
