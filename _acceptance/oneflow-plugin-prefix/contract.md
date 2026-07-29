@@ -122,6 +122,26 @@ in the change. One residual remains, recorded rather than fixed:
 Fixing it means editing an eval script after verification, which restarts the
 round. Queued, with the same disposition `ci-actions-bump` used for its two.
 
+- **`check-no-config-drift.sh` is a landing-time guard, and re-running it on a
+  later branch measures the wrong PR** (found 2026-07-29, during the re-verify
+  that `conformance-l0` forced). It answers "did *this* PR carry anything else
+  along" by diffing `origin/main...HEAD`. That question is only meaningful while
+  this feature is the thing under review. On `feat/conformance-l0`, `HEAD` is
+  someone else's work, so the guard reports
+  `FAIL: src/lib/plugins/plugins-registry-schema.ts` — a file `conformance-l0`
+  changes on purpose to record `pluginRev`, and one this feature has no claim on.
+  It fails **closed**, so nothing unsafe shipped; the cost is a red eval that
+  looks like a regression and is not one.
+
+  This is not a one-off. `origin_manifest_unmoved` (AC-6 of `per-plugin-origin`)
+  has the identical shape, and CLAUDE.md already says so in as many words: *"it
+  is a snapshot of that PR, not a standing invariant."* Both belong to a family
+  the acceptance system has no vocabulary for yet — **evals whose meaning expires
+  at merge** — which the gate re-runs forever as if they were invariants. The fix
+  is a policy decision (mark such evals landing-time-only and skip them on later
+  branches) rather than a patch to either script, so it is queued into item 0.6
+  with the other gate-semantics work, not vaccinated here.
+
 ## Notes
 
 - Tiền tố được ép ở **hai** tầng — `PLUGIN_ID_RE` của trình cài đặt và `_detect_runner` của scanner. (Dòng ghi chú cũ ở đây từng khẳng định chỉ có một tầng; nó là chính câu bị bác bỏ trong mục Amendment, và vẫn nằm lại đây như một sự thật hiện hành cho tới khi verifier vòng 2 chỉ ra. Một điều đã rút lại thì phải rút ở mọi chỗ nó được viết.)

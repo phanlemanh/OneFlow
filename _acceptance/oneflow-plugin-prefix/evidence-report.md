@@ -4,10 +4,10 @@ feature_slug: oneflow-plugin-prefix
 verdict: PASS
 failed_evals: []
 reason:
-verified_by: fresh-context verification subagent (round 3)
+verified_by: fresh-context verification subagent (round 3); round 4 re-verify 2026-07-29
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4dcb419d5d7d4612c10339bede6219662721d7e0
+verified_commit: 05fc9453fa561eaa60166c594974231459359db3
 human_signoff: Manh 2026-07-27
 ---
 
@@ -720,3 +720,51 @@ t1-exempt documentation and config that reached main independently of this branc
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.
+
+Round 4 — re-verify on `feat/conformance-l0` (2026-07-29). NOT a carry-forward.
+`verified_commit` moved from 4dcb419d5d7d4612c10339bede6219662721d7e0 to
+05fc9453fa561eaa60166c594974231459359db3, and this one needed a fresh human
+signature because the carry-forward rule explicitly does not reach it.
+
+Why it does not carry: this feature owns `sdk/tongflow/scan.py` — the scanner is
+the second place the prefix is enforced and the one that decides registration,
+which is why the T3 amendment added `sdk_pytest_scan_prefix` in the first place.
+The branch under review modifies that file. Ownership was computed, not assumed:
+this feature's owned set is the diff of merge commit dd39da8 (PR #18), intersected
+with the branch's gated diff; the intersection is `sdk/tongflow/scan.py` and
+nothing else. It is the only non-empty intersection in the repo, which is why the
+other six features were re-pinned and this one was not.
+
+What that change actually is: purely additive. `conformance-l0` adds a
+`read_plugin_rev()` function and its two imports; no existing line of the
+prefix-gating path is edited, moved, or reordered.
+
+Evals re-run on the merged tree, one at a time rather than as a suite:
+
+| Eval | Key | Result |
+|---|---|---|
+| AC-1/AC-2 normaliser | `unit_plugin_id` | PASS — 75 tests |
+| AC-4 scanner gating | `sdk_pytest_scan_prefix` | PASS — 23 tests |
+| AC-5 docs | `docs_plugin_prefix` | PASS — exit 0, both assertions reported ok |
+| AC-6 no-carry | `prefix_no_config_drift` | **FAIL — exit 1**, and it is measuring the wrong PR |
+
+The fourth is the finding of this round, recorded rather than papered over. That
+guard asserts "widening the prefix did not carry anything else along" by diffing
+`origin/main...HEAD`. On a later branch `HEAD` is a different feature's work, so
+it flags `src/lib/plugins/plugins-registry-schema.ts` — a file `conformance-l0`
+changes on purpose to record `pluginRev`, and one this feature has no claim on.
+It fails closed, so nothing unsafe passed; what it cannot do is tell a reviewer
+whether this feature regressed, because it was never asking about this feature's
+state. It asks about a PR that merged two days ago.
+
+The substance of AC-6 was therefore checked directly instead of through the
+guard: on this branch `config/`, `src/db/`, and
+`src/lib/plugins/plugins-registry.server.ts` are untouched, and
+`config/official-plugins.json` still carries 38 plugins under
+`https://github.com/tong-io`. The full write-up — and why this belongs to a whole
+family of expires-at-merge evals rather than being a bug in one script — is in
+the contract's Known limits; the fix is queued into item 0.6.
+
+Standing checks green on the merged tree: `pnpm lint:check` (413 files),
+`pnpm test` (347 passed), `pnpm build && pnpm typecheck` run sequentially, and
+`cd sdk && pytest` (117 passed).

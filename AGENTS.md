@@ -48,6 +48,10 @@ Two corollaries:
 **The carry-forward rule** (authorised by Manh, 2026-07-26). A merged feature's human signature may be re-pinned to a new commit when **both** hold:
 
 1. The feature's **own** code is unchanged — check with `git diff --name-only <old-pin>` filtered of `_acceptance/`; every differing file must belong to some other feature.
+
+**Ownership is per file, not per subtree** (settled 2026-07-29, by Manh, when `conformance-l0` forced the question). Compute a feature's owned set as the diff of the merge commit that landed it, then intersect with the branch's gated diff; an empty intersection is what condition 1 asks for. Do not read a T3 path like `sdk/**` as one feature's territory — several features live under it, and the whole-subtree reading sends every SDK-touching branch to re-verify a feature it did not touch. It cost one unnecessary re-signature already: PR #18's commit `7e307f5` re-signed `sdk-distribution-rename` on the reasoning "this branch changes `sdk/**`, which sdk-distribution-rename owns", when the files it actually owns (`pyproject.toml`, `tongflow/__init__.py`, `engine/plugins.py`, `tests/test_packaging.py`) were untouched. Older notes describing that episode as precedent are superseded by this paragraph.
+
+The per-file reading is stricter where it counts, not looser: it is what caught `sdk/tongflow/scan.py` belonging to `oneflow-plugin-prefix` on the `conformance-l0` branch, sending exactly one feature — and no others — to re-verify.
 2. The standing checks are green on the new tree.
 
 The signature then attests to the same code it originally did, which is the substance the human actually judged. Record the check in the report's `## Iterations` — including which files differed and which feature owns them.
