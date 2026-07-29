@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4dcb419d5d7d4612c10339bede6219662721d7e0
+verified_commit: 05fc9453fa561eaa60166c594974231459359db3
 human_signoff: Manh 2026-07-27
 ---
 
@@ -273,6 +273,29 @@ t1-exempt documentation and config that reached main independently of this branc
 
 (2) Standing checks green on the new tree: `pnpm lint:check`, `pnpm test`
 (329 passed), `pnpm build && pnpm typecheck`.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.
+
+Carry-forward re-pin (2026-07-29, branch feat/conformance-l0):
+`verified_commit` moved from 4dcb419d5d7d4612c10339bede6219662721d7e0 to
+05fc9453fa561eaa60166c594974231459359db3 with NO re-verify, under the carry-forward
+rule in AGENTS.md. Both of its conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. Filtered of `_acceptance/`, the files
+differing since the old pin are the 31 gated files of **conformance-l0** — the
+feature under review on this branch — plus t1-exempt `STATUS.md` and
+`docs/superpowers/**`. Ownership was computed rather than eyeballed: for each
+merged feature, its owned set was taken from the diff of the merge commit that
+landed it, then intersected with this branch's gated diff. This feature's
+intersection is empty. Across the whole repo exactly one intersection is not
+empty — `sdk/tongflow/scan.py`, owned by **oneflow-plugin-prefix** — so that
+feature is deliberately NOT re-pinned here; it is on the re-verify path instead,
+which is the half of the rule this note does not license.
+
+(2) Standing checks green on the new tree: `pnpm lint:check` (413 files),
+`pnpm test` (347 passed), `pnpm build && pnpm typecheck` (run sequentially, per
+the config note about `.next/types`), and `cd sdk && pytest` (117 passed).
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.
