@@ -1,0 +1,36 @@
+{
+  "feature_plain": "Tính ra một 'vân tay' cho mỗi lần gọi plugin, để lát sau engine biết kết quả nào dùng lại được — đây là viên gạch đầu tiên của lời hứa 'sửa miễn phí, sinh mới mới tính tiền'. Lát này CHƯA lưu và CHƯA dùng lại gì cả, chỉ tính vân tay cho đúng.",
+
+  "will_do": [
+    { "id": "AC-2", "p": "Sẽ ra vân tay KHÁC khi người dùng đổi bất kỳ trường nội dung nào — đổi giá, đổi câu hook, đổi ảnh." },
+    { "id": "AC-4", "p": "Sẽ ra vân tay GIỐNG khi cùng một file được nạp lại dưới tên khác — nhận nhau bằng nội dung, không bằng tên." },
+    { "id": "AC-5", "p": "Sẽ ra vân tay KHÁC khi file giữ nguyên tên nhưng nội dung đã đổi — đây là lỗi 'dùng lại nhầm bản cũ' mà cả cơ chế sinh ra để chặn." },
+    { "id": "AC-3", "p": "Sẽ bỏ qua những thứ đổi mỗi lần chạy nhưng không đổi kết quả (mã phiên, mã tác vụ, đường đi của kết quả) — nếu tính vào thì không lần nào dùng lại được lần nào." },
+    { "id": "AC-9", "p": "Sẽ ra vân tay KHÁC cho hai loại việc khác nhau, kể cả khi đầu vào giống hệt." },
+    { "id": "AC-10", "p": "Sẽ ra vân tay KHÁC cho hai plugin khác nhau cùng làm một loại việc." },
+    { "id": "AC-11", "p": "Sẽ ra vân tay KHÁC khi đổi model — chọn model khác là kết quả khác, không được dùng lại." },
+    { "id": "AC-8", "p": "Sẽ ra vân tay KHÁC khi plugin được cập nhật — kết quả của bản cũ không được phục vụ cho bản mới." },
+    { "id": "AC-12", "p": "Sẽ giữ nguyên vân tay khi SDK chỉ lên bản vá, và đổi khi lên bản minor — một bản vá không được thổi bay toàn bộ cache." },
+    { "id": "AC-1", "p": "Sẽ ra cùng một vân tay ở hai lần chạy khác nhau của máy — nếu không, không lần nào dùng lại được lần nào." },
+    { "id": "AC-16", "p": "Sẽ ra cùng một vân tay dù dữ liệu được dựng theo thứ tự nào — nếu không, cache trượt vĩnh viễn vì lý do người dùng không nhìn thấy." },
+    { "id": "AC-15", "p": "Sẽ dùng đúng cách mô tả dữ liệu mà bộ kiểm tra hai-runtime đang canh, thay vì tự định nghĩa một cách thứ hai." },
+    { "id": "AC-13", "p": "Sẽ ghim công thức tính vân tay bằng một bộ mẫu đã lưu — công thức đổi mà quên báo là bộ mẫu đỏ ngay." },
+    { "id": "AC-14", "p": "Sẽ tự chứng minh bộ mẫu đó không phải bù nhìn: cố tình phá công thức thì nó phải đỏ, hoàn nguyên thì phải xanh lại." }
+  ],
+
+  "wont_do": [
+    { "id": "AC-6", "p": "Sẽ KHÔNG cho dùng lại kết quả khi không biết plugin đang ở phiên bản nào — thà chạy lại còn hơn phục vụ kết quả của bản khác." },
+    { "id": "AC-7", "p": "Sẽ KHÔNG cho dùng lại kết quả khi plugin đang có sửa đổi chưa lưu — người đang sửa plugin phải thấy kết quả mới, không phải kết quả cũ. Và nếu chỗ gọi quên khai trạng thái này thì báo lỗi ngay, không âm thầm coi như 'sạch'." }
+  ],
+
+  "scope_plain": "Lát này chỉ TÍNH vân tay. Chưa lưu, chưa đọc, chưa dùng lại một kết quả nào, và chưa nối vào đường chạy thật — tất cả thuộc lát kế tiếp (L2). Việc tự dò xem plugin có sửa đổi chưa lưu cũng thuộc L2; lát này chỉ nhận câu trả lời có/không.",
+
+  "decisions_plain": [
+    { "id": "d-20260729T000001Z-3310", "p": "Đã chọn dùng lại đúng cách mô tả dữ liệu mà bộ kiểm tra hai-runtime đang canh, thay vì viết cách thứ hai — đổi lại vân tay thừa hưởng luôn cách bộ đó bỏ qua trường rỗng." },
+    { "id": "d-20260729T000002Z-5182", "p": "Đã chọn chỉ đọc, không sửa, phần dùng chung với tính năng trước — đổi lại phải gọi vòng hơn một chút, nhưng tính năng đó không phải ký lại." },
+    { "id": "d-20260729T000003Z-7744", "p": "Đã chọn đóng ngay ở lát này lỗ hổng 'plugin sửa tay mà hệ thống không biết' — đổi lại lát này gánh thêm một tham số bắt buộc; để sang lát sau thì phải huỷ toàn bộ cache đã chạy thật." },
+    { "id": "d-20260729T000004Z-9021", "p": "Đã chọn mỗi tiêu chí một phép kiểm riêng thay vì gộp chung — đổi lại tên các phép kiểm phải khớp từng ký tự, sai tên thì đỏ chứ không im lặng." },
+    { "id": "d-20260729T000005Z-2467", "p": "Đã chọn ra một quy tắc chung cho mọi phép so vân tay thay vì vá từng chỗ — đổi lại các tiêu chí dài dòng hơn, nhưng tiêu chí thêm sau tự thừa hưởng." },
+    { "id": "d-20260729T000006Z-6135", "p": "KHÔNG làm phần nối vào đường chạy thật ở lát này — đổi lại lát này chỉ chứng minh được hàm tính đúng, chưa chứng minh được nó chạy đúng trong ngữ cảnh thật." }
+  ]
+}
