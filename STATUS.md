@@ -6,7 +6,7 @@
 
 - **Nền tảng:** fork TongFlow (AGPL-3.0, không CLA, không dual-license — README §License). Đã rebrand OneFlow: logo pixel (`public/logo.svg`, `logo_icon.svg`), xoá COMMERCIAL-LICENSE.md/CLA.md.
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
-- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **7 feature đã ký**. CI 5 job, gate là job thứ 5.
+- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **8 feature đã ký** (feature thứ 9, `conformance-l0`, đã ký nhưng còn kẹt ở PR #25 — xem "Đang dở"). CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
 - **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (10 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
@@ -25,7 +25,17 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Không còn feature nào dở.** `stale-scope-by-paths` ký 29/07, `pre-merge-check` sạch cả 8 feature. Việc lớn kế tiếp vẫn là **1.L0**.
+🔴 **1.L0 KHÔNG phải việc chưa bắt đầu — nó đã ký xong và đang nằm trong [PR #25](https://github.com/phanlemanh/oneflow/pull/25) (`feat/conformance-l0`), chưa merge.** Ký Cổng 1 + Cổng 2 ngày 28/07 (T3, 11 AC / 15 eval, 4 vòng verify PASS), ~20 commit / 54 file: `sdk/tongflow/engine/batch.py`, conformance suite TS↔Python, `pluginRev`, sự kiện `node_cached`. Drift `batchField` đã đóng trong đó.
+
+**Đừng làm lại.** Bản STATUS.md trước ghi "không còn feature nào dở" là do PR #27 viết đè mất dòng này — `_acceptance/conformance-l0/` chỉ tồn tại trên nhánh, chưa có trên `main`, nên đọc `main` sẽ tưởng 1.L0 còn trắng.
+
+Nó bị chặn ba lớp, xử theo đúng thứ tự:
+
+1. **Cổng staleness** — CI 28/07: cả 7 feature cũ báo `VIOLATION … evidence is stale` → `7 violation(s) — merge blocked`.
+2. **Feature 0.5 KHÔNG tự gỡ được lớp 1.** 7 feature đó khai **0 `paths`**, mà AC-3 quy định khai 0 `paths` = giữ nguyên hành vi cũ từng chữ. Đường gỡ là **carry-forward re-pin** (AGENTS.md §2) cho feature nào code của chính nó không đổi, và **verify lại + chữ ký Cổng 2 mới** cho feature nào bị chạm — `conformance-l0` sờ vào `sdk/**` và `sdk/tongflow/scan.py`, nên ít nhất `sdk-distribution-rename` và `oneflow-plugin-prefix` phải đi đường verify lại (tiền lệ PR #18).
+3. **Conflict với `main`** — `git merge-tree` báo `STATUS.md`, `_acceptance/config.yaml` (giải bằng **union** executor keys) và 6 file `_acceptance/stale-scope-by-paths/*` (nhánh mang bản nháp cũ — lấy bản trên `main`).
+
+Ngoài ra `conformance-l0` còn **thiếu 6 `paths`** (đúng theo AC-10, không phải lỗ hổng): `src/hooks/use-workflow-recovery.ts`, `src/components/workspace/execution-status-line.tsx`, `src/hooks/use-workflow-execution.ts`, `src/constants/task-status.ts`, `src/lib/task/engine-events.ts`, `src/lib/abi/conformance.ts`. Backfill phải nằm trong chính PR #25 vì `_acceptance/conformance-l0/` có trong diff nên cross-check sẽ chạy.
 
 Feature thứ 8 gỡ treadmill staleness. Bài học đắt nhất của nó **không** nằm ở cơ chế mà ở bộ đo: 4 vòng verify tìm ra **5 lỗi fail-open cùng một họ** — luôn là *hỏi câu hỏi ở một không gian, dùng câu trả lời ở không gian khác* (`ls-files` vs `diff --name-only`; prefix neo top-level; đếm tổng thay vì phân bố; quy chủ sở hữu chỉ nhìn lùi; scope toàn glob t1-exempt) — và **16/16 eval xanh ở cả bốn trạng thái code**, vì mọi fixture trong bộ guard đều đặt `$ROOT` ở gốc git. Bộ đo có điểm mù có hệ thống; chỉ review đọc-code bắt được. 4 lỗi đã sửa + mutation-test; lỗi thứ 5 và món tiếng Việt chuyển sang contract riêng (xem Hàng đợi).
 
@@ -74,7 +84,7 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | 0.5 | Scoping staleness theo `paths` đã khai | ✅ **xong** — ký 29/07, 7 feature cũ carry-forward cùng PR |
 | **0.6** | **Ngữ nghĩa không gian tên đường dẫn + coverage-set** của cổng | 🔴 **contract riêng, quyết ở Cổng 2 của 0.5**. Gộp lỗi fail-open thứ 5: scope chỉ gồm glob t1-exempt (`docs/**`) thì `stale_files()` đã lọc chúng TRƯỚC khi áp scope → staleness set rỗng vĩnh viễn. AC phải mở đúng trục này, eval phủ cả 5 biến thể đã biết — **không vá lẻ**, 4 lần vá lẻ trước đều lòi biến thể kế tiếp |
 | **0.7** | **English-only vs văn bản vendor của kit** | 🔴 **contract riêng, quyết ở Cổng 2 của 0.5**. ≈265 dòng tiếng Việt + ≥14 thông điệp `VIOLATION`/`NOTE` CI, và `lib/gap-probe.js` biến một cụm tiếng Việt thành từ khoá điều khiển duy nhất. Nằm trong file vendor (kit 1.24.0) nên sửa tay bị ghi đè lần bump sau → việc thật là quyết định chính sách: xin upstream dịch, hay ghi ngoại lệ vendor vào CLAUDE.md/CONTRIBUTING.md |
-| **1.L0** | `pluginRev` + sự kiện `node_cached` + **conformance suite TS↔Python** (ca đầu: `batchField`) | ⏭ **việc lớn kế tiếp**. Không phụ thuộc Q1–Q3 |
+| **1.L0** | `pluginRev` + sự kiện `node_cached` + **conformance suite TS↔Python** (ca đầu: `batchField`) | 🔴 **ĐÃ KÝ CỔNG 2 (28/07), đang kẹt ở [PR #25](https://github.com/phanlemanh/oneflow/pull/25)** — không phải việc chưa bắt đầu. Xem mục "Đang dở" để biết ba lớp chặn |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
