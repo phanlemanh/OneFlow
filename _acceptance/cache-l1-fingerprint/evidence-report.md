@@ -9,7 +9,7 @@ enforcement_mode: strict
 bypass_used: false
 verified_commit: 2a8ed345aca98a5daa1e3fc45c5a91e9190b37dd
 # bypass_ack:
-human_signoff:
+human_signoff: Manh 2026-07-30
 ---
 
 # Evidence Report: cache-l1-fingerprint

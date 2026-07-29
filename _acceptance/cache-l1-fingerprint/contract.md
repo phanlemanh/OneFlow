@@ -8,7 +8,7 @@ surfaces: [sdk]
 status: implemented
 approved_by: Manh
 approved_at: 2026-07-29
-time_human_minutes: {gate1: 20, gate2: 0}
+time_human_minutes: {gate1: 20, gate2: 20}
 ---
 
 # Acceptance Contract: cache-l1-fingerprint
