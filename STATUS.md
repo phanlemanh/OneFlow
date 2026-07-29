@@ -28,7 +28,24 @@
 
 **`conformance-l0` đã ký (Cổng 2, Manh 28/07) và PR [#25](https://github.com/phanlemanh/OneFlow/pull/25) đã mở, nhưng KHÔNG merge được ngay.**
 
-`scripts/pre-merge-check.sh --base main` cho `OK [conformance-l0]` nhưng **7 VIOLATION** cho 7 feature đã ký trước: `ci-actions-bump`, `dependency-refresh-2026-07`, `measure-harness`, `oneflow-plugin-prefix`, `per-plugin-origin`, `sdk-distribution-rename`, `task-metering`. Tất cả cùng một loại — luật staleness so **cả cây** với `verified_commit` của từng report và không phân biệt được "code feature này dựa vào đã đổi" với "drift không liên quan". Nhánh này thêm file dưới `sdk/**` + `scripts/**`, nên mọi pin cũ hơn đều thành stale.
+**Tình trạng cổng sau khi merge `main` vào nhánh (29/07): từ 8 violation xuống còn 1.** Việc còn lại là một quyết định của người, không phải việc code.
+
+| Bước | Kết quả |
+|---|---|
+| Merge `main` → nhánh | ✅ conflict giải xong: 6 file `_acceptance/stale-scope-by-paths/*` + plan lấy bản trên `main`; `_acceptance/config.yaml` giải bằng **union**; `STATUS.md` gộp tay |
+| Backfill 6 `paths` của `conformance-l0` | ✅ cross-check chấp nhận, cấp scope hẹp, `OK [conformance-l0]` — 5 thay đổi bị chặn đều là `scripts/acceptance/**` của `main` |
+| Carry-forward re-pin 6 feature | ✅ `task-metering`, `measure-harness`, `sdk-distribution-rename`, `dependency-refresh-2026-07`, `ci-actions-bump`, `per-plugin-origin` — pin `4dcb419` → `05fc945` |
+| `oneflow-plugin-prefix` | ⛔ **CÒN ĐỎ, cần chữ ký Cổng 2 mới** |
+
+Cách xác định ai carry-forward được: lấy tập file mỗi feature **sở hữu** = diff của merge commit đã hạ cánh nó, rồi giao với diff gated của nhánh này. Sáu giao rỗng. Đúng một giao khác rỗng: **`sdk/tongflow/scan.py`, của `oneflow-plugin-prefix`** — nên feature đó không được re-pin, phải verify lại (đúng nửa sau của luật, thứ mà re-pin không được dùng để lách).
+
+Standing check trên cây mới đều xanh: `pnpm lint:check` (413 file) · `pnpm test` (347) · `pnpm build && pnpm typecheck` · `cd sdk && pytest` (117).
+
+**Việc chờ người quyết — `oneflow-plugin-prefix`:**
+
+- Nội dung thay đổi: PR #25 **chỉ thêm** hàm `read_plugin_rev()` vào `scan.py`, không sửa một dòng nào của logic ép tiền tố.
+- 3/4 eval của nó vẫn xanh trên cây mới: `unit_plugin_id` 75 pass · `sdk_pytest_scan_prefix` 23 pass · `docs_plugin_prefix` pass.
+- Eval thứ 4 `prefix_no_config_drift` **đỏ**, nhưng vì **guard đo sai PR**: nó diff `origin/main...HEAD` để khẳng định "PR mở rộng tiền tố không mang theo thứ khác" — chạy lại ở nhánh sau thì `HEAD` là của `conformance-l0`, nên nó bắt `src/lib/plugins/plugins-registry-schema.ts` (chỗ thêm `pluginRev`, hoàn toàn trong phạm vi 1.L0). Đây là **guard có hạn dùng tới lúc merge**, không phải bất biến — **cùng loại với `check-manifest-unmoved.sh`** mà CLAUDE.md đã ghi rõ là "snapshot of that PR, not a standing invariant". Cần contract riêng để xử lý cả họ guard này (gộp vào 0.6).
 
 ⚠️ **Feature thứ 8 (`stale-scope-by-paths`) KHÔNG gỡ được lớp chặn này** — dễ tưởng nhầm vì nó sinh ra đúng để trị staleness. Bảy feature đó khai **0 `paths`**, mà AC-3 quy định khai 0 `paths` = giữ nguyên hành vi cũ **từng chữ**. Contract của chính nó ghi thẳng: *"Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill — và PR đó phải mang theo code gated mà `paths` của chính nó phủ."* Nó chỉ tự cứu chính nó (khai `scripts/acceptance/**` + `scripts/pre-merge-check.sh`, mà nhánh này không chạm).
 
