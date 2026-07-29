@@ -35,8 +35,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 from tongflow.engine.fingerprint import KEY_SCHEMA_VERSION, node_fingerprint
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"

@@ -30,6 +30,12 @@ def digest_form(slot: str, business_input: dict[str, Any]) -> dict[str, Any]:
     Drops per-run keys, sorts keys, and replaces inline asset bytes with their
     sha256 so the key stays small and stable regardless of how large the asset
     is or which store handed it over.
+
+    Note that the return value does not depend on ``slot``: only the
+    ``"input"`` half of ``normalize_call()``'s result is returned, so ``slot``
+    has no effect here even though it is a required parameter. ``slot`` still
+    enters the cache key -- but only via the ``"slot"`` field of the payload
+    hashed in ``node_fingerprint()``, not through this function's digest.
     """
     return normalize_call(slot, business_input)["input"]
 

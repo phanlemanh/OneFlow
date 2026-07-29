@@ -31,14 +31,14 @@ def _asset(raw: bytes, file_key: str) -> dict:
 
 
 def _fp(**over):
-    args = dict(
-        slot="image-gen",
-        plugin_id="oneflow-image",
-        plugin_rev="a" * 40,
-        plugin_dirty=False,
-        model=None,
-        business_input={"text": "a cat"},
-    )
+    args = {
+        "slot": "image-gen",
+        "plugin_id": "oneflow-image",
+        "plugin_rev": "a" * 40,
+        "plugin_dirty": False,
+        "model": None,
+        "business_input": {"text": "a cat"},
+    }
     args.update(over)
     return node_fingerprint(**args)
 
@@ -122,21 +122,34 @@ def test_business_input_field_diff_changes_key():
 
 def test_per_run_keys_stripped_do_not_change_key():
     # AC-3. Each of these keys alone was enough to blow the cache open (D2)
-    # before being stripped.
-    k1 = _fp(business_input={"text": "a cat"})
-    k2 = _fp(
-        business_input={
-            "text": "a cat",
-            "_tongflow": {"progressUrl": "https://example.com", "token": "tok"},
-            "taskId": "task-123",
-            "outputs": {"result": "out"},
-            "level": 1,
-            "dependencies": ["node-a", "node-b"],
-        }
-    )
-    _assert_valid_key(k1)
-    _assert_valid_key(k2)
-    assert k1 == k2
+    # before being stripped. Test each of the five individually -- a
+    # collective one-shot comparison across all five at once would still pass
+    # if only four of the five were actually stripped, since the fifth key's
+    # contribution could cancel out in the digest. Eval E3's prose demands
+    # each key tested individually, not just collectively.
+    baseline_business_input = {"text": "a cat"}
+    k_baseline = _fp(business_input=baseline_business_input)
+    _assert_valid_key(k_baseline)
+
+    per_run_key_values = {
+        "_tongflow": {"progressUrl": "https://example.com", "token": "tok"},
+        "taskId": "task-123",
+        "outputs": {"result": "out"},
+        "level": 1,
+        "dependencies": ["node-a", "node-b"],
+    }
+    for per_run_key, per_run_value in per_run_key_values.items():
+        business_input_with_one_key = {**baseline_business_input, per_run_key: per_run_value}
+        k_with_one_key = _fp(business_input=business_input_with_one_key)
+        _assert_valid_key(k_with_one_key)
+        assert k_baseline == k_with_one_key, f"per-run key {per_run_key!r} was not stripped"
+
+    # Strictly more than the eval asks: all five at once, kept as an
+    # additional assertion on top of the individual checks above.
+    business_input_with_all_keys = {**baseline_business_input, **per_run_key_values}
+    k_with_all_keys = _fp(business_input=business_input_with_all_keys)
+    _assert_valid_key(k_with_all_keys)
+    assert k_baseline == k_with_all_keys
 
 
 def test_asset_same_bytes_diff_file_key_same_key():
@@ -261,6 +274,25 @@ def test_sdk_version_patch_same_minor_diff():
     _assert_valid_key(k_default)
     _assert_valid_key(k_explicit_current)
     assert k_default == k_explicit_current
+
+    # Part 4: sdk_major() directly, not only transitively through
+    # node_fingerprint(). Every assertion about sdkMajor above goes through
+    # node_fingerprint(), which only makes this criterion's third clause true
+    # transitively -- and leaves sdk_major()'s own ValueError branch for a
+    # malformed version string untested.
+    assert sdk_major("0.2.17") == "0.2"
+    assert sdk_major("0.2.18") == "0.2"
+    assert sdk_major("0.3.0") == "0.3"
+
+    # Default path: derive the expectation from the real installed version
+    # instead of hardcoding "0.2" -- an SDK bump must not falsely redden this.
+    expected_default_major = ".".join(SDK_VERSION.split(".")[:2])
+    assert sdk_major() == expected_default_major
+
+    # A malformed version string (no "." at all) must raise, not silently
+    # return a garbage major.minor.
+    with pytest.raises(ValueError):
+        sdk_major("1")
 
 
 def test_dict_key_insertion_order_does_not_change_key():
