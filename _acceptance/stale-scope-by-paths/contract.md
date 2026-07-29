@@ -5,10 +5,10 @@ slug: stale-scope-by-paths
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: approved
+status: signed-off
 approved_by: Manh
 approved_at: 2026-07-28
-time_human_minutes: {gate1: 10, gate2: 0}
+time_human_minutes: {gate1: 10, gate2: 15}
 ---
 
 # Acceptance Contract: stale-scope-by-paths
@@ -96,7 +96,7 @@ rather than the full Cartesian product.
 
 ## Out of scope
 
-- **Gỡ đỏ cho 7 feature hiện tại.** Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill, và cross-check sẽ ép khai đúng thay vì khai cho qua.
+- **Gỡ đỏ cho 7 feature hiện tại.** Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill — và PR đó phải mang theo code gated mà `paths` của chính nó phủ, vì một PR chỉ khai báo (không đụng gì gated khác) không còn gì để cross-check đối chiếu và bị từ chối scope hẹp thẳng thừng (xem "Known limits").
 - **Backfill 6 `paths` thiếu của `conformance-l0`.** Nó giữ whole-tree tới khi ai đó khai — đó là hành vi đúng theo AC-10, không phải lỗ hổng.
 - **Suy diff-lúc-landing từ lịch sử git** (`--first-parent`, tìm merge cũ nhất mà `^2` chứa `verified_commit`). Đã prototype và **chạy đúng** — trên `per-plugin-origin` tìm ra `6461d2b`, 41 file — nhưng loại vì thêm khảo cổ git vào script `sh` và phụ thuộc luật never-squash đúng cho **toàn bộ lịch sử cũ** chứ không chỉ từ nay. Lý do đầy đủ ở design doc.
 - **Suy affected từ đồ thị phụ thuộc** (hướng Nx/Bazel). Đúng hơn về bản chất, nhưng cần dựng graph cho cả TS và Python — một feature riêng, không phải một nhánh của cái này.
@@ -106,5 +106,34 @@ rather than the full Cartesian product.
 ## Known limits
 
 - Backfill cho feature cũ phải nằm trong PR mà gated diff được `paths` của chính nó phủ. PR trộn backfill với code khác sẽ bị từ chối scope hẹp. Ràng buộc cố ý, nhưng sẽ làm ai đó bất ngờ.
+- **Cross-check chỉ chạy ở thời điểm khai báo mới xuất hiện hoặc bị sửa** (khi `_acceptance/<slug>/` nằm trong PR diff). Không PR nào sau đó kiểm lại. Phần dư này lớn hơn "khai báo trôi dần theo thời gian", và cần nói thẳng vì nó là giới hạn của chính cam kết trung tâm:
+
+  **Một khai báo có thể có hiệu lực mà chưa từng được cross-check lần nào.** Bản vá cho lỗ "PR chỉ khai báo" từ chối scope hẹp khi coverage set rỗng — nhưng *từ chối* không có nghĩa là *chặn merge*. Nếu PR đó vẫn merge, PR kế tiếp không đụng `_acceptance/<slug>/` nữa, nên cross-check không chạy, và khai báo chưa từng kiểm ấy được dùng để thu hẹp bình thường. Tái hiện được:
+
+  ```
+  PR1 (chỉ chạm _acceptance/fx/)  → NOTE: coverage set rỗng, từ chối scope hẹp → OK
+  PR2 (code thật ở src/real/**)   → NOTE: narrow scope applied — suppressed 1  → OK
+  ```
+
+  `src/real/**` chưa bao giờ nằm trong `paths` và chưa bao giờ bị đối chiếu, nhưng bị che từ PR2 trở đi.
+
+  Đây là hệ quả trực tiếp của AC-7, không phải lỗi cài đặt: nếu cross-check chạy ở mọi PR thì `paths` của một feature đã merge không bao giờ phủ diff của PR không liên quan, nên scope hẹp bị từ chối cho MỌI feature đã merge và tính năng thành vô dụng. Thứ đóng được lỗ này là **thủ tục** (PR backfill phải mang theo code gated mà `paths` của nó phủ — xem Out of scope), không phải cơ chế. Ai bỏ qua thủ tục đó vẫn qua được.
+
+  Trường hợp nhẹ hơn cùng gốc: một khai báo trung thực lúc viết trôi dần khi codebase phình ra quanh nó (thư mục mới, file mới ngoài `paths`), không PR nào chạm lại `_acceptance/<slug>/` để kích hoạt cross-check.
 - Cross-check đối chiếu `paths` với **diff của PR**, không với thứ eval thật sự chạy. Khai `paths: ["**"]` sẽ pass mà chẳng thu hẹp gì. Không cơ chế nào chặn một khai báo trung thực với diff nhưng sai với eval — chỗ đó chỉ review bắt được.
 - Feature bị sửa `paths` ở một PR muộn hơn sẽ được cross-check với diff của PR đó, không phải diff lúc landing. Kết quả gần như chắc chắn là từ chối scope hẹp (hướng an toàn), nhưng thông báo sẽ gây bối rối.
+
+### Quyết ở Cổng 2 (2026-07-29) — chuyển sang contract riêng
+
+Ba vòng verify tìm ra **5 lỗi fail-open cùng một họ**, và không lỗi nào bị eval bắt (16/16 xanh ở cả bốn trạng thái code). Bốn lỗi đã sửa trong feature này; phần còn lại human quyết tách ra:
+
+- **Scope toàn glob t1-exempt thì vĩnh viễn rỗng (HIGH).** `scope_has_any_match()` hỏi trên TOÀN cây tracked, còn `stale_files()` trả lời trên cây ĐÃ LỌC (bỏ `_acceptance/**` + `t1_skip_globs`) *trước* khi áp scope. Một feature khai `paths: ["docs/**"]` hoàn toàn thành thật vẫn được cấp scope hẹp rồi lọc sạch mọi thay đổi đáng báo, mãi mãi. → **contract riêng**, gộp cùng chiều còn thiếu bên dưới. KHÔNG vá lẻ: bốn lần vá lẻ trước đều lòi ra biến thể kế tiếp.
+- **Chiều còn thiếu của hợp đồng này:** không AC nào nói về *ngữ nghĩa không gian tên đường dẫn* và *coverage-set*. Các AC hiện có chỉ mô tả hành vi (thu hẹp đúng / từ chối đúng / im lặng đúng). Contract mới phải mở đúng trục đó, có eval cho cả 5 biến thể đã biết.
+- **Tiếng Việt trong code và thông điệp CI (HIGH).** ~265 dòng + ≥14 thông điệp `VIOLATION`/`NOTE`, đến từ bump vendor kit 1.24.0 (`896b17e`), trong repo có luật English-only không ngoại lệ. Sửa tay sẽ bị ghi đè ở lần bump sau → **contract riêng**, và việc thật là quyết định chính sách: xin upstream dịch, hay ghi ngoại lệ vendor vào CLAUDE.md/CONTRIBUTING.md.
+
+Chấp nhận và ghi nhận ở đây (không tách contract):
+
+- `biome.json` nằm trong `t1_skip_globs` với lý do tự mâu thuẫn: `executors.test.lint` LÀ một executor, và `files.includes` của biome quyết định lint soi những gì — nên đổi file này CÓ thể làm bằng chứng lint mất hiệu lực.
+- E14 vẫn ghim vào SHA chỉ tồn tại trên `feat/conformance-l0`. Nhánh đó bị rebase hoặc xoá sau merge là E14 đỏ vĩnh viễn, vì lý do không liên quan tới cơ chế đang đo.
+- awk ghép cặp cross-layer dùng bảng chữ cái `[a-z_]+` cho key mở khối, làm `layer:` của eval trước rò sang eval sau.
+- 16 executor mới trong `config.yaml` không đặt trong ngoặc kép như 20 executor cũ; resolver cắt mọi thứ sau `#` có khoảng trắng đứng trước, nên giá trị không ngoặc kép chỉ cách một ký tự `#` là bị cắt âm thầm.

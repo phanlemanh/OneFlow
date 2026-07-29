@@ -29,6 +29,7 @@
             "!scripts/pre-merge-check.sh",
             "!scripts/recheck-evidence.js",
             "!lib/evidence-core.js",
+            "!lib/gap-probe.js",
             "!_acceptance"
         ]
     },

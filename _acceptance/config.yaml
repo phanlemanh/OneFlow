@@ -83,6 +83,7 @@ executors:
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
+    # conformance-l0 Gate 1 (2026-07-28).
     conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
     plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
     # stale-scope-by-paths Gate 1 (2026-07-28): every file below lands during
@@ -97,6 +98,7 @@ executors:
     stale_scope_partial: bash scripts/acceptance/check-stale-scoping.sh --case partial
     stale_scope_under_declared: bash scripts/acceptance/check-stale-scoping.sh --case under-declared
     stale_scope_malformed: bash scripts/acceptance/check-stale-scoping.sh --case malformed
+    stale_scope_indent_drift: bash scripts/acceptance/check-stale-scoping.sh --case indent-drift
     stale_scope_merged_halves: bash scripts/acceptance/check-stale-scoping.sh --case merged-halves
     stale_scope_suppression: bash scripts/acceptance/check-stale-scoping.sh --case suppression
     stale_scope_two_bases: bash scripts/acceptance/check-stale-scoping.sh --case two-bases
@@ -138,6 +140,10 @@ risk_tiers:
     - "scripts/pre-merge-check.sh"
     - "scripts/recheck-evidence.js"
     - "lib/evidence-core.js"
+    - "lib/gap-probe.js"
+    # Lint configuration only — it constrains how source is written, never what
+    # the product does at runtime, so a change here cannot invalidate evidence.
+    - "biome.json"
   # Contract chokepoints & wire/persistence shape — always T3 (full gate).
   t3_paths:
     - "config/tongflow.abi.json"

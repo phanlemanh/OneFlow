@@ -1,28 +1,60 @@
 {
-  "feature_plain": "Cổng chặn merge hiện coi bằng chứng của MỌI tính năng đã ký là hết hiệu lực ngay khi bất kỳ file code nào trong repo đổi — kể cả file không liên quan gì tới tính năng đó. Sửa lần này: tính năng nào tự khai rõ 'tôi kiểm những file này' thì cổng chỉ so đúng vùng đó; ai không khai thì giữ nguyên như cũ.",
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ đảm bảo thu hẹp phạm vi mà VẪN bắt được thay đổi trong vùng đã khai — đây là chốt quan trọng nhất, vì nếu cơ chế hỏng thành 'không bao giờ báo' thì mọi kiểm tra khác vẫn xanh." },
-    { "id": "AC-5", "p": "Sẽ chặn kiểu khai thiếu: nếu một tính năng khai 'tôi kiểm những file này' nhưng bỏ sót file mà chính nó vừa sửa, cổng TỪ CHỐI thu hẹp và in ra tên từng file bị bỏ sót." },
-    { "id": "AC-7", "p": "Sẽ chỉ kiểm tra tính trung thực của khai báo đúng lúc khai báo đó mới hoặc vừa đổi — tính năng đã ký từ trước không bị bắt khai lại mỗi PR." },
-    { "id": "AC-8", "p": "Sẽ giữ nguyên hai vùng miễn đang có: sửa tài liệu / thương hiệu / hồ sơ nghiệm thu không làm hết hiệu lực bằng chứng của ai cả." },
-    { "id": "AC-9", "p": "Sẽ tự chứng minh cơ chế không mù: cố tình làm hỏng nó theo hai cách (thành 'không bao giờ báo', và thành 'tin mù khai báo') rồi khẳng định bài kiểm phải báo đỏ cả hai lần." },
-    { "id": "AC-12", "p": "Sẽ tách rõ HAI mốc so sánh khác nhau — mốc kiểm 'code đã đổi chưa' và mốc kiểm 'khai báo có trung thực không'. Lẫn hai mốc này là sai đắt nhất: cơ chế sẽ chạy mà không mang lại lợi ích nào, và mọi bài kiểm khác vẫn xanh." },
-    { "id": "AC-13", "p": "Sẽ đảm bảo bản cổng phát hành KHÔNG chứa công tắc tắt nào — công tắc dùng để tự kiểm chỉ tồn tại trong bản sao tạm, vì một công tắc lọt vào bản thật là cách tắt cổng cho toàn bộ repo." },
-    { "id": "AC-14", "p": "Sẽ buộc cổng NÓI RA khi nó thu hẹp phạm vi cho một tính năng, và nói rõ khi việc thu hẹp đó che một cảnh báo mà cách cũ sẽ báo — đường duy nhất làm cổng yếu đi không được phép là đường im lặng." }
-  ],
-  "wont_do": [
-    { "id": "AC-2", "p": "Sẽ KHÔNG còn báo hết-hiệu-lực khi thay đổi nằm ngoài vùng tính năng đó đã khai — đây chính là kết quả mong muốn của cả lần sửa này." },
-    { "id": "AC-3", "p": "Sẽ KHÔNG âm thầm gỡ cảnh báo cho 7 tính năng đang đỏ: chúng chưa khai gì cả, nên giữ nguyên hành vi cũ từng chữ — kể cả không thêm một dòng output nào." },
-    { "id": "AC-4", "p": "Sẽ KHÔNG thu hẹp khi khai nửa vời (khai cho một số bài kiểm, bỏ số còn lại) — đó là trạng thái của một lần backfill làm dở, thu hẹp theo danh sách thiếu là sai." },
-    { "id": "AC-6", "p": "Sẽ KHÔNG đọc 'khai rỗng' thành 'phạm vi rỗng' — vì phạm vi rỗng khớp với không file nào, tức thành 'không bao giờ báo', cách hiểu sai nguy hiểm nhất." },
-    { "id": "AC-10", "p": "Chặn kiểu tự lừa: bài kiểm không chỉ chạy trên dữ liệu giả mà phải chạy trên repo thật và chỉ ra đúng 6 file mà tính năng conformance-l0 khai thiếu — khai báo đó do người chưa biết luật này viết ra." },
-    { "id": "AC-11", "p": "Chặn cổng tự miễn cho mình: bài kiểm mới phải nằm NGOÀI vùng được miễn, để thay đổi sửa cổng vẫn bị chính cổng đo." }
-  ],
-  "scope_plain": "Không gỡ đỏ cho 7 tính năng đang chặn PR #25 — chúng khai 0 vùng nên cơ chế này không giúp được; mỗi cái cần một PR riêng để khai bổ sung.",
+  "feature_plain": "Khi một PR chạm vào code, cổng chặn merge chỉ báo 'bằng chứng đã hết hiệu lực' cho những tính năng thật sự liên quan tới code đó — dựa trên vùng file mà chính tính năng đó tự khai. Ai không khai thì giữ nguyên hành vi cũ từng chữ.",
+  "decisions": [],
+  "analyst_plain": "",
+  "scope_plain": "Chưa gỡ đỏ cho 7 tính năng đã ký (chúng khai 0 đường dẫn nên cơ chế này không giúp được — mỗi cái cần một PR backfill riêng), chưa bổ sung 6 đường dẫn thiếu của conformance-l0, và không suy vùng ảnh hưởng từ đồ thị phụ thuộc.",
   "decisions_plain": [
-    { "id": "d-20260728T100000Z-4418", "p": "Đã chọn kiểm tính trung thực của khai báo dựa trên diff của PR hiện tại, thay vì truy lại lịch sử git để tìm diff lúc tính năng đó được gộp vào — cách truy lịch sử đã thử và CHẠY ĐÚNG, nên đây là cắt có chủ ý; đổi lại backfill cho tính năng cũ phải làm trong PR gọn." },
-    { "id": "d-20260728T100001Z-7723", "p": "KHÔNG gỡ đỏ 7 tính năng và KHÔNG khai bổ sung 6 vùng thiếu của conformance-l0 trong lần này — đổi lại PR #25 VẪN chưa merge được sau khi việc này xong, dễ khiến người đọc tưởng làm xong là hết đỏ." },
-    { "id": "d-20260728T100002Z-1195", "p": "Đã chọn tái dùng trường khai vùng có sẵn thay vì thêm một trường mới — đổi lại một trường phục vụ hai mục đích với hệ quả TRÁI NGƯỢC khi khai thiếu; chấp nhận vì phần kiểm trung thực biến khai-thiếu thành lỗi ồn ào." },
-    { "id": "d-20260728T100003Z-9046", "p": "Đã đặt bài kiểm mới ở thư mục ngoài vùng miễn, để chính thay đổi sửa cổng bị cổng đo — đổi lại thêm một thư mục." }
+    {
+      "id": "d-20260728T100000Z-4418",
+      "p": "Chỉ đối chiếu lời khai vùng file đúng MỘT lần — ngay tại PR tạo hoặc sửa lời khai đó; đổi lại lời khai đã lọt qua sẽ không được kiểm lại ở các PR sau."
+    },
+    {
+      "id": "d-20260728T100001Z-7723",
+      "p": "KHÔNG làm sạch màu đỏ cho 7 tính năng đã ký trong lần này; đổi lại xong tính năng này vẫn chưa merge được PR #25, phải backfill từng cái một."
+    },
+    {
+      "id": "d-20260728T100002Z-1195",
+      "p": "Dùng lại đúng ô khai báo vùng file đã có thay vì thêm ô mới; đổi lại một ô phục vụ hai mục đích với hai chiều rủi ro ngược nhau."
+    },
+    {
+      "id": "d-20260728T100003Z-9046",
+      "p": "Đặt bộ kiểm tra mới vào thư mục CÓ bị cổng soi, để cổng soi được chính thay đổi sửa cổng; đổi lại mỗi PR chạm nó đều làm bằng chứng của các tính năng khác bị đánh dấu hết hiệu lực."
+    },
+    {
+      "id": "d-20260728T120000Z-8814",
+      "p": "Tách bước dọn dẹp kỹ thuật thành việc riêng có ảnh chụp đối chiếu, thay vì trộn vào việc thêm tính năng; đổi lại thêm một bước."
+    },
+    {
+      "id": "d-20260728T120001Z-3357",
+      "p": "Làm tuần tự từng việc thay vì chạy song song; chậm hơn nhưng không có bước gộp nhánh nào để làm sai."
+    },
+    {
+      "id": "d-20260728T130000Z-6690",
+      "p": "Tách sang nhánh riêng để không tự làm hỏng bằng chứng đã ký của tính năng khác; đổi lại phải trông hai nhánh cùng lúc."
+    },
+    {
+      "id": "d-20260728T130001Z-2248",
+      "p": "Chụp ảnh đối chiếu SAU khi đưa file vào diện bị soi, để ảnh đó thật sự bắt được hồi quy; đổi lại thứ tự các bước ngược với trực giác."
+    },
+    {
+      "id": "d-20260729T070519Z-25550",
+      "p": "Sửa lỗi khiến một lời khai vùng file viết theo kiểu khác có thể vô hiệu hoá cảnh báo hết-hiệu-lực vĩnh viễn; đổi lại lời khai nay buộc viết theo một kiểu duy nhất, viết sai bị từ chối rõ ràng."
+    },
+    {
+      "id": "d-20260729T070519Z-3336",
+      "p": "Đổi điểm mốc của bài kiểm đối chiếu repo thật sang một điểm đã đẩy lên máy chủ, kèm chốt chặn báo lỗi nếu ai đó lại ghim vào điểm chỉ có trên máy mình."
+    },
+    {
+      "id": "d-20260729T073038Z-16840",
+      "p": "Sửa lỗi khiến bước đối chiếu lời khai hoàn toàn không chạy khi thư mục dự án nằm sâu một cấp; không có đánh đổi — trước đó nó im lặng bỏ qua."
+    },
+    {
+      "id": "d-20260729T073038Z-27321",
+      "p": "Sửa lỗi khiến một lời khai THIẾU vẫn được coi là đủ chỉ vì tổng số dòng khớp nhau; đổi lại thêm một bước kiểm tra nhỏ trên tệp khai báo."
+    },
+    {
+      "id": "d-20260729T073038Z-19288",
+      "p": "Bắt buộc mọi bài kiểm mới phải chứng minh nó thật sự bắt được lỗi, sau khi phát hiện một bài vừa viết ra đã xanh một cách vô nghĩa."
+    }
   ]
 }
