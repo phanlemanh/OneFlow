@@ -8,6 +8,55 @@
 
 **Tech Stack:** Python 3.11+, pytest qua `uv`, `hashlib.sha256`, `json.dumps` canonical.
 
+## ⚠️ Amendment sau Cổng 1 (29/07) — đọc trước Task 3
+
+Task 2 đã chạy và qua ba vòng review. **Ba thứ trong plan gốc bị thay**, Task 3–5 phải theo bản này chứ không theo văn bản gốc bên dưới:
+
+**1. Không còn hai executor key — có 16, mỗi tiêu chí một key**, dùng pytest node-id. Chín tiêu chí chung một exit code vi phạm quy tắc mà chính `_acceptance/config.yaml` viết ra: *"nine evals behind one command collapse nine criteria into one exit code, and a case that was never implemented then looks identical to a case that passed."*
+
+**Tên hàm test phải khớp TỪNG KÝ TỰ** với node-id đã ghi trong `_acceptance/config.yaml` — lệch một ký tự là eval đỏ vĩnh viễn (pytest exit 4). Mười sáu tên, theo đúng thứ tự AC-1…AC-16:
+
+| # | `sdk/tests/test_fingerprint.py` |
+|---|---|
+| 1 | `test_stable_across_processes_with_different_hashseed` |
+| 2 | `test_business_input_field_diff_changes_key` |
+| 3 | `test_per_run_keys_stripped_do_not_change_key` |
+| 4 | `test_asset_same_bytes_diff_file_key_same_key` |
+| 5 | `test_asset_same_file_key_diff_bytes_changes_key` |
+| 6 | `test_missing_plugin_rev_is_not_cacheable` |
+| 7 | `test_dirty_plugin_is_not_cacheable` |
+| 8 | `test_plugin_rev_diff_changes_key` |
+| 9 | `test_slot_diff_changes_key` |
+| 10 | `test_plugin_id_diff_changes_key` |
+| 11 | `test_model_none_vs_value_changes_key` |
+| 12 | `test_sdk_version_patch_same_minor_diff` |
+| 15 | `test_digest_form_matches_normalize_call` |
+| 16 | `test_dict_key_insertion_order_does_not_change_key` |
+
+| # | `sdk/tests/test_fingerprint_vectors.py` |
+|---|---|
+| 13 | `test_vectors_match_character_for_character` |
+| 14 | `test_vector_guard_catches_schema_version_bump` |
+
+**2. `node_fingerprint()` nhận thêm `plugin_dirty: bool` (bắt buộc, không default).** Trả `None` khi `plugin_rev` rỗng **hoặc** `plugin_dirty` đúng. Đây là việc đóng **"Điều kiện chặn L1"** mà contract đã ký của `conformance-l0` ghi: `git rev-parse HEAD` không thấy sửa đổi chưa commit, nên plugin sửa tay giữ nguyên rev và cache phục vụ kết quả cũ vĩnh viễn. Dò `git status --porcelain` là việc của L2; L1 chỉ nhận cờ. Chữ ký cuối:
+
+```python
+def node_fingerprint(
+    *,
+    slot: str,
+    plugin_id: str,
+    plugin_rev: str | None,
+    plugin_dirty: bool,
+    model: str | None,
+    business_input: dict[str, Any],
+    sdk_version: str | None = None,
+) -> str | None:
+```
+
+**3. Mọi test so hai khoá phải khẳng định cả hai vế là chuỗi khác `None`, đúng 64 ký tự hex thường** — không viết `assert k1 == k2` hay `assert k1 != k2` trần trụi. Ba vòng review mới đóng hết họ lỗi này: trong Python `None == None` đúng **và** `None != "<sha>"` cũng đúng, nên một implementation trả `None` vô điều kiện lách qua được cả hai chiều so sánh. Quy tắc chung nằm ở đầu mục `## Criteria` của contract. Ngoại lệ duy nhất: AC-6 và AC-7, nơi `None` **chính là** kết quả đúng — hai chỗ đó khẳng định `is None` chính xác.
+
+Bốn tiêu chí mới so với plan gốc: **AC-9/10/11** (`slot`, `pluginId`, `model` tham gia khoá — plan gốc không có tiêu chí nào cho ba thành phần này, nên một implementation bỏ hẳn chúng khỏi dict băm vẫn xanh hết), **AC-16** (khoá bất biến với thứ tự chèn dict), và **AC-14** (guard mutation phải chạy lại node-id của AC-13 trong subprocess và khẳng định exit khác 0 khi bump `KEY_SCHEMA_VERSION`, rồi exit 0 sau khi hoàn nguyên). File vector **phải ghim `sdk_version`**, nếu không AC-13 đỏ mỗi lần bump minor.
+
 ## Global Constraints
 
 - **Comment trong code: tiếng Anh.** (CLAUDE.md)
