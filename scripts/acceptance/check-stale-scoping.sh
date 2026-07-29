@@ -124,6 +124,30 @@ case_partial() {
     || fail partial "partial declaration did not fall back to whole-tree: $out"
   printf '%s\n' "$out" | grep -q 'narrow scope' \
     && fail partial "partial declaration was granted narrow scope"
+
+  # Same partial declaration, hidden behind balanced TOTALS: two `paths:`
+  # lines on one eval and none on the other. A completeness test that counts
+  # eval lines against paths lines sees 2 == 2 and calls it complete, then
+  # builds the union from the one eval that declared twice while the other
+  # eval's implicit whole-tree scope vanishes. A copy-paste duplicate is
+  # enough to reach it, so it is not an exotic shape.
+  # ISOLATION: the report goes in its OWN commit and --base is taken AFTER it
+  # (mk_committed_report_fixture, the shape case_out_of_scope uses), so this
+  # feature's _acceptance/ is NOT in the PR diff and the cross-check never
+  # runs. Without that, the cross-check refuses the scope on its own and the
+  # case passes whether or not the completeness test works — the assertion
+  # would be measuring the wrong guard.
+  d2="$(new_case_tmpdir)"
+  base2="$(mk_committed_report_fixture "$d2" fx dup)"
+  # Outside BOTH globs the duplicate declares (src/covered/**, src/uncovered/**),
+  # so a granted narrow scope would suppress it and a whole-tree fallback
+  # would not.
+  ( cd "$d2" && mkdir -p src/elsewhere && echo drift > src/elsewhere/new.txt && git add -A && git commit -q -m drift )
+  out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
+  printf '%s\n' "$out2" | grep -q 'narrow staleness scope applied' \
+    && fail partial "duplicate-key partial declaration was granted narrow scope: $out2"
+  printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail partial "duplicate-key partial declaration did not fall back to whole-tree: $out2"
   pass partial
 }
 
@@ -279,6 +303,29 @@ case_under_declared() {
     || fail under-declared "uncovered file not named in output: $out"
   printf '%s\n' "$out" | grep -qi 'not covered\|uncovered' \
     || fail under-declared "no under-declaration message: $out"
+
+  # The SAME under-declaration in the monorepo layout ($ROOT below the git
+  # top-level). The cross-check only runs when this feature's own
+  # _acceptance/<slug>/ is in the PR diff, and that test reads `git diff
+  # --name-only` output — whose paths are top-level-relative. A
+  # top-level-anchored prefix test therefore never matches here, the
+  # cross-check silently never runs, and narrow scope is granted UNCHECKED:
+  # AC-5 and AC-7 both dead, with no eval noticing. The two layouts must give
+  # the same answer; that is the whole assertion.
+  d2="$(new_case_tmpdir)"
+  base2="$(mk_subdir_crosscheck_fixture "$d2" fx 'pkg/src/covered/**')"
+  write_report "$d2/pkg" fx "$base2"
+  ( cd "$d2" && echo drift > pkg/src/uncovered/new.txt \
+      && echo touched >> pkg/_acceptance/fx/run-log.jsonl \
+      && git add -A && git commit -q -m "pr" )
+  vc2="$(git -C "$d2" rev-parse HEAD)"
+  write_report "$d2/pkg" fx "$vc2"
+  ( cd "$d2" && git add -A && git commit -q -m "repin" )
+  out2="$(bash "$GATE" "$d2/pkg" --base "$base2" 2>&1)"
+  printf '%s\n' "$out2" | grep -qi 'not covered\|uncovered' \
+    || fail under-declared "subdir root: cross-check did not fire, narrow scope granted unchecked: $out2"
+  printf '%s\n' "$out2" | grep -qF 'pkg/src/uncovered/new.txt' \
+    || fail under-declared "subdir root: uncovered file not named in output: $out2"
   pass under-declared
 }
 

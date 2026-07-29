@@ -15,3 +15,20 @@
 {"ts":"2026-07-29T06:38:00Z","round":1,"evalId":"E15","run_id":"minted-stale-scope-by-paths-E15-r1","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case announce"}
 {"ts":"2026-07-29T06:38:00Z","round":1,"evalId":"E16","run_id":"minted-stale-scope-by-paths-E16-r1","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case indent-drift"}
 {"ts":"2026-07-29T06:38:00Z","round":1,"kind":"baseline","evals_hash":"a5a26944d0690f5cdd3ea7db676e8db6d8570c365f8723fcdf164cd1f2c6be84","non_discriminating":[]}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E1","run_id":"minted-stale-scope-by-paths-E1-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case in-scope"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E2","run_id":"minted-stale-scope-by-paths-E2-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case out-of-scope"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E3","run_id":"minted-stale-scope-by-paths-E3-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-golden.sh"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E4","run_id":"minted-stale-scope-by-paths-E4-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case partial"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E5","run_id":"minted-stale-scope-by-paths-E5-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case under-declared"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E6","run_id":"minted-stale-scope-by-paths-E6-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case malformed"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E7","run_id":"minted-stale-scope-by-paths-E7-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case merged-halves"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E8","run_id":"minted-stale-scope-by-paths-E8-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case suppression"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E9","run_id":"minted-stale-scope-by-paths-E9-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case mutation"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E10","run_id":"minted-stale-scope-by-paths-E10-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case case-completeness"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E11","run_id":"minted-stale-scope-by-paths-E11-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E12","run_id":"minted-stale-scope-by-paths-E12-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case two-bases"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E13","run_id":"minted-stale-scope-by-paths-E13-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E14","run_id":"minted-stale-scope-by-paths-E14-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-real-repo.sh"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E15","run_id":"minted-stale-scope-by-paths-E15-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case announce"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"evalId":"E16","run_id":"minted-stale-scope-by-paths-E16-r2","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case indent-drift"}
+{"ts":"2026-07-29T07:07:00Z","round":2,"kind":"baseline","evals_hash":"62411183e323a74a14a06af051c668cffdc6a406c210ffaaf74c52e7fda99252","non_discriminating":[]}

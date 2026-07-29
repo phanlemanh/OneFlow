@@ -181,6 +181,12 @@ mk_fixture() {
     partial) p1='    paths: ["src/covered/**"]'; p2="" ;;
     empty)   p1='    paths: []'; p2='    paths: []' ;;
     narrow)  p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**"]' ;;
+    # Two paths lines on the FIRST eval, none on the second: a copy-paste
+    # duplicate. The file-wide totals still balance (2 evals, 2 paths lines),
+    # so any completeness test that compares counts rather than distribution
+    # reads this partial declaration as complete.
+    dup)     p1='    paths: ["src/covered/**"]
+    paths: ["src/uncovered/**"]'; p2="" ;;
     all|*)   p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**", "src/uncovered/**"]' ;;
   esac
   write_evals_yaml "$d" "$slug" "$p1" "$p2"
@@ -259,6 +265,35 @@ mk_subdir_fixture() {
   write_report "$sf_repo/pkg" "$sf_slug" "$sf_vc"
   ( cd "$sf_repo" && git add -A && git commit -q -m report )
   git -C "$sf_repo" rev-parse HEAD
+}
+
+# mk_subdir_crosscheck_fixture <repo-dir> <slug> <paths-glob> — the monorepo
+# layout of mk_subdir_fixture, but staged so the feature's OWN
+# _acceptance/<slug>/ is part of the PR diff: that is the one condition under
+# which the declaration is cross-checked against the gated diff, and it is
+# exactly the condition mk_subdir_fixture deliberately excludes (it takes its
+# base AFTER the report commit).
+#
+# Prints the fixture-base SHA and stops there, leaving the report/PR/re-pin
+# staging to the caller so it can mirror case_under_declared's flat shape line
+# for line — the whole point is that the two layouts differ ONLY in where the
+# acceptance tree sits, so any divergence in the gate's answer is the bug.
+mk_subdir_crosscheck_fixture() {
+  sx_repo="$1"; sx_slug="$2"; sx_glob="$3"
+  mkdir -p "$sx_repo/pkg/_acceptance/$sx_slug" "$sx_repo/pkg/src/covered" "$sx_repo/pkg/src/uncovered"
+  write_config "$sx_repo/pkg"
+  write_contract "$sx_repo/pkg" "$sx_slug"
+  write_evals_yaml "$sx_repo/pkg" "$sx_slug" "    paths: [\"$sx_glob\"]" "    paths: [\"$sx_glob\"]"
+  echo '{}' > "$sx_repo/pkg/_acceptance/$sx_slug/run-log.jsonl"
+  git_init_fixture_repo "$sx_repo"
+  (
+    cd "$sx_repo"
+    echo seed > pkg/src/covered/seed.txt
+    echo seed > pkg/src/uncovered/seed.txt
+    git add -A
+    git commit -q -m "fixture base"
+  )
+  git -C "$sx_repo" rev-parse HEAD
 }
 
 # mk_pair_fixture <dir> <slug1> <slug2>

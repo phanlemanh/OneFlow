@@ -492,6 +492,35 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   n_paths="${n_paths:-0}"
   [ "$n_evals" -eq "$n_paths" ] || return 1
 
+  # A TOTAL is not completeness. Two `paths:` lines under one eval and none
+  # under another balance this count exactly, so the union is built from a
+  # PARTIAL declaration while the undeclared eval's implicit whole-tree scope
+  # is silently dropped — the precise AC-4 failure mode this function exists to
+  # refuse, reachable by a copy-paste duplicate line. Everything above proves
+  # the file's SHAPE; this proves the shape is distributed one-per-eval.
+  #
+  # Deliberately expressed by locating the SAME two patterns already used
+  # above (the literal "- id:" anchor and $paths_re) by line number, rather
+  # than restating the grammar in a second parser: this function's own history
+  # is six rounds of one construct's forms drifting apart, and a duplicated
+  # grammar is how that drift starts. With the total already equal to
+  # n_evals, "no eval owns two" implies "every eval owns exactly one".
+  id_lines="$(grep -n "^${ei}- id:" "$f" 2>/dev/null | cut -d: -f1)"
+  paths_lines="$(grep -En "$paths_re" "$f" 2>/dev/null | cut -d: -f1)"
+  owners="$(
+    for pl in $paths_lines; do
+      owner=0
+      for il in $id_lines; do
+        [ "$il" -lt "$pl" ] && owner="$il"
+      done
+      printf '%s\n' "$owner"
+    done
+  )"
+  # owner=0 means a paths line sits at eval-key indent ABOVE the first eval —
+  # not attributable to any eval, so not a declaration this parser can read.
+  printf '%s\n' "$owners" | grep -qx 0 && return 1
+  [ -z "$(printf '%s\n' "$owners" | sort | uniq -d)" ] || return 1
+
   # Extract by pulling the quoted spans out of each matched line's array
   # body, never by splitting on `,` or `]` — those characters are meaningless
   # once they can appear inside a glob. Because the whole line already proved
@@ -641,9 +670,19 @@ slug_acceptance_touched() { # <slug> — rc 0 iff the shared $ALL_CHANGED list
   # is a wildcard — which is what keeps a slug containing a glob/regex
   # metacharacter (e.g. "a.b") from spuriously matching a sibling slug
   # ("axb"). Reads $ALL_CHANGED instead of a second per-feature git diff call.
+  #
+  # BOTH spellings, for the same reason scope_has_any_match() needs
+  # --full-name: `git diff --name-only` prints paths relative to the git
+  # TOP-LEVEL, not $ROOT. In the pkg/_acceptance/ monorepo layout this script
+  # supports, the top-level-anchored prefix alone never matches, so this
+  # function always returned 1, the `elif slug_acceptance_touched` branch never
+  # ran, and the declaration was never cross-checked against the PR's gated
+  # diff — narrow scope granted unchecked, AC-5 and AC-7 dead in that layout.
+  # slug_in_diff() below already accepts both; this is the same list read
+  # through a stricter prefix, so it must accept both too.
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    case "$f" in "_acceptance/$1/"*) return 0 ;; esac
+    case "$f" in "_acceptance/$1/"*|*"/_acceptance/$1/"*) return 0 ;; esac
   done <<CHANGEDLIST
 $ALL_CHANGED
 CHANGEDLIST

@@ -39,7 +39,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_partial
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; output contains `CASE partial: PASS`. A fixture feature with `paths` on some but not all evals is treated as not-declared and gets whole-tree staleness, not a scope built from the partial list"
+    expected: "exit 0; output contains `CASE partial: PASS`. A fixture feature with `paths` on some but not all evals is treated as not-declared and gets whole-tree staleness, not a scope built from the partial list. Two halves: the obvious one (some evals declare, some do not), and the same partial declaration hidden behind BALANCED TOTALS — two `paths:` lines on one eval and none on the other, which a count-based completeness test reads as complete. The second half must be isolated from the cross-check (report committed on its own, base taken after it), or it passes on the cross-check's refusal whether or not completeness works"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -47,7 +47,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_under_declared
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; output contains `CASE under-declared: PASS`. Complete `paths` whose union misses part of the COVERAGE SET, with the feature's `_acceptance/<slug>/` in the PR diff: narrow scope refused, whole-tree applied, AND each uncovered file printed by name. Asserting the refusal without asserting the printed filenames does not satisfy this eval"
+    expected: "exit 0; output contains `CASE under-declared: PASS`. Complete `paths` whose union misses part of the COVERAGE SET, with the feature's `_acceptance/<slug>/` in the PR diff: narrow scope refused, whole-tree applied, AND each uncovered file printed by name. Asserting the refusal without asserting the printed filenames does not satisfy this eval. Asserted in BOTH root layouts — flat, and with $ROOT one level below the git top-level — because the test for 'this feature's own artifacts are in the PR diff' reads top-level-relative diff paths: anchored to the top level alone it never matches in the monorepo layout, the cross-check silently never runs, and narrow scope is granted unchecked with AC-5 and AC-7 both dead"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
