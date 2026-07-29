@@ -2,11 +2,11 @@
 
 > Trạng thái sống của repo — cập nhật cuối mỗi gói việc. Handoff giữa máy/agent đọc **file này + `_acceptance/`**, không đọc lịch sử chat.
 
-## Hiện trạng (2026-07-29)
+## Hiện trạng (2026-07-30)
 
 - **Nền tảng:** fork TongFlow (AGPL-3.0, không CLA, không dual-license — README §License). Đã rebrand OneFlow: logo pixel (`public/logo.svg`, `logo_icon.svg`), xoá COMMERCIAL-LICENSE.md/CLA.md.
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
-- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **9 feature đã ký**. CI 5 job, gate là job thứ 5.
+- **Acceptance-Gate Kit:** đang chạy strict/strict. **10 feature đã ký** (9 trên `main`, `cache-l1-fingerprint` chờ merge). CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
 - **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (10 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
@@ -22,11 +22,12 @@
 | `oneflow-plugin-prefix` | T3 | 27/07 | `oneflow-` là quy ước thư mục plugin, `tongflow-` legacy. **Ký lại 27/07** cùng Cổng 2 của per-plugin-origin (nhánh đó sửa `plugin-id.test.ts` sang normaliser chung) |
 | `per-plugin-origin` | T2 | 27/07 | Entry manifest nhận `origin` riêng; 1 resolver cho 3 đường tải; installer CLI sang TS; manifest validate lúc nạp. Origin lệch → từ chối 409, KHÔNG tự di trú |
 | `stale-scope-by-paths` | T2 | 29/07 | Cổng chỉ báo bằng chứng hết hiệu lực cho feature mà code đổi NẰM TRONG `paths` nó khai; ai khai 0 `paths` giữ nguyên hành vi cũ từng chữ. Khai thiếu bị cross-check bắt và in tên file. **Cả 7 feature cũ được carry-forward re-pin cùng PR này** |
+| `cache-l1-fingerprint` | T3 | 30/07 | Khoá cache nội-dung-địa-chỉ: `digest_form()` mượn `normalize_call()` của L0 nên khoá tính từ chính artifact conformance suite canh; `node_fingerprint()` trả `None` khi không biết rev HOẶC plugin có sửa đổi chưa commit; vector ghim lược đồ khoá + guard tự chứng minh không rỗng. 2 vòng verify (vòng 1 REJECT) |
 | `conformance-l0` | T3 | 28/07 | Engine fan-out khớp canvas; gộp kết quả theo thứ tự batch; suite conformance TS↔Python + mutation guard; `pluginRev` lúc scan; hợp đồng `node_cached` nối thông 3 tầng. Merge 29/07 (PR #25) sau khi gỡ 7 pin stale |
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**`cache-l1-fingerprint` (lát L1 của 1.1) đang bay — verify PASS ở vòng 2 (30/07), chờ chữ ký Cổng 2.** Contract `status: implemented`, 16 tiêu chí / 16 eval / 16 executor key một-đối-một, 133 test SDK xanh. Nhánh `feat/cache-l1-fingerprint`.
+**Không còn feature nào dở.** `cache-l1-fingerprint` (lát L1 của 1.1) ký 30/07, `pre-merge-check` sạch cả 10 feature trên nhánh. **Việc lớn kế tiếp là lát L2** — store cache trên đĩa + blob dedupe + khôi phục 3 thứ của D5, chỉ tầng A.
 
 `conformance-l0` (1.L0) đã merge 29/07 qua [PR #25](https://github.com/phanlemanh/OneFlow/pull/25). Q1–Q3 của spec cache **đã chốt 29/07** — xem [design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md) và PR #30.
 
