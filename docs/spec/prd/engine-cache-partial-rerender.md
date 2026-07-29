@@ -66,9 +66,12 @@ node_fingerprint = sha256(canonical_json({
 `label`/`comment`/`locked`, `level`/`dependencies`, `exportedAt`, và `outputs` routes
 (routing quyết định *chiếu* kết quả đi đâu, không quyết định plugin *tính* ra gì).
 
-`digest_form()` duyệt cấu trúc và thay mọi `bytesBase64` bằng `{"__sha256": "<hex>"}`.
-Không hash chuỗi base64 trực tiếp: một video 200MB sẽ thành chuỗi ~270MB phải
-serialize lại mỗi lần — thay bằng digest thì khoá ngoài luôn nhỏ và ổn định.
+`digest_form()` duyệt cấu trúc và thay mọi `bytesBase64` bằng `{"__asset": "<hex>"}` —
+cùng hằng `ASSET_DIGEST_KEY` mà [`callog.py`](../../../sdk/tongflow/engine/callog.py) dùng,
+vì L1 tính khoá **từ chính** `normalize_call()` chứ không viết lại luật chuẩn hoá. Nhờ vậy
+khoá cache và log mà conformance suite đối chiếu là **một**, thay vì hai định nghĩa song
+song của cùng một thao tác. Không hash chuỗi base64 trực tiếp: một video 200MB sẽ thành
+chuỗi ~270MB phải serialize lại mỗi lần — thay bằng digest thì khoá ngoài luôn nhỏ và ổn định.
 
 `pluginRev` là điều kiện đúng đắn, không phải tuỳ chọn: plugin hiện clone không pin,
 nên sửa code plugin mà khoá không đổi sẽ tái dùng kết quả của phiên bản cũ. Cần bổ
@@ -84,12 +87,27 @@ re-render thì đó mới là ngữ nghĩa đúng.
 
 | Tầng | Áp dụng cho | Phạm vi | Ví dụ slot |
 |---|---|---|---|
-| **A — nội dung, dùng chung** | Slot tất định (không có núm bất định, hoặc có nhưng đã ghim) | Toàn hệ thống, dedupe chéo workflow/người dùng | `concat-videos`, `extract-audio`, `get-first-frame`, `transcribe`, `parse-document`, `image-upscale` (đã ghim seed) |
+| **A — nội dung, trong tenant** | Slot tất định (không có núm bất định, hoặc có nhưng đã ghim) | Trong tenant, chéo workflow | `concat-videos`, `extract-audio`, `get-first-frame`, `transcribe`, `parse-document`, `image-upscale` (đã ghim seed) |
 | **B — memo theo workflow** | Slot bất định chưa ghim seed | Chỉ trong phạm vi workflow + tenant | `image-gen`, `text-gen-video`, `image-gen-video`, `gen-music`… |
 
 Tầng B tuyệt đối không rò chéo workflow/tenant: hai người dùng có input trùng nhau
-vẫn phải nhận kết quả riêng. Tầng A thì càng chia sẻ càng lợi — và đúng những node
-rẻ-nhưng-chạy-liên-tục (ffmpeg, cắt khung, transcribe) nằm ở đây.
+vẫn phải nhận kết quả riêng.
+
+**Cả hai tầng đều khoá theo tenant** (quyết định 29/07, Manh). Tính tất định **không**
+quyết định *có chia sẻ chéo tenant hay không* — nó chỉ quyết định độ rộng **bên trong**
+một tenant: tầng A dùng lại được chéo workflow, tầng B thì không.
+
+Lý do không chia sẻ chéo tenant: `transcribe` là tất định, nên tầng A dùng chung toàn hệ
+thống sẽ trả bản chép của tenant A cho tenant B khi B có đúng bytes đó. Nội dung không lộ
+thêm gì (cùng input tất định thì cùng output), nhưng cơ chế là một **existence oracle** —
+có bytes trong tay là biết người khác đã xử lý đúng bytes đó chưa, suy ra được qua độ trễ
+hoặc qua hoá đơn mà không cần đọc nội dung. Nó đi ngược niềm tin nền số 5 của
+[vision.md](../../strategy/vision.md). **Đừng "tối ưu" nó ngược lại như một cải tiến hiệu
+năng**; đầy đủ lý lẽ ở [design doc 29/07](../../superpowers/specs/2026-07-29-cache-open-questions-design.md) §2.
+
+Tầng B ngoài ra còn **sai ngữ nghĩa** nếu dùng chéo workflow, không chỉ là chuyện bảo mật:
+cache này là *"input không đổi → dùng lại đúng cái bạn đã tạo ra"*, và "cái bạn đã tạo ra"
+gắn với workflow đã sinh ra nó.
 
 ### D4 — Dirty propagation là hệ quả, không phải cơ chế riêng
 
@@ -142,7 +160,14 @@ run_workflow(
 
 - `auto` (mặc định): tầng A + tầng B như D3.
 - `off`: bỏ qua cache hoàn toàn — dùng cho benchmark và khi cần chủ động sinh lại.
-- `force`: coi cả slot bất định như tầng A. Chỉ dành cho debug, **không** phơi ra UI.
+- `force`: coi cả slot bất định như tầng A **trong cùng tenant**. Chỉ dành cho debug,
+  **không** phơi ra UI.
+- `reuse_scope` là `(tenant, workflowId)` và **bắt buộc cho cả hai tầng** sau quyết định
+  29/07. **Thiếu scope → tắt cache hoàn toàn**, không rơi về dùng chung. Đây là điểm
+  fail-closed quan trọng nhất của cả gói: nếu thiếu scope mà âm thầm dùng chung thì một
+  lỗi cấu hình ở cloud sẽ khôi phục lại đúng existence oracle mà D3 vừa đóng — và khôi
+  phục **im lặng**. Desktop cấp một scope tenant cục bộ, nên đường self-host không mất
+  cache vì luật này.
 
 Không cần tham số `from_nodes`: "chạy từ node X" là hệ quả tự nhiên của D4, và một API
 tường minh sẽ mở đường cho việc bỏ qua node mà người dùng *tưởng* đã đổi.
@@ -201,13 +226,13 @@ bật cache mặc định.
 |---|---|---|
 | R1 | Plugin sửa code mà khoá không đổi → tái dùng kết quả cũ | `pluginRev` trong khoá (bắt buộc, L0) |
 | R2 | Đĩa phình vô hạn | Trần dung lượng cấu hình được, LRU, mặc định 20GB (L4) |
-| R3 | Rò dữ liệu chéo tenant ở cloud | Tầng B **phải** khoá theo `(tenant, workflowId)`; tầng A chỉ chứa kết quả tất định |
+| R3 | Rò dữ liệu chéo tenant ở cloud | **Cả hai** tầng khoá theo tenant (29/07). Tính tất định chỉ quyết định độ rộng *trong* một tenant, không cấp quyền chia sẻ ra ngoài. Existence oracle của tầng A dùng chung toàn hệ thống **đã bị đóng bằng chính luật này** — đừng mở lại dưới dạng một tối ưu hoá |
 | R4 | Cache một lỗi tạm thời | D8 — không bao giờ cache `success:false` |
 | R5 | Hai runtime lệch → tái dùng sai ngữ nghĩa | Conformance suite là điều kiện tiên quyết (mục 5) |
 | R6 | Đổi `sdkMajor` vô hiệu hoá toàn bộ cache | Chấp nhận; đây là hành vi đúng, chỉ cần cảnh báo trong changelog |
-| **Q1** | Có gộp `store.py:59/94` thành nội-dung-địa-chỉ luôn không? | *Cần chốt.* Sẽ dedupe toàn hệ thống nhưng đổi hình dạng `file_key` mà UI đang hiển thị |
-| **Q2** | Cache có dùng chung giữa desktop (self-host) và cloud không? | *Cần chốt.* Đề xuất: không — desktop là ổ đĩa người dùng, cloud là store của tenant |
-| **Q3** | Cửa sổ sống của tầng B bao lâu? | *Cần chốt.* Đề xuất: theo vòng đời workflow, dọn khi workflow bị xoá |
+| **Q1** | Có gộp `store.py:59/94` thành nội-dung-địa-chỉ luôn không? | **Chốt 29/07: KHÔNG.** `HttpStore` nhận `file_key` do host cấp nên "có" không thể làm đồng nhất ba store; UUID đang gánh vai trò vòng đời chứ không chỉ là tên; D6 đã thu phần lợi. Mở lại chỉ khi có số đo |
+| **Q2** | Cache có dùng chung giữa desktop (self-host) và cloud không? | **Chốt 29/07: KHÔNG** — hệ quả của việc tầng A khoá theo tenant, không còn là phán đoán |
+| **Q3** | Cửa sổ sống của tầng B bao lâu? | **Chốt 29/07: LRU theo dung lượng là cơ chế thu hồi duy nhất** (chung cho A và B), cộng `purge(tenant, workflowId)` best-effort. **Không TTL** — hai cơ chế thu hồi thì khi cache mất phải điều tra xem cái nào đã ăn |
 
 ## 8. Phác tiêu chí nghiệm thu (cho lúc build từng lát)
 
@@ -216,10 +241,13 @@ bật cache mặc định.
 - Node trúng cache vẫn làm hạ nguồn nhận đủ input (chống bẫy D5): workflow 3 tầng, node giữa trúng cache, node cuối vẫn ra kết quả đúng.
 - Xoá thư mục cache → kết quả không đổi, chỉ chậm hơn (cache không được là nguồn sự thật).
 - `success:false` không bao giờ tạo entry.
-- Hai tenant cùng input ở slot bất định → **không** dùng chung kết quả.
+- Hai tenant cùng input ở slot **bất định** → **không** dùng chung kết quả.
+- Hai tenant cùng input ở slot **tất định** → **cũng không** dùng chung kết quả. (Tiêu chí canh quyết định 29/07; thiếu nó thì quyết định đó không có gì canh.)
+- Gọi `run_workflow` **không có `reuse_scope`** → không entry nào được đọc và không entry nào được ghi. Fail-closed, không phải "dùng chung".
+- `purge(tenant, workflowId)` xoá entry tầng B của đúng workflow đó, **không** chạm workflow khác cùng tenant; gọi hai lần không lỗi.
 - Đổi `pluginRev` → không trúng cache cũ.
 
 ---
 
-**Người viết:** Claude (phiên 2026-07-25) · **Cần review:** Manh ·
+**Người viết:** Claude (phiên 2026-07-25) · **Đã review & chốt Q1–Q3:** Manh 2026-07-29 ·
 **Phụ thuộc:** không · **Chặn:** mọi việc phía sau của mô hình gói phẳng (P2 cloud)
