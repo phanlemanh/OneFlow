@@ -148,6 +148,20 @@ case_partial() {
     && fail partial "duplicate-key partial declaration was granted narrow scope: $out2"
   printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail partial "duplicate-key partial declaration did not fall back to whole-tree: $out2"
+
+  # Third shape of the same lie: E2 declares nothing, and a `paths:` key at the
+  # eval-key column sits in an unrelated mapping BELOW the evals list. Totals
+  # balance, and attributing a paths line to the "nearest `- id:` above"
+  # without checking it is still INSIDE that eval hands the stray key to E2 —
+  # the union then gains a glob no eval declared. Same isolation as above.
+  d3="$(new_case_tmpdir)"
+  base3="$(mk_committed_report_fixture "$d3" fx stray)"
+  ( cd "$d3" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  out3="$(bash "$GATE" "$d3" --base "$base3" 2>&1)"
+  printf '%s\n' "$out3" | grep -q 'narrow staleness scope applied' \
+    && fail partial "stray out-of-block paths key was folded into a granted scope: $out3"
+  printf '%s\n' "$out3" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail partial "stray out-of-block paths key did not fall back to whole-tree: $out3"
   pass partial
 }
 

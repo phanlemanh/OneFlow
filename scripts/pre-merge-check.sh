@@ -499,27 +499,48 @@ feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 onl
   # refuse, reachable by a copy-paste duplicate line. Everything above proves
   # the file's SHAPE; this proves the shape is distributed one-per-eval.
   #
-  # Deliberately expressed by locating the SAME two patterns already used
-  # above (the literal "- id:" anchor and $paths_re) by line number, rather
-  # than restating the grammar in a second parser: this function's own history
-  # is six rounds of one construct's forms drifting apart, and a duplicated
-  # grammar is how that drift starts. With the total already equal to
-  # n_evals, "no eval owns two" implies "every eval owns exactly one".
-  id_lines="$(grep -n "^${ei}- id:" "$f" 2>/dev/null | cut -d: -f1)"
-  paths_lines="$(grep -En "$paths_re" "$f" 2>/dev/null | cut -d: -f1)"
-  owners="$(
-    for pl in $paths_lines; do
-      owner=0
-      for il in $id_lines; do
-        [ "$il" -lt "$pl" ] && owner="$il"
-      done
-      printf '%s\n' "$owner"
-    done
-  )"
-  # owner=0 means a paths line sits at eval-key indent ABOVE the first eval —
-  # not attributable to any eval, so not a declaration this parser can read.
-  printf '%s\n' "$owners" | grep -qx 0 && return 1
-  [ -z "$(printf '%s\n' "$owners" | sort | uniq -d)" ] || return 1
+  # Walk the file once, tracking whether an eval item is currently OPEN, and
+  # require each open item to close having seen exactly one `paths:` line.
+  #
+  # "Nearest `- id:` above" is NOT ownership — it never asks whether the paths
+  # line is still INSIDE that eval. Any `paths:` key sitting at the eval-key
+  # column anywhere below the last `- id:` (a trailing `misc:`/`sub:` mapping,
+  # say) is attributed to the final eval: owners come out distinct, the total
+  # balances, and a file where one eval declares nothing reads as COMPLETE
+  # while a stranger's globs join the union. Same AC-4 failure mode as the
+  # duplicate key, same dangerous direction (narrower than truth).
+  #
+  # What closes an item is a line that is neither blank, nor a comment, nor
+  # indented to the eval-key column — i.e. a dedent out of the item. A
+  # paths-grammar line found while NO item is open is a stray declaration this
+  # parser cannot attribute, and is refused outright.
+  #
+  # $paths_re reaches awk through the environment, not -v: awk expands escape
+  # sequences in -v assignments, which would eat the `\[` and `\]` of the
+  # grammar and silently widen the pattern. Passing the same regex, not a
+  # second copy of it, is the point — this function's history is six rounds of
+  # one construct's forms drifting apart, and a duplicated grammar is how that
+  # drift starts.
+  PMC_EI="$ei" PMC_PATHS_RE="$paths_re" awk '
+    BEGIN {
+      ei = ENVIRON["PMC_EI"]; re = ENVIRON["PMC_PATHS_RE"]
+      idpfx = ei "- id:"; idlen = length(idpfx)
+      keypfx = ei "  ";   keylen = length(keypfx)
+      open = 0; n = 0; bad = 0
+    }
+    substr($0, 1, idlen) == idpfx {
+      if (open && n != 1) bad = 1
+      open = 1; n = 0; next
+    }
+    /^[[:space:]]*$/ { next }
+    /^[[:space:]]*#/ { next }
+    substr($0, 1, keylen) == keypfx {
+      if ($0 ~ re) { if (open) n++; else bad = 1 }
+      next
+    }
+    { if (open) { if (n != 1) bad = 1; open = 0 } }
+    END { if (open && n != 1) bad = 1; exit (bad ? 1 : 0) }
+  ' "$f" || return 1
 
   # Extract by pulling the quoted spans out of each matched line's array
   # body, never by splitting on `,` or `]` — those characters are meaningless

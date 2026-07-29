@@ -39,7 +39,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_partial
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; output contains `CASE partial: PASS`. A fixture feature with `paths` on some but not all evals is treated as not-declared and gets whole-tree staleness, not a scope built from the partial list. Two halves: the obvious one (some evals declare, some do not), and the same partial declaration hidden behind BALANCED TOTALS — two `paths:` lines on one eval and none on the other, which a count-based completeness test reads as complete. The second half must be isolated from the cross-check (report committed on its own, base taken after it), or it passes on the cross-check's refusal whether or not completeness works"
+    expected: "exit 0; output contains `CASE partial: PASS`. A fixture feature with `paths` on some but not all evals is treated as not-declared and gets whole-tree staleness, not a scope built from the partial list. Two halves: the obvious one (some evals declare, some do not), and the same partial declaration hidden behind BALANCED TOTALS — two `paths:` lines on one eval and none on the other, which a count-based completeness test reads as complete. A third half covers the same lie told a third way: one eval declares nothing while a `paths:` key at the eval-key column sits in an unrelated mapping BELOW the evals list, which 'nearest `- id:` above' attributes to the last eval. Both hidden halves must be isolated from the cross-check (report committed on its own, base taken after it), or they pass on the cross-check's refusal whether or not completeness works"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -79,7 +79,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_mutation
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; mutation guard proves the mechanism is not vacuous. Both perturbations applied to a TEMP COPY of the gate script (working tree never edited): (a) narrow scope forced to match nothing — mechanism becomes 'never stale'; (b) the completeness test forced to always pass — mechanism becomes blind trust. Each must drive the guard RED, and reverting must return it GREEN. Exercising only one, or only the green path, fails this eval"
+    expected: "exit 0; mutation guard proves the mechanism is not vacuous. Both perturbations applied to a TEMP COPY of the gate script (working tree never edited): (a) narrow scope forced to match nothing — mechanism becomes 'never stale'; (b) the completeness test forced to always pass — mechanism becomes blind trust. Completeness now lives in TWO places (the file-wide total and the per-eval distribution walk), so (b) must neutralise BOTH and assert each sed actually matched: patching only one leaves the other still refusing, and the perturbation would silently stop testing anything. Each must drive the guard RED, and reverting must return it GREEN. Exercising only one, or only the green path, fails this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10

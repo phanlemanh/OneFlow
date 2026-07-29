@@ -122,3 +122,18 @@ rather than the full Cartesian product.
   Trường hợp nhẹ hơn cùng gốc: một khai báo trung thực lúc viết trôi dần khi codebase phình ra quanh nó (thư mục mới, file mới ngoài `paths`), không PR nào chạm lại `_acceptance/<slug>/` để kích hoạt cross-check.
 - Cross-check đối chiếu `paths` với **diff của PR**, không với thứ eval thật sự chạy. Khai `paths: ["**"]` sẽ pass mà chẳng thu hẹp gì. Không cơ chế nào chặn một khai báo trung thực với diff nhưng sai với eval — chỗ đó chỉ review bắt được.
 - Feature bị sửa `paths` ở một PR muộn hơn sẽ được cross-check với diff của PR đó, không phải diff lúc landing. Kết quả gần như chắc chắn là từ chối scope hẹp (hướng an toàn), nhưng thông báo sẽ gây bối rối.
+
+### Quyết ở Cổng 2 (2026-07-29) — chuyển sang contract riêng
+
+Ba vòng verify tìm ra **5 lỗi fail-open cùng một họ**, và không lỗi nào bị eval bắt (16/16 xanh ở cả bốn trạng thái code). Bốn lỗi đã sửa trong feature này; phần còn lại human quyết tách ra:
+
+- **Scope toàn glob t1-exempt thì vĩnh viễn rỗng (HIGH).** `scope_has_any_match()` hỏi trên TOÀN cây tracked, còn `stale_files()` trả lời trên cây ĐÃ LỌC (bỏ `_acceptance/**` + `t1_skip_globs`) *trước* khi áp scope. Một feature khai `paths: ["docs/**"]` hoàn toàn thành thật vẫn được cấp scope hẹp rồi lọc sạch mọi thay đổi đáng báo, mãi mãi. → **contract riêng**, gộp cùng chiều còn thiếu bên dưới. KHÔNG vá lẻ: bốn lần vá lẻ trước đều lòi ra biến thể kế tiếp.
+- **Chiều còn thiếu của hợp đồng này:** không AC nào nói về *ngữ nghĩa không gian tên đường dẫn* và *coverage-set*. Các AC hiện có chỉ mô tả hành vi (thu hẹp đúng / từ chối đúng / im lặng đúng). Contract mới phải mở đúng trục đó, có eval cho cả 5 biến thể đã biết.
+- **Tiếng Việt trong code và thông điệp CI (HIGH).** ~265 dòng + ≥14 thông điệp `VIOLATION`/`NOTE`, đến từ bump vendor kit 1.24.0 (`896b17e`), trong repo có luật English-only không ngoại lệ. Sửa tay sẽ bị ghi đè ở lần bump sau → **contract riêng**, và việc thật là quyết định chính sách: xin upstream dịch, hay ghi ngoại lệ vendor vào CLAUDE.md/CONTRIBUTING.md.
+
+Chấp nhận và ghi nhận ở đây (không tách contract):
+
+- `biome.json` nằm trong `t1_skip_globs` với lý do tự mâu thuẫn: `executors.test.lint` LÀ một executor, và `files.includes` của biome quyết định lint soi những gì — nên đổi file này CÓ thể làm bằng chứng lint mất hiệu lực.
+- E14 vẫn ghim vào SHA chỉ tồn tại trên `feat/conformance-l0`. Nhánh đó bị rebase hoặc xoá sau merge là E14 đỏ vĩnh viễn, vì lý do không liên quan tới cơ chế đang đo.
+- awk ghép cặp cross-layer dùng bảng chữ cái `[a-z_]+` cho key mở khối, làm `layer:` của eval trước rò sang eval sau.
+- 16 executor mới trong `config.yaml` không đặt trong ngoặc kép như 20 executor cũ; resolver cắt mọi thứ sau `#` có khoảng trắng đứng trước, nên giá trị không ngoặc kép chỉ cách một ký tự `#` là bị cắt âm thầm.

@@ -150,6 +150,10 @@ write_evals_yaml() {
     echo "    executor: test"
     echo "    cmd: config:executors.test.unit"
     [ -n "$4" ] && echo "$4"
+    # Optional $5: content appended AFTER the evals list — for shapes that put
+    # a `paths:` key outside any eval item.
+    [ -n "${5:-}" ] && echo "$5"
+    :
   } > "$1/_acceptance/$2/evals.yaml"
 }
 
@@ -176,6 +180,11 @@ mk_fixture() {
   mkdir -p "$d/_acceptance/$slug" "$d/src/covered" "$d/src/uncovered" "$d/docs"
   write_config "$d"
   write_contract "$d" "$slug"
+  # Reset before the case: this file has no `local`, so a value set by one
+  # mode's branch would otherwise survive into the NEXT mk_fixture call and
+  # silently append a trailer to an unrelated fixture (see mk_pair_fixture's
+  # note on the same hazard).
+  trailer=""
   case "$mode" in
     none)    p1=""; p2="" ;;
     partial) p1='    paths: ["src/covered/**"]'; p2="" ;;
@@ -187,9 +196,17 @@ mk_fixture() {
     # reads this partial declaration as complete.
     dup)     p1='    paths: ["src/covered/**"]
     paths: ["src/uncovered/**"]'; p2="" ;;
+    # E2 declares NOTHING; a `paths:` key sits at the eval-key column in an
+    # unrelated mapping BELOW the evals list. Totals balance again (2 evals,
+    # 2 paths lines), and "nearest `- id:` above" hands the stray key to E2 —
+    # so the union silently gains a glob no eval ever declared.
+    stray)   p1='    paths: ["src/covered/**"]'; p2=""
+             trailer='misc:
+  sub:
+    paths: ["docs/**"]' ;;
     all|*)   p1='    paths: ["src/covered/**"]'; p2='    paths: ["src/covered/**", "src/uncovered/**"]' ;;
   esac
-  write_evals_yaml "$d" "$slug" "$p1" "$p2"
+  write_evals_yaml "$d" "$slug" "$p1" "$p2" "${trailer:-}"
   echo '{}' > "$d/_acceptance/$slug/run-log.jsonl"
   git_init_fixture_repo "$d"
   (
@@ -379,15 +396,26 @@ run_mutation_case() {
   printf '%s\n' "$a_out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     && fail mutation "perturbation (a) did not go RED — in-scope changes are not actually caught"
 
-  # (b) neutralize feature_scope's n_evals==n_paths completeness check: a
-  # "partial" declaration (one eval left undeclared) is then trusted as
-  # complete, scoping ONLY to what WAS declared and silently dropping the
-  # undeclared eval's implicit "everything" — drift outside that narrowed
-  # scope goes unreported.
+  # (b) neutralize feature_scope's completeness proof: a "partial" declaration
+  # (one eval left undeclared) is then trusted as complete, scoping ONLY to
+  # what WAS declared and silently dropping the undeclared eval's implicit
+  # "everything" — drift outside that narrowed scope goes unreported.
+  #
+  # Completeness lives in TWO places since the per-eval distribution proof was
+  # added: the file-wide total, and the awk that walks each eval item. Patching
+  # only the total leaves the awk still refusing, so the mechanism does NOT
+  # break and this perturbation would silently stop testing anything — the
+  # exact vacuous-guard failure this case exists to rule out. Both sites are
+  # patched, and each is asserted to have actually matched, so a future edit
+  # that moves either one turns this case red instead of quietly weakening it.
   sed 's/\[ "\$n_evals" -eq "\$n_paths" \] || return 1/:/' \
-    "$work/gate.sh" > "$work/gate_b.sh"
-  cmp -s "$work/gate.sh" "$work/gate_b.sh" \
-    && fail mutation "perturbation (b) patched nothing — the sed target moved"
+    "$work/gate.sh" > "$work/gate_b0.sh"
+  cmp -s "$work/gate.sh" "$work/gate_b0.sh" \
+    && fail mutation "perturbation (b) patched nothing — the total-count sed target moved"
+  sed 's/END { if (open \&\& n != 1) bad = 1; exit (bad ? 1 : 0) }/END { exit 0 }/' \
+    "$work/gate_b0.sh" > "$work/gate_b.sh"
+  cmp -s "$work/gate_b0.sh" "$work/gate_b.sh" \
+    && fail mutation "perturbation (b) patched nothing — the per-eval awk sed target moved"
   b_out="$(run_gate_with_drift "$work/gate_b.sh" partial src/uncovered/new.txt)"
   printf '%s\n' "$b_out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     && fail mutation "perturbation (b) did not go RED — a partial declaration is trusted"
