@@ -8,7 +8,7 @@ surfaces: [plugins, sdk]
 status: signed-off
 approved_by: Manh
 approved_at: 2026-07-26
-time_human_minutes: {gate1: 0, gate2: 0}
+time_human_minutes: {gate1: 0, gate2: 15}
 ---
 
 # Acceptance Contract: oneflow-plugin-prefix

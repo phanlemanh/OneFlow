@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent (round 3); round 4 re-verify 20
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 05fc9453fa561eaa60166c594974231459359db3
-human_signoff: Manh 2026-07-27
+human_signoff: Manh 2026-07-29
 ---
 
 # Evidence Report: oneflow-plugin-prefix
