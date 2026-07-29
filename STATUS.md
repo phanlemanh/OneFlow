@@ -26,7 +26,14 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Không còn feature nào dở.** `conformance-l0` (1.L0) đã merge 29/07 qua [PR #25](https://github.com/phanlemanh/OneFlow/pull/25) — `pre-merge-check` sạch cả 9 feature trên `main`. **Việc lớn kế tiếp là 1.1 — cache engine hạ cánh trong `sdk/tongflow/engine/`**, thứ mà toàn bộ mệnh đề kinh tế "sửa miễn phí, sinh mới mới tính tiền" đứng lên trên. Chốt Q1–Q3 của spec cache trước khi vào lát L2.
+**`cache-l1-fingerprint` (lát L1 của 1.1) đang bay — verify PASS ở vòng 2 (30/07), chờ chữ ký Cổng 2.** Contract `status: implemented`, 16 tiêu chí / 16 eval / 16 executor key một-đối-một, 133 test SDK xanh. Nhánh `feat/cache-l1-fingerprint`.
+
+`conformance-l0` (1.L0) đã merge 29/07 qua [PR #25](https://github.com/phanlemanh/OneFlow/pull/25). Q1–Q3 của spec cache **đã chốt 29/07** — xem [design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md) và PR #30.
+
+**Hai thứ L1 để lại cho L2, đọc trước khi cắm dây** (chi tiết ở Known limits của contract):
+
+- **`sdk_major()` chỉ kiểm "có dấu chấm".** `sdk_major('v0.2.17')` → `'v0.2'`, `sdk_major('..')` → `'.'`. `sdk_version` là tham số công khai của `node_fingerprint()`, nên một caller truyền chuỗi dạng tag làm `sdkMajor` rác được băm vào **mọi** khoá, không báo lỗi. Sửa rẻ: đòi hai thành phần đầu là chữ số.
+- **`mime`/`filename` của asset không vào digest.** Cùng bytes + metadata khác → **cùng một khoá** (kiểm chứng: `denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên plugin chọn decoder theo `input.mime` sẽ bị phục vụ entry của metadata kia. Sửa nằm trong `callog.py` — của `conformance-l0` — nên cần contract riêng.
 
 ## Cách gỡ 7 pin stale đã chặn PR #25 — giữ lại vì sẽ gặp lại
 
@@ -121,7 +128,9 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | **0.7** | **English-only vs văn bản vendor của kit** | 🔴 **contract riêng, quyết ở Cổng 2 của 0.5**. ≈265 dòng tiếng Việt + ≥14 thông điệp `VIOLATION`/`NOTE` CI, và `lib/gap-probe.js` biến một cụm tiếng Việt thành từ khoá điều khiển duy nhất. Nằm trong file vendor (kit 1.24.0) nên sửa tay bị ghi đè lần bump sau → việc thật là quyết định chính sách: xin upstream dịch, hay ghi ngoại lệ vendor vào CLAUDE.md/CONTRIBUTING.md |
 | **1.L0** | `pluginRev` + sự kiện `node_cached` + **conformance suite TS↔Python** (ca đầu: `batchField`) | ✅ **xong** — ký 28/07, merge 29/07 ([PR #25](https://github.com/phanlemanh/OneFlow/pull/25), merge commit `99a75ad`) |
 | **1.L0b** | Gỡ 7 pin stale chặn PR #25 | ✅ **xong** — 6 carry-forward re-pin + 1 re-verify & ký lại (`oneflow-plugin-prefix`). Cách làm giữ ở mục trên vì sẽ gặp lại |
-| **1.1** | **Cache engine hạ cánh trong `sdk/tongflow/engine/` (lát L1→L4)** | ⏭ **việc lớn kế tiếp** — tiền đề `batchField` đã đóng ở 1.L0. **Q1–Q3 của spec cache cần chốt trước lát L2** |
+| 0.4b | Chốt Q1–Q3 của spec cache | ✅ **xong** — chốt 29/07, PR #30 ([design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md)). Tầng A khoá theo tenant; `reuse_scope` thiếu → tắt cache; LRU là cơ chế thu hồi duy nhất |
+| **1.1-L1** | `digest_form()` + `node_fingerprint()` + test vector ghim lược đồ khoá | ◐ **verify PASS vòng 2 (30/07), chờ ký Cổng 2** — nhánh `feat/cache-l1-fingerprint` |
+| **1.1-L2** | Store cache trên đĩa + blob dedupe + khôi phục 3 thứ (D5), chỉ tầng A | ⏭ **việc lớn kế tiếp sau L1**. Mang theo 2 known limit của L1: `sdk_major()` lỏng, và `mime`/`filename` không vào digest |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
