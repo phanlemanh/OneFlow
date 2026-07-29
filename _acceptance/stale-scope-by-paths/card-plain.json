@@ -1,0 +1,60 @@
+{
+  "feature_plain": "Khi một PR chạm vào code, cổng chặn merge chỉ báo 'bằng chứng đã hết hiệu lực' cho những tính năng thật sự liên quan tới code đó — dựa trên vùng file mà chính tính năng đó tự khai. Ai không khai thì giữ nguyên hành vi cũ từng chữ.",
+  "decisions": [],
+  "analyst_plain": "",
+  "scope_plain": "Chưa gỡ đỏ cho 7 tính năng đã ký (chúng khai 0 đường dẫn nên cơ chế này không giúp được — mỗi cái cần một PR backfill riêng), chưa bổ sung 6 đường dẫn thiếu của conformance-l0, và không suy vùng ảnh hưởng từ đồ thị phụ thuộc.",
+  "decisions_plain": [
+    {
+      "id": "d-20260728T100000Z-4418",
+      "p": "Chỉ đối chiếu lời khai vùng file đúng MỘT lần — ngay tại PR tạo hoặc sửa lời khai đó; đổi lại lời khai đã lọt qua sẽ không được kiểm lại ở các PR sau."
+    },
+    {
+      "id": "d-20260728T100001Z-7723",
+      "p": "KHÔNG làm sạch màu đỏ cho 7 tính năng đã ký trong lần này; đổi lại xong tính năng này vẫn chưa merge được PR #25, phải backfill từng cái một."
+    },
+    {
+      "id": "d-20260728T100002Z-1195",
+      "p": "Dùng lại đúng ô khai báo vùng file đã có thay vì thêm ô mới; đổi lại một ô phục vụ hai mục đích với hai chiều rủi ro ngược nhau."
+    },
+    {
+      "id": "d-20260728T100003Z-9046",
+      "p": "Đặt bộ kiểm tra mới vào thư mục CÓ bị cổng soi, để cổng soi được chính thay đổi sửa cổng; đổi lại mỗi PR chạm nó đều làm bằng chứng của các tính năng khác bị đánh dấu hết hiệu lực."
+    },
+    {
+      "id": "d-20260728T120000Z-8814",
+      "p": "Tách bước dọn dẹp kỹ thuật thành việc riêng có ảnh chụp đối chiếu, thay vì trộn vào việc thêm tính năng; đổi lại thêm một bước."
+    },
+    {
+      "id": "d-20260728T120001Z-3357",
+      "p": "Làm tuần tự từng việc thay vì chạy song song; chậm hơn nhưng không có bước gộp nhánh nào để làm sai."
+    },
+    {
+      "id": "d-20260728T130000Z-6690",
+      "p": "Tách sang nhánh riêng để không tự làm hỏng bằng chứng đã ký của tính năng khác; đổi lại phải trông hai nhánh cùng lúc."
+    },
+    {
+      "id": "d-20260728T130001Z-2248",
+      "p": "Chụp ảnh đối chiếu SAU khi đưa file vào diện bị soi, để ảnh đó thật sự bắt được hồi quy; đổi lại thứ tự các bước ngược với trực giác."
+    },
+    {
+      "id": "d-20260729T070519Z-25550",
+      "p": "Sửa lỗi khiến một lời khai vùng file viết theo kiểu khác có thể vô hiệu hoá cảnh báo hết-hiệu-lực vĩnh viễn; đổi lại lời khai nay buộc viết theo một kiểu duy nhất, viết sai bị từ chối rõ ràng."
+    },
+    {
+      "id": "d-20260729T070519Z-3336",
+      "p": "Đổi điểm mốc của bài kiểm đối chiếu repo thật sang một điểm đã đẩy lên máy chủ, kèm chốt chặn báo lỗi nếu ai đó lại ghim vào điểm chỉ có trên máy mình."
+    },
+    {
+      "id": "d-20260729T073038Z-16840",
+      "p": "Sửa lỗi khiến bước đối chiếu lời khai hoàn toàn không chạy khi thư mục dự án nằm sâu một cấp; không có đánh đổi — trước đó nó im lặng bỏ qua."
+    },
+    {
+      "id": "d-20260729T073038Z-27321",
+      "p": "Sửa lỗi khiến một lời khai THIẾU vẫn được coi là đủ chỉ vì tổng số dòng khớp nhau; đổi lại thêm một bước kiểm tra nhỏ trên tệp khai báo."
+    },
+    {
+      "id": "d-20260729T073038Z-19288",
+      "p": "Bắt buộc mọi bài kiểm mới phải chứng minh nó thật sự bắt được lỗi, sau khi phát hiện một bài vừa viết ra đã xanh một cách vô nghĩa."
+    }
+  ]
+}

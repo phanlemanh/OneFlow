@@ -369,16 +369,346 @@ GLOBS
   return 1
 }
 
-stale_files() { # <root> <commit> — files changed since <commit> (incl. working
-  # tree) that are neither gate artifacts (_acceptance/) nor t1_skip_globs:
-  # i.e. code the pinned evidence no longer covers. Untracked files are
-  # invisible to git diff — CI runs on a committed tree, so that is moot there.
-  git -C "$1" diff --name-only "$2" -- 2>/dev/null | while IFS= read -r f; do
+feature_scope() { # <evals.yaml> — union of declared globs on stdout; rc 0 only
+  # when EVERY eval declares a usable `paths`. `paths` was introduced as a
+  # carry-forward performance knob, where under-declaring is safe; here it gates
+  # correctness, so anything less than a complete, parseable declaration falls
+  # back to whole-tree rather than to a narrower scope.
+  #
+  # This is a grep-based parser, not a YAML parser — it cannot afford to guess.
+  # Six rounds in a row each patched one bad FORM of the same construct while
+  # a sibling form of that same construct survived (fixed-literal indentation,
+  # then a whitespace class, then multi-line arrays, then the first `]`, then
+  # a key-name alphabet that still let a quoted, spaced, or colon-bearing key
+  # through), because "reject the forms I thought of" can never enumerate
+  # every form. This version instead whitelists exactly what is understood —
+  # for BOTH the key and the value — and refuses everything else by
+  # construction:
+  #
+  #   <EI>  <simple-key>: ["glob", "glob", ...][optional trailing # comment]
+  #
+  # anchored at both ends of the physical line, where EI is the derived
+  # eval-item indent, <simple-key> matches `[A-Za-z_][A-Za-z0-9_-]*` — no
+  # quotes, no embedded space, no embedded colon (enforced up front by the
+  # key-grammar check below, on EVERY line at eval-key indentation, not just
+  # `paths:` lines) — and, when that key is `paths`, each glob is a
+  # double-quoted string with no `"` inside it. A `]`, `,`, or `#` inside a
+  # quoted glob is harmless BECAUSE the whole line matched this grammar
+  # first — only then is the true closing `]` known, and globs are pulled out
+  # as quoted spans, never by splitting on `,` or `]`. Everything else is
+  # refused, not guessed at: a quoted, spaced, or colon-bearing key, an empty
+  # key, a list item at eval-key indent, multi-line arrays, single- or
+  # un-quoted items, nested arrays, `paths: []`, `paths:` with no value,
+  # block scalars, or any trailing content after `]` that is not a `#`
+  # comment. A wider whole-tree fallback is always safe, a narrower wrong
+  # scope never is.
+  f="$1"
+  [ -f "$f" ] || return 1
+
+  # Derive the eval-item indentation from the FIRST "- id:" line, LITERALLY
+  # (the exact leading whitespace captured, not a whitespace class) — every
+  # pattern below is anchored to this exact string.
+  ei="$(grep -m1 '^[[:space:]]*- id:' "$f" 2>/dev/null | sed 's/- id:.*$//')"
+
+  # Indentation consistency: every "- id:" line (loosely matched, any leading
+  # whitespace) must equal EI exactly. If some drift to a different
+  # indentation (odd space count, or a literal tab alongside spaces), this
+  # parser cannot read the file reliably — return non-zero rather than guess.
+  loose_n="$(grep -c '^[[:space:]]*- id:' "$f" 2>/dev/null || true)"
+  exact_n="$(grep -c "^${ei}- id:" "$f" 2>/dev/null || true)"
+  loose_n="${loose_n:-0}"
+  exact_n="${exact_n:-0}"
+  [ "$loose_n" -eq "$exact_n" ] || return 1
+
+  n_evals="$exact_n"
+  [ "$n_evals" -gt 0 ] || return 1
+
+  # Eval-key line shape: every line indented to EXACTLY the eval-key
+  # indentation (EI plus two literal spaces — the column a `- ` marker lines
+  # sibling keys up with) must be a simple, unquoted `key:` —
+  # `[A-Za-z_][A-Za-z0-9_-]*:`. The key name is deliberately NOT enumerated
+  # as "the key names I expect" (kebab-case `expected-output:`, digit-suffixed
+  # `note2:`, etc. are all legal); what is refused is any key shape this
+  # line-based parser cannot read reliably at all: a quoted key
+  # (`"note: x":`), a key with an embedded colon (`"note: x":` again — the
+  # colon inside the quotes, not just the one ending it), a key with a
+  # space (`my key:`), an empty key (`: `), or a list item sitting at this
+  # same indent (`- foo:`). None of those are things this parser can
+  # disambiguate from a real key, so the whole file is refused rather than
+  # guessed at. Loose vs strict counts at the SAME indentation (mirroring the
+  # "- id:" indentation check above) catch every one of them: a line
+  # matching the loose "something non-blank sits here" selector that does
+  # NOT also match the strict key grammar means this file has a line this
+  # parser cannot read.
+  key_loose_n="$(grep -c "^${ei}  [^[:space:]]" "$f" 2>/dev/null || true)"
+  key_strict_n="$(grep -Ec "^${ei}  [A-Za-z_][A-Za-z0-9_-]*:" "$f" 2>/dev/null || true)"
+  key_loose_n="${key_loose_n:-0}"
+  key_strict_n="${key_strict_n:-0}"
+  [ "$key_loose_n" -eq "$key_strict_n" ] || return 1
+
+  # This parser cannot read YAML block scalars. A `|`/`>` indicator as the
+  # VALUE of ANY eval-level key (EI plus two spaces) means the following
+  # lines are opaque prose that can look like anything, including a decoy
+  # `paths:` line — refuse rather than let that prose feed either counter
+  # below. Because the check above has already proven every eval-key-indent
+  # line is a simple `<key>:`, the value begins immediately after THAT key's
+  # single colon — so this is expressed in the SAME key grammar rather than a
+  # fresh, unconstrained `[^:]*` that would anchor on the wrong colon when a
+  # key contains one of its own (the exact bypass this round closes: a key
+  # like `"note: x":` has an embedded colon, and `[^:]*` stops at the first
+  # one, landing mid-key instead of at the key's true end).
+  #
+  # The indicator must be followed by nothing but an optional YAML
+  # chomping/indent suffix (`-`, `+`, a digit) and then end-of-line or a
+  # trailing comment, anchoring it to be the START of the value — a
+  # legitimate single-line value that merely CONTAINS `|` or `>` later on —
+  # e.g. `expected: "exit 0; a > b"` — has its own first non-space character
+  # (here `"`) right after the colon, never matches, and is left alone.
+  if grep -E -q "^${ei}  [A-Za-z_][A-Za-z0-9_-]*:[[:space:]]*[|>][-+0-9]*[[:space:]]*(#.*)?\$" "$f" 2>/dev/null; then
+    return 1
+  fi
+
+  # Declarations: ONE pattern, anchored at both `^` and `$` of the physical
+  # line, drives both the counter and the extractor below, so they cannot
+  # disagree. Requiring the closing `]` (and nothing but an optional comment)
+  # on the SAME line is what rules out a multi-line array — a `paths: [`
+  # opening a line whose globs continue on following lines simply fails to
+  # match this pattern at all, so it falls short of n_evals and the function
+  # refuses. Each item must be `"..."` (double-quoted, no embedded `"`); a
+  # single-quoted, unquoted, or nested-array item likewise fails to match. A
+  # `paths:` whose value is not exactly this shape (e.g. `paths: []`,
+  # `paths:` with no value, `paths: >`) is not a declaration at all: it can
+  # never count toward completeness while contributing zero globs. A stray
+  # feature-level top-level `paths:` key (indented differently, not under any
+  # eval) is excluded by the same exact-indentation anchor.
+  #
+  # The grammar permits optional whitespace right inside the brackets
+  # (`[ "a" ]`) and an optional trailing comma before the close (`["a",]`) —
+  # both unremarkable YAML a maintainer would expect to work — while every
+  # other refusal (single-line only, double-quoted only, no nested arrays, no
+  # trailing non-comment suffix) stays exactly as strict.
+  paths_re="^${ei}  paths:[[:space:]]*\\[[[:space:]]*\"[^\"]*\"(,[[:space:]]*\"[^\"]*\")*,?[[:space:]]*\\][[:space:]]*(#.*)?\$"
+  n_paths="$(grep -E -c "$paths_re" "$f" 2>/dev/null || true)"
+  n_paths="${n_paths:-0}"
+  [ "$n_evals" -eq "$n_paths" ] || return 1
+
+  # A TOTAL is not completeness. Two `paths:` lines under one eval and none
+  # under another balance this count exactly, so the union is built from a
+  # PARTIAL declaration while the undeclared eval's implicit whole-tree scope
+  # is silently dropped — the precise AC-4 failure mode this function exists to
+  # refuse, reachable by a copy-paste duplicate line. Everything above proves
+  # the file's SHAPE; this proves the shape is distributed one-per-eval.
+  #
+  # Walk the file once, tracking whether an eval item is currently OPEN, and
+  # require each open item to close having seen exactly one `paths:` line.
+  #
+  # "Nearest `- id:` above" is NOT ownership — it never asks whether the paths
+  # line is still INSIDE that eval. Any `paths:` key sitting at the eval-key
+  # column anywhere below the last `- id:` (a trailing `misc:`/`sub:` mapping,
+  # say) is attributed to the final eval: owners come out distinct, the total
+  # balances, and a file where one eval declares nothing reads as COMPLETE
+  # while a stranger's globs join the union. Same AC-4 failure mode as the
+  # duplicate key, same dangerous direction (narrower than truth).
+  #
+  # What closes an item is a line that is neither blank, nor a comment, nor
+  # indented to the eval-key column — i.e. a dedent out of the item. A
+  # paths-grammar line found while NO item is open is a stray declaration this
+  # parser cannot attribute, and is refused outright.
+  #
+  # $paths_re reaches awk through the environment, not -v: awk expands escape
+  # sequences in -v assignments, which would eat the `\[` and `\]` of the
+  # grammar and silently widen the pattern. Passing the same regex, not a
+  # second copy of it, is the point — this function's history is six rounds of
+  # one construct's forms drifting apart, and a duplicated grammar is how that
+  # drift starts.
+  PMC_EI="$ei" PMC_PATHS_RE="$paths_re" awk '
+    BEGIN {
+      ei = ENVIRON["PMC_EI"]; re = ENVIRON["PMC_PATHS_RE"]
+      idpfx = ei "- id:"; idlen = length(idpfx)
+      keypfx = ei "  ";   keylen = length(keypfx)
+      open = 0; n = 0; bad = 0
+    }
+    substr($0, 1, idlen) == idpfx {
+      if (open && n != 1) bad = 1
+      open = 1; n = 0; next
+    }
+    /^[[:space:]]*$/ { next }
+    /^[[:space:]]*#/ { next }
+    substr($0, 1, keylen) == keypfx {
+      if ($0 ~ re) { if (open) n++; else bad = 1 }
+      next
+    }
+    { if (open) { if (n != 1) bad = 1; open = 0 } }
+    END { if (open && n != 1) bad = 1; exit (bad ? 1 : 0) }
+  ' "$f" || return 1
+
+  # Extract by pulling the quoted spans out of each matched line's array
+  # body, never by splitting on `,` or `]` — those characters are meaningless
+  # once they can appear inside a glob. Because the whole line already proved
+  # it matches the grammar above, the prefix up to the array's `[` and the
+  # suffix from the array's `]` (plus optional trailing comment) can be
+  # stripped safely, leaving only the array body to scan for `"..."` spans.
+  decls="$(grep -E "$paths_re" "$f" 2>/dev/null || true)"
+  globs=""
+  n_lines=0
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    n_lines=$((n_lines + 1))
+    body="$(printf '%s\n' "$line" \
+      | sed -E "s/^${ei}  paths:[[:space:]]*\[//" \
+      | sed -E 's/\][[:space:]]*(#.*)?$//')"
+    line_globs="$(printf '%s\n' "$body" | grep -o '"[^"]*"' | sed -e 's/^"//' -e 's/"$//')"
+    # The grammar guarantees at least one item per matched line; if
+    # extraction still comes up empty, the counter and extractor have
+    # silently diverged — refuse rather than emit a union short of the truth.
+    [ -n "$line_globs" ] || return 1
+    globs="${globs}${line_globs}
+"
+  done <<DECLS
+$decls
+DECLS
+  [ "$n_lines" -eq "$n_paths" ] || return 1
+
+  globs="$(printf '%s\n' "$globs" \
+    | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' \
+    | grep -v '^$' | sort -u)"
+  # An empty array parses to zero globs (never matched by this grammar, but
+  # kept as a last-resort guard). A zero-glob scope matches nothing, which
+  # would read as "never stale" — treat it as not declared.
+  [ -n "$globs" ] || return 1
+  printf '%s\n' "$globs"
+  return 0
+}
+
+gated_coverage() { # <changed-list> — the newline-separated changed-file list
+  # (already BASE_SHA...HEAD, computed ONCE above the feature loop) filtered
+  # down to gated files: excludes _acceptance/** and anything matching
+  # T1_GLOBS. This is the COVERAGE SET a declaration's `paths` must cover, and
+  # it is shared by the "is the coverage set even non-empty" check and
+  # scope_gaps() below — both need the identical filter, and computing it once
+  # here (rather than once per feature, or via a second git invocation) is
+  # what removes a `git diff` call per feature.
+  printf '%s\n' "$1" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
     case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
-    match_globs "$f" "$T1_GLOBS" || printf '%s\n' "$f"
+    match_globs "$f" "$T1_GLOBS" && continue
+    printf '%s\n' "$f"
   done
 }
 
+scope_gaps() { # <gated-coverage-list> <scope-globs> — gated-coverage files
+  # (see gated_coverage() above) the union misses. COVERAGE SET is
+  # BASE_SHA...HEAD (per PR), never the per-feature verified_commit range:
+  # cross-checking a merged feature against its own range spans every
+  # unrelated merge since sign-off, so no honest declaration ever covers it
+  # and narrow scope would be refused forever.
+  printf '%s\n' "$1" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    match_globs "$f" "$2" || printf '%s\n' "$f"
+  done
+}
+
+scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
+  # tracked by git matches the union; rc 1 otherwise. A declared union that
+  # matches NO file in the repository is a typo or a stale/renamed path, not a
+  # scope — and unlike scope_gaps() above (which only runs the moment this
+  # feature's own _acceptance/<slug>/ changes, and can pass VACUOUSLY when
+  # that PR's coverage set happens to be empty), this must hold independent of
+  # any PR diff: a match-nothing glob accepted once at declaration time would
+  # otherwise filter out every real change forever, on every later PR, silently.
+  #
+  # Uses match_globs() — the same `case`-pattern matcher scope_gaps()/
+  # stale_files() use — rather than handing globs to `git ls-files` as
+  # pathspecs, whose `*` semantics differ from shell `case` globbing.
+  #
+  # `--full-name` is load-bearing, not cosmetic. Plain `git -C <root> ls-files`
+  # prints paths relative to <root>, but every OTHER consumer of these same
+  # globs — stale_files(), gated_coverage(), scope_gaps() — matches against
+  # `git diff --name-only`, whose paths are relative to the GIT TOP-LEVEL. The
+  # two namespaces coincide only when $ROOT is the git root. In the monorepo
+  # layout this script explicitly supports (pkg/_acceptance/, see the comment
+  # in the feature loop below), they diverge: ls-files says `src/a.txt` where
+  # diff says `pkg/src/a.txt`. Without --full-name a $ROOT-relative
+  # declaration passes this guard (it matches ls-files) and then filters out
+  # every real change in stale_files (which never sees that spelling) — the
+  # feature is never reported stale again, silently, on every later PR. That
+  # is precisely the fail-open this function exists to close, so it must ask
+  # the question in the same namespace the answer is used in.
+  #
+  # Any doubt (git missing, not a repo, ls-files unusable) is "cannot verify"
+  # and returns rc 1 — refuse narrow scope, same as every other doubt in this
+  # function. Stops at the first match rather than scanning every tracked file.
+  command -v git >/dev/null 2>&1 || return 1
+  git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
+  git -C "$1" ls-files --full-name 2>/dev/null | {
+    hit=1
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      if match_globs "$f" "$2"; then
+        hit=0
+        break
+      fi
+    done
+    exit "$hit"
+  }
+}
+
+stale_files() { # <root> <commit> [scope-globs] — gated files changed since
+  # <commit> (incl. working tree). Gate artifacts (_acceptance/) and
+  # t1_skip_globs never count. With a non-empty third argument, only files
+  # matching it count: that is the STALENESS SET narrowed to what the feature's
+  # evals declare they exercise. Untracked files are invisible to git diff — CI
+  # runs on a committed tree, so that is moot there.
+  #
+  # `-c core.quotePath=false` disables git's default quoting/octal-escaping of
+  # non-ASCII and control-byte paths (core.quotePath defaults on) — without
+  # it, a path like café.txt arrives as the literal string
+  # "caf\303\251.txt", which can never match a plain-ASCII glob. Before
+  # `scope` existed that only meant the whole-tree set carried the quoted
+  # string (a safe over-report); scoping inverts that into a silent
+  # under-refusal, dropping the file from a narrow staleness set entirely. Any
+  # path that STILL arrives quoted despite the setting (a literal `"` or a
+  # backslash escape the setting cannot unquote) is treated as stale
+  # unconditionally, bypassing the scope filter — a name this parser cannot
+  # read cleanly is exactly the doubt the governing rule (any ambiguity keeps
+  # whole-tree staleness) exists for.
+  scope="${3:-}"
+  git -c core.quotePath=false -C "$1" diff --name-only "$2" -- 2>/dev/null | while IFS= read -r f; do
+    case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
+    match_globs "$f" "$T1_GLOBS" && continue
+    case "$f" in \"*) printf '%s\n' "$f"; continue ;; esac
+    if [ -n "$scope" ]; then
+      match_globs "$f" "$scope" || continue
+    fi
+    printf '%s\n' "$f"
+  done
+}
+
+slug_acceptance_touched() { # <slug> — rc 0 iff the shared $ALL_CHANGED list
+  # (BASE_SHA...HEAD, set once above the feature loop) contains any path under
+  # _acceptance/<slug>/. The prefix "_acceptance/$1/" is QUOTED in the `case`
+  # pattern below, so it is matched literally — only the trailing unquoted `*`
+  # is a wildcard — which is what keeps a slug containing a glob/regex
+  # metacharacter (e.g. "a.b") from spuriously matching a sibling slug
+  # ("axb"). Reads $ALL_CHANGED instead of a second per-feature git diff call.
+  #
+  # BOTH spellings, for the same reason scope_has_any_match() needs
+  # --full-name: `git diff --name-only` prints paths relative to the git
+  # TOP-LEVEL, not $ROOT. In the pkg/_acceptance/ monorepo layout this script
+  # supports, the top-level-anchored prefix alone never matches, so this
+  # function always returned 1, the `elif slug_acceptance_touched` branch never
+  # ran, and the declaration was never cross-checked against the PR's gated
+  # diff — narrow scope granted unchecked, AC-5 and AC-7 dead in that layout.
+  # slug_in_diff() below already accepts both; this is the same list read
+  # through a stricter prefix, so it must accept both too.
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in "_acceptance/$1/"*|*"/_acceptance/$1/"*) return 0 ;; esac
+  done <<CHANGEDLIST
+$ALL_CHANGED
+CHANGEDLIST
+  return 1
+}
 
 # config.yaml 2-space lint: every kit parser (hook resolveConfigKey, the sed/awk
 # here) is line/indent based — a TAB or odd indent silently breaks config:
@@ -404,9 +734,21 @@ fi
 # nó (chỉ xét slug có file trong PR), nên hoist lên đây; T1-escape bên dưới DÙNG
 # LẠI ba biến này thay vì tính lại. Thông điệp giữ NGUYÊN VĂN để nội dung và thứ
 # tự output không đổi.
+#
+# Two variable sets, ONE `git diff`. The kit ships DIFF_READY/DIFF_FILES for
+# gap-probe and the T1-escape backstop; the paths-scoping feature adds
+# BASE_SHA/ALL_CHANGED/COVERAGE_OK/GATED_COVERAGE for the per-feature scope
+# cross-check. They describe the same BASE_SHA...HEAD range, so they are filled
+# from a single query below and move together — DIFF_READY==COVERAGE_OK and
+# DIFF_FILES==ALL_CHANGED at every exit of this block. Keeping two names rather
+# than collapsing them keeps both upstream and local call sites readable.
 DIFF_READY=0
 DIFF_FILES=""
 DIFF_SKIP_NOTE=""
+BASE_SHA=""
+ALL_CHANGED=""
+COVERAGE_OK=0
+GATED_COVERAGE=""
 if [ -z "$BASE" ]; then
   DIFF_SKIP_NOTE="no PR base given (pass --base <ref> or set PRE_MERGE_BASE; GitHub Actions: --base \"origin/\$GITHUB_BASE_REF\")"
 elif ! command -v git >/dev/null 2>&1 || ! git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
@@ -436,9 +778,20 @@ else
     # tin phạm vi "đã biết và RỖNG" → gap-probe không bao giờ nổ, T1-escape
     # không thấy gì, NOTE bỏ-qua không in, và guard fail-closed của CI (grep
     # "skipped") bị vượt luôn. Mù thì phải KHAI là mù.
-    if DIFF_FILES="$(git -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"; then
+    #
+    # `-c core.quotePath=false` comes from the paths-scoping feature: without
+    # it a non-ASCII path arrives octal-escaped ("caf\303\251.txt") and can
+    # never match a plain-ASCII glob, which silently drops it from a NARROW
+    # staleness set. Over-reporting was harmless before scoping existed; under
+    # scoping it inverts into a silent under-refusal, so the setting is load-
+    # bearing here and merely harmless for the kit's own consumers.
+    if ALL_CHANGED="$(git -c core.quotePath=false -C "$ROOT" diff --name-only "$BASE_SHA...HEAD" -- 2>/dev/null)"; then
+      COVERAGE_OK=1
+      GATED_COVERAGE="$(gated_coverage "$ALL_CHANGED")"
+      DIFF_FILES="$ALL_CHANGED"
       DIFF_READY=1
     else
+      ALL_CHANGED=""
       DIFF_FILES=""
       DIFF_SKIP_NOTE="git diff \"$BASE\"...HEAD failed (no merge base? shallow/grafted clone, unrelated history, force-pushed base)"
     fi
@@ -748,7 +1101,101 @@ GLOBS2
   elif ! git -C "$ROOT" rev-parse --quiet --verify "$vc^{commit}" >/dev/null 2>&1; then
     echo "NOTE [$slug]: verified_commit $vc not found in this clone (rebase/squash or shallow fetch?) — staleness unverifiable; re-verify to re-pin"
   else
-    stale="$(stale_files "$ROOT" "$vc")"
+    # feature_scope's non-zero return means "not declared" (partial/malformed/
+    # absent paths) — the normal fallback path, not an error, so it must not
+    # abort the script or leak stderr; scope simply stays empty (whole-tree).
+    scope=""
+    if scope="$(feature_scope "$dir/evals.yaml")"; then :; else scope=""; fi
+    # A feature earns narrow scope only when its declaration is CHECKED against
+    # this PR's own gated diff (the coverage set, BASE_SHA...HEAD) — and that
+    # check only runs at the one moment the declaration is new or changed: when
+    # this feature's own _acceptance/<slug>/ is part of the PR diff. Without a
+    # usable coverage set (BASE_SHA unresolvable, OR resolvable but its `git
+    # diff` could not be computed — COVERAGE_OK!=1 covers both) there is
+    # nothing to check the declaration against at all, so "cannot cross-check"
+    # must unconditionally fall back to whole-tree — never read as
+    # "declaration covers everything". This only speaks up for a feature that
+    # actually HAD a scope to refuse (the outer `[ -n "$scope" ]`); an
+    # undeclared feature (scope already empty) stays completely silent here,
+    # same as before.
+    if [ -n "$scope" ]; then
+      if [ "$COVERAGE_OK" -ne 1 ]; then
+        if [ -z "$BASE_SHA" ]; then
+          echo "NOTE [$slug]: no usable PR base (BASE_SHA empty) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
+        else
+          echo "NOTE [$slug]: this PR's gated diff could not be computed (git diff \"$BASE_SHA...HEAD\" failed) — declared eval paths cannot be cross-checked against this PR's gated diff; narrow staleness scope refused, whole-tree applied"
+        fi
+        scope=""
+      # A literal-prefix `case` match against the shared $ALL_CHANGED list (see
+      # slug_acceptance_touched() below), not a grep regex: unlike a regex
+      # over `git diff --name-only` output, a quoted case-pattern prefix
+      # cannot have its directory boundary defeated by a slug containing a
+      # regex metacharacter (e.g. slug "a.b" matching an unrelated
+      # "_acceptance/axb/" via the "." wildcard) — the prefix segment is
+      # quoted, so only the trailing unquoted `*` acts as a wildcard. So "fx"
+      # still never matches "fx-extra".
+      elif slug_acceptance_touched "$slug"; then
+        # This feature's own _acceptance/<slug>/ IS part of the PR diff — the
+        # declaration is new or changed, so this is the one moment the
+        # cross-check must run. An EMPTY gated coverage set (this PR touches
+        # nothing gated besides its own _acceptance/<slug>/) is the exact
+        # defect this branch exists to close: scope_gaps() over an empty list
+        # returns no gaps, which used to read as "declaration checked out
+        # fine" when there was in fact NOTHING to check it against — the same
+        # class of doubt as "no usable base" above, and the governing rule
+        # says doubt keeps whole-tree, never narrow-on-a-guess.
+        if [ -z "$GATED_COVERAGE" ]; then
+          echo "NOTE [$slug]: this PR's gated coverage set is empty (only _acceptance/$slug/ changed) — nothing to cross-check declared eval paths against; narrow staleness scope refused, whole-tree applied"
+          scope=""
+        else
+          gaps="$(scope_gaps "$GATED_COVERAGE" "$scope")"
+          if [ -n "$gaps" ]; then
+            echo "NOTE [$slug]: declared eval paths do not cover this PR's gated diff — narrow staleness scope refused, whole-tree applied. Not covered:"
+            printf '%s\n' "$gaps" | head -10 | sed 's/^/    /'
+            scope=""
+          fi
+        fi
+      fi
+    fi
+    # A declared union that matches no tracked file at all is a typo or a
+    # rotted/renamed path, not a scope. This is deliberately OUTSIDE the
+    # cross-check branch above and applies whenever scope is still non-empty
+    # here, regardless of whether that cross-check ran: the cross-check only
+    # fires the moment this feature's own _acceptance/<slug>/ is part of the
+    # PR diff, i.e. when the declaration is new or changed. A PR that
+    # introduces a match-nothing declaration while touching only its own gate
+    # artifacts has an EMPTY coverage set, so the cross-check passes
+    # vacuously and narrow scope is granted; every later PR that changes real
+    # code without touching this feature's _acceptance/<slug>/ then skips the
+    # cross-check entirely, and stale_files scoped to a match-nothing glob
+    # filters out every real change forever. Governing rule: narrow scope is
+    # never granted on a guess — a scope that provably matches nothing
+    # tracked in the repo is exactly that. Silent for an undeclared feature:
+    # scope is already empty there, so this guard never fires (AC-3).
+    if [ -n "$scope" ] && ! scope_has_any_match "$ROOT" "$scope"; then
+      echo "NOTE [$slug]: declared eval paths match no tracked file in the repository — treating the declaration as a typo/stale path; narrow staleness scope refused, whole-tree applied"
+      scope=""
+    fi
+    stale="$(stale_files "$ROOT" "$vc" "$scope")"
+    # A granted narrow scope is the only path that WEAKENS the gate (it can
+    # only shrink the staleness set stale_files reports), and until now it was
+    # the only path with no output at all — leaving "this feature is genuinely
+    # unaffected" indistinguishable from "this feature's declaration has
+    # drifted and no longer names the code this PR touched". Announce it, and
+    # say explicitly when the narrowing suppressed a change whole-tree would
+    # have reported. Every refusal branch above already clears scope back to
+    # "", so this only fires when scope survived all three checks; an
+    # undeclared feature never sets scope in the first place and stays silent
+    # (the golden baseline pins this for the seven undeclared features).
+    if [ -n "$scope" ]; then
+      wide="$(stale_files "$ROOT" "$vc")"
+      n_wide="$(printf '%s' "$wide" | grep -c . || true)"
+      n_narrow="$(printf '%s' "$stale" | grep -c . || true)"
+      suppressed=$((n_wide - n_narrow))
+      msg="NOTE [$slug]: narrow staleness scope applied ($(printf '%s' "$scope" | tr '\n' ' ' | sed 's/[[:space:]]*$//'))"
+      [ "$suppressed" -gt 0 ] && msg="$msg — suppressed $suppressed whole-tree change(s)"
+      echo "$msg"
+    fi
     if [ -n "$stale" ]; then
       echo "VIOLATION [$slug]: evidence is stale — code changed after verify (verified_commit $vc); re-run verify before merge. Changed:"
       printf '%s\n' "$stale" | head -10 | sed 's/^/    /'
@@ -835,6 +1282,11 @@ fi
 # gated PR re-verifies, so its diff always includes gate artifacts.) There is
 # no path→slug mapping, so "carries artifacts" means any _acceptance/ change;
 # the per-slug checks above judge their quality.
+# Reuses the shared diff computed once above the feature loop (same
+# BASE_SHA...HEAD range) instead of a second `git diff` here. Both variable
+# sets are filled from that single query, so $DIFF_FILES and the scope
+# cross-check's $ALL_CHANGED are the same list; DIFF_READY and COVERAGE_OK
+# likewise move together.
 if [ "$T1_ESCAPE" -eq 0 ]; then
   t1_escape_not_enforced
 elif [ "$DIFF_READY" -eq 0 ]; then

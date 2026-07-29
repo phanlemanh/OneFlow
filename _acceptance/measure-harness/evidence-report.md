@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 14)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e657d56ea07675e2f887048e01e73724f400226a
+verified_commit: 4dcb419d5d7d4612c10339bede6219662721d7e0
 human_signoff: Manh 2026-07-26
 ---
 
@@ -860,6 +860,34 @@ here or across the other features re-pinned in this PR.
 else in the report body changed. The human signature line in frontmatter was not
 touched — it attests to the same code it originally did, which is what the
 carry-forward rule in AGENTS.md authorises.
+
+Carry-forward re-pin (2026-07-29, branch feat/stale-scope-by-paths):
+`verified_commit` moved from e657d56ea07675e2f887048e01e73724f400226a to
+4dcb419d5d7d4612c10339bede6219662721d7e0 with NO re-verify, under the carry-forward
+rule in AGENTS.md. Both of its conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. Filtered of `_acceptance/`, the files
+differing since the old pin are: the five `scripts/acceptance/**` guard files and
+`scripts/pre-merge-check.sh` — all owned by **stale-scope-by-paths**, the feature
+under review on this branch, and the only non-exempt changes the gate reports; plus
+t1-exempt documentation and config that reached main independently of this branch —
+`STATUS.md`, `.gitignore`, `docs/**` (ADRs, roadmap, strategy, G0 runbook),
+`measure/wer-corpus/README.md`, and `biome.json` + `lib/evidence-core.js` +
+`lib/gap-probe.js` (acceptance-gate kit 1.24.0, merged to main as PR #26).
+
+
+Judgment call recorded explicitly: `measure/wer-corpus/README.md` sits under
+`measure/` and so could look like this feature's own. It was authored by the G0
+documentation work (9c9660b, 4b9702b) on main, neither this feature's contract nor
+any of its evals reference it, and it is `**/*.md` (t1-exempt). It is not code this
+feature's evidence attests to, so the signature still carries. Flagged here rather
+than omitted, because it is the one file in this batch where ownership was arguable.
+
+(2) Standing checks green on the new tree: `pnpm lint:check`, `pnpm test`
+(329 passed), `pnpm build && pnpm typecheck`.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.
 
 ## Gate 2 checklist (human)
 

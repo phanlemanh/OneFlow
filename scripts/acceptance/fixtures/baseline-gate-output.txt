@@ -1,0 +1,7 @@
+VIOLATION [ci-actions-bump]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [dependency-refresh-2026-07]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [measure-harness]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [oneflow-plugin-prefix]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [per-plugin-origin]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [sdk-distribution-rename]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+VIOLATION [task-metering]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:

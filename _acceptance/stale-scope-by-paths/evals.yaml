@@ -1,0 +1,139 @@
+schema_version: 1
+feature_slug: stale-scope-by-paths
+# Every eval declares `paths` — this feature invents the rule, so failing to
+# follow it would refuse its own narrow scope and say so out loud.
+#
+# One config key per eval, each resolving to the same guard with a different
+# `--case`. Nine evals behind one command would collapse nine criteria into one
+# exit code: a guard that never implements the partial and malformed cases still
+# exits 0, and both AC-9 mutations still go red, so nothing notices. Each
+# criterion owns an exit code, and each `expected` names the labelled token the
+# guard must print for that case.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.stale_scope_in_scope
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE in-scope: PASS`. A fixture feature with complete, covering `paths` is STILL reported stale when a file in its STALENESS SET matches its union. Asserting only the out-of-scope case does not satisfy this eval: a mechanism broken into 'never stale' passes every other criterion. Four halves: the flat case; a non-ASCII in-union path (quotePath); and — with $ROOT one level BELOW the git top-level, the monorepo layout the gate supports — a top-level-spelled declaration that still stales, plus a $ROOT-relative one that is REFUSED out loud and falls back to whole-tree. The last is the regression: the match-nothing guard must ask its question in the same path namespace the staleness filter answers it in, or a declaration passes validation and then silently filters out every real change forever"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.stale_scope_out_of_scope
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE out-of-scope: PASS`. The same fixture feature is NOT reported stale when every file in its staleness set falls outside its union, and the run attributes no violation to it"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.stale_scoping_golden
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; the gate's output for the seven features that declare NO paths is byte-identical to the baseline captured BEFORE pre-merge-check.sh was touched, and that baseline's capture commit predates the change in git history. Comparing violation COUNT alone does not satisfy this eval — a new output line or a reworded message is a behaviour change for anyone reading the gate"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.stale_scope_partial
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE partial: PASS`. A fixture feature with `paths` on some but not all evals is treated as not-declared and gets whole-tree staleness, not a scope built from the partial list. Two halves: the obvious one (some evals declare, some do not), and the same partial declaration hidden behind BALANCED TOTALS — two `paths:` lines on one eval and none on the other, which a count-based completeness test reads as complete. A third half covers the same lie told a third way: one eval declares nothing while a `paths:` key at the eval-key column sits in an unrelated mapping BELOW the evals list, which 'nearest `- id:` above' attributes to the last eval. Both hidden halves must be isolated from the cross-check (report committed on its own, base taken after it), or they pass on the cross-check's refusal whether or not completeness works"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.stale_scope_under_declared
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE under-declared: PASS`. Complete `paths` whose union misses part of the COVERAGE SET, with the feature's `_acceptance/<slug>/` in the PR diff: narrow scope refused, whole-tree applied, AND each uncovered file printed by name. Asserting the refusal without asserting the printed filenames does not satisfy this eval. Asserted in BOTH root layouts — flat, and with $ROOT one level below the git top-level — because the test for 'this feature's own artifacts are in the PR diff' reads top-level-relative diff paths: anchored to the top level alone it never matches in the monorepo layout, the cross-check silently never runs, and narrow scope is granted unchecked with AC-5 and AC-7 both dead"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.stale_scope_malformed
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE malformed: PASS`. `paths: []` and a `paths` value parsing to zero globs are BOTH treated as not-declared (whole-tree), never as a declared-but-empty scope that matches nothing and reads as 'never stale'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.stale_scope_merged_halves
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE merged-halves: PASS` and BOTH sub-results. A merged fixture feature whose `_acceptance/<slug>/` is ABSENT from the PR diff keeps narrow scope with NO cross-check; the same feature with it PRESENT does get cross-checked. Halves C/D/D2 pin that a base the machine cannot compute never buys narrow scope: no base at all falls back to whole-tree staleness, a base resolvable but sharing no merge base with HEAD does the same, and an UNRESOLVABLE ref refuses to run at all (exit 2 + `VIOLATION [scope]`) — the harder of the two failure modes, adopted with kit 1.24.0"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.stale_scope_suppression
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE suppression: PASS`. SUPPRESSION half — a PR changing only `_acceptance/**` and `t1_skip_globs` paths yields two empty sets and stales no feature, for declared and undeclared fixtures alike"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.stale_scope_mutation
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; mutation guard proves the mechanism is not vacuous. Both perturbations applied to a TEMP COPY of the gate script (working tree never edited): (a) narrow scope forced to match nothing — mechanism becomes 'never stale'; (b) the completeness test forced to always pass — mechanism becomes blind trust. Completeness now lives in TWO places (the file-wide total and the per-eval distribution walk), so (b) must neutralise BOTH and assert each sed actually matched: patching only one leaves the other still refusing, and the perturbation would silently stop testing anything. Each must drive the guard RED, and reverting must return it GREEN. Exercising only one, or only the green path, fails this eval"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.stale_scope_case_completeness
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; the guard exits NON-ZERO when any single named case is removed from its case list. Without this, a case that was never implemented is indistinguishable from a case that passed — the guard just exits 0 with one fewer line"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.stale_scope_guard_not_exempt
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; the guard script's own repo-relative path is tested against EVERY glob in `risk_tiers.t1_skip_globs` using the same matcher the gate uses, and matches NONE — so the gate applies to the change that alters the gate"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.stale_scope_two_bases
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE two-bases: PASS`. A fixture repo where `verified_commit...HEAD` and `BASE_SHA...HEAD` DELIBERATELY differ — feature signed off several unrelated commits ago — and whose `paths` cover the coverage set but NOT everything changed since `verified_commit`: the cross-check passes and narrow scope is granted. An implementation that cross-checks against the per-feature range must fail this eval while passing every other fixture"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.stale_scope_no_kill_switch
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; `scripts/pre-merge-check.sh` as shipped at HEAD contains NONE of the guard's perturbation knobs by name. An env-var mutation switch in the shipped gate is a production kill switch: set it and every declared feature gets a match-nothing scope while the gate exits clean"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.stale_scope_real_repo
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; run against THIS repo with both refs pinned to literal SHAs — BASE_SHA=336944d68a7bc7fe6da281a8c6eaf24d105703a2, HEAD=7352ca57b932924dfabb18a80f4e71ed4b6810fd — NOT to branch names, so merging PR #25 or adding a file to the branch cannot move the answer. Both SHAs must be reachable from a remote-tracking ref, and the guard's preflight fails loudly when one is not: a commit present only in the author's clone makes this eval pass on one machine and fail on CI, which is the failure mode a real-repo assertion can least afford. Asserts the cross-check FIRED, the uncovered list is NON-EMPTY, and the list is exactly this set of six: src/hooks/use-workflow-recovery.ts, src/components/workspace/execution-status-line.tsx, src/hooks/use-workflow-execution.ts, src/constants/task-status.ts, src/lib/task/engine-events.ts, src/lib/abi/conformance.ts. A subset match, or a pass with an empty list, fails this eval. Fixture-only assertions do not satisfy it — the point is a declaration written by someone who did not know this rule existed"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.stale_scope_announce
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE announce: PASS`. Three assertions: a feature granted narrow scope produces ONE line naming it and the globs that scoped it; when that narrow scope suppressed a staleness whole-tree would have reported, the line says so explicitly; and an undeclared feature produces NO such line, so AC-3's silence still holds"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.stale_scope_indent_drift
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: "exit 0; output contains `CASE indent-drift: PASS`. feature_scope() refuses every YAML form it cannot read cleanly: indentation drift (both a space-count drift and a literal-tab drift on an eval-item line), block-scalar decoys — including hyphenated-key, digit-suffixed-key, colon-in-key, and quoted-key variants — a feature-level top-level `paths:` key sibling to `evals:`, a multi-line array (both alongside a complete sibling eval and as the file's only eval), single-quoted items, a nested array, and trailing non-comment junk after the closing `]`. It still ACCEPTS, and joins into the union: a single-line value that merely contains `>` after its colon, a hyphenated key with an ordinary single-line value, a trailing inline `#` comment (stripped clean, not leaked into the glob), and a glob containing `]` from a bracket character class (with a sibling glob after it not dropped)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
