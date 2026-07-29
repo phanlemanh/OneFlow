@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: d1b73c2c38c960925e6ef8c63f617d89030a8ec9
+verified_commit: aba508a0edc61656b21d46bec6361cf4c6a0f927
 human_signoff: Manh 2026-07-28
 ---
 
@@ -205,6 +205,30 @@ Round 2: Commit `bff647b` ("fix: three review findings from verification round 1
 Round 3: Commit `43d2e3c` ("fix: close the high and two low findings from verification round 2") addressed the round-2 findings. Re-ran all 15 machine evals (E1-E15) plus the full supporting suite (`pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test`, `pnpm verify:plugins`, `pnpm gen:abi` + diff-check) against `verified_commit: 43d2e3c37e1100db31db86a0618d9b5fc6705da4` — all green, no failures, no BLOCKED evals, no judgment items pending. `evals.yaml` did not change since round 1, so the A/B baseline was again not re-measured this round (round-1 baseline results are carried forward in `## Analyst` above). Fresh adversarial code review of the round-3 tree surfaced 9 new findings (1 high, 4 medium, 4 low — the high one being a latent circular-import dependency `sdk/tongflow/scan.py` now has on `sdk/tongflow/engine`, which only avoids breaking today because of import order in `tongflow/__init__.py`); none block this PASS as none map to a failing eval, but the high finding and the two medium canvas/ABI-shape findings are carried to Gate 2 as human decisions — see `review-findings.md`.
 
 Round 4: Commit `d1b73c2` ("fix: break the scan/engine import cycle and de-snapshot the switch guard") addressed the round-3 high finding (the latent circular import between `sdk/tongflow/scan.py` and `sdk/tongflow/engine`). Re-ran all 15 machine evals (E1-E15) plus the full supporting suite (`pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test`, `pnpm verify:plugins`, `pnpm gen:abi` + diff-check) against `verified_commit: d1b73c2c38c960925e6ef8c63f617d89030a8ec9` — all green, no failures, no BLOCKED evals, no judgment items pending. `evals.yaml` did not change since round 1, so the A/B baseline was again not re-measured this round (round-1 baseline results are carried forward in `## Analyst` above). Fresh adversarial code review of the round-4 tree surfaced 8 new findings (2 high, 3 medium, 3 low — the two highs being: `src/lib/abi/conformance.ts` importing `node:crypto`/`Buffer` while sitting in a client-reachable `src/lib/abi` directory with neither a `.server.ts` suffix nor a `server-only` guard; and the empty-batch fan-out clearing `data_node_state` engine-side while the canvas — fed a truthy `output: {}` — keeps showing the previous run's values, a fresh instance of the exact engine/canvas divergence this slice exists to remove). None of the 8 findings block this PASS as none map to a failing eval; all are carried to Gate 2 as human decisions — see `review-findings.md`.
+
+Carry-forward re-pin (2026-07-30, branch feat/cache-l1-fingerprint):
+`verified_commit` moved from d1b73c2c38c960925e6ef8c63f617d89030a8ec9 to
+aba508a0edc61656b21d46bec6361cf4c6a0f927 with NO re-verify, under the carry-forward
+rule in AGENTS.md. Both conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. The branch's entire gated diff is FOUR
+NEW FILES — `sdk/tongflow/engine/fingerprint.py`, `sdk/tests/test_fingerprint.py`,
+`sdk/tests/test_fingerprint_vectors.py`, `sdk/tests/fixtures/fingerprint_vectors.json`
+— so no pre-existing feature can own any of them. Ownership was computed per file
+under the rule settled 2026-07-29, not inferred from the subtree: each feature's
+owned set is the gated diff of the merge commit that landed it, intersected with
+this branch's gated diff. All eight intersections are empty. Note in particular
+that conformance-l0 declares `paths: ["sdk/**"]`, so narrow scope does NOT save it
+— it is carried on ownership, not on scope.
+
+(2) Standing checks green on the new tree, measured by round 2 of this branch's
+own S4 verify rather than re-run by hand: `pnpm build && pnpm typecheck`,
+`pnpm lint:check`, `pnpm test`, `cd sdk && pytest` (133 passed),
+`pnpm verify:plugins`, and the generated-ABI drift check — all six suite commands
+exited 0, alongside 16/16 feature evals.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.
 
 ## Gate 2 checklist (human)
 
