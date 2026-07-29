@@ -1,87 +1,87 @@
 {
-  "keySchemaVersion": 1,
-  "cases": [
-    {
-      "name": "scalar-only",
-      "slot": "gen-text",
-      "pluginId": "oneflow-text",
-      "pluginRev": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "pluginDirty": false,
-      "model": null,
-      "sdkVersion": "0.2.17",
-      "businessInput": {
-        "text": "xin chào"
-      },
-      "expected": "8c50dedb19b8185eb71bdeab8f9cb10d5ab05b569425178b8fcf0025a749e052"
-    },
-    {
-      "name": "with-model",
-      "slot": "image-gen",
-      "pluginId": "oneflow-image",
-      "pluginRev": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "pluginDirty": false,
-      "model": "flux-dev",
-      "sdkVersion": "0.2.17",
-      "businessInput": {
-        "text": "a cat",
-        "seed": 7,
-        "width": 512,
-        "height": 512
-      },
-      "expected": "7067ecb4021ca91c0d2f21e17b0d2b2d8cecc178730ea7ad0be65858fbb7e28a"
-    },
-    {
-      "name": "inline-asset",
-      "slot": "image-edit",
-      "pluginId": "oneflow-image",
-      "pluginRev": "cccccccccccccccccccccccccccccccccccccccc",
-      "pluginDirty": false,
-      "model": null,
-      "sdkVersion": "0.2.17",
-      "businessInput": {
-        "text": "remove bg",
-        "image": {
-          "file_key": "uploads/a.png",
-          "bytesBase64": "iVBORw0KGgogZmFrZSBwaXhlbHM="
+    "keySchemaVersion": 1,
+    "cases": [
+        {
+            "name": "scalar-only",
+            "slot": "gen-text",
+            "pluginId": "oneflow-text",
+            "pluginRev": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "pluginDirty": false,
+            "model": null,
+            "sdkVersion": "0.2.17",
+            "businessInput": {
+                "text": "xin chào"
+            },
+            "expected": "8c50dedb19b8185eb71bdeab8f9cb10d5ab05b569425178b8fcf0025a749e052"
+        },
+        {
+            "name": "with-model",
+            "slot": "image-gen",
+            "pluginId": "oneflow-image",
+            "pluginRev": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "pluginDirty": false,
+            "model": "flux-dev",
+            "sdkVersion": "0.2.17",
+            "businessInput": {
+                "text": "a cat",
+                "seed": 7,
+                "width": 512,
+                "height": 512
+            },
+            "expected": "7067ecb4021ca91c0d2f21e17b0d2b2d8cecc178730ea7ad0be65858fbb7e28a"
+        },
+        {
+            "name": "inline-asset",
+            "slot": "image-edit",
+            "pluginId": "oneflow-image",
+            "pluginRev": "cccccccccccccccccccccccccccccccccccccccc",
+            "pluginDirty": false,
+            "model": null,
+            "sdkVersion": "0.2.17",
+            "businessInput": {
+                "text": "remove bg",
+                "image": {
+                    "file_key": "uploads/a.png",
+                    "bytesBase64": "iVBORw0KGgogZmFrZSBwaXhlbHM="
+                }
+            },
+            "expected": "d6c6d71538b5cacad1e02001e7471356382995c92b79572071fa773e07b2ba75"
+        },
+        {
+            "name": "nested-asset-list",
+            "slot": "concat-videos",
+            "pluginId": "oneflow-ffmpeg",
+            "pluginRev": "dddddddddddddddddddddddddddddddddddddddd",
+            "pluginDirty": false,
+            "model": null,
+            "sdkVersion": "0.2.17",
+            "businessInput": {
+                "videos": [
+                    {
+                        "file_key": "m1",
+                        "bytesBase64": "Y2xpcC1vbmU="
+                    },
+                    {
+                        "file_key": "m2",
+                        "bytesBase64": "Y2xpcC10d28="
+                    }
+                ]
+            },
+            "expected": "42fea0216c76050d48029cd586d46d554f51e9d7d7b7924848f04dbacfc7c66a"
+        },
+        {
+            "name": "unicode-and-empty-dropped",
+            "slot": "gen-text",
+            "pluginId": "oneflow-text",
+            "pluginRev": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "pluginDirty": false,
+            "model": null,
+            "sdkVersion": "0.2.17",
+            "businessInput": {
+                "text": "Giá: 199.000đ",
+                "userPrompt": ""
+            },
+            "expected": "85aceaeecefd24892929c6593457c72015a325392e3983f19819d75f13ec62ac"
         }
-      },
-      "expected": "d6c6d71538b5cacad1e02001e7471356382995c92b79572071fa773e07b2ba75"
-    },
-    {
-      "name": "nested-asset-list",
-      "slot": "concat-videos",
-      "pluginId": "oneflow-ffmpeg",
-      "pluginRev": "dddddddddddddddddddddddddddddddddddddddd",
-      "pluginDirty": false,
-      "model": null,
-      "sdkVersion": "0.2.17",
-      "businessInput": {
-        "videos": [
-          {
-            "file_key": "m1",
-            "bytesBase64": "Y2xpcC1vbmU="
-          },
-          {
-            "file_key": "m2",
-            "bytesBase64": "Y2xpcC10d28="
-          }
-        ]
-      },
-      "expected": "42fea0216c76050d48029cd586d46d554f51e9d7d7b7924848f04dbacfc7c66a"
-    },
-    {
-      "name": "unicode-and-empty-dropped",
-      "slot": "gen-text",
-      "pluginId": "oneflow-text",
-      "pluginRev": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-      "pluginDirty": false,
-      "model": null,
-      "sdkVersion": "0.2.17",
-      "businessInput": {
-        "text": "Giá: 199.000đ",
-        "userPrompt": ""
-      },
-      "expected": "85aceaeecefd24892929c6593457c72015a325392e3983f19819d75f13ec62ac"
-    }
-  ]
+    ]
 }

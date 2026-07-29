@@ -1,10 +1,5 @@
 """Recorded key-schema vectors and the guard that proves they are not a bluff.
 
-Note: this suite mutates a tracked source file (`fingerprint.py`) for the
-duration of AC-14's guard. It must never be run under pytest-xdist or
-concurrently with another invocation of itself -- a parallel worker importing
-`fingerprint.py` mid-bump would read the wrong `KEY_SCHEMA_VERSION`.
-
 AC-13: the vector file pins its own `sdk_version` per case (never falls back to
 `tongflow.__version__`), and every recorded key must still match, character for
 character, what the current implementation computes.
@@ -15,6 +10,18 @@ another fresh subprocess. Recomputing keys inline and diffing them against each
 other would only prove `v` is hashed somewhere; it would not prove that
 AC-13's own pytest node-id is what actually flips. That is why this guard
 re-invokes pytest itself rather than reimplementing the comparison.
+
+The bump-and-rerun step NEVER touches the tracked `fingerprint.py`. Instead it
+copies the `tongflow/` package and `tests/` directory into a fresh temporary
+directory per subprocess run, bumps `KEY_SCHEMA_VERSION` only inside that copy,
+and points the subprocess's cwd/PYTHONPATH at the copy -- the same
+patch-a-copy-not-the-working-tree technique the stale-scope-by-paths guard
+uses for its own mutation case (see `scripts/acceptance/check-stale-scoping.sh
+--case mutation` and `_acceptance/stale-scope-by-paths/contract.md` AC-9).
+Every temp directory is a fresh, independent copy, so there is nothing to
+restore, no shared mutable state between the "bumped" and "reverted" runs, and
+this guard is safe to run concurrently with itself or with any other test in
+this suite -- unlike a guard that edits the tracked source in place.
 
 The schema-version precondition ("the recorded vectors were generated under
 the `KEY_SCHEMA_VERSION` currently in fingerprint.py") is asserted here, in
@@ -31,21 +38,23 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from tongflow.engine.fingerprint import KEY_SCHEMA_VERSION, node_fingerprint
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 VECTORS_PATH = FIXTURES_DIR / "fingerprint_vectors.json"
-FINGERPRINT_MODULE_PATH = Path(__file__).parent.parent / "tongflow" / "engine" / "fingerprint.py"
 SDK_ROOT = Path(__file__).parent.parent
+TONGFLOW_SRC_DIR = SDK_ROOT / "tongflow"
+TESTS_SRC_DIR = SDK_ROOT / "tests"
 AC13_NODE_ID = "tests/test_fingerprint_vectors.py::test_vectors_match_character_for_character"
 
 # Ample headroom for a single-test pytest subprocess; if the inner run ever
-# hangs this bounds the guard's own runtime instead of hanging indefinitely
-# while `fingerprint.py` sits bumped on disk.
+# hangs this bounds the guard's own runtime instead of hanging indefinitely.
 SUBPROCESS_TIMEOUT_SECONDS = 120
 
 
@@ -54,45 +63,67 @@ def _load_vectors() -> dict:
         return json.load(f)
 
 
-def _clear_fingerprint_bytecode_cache() -> None:
-    """Delete any cached bytecode for the module the guard edits.
+def _copy_sdk_tree(dest: Path) -> None:
+    """Copy the tongflow package and tests directory into an isolated `dest`.
 
-    Two back-to-back writes to the same path (bump, then revert) can land
-    inside the same filesystem mtime tick, which would let a stale
-    `__pycache__/fingerprint*.pyc` survive an invalidation check and silently
-    serve the *previous* source. That would make the guard flaky in exactly
-    the direction that matters: a bumped source could still run the old
-    (un-bumped) bytecode and report success for the wrong reason. Removing the
-    cache directory before every subprocess run makes each run compile fresh.
+    Only these two directories are needed to run AC-13's node-id: the package
+    under test and the test file plus its fixture. Copying (rather than
+    editing SDK_ROOT in place) is what keeps this guard from ever writing the
+    tracked `fingerprint.py` -- not "restoring it afterward", but never
+    touching it at all.
     """
-    pycache_dir = FINGERPRINT_MODULE_PATH.parent / "__pycache__"
-    if not pycache_dir.is_dir():
-        return
-    for cached in pycache_dir.glob("fingerprint.*.pyc"):
-        cached.unlink()
+    ignore = shutil.ignore_patterns("__pycache__")
+    shutil.copytree(TONGFLOW_SRC_DIR, dest / "tongflow", ignore=ignore)
+    shutil.copytree(TESTS_SRC_DIR, dest / "tests", ignore=ignore)
 
 
-def _run_ac13_in_subprocess() -> subprocess.CompletedProcess[str]:
-    """Re-run AC-13's own pytest node-id in a fresh subprocess.
-
-    Uses the same interpreter (`sys.executable`) and the same `PYTHONPATH=.`
-    convention as the rest of this suite -- never `python3`, and never the
-    ambient environment's default interpreter, since that could silently
-    select a different (or absent) tongflow install. `PYTHONDONTWRITEBYTECODE`
-    plus the explicit cache clear above both guard against the stale-`.pyc`
-    hazard described there.
-    """
-    _clear_fingerprint_bytecode_cache()
-    env = {**os.environ, "PYTHONPATH": ".", "PYTHONDONTWRITEBYTECODE": "1"}
-    return subprocess.run(
-        [sys.executable, "-m", "pytest", "-q", AC13_NODE_ID],
-        cwd=SDK_ROOT,
-        capture_output=True,
-        text=True,
-        env=env,
-        check=False,
-        timeout=SUBPROCESS_TIMEOUT_SECONDS,
+def _bump_schema_version_in_copy(copy_root: Path) -> None:
+    """Bump KEY_SCHEMA_VERSION by 1 inside the COPY's fingerprint.py only."""
+    fp_path = copy_root / "tongflow" / "engine" / "fingerprint.py"
+    source = fp_path.read_text(encoding="utf-8")
+    old_line = f"KEY_SCHEMA_VERSION = {KEY_SCHEMA_VERSION}"
+    new_line = f"KEY_SCHEMA_VERSION = {KEY_SCHEMA_VERSION + 1}"
+    assert old_line in source, (
+        "expected an exact `KEY_SCHEMA_VERSION = <int>` assignment line in "
+        "fingerprint.py -- the guard's string replacement relies on it."
     )
+    assert source.count(old_line) == 1, (
+        "the exact assignment line must appear exactly once, or the "
+        "replacement below could touch something unintended."
+    )
+    fp_path.write_text(source.replace(old_line, new_line, 1), encoding="utf-8")
+
+
+def _run_ac13_against_copy(*, bump_schema_version: bool) -> subprocess.CompletedProcess[str]:
+    """Run AC-13's own pytest node-id against a fresh, isolated copy of the SDK.
+
+    Uses the same interpreter (`sys.executable`) and `PYTHONPATH=.` convention
+    as the rest of this suite -- never `python3`, and never the ambient
+    environment's default interpreter, since that could silently select a
+    different (or absent) tongflow install. The env is extended, not
+    replaced (`{**os.environ, ...}`), and `cwd` is the temp copy's root -- the
+    same fix applied to the sibling AC-1 subprocess in test_fingerprint.py.
+
+    Each call gets its own brand-new temp directory, so there is no shared
+    mutable state -- and no stale-bytecode hazard -- between a "bumped" call
+    and a "reverted" one.
+    """
+    with tempfile.TemporaryDirectory(prefix="fingerprint-ac14-") as tmp:
+        copy_root = Path(tmp)
+        _copy_sdk_tree(copy_root)
+        if bump_schema_version:
+            _bump_schema_version_in_copy(copy_root)
+
+        env = {**os.environ, "PYTHONPATH": ".", "PYTHONDONTWRITEBYTECODE": "1"}
+        return subprocess.run(
+            [sys.executable, "-m", "pytest", "-q", AC13_NODE_ID],
+            cwd=copy_root,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+            timeout=SUBPROCESS_TIMEOUT_SECONDS,
+        )
 
 
 def test_vectors_match_character_for_character():
@@ -128,11 +159,11 @@ def test_vector_guard_catches_schema_version_bump():
     # every other component's removal reddens some existing test, but
     # dropping KEY_SCHEMA_VERSION from the hashed payload leaves all of
     # AC-1..AC-13/AC-15/AC-16 green. This test proves the vector file itself
-    # is that guard, by actually bumping the constant, actually re-running
-    # AC-13's own pytest node-id in a separate process, and actually reverting
-    # -- not by recomputing a key inline and comparing it to itself, which
-    # would only prove `v` is hashed somewhere, not that AC-13's test is what
-    # turns red.
+    # is that guard, by actually bumping the constant in an isolated copy of
+    # the package, actually re-running AC-13's own pytest node-id against that
+    # copy in a separate process, and actually observing the failure -- not by
+    # recomputing a key inline and comparing it to itself, which would only
+    # prove `v` is hashed somewhere, not that AC-13's test is what turns red.
 
     # Precondition: "Given AC-13's vectors are green" -- the recorded schema
     # version must match the constant we are about to bump. This lives here,
@@ -147,61 +178,17 @@ def test_vector_guard_catches_schema_version_bump():
         "regenerate the vector file."
     )
 
-    original_source = FINGERPRINT_MODULE_PATH.read_text(encoding="utf-8")
-    old_line = f"KEY_SCHEMA_VERSION = {KEY_SCHEMA_VERSION}"
-    new_line = f"KEY_SCHEMA_VERSION = {KEY_SCHEMA_VERSION + 1}"
-    assert old_line in original_source, (
-        "expected an exact `KEY_SCHEMA_VERSION = <int>` assignment line in "
-        "fingerprint.py -- the guard's string replacement relies on it."
-    )
-    assert original_source.count(old_line) == 1, (
-        "the exact assignment line must appear exactly once, or the "
-        "replacement below could touch something unintended."
+    bumped_result = _run_ac13_against_copy(bump_schema_version=True)
+    assert bumped_result.returncode != 0, (
+        "bumping KEY_SCHEMA_VERSION by 1 (in an isolated copy) did not turn "
+        "AC-13's own test red in a fresh subprocess -- `v` is not actually "
+        "guarded.\n"
+        f"stdout:\n{bumped_result.stdout}\nstderr:\n{bumped_result.stderr}"
     )
 
-    # Capture any failure from the bump-and-rerun step instead of letting an
-    # `assert` inside `finally` mask it: an exception raised while restoring
-    # would otherwise silently replace whatever went wrong above, hiding the
-    # actual cause. The restore itself always runs; the original failure (if
-    # any) is re-raised afterward, or chained as the cause if restoration
-    # also failed.
-    guard_error: BaseException | None = None
-    try:
-        bumped_source = original_source.replace(old_line, new_line, 1)
-        FINGERPRINT_MODULE_PATH.write_text(bumped_source, encoding="utf-8")
-
-        bumped_result = _run_ac13_in_subprocess()
-        assert bumped_result.returncode != 0, (
-            "bumping KEY_SCHEMA_VERSION by 1 did not turn AC-13's own test "
-            "red in a fresh subprocess -- `v` is not actually guarded.\n"
-            f"stdout:\n{bumped_result.stdout}\nstderr:\n{bumped_result.stderr}"
-        )
-    except BaseException as exc:  # noqa: BLE001 - must restore on any failure
-        guard_error = exc
-    finally:
-        # Restore no matter what -- an assertion failure above, or any other
-        # exception, must still leave the source file byte-for-byte as it
-        # was. Also clear the bytecode cache after restoring: any process
-        # outside this guard that imports fingerprint.py while it is bumped
-        # (an IDE test runner, a concurrent invocation) could otherwise leave
-        # a poisoned .pyc that outlives the guard and fails later runs
-        # against an already-clean git tree.
-        FINGERPRINT_MODULE_PATH.write_text(original_source, encoding="utf-8")
-        _clear_fingerprint_bytecode_cache()
-
-    restored_source = FINGERPRINT_MODULE_PATH.read_text(encoding="utf-8")
-    if restored_source != original_source:
-        raise AssertionError(
-            "fingerprint.py was not restored byte-for-byte after the guard "
-            "ran -- a guard that leaves the repo modified on failure is "
-            "worse than no guard."
-        ) from guard_error
-    if guard_error is not None:
-        raise guard_error
-
-    reverted_result = _run_ac13_in_subprocess()
+    reverted_result = _run_ac13_against_copy(bump_schema_version=False)
     assert reverted_result.returncode == 0, (
-        "after reverting KEY_SCHEMA_VERSION, AC-13's own test should pass "
-        "again in a fresh subprocess.\n"
+        "AC-13's own test should pass in a fresh subprocess against an "
+        "unmodified copy of the package (the 'reverted' state).\n"
         f"stdout:\n{reverted_result.stdout}\nstderr:\n{reverted_result.stderr}"
     )

@@ -1,7 +1,12 @@
 import base64
+import importlib.util
+import os
 import re
 import subprocess
 import sys
+import tempfile
+from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -10,6 +15,10 @@ from tongflow.engine.callog import normalize_call
 from tongflow.engine.fingerprint import digest_form, node_fingerprint, sdk_major
 
 _HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+SDK_ROOT = Path(__file__).parent.parent
+FINGERPRINT_SRC_PATH = SDK_ROOT / "tongflow" / "engine" / "fingerprint.py"
+_SORT_KEYS_CALL = 'json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)'
+_NO_SORT_KEYS_CALL = 'json.dumps(payload, separators=(",", ":"), ensure_ascii=True)'
 
 
 def _assert_valid_key(key: object) -> None:
@@ -41,6 +50,50 @@ def _fp(**over):
     }
     args.update(over)
     return node_fingerprint(**args)
+
+
+def _load_fingerprint_module_variant(*, strip_sort_keys: bool, tmp_dir: Path):
+    """Load an independent, throwaway copy of fingerprint.py as its own module.
+
+    Used only by the AC-16 mutation sub-guard below. digest_form() (via
+    callog.normalize_call) recursively sorts every dict it touches BEFORE
+    node_fingerprint ever calls json.dumps, so any assertion that goes
+    through digest_form -- like the business_input equality checks in
+    test_dict_key_insertion_order_does_not_change_key -- cannot discriminate
+    whether node_fingerprint's OWN `sort_keys=True` does anything at all.
+    Mutation-confirmed: deleting `sort_keys=True` from fingerprint.py leaves
+    those assertions green. Loading a second module instance under a private
+    name -- in a temp file, never the tracked one -- lets the test bypass
+    digest_form entirely (by monkeypatching this loaded copy's own
+    `digest_form` attribute) without ever touching the working tree or the
+    real `tongflow.engine.fingerprint` module other tests rely on.
+    """
+    source = FINGERPRINT_SRC_PATH.read_text(encoding="utf-8")
+    assert _SORT_KEYS_CALL in source, (
+        "expected an exact `json.dumps(payload, sort_keys=True, ...)` call in "
+        "fingerprint.py -- this sub-guard's string replacement relies on it."
+    )
+    if strip_sort_keys:
+        source = source.replace(_SORT_KEYS_CALL, _NO_SORT_KEYS_CALL, 1)
+
+    variant_path = tmp_dir / f"_fingerprint_variant_{'nosort' if strip_sort_keys else 'sorted'}.py"
+    variant_path.write_text(source, encoding="utf-8")
+
+    # Dotted, "tongflow.engine"-prefixed module name so importlib derives
+    # `__package__ = "tongflow.engine"` automatically, letting the copy's own
+    # `from .callog import normalize_call` resolve against the real,
+    # already-imported callog module -- callog.py itself is never copied,
+    # mutated, or re-executed.
+    module_name = f"tongflow.engine.{variant_path.stem}"
+    spec = importlib.util.spec_from_file_location(module_name, variant_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        del sys.modules[module_name]
+    return module
 
 
 def test_digest_form_matches_normalize_call():
@@ -100,9 +153,15 @@ def test_stable_across_processes_with_different_hashseed():
     for seed in ("0", "12345"):
         out = subprocess.run(
             [sys.executable, "-c", script],
+            cwd=SDK_ROOT,
             capture_output=True,
             text=True,
-            env={"PYTHONHASHSEED": seed, "PYTHONPATH": "."},
+            # Extend the parent's environment rather than replacing it: a
+            # replaced env drops PATH/HOME (and, on Windows, SystemRoot,
+            # which breaks CPython startup outright). `cwd=SDK_ROOT` makes
+            # `PYTHONPATH=.` resolve to the sdk/ package root regardless of
+            # the caller's own working directory.
+            env={**os.environ, "PYTHONHASHSEED": seed, "PYTHONPATH": "."},
             check=True,
         )
         keys.append(out.stdout.strip())
@@ -314,3 +373,69 @@ def test_dict_key_insertion_order_does_not_change_key():
     _assert_valid_key(k1)
     _assert_valid_key(k2)
     assert k1 == k2
+
+    # Mutation sub-guard, added after mutation testing showed the assertions
+    # above pass unchanged even with `sort_keys=True` deleted from
+    # fingerprint.py's json.dumps call: digest_form() (via
+    # callog.normalize_call) already sorts business_input's keys, recursively,
+    # before node_fingerprint ever serializes anything, so the check above
+    # only re-proves normalize_call's own sorting -- something conformance-l0
+    # already covers -- not that node_fingerprint's OWN serialization
+    # normalizes order "rather than hashing raw dict iteration order" (E16's
+    # wording). To prove that specifically, bypass digest_form and hand
+    # node_fingerprint's own json.dumps call two same-content,
+    # different-insertion-order dicts directly.
+    order_a: dict[str, Any] = {}
+    order_a["zeta"] = 1
+    order_a["alpha"] = 2
+    order_b: dict[str, Any] = {}
+    order_b["alpha"] = 2
+    order_b["zeta"] = 1
+    assert order_a == order_b
+    assert list(order_a) != list(order_b)  # sanity: genuinely different insertion order
+
+    def _keys_bypassing_digest_form(module) -> tuple[str | None, str | None]:
+        # Bypass digest_form/normalize_call's sorting entirely: hand back
+        # business_input completely unchanged, so whatever insertion order it
+        # arrives in is exactly what reaches this module's own json.dumps call.
+        module.digest_form = lambda slot, business_input: business_input
+        key_a = module.node_fingerprint(
+            slot="image-gen",
+            plugin_id="oneflow-image",
+            plugin_rev="a" * 40,
+            plugin_dirty=False,
+            model=None,
+            business_input=order_a,
+        )
+        key_b = module.node_fingerprint(
+            slot="image-gen",
+            plugin_id="oneflow-image",
+            plugin_rev="a" * 40,
+            plugin_dirty=False,
+            model=None,
+            business_input=order_b,
+        )
+        return key_a, key_b
+
+    with tempfile.TemporaryDirectory(prefix="fingerprint-ac16-") as tmp:
+        tmp_path = Path(tmp)
+
+        sorted_module = _load_fingerprint_module_variant(strip_sort_keys=False, tmp_dir=tmp_path)
+        sorted_key_a, sorted_key_b = _keys_bypassing_digest_form(sorted_module)
+        _assert_valid_key(sorted_key_a)
+        _assert_valid_key(sorted_key_b)
+        assert sorted_key_a == sorted_key_b, (
+            "sort_keys=True is present but node_fingerprint still produced "
+            "different keys for two dicts with identical content but "
+            "different insertion order"
+        )
+
+        nosort_module = _load_fingerprint_module_variant(strip_sort_keys=True, tmp_dir=tmp_path)
+        nosort_key_a, nosort_key_b = _keys_bypassing_digest_form(nosort_module)
+        _assert_valid_key(nosort_key_a)
+        _assert_valid_key(nosort_key_b)
+        assert nosort_key_a != nosort_key_b, (
+            "removing sort_keys=True from fingerprint.py's json.dumps call did "
+            "not change the key for two dicts with identical content but "
+            "different insertion order -- this sub-guard is vacuous"
+        )
