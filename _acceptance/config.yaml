@@ -42,7 +42,7 @@ executors:
     # cache-l1-fingerprint Gate 1 (2026-07-29): both test files land during
     # implementation; keys declared now so eval refs stay portable.
     # One key per criterion, each a distinct pytest node-id on the same two
-    # files: nine (now fifteen) criteria sharing one exit code is the exact
+    # files: sixteen criteria sharing one exit code is the exact
     # pattern the stale-scope-by-paths comment below forbids — a criterion
     # never implemented would look identical to one that passed.
     sdk_pytest_fingerprint_hashseed_stable: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py::test_stable_across_processes_with_different_hashseed"
@@ -60,6 +60,7 @@ executors:
     sdk_pytest_fingerprint_vectors_exact: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint_vectors.py::test_vectors_match_character_for_character"
     sdk_pytest_fingerprint_vectors_guard: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint_vectors.py::test_vector_guard_catches_schema_version_bump"
     sdk_pytest_fingerprint_digest_form_parity: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py::test_digest_form_matches_normalize_call"
+    sdk_pytest_fingerprint_dict_order_stable: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py::test_dict_key_insertion_order_does_not_change_key"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance

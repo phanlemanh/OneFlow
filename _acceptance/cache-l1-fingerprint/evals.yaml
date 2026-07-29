@@ -1,7 +1,7 @@
 schema_version: 1
 feature_slug: cache-l1-fingerprint
 # One executor key per criterion, each a distinct pytest node-id on the same
-# two test files — nine (now fifteen) criteria sharing one exit code is the
+# two test files — sixteen criteria sharing one exit code is the
 # exact pattern the "One key per eval, same guard with a different --case"
 # comment on the stale-scope-by-paths keys in _acceptance/config.yaml forbids:
 # a criterion never implemented would look identical to one that passed.
@@ -22,7 +22,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_business_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two business_input values differing in exactly one business field yield different keys"
+    expected: "exit 0; two business_input values differing in exactly one business field yield different keys, and both keys are non-None strings — an assertion of only k1 != k2 does not satisfy this eval, since None != '<sha>' is True in Python"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E3
@@ -46,7 +46,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_asset_ref_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two assets with the SAME file_key but different bytes yield DIFFERENT keys — this is the exact D1 bug (reference-keyed cache hit on changed content) the hook placement exists to prevent"
+    expected: "exit 0; two assets with the SAME file_key but different bytes yield DIFFERENT keys, and both keys are non-None strings — this is the exact D1 bug (reference-keyed cache hit on changed content) the hook placement exists to prevent; an assertion of only k1 != k2 does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
@@ -62,7 +62,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_dirty_plugin
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; node_fingerprint() called with the required plugin_dirty=True returns None even when plugin_rev is a valid non-empty sha — plugin_dirty is a required keyword argument (no default that lets a caller omit it and silently get a cacheable key); this closes conformance-l0's recorded blocking condition (git rev-parse HEAD blind to uncommitted edits)"
+    expected: "exit 0; node_fingerprint() called with the required plugin_dirty=True returns None even when plugin_rev is a valid non-empty sha — plugin_dirty is a required keyword argument, and calling node_fingerprint() without passing plugin_dirty raises TypeError (no default value) rather than silently defaulting to False; this closes conformance-l0's recorded blocking condition (git rev-parse HEAD blind to uncommitted edits)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8
@@ -70,7 +70,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_rev_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two calls identical in every field (including plugin_dirty=False on both) except plugin_rev yield different keys"
+    expected: "exit 0; two calls identical in every field (including plugin_dirty=False on both, and both plugin_rev values non-empty) except plugin_rev yield different keys, and both keys are non-None strings — an assertion of only k1 != k2 does not satisfy this eval, since None != '<sha>' is True in Python"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9
@@ -78,7 +78,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_slot_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two calls identical in every field except slot (node.feature) yield different keys — an implementation that omits slot from the hashed dict must fail this eval even though it can still pass E1-E6/E8/E12/E13/E15"
+    expected: "exit 0; two calls identical in every field except slot (node.feature) yield different keys, and both keys are non-None strings — an implementation that omits slot from the hashed dict must fail this eval even though it can still pass E1-E6/E8/E12/E13/E15; an assertion of only k1 != k2 does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10
@@ -86,7 +86,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_plugin_id_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; two calls with the SAME slot but different pluginId (two distinct plugins serving one slot) yield different keys — an implementation that omits pluginId from the hashed dict must fail this eval"
+    expected: "exit 0; two calls with the SAME slot but different pluginId (two distinct plugins serving one slot) yield different keys, and both keys are non-None strings — an implementation that omits pluginId from the hashed dict must fail this eval; an assertion of only k1 != k2 does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E11
@@ -94,7 +94,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_model_diff
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; model=None vs model='flux-dev', all else identical, yield different keys — an implementation that omits model from the hashed dict must fail this eval"
+    expected: "exit 0; model=None vs model='flux-dev', all else identical, yield different keys, and both keys are non-None strings — an implementation that omits model from the hashed dict, or one that incorrectly treats a None model as 'not cacheable' the way a missing plugin_rev is, must fail this eval; an assertion of only k1 != k2 does not satisfy this eval, since a fingerprint that returns None whenever model is None would otherwise make model=None nodes permanently uncacheable while still passing a bare inequality check"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12
@@ -102,7 +102,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_sdk_version
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; SDK versions differing only in PATCH (0.2.17 vs 0.2.18), injected via node_fingerprint()'s optional sdk_version parameter (not read from tongflow.__version__ by default), yield the SAME key, and SDK versions differing in MINOR (0.2.17 vs 0.3.0) via the same parameter yield DIFFERENT keys — both halves asserted, not only one; a test that can only satisfy this by monkeypatching an already-derived sdkMajor value does not satisfy this eval"
+    expected: "exit 0; SDK versions differing only in PATCH (0.2.17 vs 0.2.18), injected via node_fingerprint()'s optional sdk_version parameter (not read from tongflow.__version__ by default), yield the SAME key; SDK versions differing in MINOR (0.2.17 vs 0.3.0) via the same parameter yield DIFFERENT keys, both non-None strings (an assertion of only k1 != k2 does not satisfy this half); AND calling node_fingerprint() WITHOUT sdk_version (default path) derives sdkMajor from tongflow.__version__ (currently '0.2.17') as '0.2', not a placeholder like '0.0' — all three halves asserted, not only the injected-parameter halves; a test that can only satisfy this by monkeypatching an already-derived sdkMajor value does not satisfy this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E13
@@ -110,7 +110,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_vectors_exact
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; every recorded input in the committed sdk/tests/fixtures/fingerprint_vectors.json recomputes to a key matching the recorded key CHARACTER FOR CHARACTER — a schema drift in the key that silently invalidates old cache entries without a version bump must fail this eval"
+    expected: "exit 0; every recorded input in the committed sdk/tests/fixtures/fingerprint_vectors.json — each entry pinning its own sdk_version rather than deriving it from tongflow.__version__ at test time — recomputes to a key matching the recorded key CHARACTER FOR CHARACTER — a schema drift in the key that silently invalidates old cache entries without a version bump must fail this eval; a vector file that omits the pinned sdk_version would make this eval fail on every SDK minor/patch bump instead of only on real key-schema drift"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E14
@@ -118,7 +118,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_fingerprint_vectors_guard
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
-    expected: "exit 0; a mutation guard that bumps the KEY_SCHEMA_VERSION module constant by 1 (in-process, no working-tree edit, no fixture edit) turns E13's assertion RED, and reverting the constant turns it green again — proving E13 is a real character-for-character comparison rather than a vacuous one (e.g. comparing a value against itself); a guard that only ever stays green does not satisfy this eval"
+    expected: "exit 0; a mutation guard that bumps the KEY_SCHEMA_VERSION module constant by 1 (no working-tree edit, no fixture edit) then RE-RUNS E13's own pytest node-id (tests/test_fingerprint_vectors.py::test_vectors_match_character_for_character) in a SEPARATE SUBPROCESS and asserts that subprocess exits non-zero; after reverting the constant, the guard re-runs the same node-id in a subprocess and asserts exit 0 — proving E13 is a real character-for-character comparison rather than a vacuous one (e.g. comparing a value against itself); a guard that instead recomputes keys inline and compares them to itself, without invoking the actual pytest node-id in a subprocess, does not satisfy this eval, nor does a guard that only ever stays green"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E15
@@ -127,4 +127,12 @@ evals:
     cmd: config:executors.test.sdk_pytest_fingerprint_digest_form_parity
     paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json", "sdk/tongflow/engine/callog.py"]
     expected: "exit 0; for the same (slot, business_input), digest_form(slot, bi) equals normalize_call(slot, bi)['input'] from callog.py, asserted across MULTIPLE input shapes — an asset-bearing input (matching callog.py's shipped {'__asset': '<sha256>'} form, not spec D2's '__sha256' key — see contract Notes for the documented deviation), an input with None/empty-string fields that must be omitted rather than written as null, a nested list of assets, and at least two distinct slots — a single trivial or empty input does not satisfy this eval; the cache key must be computed from the SAME normalized artifact the L0 conformance suite already proves TS/Python agree on, not a separately-maintained normalization"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-16
+    executor: test
+    cmd: config:executors.test.sdk_pytest_fingerprint_dict_order_stable
+    paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
+    expected: "exit 0; two business_input dicts with identical content but different key insertion order (e.g. the same keys/values constructed in reverse order, or via two differently-ordered dict literals) yield the SAME key — proving the implementation normalizes serialization order (e.g. sort_keys) before hashing rather than hashing raw dict iteration order, which would make the key depend on caller-side construction order and cause permanent cache misses against L1's DoD 'fingerprint ổn định qua các lần chạy'; dict equality alone (which is order-insensitive in Python) does not satisfy this eval — the test must construct two genuinely differently-ordered dicts and compare the computed KEYS, not the dicts"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
