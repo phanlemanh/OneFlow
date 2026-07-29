@@ -39,6 +39,10 @@ executors:
     sdk_pytest_scan_prefix: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_prefix.py"
     # per-plugin-origin Gate 1 (2026-07-27): file lands during implementation.
     unit_official_manifest: "pnpm vitest run src/lib/plugins/official-manifest.test.ts"
+    # cache-l1-fingerprint Gate 1 (2026-07-29): both files land during
+    # implementation; keys declared now so eval refs stay portable.
+    sdk_pytest_fingerprint: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py"
+    sdk_pytest_fingerprint_vectors: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint_vectors.py"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
