@@ -25,9 +25,14 @@ from typing import Any, Callable, Optional, Union
 
 from .abi_schema import load_abi_schema, resolve_abi_path
 from .assets import convert_asset_outputs_to_file_refs, materialize_asset_inputs
+from .batch import (
+    batch_field_of,
+    fan_out_inputs,
+    merge_fanout_results,
+    merge_fanout_views,
+)
 from .bindings import resolve_node_params
 from .invoker import invoke_plugin
-from .output_view import compute_output_view
 from .paths import resolve_data_dir, resolve_plugins_dir
 from .plugins import (
     DEFAULT_ORG,
@@ -235,6 +240,23 @@ def run_workflow(
     else:
         store = DiskStore(out_path, fk_base)
 
+    # Event shapes this loop emits. `node_cached` is declared here while there
+    # is still no cache to hit: adding fields to an event already running in
+    # production costs far more than declaring them up front, and the host side
+    # (engine-events.ts -> SSE -> canvas) is wired for it as of L0. L2 fills in
+    # fingerprint/tier/output and calls emit() with exactly this shape.
+    #
+    #   {"type": "node_cached", "nodeId": str, "feature": str,
+    #    "label": str, "fingerprint": str, "tier": "A" | "B",
+    #    "output": dict | None}
+    #
+    # `output` is the reused artifact itself, and it is declared here for the
+    # same reason as the rest: the canvas applies a completed node's result from
+    # this payload alone (use-workflow-execution.ts -> applyNodeOutput), so an
+    # event without it would flip the node to "completed" showing nothing. It is
+    # optional because L0 has no cache to hit; omitting it costs nothing on the
+    # wire, whereas discovering the gap at L2 costs a second pass over three
+    # layers.
     def emit(event: dict[str, Any]) -> None:
         if on_progress is not None:
             on_progress(event)
@@ -327,42 +349,60 @@ def run_workflow(
                 params = resolve_node_params(
                     node, output_views, data_node_state, data_nodes, inputs
                 )
-                business_input = materialize_asset_inputs(
-                    slot, params, abi, search_dirs, store
-                )
+                # Match the canvas: a node declaring `batchField` becomes one
+                # plugin call per item (buildPrompts in src/lib/abi/resolve.ts).
+                per_call_params = fan_out_inputs(node, params)
                 plugin_dir = plugins_dir / cfg["localSubdir"]
-                if invoker is not None:
-                    raw = invoker(plugin_id, slot, business_input, plugin_dir, model)
-                else:
-                    raw = invoke_plugin(
-                        python=python,
-                        plugin_dir=plugin_dir,
-                        entry_file=cfg.get("entryFile", "entry.py"),
-                        plugin_id=plugin_id,
-                        node_slot=slot,
-                        prompt=business_input,
-                        sdk_root=SDK_ROOT,
-                        task_id=task_id,
-                        model=model,
-                        on_progress=on_progress,
-                    )
-                result = convert_asset_outputs_to_file_refs(slot, raw, abi, store)
 
-                if result.get("success") is False:
-                    raise RuntimeError(
-                        str(result.get("error") or "Plugin returned success=false")
+                results: list[dict[str, Any]] = []
+                for call_params in per_call_params:
+                    business_input = materialize_asset_inputs(
+                        slot, call_params, abi, search_dirs, store
                     )
+                    if invoker is not None:
+                        raw = invoker(plugin_id, slot, business_input, plugin_dir, model)
+                    else:
+                        raw = invoke_plugin(
+                            python=python,
+                            plugin_dir=plugin_dir,
+                            entry_file=cfg.get("entryFile", "entry.py"),
+                            plugin_id=plugin_id,
+                            node_slot=slot,
+                            prompt=business_input,
+                            sdk_root=SDK_ROOT,
+                            task_id=task_id,
+                            model=model,
+                            on_progress=on_progress,
+                        )
+                    one = convert_asset_outputs_to_file_refs(slot, raw, abi, store)
 
-                node_outputs[node_id] = result
+                    if one.get("success") is False:
+                        raise RuntimeError(
+                            str(one.get("error") or "Plugin returned success=false")
+                        )
+                    results.append(one)
+
+                # A batched node's raw output is the list of its calls; an
+                # unbatched one keeps the single dict it has always been, so
+                # `outputs[nodeId]` stays what existing consumers expect.
+                node_outputs[node_id] = (
+                    results[0] if batch_field_of(node) is None else results
+                )
 
                 routes = node.get("outputs") or []
-                view = compute_output_view(routes, result)
+                view = merge_fanout_views(routes, results)
                 output_views[node_id] = view
                 for route in routes:
                     target = route.get("downstreamDataNodeId")
                     if not target:
                         continue
                     channel = view.get(route.get("sourceField"))
+                    # What keeps stale downstream data from surviving an empty
+                    # batch is `merge_fanout_views` always emitting the channel
+                    # — with `values: []` when there were no results — so this
+                    # guard sees a real channel and refreshes state to empty.
+                    # It used to be reached with the channel missing, which left
+                    # the previous run's values in place.
                     if not channel:
                         continue
                     slot_state = data_node_state.get(target, {})
@@ -376,7 +416,12 @@ def run_workflow(
                     {
                         "type": "node_completed",
                         "nodeId": node_id,
-                        "output": result,
+                        # Every result, not the last one: this event is the only
+                        # path an executable's output takes to the canvas, so
+                        # emitting one of N would render a five-item batch as a
+                        # single item while the engine's own downstream nodes
+                        # saw all five.
+                        "output": merge_fanout_results(results),
                         "label": label,
                     }
                 )

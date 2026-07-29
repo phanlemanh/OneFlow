@@ -109,6 +109,10 @@ export function useWorkflowRecovery(options: UseWorkflowRecoveryOptions = {}) {
                     break;
 
                 case NodeStatus.NODE_COMPLETED:
+                // A cache hit is a completed node here too. This is the replay
+                // path after a reconnect, so omitting it would leave a node
+                // that already has its answer spinning for the rest of the run.
+                case NodeStatus.NODE_CACHED:
                     if (message.nodeId) {
                         setNodeExecutionStatus(message.nodeId, "completed");
                         onNodeStatusChange?.(message.nodeId, "completed");

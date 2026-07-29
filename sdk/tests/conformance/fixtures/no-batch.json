@@ -1,0 +1,96 @@
+{
+    "case": "no-batch",
+    "note": "gen-music mounted as textGenMusicNode: two scalar text handles, no batchOn anywhere. This is the regression case — the non-batch path must be byte-identical before and after fan-out lands, and baseline-no-batch.json pins what 'before' was.",
+    "slot": "gen-music",
+    "stubOutput": {
+        "success": true,
+        "text": "stub"
+    },
+    "workflow": {
+        "name": "conformance-no-batch",
+        "version": "1.0",
+        "exportedAt": "2026-07-28T00:00:00Z",
+        "inputs": [],
+        "outputs": [],
+        "dataNodes": [
+            {
+                "id": "dn-tags",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["lo-fi, mellow"]
+                },
+                "level": 0
+            },
+            {
+                "id": "dn-lyrics",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["một câu hát"]
+                },
+                "level": 0
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "exec-music",
+                "type": "textGenMusicNode",
+                "feature": "gen-music",
+                "pluginId": "oneflow-conformance-stub",
+                "bindings": {
+                    "tags": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-tags",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:tags"
+                    },
+                    "lyrics": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-lyrics",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:lyrics"
+                    },
+                    "duration": {
+                        "kind": "config",
+                        "value": 30
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false
+                    }
+                ],
+                "dependencies": ["dn-tags", "dn-lyrics"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["dn-tags", "dn-lyrics"], ["exec-music"]],
+        "dataNodeEdges": []
+    },
+    "expectedCalls": [
+        {
+            "slot": "gen-music",
+            "input": {
+                "duration": 30,
+                "lyrics": "một câu hát",
+                "tags": "lo-fi, mellow"
+            }
+        }
+    ]
+}

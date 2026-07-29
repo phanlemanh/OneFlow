@@ -1,0 +1,13 @@
+{
+    "calls": [
+        {
+            "input": {
+                "duration": 30,
+                "lyrics": "một câu hát",
+                "tags": "lo-fi, mellow"
+            },
+            "slot": "gen-music"
+        }
+    ],
+    "case": "no-batch"
+}

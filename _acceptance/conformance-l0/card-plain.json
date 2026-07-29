@@ -1,0 +1,116 @@
+{
+  "feature_plain": "Khi một node trên canvas được đặt xử lý nhiều đầu vào cùng lúc, phần chạy thật (engine) giờ chạy đúng số lượt đó và gom đủ kết quả trả về — trước đây engine gộp cả loạt thành một lượt, nên canvas và engine hiểu khác nhau về cùng một thao tác. Kèm theo: bộ kiểm tự động canh cho hai bên không lệch lại, dấu vết phiên bản của từng plugin, và đường dẫn sẵn sàng để tính năng 'sửa miễn phí' báo về giao diện ở lát sau.",
+  "scope_plain": "Chưa làm bộ nhớ đệm thật (chưa lưu, chưa đọc lại kết quả cũ) — lát này chỉ dọn nền và chốt hợp đồng; phần tiết kiệm tiền cho người dùng nằm ở lát kế tiếp.",
+  "analyst_plain": "Một trong 15 phép đo — phép chạy toàn bộ bộ test cũ của engine — xanh cả trên code mới lẫn code cũ. Đó đúng là mục đích của nó: canh cho tính năng mới không làm hỏng cái đang chạy, chứ không phải chứng minh cái mới hoạt động. 14 phép còn lại đỏ trên code cũ, xanh trên code mới (đo ở vòng 1; các vòng sau mang kết quả đó sang vì bộ phép đo không đổi).",
+  "decisions": [],
+  "decisions_plain": [
+    {
+      "id": "d-20260728T000001Z-4471",
+      "p": "Đã chọn so hai cách hiểu của cùng một thao tác trên bộ dữ liệu mẫu chung, thay vì dựng thêm một bộ máy chạy thứ hai — đổi lại bộ kiểm chỉ phủ đúng thao tác chia lô, không phủ mọi khác biệt khác giữa hai bên."
+    },
+    {
+      "id": "d-20260728T000002Z-8823",
+      "p": "Đã chọn sửa engine cho khớp canvas ngay trong lát này, thay vì đánh dấu 'biết lệch rồi, để sau' — đổi lại lát này to hơn dự kiến và có chạm vào đường chạy workflow đang phục vụ người dùng."
+    },
+    {
+      "id": "d-20260728T000003Z-1902",
+      "p": "KHÔNG làm phần phát tín hiệu 'dùng lại kết quả cũ' thật trong lát này, chỉ nối sẵn đường — đổi lại tín hiệu đó tồn tại nhưng im lặng cho tới lát sau, người đọc code có thể tưởng nó hỏng."
+    },
+    {
+      "id": "d-20260728T000004Z-5560",
+      "p": "KHÔNG sinh dữ liệu mẫu tự động mà viết tay — đổi lại thêm ca kiểm mới tốn công hơn, bù lại không ai giấu được lỗi lệch bằng cách bấm nút sinh lại."
+    },
+    {
+      "id": "d-20260728T000005Z-7314",
+      "p": "KHÔNG dùng dấu vết phiên bản plugin vào việc gì trong lát này, chỉ ghi lại — đổi lại nó nằm im tới lát sau mới có tác dụng."
+    },
+    {
+      "id": "d-20260728T003000Z-6621",
+      "p": "Đã chọn tách phần chia lô ra một file riêng thay vì viết thẳng vào bộ chạy chính — đổi lại thêm một lớp trung gian trên đường chạy nóng, bù lại kiểm được mà không phải dựng cả workflow."
+    },
+    {
+      "id": "d-20260728T003001Z-9047",
+      "p": "Đã chốt việc chụp ảnh hành vi cũ phải làm TRƯỚC mọi sửa đổi — đổi lại nếu ai làm sai thứ tự thì ảnh chụp đó vô giá trị và phải quay lại làm lại."
+    },
+    {
+      "id": "d-20260728T004000Z-2215",
+      "p": "Kế hoạch 11 bước đã được anh duyệt ngày 28/07 và thứ tự bị khoá — đổi lại không còn tự do đảo bước cho tiện tay."
+    },
+    {
+      "id": "d-20260728T005000Z-7788",
+      "p": "Đã chọn cho trường chia lô luôn giữ nguyên cả danh sách thay vì bị thu về một giá trị — đổi lại phần này lệch một nhánh so với bản gốc, bù lại nếu không sửa thì việc chia lô lặng lẽ quay về một lượt gọi."
+    },
+    {
+      "id": "d-20260728T005001Z-1130",
+      "p": "Đã chọn cho dữ liệu mẫu tự khai cấu hình của nó — quyết định này ĐÃ BỊ THAY THẾ ở vòng kiểm sau (xem mục cuối bảng)."
+    },
+    {
+      "id": "d-20260728T010500Z-4402",
+      "p": "Đã gỡ một chốt chặn thừa sau khi kiểm chứng nó không khác gì code cũ — không mất gì, đó là nhiễu kèm chú thích gợi ý một khác biệt không tồn tại."
+    },
+    {
+      "id": "d-20260728T012000Z-8890",
+      "p": "Đã chọn dựng kho plugin giả trực tiếp trong bài kiểm thay vì đi qua cửa cài đặt thật — đổi lại bài kiểm không phủ phần phân giải địa chỉ tải, bù lại tránh phải dựng một máy chủ git chỉ để chạy kiểm."
+    },
+    {
+      "id": "d-20260728T013000Z-5517",
+      "p": "Đã tách phần dịch tín hiệu ra một file thuần để kiểm được cả ba tầng — đổi lại thêm một file, bù lại nếu để nguyên thì không kiểm được tầng nào cả."
+    },
+    {
+      "id": "d-20260728T020000Z-3341",
+      "p": "Đã sửa một lỗi tự gây ra ở vòng kiểm 1: node trả về ít kết quả hơn số ô đầu ra sẽ xoá sạch nội dung tốt đang có ở các ô còn lại — đổi lại luật phức tạp thêm một nhánh."
+    },
+    {
+      "id": "d-20260728T020001Z-7729",
+      "p": "Đã sửa lỗi chỉ gửi kết quả cuối cùng về giao diện: loạt 5 ảnh chỉ hiện 1 — đúng thứ lệch mà lát này sinh ra để xoá."
+    },
+    {
+      "id": "d-20260728T020002Z-1188",
+      "p": "Đã sửa lỗi máy không cài git thì sập toàn bộ việc quét plugin — đổi lại lỗi đọc phiên bản giờ là cảnh báo chứ không chặn, bù lại một plugin hỏng không còn kéo sập tất cả."
+    },
+    {
+      "id": "d-20260728T020003Z-9903",
+      "p": "Đã đảo quyết định cũ: dữ liệu mẫu nay tra cấu hình thật thay vì tự khai — vì nếu tự khai thì đổi cấu hình production mà bộ kiểm vẫn xanh, tức nó chứng nhận một thứ không còn tồn tại."
+    },
+    {
+      "id": "d-20260728T035000Z-4471",
+      "p": "Đã sửa lỗ hổng trong chính bộ kiểm: nó không phân biệt được 'chạy xong và không gọi lượt nào' với 'chạy sập giữa chừng' — nay bắt buộc run phải báo thành công."
+    },
+    {
+      "id": "d-20260728T035001Z-8823",
+      "p": "Đã khai thêm ô 'kết quả dùng lại' vào hợp đồng tín hiệu, thay vì gỡ nó ở đầu nhận — vì giao diện dựng kết quả node CHỈ từ gói tin đó, thiếu ô này thì lát sau node báo xong mà trống trơn."
+    },
+    {
+      "id": "d-20260728T052000Z-3310",
+      "p": "Đã nối tín hiệu 'dùng lại kết quả cũ' vào 2 chỗ giao diện còn thiếu (tải lại trang giữa chừng, thanh đếm) — thiếu thì node cache quay mãi; kèm guard tĩnh vì không render được hook trong môi trường test hiện tại."
+    },
+    {
+      "id": "d-20260728T052001Z-7742",
+      "p": "Đã cho hai nửa bộ kiểm tự đọc thư mục ca kiểm thay vì liệt kê tay — thêm ca giờ chỉ là thêm file, không còn chỗ nào quên đồng bộ."
+    },
+    {
+      "id": "d-20260728T052002Z-9081",
+      "p": "Đã bắt lỗi khi git trả về phiên bản plugin sai định dạng — một giá trị lệch trước đây xoá sạch danh sách plugin chứ không chỉ hỏng một mục."
+    },
+    {
+      "id": "d-20260728T052003Z-2264",
+      "p": "KHÔNG sửa 3 finding của vòng kiểm 2 (lô rỗng lệch canvas, bump phiên bản SDK, phiên bản plugin mù với sửa chưa commit) — anh quyết ghi nợ; cái cuối là điều kiện chặn lát cache kế tiếp."
+    },
+    {
+      "id": "d-20260728T070000Z-5518",
+      "p": "Đã gỡ một vòng import vòng tròn mà chính lát này gây ra — nó chạy được thuần do may, ai sắp xếp lại file khởi tạo là toàn bộ máy quét plugin chết; kèm test chặn tái diễn."
+    },
+    {
+      "id": "d-20260728T070001Z-1163",
+      "p": "Đã bỏ cách đếm cứng trong guard em tự thêm — nó là loại snapshot làm đỏ những PR không liên quan, và thêm chỗ đọc tín hiệu thứ 5 là thứ nên hoan nghênh chứ không chặn."
+    },
+    {
+      "id": "d-20260728T070002Z-9924",
+      "p": "Đã chốt TRƯỚC khi chạy: vòng kiểm 4 là vòng cuối, mọi finding của vòng đó thành nợ — vì 3 vòng đều đạt, 0 phép đo nào đỏ, mà reviewer mới lại ra danh sách mới mỗi vòng."
+    },
+    {
+      "id": "d-20260728T090000Z-6607",
+      "p": "Giữ đúng cam kết dừng: 8 finding vòng 4 (2 nặng) thành nợ đã ghi tên. Cả hai cái nặng đều là lỗi tiềm ẩn, chưa lộ ra với người dùng ở lát này."
+    }
+  ]
+}

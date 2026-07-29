@@ -1,0 +1,122 @@
+schema_version: 1
+feature_slug: conformance-l0
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_batch
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_engine_batch.py"]
+    expected: "exit 0; a node whose batchField holds 3 items drives exactly 3 recorded invocations; invocation i carries input[batchField] == items[i] as a scalar (assert not isinstance(..., list)); every other input field is identical across the three calls"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_batch
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_engine_batch.py"]
+    expected: "exit 0; SUPPRESSION half — a batchField resolving to [] records ZERO invocations (not one with an empty array), the run completes with no failure recorded for that node, and a non-array batch value likewise records zero"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest
+    paths: ["sdk/**"]
+    expected: "exit 0; the pre-existing engine suite (sdk/tests/test_engine.py and siblings) passes with NO edits to those files — the diff for this feature must not touch them; a node without batchField still produces exactly one invocation"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_conformance
+    paths: ["sdk/tests/conformance/**", "sdk/tongflow/engine/runner.py"]
+    expected: "exit 0; the non-batch call-log equals the baseline fixture FIELD FOR FIELD (assert whole-dict equality, an empty diff — not call count alone); the baseline file was captured before runner.py was modified, and its capture commit predates the fan-out change in git history"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_batch
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_engine_batch.py"]
+    expected: "exit 0; after a 3-way fan-out whose calls return values v0, v1, v2 for one sourceField, output_views[nodeId][sourceField].values == [v0, v1, v2] in batch order — asserting order explicitly, not just length or set membership; nodeType/dataField/expandEach of the route are preserved"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_batch
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_engine_batch.py"]
+    expected: "exit 0; in a three-node workflow whose middle node fans out into 3 calls, the third node's resolved params contain all 3 upstream values — proving the merged view reaches consumers through data_node_state, not only output_views"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_conformance
+    paths: ["sdk/tests/conformance/**", "sdk/tongflow/engine/runner.py"]
+    expected: "exit 0; the Python side runs all four fixtures (batch-basic, batch-empty, no-batch, batch-collect) through run_workflow with a recording invoker and its normalized call-log equals the expectedCalls committed in each fixture; the log carries EVERY ABI business field of the slot (not just the batch field), drops only _tongflow/taskId/routing keys, sorts keys, renders assets as {__asset: sha256}, and omits valueless fields rather than writing null"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_conformance
+    paths: ["sdk/tests/conformance/**", "src/lib/abi/resolve.ts", "src/lib/abi/conformance.ts", "src/lib/abi/conformance.test.ts"]
+    expected: "exit 0; the TypeScript side reads the SAME fixture files from sdk/tests/conformance/fixtures/ (not a copy under src/) and its buildPrompts-derived call-log equals each fixture's expectedCalls under the same normalization rules as E6; a fixture whose file is missing fails loudly rather than being skipped"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.conformance_discriminating
+    paths: ["scripts/conformance/**", "sdk/tests/conformance/**"]
+    expected: "exit 0; mutation guard proves the suite is not vacuous — for BOTH perturbation kinds, applied in-process with no working-tree edits: (a) change one side's call count, (b) add/remove one business field OTHER THAN the batch field on one side. Each perturbation must drive the suite RED, and reverting must return it GREEN. A guard exercising only kind (a), or only the green case, fails this eval"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_plugin_rev
+    paths: ["sdk/tongflow/scan.py", "sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_rev.py"]
+    expected: "exit 0; against a real temporary git checkout the scanner writes pluginRev equal to the full 40-character rev-parse HEAD (assert length 40 and equality with the fixture's real sha, not merely truthiness)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.plugin_rev_joined_path
+    paths: ["src/lib/plugins/**", "sdk/tongflow/scan.py", "scripts/plugins/**"]
+    expected: "exit 0; JOINED PATH — a plugin is installed into a temp dir through the TypeScript installer's real code path (isomorphic-git, not a shell git clone standing in for it), then the Python scanner runs over that dir, and the registry entry it produces carries pluginRev equal to that checkout's sha; asserting the TS side merely resolves a sha does not satisfy this eval"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.sdk_pytest_plugin_rev
+    paths: ["sdk/tongflow/scan.py", "sdk/tests/test_plugin_rev.py"]
+    expected: "exit 0; the two no-rev states are told apart — a directory that is NOT a git checkout yields an entry with pluginRev absent and a successful scan, while a directory that IS a git checkout whose rev read fails raises a named error naming the plugin rather than silently omitting the field"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_plugin_rev
+    paths: ["src/lib/plugins/**", "src/lib/plugins/plugin-rev.test.ts"]
+    expected: "exit 0; SUPPRESSION half — a registry JSON captured before this feature (no pluginRev anywhere) still parses against PluginsRegistrySchema, and an entry carrying pluginRev parses too"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.unit_node_cached
+    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-events.ts", "src/lib/task/sse-events.ts", "src/app/api/**", "src/lib/task/node-cached.test.ts", "src/constants/task-status.ts", "src/hooks/use-workflow-execution.ts", "src/hooks/use-workflow-recovery.ts", "src/components/workspace/execution-status-line.tsx"]
+    expected: "exit 0; ALL THREE LAYERS — a node_cached event is injected at the engine boundary, travels through engine-delegate.server.ts, is serialized as it would be on the SSE route, and is consumed by the client-side parser; the value the parser yields still carries fingerprint and tier. Asserting only the delegate's in-process notification does not satisfy this eval. SUPPRESSION half — an unrecognized event type produces no notification, does not throw, and leaves the stream alive"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.sdk_pytest_batch
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_engine_batch.py"]
+    expected: "exit 0; a three-node workflow whose middle node has an EMPTY batch runs to completion — output_views[middleNodeId][sourceField] exists with values == [] and route metadata taken from the route itself (no IndexError from results[0], no missing nodeId key), the third node resolves its params to an empty list, and the run reports success; asserting only that the middle node made zero calls does not satisfy this eval"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

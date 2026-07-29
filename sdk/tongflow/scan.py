@@ -3,9 +3,12 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import subprocess
 from pathlib import Path
+from typing import Optional
 
 from .abi import load_abi
+from ._subproc import utf8_env
 from ._ast_utils import (
     DEFAULT_SLOTS_CONST,
     SLOT_MODELS_CONST,
@@ -268,6 +271,62 @@ def _scan_default_slots_in_dir(plugin_dir: Path) -> tuple[list[str], list[str]]:
     return slots, problems
 
 
+def read_plugin_rev(plugin_dir: Path) -> Optional[str]:
+    """The installed commit of a plugin, or None when there is no rev to read.
+
+    Three states, and conflating any two of them costs something different:
+
+    * **Not a checkout** (hand-copied, as dev environments do) — no rev, no
+      complaint.
+    * **A checkout on a host with no git binary.** The in-app installer clones
+      with isomorphic-git precisely so the host does not need one, so a real
+      ``.git`` on a machine without git is an ordinary state, not a defect —
+      a Windows desktop build being the obvious case. This must behave like the
+      first case, and note that ``subprocess.run`` raises ``FileNotFoundError``
+      here rather than returning non-zero: catching only the return code would
+      let the exception escape and abort the scan of *every* plugin.
+    * **A checkout whose rev genuinely cannot be read** (corrupt HEAD, say).
+      That is a real failure and is raised, because L1 folds this value into the
+      cache key: a silently missing rev means a plugin can change while its key
+      does not. The caller turns it into a per-plugin scan error rather than
+      letting one bad checkout take the whole registry down.
+    """
+    if not (plugin_dir / ".git").exists():
+        return None
+    try:
+        r = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=plugin_dir,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=utf8_env(),
+        )
+    except OSError:
+        # No git binary (or it cannot be executed). Same outcome as a
+        # non-checkout: no rev is recorded, and the scan carries on.
+        return None
+    if r.returncode != 0:
+        raise RuntimeError(
+            f"cannot read plugin rev for {plugin_dir.name}: "
+            f"{r.stderr.strip() or r.stdout.strip()}"
+        )
+    rev = r.stdout.strip()
+    # The consumer declares `pluginRev: z.string().length(40)` and parses the
+    # manifest un-guarded, so an out-of-format value does not degrade one entry
+    # — it throws and leaves the app with no plugins at all. Fail here instead,
+    # where the error names the plugin and the caller turns it into one scan
+    # error. (A short sha, an abbreviated `core.abbrev`, or a ref name rather
+    # than a sha would all get through otherwise.)
+    if len(rev) != 40 or any(c not in "0123456789abcdef" for c in rev):
+        raise RuntimeError(
+            f"cannot read plugin rev for {plugin_dir.name}: "
+            f"git returned {rev!r}, not a 40-character sha"
+        )
+    return rev
+
+
 def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
     abi = load_abi(abi_path)
     valid = abi.node_slots
@@ -403,11 +462,26 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
             if plugin_id not in default_claims.setdefault(slot, []):
                 default_claims[slot].append(plugin_id)
 
+        # Every other per-plugin failure in this loop is reported through
+        # `errors` and skipped rather than raised, because one broken plugin
+        # must not cost the registry every other one. An unreadable rev follows
+        # the same rule: the plugin still registers, without a rev, and the
+        # reason is surfaced where the consumer already looks.
+        try:
+            rev = read_plugin_rev(pdir)
+        except RuntimeError as e:
+            errors.append({"pluginId": plugin_id, "message": str(e)})
+            rev = None
+
         plugins[plugin_id] = {
             "localSubdir": plugin_id,
             "methodsByNodeSlot": llm_methods,
             "entryFile": "entry.py",
             "needsDeploy": needs_deploy,
+            # Optional on purpose: a hand-copied plugin has no rev, and a
+            # registry written before this field existed must still parse.
+            # L1 folds it into the cache key; L0 only records it.
+            **({"pluginRev": rev} if rev else {}),
         }
 
     # de-dupe lists, preserve order

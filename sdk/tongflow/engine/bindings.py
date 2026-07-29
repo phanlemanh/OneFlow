@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .batch import batch_field_of
+
 
 def resolve_node_params(
     node: dict[str, Any],
@@ -18,6 +20,13 @@ def resolve_node_params(
     data_nodes: list[dict[str, Any]],
     inputs: dict[str, Any],
 ) -> dict[str, Any]:
+    # One deliberate departure from the runner.ts translation: the field named
+    # by `batchField` keeps its full list even though the exporter marks it
+    # `consumerShape: "scalar"`. That marking describes the *plugin's* view —
+    # each fan-out iteration receives one item — but the runner needs every item
+    # to decide how many iterations there are. Collapsing to the first value
+    # here would leave `fan_out_inputs` with a single string and silently
+    # restore the one-call behaviour this whole slice exists to remove.
     params: dict[str, Any] = {}
     bindings = node.get("bindings")
     if not bindings:
@@ -52,13 +61,17 @@ def resolve_node_params(
                 return [supplied]
         return []
 
+    batch_field = batch_field_of(node)
+
     for field, binding in bindings.items():
         kind = binding.get("kind")
         if kind == "handle":
             collected: list[str] = []
             for s in binding.get("sources", []):
                 collected.extend(read_source(s["fromNodeId"], s["fromField"]))
-            if binding.get("consumerShape") == "scalar":
+            if field == batch_field:
+                params[field] = collected
+            elif binding.get("consumerShape") == "scalar":
                 if collected:
                     params[field] = collected[0]
             else:

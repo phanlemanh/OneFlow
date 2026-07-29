@@ -26,6 +26,7 @@ import {
     issueEngineAssetToken,
     revokeEngineAssetToken,
 } from "./engine-asset-tokens.server";
+import { mapEngineEvent } from "./engine-events";
 
 /**
  * Delegate workflow execution to the SDK engine (`python -m tongflow.engine`),
@@ -60,6 +61,13 @@ function num(v: unknown): number | undefined {
 function handleEvent(taskId: string, ev: Record<string, unknown>): void {
     const type = str(ev.type);
     const nodeId = str(ev.nodeId);
+
+    const mapped = mapEngineEvent(ev);
+    if (mapped) {
+        notifyTask(taskId, mapped.status, mapped.data, mapped.nodeId);
+        return;
+    }
+
     switch (type) {
         case "workflow_started":
             notifyTask(taskId, WorkflowStatus.WORKFLOW_STARTED, {
