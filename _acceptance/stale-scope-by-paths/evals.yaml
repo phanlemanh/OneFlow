@@ -15,7 +15,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_in_scope
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; output contains `CASE in-scope: PASS`. A fixture feature with complete, covering `paths` is STILL reported stale when a file in its STALENESS SET matches its union. Asserting only the out-of-scope case does not satisfy this eval: a mechanism broken into 'never stale' passes every other criterion"
+    expected: "exit 0; output contains `CASE in-scope: PASS`. A fixture feature with complete, covering `paths` is STILL reported stale when a file in its STALENESS SET matches its union. Asserting only the out-of-scope case does not satisfy this eval: a mechanism broken into 'never stale' passes every other criterion. Four halves: the flat case; a non-ASCII in-union path (quotePath); and — with $ROOT one level BELOW the git top-level, the monorepo layout the gate supports — a top-level-spelled declaration that still stales, plus a $ROOT-relative one that is REFUSED out loud and falls back to whole-tree. The last is the regression: the match-nothing guard must ask its question in the same path namespace the staleness filter answers it in, or a declaration passes validation and then silently filters out every real change forever"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2
@@ -119,7 +119,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_real_repo
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; run against THIS repo with both refs pinned to literal SHAs — BASE_SHA=336944d68a7bc7fe6da281a8c6eaf24d105703a2, HEAD=5986bb27b8aa2200e74f44c729be8782264d137d — NOT to branch names, so merging PR #25 or adding a file to the branch cannot move the answer. Asserts the cross-check FIRED, the uncovered list is NON-EMPTY, and the list is exactly this set of six: src/hooks/use-workflow-recovery.ts, src/components/workspace/execution-status-line.tsx, src/hooks/use-workflow-execution.ts, src/constants/task-status.ts, src/lib/task/engine-events.ts, src/lib/abi/conformance.ts. A subset match, or a pass with an empty list, fails this eval. Fixture-only assertions do not satisfy it — the point is a declaration written by someone who did not know this rule existed"
+    expected: "exit 0; run against THIS repo with both refs pinned to literal SHAs — BASE_SHA=336944d68a7bc7fe6da281a8c6eaf24d105703a2, HEAD=7352ca57b932924dfabb18a80f4e71ed4b6810fd — NOT to branch names, so merging PR #25 or adding a file to the branch cannot move the answer. Both SHAs must be reachable from a remote-tracking ref, and the guard's preflight fails loudly when one is not: a commit present only in the author's clone makes this eval pass on one machine and fail on CI, which is the failure mode a real-repo assertion can least afford. Asserts the cross-check FIRED, the uncovered list is NON-EMPTY, and the list is exactly this set of six: src/hooks/use-workflow-recovery.ts, src/components/workspace/execution-status-line.tsx, src/hooks/use-workflow-execution.ts, src/constants/task-status.ts, src/lib/task/engine-events.ts, src/lib/abi/conformance.ts. A subset match, or a pass with an empty list, fails this eval. Fixture-only assertions do not satisfy it — the point is a declaration written by someone who did not know this rule existed"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E15

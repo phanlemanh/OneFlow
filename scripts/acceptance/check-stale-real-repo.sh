@@ -22,8 +22,17 @@
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
+#
+# Both SHAs must be PUSHED commits, reachable from some remote-tracking ref.
+# A commit that exists only in the author's clone makes this eval pass on one
+# machine and fail everywhere else — and this is the one criterion in the
+# feature that asserts against real repo data rather than a fixture, so it is
+# exactly the one that must survive a clean checkout. HEAD_SHA was originally
+# pinned to an unpushed commit on the sibling branch; the reachability
+# preflight below exists so that mistake fails loudly at authoring time
+# instead of silently passing local review.
 BASE_SHA=336944d68a7bc7fe6da281a8c6eaf24d105703a2
-HEAD_SHA=5986bb27b8aa2200e74f44c729be8782264d137d
+HEAD_SHA=7352ca57b932924dfabb18a80f4e71ed4b6810fd
 
 EXPECTED="src/components/workspace/execution-status-line.tsx
 src/constants/task-status.ts
@@ -35,6 +44,21 @@ src/lib/task/engine-events.ts"
 for sha in "$BASE_SHA" "$HEAD_SHA"; do
   git -C "$ROOT" rev-parse --quiet --verify "$sha^{commit}" >/dev/null 2>&1 \
     || { echo "FAIL: pinned commit $sha not in this clone (shallow fetch or rewritten history)"; exit 1; }
+  # Present locally is NOT enough: an unpushed commit is present in exactly one
+  # clone. Require reachability from a remote-tracking ref, which is what any
+  # other clone (CI included) can actually obtain. Stale remote refs can make
+  # this red for a genuinely-pushed commit — the remedy is a fetch, and a
+  # spurious red that a fetch clears is the cheap side of this trade.
+  reachable=0
+  for ref in $(git -C "$ROOT" for-each-ref --format='%(refname)' refs/remotes/ 2>/dev/null); do
+    if git -C "$ROOT" merge-base --is-ancestor "$sha" "$ref" 2>/dev/null; then reachable=1; break; fi
+  done
+  [ "$reachable" -eq 1 ] || {
+    echo "FAIL: pinned commit $sha is in this clone but reachable from NO remote-tracking ref"
+    echo "      — it is unpushed local work, so this eval would pass here and fail on CI."
+    echo "      Run 'git fetch --all' first; if it is still unreachable, push the commit or re-pin to one that is."
+    exit 1
+  }
 done
 
 work="$(mktemp -d)"

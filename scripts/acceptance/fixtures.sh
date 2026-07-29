@@ -227,6 +227,40 @@ mk_committed_report_fixture() {
   git -C "$mcf_dir" rev-parse HEAD
 }
 
+# mk_subdir_fixture <repo-dir> <slug> <paths-glob> — the monorepo layout: the
+# git repo is <repo-dir>, but the acceptance tree and the sources live one
+# level down in <repo-dir>/pkg, which is the root the gate is pointed at. Every
+# other fixture in this suite puts $ROOT at the git top-level, where the
+# ls-files and diff --name-only namespaces happen to coincide and a namespace
+# bug is invisible. <paths-glob> is written verbatim into both evals, so a
+# caller can declare either spelling (top-level `pkg/src/covered/**` or
+# $ROOT-relative `src/covered/**`) and assert what the gate does with it.
+#
+# Prints the post-report commit SHA on stdout, same contract as
+# mk_committed_report_fixture, so --base is taken AFTER the report and this
+# feature's own _acceptance/<slug>/ is NOT in the PR diff (no cross-check) —
+# the shape every later PR has, which is where the namespace hole opens.
+mk_subdir_fixture() {
+  sf_repo="$1"; sf_slug="$2"; sf_glob="$3"
+  mkdir -p "$sf_repo/pkg/_acceptance/$sf_slug" "$sf_repo/pkg/src/covered" "$sf_repo/pkg/src/uncovered"
+  write_config "$sf_repo/pkg"
+  write_contract "$sf_repo/pkg" "$sf_slug"
+  write_evals_yaml "$sf_repo/pkg" "$sf_slug" "    paths: [\"$sf_glob\"]" "    paths: [\"$sf_glob\"]"
+  echo '{}' > "$sf_repo/pkg/_acceptance/$sf_slug/run-log.jsonl"
+  git_init_fixture_repo "$sf_repo"
+  (
+    cd "$sf_repo"
+    echo seed > pkg/src/covered/seed.txt
+    echo seed > pkg/src/uncovered/seed.txt
+    git add -A
+    git commit -q -m "fixture base"
+  )
+  sf_vc="$(git -C "$sf_repo" rev-parse HEAD)"
+  write_report "$sf_repo/pkg" "$sf_slug" "$sf_vc"
+  ( cd "$sf_repo" && git add -A && git commit -q -m report )
+  git -C "$sf_repo" rev-parse HEAD
+}
+
 # mk_pair_fixture <dir> <slug1> <slug2>
 # Two independently narrow-scoped features (paths cover src/covered/** only)
 # sharing ONE repo — for guards that assert one feature's cross-check cannot

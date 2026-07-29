@@ -170,6 +170,31 @@ case_in_scope() {
     || fail in-scope "non-ASCII in-union path did NOT stale the feature (quoted-path dropped from narrow scope): $out2"
   printf '%s\n' "$out2" | grep -qF 'café.txt' \
     || fail in-scope "non-ASCII in-union path was staled but not named cleanly (still quoted/escaped): $out2"
+
+  # Monorepo layout ($ROOT below the git top-level), both spellings. Every
+  # other fixture here puts $ROOT at the git root, where ls-files and
+  # `diff --name-only` agree and a namespace mismatch cannot show. Half 3a: a
+  # top-level-spelled declaration must behave exactly like the flat case —
+  # an in-union change still stales. Half 3b is the regression proper: a
+  # $ROOT-relative spelling matches no tracked file in the namespace the
+  # staleness filter uses, so it must be REFUSED out loud and fall back to
+  # whole-tree — never granted and then silently filtering everything out,
+  # which is "never stale" wearing a narrow-scope hat.
+  d3="$(new_case_tmpdir)"
+  base3="$(mk_subdir_fixture "$d3" fx 'pkg/src/covered/**')"
+  ( cd "$d3" && echo drift > pkg/src/covered/new.txt && git add -A && git commit -q -m drift )
+  out3="$(bash "$GATE" "$d3/pkg" --base "$base3" 2>&1)"
+  printf '%s\n' "$out3" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail in-scope "subdir root, top-level-spelled paths: in-union change did NOT stale the feature: $out3"
+
+  d4="$(new_case_tmpdir)"
+  base4="$(mk_subdir_fixture "$d4" fx 'src/covered/**')"
+  ( cd "$d4" && echo drift > pkg/src/covered/new.txt && git add -A && git commit -q -m drift )
+  out4="$(bash "$GATE" "$d4/pkg" --base "$base4" 2>&1)"
+  printf '%s\n' "$out4" | grep -q 'NOTE \[fx\]: declared eval paths match no tracked file' \
+    || fail in-scope "subdir root, \$ROOT-relative paths: match-nothing declaration was NOT refused: $out4"
+  printf '%s\n' "$out4" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail in-scope "subdir root, \$ROOT-relative paths: refused scope did NOT fall back to whole-tree staleness: $out4"
   pass in-scope
 }
 

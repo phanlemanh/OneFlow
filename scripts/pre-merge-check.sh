@@ -571,12 +571,26 @@ scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
   # stale_files() use — rather than handing globs to `git ls-files` as
   # pathspecs, whose `*` semantics differ from shell `case` globbing.
   #
+  # `--full-name` is load-bearing, not cosmetic. Plain `git -C <root> ls-files`
+  # prints paths relative to <root>, but every OTHER consumer of these same
+  # globs — stale_files(), gated_coverage(), scope_gaps() — matches against
+  # `git diff --name-only`, whose paths are relative to the GIT TOP-LEVEL. The
+  # two namespaces coincide only when $ROOT is the git root. In the monorepo
+  # layout this script explicitly supports (pkg/_acceptance/, see the comment
+  # in the feature loop below), they diverge: ls-files says `src/a.txt` where
+  # diff says `pkg/src/a.txt`. Without --full-name a $ROOT-relative
+  # declaration passes this guard (it matches ls-files) and then filters out
+  # every real change in stale_files (which never sees that spelling) — the
+  # feature is never reported stale again, silently, on every later PR. That
+  # is precisely the fail-open this function exists to close, so it must ask
+  # the question in the same namespace the answer is used in.
+  #
   # Any doubt (git missing, not a repo, ls-files unusable) is "cannot verify"
   # and returns rc 1 — refuse narrow scope, same as every other doubt in this
   # function. Stops at the first match rather than scanning every tracked file.
   command -v git >/dev/null 2>&1 || return 1
   git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
-  git -C "$1" ls-files 2>/dev/null | {
+  git -C "$1" ls-files --full-name 2>/dev/null | {
     hit=1
     while IFS= read -r f; do
       [ -n "$f" ] || continue
