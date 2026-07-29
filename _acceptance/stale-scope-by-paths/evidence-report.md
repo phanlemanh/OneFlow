@@ -1,13 +1,13 @@
 ---
 schema_version: 2
 feature_slug: stale-scope-by-paths
-verdict: REJECT
+verdict: PASS
 failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 0491c3a471087a1d727ece0648418b99ca04bdb6
+verified_commit: f1b5f8eec58a69e6fac181e1c0c839ef1a1e3056
 human_signoff:
 ---
 
@@ -35,147 +35,147 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: minted-stale-scope-by-paths-E1-r2
+  run_id: minted-stale-scope-by-paths-E1-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_in_scope
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE in-scope: PASS
 
 - eval: E2
-  run_id: minted-stale-scope-by-paths-E2-r2
+  run_id: minted-stale-scope-by-paths-E2-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_out_of_scope
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE out-of-scope: PASS
 
 - eval: E3
-  run_id: minted-stale-scope-by-paths-E3-r2
+  run_id: minted-stale-scope-by-paths-E3-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scoping_golden
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     OK: undeclared features keep byte-identical gate output
 
 - eval: E4
-  run_id: minted-stale-scope-by-paths-E4-r2
+  run_id: minted-stale-scope-by-paths-E4-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_partial
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE partial: PASS
 
 - eval: E5
-  run_id: minted-stale-scope-by-paths-E5-r2
+  run_id: minted-stale-scope-by-paths-E5-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_under_declared
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE under-declared: PASS
 
 - eval: E6
-  run_id: minted-stale-scope-by-paths-E6-r2
+  run_id: minted-stale-scope-by-paths-E6-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_malformed
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE malformed: PASS
 
 - eval: E7
-  run_id: minted-stale-scope-by-paths-E7-r2
+  run_id: minted-stale-scope-by-paths-E7-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_merged_halves
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE merged-halves: PASS
-    EXIT_CODE: 0
 
 - eval: E8
-  run_id: minted-stale-scope-by-paths-E8-r2
+  run_id: minted-stale-scope-by-paths-E8-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_suppression
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE suppression: PASS
 
 - eval: E9
-  run_id: minted-stale-scope-by-paths-E9-r2
+  run_id: minted-stale-scope-by-paths-E9-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_mutation
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE mutation: PASS
 
 - eval: E10
-  run_id: minted-stale-scope-by-paths-E10-r2
+  run_id: minted-stale-scope-by-paths-E10-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_case_completeness
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE case-completeness: PASS
 
 - eval: E11
-  run_id: minted-stale-scope-by-paths-E11-r2
+  run_id: minted-stale-scope-by-paths-E11-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_guard_not_exempt
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE guard-not-exempt: PASS
 
 - eval: E12
-  run_id: minted-stale-scope-by-paths-E12-r2
+  run_id: minted-stale-scope-by-paths-E12-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_two_bases
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE two-bases: PASS
+    EXIT_CODE=0
 
 - eval: E13
-  run_id: minted-stale-scope-by-paths-E13-r2
+  run_id: minted-stale-scope-by-paths-E13-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_no_kill_switch
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE no-kill-switch: PASS
 
 - eval: E14
-  run_id: minted-stale-scope-by-paths-E14-r2
+  run_id: minted-stale-scope-by-paths-E14-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_real_repo
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     OK: conformance-l0 refused narrow scope for exactly the six declared-but-missing files
 
 - eval: E15
-  run_id: minted-stale-scope-by-paths-E15-r2
+  run_id: minted-stale-scope-by-paths-E15-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_announce
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE announce: PASS
 
 - eval: E16
-  run_id: minted-stale-scope-by-paths-E16-r2
+  run_id: minted-stale-scope-by-paths-E16-r3
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_indent_drift
-  verified_at: 2026-07-29T07:22:48Z
+  verified_at: 2026-07-29T07:35:00Z
   output: |
     CASE indent-drift: PASS
 
@@ -185,13 +185,15 @@ none — moi eval feature deu red tren baseline (co phan biet)
 
 ## Variance
 
-none — khong co eval nao chay nhieu lan (runs=1 cho toan bo E1-E16), khong phat sinh phuong sai.
+none — every multi-run eval is uniform
 
 ## Iterations
 
 Round 1: All 16 script evals (E1-E16) exit 0 against the fixture suite, and the supporting `pnpm build`/`typecheck`/`lint:check`/`test`, SDK `pytest`, `verify:plugins`, and `gen:abi` diff-check all pass clean — but code review surfaced 2 CRITICAL/HIGH in-contract findings that no fixture in the current suite exercises: an AC-1 counterexample (scope_has_any_match() vs stale_files()/scope_gaps() namespace mismatch — narrow scope silently matches nothing once `_acceptance/` sits below the git root, reproduced end-to-end against a fixture repo) and an AC-10 reproducibility gap (E14's pinned HEAD_SHA 5986bb27b8aa2200e74f44c729be8782264d137d is unreachable from any remote ref, so it only passes in this working copy, not on a fresh clone or CI). Overall gate verdict REJECT. Returned to implementation.
 
 Round 2: All 16 script evals (E1-E16) exit 0 again — E1 was strengthened to cover the $ROOT-below-git-root monorepo halves and E14 now pins BASE_SHA=336944d68a7bc7fe6da281a8c6eaf24d105703a2 / HEAD=7352ca57b932924dfabb18a80f4e71ed4b6810fd with a remote-reachability preflight, closing round 1's AC-1 and AC-10 findings — and the supporting `pnpm build`/`typecheck`, `lint:check`, `test`, SDK `pytest`, `verify:plugins`, and `gen:abi` diff-check all pass clean again — but code review surfaced 2 NEW CRITICAL/HIGH in-contract findings the current suite still does not exercise: an AC-5 monorepo blind spot (slug_acceptance_touched() at scripts/pre-merge-check.sh:646 matches only the top-level-anchored `_acceptance/<slug>/` prefix while every sibling diff consumer — slug_in_diff(), stale_files(), gated_coverage() — accepts the nested `*/_acceptance/<slug>/` spelling too, so in the `pkg/_acceptance/` monorepo layout the declared-paths cross-check silently never fires and narrow scope is granted unchecked, reproduced end-to-end with identical fixtures differing only in root placement) and an AC-4 completeness-counting gap (feature_scope() at scripts/pre-merge-check.sh:493 compares total `- id:` line count to total `paths:` line count instead of per-eval, so a duplicate `paths:` line under one eval balances a missing one under another and a partial declaration reads as complete, confirmed by extracting and running the shipped function). Overall gate verdict REJECT. Returned to implementation.
+
+Round 3: All 16 script evals (E1-E16) exit 0 again — slug_acceptance_touched() now also accepts the nested `*/_acceptance/<slug>/` spelling alongside the top-level one (closing round 2's AC-5 monorepo blind spot) and feature_scope()'s completeness check now attributes each `paths:` line to the eval block it falls inside instead of comparing bare total counts (closing round 2's AC-4 gap) — and the supporting `pnpm build`/`typecheck`, `lint:check`, `test`, SDK `pytest`, `verify:plugins`, and `gen:abi` diff-check all pass clean again. Overall gate verdict PASS.
 
 ## Gate 2 checklist (human)
 

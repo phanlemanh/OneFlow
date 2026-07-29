@@ -46,3 +46,97 @@
 - **claude-sonnet-5**: 15 agent · 152 calls · out 69,597 · in 6,714 · cache_read 11,789,061 · cache_create 1,231,448
 - **claude-haiku-4-5-20251001**: 22 agent · 55 calls · out 11,303 · in 484 · cache_read 1,848,441 · cache_create 962,415
 
+### S4 round 2 — wf_15f133bf-94b (38 agent, 102,790 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:bugs | claude-opus-5 | 18 | 17,785 | 36 | 2,406,407 | 342 |
+| review:conventions | claude-opus-5 | 23 | 12,642 | 45 | 2,440,246 | 308 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 21 | 11,103 | 42 | 1,730,746 | 272 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 16 | 8,827 | 32 | 1,560,250 | 138 |
+| refute:check-stale-real-repo.sh | claude-sonnet-5 | 7 | 6,784 | 14 | 469,625 | 105 |
+| synthesize:report | claude-sonnet-5 | 9 | 6,441 | 18 | 840,031 | 273 |
+| refute:check-stale-golden.sh | claude-sonnet-5 | 5 | 5,839 | 10 | 317,076 | 84 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 14 | 5,049 | 28 | 1,095,594 | 119 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 9 | 3,442 | 18 | 659,249 | 69 |
+| baseline:diffBase | claude-sonnet-5 | 6 | 3,331 | 12 | 378,972 | 60 |
+| refute:evidence-report.md | claude-sonnet-5 | 10 | 2,946 | 1,356 | 771,567 | 125 |
+| refute:evidence-core.js | claude-sonnet-5 | 11 | 2,845 | 22 | 817,776 | 103 |
+| refute:check-stale-scoping.sh | claude-sonnet-5 | 5 | 2,137 | 4,413 | 354,283 | 56 |
+| capture:provenance | claude-sonnet-5 | 2 | 1,310 | 4 | 71,165 | 18 |
+| machine:bash scripts/acceptance/check-stale-real | claude-haiku-4-5-20251001 | 3 | 1,163 | 26 | 118,730 | 23 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 5 | 1,135 | 42 | 205,517 | 31 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 4 | 918 | 34 | 170,490 | 21 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 3 | 797 | 26 | 118,409 | 17 |
+| refute:config.yaml | claude-sonnet-5 | 6 | 762 | 12 | 389,851 | 65 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 706 | 18 | 49,199 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 667 | 18 | 66,498 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 3 | 656 | 26 | 118,834 | 17 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 655 | 18 | 49,196 | 14 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 595 | 18 | 66,500 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 554 | 18 | 49,200 | 11 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 524 | 26 | 118,381 | 25 |
+| machine:bash scripts/acceptance/check-stale-gold | claude-haiku-4-5-20251001 | 2 | 455 | 18 | 49,191 | 11 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 370 | 18 | 66,477 | 13 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 368 | 18 | 66,489 | 32 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 4 | 310 | 34 | 170,494 | 20 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 294 | 18 | 66,518 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 282 | 26 | 101,032 | 18 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 282 | 18 | 66,481 | 13 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 262 | 18 | 66,502 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 236 | 18 | 66,502 | 17 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 4 | 210 | 36 | 170,367 | 24 |
+| triage | claude-sonnet-5 | 2 | 102 | 4 | 75,687 | 114 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 6 | 18 | 49,198 | 13 |
+
+- **claude-opus-5**: 2 agent · 41 calls · out 30,427 · in 81 · cache_read 4,846,653 · cache_create 306,032
+- **claude-sonnet-5**: 14 agent · 123 calls · out 60,918 · in 5,985 · cache_read 9,531,872 · cache_create 1,173,388
+- **claude-haiku-4-5-20251001**: 22 agent · 58 calls · out 11,445 · in 510 · cache_read 2,070,205 · cache_create 892,564
+
+### S4 round 3 — wf_0b39f0a3-bc2 (38 agent, 119,434 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:bugs | claude-opus-5 | 33 | 35,918 | 66 | 4,603,510 | 618 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 22 | 13,787 | 44 | 2,136,553 | 250 |
+| review:conventions | claude-opus-5 | 27 | 13,591 | 54 | 2,685,485 | 376 |
+| refute:config.yaml | claude-sonnet-5 | 15 | 9,313 | 30 | 1,241,611 | 259 |
+| refute:baseline-gate-output.txt | claude-sonnet-5 | 14 | 8,453 | 1,057 | 1,224,278 | 288 |
+| refute:check-stale-real-repo.sh | claude-sonnet-5 | 12 | 7,013 | 24 | 1,003,007 | 204 |
+| refute:config.yaml | claude-sonnet-5 | 13 | 4,400 | 26 | 988,060 | 135 |
+| refute:evidence-core.js | claude-sonnet-5 | 10 | 4,220 | 20 | 716,614 | 234 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 8 | 3,458 | 16 | 598,477 | 95 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 10 | 2,462 | 778 | 736,682 | 165 |
+| refute:pre-merge-check.sh | claude-sonnet-5 | 10 | 2,059 | 20 | 762,137 | 119 |
+| baseline:diffBase | claude-sonnet-5 | 7 | 1,944 | 14 | 455,675 | 69 |
+| refute:evidence-report.md | claude-sonnet-5 | 7 | 1,174 | 1,531 | 482,792 | 96 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 5 | 929 | 42 | 205,926 | 25 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 724 | 26 | 101,137 | 16 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 691 | 26 | 118,336 | 16 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 679 | 18 | 66,525 | 13 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 660 | 18 | 66,498 | 16 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 654 | 18 | 66,489 | 38 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 653 | 18 | 66,481 | 11 |
+| machine:bash scripts/acceptance/check-stale-real | claude-haiku-4-5-20251001 | 2 | 643 | 18 | 66,495 | 17 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 578 | 18 | 66,477 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 517 | 18 | 49,197 | 12 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 493 | 18 | 66,481 | 11 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 442 | 26 | 118,378 | 26 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 5 | 430 | 42 | 222,546 | 29 |
+| capture:provenance | claude-sonnet-5 | 2 | 423 | 4 | 71,165 | 13 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 3 | 420 | 26 | 118,327 | 18 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 4 | 417 | 34 | 153,120 | 21 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 415 | 18 | 49,198 | 17 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 340 | 18 | 66,518 | 14 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 328 | 18 | 49,198 | 12 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 291 | 18 | 66,502 | 17 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 283 | 18 | 66,500 | 12 |
+| machine:bash scripts/acceptance/check-stale-gold | claude-haiku-4-5-20251001 | 2 | 270 | 18 | 49,191 | 16 |
+| machine:bash scripts/acceptance/check-stale-scop | claude-haiku-4-5-20251001 | 2 | 246 | 18 | 49,197 | 11 |
+| triage | claude-sonnet-5 | 2 | 104 | 4 | 76,571 | 154 |
+| synthesize:report | claude-sonnet-5 | 4 | 12 | 8 | 287,539 | 191 |
+
+- **claude-opus-5**: 2 agent · 60 calls · out 49,509 · in 120 · cache_read 7,288,995 · cache_create 328,615
+- **claude-sonnet-5**: 14 agent · 136 calls · out 58,822 · in 3,576 · cache_read 10,781,161 · cache_create 1,283,795
+- **claude-haiku-4-5-20251001**: 22 agent · 56 calls · out 11,103 · in 492 · cache_read 1,948,717 · cache_create 908,935
+
