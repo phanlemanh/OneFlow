@@ -130,6 +130,10 @@ risk_tiers:
     - "scripts/pre-merge-check.sh"
     - "scripts/recheck-evidence.js"
     - "lib/evidence-core.js"
+    - "lib/gap-probe.js"
+    # Lint configuration only — it constrains how source is written, never what
+    # the product does at runtime, so a change here cannot invalidate evidence.
+    - "biome.json"
   # Contract chokepoints & wire/persistence shape — always T3 (full gate).
   t3_paths:
     - "config/tongflow.abi.json"

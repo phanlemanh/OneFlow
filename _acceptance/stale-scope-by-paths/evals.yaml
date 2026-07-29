@@ -63,7 +63,7 @@ evals:
     executor: script
     cmd: config:executors.script.stale_scope_merged_halves
     paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; output contains `CASE merged-halves: PASS` and BOTH sub-results. A merged fixture feature whose `_acceptance/<slug>/` is ABSENT from the PR diff keeps narrow scope with NO cross-check; the same feature with it PRESENT does get cross-checked"
+    expected: "exit 0; output contains `CASE merged-halves: PASS` and BOTH sub-results. A merged fixture feature whose `_acceptance/<slug>/` is ABSENT from the PR diff keeps narrow scope with NO cross-check; the same feature with it PRESENT does get cross-checked. Halves C/D/D2 pin that a base the machine cannot compute never buys narrow scope: no base at all falls back to whole-tree staleness, a base resolvable but sharing no merge base with HEAD does the same, and an UNRESOLVABLE ref refuses to run at all (exit 2 + `VIOLATION [scope]`) — the harder of the two failure modes, adopted with kit 1.24.0"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8

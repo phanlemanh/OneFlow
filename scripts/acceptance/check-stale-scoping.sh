@@ -297,8 +297,9 @@ merged_halves_ab() {
 # staleness (the working tree still carries the Half-A drift file, which sits
 # outside this feature's declared "narrow" scope) rather than silently
 # reporting OK. Half D: same as Half C but with an UNRESOLVABLE --base — must
-# fail closed exactly like the missing-base case, not be treated any more
-# permissively just because a ref string was supplied. Reuses the "$d" that
+# fail closed at least as hard as the missing-base case, never more
+# permissively just because a ref string was supplied; since kit 1.24.0 that
+# means refusing to run (exit 2). Reuses the "$d" that
 # merged_halves_ab left behind.
 merged_halves_cd() {
   outC="$(bash "$GATE" "$d" 2>&1)"
@@ -307,9 +308,18 @@ merged_halves_cd() {
   printf '%s\n' "$outC" | grep -q 'OK \[fx\]' \
     && fail merged-halves "half C: no PR base wrongly reported OK: $outC"
 
-  outD="$(bash "$GATE" "$d" --base bogus-ref-xyz-does-not-exist 2>&1)"
-  printf '%s\n' "$outD" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
-    || fail merged-halves "half D: unresolvable PR base did not fall back to whole-tree staleness: $outD"
+  # Since kit 1.24.0 this fails closed HARDER than Half C: instead of falling
+  # back to whole-tree staleness, the gate refuses to run at all. An operator
+  # who declared a scope the machine cannot compute gets an error, not a
+  # quieter check (kit ADR 0004 — a CI job with a mistyped base_ref used to
+  # check an empty set and report clean). What this half guards is unchanged —
+  # a bad ref must never buy narrow scope — only the mechanism moved, from
+  # "widest staleness set" to "do not run".
+  outD="$(bash "$GATE" "$d" --base bogus-ref-xyz-does-not-exist 2>&1)"; rcD=$?
+  [ "$rcD" -eq 2 ] \
+    || fail merged-halves "half D: unresolvable PR base did not exit 2 (got $rcD): $outD"
+  printf '%s\n' "$outD" | grep -q 'VIOLATION \[scope\]: base .* resolve' \
+    || fail merged-halves "half D: unresolvable PR base did not report the scope violation: $outD"
   printf '%s\n' "$outD" | grep -q 'OK \[fx\]' \
     && fail merged-halves "half D: unresolvable PR base wrongly reported OK: $outD"
 
