@@ -6,7 +6,7 @@
 
 - **Nền tảng:** fork TongFlow (AGPL-3.0, không CLA, không dual-license — README §License). Đã rebrand OneFlow: logo pixel (`public/logo.svg`, `logo_icon.svg`), xoá COMMERCIAL-LICENSE.md/CLA.md.
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
-- **Acceptance-Gate Kit:** đang chạy strict/strict. **9 feature đã ký** (8 trên `main`, `conformance-l0` chờ merge ở PR #25). CI 5 job, gate là job thứ 5.
+- **Acceptance-Gate Kit:** đang chạy strict/strict. `main` sạch — **9 feature đã ký**. CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
 - **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (10 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
@@ -22,7 +22,7 @@
 | `oneflow-plugin-prefix` | T3 | 27/07 | `oneflow-` là quy ước thư mục plugin, `tongflow-` legacy. **Ký lại 27/07** cùng Cổng 2 của per-plugin-origin (nhánh đó sửa `plugin-id.test.ts` sang normaliser chung) |
 | `per-plugin-origin` | T2 | 27/07 | Entry manifest nhận `origin` riêng; 1 resolver cho 3 đường tải; installer CLI sang TS; manifest validate lúc nạp. Origin lệch → từ chối 409, KHÔNG tự di trú |
 | `stale-scope-by-paths` | T2 | 29/07 | Cổng chỉ báo bằng chứng hết hiệu lực cho feature mà code đổi NẰM TRONG `paths` nó khai; ai khai 0 `paths` giữ nguyên hành vi cũ từng chữ. Khai thiếu bị cross-check bắt và in tên file. **Cả 7 feature cũ được carry-forward re-pin cùng PR này** |
-| `conformance-l0` | T3 | 28/07 | Engine fan-out khớp canvas; gộp kết quả theo thứ tự batch; suite conformance TS↔Python + mutation guard; `pluginRev` lúc scan; hợp đồng `node_cached` nối thông 3 tầng. **PR #25 mở, CHƯA merge** — xem nợ carry-forward dưới |
+| `conformance-l0` | T3 | 28/07 | Engine fan-out khớp canvas; gộp kết quả theo thứ tự batch; suite conformance TS↔Python + mutation guard; `pluginRev` lúc scan; hợp đồng `node_cached` nối thông 3 tầng. Merge 29/07 (PR #25) sau khi gỡ 7 pin stale |
 
 ## Đang dở — bắt máy A tiếp ở đây
 
@@ -49,13 +49,6 @@ Standing check trên cây mới đều xanh: `pnpm lint:check` (413 file) · `pn
 **Phát hiện của vòng re-verify, và là thứ đáng mang đi nhất:** eval `prefix_no_config_drift` đỏ **không phải vì regression mà vì nó đo nhầm PR**. Nó khẳng định "PR mở rộng tiền tố không mang theo thứ khác" bằng cách diff `origin/main...HEAD` — chạy lại ở nhánh sau thì `HEAD` là việc của người khác, nên nó bắt `src/lib/plugins/plugins-registry-schema.ts` (chỗ `conformance-l0` cố ý thêm `pluginRev`). Fail **closed**, không có gì không an toàn lọt qua; cái mất là nó không còn trả lời được câu hỏi về feature của chính nó.
 
 Đây là **một họ, không phải một ca lẻ**: `origin_manifest_unmoved` (AC-6 của `per-plugin-origin`) cùng hình dạng y hệt, và CLAUDE.md đã ghi đúng câu đó — *"a snapshot of that PR, not a standing invariant"*. Hệ acceptance chưa có từ để gọi loại này: **eval hết hạn ý nghĩa lúc merge**, mà cổng vẫn chạy lại mãi như thể chúng là bất biến. Bản chất AC-6 đã kiểm tay trực tiếp thay cho guard (`config/`, `src/db/`, `plugins-registry.server.ts` không đổi; manifest vẫn 38 plugin dưới `tong-io`). Sửa = chạm script eval sau verify = bắt đầu lại vòng, nên **gộp vào 0.6** chứ không vá lẻ.
-
-⚠️ **Feature thứ 8 (`stale-scope-by-paths`) KHÔNG gỡ được lớp chặn này** — dễ tưởng nhầm vì nó sinh ra đúng để trị staleness. Bảy feature đó khai **0 `paths`**, mà AC-3 quy định khai 0 `paths` = giữ nguyên hành vi cũ **từng chữ**. Contract của chính nó ghi thẳng: *"Chúng khai 0 `paths`, nên cơ chế này không giúp được. Mỗi feature cần một PR gọn riêng để backfill — và PR đó phải mang theo code gated mà `paths` của chính nó phủ."* Nó chỉ tự cứu chính nó (khai `scripts/acceptance/**` + `scripts/pre-merge-check.sh`, mà nhánh này không chạm).
-
-Đường gỡ đúng luật là **luật carry-forward của AGENTS.md §2**, áp riêng cho từng feature:
-
-- **Code của chính nó không đổi** → carry-forward re-pin (chỉ cần standing check xanh, chữ ký giữ nguyên).
-- **Code của chính nó bị chạm** → re-verify + **chữ ký Cổng 2 mới**. Nhánh này sửa `sdk/tongflow/scan.py` và thêm nhiều file `sdk/**`, nên `oneflow-plugin-prefix` (scanner ép tiền tố) và `sdk-distribution-rename` gần như chắc chắn đi đường này — đúng tiền lệ PR #18.
 
 Round count hai chữ số của `measure-harness` (14), `task-metering` (14), `sdk-distribution-rename` (13) chính là những lần trả giá trước cho đúng luật này.
 
