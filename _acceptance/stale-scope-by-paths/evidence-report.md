@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 5037c8df9fc077fcefafc277b0cc92170fad07ed
-human_signoff:
+human_signoff: Manh 2026-07-29
 ---
 
 # Evidence Report: stale-scope-by-paths
