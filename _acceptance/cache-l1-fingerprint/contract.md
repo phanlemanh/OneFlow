@@ -109,6 +109,12 @@ Hai vòng verify. Vòng 1 **REJECT** (16/16 eval xanh nhưng `pnpm lint:check` �
   Trong lúc mở khoá, chữ ký của test AC-7 từng ngưng cô lập `plugin_dirty` (lời gọi TypeError
   thiếu ba kwargs thay vì một) — đã sửa cùng nhánh, và vòng verify lại của feature này phải
   xác nhận cả điều đó.
+- **`KEY_SCHEMA_VERSION` bump 2 → 3 ở lát L3 (2026-07-30, nhánh `feat/cache-l3-tier-b`).**
+  L3 nối `workflowScope` vào khoá (tầng B: memo theo `workflow_id`), tức sửa `fingerprint.py` —
+  file feature này sở hữu. Theo luật per-file (AGENTS.md §2) chữ ký Cổng 2 của feature này
+  **không carry-forward được lần nữa**: nó phải verify lại và ký lại cùng PR của L3. Vector của
+  AC-13 đã sinh lại dưới `v = 3`, thêm ít nhất một ca `workflowScope` khác `null` (tầng B) bên
+  cạnh ca `null` vô điều kiện của tầng A mà L3 tự khai (AC-7 của `cache-l3-tier-b`).
 
 ## Notes
 
