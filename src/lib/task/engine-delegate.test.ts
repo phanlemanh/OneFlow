@@ -55,6 +55,7 @@ describe("engine delegate options", () => {
             assetOptions: {},
             autoInstall: true,
             taskId: "task-1",
+            workflowId: null,
         };
         expect(engineOptionsFor("", extras).tenant).toBe("local");
         expect(engineOptionsFor("abc", extras).tenant).toBe("user:abc");
@@ -82,6 +83,7 @@ describe("engine delegate options", () => {
             assetOptions: {},
             autoInstall: true,
             taskId: "task-1",
+            workflowId: null,
         };
         const optsA = engineOptionsFor("abc", extras);
         const optsB = engineOptionsFor("abc", extras);
@@ -94,6 +96,13 @@ describe("engine delegate options", () => {
         // engineOptionsFor into options.workflow_id. Assert on the actual
         // built OBJECT (not a standalone helper) so deleting the
         // `workflow_id` line from the builder reddens this test.
+        //
+        // `workflowId` is a REQUIRED field of `EngineOptionsExtras` (I1
+        // fix): a non-workflow task must pass `workflowId: null` explicitly,
+        // there is no "omitted" case to test here anymore — omitting it is
+        // now a `pnpm typecheck` failure, not a runtime null. See the I1
+        // mutation proof (delete `workflowId,` from the extras object in
+        // engine-delegate.server.ts) for that guarantee.
         const { engineOptionsFor } = await import("./engine-delegate.server");
         const baseExtras = {
             pluginsDir: "/plugins",
@@ -112,9 +121,5 @@ describe("engine delegate options", () => {
         });
         expect(withNull.workflow_id).toBeNull();
         expect(withNull.workflow_id).not.toBe("");
-
-        const withAbsent = engineOptionsFor("", baseExtras);
-        expect(withAbsent.workflow_id).toBeNull();
-        expect(withAbsent.workflow_id).not.toBe("");
     });
 });

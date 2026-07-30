@@ -98,7 +98,7 @@ executors:
     sdk_pytest_l3_workflow_scope_unconditional: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py::test_workflow_scope_emitted_unconditionally"
     sdk_pytest_l3_git_status_failure_is_dirty: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_git_status_failure_reads_as_dirty"
     sdk_pytest_l3_bridge_workflow_id: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_bridge_forwards_workflow_id"
-    sdk_pytest_l3_l1_l2_evals_on_new_tree: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint_vectors.py"
+    sdk_pytest_l3_l1_l2_evals_on_new_tree: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py tests/test_fingerprint_vectors.py"
     # AC-9 TS half reuses the engineOptionsFor seam; -t scopes to its own test.
     unit_l3_workflow_id_sentinel: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'workflow_id'"
     sdk_pytest_l3_tenant_in_tier_b_key: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_two_tenants_do_not_share_tier_b"

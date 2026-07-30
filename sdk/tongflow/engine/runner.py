@@ -261,8 +261,12 @@ def run_workflow(
     # Gate for tier B (nondeterministic slots, memoized per workflow): a
     # non-empty, non-whitespace workflow_id is required, computed once here
     # rather than per call. Absence disables tier B ONLY -- tier A's
-    # workflow_scope=None path below is untouched by this flag.
-    wf_scope_ok = bool(workflow_id and str(workflow_id).strip())
+    # workflow_scope=None path below is untouched by this flag. `wf_id_clean`
+    # is the STRIPPED value, computed once alongside the gate itself, so the
+    # scope string built below can reuse it instead of re-interpolating the
+    # raw (possibly whitespace-padded) `workflow_id`.
+    wf_id_clean = str(workflow_id).strip() if workflow_id else ""
+    wf_scope_ok = bool(wf_id_clean)
 
     # Output store: in-memory (inline, zero disk) or on-disk (file_key paths,
     # used by the desktop delegation so the canvas reads via /api/uploads).
@@ -415,7 +419,7 @@ def run_workflow(
                     elif node_cache is not None and slot in TIER_B_SLOTS and wf_scope_ok:
                         if plugin_dir not in dirty_by_dir:
                             dirty_by_dir[plugin_dir] = plugin_is_dirty(plugin_dir)
-                        scope = f"wf:{workflow_id}:node:{node_id}"
+                        scope = f"wf:{wf_id_clean}:node:{node_id}"
                         # A batched node fans out into N calls with, in the
                         # duplicate-variant case, byte-identical call_params
                         # (AC-14): collapsing them onto one key is correct for

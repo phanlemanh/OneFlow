@@ -67,11 +67,15 @@ export interface EngineOptionsExtras {
     autoInstall: boolean;
     taskId: string;
     /**
-     * The workflow this task belongs to, or null/absent for a non-workflow
-     * task. Always emitted as `workflow_id` — a numeric string, or `null`,
-     * never `""` (see AC-9, cache-l3-tier-b).
+     * The workflow this task belongs to, or null for a non-workflow task.
+     * Required (not optional) so that dropping this field from a call site is
+     * a compile error rather than a silent tier-B-disabling no-op: without
+     * it, `engineOptionsFor` would treat every call as workflow-less and
+     * `workflow_id` would always resolve to `null` (see AC-9,
+     * cache-l3-tier-b). Always emitted as `workflow_id` — a numeric string,
+     * or `null`, never `""`.
      */
-    workflowId?: number | null;
+    workflowId: number | null;
 }
 
 /**
@@ -182,7 +186,7 @@ export async function executeWorkflowViaEngine(
     taskId: string,
     workflowJson: string,
     inputs: Record<string, unknown>,
-    workflowId?: number | null,
+    workflowId: number | null,
 ): Promise<void> {
     const controller = registerTask(taskId);
     let assetToken: string | null = null;

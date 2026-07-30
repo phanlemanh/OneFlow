@@ -111,7 +111,9 @@ def test_tier_lists_are_disjoint_and_pinned():
     #     a silent addition or drop must go red here, not slide in unreviewed.
     # (2) the two allowlists never overlap -- one slot in both would be two
     #     cache semantics for one computation.
-    # (3) the five deliberately-uncached generative slots sit in NEITHER list.
+    # (3) the nine deliberately-uncached generative slots sit in NEITHER list
+    #     (the original five plus the four TTS slots the design's
+    #     "descoped generative" group also names).
     assert TIER_B_SLOTS == frozenset({
         "audio-video-lip-sync", "gen-music", "image-edit", "image-fusion",
         "image-gen", "image-gen-model", "image-gen-text", "image-gen-video",
@@ -127,12 +129,13 @@ def test_tier_lists_are_disjoint_and_pinned():
         assert descoped not in TIER_B_SLOTS
     assert DESCOPED_GENERATIVE_SLOTS == frozenset({
         "gen-text", "image-describe", "video-describe", "audio-describe",
-        "music-brief",
+        "music-brief", "text-gen-speech-preset", "text-gen-speech-clone",
+        "text-gen-speech-instruct", "text-audio-gen-speech",
     })
 
     # Gap-probe P1's guard: derive the knobbed-slot set from the REAL ABI at
     # TEST time (not baked into a runtime lookup -- see node_cache.py's
-    # no-suy-lúc-chạy rule) and check it against the pinned constants, so a
+    # no-runtime-inference rule) and check it against the pinned constants, so a
     # future ABI addition that grows a seed/temperature/top_p knob on a slot
     # currently in neither list turns red here instead of being cached as if
     # deterministic under TIER_A, or silently uncached under neither.
@@ -199,6 +202,41 @@ def test_git_status_failure_reads_as_dirty(tmp_path):
     plain = tmp_path / "plain-no-git"
     plain.mkdir()
     assert plugin_is_dirty(plain) is False
+
+    # AC-8, end-to-end half: the unit assertion above proves the pure
+    # function flips to True, but a mutation that returns True whenever
+    # `.git` merely EXISTS (never checking `git status` at all) would also
+    # satisfy it -- and would disable tier A's cache for every checkout,
+    # always, which the run-level assertions below catch. Reuses
+    # `_two_node_workflow`'s already-wired n1/n2 tier-A pair (`combine-text`
+    # -> `split-text`, plugin id `oneflow-text`), so `_run`'s default
+    # `plugin_dir_name="oneflow-text"` lines up with the checkout below.
+    e2e_plugin_dir = tmp_path / "plugins" / "oneflow-text"
+    e2e_plugin_dir.mkdir(parents=True)
+    (e2e_plugin_dir / "entry.py").write_text("x = 1\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q"], cwd=e2e_plugin_dir, check=True, env=env)
+    subprocess.run(["git", "add", "-A"], cwd=e2e_plugin_dir, check=True, env=env)
+    subprocess.run(["git", "commit", "-qm", "init"], cwd=e2e_plugin_dir, check=True, env=env)
+
+    # (a) Pre-mock baseline: on the REAL, unmocked git binary this checkout
+    # reads as clean. Establishing this here (rather than assuming it) is
+    # what makes the run-level dirtiness below attributable to the mocked
+    # `git status` failure and not to some other stray dirty state.
+    assert plugin_is_dirty(e2e_plugin_dir) is False
+
+    wf = _two_node_workflow("hello")
+    with patch("subprocess.run", return_value=_FailedRun()):
+        # (b) End-to-end: `git status` failing must disable tier A's cache
+        # for the whole run -- both nodes' invoker calls happen IN FULL on
+        # both runs (no warm hit ever), and no cache entry lands on disk.
+        r1, c1 = _run(wf, tmp_path)
+        r2, c2 = _run(wf, tmp_path)
+    assert r1["status"] == "success"
+    assert r2["status"] == "success"
+    assert len(c1) == 2
+    assert len(c2) == 2
+    cache_root = tmp_path / "data" / ".tongflow" / "node-cache"
+    assert not (cache_root.exists() and list(cache_root.rglob("result.json")))
 
 
 def test_plugin_without_git_is_not_reported_dirty(tmp_path):
@@ -969,6 +1007,16 @@ def test_missing_workflow_id_disables_only_tier_b(tmp_path):
         assert len(gen_calls_1) == 1, label
         assert len(gen_calls_2) == 1, label      # tier B never hits
         assert len(concat_calls_2) == 0, label   # tier A still hits warm
+
+        # AC-5's write direction, not just its read direction: a mutation
+        # that computes the tier-B cache_key regardless of wf_scope_ok (and
+        # gates only the `.get()` read) still passes every assertion above,
+        # because `.put()` after a cold call writes unconditionally once
+        # cache_key is truthy -- it would leave a tier-B entry on disk that
+        # a later, differently-scoped run could accidentally serve. Only
+        # tier A's (concat-videos) single entry may exist on disk.
+        root = d / "data" / ".tongflow" / "node-cache"
+        assert len(list(root.rglob("result.json"))) == 1, label
 
 
 def test_bridge_forwards_workflow_id(tmp_path):

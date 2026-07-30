@@ -121,6 +121,10 @@ DESCOPED_GENERATIVE_SLOTS = frozenset({
     "video-describe",
     "audio-describe",
     "music-brief",
+    "text-gen-speech-preset",
+    "text-gen-speech-clone",
+    "text-gen-speech-instruct",
+    "text-audio-gen-speech",
 })
 
 _BLOB_KEY = "__cache_blob"

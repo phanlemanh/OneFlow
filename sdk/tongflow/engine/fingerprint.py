@@ -124,6 +124,13 @@ def node_fingerprint(
     ``workflow_scope=None`` like ``tenant=""`` (return ``None``, "not
     cacheable") would make every tier-A slot un-cacheable, silently deleting
     L1 and L2's entire benefit.
+
+    An empty or whitespace-only ``workflow_scope`` string is not this
+    function's problem to reject: unlike ``tenant``, it is treated as opaque
+    here, not validated. Rejecting a blank workflow id (AC-5) is the caller's
+    gate -- see ``runner.py``'s ``wf_scope_ok`` -- which must decide never to
+    call this function with such a scope for a tier-B slot in the first
+    place.
     """
     if not plugin_rev or plugin_dirty or not tenant:
         return None

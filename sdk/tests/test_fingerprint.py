@@ -484,6 +484,10 @@ def test_workflow_scope_emitted_unconditionally():
         workflow_scope=None,
     )
     _assert_valid_key(k_tier_a)
+    # Load-bearing: this is what binds the blob this test hand-rebuilt above
+    # to the actual hash node_fingerprint() produces in production -- without
+    # it, everything above only proves this test's own blob construction is
+    # self-consistent, never that it matches what node_fingerprint() hashes.
     assert k_tier_a == hashlib.sha256(blob_tier_a.encode("utf-8")).hexdigest()
 
     # Same input, only workflow_scope differs (None vs a tier-B scope
