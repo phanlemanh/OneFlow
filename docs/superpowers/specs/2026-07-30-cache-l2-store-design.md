@@ -130,9 +130,20 @@ Blob nằm ở **gốc** `node-cache/`, không trong từng entry — nếu đ�
 "dùng chung" được, và câu *"200 video khác nhau chỉ khác overlay vẫn chia sẻ mọi blob nguồn"*
 của D6 thành sai.
 
-**Ghi atomic:** temp file + `os.replace`. Hai run song song ghi cùng một entry là chuyện
-thường (nội-dung-địa-chỉ nên bytes giống nhau, ghi sau thắng là vô hại), nhưng một tiến trình
-khác đọc `result.json` đang viết dở thì không vô hại.
+**Ghi atomic — `result.json` VÀ blob, cùng một luật:** temp file + `os.replace`. Hai run song
+song ghi cùng một entry là chuyện thường (nội-dung-địa-chỉ nên bytes giống nhau, ghi sau thắng
+là vô hại), nhưng một tiến trình khác đọc file đang viết dở thì không vô hại.
+
+Bản đầu của tài liệu này chỉ đòi atomic cho `result.json` và lập luận rằng blob "vô hại vì
+nội-dung-địa-chỉ". Gap-probe bác đúng chỗ đó: **cái hại được nêu — đọc một file viết dở — áp
+y hệt cho blob.** Một run bị SIGKILL giữa lúc ghi blob để lại file cụt ở đúng tên sha; run sau
+trúng, `put` bytes cụt vào store, slot ffmpeg hạ nguồn ăn nửa video và sinh output hỏng — rồi
+output hỏng đó lại được cache. Ghi atomic đóng cửa sổ đó ngay từ đầu.
+
+Thêm một lưới đỡ **O(1)**, không phải băm lại: `result.json` ghi kèm **kích thước** mỗi blob;
+lúc đọc, kích thước lệch → coi là miss và ghi lại. Không băm lại toàn bộ blob khi trúng — với
+một video 200MB thì đó là I/O tỷ lệ kích thước trên mỗi lần trúng, đúng thứ cache sinh ra để
+tránh.
 
 **Khi trúng — mấu chốt đúng-sai của D6:** engine `put` lại blob vào store **của lần chạy hiện
 tại** rồi mới dựng `result`. `MemoryStore` trả `mem://<uuid>` chỉ sống trong tiến trình, nên

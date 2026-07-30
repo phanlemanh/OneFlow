@@ -1,0 +1,153 @@
+# 18 eval / 16 tiêu chí. AC-14 và AC-16 đều (cross-layer) nên mỗi cái có ĐÔI eval:
+# một phía TS, một `layer: backend-effect` — bằng chứng lớp UI/TS một mình không bao
+# giờ đủ cho tiêu chí xuyên lớp. Mọi eval khai `paths` ngay từ đầu: khai 0 paths là
+# tự đưa feature vào treadmill staleness mà stale-scope-by-paths sinh ra để trị,
+# và backfill sau chỉ hợp lệ trong PR mang code gated do paths của chính nó phủ.
+# Một executor key cho MỖI tiêu chí (bài học L1): nhiều tiêu chí chung một exit
+# code thì một tiêu chí chưa hề viết trông y hệt một tiêu chí đã pass.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_hit_after_miss
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; một workflow chỉ gồm slot trong allowlist chạy hai lần với CÙNG data_dir và CÙNG tenant: lần hai gọi invoker ĐÚNG 0 lần, và outputs của hai lần byte-identical sau chuẩn hoá. Đếm lời gọi invoker là bắt buộc — một assertion chỉ khẳng định 'kết quả giống nhau' KHÔNG thoả eval này, vì chạy lại plugin cũng cho kết quả giống nhau mà chẳng tiết kiệm gì"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_blob_into_run_store
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; entry ghi ở một lần chạy, rồi trúng ở lần chạy dùng store KHÁC (MemoryStore mới): blob được put lại vào store của lần chạy hiện tại VÀ node hạ nguồn nhận file_key GIẢI ĐƯỢC trong store đó. Chỉ khẳng định 'trúng cache' không thoả eval này — phải khẳng định hạ nguồn giải được file_key, vì mem:// handle của lần chạy trước là con trỏ chết và một cache trả handle chết vẫn 'trúng'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_no_entry_on_failure
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; một lời gọi trả success:false → KHÔNG entry nào được tạo cho khoá đó, chứng minh bằng cách đếm file dưới node-cache/ trước và sau (không phải bằng cách chỉ kiểm run raise). Điểm ghi cache phải nằm SAU phép kiểm success"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_unusable_entry_is_miss
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; BA ca đều kiểm RIÊNG, không gộp — (a) entry còn nhưng blob nó trỏ tới đã bị xoá, (b) result.json không parse được, (c) blob tồn tại nhưng KÍCH THƯỚC lệch so với kích thước ghi trong result.json: cả ba coi là miss, plugin được gọi, run kết thúc THÀNH CÔNG, và entry được ghi lại đúng. Một implementation raise ở đây biến cache hỏng thành run hỏng. Ca (c) là ca một run bị kill giữa lúc ghi blob để lại file cụt — (a) và (b) đều xanh trong ca đó"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_write_failure_survives
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; thư mục cache không ghi được (chmod 0500, hoặc đường dẫn bị chiếm bởi một file): run kết thúc THÀNH CÔNG, plugin được gọi, và KHÔNG ngoại lệ nào lọt ra ngoài run_workflow. Khẳng định cả ba, không chỉ 'không raise'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_deleted_dir_same_result
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; sau khi cache đã có entry, xoá cả thư mục node-cache/ rồi chạy lại: kết quả KHÔNG ĐỔI và số lời gọi invoker trở lại bằng lần chạy đầu. Đây là tiêu chí chứng minh cache không lặng lẽ thành nguồn sự thật"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_slot_not_allowlisted
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; slot NGOÀI allowlist tầng A, chạy hai lần: CẢ HAI CHIỀU được kiểm — không entry nào được ghi cho slot đó, và không lần nào đọc entry cho nó; invoker được gọi đủ ở cả hai lần. Chỉ kiểm chiều đọc không thoả eval này"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_tenant_missing
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; tenant là chuỗi rỗng VÀ tenant thiếu hẳn — hai ca kiểm riêng — chạy hai lần mỗi ca: không đọc, không ghi entry nào; invoker được gọi đủ ở cả hai lần. Cả hai chiều, theo quy tắc chung thứ hai của hợp đồng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_tenant_isolation
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; cùng workflow, cùng input, DÙNG CHUNG MỘT data_dir, chạy tenant='user:a' rồi tenant='user:b': lần hai invoker VẪN được gọi (không phục vụ chéo) và hai entry riêng tồn tại trên đĩa. Dùng chung data_dir là điều kiện BẮT BUỘC của ca kiểm — tách data_dir thì đường dẫn đã cô lập và eval xanh mà không chứng minh tenant nằm trong khoá"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_dirty_plugin
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; HAI ca kiểm RIÊNG — (a) thư mục plugin là git checkout THẬT (fixture git init) CÓ thay đổi chưa commit; (b) thư mục plugin KHÔNG phải checkout gì cả (không có .git). Mỗi ca chạy hai lần: không đọc, không ghi entry nào cho plugin đó; invoker được gọi đủ ở cả hai lần. Ca (a) BẮT BUỘC git init thật, vì thư mục không .git cho plugin_rev None nên eval sẽ xanh vì lý do sai. Ca (b) chặn một implementation thay None bằng placeholder (\"\" / \"unknown\") để có cái mà cache — lúc đó hai phiên bản plugin khác nhau dùng chung khoá"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_batch_partial_hit
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; node chia lô 5 item mà 3 item đã có entry: invoker được gọi ĐÚNG 2 lần, và output đủ 5 item theo ĐÚNG thứ tự batch. Khẳng định thứ tự là bắt buộc — gộp kết quả sai thứ tự là hỏng dữ liệu, không phải chậm. Eval này cũng là thứ chứng minh điểm móc thật sự per-call chứ không per-node"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_blob_dedupe
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; hai entry KHÁC NHAU cùng tham chiếu một asset giống bytes: trên đĩa chỉ có MỘT file blob cho asset đó, đếm bằng cách liệt kê node-cache/blobs/. Nếu blob nằm trong từng entry thay vì ở gốc node-cache/ thì eval này đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_abi_digest_in_key
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; entry đã ghi, rồi đổi MỘT byte trong file ABI đang dùng và chạy lại với mọi thứ khác giữ nguyên: MISS — invoker được gọi lại. Eval phải đổi ABI thật (file mà resolve_abi_path trả về), không phải monkeypatch một digest đã tính sẵn — một test patch giá trị digest chứng minh digest được dùng, không chứng minh ABI là nguồn của digest"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-14
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_l2_engine_rejects_empty_tenant
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/__main__.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; nửa PHÍA ENGINE của AC-14: engine nhận options.tenant là chuỗi rỗng, và riêng ca vắng hẳn field, đều coi là không cacheable — kiểm qua đúng đường bridge NDJSON của __main__.py chứ không gọi run_workflow trực tiếp, vì bridge là chỗ options được đọc và là nơi một field vắng biến thành mặc định"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-14
+    executor: test
+    cmd: config:executors.test.unit_l2_tenant_sentinel
+    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-delegate.test.ts", "src/lib/runtime/scope.server.ts"]
+    expected: "exit 0; nửa PHÍA TS của AC-14: getScope() trả '' → options.tenant === 'local'; getScope() trả '<id>' → options.tenant === 'user:<id>'; và options.tenant KHÔNG BAO GIỜ là chuỗi rỗng ở bất kỳ nhánh nào. Ba khẳng định riêng — chỉ kiểm nhánh có-id thì nhánh rỗng (bản OSS, đường chạy phổ biến nhất) không được đo"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-15
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l2_input_change_partial_rerun
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; workflow >=3 node allowlist đã trúng toàn bộ, đổi ĐÚNG MỘT trường nghiệp vụ (param, không phải asset) của một node rồi chạy lại cùng data_dir/tenant/ABI: invoker gọi đúng 1 lần cho node đó + 1 lần cho mỗi node hạ nguồn, các node khác 0 lần, và output node đã đổi KHÁC output đã cache. NỬA THỨ HAI phải đo riêng: hai lời gọi trong CÙNG một batch chỉ khác một param nghiệp vụ → hai khoá khác nhau. Một test gieo sẵn entry thay vì dẫn xuất chúng từ input khác nhau KHÔNG thoả eval này — gieo sẵn không phát hiện được việc khoá theo mức node"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17
+    criterion: AC-16
+    executor: test
+    cmd: config:executors.test.unit_l2_data_dir_stable
+    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-delegate.test.ts", "src/lib/runtime/scope.server.ts", "src/lib/runtime/paths.server.ts"]
+    expected: "exit 0; nửa PHÍA TS của AC-16: dựng request bridge cho hai task run liên tiếp trong cùng một scope → options.data_dir byte-identical giữa hai lần, và giá trị đó dẫn xuất từ scopedDataDirFor() chứ không phải đường dẫn theo task id hay thư mục tạm. Khẳng định cả hai vế: chỉ so 'bằng nhau' mà không kiểm nguồn dẫn xuất thì một implementation hardcode một temp dir cố định vẫn xanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-16
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_l2_bridge_same_data_dir_hits
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/__main__.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; nửa BACKEND-EFFECT của AC-16: gọi bridge NDJSON của __main__.py HAI LẦN với options y hệt (cùng data_dir, cùng tenant) → lần hai gọi plugin 0 lần. Chứng minh data_dir bền THẬT SỰ dẫn tới trúng cache qua đúng đường host dùng, chứ không chỉ chứng minh TS dựng ra một chuỗi giống nhau"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
