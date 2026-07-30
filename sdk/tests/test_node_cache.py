@@ -557,3 +557,67 @@ def test_changing_one_node_input_reruns_only_it_and_downstream(tmp_path):
     assert len(n3_calls) == 0
     assert len(c3) == 2
     assert r3["outputs"]["n1"] != r1["outputs"]["n1"]
+
+
+def _bridge(request: dict) -> dict:
+    """Drive __main__.main() over stdin/stdout the way a host does."""
+    import io
+    import sys as _sys
+    from tongflow.engine import __main__ as bridge
+    old_in, old_out = _sys.stdin, _sys.stdout
+    _sys.stdin = io.StringIO(json.dumps(request))
+    _sys.stdout = io.StringIO()
+    try:
+        bridge.main()
+        lines = [l for l in _sys.stdout.getvalue().splitlines() if l.strip()]
+    finally:
+        _sys.stdin, _sys.stdout = old_in, old_out
+    return json.loads(lines[-1])
+
+
+def test_engine_rejects_empty_tenant(tmp_path):
+    # AC-14, engine half, through the real bridge — options is where a missing
+    # field turns into a default, so testing run_workflow directly would miss it.
+    wf = _two_node_workflow("hello")
+    plugins_dir = tmp_path / "plugins"
+    (plugins_dir / "oneflow-text").mkdir(parents=True)
+    manifest = {"plugins": {"oneflow-text": {
+        "localSubdir": "oneflow-text", "pluginRev": "a" * 40}}}
+    root = tmp_path / "data" / ".tongflow" / "node-cache"
+
+    for opts in ({"tenant": ""}, {}):                   # empty AND absent
+        req = {"workflow": wf, "inputs": {}, "options": {
+            "plugins_dir": str(plugins_dir), "data_dir": str(tmp_path / "data"),
+            "auto_install": False, **opts}}
+        with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+            with patch.object(runner_mod, "invoke_plugin",
+                              lambda **kw: {"success": True, "text": "out"}):
+                _bridge(req)
+                _bridge(req)
+    assert not (root.exists() and list(root.rglob("result.json")))
+
+
+def test_bridge_reuses_cache_across_two_invocations(tmp_path):
+    # AC-16, backend-effect half: a stable data_dir must actually produce a hit
+    # through the path the host uses, not merely be an equal string in TS.
+    wf = _two_node_workflow("hello")
+    plugins_dir = tmp_path / "plugins"
+    (plugins_dir / "oneflow-text").mkdir(parents=True)
+    manifest = {"plugins": {"oneflow-text": {
+        "localSubdir": "oneflow-text", "pluginRev": "a" * 40}}}
+    calls: list[str] = []
+
+    def fake_invoke(**kw):
+        calls.append(kw["node_slot"])
+        return {"success": True, "text": "out"}
+
+    req = {"workflow": wf, "inputs": {}, "options": {
+        "plugins_dir": str(plugins_dir), "data_dir": str(tmp_path / "data"),
+        "tenant": "local", "auto_install": False}}
+    with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+        with patch.object(runner_mod, "invoke_plugin", fake_invoke):
+            _bridge(req)
+            first = len(calls)
+            _bridge(req)
+    assert first == 2
+    assert len(calls) == first                          # second run: zero calls
