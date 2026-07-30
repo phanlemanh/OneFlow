@@ -87,6 +87,30 @@ Engine coi chuỗi rỗng / thiếu field là **không cacheable**. Cloud quên 
 (tốn GPU-giây, không sai kết quả) thay vì đồn chung một cache. Đây là code không ai nhìn thấy
 cho tới khi hỏng, nên nó cần eval riêng.
 
+### Cũng vào khoá: digest của ABI
+
+Quét chân ngành (`morphological-scan`, preset test-matrix) bắt được một ô mà **bản đầu của
+tài liệu này đã sót**, và nó cùng họ với bug kinh điển nhất của `[NGÀNH: ccache]` — *không băm
+binary compiler, không băm `__DATE__`, không băm include-path*: **khoá thiếu một input thật.**
+
+`config/tongflow.abi.json` là input của phép tính mà khoá không chứa. Cả
+`materialize_asset_inputs` và `convert_asset_outputs_to_file_refs` đều đọc ABI, nên đổi schema
+của một slot làm **cùng input cho ra kết quả khác** — mà khoá không đổi. `sdkMajor` không phủ
+được: ABI là file riêng có `version` riêng, và trong repo nó đổi **không** kéo theo bump minor
+của SDK (mỗi feature cross-layer đều chạm nó theo CLAUDE.md). Thêm nữa `abi_path` là **option**
+nên host truyền được một ABI khác hẳn.
+
+Quyết định 30/07: **băm cả file**, `sha256(abi_file.read_bytes())`, tính một lần mỗi run
+(`abi_file` có sẵn ở `runner.py:229`). Không băm riêng schema của slot đang gọi — `$defs` dùng
+chung nghĩa là phải resolve `$ref` mới thấy hết ảnh hưởng, và một phép băm-hẹp-sai còn tệ hơn
+băm-rộng-đúng.
+
+**Cái giá, ghi rõ vì nó là chi phí vận hành thật:** mỗi lần sửa ABI là **toàn bộ cache mất
+hiệu lực**. Ở giai đoạn này ABI đổi khá thường, nên trong lúc phát triển tỷ lệ trúng sẽ thấp.
+Đây là hành vi *đúng* — spec đã nhận cùng đánh đổi cho `sdkMajor` ở R6 — nhưng đừng ngạc nhiên
+khi thấy cache "không hoạt động" ngay sau một PR chạm ABI. Không dùng field `version` của ABI
+thay cho digest: một version không được bump ở mọi lần sửa chính là bug đang muốn đóng.
+
 ### Cái giá đã nhận
 
 Sửa `fingerprint.py` = sửa file mà `cache-l1-fingerprint` **sở hữu** → theo luật per-file
@@ -159,7 +183,7 @@ module mới, cùng lý do.
 | Mục | Đang viết | Phải thành |
 |---|---|---|
 | **D5** | "Một lần trúng cache phải khôi phục **ba** thứ" — giả định bỏ qua cả node | Ghi rõ L2 cache **per-call**, nên ba thứ đó được tính lại từ `results` như thường; cái bẫy chỉ áp cho thiết kế per-node, và đó không phải thiết kế đã chọn |
-| **D2** | `"v": 1` | `"v": 2` — tenant vào khoá từ L2; kèm một dòng vì sao (§3 tài liệu này) |
+| **D2** | `"v": 1`; khoá gồm 7 thành phần | `"v": 2`; thêm **`tenant`** và **`abiDigest`** — kèm lý do (§3 tài liệu này). Ghi rõ ABI là input của phép tính, không phải cấu hình ngoài lề |
 | **D6** | "blob … ở `.../blobs/<sha256>`" (mơ hồ chỗ đặt) | Blob ở **gốc** `node-cache/`, không trong từng entry — nếu không thì không dùng chung được |
 | **D3** | Tầng A gồm `transcribe`, `parse-document` | Ghi chú: L2 hoãn ba slot đó tới sau 1.1-L1b, kèm lý do; danh sách mở dần bằng hằng số |
 
