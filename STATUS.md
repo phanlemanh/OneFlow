@@ -27,7 +27,7 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Không còn feature nào dở.** `cache-l1-fingerprint` (lát L1 của 1.1) ký 30/07, `pre-merge-check` sạch cả 10 feature trên nhánh. **Việc lớn kế tiếp là lát L2** — store cache trên đĩa + blob dedupe + khôi phục 3 thứ của D5, chỉ tầng A.
+**Không còn feature nào dở trên `main`.** `cache-l1-fingerprint` (lát L1 của 1.1) ký 30/07, `pre-merge-check` sạch cả 10 feature trên nhánh. **Lát L2 đang bay** trên nhánh `feat/cache-l2-store` — store cache trên đĩa + blob dedupe + khôi phục 3 thứ của D5, chỉ tầng A; L2 bump `KEY_SCHEMA_VERSION` 1 → 2 và sửa `fingerprint.py`, nên `cache-l1-fingerprint` **sẽ phải verify lại và ký lại** cùng PR này (xem Known limits của contract đó).
 
 `conformance-l0` (1.L0) đã merge 29/07 qua [PR #25](https://github.com/phanlemanh/OneFlow/pull/25). Q1–Q3 của spec cache **đã chốt 29/07** — xem [design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md) và PR #30.
 
@@ -132,7 +132,7 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | 0.4b | Chốt Q1–Q3 của spec cache | ✅ **xong** — chốt 29/07, PR #30 ([design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md)). Tầng A khoá theo tenant; `reuse_scope` thiếu → tắt cache; LRU là cơ chế thu hồi duy nhất |
 | **1.1-L1** | `digest_form()` + `node_fingerprint()` + test vector ghim lược đồ khoá | ✅ **ký 30/07** — 16 tiêu chí, 2 vòng verify (vòng 1 REJECT, vòng 2 PASS) |
 | **1.1-L1b** | **`mime`/`filename` của asset vào digest khoá cache** | 🔴 **contract riêng, quyết ở Cổng 2 của L1**. Cùng bytes + metadata khác → **cùng một khoá** (`denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên ở L2 plugin chọn decoder theo `input.mime` bị phục vụ entry của loại kia. Sửa nằm trong `callog.py` — **của `conformance-l0`** — nên feature đó phải verify lại + ký lại. AC-4/AC-5 chỉ phủ trục `file_key` vs bytes |
-| **1.1-L2** | Store cache trên đĩa + blob dedupe + khôi phục 3 thứ (D5), chỉ tầng A | ⏭ **việc lớn kế tiếp sau L1**. Mang theo 2 known limit của L1: `sdk_major()` lỏng, và `mime`/`filename` không vào digest |
+| **1.1-L2** | Store cache trên đĩa + blob dedupe + khôi phục 3 thứ (D5), chỉ tầng A | ◐ đang bay — nhánh feat/cache-l2-store, ký Cổng 1 30/07 |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
