@@ -370,3 +370,124 @@ def test_abi_change_invalidates_the_key(tmp_path):
     assert len(run_with_abi(copy)) == 0                 # warm
     copy.write_text(copy.read_text(encoding="utf-8") + "\n", encoding="utf-8")
     assert len(run_with_abi(copy)) == 2                 # ABI changed -> miss
+
+
+def test_hit_reputs_blobs_into_current_run_store(tmp_path):
+    # AC-2, the correctness crux of D6. Asserting "it hit" is not enough: a
+    # cache returning a dead mem:// handle from an earlier process also "hits".
+    #
+    # This does NOT reuse `_two_node_workflow`: its n2 (split-text) consumes a
+    # "texts" field, so routing n1's "image" output at it (field-name
+    # mismatch) would leave n2's input empty on both runs and prove nothing.
+    # A real asset-consuming downstream (image-describe, deliberately NOT tier
+    # A so it is never itself served from cache) is what actually forces
+    # something to read n1's cached asset back out.
+    wf = {
+        "executableNodes": [
+            {"id": "n1", "feature": "get-first-frame", "pluginId": "oneflow-text",
+             "bindings": {},
+             "outputs": [{"sourceField": "image", "nodeType": "imageNode",
+                          "dataField": "fileKeys", "itemValuePath": "file_key",
+                          "downstreamDataNodeId": "d1"}],
+             "level": 0, "dependencies": []},
+            {"id": "n2", "feature": "image-describe", "pluginId": "oneflow-text",
+             "bindings": {"image": {"kind": "handle", "consumerShape": "scalar",
+                                     "sources": [{"fromNodeId": "d1",
+                                                  "fromField": "fileKeys"}]}},
+             "outputs": [], "level": 1, "dependencies": ["n1"]},
+        ],
+        "dataNodes": [{"id": "d1", "nodeType": "imageNode"}],
+        "executionLevels": [["n1"], ["n2"]],
+        "inputs": [],
+    }
+
+    calls: list[dict] = []
+
+    def inv(plugin_id, slot, business_input, plugin_dir, model):
+        if slot == "get-first-frame":
+            # No `file_key` here: `_normalize_file_ref` treats a present
+            # `file_key` as already-resolved and returns it as-is, ignoring
+            # `bytesBase64` entirely -- so raw bytes are the only way to force
+            # a real `store.put()` and get a live asset ref out of n1.
+            return {"success": True, "image": {"bytesBase64":
+                    base64.b64encode(b"frame-bytes").decode("ascii")}}
+        calls.append(business_input)
+        return {"success": True, "text": "described"}
+
+    plugins_dir = tmp_path / "plugins"
+    (plugins_dir / "oneflow-text").mkdir(parents=True, exist_ok=True)
+    manifest = {"plugins": {"oneflow-text": {
+        "localSubdir": "oneflow-text", "pluginRev": "a" * 40}}}
+
+    def once():
+        with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+            return run_workflow(wf, {}, plugins_dir=plugins_dir,
+                                data_dir=tmp_path / "data", tenant="local",
+                                invoker=inv, auto_install=False)
+
+    r1 = once()
+    r2 = once()
+    assert r1["status"] == "success" and r2["status"] == "success"
+    # n2 (image-describe) is outside TIER_A_SLOTS, so it is invoked fresh on
+    # both runs regardless of n1's cache state -- the point is WHAT it got.
+    assert len(calls) == 2
+    # On the cached run (r2), the downstream node must have received real,
+    # resolvable image bytes -- not an empty/dead handle left by n1's HIT.
+    for business_input in calls:
+        assert base64.b64decode(business_input["image"]["bytesBase64"]) == b"frame-bytes"
+    # n1's own output must be the same content on both runs, resolved through
+    # each run's own store.
+    out1 = r1["outputs"]["n1"]["image"]
+    out2 = r2["outputs"]["n1"]["image"]
+    assert base64.b64decode(out1["bytesBase64"]) == b"frame-bytes"
+    assert base64.b64decode(out2["bytesBase64"]) == b"frame-bytes"
+
+
+def _batch_workflow(items: list[str]) -> dict:
+    """One tier-A batched node, no downstream consumer.
+
+    Mirrors the shape `test_engine_batch.py` uses for a batched node --
+    `batchField` set on the executable node plus a list-valued binding for
+    that same field -- but keeps it to a single node. Reusing
+    `_two_node_workflow` and renaming its n1 to the same slot as n2 would
+    make n2 ALSO call split-text once per run, double counting invoker calls
+    against the same `slot` filter and making the assertion below meaningless.
+    """
+    return {
+        "executableNodes": [
+            {"id": "n1", "feature": "split-text", "pluginId": "oneflow-text",
+             "batchField": "text",
+             "bindings": {"text": {"kind": "static", "value": items}},
+             "outputs": [], "level": 0, "dependencies": []},
+        ],
+        "dataNodes": [],
+        "executionLevels": [["n1"]],
+        "inputs": [],
+    }
+
+
+def test_batch_partial_hit_calls_only_the_misses(tmp_path):
+    # AC-11. This is what a per-node cache cannot do, so it is also the test
+    # that proves the hook really is per-call.
+    _, c1 = _run(_batch_workflow(["a", "b", "c"]), tmp_path)
+    assert len([x for x in c1 if x["slot"] == "split-text"]) == 3
+    _, c2 = _run(_batch_workflow(["a", "b", "c", "d", "e"]), tmp_path)
+    # a/b/c are cached; only d/e run.
+    assert len([x for x in c2 if x["slot"] == "split-text"]) == 2
+
+
+def test_changing_one_node_input_reruns_only_it_and_downstream(tmp_path):
+    # AC-15 — the criterion the parent spec is NAMED after, and the one the
+    # clean-context critique found missing. An implementation keying on
+    # node-level params instead of the per-call materialized input passes
+    # AC-1/AC-6/AC-11/AC-13 while serving stale output on every edit.
+    wf1 = _two_node_workflow("first")
+    _, c1 = _run(wf1, tmp_path)
+    assert len(c1) == 2
+    _, c2 = _run(wf1, tmp_path)
+    assert len(c2) == 0
+    wf2 = _two_node_workflow("second")                  # one business field changed
+    r3, c3 = _run(wf2, tmp_path)
+    # n1 changed -> n1 reruns; n2 is downstream of it -> n2 reruns too.
+    assert len(c3) == 2
+    assert r3["outputs"]["n1"] != _run(wf1, tmp_path)[0]["outputs"]["n1"]
