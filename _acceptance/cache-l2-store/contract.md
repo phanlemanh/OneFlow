@@ -8,7 +8,7 @@ surfaces: [sdk, api]
 status: verified
 approved_by: Manh
 approved_at: 2026-07-30
-time_human_minutes: {gate1: 25, gate2: 0}
+time_human_minutes: {gate1: 25, gate2: 20}
 ---
 
 # Acceptance Contract: cache-l2-store
