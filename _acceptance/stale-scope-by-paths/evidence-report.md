@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5037c8df9fc077fcefafc277b0cc92170fad07ed
+verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
 human_signoff: Manh 2026-07-29
 ---
 
@@ -215,3 +215,33 @@ Round 4 (this round): feature_scope()'s completeness check now walks the evals l
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+
+---
+
+Carry-forward re-pin (2026-07-30, branch feat/cache-l3-tier-b):
+`verified_commit` moved from 5037c8df9fc077fcefafc277b0cc92170fad07ed to
+77fb83f9cc25c9d65e0021563203aafd899928e0 with NO re-verify, under the carry-forward rule in AGENTS.md.
+Both conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. The branch's gated diff is exactly the
+11 files of **cache-l3-tier-b**:
+sdk/tests/fixtures/fingerprint_vectors.json · sdk/tests/test_fingerprint.py ·
+sdk/tests/test_fingerprint_vectors.py · sdk/tests/test_node_cache.py ·
+sdk/tongflow/engine/__main__.py · sdk/tongflow/engine/fingerprint.py ·
+sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py ·
+src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts ·
+src/lib/task/runner.ts
+Ownership was computed, not eyeballed: each merged feature's owned set was taken
+from the gated diff of the merge commit that landed it, then intersected with
+this branch's gated diff. This feature's intersection is empty. Four features
+have non-empty intersections — cache-l1-fingerprint, cache-l2-store,
+conformance-l0 (sdk/tongflow/engine/runner.py + src/lib/task/engine-delegate.server.ts),
+and task-metering (src/lib/task/runner.ts) — all four are on the re-verify path
+with fresh rerun evidence and fresh signatures, the half of the rule this note
+does not license.
+
+(2) Standing checks green on the new tree (S4 round 1 of cache-l3-tier-b, run-log `_acceptance/cache-l3-tier-b/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (350 passed), full sdk pytest (170 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.

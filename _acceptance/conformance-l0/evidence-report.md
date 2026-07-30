@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2
+verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
 human_signoff: Manh 2026-07-30
 ---
 
@@ -266,3 +266,9 @@ L2 known limit).
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+
+---
+
+Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code changed on this branch, so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to 77fb83f9cc25c9d65e0021563203aafd899928e0. A FRESH human signature is required at cache-l3-tier-b's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): eval E14 of cache-l3-tier-b — the full conformance-l0 eval set (pytest batch/conformance/plugin-rev, 3 vitest files, discriminating-suite guard, rev-joined-path guard), one exit code, run_id minted-cache-l3-tier-b-E14-r1, exit 0. Run-log: `_acceptance/cache-l3-tier-b/run-log.jsonl`.
