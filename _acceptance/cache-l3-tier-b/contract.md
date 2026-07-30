@@ -5,7 +5,7 @@ slug: cache-l3-tier-b
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, api]
-status: approved
+status: implemented
 approved_by: Manh
 approved_at: 2026-07-30
 time_human_minutes: {gate1: 10, gate2: 0}
