@@ -210,8 +210,7 @@ Seam đã có sẵn: `invoker` là keyword param công khai của `run_workflow`
 - Batch 5 item, 3 đã cache → đúng 2 lời gọi.
 
 **Ràng buộc fixture, phát hiện lúc thiết kế:** fixture plugin hiện tại là thư mục tay **không
-có `.git`**, nên `read_plugin_rev` trả `None` và theo luật L1 là *không cacheable* — test sẽ
-không bao giờ trúng cache. Fixture của `test_engine_batch.py` patch thẳng `scan_manifest`, nên nó
+có `.git`**. Fixture của `test_engine_batch.py` patch thẳng `scan_manifest`, nên nó
 tự cấp `cfg` kèm `pluginRev` và `read_plugin_rev` không bao giờ chạy — **chỉ ca (a) của AC-10**
 (dò dirty) cần một git checkout thật, vì `plugin_is_dirty` đọc working tree thật. Mười lăm tiêu
 chí còn lại dùng manifest patch là đủ. Câu trong bản đầu của tài liệu này ("mọi fixture buộc phải

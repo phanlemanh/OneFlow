@@ -38,16 +38,35 @@ describe("engine delegate options", () => {
         // Empty scope is the single-tenant OSS build; it must become "local",
         // never the empty string — an empty tenant is what the engine treats as
         // "not declared", and a misconfigured cloud looks identical to it.
-        const { tenantFor } = await import("./engine-delegate.server");
+        const { tenantFor, engineOptionsFor } = await import(
+            "./engine-delegate.server"
+        );
         expect(tenantFor("")).toBe("local");
         expect(tenantFor("abc")).toBe("user:abc");
         for (const scope of ["", "abc"]) {
             expect(tenantFor(scope)).not.toBe("");
         }
+
+        // Hold the WIRING itself, not just the helper: assert the actual
+        // `options` object the engine request carries, so a reviewer deleting
+        // `tenant: tenantFor(scope)` from the request reddens this test.
+        const extras = {
+            pluginsDir: "/plugins",
+            assetOptions: {},
+            autoInstall: true,
+            taskId: "task-1",
+        };
+        expect(engineOptionsFor("", extras).tenant).toBe("local");
+        expect(engineOptionsFor("abc", extras).tenant).toBe("user:abc");
+        for (const scope of ["", "abc"]) {
+            expect(engineOptionsFor(scope, extras).tenant).not.toBe("");
+        }
     });
 
     it("data_dir is stable across two consecutive runs for one scope", async () => {
-        const { dataRootFor } = await import("./engine-delegate.server");
+        const { dataRootFor, engineOptionsFor } = await import(
+            "./engine-delegate.server"
+        );
         const a = dataRootFor("abc");
         const b = dataRootFor("abc");
         expect(a).toBe(b);
@@ -55,5 +74,18 @@ describe("engine delegate options", () => {
         // path: a hardcoded constant would satisfy equality alone.
         const { scopedDataDirFor } = await import("@/lib/runtime/scope.server");
         expect(a).toBe(scopedDataDirFor("abc"));
+
+        // Same for the wired `options.data_dir`: hardcoding it (e.g. "/tmp/nope")
+        // inside the request must fail this assertion, not just the pure helper.
+        const extras = {
+            pluginsDir: "/plugins",
+            assetOptions: {},
+            autoInstall: true,
+            taskId: "task-1",
+        };
+        const optsA = engineOptionsFor("abc", extras);
+        const optsB = engineOptionsFor("abc", extras);
+        expect(optsA.data_dir).toBe(scopedDataDirFor("abc"));
+        expect(optsA.data_dir).toBe(optsB.data_dir);
     });
 });

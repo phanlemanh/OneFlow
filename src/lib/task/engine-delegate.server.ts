@@ -60,6 +60,38 @@ export function dataRootFor(scope: string): string {
     return scopedDataDirFor(scope);
 }
 
+/** Non-scope-derived fields the engine request's `options` block carries. */
+export interface EngineOptionsExtras {
+    pluginsDir: string;
+    assetOptions: Record<string, unknown>;
+    autoInstall: boolean;
+    taskId: string;
+}
+
+/**
+ * The engine request's `options` block, pure so tests can hold the WIRING —
+ * not merely the helpers — to the contract: a reviewer deleted the `tenant`
+ * line and hardcoded `data_dir` and both acceptance evals stayed green until
+ * this seam existed. `tenant` and `data_dir` are the only fields derived from
+ * `scope` here; everything else passes through `extra` untouched, so this is
+ * the single place tenant/data_dir enter the options.
+ */
+export function engineOptionsFor(
+    scope: string,
+    extra: EngineOptionsExtras,
+): Record<string, unknown> {
+    return {
+        // abi_path omitted on purpose: the engine falls back to the ABI
+        // bundled in the SDK, which always exists in the resources dir.
+        plugins_dir: extra.pluginsDir,
+        data_dir: dataRootFor(scope),
+        tenant: tenantFor(scope),
+        ...extra.assetOptions,
+        auto_install: extra.autoInstall,
+        task_id: extra.taskId,
+    };
+}
+
 function asRecord(v: unknown): Record<string, unknown> | null {
     return v && typeof v === "object" && !Array.isArray(v)
         ? (v as Record<string, unknown>)
@@ -184,16 +216,12 @@ export async function executeWorkflowViaEngine(
         const request = {
             workflow: JSON.parse(workflowJson),
             inputs,
-            options: {
-                // abi_path omitted on purpose: the engine falls back to the ABI
-                // bundled in the SDK, which always exists in the resources dir.
-                plugins_dir: pluginsDir(),
-                data_dir: dataRoot,
-                tenant: tenantFor(scope),
-                ...assetOptions,
-                auto_install: true,
-                task_id: taskId,
-            },
+            options: engineOptionsFor(scope, {
+                pluginsDir: pluginsDir(),
+                assetOptions,
+                autoInstall: true,
+                taskId,
+            }),
         };
 
         // In a scoped (cloud) run, point the Modal deploy cache into the
