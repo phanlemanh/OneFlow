@@ -88,4 +88,33 @@ describe("engine delegate options", () => {
         expect(optsA.data_dir).toBe(scopedDataDirFor("abc"));
         expect(optsA.data_dir).toBe(optsB.data_dir);
     });
+
+    it("emits options.workflow_id as a numeric string, or null — never an empty string", async () => {
+        // AC-9 (cross-layer): runner.ts threads task.workflowId through
+        // engineOptionsFor into options.workflow_id. Assert on the actual
+        // built OBJECT (not a standalone helper) so deleting the
+        // `workflow_id` line from the builder reddens this test.
+        const { engineOptionsFor } = await import("./engine-delegate.server");
+        const baseExtras = {
+            pluginsDir: "/plugins",
+            assetOptions: {},
+            autoInstall: true,
+            taskId: "task-1",
+        };
+
+        const withId = engineOptionsFor("", { ...baseExtras, workflowId: 41 });
+        expect(withId.workflow_id).toBe("41");
+        expect(withId.workflow_id).not.toBe("");
+
+        const withNull = engineOptionsFor("", {
+            ...baseExtras,
+            workflowId: null,
+        });
+        expect(withNull.workflow_id).toBeNull();
+        expect(withNull.workflow_id).not.toBe("");
+
+        const withAbsent = engineOptionsFor("", baseExtras);
+        expect(withAbsent.workflow_id).toBeNull();
+        expect(withAbsent.workflow_id).not.toBe("");
+    });
 });

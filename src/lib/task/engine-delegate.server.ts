@@ -66,6 +66,12 @@ export interface EngineOptionsExtras {
     assetOptions: Record<string, unknown>;
     autoInstall: boolean;
     taskId: string;
+    /**
+     * The workflow this task belongs to, or null/absent for a non-workflow
+     * task. Always emitted as `workflow_id` — a numeric string, or `null`,
+     * never `""` (see AC-9, cache-l3-tier-b).
+     */
+    workflowId?: number | null;
 }
 
 /**
@@ -89,6 +95,7 @@ export function engineOptionsFor(
         ...extra.assetOptions,
         auto_install: extra.autoInstall,
         task_id: extra.taskId,
+        workflow_id: extra.workflowId != null ? String(extra.workflowId) : null,
     };
 }
 
@@ -175,6 +182,7 @@ export async function executeWorkflowViaEngine(
     taskId: string,
     workflowJson: string,
     inputs: Record<string, unknown>,
+    workflowId?: number | null,
 ): Promise<void> {
     const controller = registerTask(taskId);
     let assetToken: string | null = null;
@@ -221,6 +229,7 @@ export async function executeWorkflowViaEngine(
                 assetOptions,
                 autoInstall: true,
                 taskId,
+                workflowId,
             }),
         };
 
