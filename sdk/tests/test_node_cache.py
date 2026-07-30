@@ -895,8 +895,10 @@ def test_editing_downstream_a_keeps_tier_b_generation(tmp_path):
     # key ever swallowed a sibling node's input (a whole-workflow-scoped key
     # instead of per-call), this would go red.
     wf1 = _mixed_workflow(extra_video_bytes=b"extra-a")
-    _run_mixed(wf1, tmp_path, workflow_id="wf-1")           # cold
-    _run_mixed(wf1, tmp_path, workflow_id="wf-1")           # warm both
+    r1, c1 = _run_mixed(wf1, tmp_path, workflow_id="wf-1")           # cold
+    r2, c2 = _run_mixed(wf1, tmp_path, workflow_id="wf-1")           # warm both
+    assert r1["status"] == "success"
+    assert r2["status"] == "success"
     wf2 = _mixed_workflow(extra_video_bytes=b"extra-b")     # only n2's own input changed
     r3, c3 = _run_mixed(wf2, tmp_path, workflow_id="wf-1")
     gen_calls = [c for c in c3 if c["slot"] == "image-gen-video"]
@@ -912,16 +914,19 @@ def test_two_workflows_do_not_share_tier_b(tmp_path):
     # for the second workflow and produce a genuinely separate cache entry.
     wf = _tier_b_workflow()
     shared = tmp_path / "data"
-    _, c1 = _run(wf, tmp_path, data_dir=shared, workflow_id="wf-A")
+    r1, c1 = _run(wf, tmp_path, data_dir=shared, workflow_id="wf-A")
+    assert r1["status"] == "success"
     root = shared / ".tongflow" / "node-cache"
     entries_after_a = len(list(root.rglob("result.json"))) if root.exists() else 0
-    _, c2 = _run(wf, tmp_path, data_dir=shared, workflow_id="wf-B")
+    r2, c2 = _run(wf, tmp_path, data_dir=shared, workflow_id="wf-B")
+    assert r2["status"] == "success"
     entries_after_b = len(list(root.rglob("result.json")))
     gen_calls_1 = [c for c in c1 if c["slot"] == "image-gen-video"]
     gen_calls_2 = [c for c in c2 if c["slot"] == "image-gen-video"]
     assert len(gen_calls_1) == 1
     assert len(gen_calls_2) == 1              # invoked again, not served from wf-A
-    assert entries_after_b > entries_after_a  # a genuinely separate entry was written
+    assert entries_after_a == 1               # exactly 1 tier-B entry after workflow A
+    assert entries_after_b == 2               # exactly 2 tier-B entries after workflow B
 
 
 def test_duplicated_node_generates_fresh(tmp_path):
@@ -1018,8 +1023,10 @@ def test_two_tenants_do_not_share_tier_b(tmp_path):
     # guard the gap-probe called for.
     wf = _tier_b_workflow()
     shared = tmp_path / "data"
-    _, ca = _run(wf, tmp_path, tenant="user:a", data_dir=shared, workflow_id="wf-1")
-    _, cb = _run(wf, tmp_path, tenant="user:b", data_dir=shared, workflow_id="wf-1")
+    ra, ca = _run(wf, tmp_path, tenant="user:a", data_dir=shared, workflow_id="wf-1")
+    rb, cb = _run(wf, tmp_path, tenant="user:b", data_dir=shared, workflow_id="wf-1")
+    assert ra["status"] == "success"
+    assert rb["status"] == "success"
     gen_a = [c for c in ca if c["slot"] == "image-gen-video"]
     gen_b = [c for c in cb if c["slot"] == "image-gen-video"]
     assert len(gen_a) == 1
