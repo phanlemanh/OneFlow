@@ -34,7 +34,7 @@ from .batch import (
 from .bindings import resolve_node_params
 from .fingerprint import node_fingerprint
 from .invoker import invoke_plugin
-from .node_cache import TIER_A_SLOTS, NodeCache, abi_digest_of, plugin_is_dirty
+from .node_cache import TIER_A_SLOTS, TIER_B_SLOTS, NodeCache, abi_digest_of, plugin_is_dirty
 from .paths import resolve_data_dir, resolve_plugins_dir
 from .plugins import (
     DEFAULT_ORG,
@@ -188,6 +188,7 @@ def run_workflow(
     on_progress: Optional[EventCb] = None,
     task_id: str = "tongflow-engine",
     tenant: Optional[str] = None,
+    workflow_id: Optional[str] = None,
     invoker: Optional[InvokerCb] = None,
 ) -> dict[str, Any]:
     """Execute an exported workflow and return its results.
@@ -221,6 +222,11 @@ def run_workflow(
             an empty string or None disables the cache entirely rather than
             falling back to a shared one. The single-tenant build sends
             "local"; a cloud shell sends "user:<id>".
+        workflow_id: cache scope for tier B (nondeterministic) slots within
+            this run. A non-empty, non-whitespace string is required for tier
+            B memoization to activate (`"wf:<workflow_id>:node:<nodeId>"`);
+            absent, None, empty, or whitespace-only disables tier B caching
+            only -- tier A caching is unaffected either way.
 
     Returns:
         ``{"status", "outputs", "outputs_by_name", "errors", "failures"}``.
@@ -252,6 +258,11 @@ def run_workflow(
     # goes dirty mid-run keeps the verdict computed at its first cache lookup
     # -- acceptable for a single run.
     dirty_by_dir: dict[Path, bool] = {}
+    # Gate for tier B (nondeterministic slots, memoized per workflow): a
+    # non-empty, non-whitespace workflow_id is required, computed once here
+    # rather than per call. Absence disables tier B ONLY -- tier A's
+    # workflow_scope=None path below is untouched by this flag.
+    wf_scope_ok = bool(workflow_id and str(workflow_id).strip())
 
     # Output store: in-memory (inline, zero disk) or on-disk (file_key paths,
     # used by the desktop delegation so the canvas reads via /api/uploads).
@@ -379,7 +390,7 @@ def run_workflow(
                 plugin_dir = plugins_dir / cfg["localSubdir"]
 
                 results: list[dict[str, Any]] = []
-                for call_params in per_call_params:
+                for idx, call_params in enumerate(per_call_params):
                     business_input = materialize_asset_inputs(
                         slot, call_params, abi, search_dirs, store
                     )
@@ -396,14 +407,40 @@ def run_workflow(
                             abi_digest=abi_dig,
                             model=model,
                             business_input=business_input,
-                            # Tier A only, for now -- this call site predates
-                            # L3's workflow_scope key component. Tier A has no
-                            # workflow scope (see node_fingerprint's docstring),
-                            # so None is the correct value here, not a
-                            # placeholder. Wiring TIER_B_SLOTS and a real
-                            # per-workflow scope string is a later L3 task.
+                            # Tier A has no workflow scope at all -- its result
+                            # is reusable across every workflow that shares the
+                            # same input, which is the whole point of L1/L2.
                             workflow_scope=None,
                         )
+                    elif node_cache is not None and slot in TIER_B_SLOTS and wf_scope_ok:
+                        if plugin_dir not in dirty_by_dir:
+                            dirty_by_dir[plugin_dir] = plugin_is_dirty(plugin_dir)
+                        scope = f"wf:{workflow_id}:node:{node_id}"
+                        # A batched node fans out into N calls with, in the
+                        # duplicate-variant case, byte-identical call_params
+                        # (AC-14): collapsing them onto one key is correct for
+                        # tier A (deterministic -- same input, same output) but
+                        # wrong here -- the whole point of a nondeterministic
+                        # slot is that the user asked for N distinct variants
+                        # of the same prompt. The call's ordinal keeps each
+                        # variant's key distinct within this node's scope.
+                        if batch_field_of(node) is not None:
+                            scope = f"{scope}:call:{idx}"
+                        cache_key = node_fingerprint(
+                            slot=slot,
+                            plugin_id=plugin_id,
+                            plugin_rev=cfg.get("pluginRev"),
+                            plugin_dirty=dirty_by_dir[plugin_dir],
+                            tenant=tenant,
+                            abi_digest=abi_dig,
+                            model=model,
+                            business_input=business_input,
+                            workflow_scope=scope,
+                        )
+                    # slot in TIER_B_SLOTS without wf_scope_ok: cache_key stays
+                    # None -- tier B off for this call, tier A elsewhere in the
+                    # same run is unaffected. slot in neither tier: no cache,
+                    # unchanged.
 
                     cached = (
                         node_cache.get(cache_key, store)
