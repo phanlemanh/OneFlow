@@ -67,7 +67,7 @@ Không gian ≈ 5×5×3×4 = 300 ô → quét **pairwise** theo Pareto của pre
 **Ô đã quét, cố ý để ngoài Core:**
 - Phiên bản binary `ffmpeg` không nằm trong khoá — cùng họ AC-13, xem `## Notes`.
 - Hai run ghi song song cùng một entry — atomic write đã phủ phần nguy hiểm; không đáng một AC riêng ở L2.
-- Store `Disk` / `Http` trên đường trúng cache — cùng cơ chế `put`, phủ bằng AC-2.
+- Store `Http` trên đường trúng cache — cùng cơ chế `put`, phủ bằng AC-2. **Đính chính 30/07 (final review, prose-only):** vế `Disk` của bullet gốc là SAI — `DiskStore.get()` trả `None` by design, nên kết quả mang asset trên đường desktop-delegation (`file_key_base` tương đối) KHÔNG cache được và L2 fail-closed từ chối ghi entry. Hệ quả đo được: 9/11 slot tầng A có output asset → DoD 'workflow ffmpeg thuần 100% trúng' đạt trên MemoryStore/HttpStore, còn desktop hiện 0% cho slot asset. Dạy cache biết `file_key_base` là hàng đợi riêng (xem STATUS).
 - Plugin đọc env var không khai (API key) — `[NGÀNH: Bazel]` non-hermetic action; 11 slot tầng A đều thuần cơ khí không gọi API nên ô này rỗng ở L2, sẽ sống lại ở L3.
 
 ## Out of scope

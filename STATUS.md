@@ -131,6 +131,7 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | **1.L0b** | Gỡ 7 pin stale chặn PR #25 | ✅ **xong** — 6 carry-forward re-pin + 1 re-verify & ký lại (`oneflow-plugin-prefix`). Cách làm giữ ở mục trên vì sẽ gặp lại |
 | 0.4b | Chốt Q1–Q3 của spec cache | ✅ **xong** — chốt 29/07, PR #30 ([design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md)). Tầng A khoá theo tenant; `reuse_scope` thiếu → tắt cache; LRU là cơ chế thu hồi duy nhất |
 | **1.1-L1** | `digest_form()` + `node_fingerprint()` + test vector ghim lược đồ khoá | ✅ **ký 30/07** — 16 tiêu chí, 2 vòng verify (vòng 1 REJECT, vòng 2 PASS) |
+| **1.1-L2b** | **Dạy cache `file_key_base`** để desktop-delegation (DiskStore, file_key tương đối) cache được kết quả mang asset | 🔴 hàng đợi mới từ final review L2: hiện fail-closed → desktop 0% hit cho 9/11 slot tầng A; DoD chỉ đạt trên MemoryStore/HttpStore |
 | **1.1-L1b** | **`mime`/`filename` của asset vào digest khoá cache** | 🔴 **contract riêng, quyết ở Cổng 2 của L1**. Cùng bytes + metadata khác → **cùng một khoá** (`denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên ở L2 plugin chọn decoder theo `input.mime` bị phục vụ entry của loại kia. Sửa nằm trong `callog.py` — **của `conformance-l0`** — nên feature đó phải verify lại + ký lại. AC-4/AC-5 chỉ phủ trục `file_key` vs bytes |
 | **1.1-L2** | Store cache trên đĩa + blob dedupe + khôi phục 3 thứ (D5), chỉ tầng A | ◐ đang bay — nhánh feat/cache-l2-store, ký Cổng 1 30/07 |
 
