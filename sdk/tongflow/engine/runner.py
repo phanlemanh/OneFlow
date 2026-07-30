@@ -396,6 +396,13 @@ def run_workflow(
                             abi_digest=abi_dig,
                             model=model,
                             business_input=business_input,
+                            # Tier A only, for now -- this call site predates
+                            # L3's workflow_scope key component. Tier A has no
+                            # workflow scope (see node_fingerprint's docstring),
+                            # so None is the correct value here, not a
+                            # placeholder. Wiring TIER_B_SLOTS and a real
+                            # per-workflow scope string is a later L3 task.
+                            workflow_scope=None,
                         )
 
                     cached = (

@@ -25,7 +25,11 @@ from .callog import normalize_call
 # 1 -> 2 (L2, 2026-07-30): `tenant` and `abiDigest` joined the payload. Bumped
 # while no entry had ever been written, which is why it cost nothing; doing it
 # after L2 ships would mean invalidating a cache that is running for real.
-KEY_SCHEMA_VERSION = 2
+#
+# 2 -> 3 (L3, 2026-07-30): `workflowScope` joined the payload. Bumped while
+# entries exist only on dev machines, so -- like the 1 -> 2 bump -- this
+# invalidation costs nothing real yet either.
+KEY_SCHEMA_VERSION = 3
 
 
 def digest_form(slot: str, business_input: dict[str, Any]) -> dict[str, Any]:
@@ -79,6 +83,7 @@ def node_fingerprint(
     abi_digest: str,
     model: str | None,
     business_input: dict[str, Any],
+    workflow_scope: str | None,
     sdk_version: str | None = None,
 ) -> str | None:
     """The cache key for one plugin call, or ``None`` when it cannot be cached.
@@ -104,6 +109,21 @@ def node_fingerprint(
     the computation -- both ``materialize_asset_inputs`` and
     ``convert_asset_outputs_to_file_refs`` read it -- so omitting it is the
     same bug class as a compiler cache that does not hash the compiler.
+
+    ``workflow_scope`` is required, but unlike ``tenant`` its ``None`` is a
+    VALUE, not a bail-to-not-cacheable signal. Tier A (deterministic slots)
+    legitimately has no workflow scope at all -- its result is reusable across
+    every workflow that shares the same input, which is the whole point of L1
+    and L2. Tier B (nondeterministic slots, memoized per workflow) passes a
+    real scope string such as ``"wf:<id>:node:<id>"``. Both cases still emit
+    the ``"workflowScope"`` key in the hashed payload unconditionally -- tier
+    A's blob contains the literal ``"workflowScope":null`` rather than
+    omitting the key -- because L1's invariant is that every key component is
+    present in every payload, with no field whose mere absence vs. presence
+    could itself collide two semantically different calls. Treating
+    ``workflow_scope=None`` like ``tenant=""`` (return ``None``, "not
+    cacheable") would make every tier-A slot un-cacheable, silently deleting
+    L1 and L2's entire benefit.
     """
     if not plugin_rev or plugin_dirty or not tenant:
         return None
@@ -117,6 +137,7 @@ def node_fingerprint(
         "model": model,
         "sdkMajor": sdk_major(sdk_version),
         "input": digest_form(slot, business_input),
+        "workflowScope": workflow_scope,
     }
     # sort_keys + fixed separators + ensure_ascii is the canonical form. All
     # three matter: any of them left to a default is a key that changes when a

@@ -1,5 +1,5 @@
 {
-    "keySchemaVersion": 2,
+    "keySchemaVersion": 3,
     "cases": [
         {
             "name": "scalar-only",
@@ -10,11 +10,12 @@
             "model": null,
             "sdkVersion": "0.2.17",
             "businessInput": {
-                "text": "xin chào"
+                "text": "xin ch\u00e0o"
             },
-            "expected": "42cd6654ef7b39c5b58827759fb8ca44ed1c2f1a5d80920eeb7f3eb2d82e2fd8",
+            "expected": "7e52dac59e444919ab8de0c1f0003d110345fdabef2d99f734a9a828f0959aac",
             "tenant": "local",
-            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "workflowScope": null
         },
         {
             "name": "with-model",
@@ -30,9 +31,10 @@
                 "width": 512,
                 "height": 512
             },
-            "expected": "3c5e799e31f1268ca89ebb383b28ce00a6d0367a954cd3fd49f4e8264f1b4086",
+            "expected": "63c308d96019d77ad144baeb88189e32469a8140ad3619ae31d8a45c6b4e887d",
             "tenant": "local",
-            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "workflowScope": "wf:1:node:n1"
         },
         {
             "name": "inline-asset",
@@ -49,9 +51,10 @@
                     "bytesBase64": "iVBORw0KGgogZmFrZSBwaXhlbHM="
                 }
             },
-            "expected": "68f110098f0efae44c9d2c01e726fbf4ead5b570d7aeba9a59786a5202e4e657",
+            "expected": "2989184c61c346761b7ca9367c5cf67260c51e45d7c08508aa40ebd1c3883467",
             "tenant": "local",
-            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "workflowScope": null
         },
         {
             "name": "nested-asset-list",
@@ -73,9 +76,10 @@
                     }
                 ]
             },
-            "expected": "ee2cd2f228d7c0e5708586e06862832016ffcf9bdbbd18b9895134540873ca49",
+            "expected": "7af96880b63c3255218c54c639b47ce0353099875fa1368c1d28dfc2befd5db1",
             "tenant": "local",
-            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "workflowScope": null
         },
         {
             "name": "unicode-and-empty-dropped",
@@ -86,12 +90,13 @@
             "model": null,
             "sdkVersion": "0.2.17",
             "businessInput": {
-                "text": "Giá: 199.000đ",
+                "text": "Gi\u00e1: 199.000\u0111",
                 "userPrompt": ""
             },
-            "expected": "aef209eff754353e87f475bc43788b4463a1b588902989e2a5e396874626f3b2",
+            "expected": "6f036d21cbca219692e832c0e2a11b666117cdee4ffb8a1df96491f2d7f0ef6d",
             "tenant": "local",
-            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+            "workflowScope": null
         }
     ]
 }
