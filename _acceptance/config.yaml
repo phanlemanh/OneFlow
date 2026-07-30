@@ -101,6 +101,10 @@ executors:
     sdk_pytest_l3_l1_l2_evals_on_new_tree: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint_vectors.py"
     # AC-9 TS half reuses the engineOptionsFor seam; -t scopes to its own test.
     unit_l3_workflow_id_sentinel: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'workflow_id'"
+    sdk_pytest_l3_tenant_in_tier_b_key: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_two_tenants_do_not_share_tier_b"
+    sdk_pytest_l3_l2_full_rerun: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py && pnpm vitest run src/lib/task/engine-delegate.test.ts"
+    l3_conformance_l0_full_rerun: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py tests/conformance tests/test_plugin_rev.py && pnpm vitest run src/lib/abi/conformance.test.ts src/lib/task/node-cached.test.ts src/lib/plugins/plugin-rev.test.ts && bash scripts/conformance/check-suite-discriminating.sh && pnpm tsx scripts/plugins/check-rev-joined-path.ts"
+    sdk_pytest_l3_batch_duplicate_variants: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_tier_b_batch_duplicates_generate_per_call"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
