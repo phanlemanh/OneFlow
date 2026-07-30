@@ -5,10 +5,10 @@ slug: cache-l2-store
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, api]
-status: draft
-approved_by:
-approved_at:
-time_human_minutes: {gate1: 0, gate2: 0}
+status: approved
+approved_by: Manh
+approved_at: 2026-07-30
+time_human_minutes: {gate1: 25, gate2: 0}
 ---
 
 # Acceptance Contract: cache-l2-store
