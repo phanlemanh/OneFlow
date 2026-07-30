@@ -54,6 +54,14 @@ def test_unusable_entry_is_treated_as_miss(tmp_path):
     blob.write_bytes(b"short")
     assert cache.get(key, MemoryStore()) is None
 
+    # Self-healing: `put()` for the same content must overwrite the truncated
+    # blob with the correct bytes -- the entry gets written back correctly --
+    # so a subsequent `get()` HITS instead of missing on this content forever.
+    cache.put(key, _asset(store, b"payload-bytes"), store)
+    blob = _blob_files(tmp_path)[0]
+    assert blob.read_bytes() == b"payload-bytes"
+    assert cache.get(key, MemoryStore()) is not None
+
 
 def test_unwritable_cache_dir_does_not_break_the_run(tmp_path):
     # AC-5. ccache's read-only-cache-dir case. The spec says the cache is not
@@ -204,7 +212,8 @@ def _two_node_workflow(text: str) -> dict:
     }
 
 
-def _run(workflow, tmp_path, *, tenant="local", data_dir=None, plugin_dir_name="oneflow-text"):
+def _run(workflow, tmp_path, *, tenant="local", data_dir=None,
+         plugin_dir_name="oneflow-text", plugin_rev="a" * 40):
     calls: list[dict] = []
 
     def recording_invoker(plugin_id, slot, business_input, plugin_dir, model):
@@ -213,10 +222,13 @@ def _run(workflow, tmp_path, *, tenant="local", data_dir=None, plugin_dir_name="
 
     plugins_dir = tmp_path / "plugins"
     (plugins_dir / plugin_dir_name).mkdir(parents=True, exist_ok=True)
-    manifest = {"plugins": {"oneflow-text": {
-        "localSubdir": plugin_dir_name,
-        "pluginRev": "a" * 40,
-    }}}
+    plugin_cfg = {"localSubdir": plugin_dir_name}
+    # `plugin_rev=None` models AC-10 case (b): a plugin dir that is not a
+    # checkout at all, so the manifest carries no `pluginRev` key -- as
+    # opposed to the default, a real recorded revision.
+    if plugin_rev is not None:
+        plugin_cfg["pluginRev"] = plugin_rev
+    manifest = {"plugins": {"oneflow-text": plugin_cfg}}
     with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
         result = run_workflow(
             workflow, {},
@@ -337,6 +349,19 @@ def test_dirty_plugin_is_not_cacheable_end_to_end(tmp_path):
     assert len(c2) == len(c1) == 2
     root = tmp_path / "data" / ".tongflow" / "node-cache"
     assert not (root.exists() and list(root.rglob("result.json")))
+
+    # AC-10 case (b): a plugin dir that is not a checkout at all -- the
+    # manifest supplies NO `pluginRev`, so there is nothing to key on
+    # regardless of the working tree's git state. A fresh sandbox (not
+    # `tmp_path` directly) so case (a)'s dirty checkout above cannot leak
+    # into this one's plugins_dir / data_dir.
+    sandbox_b = tmp_path / "case-b"
+    sandbox_b.mkdir()
+    _, c1b = _run(wf, sandbox_b, plugin_rev=None)
+    _, c2b = _run(wf, sandbox_b, plugin_rev=None)
+    assert len(c2b) == len(c1b) == 2
+    root_b = sandbox_b / "data" / ".tongflow" / "node-cache"
+    assert not (root_b.exists() and list(root_b.rglob("result.json")))
 
 
 def test_abi_change_invalidates_the_key(tmp_path):
@@ -488,8 +513,8 @@ def test_batch_partial_hit_calls_only_the_misses(tmp_path):
     # AC-11's order/completeness half: the merged output must carry all 5
     # items IN BATCH ORDER, not just the 2 that were actually invoked. A
     # runner that only appends cached results for unbatched nodes would
-    # silently drop the 3 hits here -- gộp kết quả sai thứ tự là hỏng dữ liệu
-    # chứ không phải chậm.
+    # silently drop the 3 hits here -- merging results in the wrong order is
+    # data corruption, not slowness.
     assert [x["text"] for x in r2["outputs"]["n1"]] == [
         "out:a", "out:b", "out:c", "out:d", "out:e",
     ]

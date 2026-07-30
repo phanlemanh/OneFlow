@@ -241,8 +241,16 @@ def run_workflow(
     try:
         abi_dig = abi_digest_of(abi_file)
     except OSError:
+        # Can't hash the ABI, so there is no reliable key input. Fail closed
+        # (cache off) rather than an empty digest, which would give every ABI
+        # variant the same shared key -- fail-open, the wrong direction here.
         abi_dig = ""
-    node_cache = NodeCache(data_dir) if tenant else None
+        node_cache = None
+    else:
+        node_cache = NodeCache(data_dir) if tenant else None
+    # One `git status` per plugin dir per run (memoized here); a plugin that
+    # goes dirty mid-run keeps the verdict computed at its first cache lookup
+    # -- acceptable for a single run.
     dirty_by_dir: dict[Path, bool] = {}
 
     # Output store: in-memory (inline, zero disk) or on-disk (file_key paths,

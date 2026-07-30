@@ -172,7 +172,8 @@ class NodeCache:
         fail the run (spec section 8)."""
         try:
             payload = self._dehydrate(result, store)
-            self._entry(key).parent.mkdir(parents=True, exist_ok=True)
+            # No explicit mkdir here: `_atomic_write` already creates the
+            # parent directory before writing.
             _atomic_write(
                 self._entry(key),
                 json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -214,7 +215,18 @@ class NodeCache:
                 data = self._capture_bytes(fk, store)
                 sha = hashlib.sha256(data).hexdigest()
                 blob = self._blob(sha)
-                if not blob.exists():
+                # Rewrite whenever the on-disk blob doesn't match: absent, or a
+                # size mismatch left by a process that died mid-write (the
+                # truncated-blob case `_rehydrate` detects on the read side).
+                # A `stat()` failure is treated the same as a mismatch rather
+                # than trusted as "fine" -- self-healing, not another miss
+                # forever. Matching size skips the write so AC-12's one-blob
+                # dedupe still holds.
+                try:
+                    blob_ok = blob.exists() and blob.stat().st_size == len(data)
+                except OSError:
+                    blob_ok = False
+                if not blob_ok:
                     _atomic_write(blob, data)
                 rest = {k: v for k, v in node.items() if k != "file_key"}
                 # Derive `ext` the same way assets.py does for a freshly
