@@ -10,7 +10,9 @@ from unittest.mock import patch
 from tongflow.engine import run_workflow
 from tongflow.engine import runner as runner_mod
 from tongflow.engine.node_cache import (
+    DESCOPED_GENERATIVE_SLOTS,
     TIER_A_SLOTS,
+    TIER_B_SLOTS,
     NodeCache,
     abi_digest_of,
     plugin_is_dirty,
@@ -103,6 +105,49 @@ def test_allowlist_holds_exactly_the_eleven_mechanical_slots():
         assert deferred not in TIER_A_SLOTS
 
 
+def test_tier_lists_are_disjoint_and_pinned():
+    # E6 / AC-6. Three independent guards on the same pair of constants:
+    # (1) TIER_B_SLOTS is pinned to the exact 23-slot literal from design §3 --
+    #     a silent addition or drop must go red here, not slide in unreviewed.
+    # (2) the two allowlists never overlap -- one slot in both would be two
+    #     cache semantics for one computation.
+    # (3) the five deliberately-uncached generative slots sit in NEITHER list.
+    assert TIER_B_SLOTS == frozenset({
+        "audio-video-lip-sync", "gen-music", "image-edit", "image-fusion",
+        "image-gen", "image-gen-model", "image-gen-text", "image-gen-video",
+        "image-image-gen-video", "image-upscale", "images-gen-video",
+        "music-complete", "music-cover", "music-extract", "music-lego",
+        "music-repaint", "speech-text-gen-video", "speech-video-gen-video",
+        "text-gen-video", "video-edit", "video-gen-text",
+        "video-image-gen-video-move", "video-upscale",
+    })
+    assert TIER_A_SLOTS & TIER_B_SLOTS == frozenset()
+    for descoped in DESCOPED_GENERATIVE_SLOTS:
+        assert descoped not in TIER_A_SLOTS
+        assert descoped not in TIER_B_SLOTS
+    assert DESCOPED_GENERATIVE_SLOTS == frozenset({
+        "gen-text", "image-describe", "video-describe", "audio-describe",
+        "music-brief",
+    })
+
+    # Gap-probe P1's guard: derive the knobbed-slot set from the REAL ABI at
+    # TEST time (not baked into a runtime lookup -- see node_cache.py's
+    # no-suy-lúc-chạy rule) and check it against the pinned constants, so a
+    # future ABI addition that grows a seed/temperature/top_p knob on a slot
+    # currently in neither list turns red here instead of being cached as if
+    # deterministic under TIER_A, or silently uncached under neither.
+    from tongflow.engine.abi_schema import resolve_abi_path
+    abi = json.loads(resolve_abi_path(None).read_text(encoding="utf-8"))
+    knobbed = {
+        node["nodeSlot"]
+        for node in abi["nodes"]
+        if any(k in node.get("inputs", {}).get("properties", {})
+               for k in ("seed", "temperature", "top_p"))
+    }
+    assert knobbed <= (TIER_B_SLOTS | DESCOPED_GENERATIVE_SLOTS)
+    assert knobbed & TIER_A_SLOTS == frozenset()
+
+
 def test_abi_digest_tracks_file_contents(tmp_path):
     p = tmp_path / "abi.json"
     p.write_text('{"version": 1}', encoding="utf-8")
@@ -125,6 +170,35 @@ def test_plugin_is_dirty_reads_the_real_working_tree(tmp_path):
     assert plugin_is_dirty(d) is False
     (d / "entry.py").write_text("x = 2\n", encoding="utf-8")
     assert plugin_is_dirty(d) is True
+
+
+def test_git_status_failure_reads_as_dirty(tmp_path):
+    # E8 / AC-8, unit half. A real checkout (so `.git` truly exists and the
+    # early-return branch is not what's under test), then force `git status`
+    # itself to fail -- index corruption or a permissions error, not "not a
+    # checkout". R1: a readable rev + unknowable dirtiness must NOT be treated
+    # as clean, or edited plugin code gets cached under a clean-rev key.
+    d = tmp_path / "plug"
+    d.mkdir()
+    (d / "entry.py").write_text("x = 1\n", encoding="utf-8")
+    env = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@e",
+           "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@e"}
+    subprocess.run(["git", "init", "-q"], cwd=d, check=True, env=env)
+    subprocess.run(["git", "add", "-A"], cwd=d, check=True, env=env)
+    subprocess.run(["git", "commit", "-qm", "init"], cwd=d, check=True, env=env)
+
+    class _FailedRun:
+        returncode = 1
+        stdout = ""
+
+    with patch("subprocess.run", return_value=_FailedRun()):
+        assert plugin_is_dirty(d) is True
+
+    # Unchanged: no `.git` at all still reads as clean -- that state is
+    # already uncacheable via a missing `pluginRev`, not via this function.
+    plain = tmp_path / "plain-no-git"
+    plain.mkdir()
+    assert plugin_is_dirty(plain) is False
 
 
 def test_plugin_without_git_is_not_reported_dirty(tmp_path):
