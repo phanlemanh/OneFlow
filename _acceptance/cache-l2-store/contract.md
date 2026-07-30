@@ -5,7 +5,7 @@ slug: cache-l2-store
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, api]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-07-30
 time_human_minutes: {gate1: 25, gate2: 20}

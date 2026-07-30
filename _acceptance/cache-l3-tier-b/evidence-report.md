@@ -7,7 +7,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 80f9702996007f13608e3d6031ada91a6a2f12d8
-human_signoff:
+human_signoff: Manh 2026-07-30
 ---
 
 # Evidence Report: cache-l3-tier-b
