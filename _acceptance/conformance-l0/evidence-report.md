@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: aba508a0edc61656b21d46bec6361cf4c6a0f927
+verified_commit: e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2
 human_signoff: Manh 2026-07-28
 ---
 
@@ -229,6 +229,32 @@ exited 0, alongside 16/16 feature evals.
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.
+
+Re-verify on `feat/cache-l2-store` (2026-07-30). NOT a carry-forward.
+`verified_commit` moved from aba508a0edc61656b21d46bec6361cf4c6a0f927 to
+e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2, and this needs a fresh human signature under the
+per-file ownership rule (settled 2026-07-29): the branch modifies TWO files this
+feature owns — `sdk/tongflow/engine/runner.py` (the cache read/write block wired
+into the per-call loop this feature built) and `src/lib/task/engine-delegate.server.ts`
+(tenant sentinel + engineOptionsFor seam). This cost was NOT priced at L2's
+Gate 1 — only cache-l1-fingerprint's re-signature was — and is disclosed here
+rather than smuggled into a carry-forward.
+
+All eight of this feature's evals re-run individually on the merged tree, each
+by its own config key, all exit 0: sdk_pytest_batch (16), sdk_pytest_conformance
+(5), sdk_pytest_plugin_rev (7), unit_conformance, unit_node_cached,
+unit_plugin_rev, conformance_discriminating (all three perturbation kinds), and
+plugin_rev_joined_path (TS install -> Python scan join preserved). The full
+suite context: 159 SDK tests, 349 vitest, build/typecheck/lint green (L2 S4
+round 1, 18/18 evals).
+
+Semantic note for the signer: L2's runner changes ADD a cache branch ahead of
+invoke_plugin; the fan-out/merge semantics this feature pinned (per-call fan-out,
+ordered merge, empty-batch state reset) are untouched — its own batch tests and
+the discriminating-suite guard still pass unmodified, which is precisely what
+they exist to prove. One of its comments is now stale (the node_cached event it
+declared for L2 is not yet emitted — L2 hits ride node_completed; recorded as an
+L2 known limit).
 
 ## Gate 2 checklist (human)
 

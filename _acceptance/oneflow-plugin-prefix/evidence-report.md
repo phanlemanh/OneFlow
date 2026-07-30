@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 3); round 4 re-verify 2026-07-29
 enforcement_mode: strict
 bypass_used: false
-verified_commit: aba508a0edc61656b21d46bec6361cf4c6a0f927
+verified_commit: e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2
 human_signoff: Manh 2026-07-29
 ---
 
@@ -792,3 +792,24 @@ exited 0, alongside 16/16 feature evals.
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.
+
+Carry-forward re-pin (2026-07-30, branch feat/cache-l2-store):
+`verified_commit` moved from aba508a0edc61656b21d46bec6361cf4c6a0f927 to
+e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2 with NO re-verify, under the carry-forward rule in AGENTS.md.
+
+(1) This feature's own code is unchanged. The branch's gated diff is ten files:
+four owned by cache-l1-fingerprint (fingerprint.py + its tests + vectors), two
+owned by conformance-l0 (runner.py, engine-delegate.server.ts), and four NEW
+files owned by cache-l2-store (node_cache.py, test_node_cache.py, __main__.py's
+tenant hunk, engine-delegate.test.ts). Ownership computed per file: this
+feature's owned set (the gated diff of its landing merge commit) intersects the
+branch's gated diff EMPTY. The two features whose intersections are non-empty
+are deliberately NOT re-pinned here — they go to re-verify with fresh Gate 2
+signatures instead.
+
+(2) Standing checks green on the new tree, measured by this branch's own S4
+round 1 rather than re-run by hand: all six suite commands (build+typecheck,
+lint, unit 349, sdk pytest 159, verify:plugins, ABI drift) exited 0 alongside
+18/18 feature evals.
+
+The human signature line in frontmatter was not touched.
