@@ -65,7 +65,14 @@ Không gian ≈ 5×5×3×4 = 300 ô → quét **pairwise** theo Pareto của pre
 **Ô chân ngành lộ ra mà bản đầu design đã sót:** ABI không nằm trong khoá → AC-13. Đây là giá trị rõ nhất của bước quét: nó đến từ `[NGÀNH: ccache]`, không từ trí nhớ về sản phẩm này.
 
 **Ô đã quét, cố ý để ngoài Core:**
-- Phiên bản binary `ffmpeg` không nằm trong khoá — cùng họ AC-13, xem `## Notes`.
+- Phiên bản binary `ffmpeg` không nằm trong khoá — cùng họ AC-13, xem `## Known limits (ghi ở Cổng 2 từ 4 finding ngoài hợp đồng của S4 round 1 — quyết định: ghi Known limits, không sửa trong lát này)
+
+- **`plugin_is_dirty` fail-OPEN khi `git status` exit khác 0** (index hỏng, lỗi quyền worktree): rev vẫn đọc được mà độ bẩn không biết được → plugin ĐANG có sửa đổi được cache dưới khoá rev-sạch, và run sau (kể cả checkout sạch thật của rev đó) nhận output của bản đã sửa — đúng hiểm hoạ R1. Mọi đường lỗi khác trong file fail-closed; riêng chỗ này ngược chiều. **Ứng viên sửa đầu tiên của lát kế** (một dòng: returncode != 0 → coi là dirty), chưa sửa ở đây vì đụng eval sau verify là bắt đầu lại vòng.
+- **`engineOptionsFor` spread `assetOptions` SAU `tenant`/`data_dir`**: một key tương lai trùng tên sẽ âm thầm đè giá trị dẫn xuất từ scope — đúng lớp regression mà seam này sinh ra để chặn, và test hiện truyền `assetOptions: {}` nên không bắt được. Sửa = đảo thứ tự spread hoặc assert không trùng key.
+- **`NodeCache.get/put` nuốt mọi ngoại lệ không một dòng log**: cache hỏng vĩnh viễn (sai quyền sau migration) không phân biệt được với cache lạnh. Degrade-to-miss là đúng spec §8; thiếu là tính quan sát được — một warning memo hoá mỗi run là đủ.
+- **Comment `node_cached` trong `runner.py` nói L2 phát event đó — L2 không phát.** Cache hit đi qua `node_completed` như run thường; wiring `engine-events.ts` cho `node_cached` vẫn là dead code. Hoặc phát event ở đường hit, hoặc sửa comment nói lát nào sở hữu nó.
+
+## Notes`.
 - Hai run ghi song song cùng một entry — atomic write đã phủ phần nguy hiểm; không đáng một AC riêng ở L2.
 - Store `Http` trên đường trúng cache — cùng cơ chế `put`, phủ bằng AC-2. **Đính chính 30/07 (final review, prose-only):** vế `Disk` của bullet gốc là SAI — `DiskStore.get()` trả `None` by design, nên kết quả mang asset trên đường desktop-delegation (`file_key_base` tương đối) KHÔNG cache được và L2 fail-closed từ chối ghi entry. Hệ quả đo được: 9/11 slot tầng A có output asset → DoD 'workflow ffmpeg thuần 100% trúng' đạt trên MemoryStore/HttpStore, còn desktop hiện 0% cho slot asset. Dạy cache biết `file_key_base` là hàng đợi riêng (xem STATUS).
 - Plugin đọc env var không khai (API key) — `[NGÀNH: Bazel]` non-hermetic action; 11 slot tầng A đều thuần cơ khí không gọi API nên ô này rỗng ở L2, sẽ sống lại ở L3.
