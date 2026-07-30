@@ -27,7 +27,7 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**`cache-l3-tier-b — S4 round 1 PASS (15/15), status `verified`, chờ Cổng 2 (NĂM chữ ký: L3 + re-sign L1/L2/conformance-l0 đã báo giá + task-metering PHÁT SINH vì runner.ts)
+**`cache-l3-tier-b — SIGNED OFF (Manh 30/07, gate2 15m) cùng 4 re-sign (L1/L2/conformance-l0/task-metering); PR mở, chờ merge
 
 **`cache-l2-store` (lát L2) đã ký Cổng 2 (30/07) — [PR #32](https://github.com/phanlemanh/OneFlow/pull/32) mở, `pre-merge-check` sạch cả 11 feature.** Cache thật sự đọc/ghi lần đầu: chạy lại workflow không đổi → 0 lời gọi plugin; sửa một node → chỉ node đó + hạ nguồn chạy lại. S4 PASS ngay vòng 1 (18/18 eval — lần đầu trong repo). Kèm PR: `cache-l1-fingerprint` và `conformance-l0` **ký lại** (luật per-file — L2 sửa `fingerprint.py` và `runner.py`/`engine-delegate.server.ts`; chi phí thứ hai KHÔNG được báo giá ở Cổng 1, đã disclose trong re-verify note); 7 feature carry-forward; `stale-scope-by-paths` không cần gì nhờ scope hẹp — cơ chế 0.5 trả công lần đầu.
 
