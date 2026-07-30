@@ -5,7 +5,10 @@ import json
 import os
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
+from tongflow.engine import run_workflow
+from tongflow.engine import runner as runner_mod
 from tongflow.engine.node_cache import (
     TIER_A_SLOTS,
     NodeCache,
@@ -170,3 +173,200 @@ def test_absolute_disk_file_key_is_captured(tmp_path):
     out = cache.get("a1" + "0" * 62, fresh)
     assert out is not None
     assert fresh.get(out["video"]["file_key"]) == b"abs-bytes"
+
+
+def _two_node_workflow(text: str) -> dict:
+    """combine-text -> split-text. Both are tier A, neither needs a real plugin.
+
+    NOTE: the top-level key is `executableNodes` (matching what `run_workflow`
+    actually reads, see runner.py `wf.get("executableNodes", ...)`), and n2's
+    binding reads its upstream via the ordinary `handle` shape (a `sources`
+    list of `{fromNodeId, fromField}`) -- there is no `"dataNode"` binding
+    kind in `resolve_node_params`; that kind is only how the DOWNSTREAM data
+    node is reached from `n1`'s `outputs` route.
+    """
+    return {
+        "executableNodes": [
+            {"id": "n1", "feature": "combine-text", "pluginId": "oneflow-text",
+             "bindings": {"text": {"kind": "static", "value": text}},
+             "outputs": [{"sourceField": "text", "nodeType": "textNode",
+                          "dataField": "texts", "downstreamDataNodeId": "d1"}],
+             "level": 0, "dependencies": []},
+            {"id": "n2", "feature": "split-text", "pluginId": "oneflow-text",
+             "bindings": {"text": {"kind": "handle", "consumerShape": "scalar",
+                                    "sources": [{"fromNodeId": "d1",
+                                                 "fromField": "texts"}]}},
+             "outputs": [], "level": 1, "dependencies": ["n1"]},
+        ],
+        "dataNodes": [{"id": "d1", "nodeType": "textNode"}],
+        "executionLevels": [["n1"], ["n2"]],
+        "inputs": [],
+    }
+
+
+def _run(workflow, tmp_path, *, tenant="local", data_dir=None, plugin_dir_name="oneflow-text"):
+    calls: list[dict] = []
+
+    def recording_invoker(plugin_id, slot, business_input, plugin_dir, model):
+        calls.append({"slot": slot, "input": business_input})
+        return {"success": True, "text": f"out:{business_input.get('text')}"}
+
+    plugins_dir = tmp_path / "plugins"
+    (plugins_dir / plugin_dir_name).mkdir(parents=True, exist_ok=True)
+    manifest = {"plugins": {"oneflow-text": {
+        "localSubdir": plugin_dir_name,
+        "pluginRev": "a" * 40,
+    }}}
+    with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+        result = run_workflow(
+            workflow, {},
+            plugins_dir=plugins_dir,
+            data_dir=data_dir or (tmp_path / "data"),
+            tenant=tenant,
+            invoker=recording_invoker,
+            auto_install=False,
+        )
+    return result, calls
+
+
+def test_second_run_hits_cache_with_zero_plugin_calls(tmp_path):
+    # AC-1, the DoD. Counting invoker calls is the only measure that cannot be
+    # "close enough": a hit that still calls the plugin saves nothing.
+    wf = _two_node_workflow("hello")
+    r1, c1 = _run(wf, tmp_path)
+    r2, c2 = _run(wf, tmp_path)
+    assert len(c1) == 2
+    assert len(c2) == 0
+    assert r2["outputs"] == r1["outputs"]
+
+
+def test_failed_call_never_writes_an_entry(tmp_path):
+    # AC-3. A transient failure cached as a permanent one is the worst bug in
+    # this family, so the write point must sit AFTER the success check.
+    def failing_invoker(plugin_id, slot, business_input, plugin_dir, model):
+        return {"success": False, "error": "boom"}
+
+    plugins_dir = tmp_path / "plugins"
+    (plugins_dir / "oneflow-text").mkdir(parents=True)
+    manifest = {"plugins": {"oneflow-text": {
+        "localSubdir": "oneflow-text", "pluginRev": "a" * 40}}}
+    root = tmp_path / "data" / ".tongflow" / "node-cache"
+    with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+        try:
+            run_workflow(_two_node_workflow("x"), {}, plugins_dir=plugins_dir,
+                         data_dir=tmp_path / "data", tenant="local",
+                         invoker=failing_invoker, auto_install=False)
+        except Exception:
+            pass
+    entries = list(root.rglob("result.json")) if root.exists() else []
+    assert entries == []
+
+
+def test_deleting_cache_dir_keeps_results_identical(tmp_path):
+    # AC-6. Spec section 8 verbatim: deleting the cache changes nothing but speed.
+    import shutil
+    wf = _two_node_workflow("hello")
+    r1, c1 = _run(wf, tmp_path)
+    _run(wf, tmp_path)                                  # warm
+    shutil.rmtree(tmp_path / "data" / ".tongflow")
+    r3, c3 = _run(wf, tmp_path)
+    assert r3["outputs"] == r1["outputs"]
+    assert len(c3) == len(c1)
+
+
+def test_slot_outside_allowlist_is_never_cached(tmp_path):
+    # AC-7, BOTH directions. A new slot defaults to uncached.
+    # n1 (gen-text) is deliberately made the disallowed slot while n2
+    # (split-text) stays Tier A, so the two directions are checked
+    # independently: n1's OWN call count must stay flat across runs (never
+    # read), while the on-disk entry count must stay at exactly one -- n2's
+    # (never written for n1).
+    wf = _two_node_workflow("hello")
+    wf["executableNodes"][0]["feature"] = "gen-text"    # not in TIER_A_SLOTS
+    _, c1 = _run(wf, tmp_path)
+    _, c2 = _run(wf, tmp_path)
+    gen_text_calls_1 = [c for c in c1 if c["slot"] == "gen-text"]
+    gen_text_calls_2 = [c for c in c2 if c["slot"] == "gen-text"]
+    assert len(gen_text_calls_2) == len(gen_text_calls_1) == 1   # not read
+    root = tmp_path / "data" / ".tongflow" / "node-cache"
+    keys = list(root.rglob("result.json")) if root.exists() else []
+    assert len(keys) == 1                               # only n2 (split-text) written
+
+
+def test_missing_tenant_is_not_cacheable(tmp_path):
+    # AC-8, both cases, both directions.
+    wf = _two_node_workflow("hello")
+    for bad in ("", None):
+        d = tmp_path / f"t{bad!r}"
+        _, c1 = _run(wf, d, tenant=bad)
+        _, c2 = _run(wf, d, tenant=bad)
+        assert len(c2) == len(c1) == 2
+        root = d / "data" / ".tongflow" / "node-cache"
+        assert not (root.exists() and list(root.rglob("result.json")))
+
+
+def test_two_tenants_sharing_data_dir_do_not_cross_serve(tmp_path):
+    # AC-9. Sharing ONE data_dir is mandatory: split them and the path already
+    # isolates, so the test would pass without proving tenant is in the key.
+    wf = _two_node_workflow("hello")
+    shared = tmp_path / "data"
+    _, ca = _run(wf, tmp_path, tenant="user:a", data_dir=shared)
+    _, cb = _run(wf, tmp_path, tenant="user:b", data_dir=shared)
+    assert len(ca) == 2 and len(cb) == 2
+    entries = list((shared / ".tongflow" / "node-cache").rglob("result.json"))
+    assert len(entries) == 4                            # 2 nodes x 2 tenants
+
+
+def test_dirty_plugin_is_not_cacheable_end_to_end(tmp_path):
+    # AC-10 case (a): a REAL checkout with uncommitted edits. This is the one
+    # test that needs `git init` — the fixture patches scan_manifest, so
+    # read_plugin_rev never runs, but plugin_is_dirty reads the real tree.
+    wf = _two_node_workflow("hello")
+    plugins_dir = tmp_path / "plugins"
+    d = plugins_dir / "oneflow-text"
+    d.mkdir(parents=True)
+    (d / "entry.py").write_text("x = 1\n", encoding="utf-8")
+    env = {**os.environ, "GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@e",
+           "GIT_COMMITTER_NAME": "t", "GIT_COMMITTER_EMAIL": "t@e"}
+    subprocess.run(["git", "init", "-q"], cwd=d, check=True, env=env)
+    subprocess.run(["git", "add", "-A"], cwd=d, check=True, env=env)
+    subprocess.run(["git", "commit", "-qm", "i"], cwd=d, check=True, env=env)
+    (d / "entry.py").write_text("x = 2\n", encoding="utf-8")   # now dirty
+    _, c1 = _run(wf, tmp_path)
+    _, c2 = _run(wf, tmp_path)
+    assert len(c2) == len(c1) == 2
+    root = tmp_path / "data" / ".tongflow" / "node-cache"
+    assert not (root.exists() and list(root.rglob("result.json")))
+
+
+def test_abi_change_invalidates_the_key(tmp_path):
+    # AC-13. Change the REAL ABI file, not a monkeypatched digest — patching a
+    # digest proves the digest is used, not that the ABI is its source.
+    import shutil
+    from tongflow.engine.abi_schema import resolve_abi_path
+    real = resolve_abi_path(None)
+    copy = tmp_path / "abi.json"
+    shutil.copyfile(real, copy)
+    wf = _two_node_workflow("hello")
+
+    def run_with_abi(abi):
+        calls: list[dict] = []
+
+        def inv(plugin_id, slot, business_input, plugin_dir, model):
+            calls.append({"slot": slot})
+            return {"success": True, "text": "out"}
+
+        plugins_dir = tmp_path / "plugins"
+        (plugins_dir / "oneflow-text").mkdir(parents=True, exist_ok=True)
+        manifest = {"plugins": {"oneflow-text": {
+            "localSubdir": "oneflow-text", "pluginRev": "a" * 40}}}
+        with patch.object(runner_mod, "scan_manifest", lambda _pd, _abi: manifest):
+            run_workflow(wf, {}, plugins_dir=plugins_dir,
+                         data_dir=tmp_path / "data", tenant="local",
+                         abi_path=abi, invoker=inv, auto_install=False)
+        return calls
+
+    assert len(run_with_abi(copy)) == 2
+    assert len(run_with_abi(copy)) == 0                 # warm
+    copy.write_text(copy.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+    assert len(run_with_abi(copy)) == 2                 # ABI changed -> miss

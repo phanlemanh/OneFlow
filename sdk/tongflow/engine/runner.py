@@ -32,7 +32,9 @@ from .batch import (
     merge_fanout_views,
 )
 from .bindings import resolve_node_params
+from .fingerprint import node_fingerprint
 from .invoker import invoke_plugin
+from .node_cache import TIER_A_SLOTS, NodeCache, abi_digest_of, plugin_is_dirty
 from .paths import resolve_data_dir, resolve_plugins_dir
 from .plugins import (
     DEFAULT_ORG,
@@ -185,6 +187,7 @@ def run_workflow(
     plugin_git_urls: Optional[dict[str, str]] = None,
     on_progress: Optional[EventCb] = None,
     task_id: str = "tongflow-engine",
+    tenant: Optional[str] = None,
     invoker: Optional[InvokerCb] = None,
 ) -> dict[str, Any]:
     """Execute an exported workflow and return its results.
@@ -214,6 +217,10 @@ def run_workflow(
         auto_install: clone missing plugins and provision a shared venv.
         org / plugin_git_urls: where to clone official / custom plugins from.
         on_progress: optional callback receiving progress event dicts.
+        tenant: cache scope for this run. Required for any caching to happen;
+            an empty string or None disables the cache entirely rather than
+            falling back to a shared one. The single-tenant build sends
+            "local"; a cloud shell sends "user:<id>".
 
     Returns:
         ``{"status", "outputs", "outputs_by_name", "errors", "failures"}``.
@@ -228,6 +235,15 @@ def run_workflow(
     fk_base = Path(file_key_base).resolve() if file_key_base else None
     abi_file = resolve_abi_path(abi_path)
     abi = load_abi_schema(abi_file)
+
+    # One digest per run: the ABI does not change mid-run, and hashing it per
+    # call would be pointless I/O.
+    try:
+        abi_dig = abi_digest_of(abi_file)
+    except OSError:
+        abi_dig = ""
+    node_cache = NodeCache(data_dir) if tenant else None
+    dirty_by_dir: dict[Path, bool] = {}
 
     # Output store: in-memory (inline, zero disk) or on-disk (file_key paths,
     # used by the desktop delegation so the canvas reads via /api/uploads).
@@ -359,6 +375,30 @@ def run_workflow(
                     business_input = materialize_asset_inputs(
                         slot, call_params, abi, search_dirs, store
                     )
+                    cache_key = None
+                    if node_cache is not None and slot in TIER_A_SLOTS:
+                        if plugin_dir not in dirty_by_dir:
+                            dirty_by_dir[plugin_dir] = plugin_is_dirty(plugin_dir)
+                        cache_key = node_fingerprint(
+                            slot=slot,
+                            plugin_id=plugin_id,
+                            plugin_rev=cfg.get("pluginRev"),
+                            plugin_dirty=dirty_by_dir[plugin_dir],
+                            tenant=tenant,
+                            abi_digest=abi_dig,
+                            model=model,
+                            business_input=business_input,
+                        )
+
+                    cached = (
+                        node_cache.get(cache_key, store)
+                        if (node_cache is not None and cache_key)
+                        else None
+                    )
+                    if cached is not None:
+                        results.append(cached)
+                        continue
+
                     if invoker is not None:
                         raw = invoker(plugin_id, slot, business_input, plugin_dir, model)
                     else:
@@ -380,6 +420,11 @@ def run_workflow(
                         raise RuntimeError(
                             str(one.get("error") or "Plugin returned success=false")
                         )
+                    # Write AFTER the success check: D8 forbids caching a
+                    # failure, and a transient error cached as a permanent one
+                    # is the worst outcome in this family.
+                    if node_cache is not None and cache_key:
+                        node_cache.put(cache_key, one, store)
                     results.append(one)
 
                 # A batched node's raw output is the list of its calls; an
