@@ -44,6 +44,22 @@ import { mapEngineEvent } from "./engine-events";
  * has been removed.
  */
 
+/**
+ * Cache scope sent to the engine. The empty scope of the single-tenant build
+ * becomes an explicit "local" rather than "" — the engine treats an empty
+ * tenant as "not declared" and disables the cache, and a cloud whose
+ * `resolveScope()` returns "" for everyone would otherwise look identical to a
+ * legitimate single-tenant install while pooling every user's cache.
+ */
+export function tenantFor(scope: string): string {
+    return scope ? `user:${scope}` : "local";
+}
+
+/** Data root for a scope. Stable across runs: the cache lives under it. */
+export function dataRootFor(scope: string): string {
+    return scopedDataDirFor(scope);
+}
+
 function asRecord(v: unknown): Record<string, unknown> | null {
     return v && typeof v === "object" && !Array.isArray(v)
         ? (v as Record<string, unknown>)
@@ -141,7 +157,7 @@ export async function executeWorkflowViaEngine(
         const python = resolveBasePython() ?? (await resolvePythonLite());
         const sdkDir = join(resourcesDir(), "sdk");
         const scope = await getScope();
-        const dataRoot = scopedDataDirFor(scope);
+        const dataRoot = dataRootFor(scope);
         const uploadsBase = join(dataRoot, "uploads");
         const outDir = join(uploadsBase, "tasks", taskId);
 
@@ -173,6 +189,7 @@ export async function executeWorkflowViaEngine(
                 // bundled in the SDK, which always exists in the resources dir.
                 plugins_dir: pluginsDir(),
                 data_dir: dataRoot,
+                tenant: tenantFor(scope),
                 ...assetOptions,
                 auto_install: true,
                 task_id: taskId,
