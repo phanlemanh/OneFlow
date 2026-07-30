@@ -27,7 +27,7 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**Không còn feature nào dở trên `main`.** `cache-l1-fingerprint` (lát L1 của 1.1) ký 30/07, `pre-merge-check` sạch cả 10 feature trên nhánh. **Lát L2 đang bay** trên nhánh `feat/cache-l2-store` — store cache trên đĩa + blob dedupe + khôi phục 3 thứ của D5, chỉ tầng A; L2 bump `KEY_SCHEMA_VERSION` 1 → 2 và sửa `fingerprint.py`, nên `cache-l1-fingerprint` **sẽ phải verify lại và ký lại** cùng PR này (xem Known limits của contract đó).
+**`cache-l2-store` (lát L2) đã ký Cổng 2 (30/07) — [PR #32](https://github.com/phanlemanh/OneFlow/pull/32) mở, `pre-merge-check` sạch cả 11 feature.** Cache thật sự đọc/ghi lần đầu: chạy lại workflow không đổi → 0 lời gọi plugin; sửa một node → chỉ node đó + hạ nguồn chạy lại. S4 PASS ngay vòng 1 (18/18 eval — lần đầu trong repo). Kèm PR: `cache-l1-fingerprint` và `conformance-l0` **ký lại** (luật per-file — L2 sửa `fingerprint.py` và `runner.py`/`engine-delegate.server.ts`; chi phí thứ hai KHÔNG được báo giá ở Cổng 1, đã disclose trong re-verify note); 7 feature carry-forward; `stale-scope-by-paths` không cần gì nhờ scope hẹp — cơ chế 0.5 trả công lần đầu.
 
 `conformance-l0` (1.L0) đã merge 29/07 qua [PR #25](https://github.com/phanlemanh/OneFlow/pull/25). Q1–Q3 của spec cache **đã chốt 29/07** — xem [design doc](docs/superpowers/specs/2026-07-29-cache-open-questions-design.md) và PR #30.
 
@@ -133,7 +133,8 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | **1.1-L1** | `digest_form()` + `node_fingerprint()` + test vector ghim lược đồ khoá | ✅ **ký 30/07** — 16 tiêu chí, 2 vòng verify (vòng 1 REJECT, vòng 2 PASS) |
 | **1.1-L2b** | **Dạy cache `file_key_base`** để desktop-delegation (DiskStore, file_key tương đối) cache được kết quả mang asset | 🔴 hàng đợi mới từ final review L2: hiện fail-closed → desktop 0% hit cho 9/11 slot tầng A; DoD chỉ đạt trên MemoryStore/HttpStore |
 | **1.1-L1b** | **`mime`/`filename` của asset vào digest khoá cache** | 🔴 **contract riêng, quyết ở Cổng 2 của L1**. Cùng bytes + metadata khác → **cùng một khoá** (`denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên ở L2 plugin chọn decoder theo `input.mime` bị phục vụ entry của loại kia. Sửa nằm trong `callog.py` — **của `conformance-l0`** — nên feature đó phải verify lại + ký lại. AC-4/AC-5 chỉ phủ trục `file_key` vs bytes |
-| **1.1-L2** | Store cache trên đĩa + blob dedupe + khôi phục 3 thứ (D5), chỉ tầng A | ◐ đang bay — nhánh feat/cache-l2-store, ký Cổng 1 30/07 |
+| **1.1-L2** | Store cache trên đĩa + blob dedupe, chỉ tầng A, per-call | ✅ **ký 30/07** — 16 tiêu chí / 18 eval, S4 PASS vòng 1, PR #32. Known limits: `plugin_is_dirty` fail-open khi `git status` lỗi (ứng viên sửa đầu của lát kế) · cache nuốt lỗi không log · spread-order `assetOptions` · comment `node_cached` stale |
+| **1.1-L3** | Tầng B (memo theo workflow + tenant) | ⏭ **việc lớn kế tiếp** — kế thừa luật scope + tenant sentinel của L2 |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
