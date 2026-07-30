@@ -1,0 +1,149 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · cache-l2-store</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Cache L2 — on-disk node cache, tier A only</h1><div class="sub">Trang bằng chứng · <span class="mono">cache-l2-store</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E1-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E2-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E3-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E4-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E5-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E6-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E7-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E8-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E9-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E10-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E11-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-12</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E12-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-13</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E13-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-14</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E14-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-14</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E15-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-15</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E16-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-16</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E17-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+<tr><td><a href="#E18">E18</a></td><td>AC-16</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l2-store-E18-r1</td><td class="mono">2026-07-30T00:00:00Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · test</h3><p class="crit">AC-1: Given một workflow chỉ gồm slot trong allowlist, When chạy lần một rồi chạy lần hai với **cùng `data_dir` và cùng `tenant`**, Then lần hai gọi invoker **0 lần**, và mọi asset trong `outputs` được **giải qua store của lần chạy tương ứng** rồi so **byte-for-byte** với bytes đã giải của lần chạy một. Chuẩn hoá được phép áp **duy nhất** cho chuỗi handle đục của store (`mem://&lt;uuid&gt;` khác nhau giữa hai tiến trình là hợp lệ); mọi thứ khác phải so nguyên. *Đây là DoD của §6. Định nghĩa phép chuẩn hoá ngay trong tiêu chí là bắt buộc: để hở chữ &quot;chuẩn hoá&quot; thì một verifier có thể strip mọi handle asset (chúng KHÁC nhau một cách hợp lệ) rồi chỉ so bộ xương JSON còn lại — và một implementation trả về blob KHÁC nhưng hợp lệ vẫn xanh. Đếm lời gọi invoker là thước duy nhất không thể &quot;gần đúng&quot;: một cache trúng mà vẫn gọi plugin thì không tiết kiệm gì, còn 0 lời gọi mà output khác là hỏng dữ liệu.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E1-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_hit_after_miss</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.19s</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · test</h3><p class="crit">AC-2: Given một entry đã có trong cache mà lần chạy hiện tại dùng một store **khác** (ví dụ `MemoryStore` mới của tiến trình mới), When trúng cache, Then blob được `put` lại vào store của **lần chạy hiện tại** và node hạ nguồn nhận `file_key` **giải được trong store đó**. *Mấu chốt đúng-sai của D6: `MemoryStore` trả `mem://&lt;uuid&gt;` chỉ sống trong tiến trình, nên lưu handle đó vào cache là lưu một con trỏ chết. Nếu chỉ khẳng định &quot;trúng cache&quot; mà không khẳng định hạ nguồn giải được `file_key`, tiêu chí này xanh trong khi node sau chạy với input rỗng — đúng loại hỏng-âm-thầm mà D5 gọi tên.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E2-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_blob_into_run_store</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.14s</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · test</h3><p class="crit">AC-3: Given một lời gọi plugin trả `success: false`, When run kết thúc (runner raise theo hành vi hiện tại), Then **không entry nào** được tạo cho khoá đó, kiểm bằng cách đếm file dưới `node-cache/` trước và sau. *D8: một lỗi hạ tầng nhất thời bị cache lại thành lỗi vĩnh viễn là bug tệ nhất trong nhóm này. Điểm ghi cache phải nằm SAU phép kiểm success, không phải trước.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E3-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_no_entry_on_failure</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · test</h3><p class="crit">AC-4: Given một entry tồn tại nhưng (a) blob nó trỏ tới đã bị xoá, (b) `result.json` không parse được, hoặc (c) blob tồn tại nhưng **kích thước lệch** so với kích thước đã ghi trong `result.json`, When chạy lại, Then **coi như miss** — plugin được gọi, run kết thúc thành công, và entry được ghi lại đúng. Ba ca kiểm **riêng**, không gộp. *Ba ca đều là trạng thái thật (`[NGÀNH: Bazel]` — blob bị GC mà entry còn là ca kinh điển của disk cache). Một implementation raise ở đây biến một cache hỏng thành một run hỏng. Ca (c) là ca gap-probe bắt được: một run bị SIGKILL giữa lúc ghi blob để lại file **cụt** ở đúng tên sha — blob tồn tại, `result.json` parse được, nên (a) và (b) đều xanh, mà run sau `put` bytes cụt vào store và slot ffmpeg hạ nguồn sinh output hỏng, rồi output hỏng đó lại được cache. Dùng kích thước chứ không băm lại: băm lại một video 200MB trên MỖI lần trúng là đúng thứ cache sinh ra để tránh.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E4-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_unusable_entry_is_miss</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.14s</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · test</h3><p class="crit">AC-5: Given thư mục cache **không ghi được** (ví dụ chmod 0500 hoặc đường dẫn bị chiếm bởi một file), When chạy workflow, Then run kết thúc **thành công**, plugin được gọi, và **không ngoại lệ nào** lọt ra ngoài. *`[NGÀNH: ccache]` cache dir read-only. §8 nói cache không phải nguồn sự thật; một cache không ghi được mà làm hỏng run thì vi phạm đúng câu đó.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E5-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_write_failure_survives</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · test</h3><p class="crit">AC-6: Given cache đã có entry, When xoá cả thư mục `node-cache/` rồi chạy lại, Then kết quả **không đổi** và số lời gọi invoker trở lại như lần chạy đầu. *§8 nguyên văn: &quot;xoá thư mục cache → kết quả không đổi, chỉ chậm hơn&quot;. Đây là tiêu chí chứng minh cache không lặng lẽ trở thành nguồn sự thật.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E6-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_deleted_dir_same_result</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · test</h3><p class="crit">AC-7: Given một slot **ngoài** allowlist tầng A, When chạy hai lần, Then không entry nào được ghi cho slot đó **và** không lần nào đọc entry cho nó — invoker được gọi đủ ở cả hai lần. *Allowlist là fail-closed: slot mới mặc định không được cache. Kiểm cả hai chiều theo quy tắc chung thứ hai.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E7-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_slot_not_allowlisted</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · test</h3><p class="crit">AC-8: Given `tenant` là chuỗi rỗng hoặc thiếu hẳn trong options, When chạy hai lần, Then **không đọc, không ghi** entry nào; invoker được gọi đủ ở cả hai lần. *Nửa fail-closed của quyết định đưa tenant vào khoá. Chuỗi rỗng đi qua được nghĩa là cloud cấu hình sai cũng đi qua được y hệt, và lúc đó cả tính năng chỉ còn là một cái tên.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E8-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_tenant_missing</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · test</h3><p class="crit">AC-9: Given cùng workflow, cùng input, cùng `data_dir`, chạy với `tenant=&quot;user:a&quot;` rồi `tenant=&quot;user:b&quot;`, When lần hai chạy, Then invoker **vẫn được gọi** (không phục vụ chéo) và hai entry riêng tồn tại. *`[NGÀNH: Turborepo]` — remote cache scoping đã từng có advisory thật. Đây là tiêu chí duy nhất chứng minh tenant thực sự vào KHOÁ chứ không chỉ vào đường dẫn: dùng CHUNG một `data_dir` là điều kiện bắt buộc của ca kiểm, vì nếu tách `data_dir` thì đường dẫn đã cô lập và tiêu chí xanh mà không chứng minh gì.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E9-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_tenant_isolation</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · test</h3><p class="crit">AC-10: Given thư mục plugin **không dùng được để định danh phiên bản** theo một trong hai cách — (a) là git checkout **có thay đổi chưa commit**, hoặc (b) **không phải checkout gì cả** (không có `.git`) — When chạy hai lần cho mỗi ca, Then không đọc, không ghi entry nào cho plugin đó; invoker được gọi đủ ở cả hai lần. Hai ca kiểm **riêng**. *Đóng đúng &quot;Điều kiện chặn L1&quot; mà `conformance-l0` ghi ở Cổng 2, ở phía caller: L1 chỉ nhận cờ `plugin_dirty`, L2 là chỗ dò nó. Không có tiêu chí này thì cờ kia vĩnh viễn là `False` và điều kiện chặn vẫn mở. Ca (b) do gap-probe bắt: nếu implementation thay `None` bằng một placeholder (`&quot;&quot;` / `&quot;unknown&quot;`) để &quot;có cái mà cache&quot;, hai phiên bản plugin khác nhau sẽ dùng chung khoá và phục vụ output của nhau — mà KHÔNG eval nào phản đối, vì mọi fixture đều `git init` thật.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E10-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_dirty_plugin</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.13s</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · test</h3><p class="crit">AC-11: Given một node chia lô 5 item mà 3 item đã có entry, When chạy, Then invoker được gọi **đúng 2 lần** và output đủ 5 item theo đúng thứ tự batch. *Đây là thứ per-node không làm được, nên nó cũng là tiêu chí chứng minh điểm móc thật sự là per-call. Khẳng định thứ tự vì gộp kết quả sai thứ tự là hỏng dữ liệu chứ không phải chậm.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E11-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_batch_partial_hit</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.12s</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · test</h3><p class="crit">AC-12: Given hai entry khác nhau mà cùng tham chiếu một asset giống bytes, When cả hai đã ghi, Then trên đĩa chỉ có **một** file blob cho asset đó. *Dedupe của D6, và là cơ sở cho câu &quot;200 video khác nhau chỉ khác overlay vẫn chia sẻ mọi blob nguồn&quot;. Nếu blob nằm trong từng entry thay vì ở gốc `node-cache/`, tiêu chí này đỏ.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E12-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_blob_dedupe</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · test</h3><p class="crit">AC-13: Given một entry đã ghi, When **ABI đổi** (một byte trong file ABI đang dùng) và chạy lại với mọi thứ khác giữ nguyên, Then **miss** — invoker được gọi lại. *ABI là input của phép tính: cả `materialize_asset_inputs` và `convert_asset_outputs_to_file_refs` đọc nó, nên cùng input có thể ra kết quả khác. `sdkMajor` KHÔNG phủ được vì ABI là file riêng có version riêng và đổi không kéo theo bump SDK. Cùng họ bug với `[NGÀNH: ccache]` không băm binary compiler — bỏ tiêu chí này là nhận đúng cái lỗi mà ngành mất nhiều năm mới trị hết.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E13-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_abi_digest_in_key</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · test</h3><p class="crit">AC-14</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E14-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_engine_rejects_empty_tenant</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge pass">PASS</span> &nbsp;E15 · test</h3><p class="crit">AC-14</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E15-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_l2_tenant_sentinel</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">Tests  1 passed | 1 skipped (2)
+Start at  13:14:04
+Duration  339ms (transform 72ms, setup 0ms, import 23ms, tests 207ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge pass">PASS</span> &nbsp;E16 · test</h3><p class="crit">AC-15: Given một workflow gồm **≥3 node trong allowlist** đã trúng cache toàn bộ, When **đúng một node đổi một trường nghiệp vụ** (một param, KHÔNG phải asset) rồi chạy lại với cùng `data_dir` / `tenant` / ABI, Then invoker được gọi **đúng một lần cho node đó cộng một lần cho mỗi node hạ nguồn của nó**, các node khác **0 lần**, và output của node đã đổi **khác** output đã cache. Và given hai lời gọi **trong cùng một batch** chỉ khác nhau ở một param nghiệp vụ, Then hai khoá của chúng khác nhau. *Đây là tiêu chí của chính cái tên spec — `engine-cache-partial-rerender` — và bản đầu của hợp đồng này **không có nó**; gap-probe bắt được, xếp P0. Kịch bản fail: `node_cache.py` dựng lời gọi fingerprint từ `params` mức NODE (hoặc chỉ từ digest asset) thay vì từ `call_params` per-call mà `fan_out_inputs` sinh ra, làm rơi các trường nghiệp vụ của node. Người dùng sửa `text` của một node `combine-text` rồi chạy lại: khoá không đổi → lần hai phục vụ output CŨ, âm thầm, với 0 lời gọi invoker. Mà AC-1 (cùng input hai lần), AC-6 (xoá thư mục), AC-13 (đổi ABI) và AC-11 (gieo sẵn 3/5 entry) đều vẫn XANH — AC-11 gieo entry sẵn chứ không dẫn xuất chúng từ input khác nhau, nên nó không bắt được việc khoá theo mức node. Không có AC-15 thì Cổng 1 được duyệt với niềm tin DoD đã phủ, và Cổng 2 ship một cache phục vụ kết quả cũ mỗi lần người dùng sửa.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E16-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_input_change_partial_rerun</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.06s</pre>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge pass">PASS</span> &nbsp;E17 · test</h3><p class="crit">AC-16</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E17-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_l2_data_dir_stable</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">Tests  1 passed | 1 skipped (2)
+Start at  13:14:03
+Duration  353ms (transform 93ms, setup 0ms, import 22ms, tests 211ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E18"><h3><span class="badge pass">PASS</span> &nbsp;E18 · test</h3><p class="crit">AC-16</p>
+<div class="kv"><span>run_id <b>minted-cache-l2-store-E18-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l2_bridge_same_data_dir_hits</b></span><span>verified_at <b>2026-07-30T00:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.04s</pre>
+</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: all evals passed on first attempt (E1-E18 green); pnpm build/typecheck/lint/test, sdk pytest full suite, verify:plugins, and gen:abi diff all clean. No return to implementation needed.</li></ul>
+<h2>Checklist Cổng 2 (bạn)</h2><div class="card"><ul class="ck"><li><input type="checkbox" id="ck0"><label for="ck0">Read the table + spot-check 1-2 evidence blocks</label></li><li><input type="checkbox" id="ck1"><label for="ck1">Personally verify every judgment item marked UNCERTAIN, then fill its</label></li><li><input type="checkbox" id="ck2"><label for="ck2">T3 only: personally verify ALL judgment items and fill `human_override`</label></li><li><input type="checkbox" id="ck3"><label for="ck3">If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when</label></li><li><input type="checkbox" id="ck4"><label for="ck4">Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract</label></li></ul><div class="note">Tick để theo dõi — chỉ lưu trong trình duyệt; quyết định THẬT vào human_signoff / human_override của report.</div></div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

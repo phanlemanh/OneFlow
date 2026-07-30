@@ -1,40 +1,23 @@
 {
-  "feature_plain": "Lần đầu tiên hệ thống THẬT SỰ dùng lại kết quả đã làm. Lát trước chỉ tính 'vân tay'; lát này dùng vân tay đó để bỏ hẳn một lần chạy plugin. Đây là chỗ lời hứa 'sửa miễn phí — sinh mới mới tính tiền' bắt đầu có thật. Chỉ mở cho nhóm việc cơ khí (ghép/cắt/tách video, ghép văn bản) — 11 loại việc, không hơn.",
-
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ chạy lại một workflow đã chạy mà KHÔNG gọi plugin lần nào, và cho ra đúng cùng nội dung — kiểm bằng cách so từng byte của file, không phải so 'trông giống'." },
-    { "id": "AC-15", "p": "Sẽ chỉ chạy lại đúng node bạn vừa sửa và những node phía sau nó — các node khác không chạy lại lần nào. Đây chính là điều làm nên tên 'sửa từng phần'." },
-    { "id": "AC-11", "p": "Sẽ tiết kiệm được cả khi chỉ tiết kiệm được một phần: lô 5 video mà 3 đã có sẵn thì chỉ chạy 2." },
-    { "id": "AC-2", "p": "Sẽ đảm bảo file lấy từ kho cũ mở được ở lần chạy hiện tại — không phải một đường dẫn chết trỏ về lần chạy trước." },
-    { "id": "AC-12", "p": "Sẽ chỉ lưu MỘT bản cho những file giống nhau, dù chúng xuất hiện trong nhiều kết quả khác nhau." },
-    { "id": "AC-6", "p": "Sẽ vẫn ra kết quả đúng nếu bạn xoá sạch kho cache — chỉ chậm hơn. Kho cache không bao giờ là nơi giữ sự thật." },
-    { "id": "AC-13", "p": "Sẽ không dùng lại kết quả cũ khi bản hợp đồng kỹ thuật giữa hệ thống và plugin đã đổi — cùng đầu vào lúc đó có thể ra kết quả khác." },
-    { "id": "AC-9", "p": "Sẽ không bao giờ đưa kết quả của người dùng này cho người dùng khác, kể cả khi hai người lưu chung một chỗ." },
-    { "id": "AC-16", "p": "Sẽ giữ chỗ lưu cache ổn định giữa các lần chạy — nếu chỗ lưu đổi mỗi lần thì cache có mà như không." }
-  ],
-
-  "wont_do": [
-    { "id": "AC-3", "p": "Sẽ KHÔNG lưu lại kết quả của một lần chạy lỗi — một lỗi mạng nhất thời bị lưu thành lỗi vĩnh viễn là kiểu hỏng tệ nhất ở đây." },
-    { "id": "AC-4", "p": "Sẽ KHÔNG phục vụ một bản lưu hỏng: thiếu file, file đọc không ra, hoặc file bị ghi dở dang đều bị coi là 'chưa có' và chạy lại." },
-    { "id": "AC-5", "p": "Sẽ KHÔNG làm hỏng công việc của bạn khi không ghi được cache (đĩa đầy, thiếu quyền) — vẫn chạy xong bình thường, không báo lỗi ra ngoài." },
-    { "id": "AC-7", "p": "Sẽ KHÔNG dùng lại kết quả của những loại việc chưa được cho phép — loại việc mới mặc định là không, phải khai tên mới được." },
-    { "id": "AC-8", "p": "Sẽ KHÔNG dùng lại gì cả khi hệ thống không biết đây là người dùng nào — thà chạy lại còn hơn đoán." },
-    { "id": "AC-10", "p": "Sẽ KHÔNG dùng lại kết quả khi không biết plugin đang ở phiên bản nào, hoặc plugin đang có sửa đổi chưa lưu — người đang sửa plugin phải thấy kết quả mới." },
-    { "id": "AC-14", "p": "Sẽ CHẶN trường hợp 'không rõ là ai' bị hiểu nhầm thành một người dùng hợp lệ — chỗ nối giữa web và engine phải khai tên rõ ràng, không được để trống." }
-  ],
-
-  "scope_plain": "Lát này chỉ mở cho 11 loại việc cơ khí, và chỉ dùng lại trong phạm vi một người dùng. Chưa làm: dùng lại cho các việc sinh nội dung bằng AI (lát sau), giới hạn dung lượng kho cache và tự dọn (lát sau nữa), và hai món nợ đã biết từ lát trước để nguyên. Cố ý HOÃN ba loại việc mà chính bản thiết kế gốc có nêu tên — chép lời, chép lời có mốc thời gian, và đọc tài liệu — vì lát này biến một lỗ hổng đã biết thành có thật, xem mục dưới.",
-
+  "feature_plain": "Lần đầu tiên hệ thống THẬT SỰ dùng lại kết quả đã làm: chạy lại một workflow không đổi thì không tốn một lời gọi plugin nào, và sửa một node thì chỉ node đó cùng phần phía sau chạy lại. Đây là chỗ lời hứa 'sửa miễn phí — sinh mới mới tính tiền' bắt đầu có thật, cho 11 loại việc cơ khí, trong phạm vi từng người dùng.",
+  "analyst_plain": "Không phép kiểm nào bị đánh giá 'chạy cũng như không'. 18/18 phép kiểm và cả 6 lệnh kiểm chuẩn của repo đều xanh ngay vòng đầu — lần đầu một lát qua vòng thẩm định không bị bác, nhờ 5 vòng review trong lúc code đã bắt hết lỗi trước.",
   "decisions_plain": [
-    { "id": "d-20260730T060001Z-4237", "p": "Đã chọn dùng lại ở mức TỪNG LỜI GỌI thay vì từng node — nhờ đó cái bẫy nguy hiểm nhất mà bản thiết kế gốc cảnh báo tự biến mất, và lô 5 việc trúng 3 vẫn tiết kiệm được." },
-    { "id": "d-20260730T060002Z-4374", "p": "Đã chọn đưa danh tính người dùng vào chính 'vân tay' thay vì chỉ vào đường dẫn lưu — đổi lại lát trước phải ký lại, nhưng hai người lưu chung một chỗ vẫn không thể nhận kết quả của nhau." },
-    { "id": "d-20260730T060003Z-4511", "p": "Đã chọn buộc phía web khai tên người dùng rõ ràng — cấu hình sai thì MẤT cache (tốn tiền chạy lại) chứ không âm thầm gộp mọi người vào một kho." },
-    { "id": "d-20260730T060004Z-4648", "p": "Đã chọn liệt kê tay danh sách loại việc được dùng lại, thay vì tự suy từ hợp đồng kỹ thuật — vì suy tự động đẩy cả những việc sinh nội dung bằng AI vào nhóm dùng chung, tức sai." },
-    { "id": "d-20260730T060005Z-4785", "p": "KHÔNG mở ba loại việc chép-lời và đọc-tài-liệu ở lát này — mất một phần tiết kiệm thật, đổi lại tránh một lỗ hổng mà chính lát này làm cho nó sống." },
-    { "id": "d-20260730T060006Z-4922", "p": "Đã chọn tính cả bản hợp đồng kỹ thuật vào vân tay — đổi lại mỗi lần sửa hợp đồng đó là cả kho cache mất hiệu lực, mà giai đoạn này nó đổi khá thường." },
-    { "id": "d-20260730T060007Z-5059", "p": "KHÔNG tính phiên bản công cụ xử lý video vào vân tay ở lát này — để hở một lỗ cùng loại, vì chưa đọc được plugin thật để biết công cụ đó đến từ đâu." },
-    { "id": "d-20260730T063001Z-5551", "p": "Đã thêm tiêu chí 'sửa một node thì chỉ node đó chạy lại' sau khi vòng phản biện chỉ ra bộ tiêu chí đã QUÊN đúng điều làm nên tên của tính năng." },
-    { "id": "d-20260730T063002Z-5825", "p": "Đã chọn phát hiện file ghi dở bằng cách so kích thước thay vì tính lại mã kiểm tra — tính lại một video 200MB ở mỗi lần dùng lại là đúng thứ cache sinh ra để tránh." },
-    { "id": "d-20260730T063003Z-5825", "p": "Đã điều chỉnh hai phát hiện của vòng phản biện thay vì nhận nguyên — vì người phản biện bị cấm đọc code nên phải phỏng đoán, và cả hai phỏng đoán đều lệch so với code thật." }
-  ]
+    {
+      "id": "d-20260730T073001Z-6210",
+      "p": "Đã chọn tách việc sửa file dùng chung của lát trước thành một bước riêng — nhờ đó nghĩa vụ ký lại của lát trước quy về đúng một chỗ."
+    },
+    {
+      "id": "d-20260730T073002Z-6347",
+      "p": "KHÔNG sửa bản đặc tả trong PR này — sửa đặc tả trước khi biết code có đúng như thiết kế là viết ngược; sẽ là một PR tài liệu riêng sau khi merge."
+    },
+    {
+      "id": "d-20260730T090001Z-7301",
+      "p": "Đã chọn KHÔNG cache kết quả mang file trên đường desktop khi chưa biết chỗ gốc của file — thà bỏ lỡ tiết kiệm còn hơn trả về file của task cũ. Hệ quả: desktop hiện chưa được hưởng cache cho 9/11 loại việc; đã thành hàng đợi riêng."
+    },
+    {
+      "id": "d-20260730T090002Z-7438",
+      "p": "Đã chọn cho cache tự lành khi phát hiện file lưu dở dang — ghi đè bằng bản đúng thay vì bỏ lỡ vĩnh viễn."
+    }
+  ],
+  "scope_plain": "Chỉ 11 loại việc cơ khí, chỉ trong phạm vi một người dùng. Chưa làm: cache cho việc sinh nội dung AI (lát sau), giới hạn dung lượng + tự dọn (lát sau nữa), cache trên đường desktop cho kết quả mang file (hàng đợi 1.1-L2b), và hai món nợ đã biết từ lát trước."
 }
