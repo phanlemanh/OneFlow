@@ -259,6 +259,32 @@ def test_dirty_plugin_is_not_cacheable():
             slot="image-gen",
             plugin_id="oneflow-image",
             plugin_rev="a" * 40,
+            tenant="local",
+            abi_digest="0" * 64,
+            model=None,
+            business_input={"text": "a cat"},
+        )
+
+    # tenant has no default -- omitting it must raise TypeError.
+    with pytest.raises(TypeError):
+        node_fingerprint(  # type: ignore[call-arg]
+            slot="image-gen",
+            plugin_id="oneflow-image",
+            plugin_rev="a" * 40,
+            plugin_dirty=False,
+            abi_digest="0" * 64,
+            model=None,
+            business_input={"text": "a cat"},
+        )
+
+    # abi_digest has no default -- omitting it must raise TypeError.
+    with pytest.raises(TypeError):
+        node_fingerprint(  # type: ignore[call-arg]
+            slot="image-gen",
+            plugin_id="oneflow-image",
+            plugin_rev="a" * 40,
+            plugin_dirty=False,
+            tenant="local",
             model=None,
             business_input={"text": "a cat"},
         )
