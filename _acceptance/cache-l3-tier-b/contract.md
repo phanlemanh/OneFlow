@@ -62,3 +62,26 @@ Quét CT-S bằng trục của L2 tái dùng có điều chỉnh (L3 là thành 
 - **Ba chữ ký kèm PR này** (báo giá tại Cổng 1): `cache-l1-fingerprint` (sửa `fingerprint.py`), `cache-l2-store` (sửa `node_cache.py`/`runner.py`/tests), `conformance-l0` (sửa `runner.py`/`engine-delegate.server.ts` — sở hữu gốc). Bảy feature còn lại dự kiến carry-forward theo luật per-file.
 - **`image-upscale`/`video-upscale` nằm ở B dù D3 từng minh hoạ upscale-đã-ghim-seed thuộc A** — seed hiện không bị ghim ở đâu; ví dụ của D3 mô tả trạng thái tương lai có cơ chế ghim.
 - **Nhóm không-núm chưa cache là tiền thật bỏ lỡ** (gen-text chạy lại khi input không đổi) — revisit sau tiếng nói người dùng đầu tiên.
+
+## Known limits (ghi ở Cổng 2, KHÔNG phải tiêu chí)
+
+- **Tầng B là máy sinh entry mồ côi đơn điệu (L4-a).** Mỗi lần sửa prompt của một node
+  tầng B là một entry media-size mới dưới khoá mới; 5 lần sửa = 5 entry, chỉ 1 còn với
+  tới được. Chưa có eviction/LRU/trần dung lượng cho tới L4 — trên máy dev điều này chỉ
+  tốn đĩa, nhưng L4 phải coi orphan tầng B là dạng rác số một.
+- **Kinh tế batch-ordinal (F3).** Ordinal của call trong lô tham gia `workflowScope`,
+  nên CHÈN một biến thể vào ĐẦU lô làm mọi call phía sau lệch chỉ số và sinh lại từ vị
+  trí đó — thêm-vào-cuối thì rẻ, chèn-vào-đầu thì đắt. Đánh đổi có chủ ý: giữ kỳ vọng
+  "N biến thể là N bản khác nhau" (AC-14) quan trọng hơn tối ưu ca chèn giữa.
+- **Guard ABI đọc bản copy đóng gói** (`sdk/tongflow/_data/tongflow.abi.json`), không
+  đọc `config/tongflow.abi.json` gốc — hai bản được giữ đồng bộ bởi suite check
+  `gen:abi` diff-clean, nhưng guard tự nó không chứng minh sự đồng bộ đó.
+- **E9 không phân biệt so với baseline (có chủ ý).** Sentinel shape của
+  `engineOptionsFor` có từ L2 nên E9 pass cả trên diffBase — nó là regression-guard.
+  Guard PHÂN BIỆT cho wiring AC-9 là type system: `workflowId` là tham số bắt buộc của
+  `executeWorkflowViaEngine` (xoá wiring = lỗi compile, đã chứng minh TS2554/TS2345),
+  và `pnpm typecheck` nằm trong suite của chính round verify này. Nửa hành-vi do E10 lo.
+- **`test_node_cache.py` 1101 dòng, vượt trần 800** — tách `test_node_cache_tier_b.py`
+  ở L4 (15 executor key ghim node-id theo path, phải sửa cùng commit).
+- **Comment `DESCOPED_GENERATIVE_SLOTS` trỏ sai chỗ guard** (guard nằm trong test suite,
+  không phải "bên dưới" trong module) — sửa một dòng ở lát kế, không sửa sau verify.
