@@ -123,3 +123,50 @@ def test_plugin_without_git_is_not_reported_dirty(tmp_path):
     d = tmp_path / "plain"
     d.mkdir()
     assert plugin_is_dirty(d) is False
+
+
+def test_hit_returns_bytes_resolvable_in_a_fresh_store(tmp_path):
+    # The correctness crux of D6: a hit must re-put blobs into the CURRENT
+    # store. A reviewer proved every existing test stays green when get()
+    # returns a dead pointer — this test is the one that pins the happy path.
+    cache = NodeCache(tmp_path)
+    first = MemoryStore()
+    cache.put("e" * 64, _asset(first, b"real-bytes"), first)
+    fresh = MemoryStore()
+    out = cache.get("e" * 64, fresh)
+    assert out is not None
+    fk = out["video"]["file_key"]
+    assert fresh.get(fk) == b"real-bytes"
+    # ext must survive the round trip: video/mp4 -> .mp4, not .bin (I2).
+    # MemoryStore ignores ext, so assert via a DiskStore target too.
+    from tongflow.engine.store import DiskStore
+    disk = DiskStore(tmp_path / "out")
+    out2 = cache.get("e" * 64, disk)
+    assert out2["video"]["file_key"].endswith(".mp4")
+
+
+def test_uncapturable_asset_refuses_to_cache_the_entry(tmp_path):
+    # C1 fail-closed: DiskStore.get() returns None by design and the file_key
+    # is relative, so bytes cannot be captured -> put() must write NOTHING.
+    from tongflow.engine.store import DiskStore
+    cache = NodeCache(tmp_path)
+    disk = DiskStore(tmp_path / "out", file_key_base=tmp_path)
+    ref = disk.put(b"content", mime="video/mp4", filename="a.mp4")
+    assert not Path(ref["file_key"]).is_absolute()
+    cache.put("f" * 64, {"success": True, "video": ref}, disk)
+    root = tmp_path / ".tongflow" / "node-cache"
+    assert not (root.exists() and list(root.rglob("result.json")))
+
+
+def test_absolute_disk_file_key_is_captured(tmp_path):
+    # DiskStore WITHOUT file_key_base yields absolute paths; those we can read.
+    from tongflow.engine.store import DiskStore
+    cache = NodeCache(tmp_path)
+    disk = DiskStore(tmp_path / "out")
+    ref = disk.put(b"abs-bytes", mime="video/mp4", filename="a.mp4")
+    assert Path(ref["file_key"]).is_absolute()
+    cache.put("a1" + "0" * 62, {"success": True, "video": ref}, disk)
+    fresh = MemoryStore()
+    out = cache.get("a1" + "0" * 62, fresh)
+    assert out is not None
+    assert fresh.get(out["video"]["file_key"]) == b"abs-bytes"
