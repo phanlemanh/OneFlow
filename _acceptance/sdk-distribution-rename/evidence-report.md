@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 13)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 05fc9453fa561eaa60166c594974231459359db3
+verified_commit: aba508a0edc61656b21d46bec6361cf4c6a0f927
 human_signoff: Manh 2026-07-27
 ---
 
@@ -769,6 +769,30 @@ this feature's own sdk files (`pyproject.toml`, `tongflow/__init__.py`,
 `engine/plugins.py`, `tests/test_packaging.py`) are untouched. If the reviewer
 prefers the whole-subtree reading, this feature moves to the re-verify path
 alongside oneflow-plugin-prefix; nothing else in this branch changes.
+
+Carry-forward re-pin (2026-07-30, branch feat/cache-l1-fingerprint):
+`verified_commit` moved from 05fc9453fa561eaa60166c594974231459359db3 to
+aba508a0edc61656b21d46bec6361cf4c6a0f927 with NO re-verify, under the carry-forward
+rule in AGENTS.md. Both conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. The branch's entire gated diff is FOUR
+NEW FILES — `sdk/tongflow/engine/fingerprint.py`, `sdk/tests/test_fingerprint.py`,
+`sdk/tests/test_fingerprint_vectors.py`, `sdk/tests/fixtures/fingerprint_vectors.json`
+— so no pre-existing feature can own any of them. Ownership was computed per file
+under the rule settled 2026-07-29, not inferred from the subtree: each feature's
+owned set is the gated diff of the merge commit that landed it, intersected with
+this branch's gated diff. All eight intersections are empty. Note in particular
+that conformance-l0 declares `paths: ["sdk/**"]`, so narrow scope does NOT save it
+— it is carried on ownership, not on scope.
+
+(2) Standing checks green on the new tree, measured by round 2 of this branch's
+own S4 verify rather than re-run by hand: `pnpm build && pnpm typecheck`,
+`pnpm lint:check`, `pnpm test`, `cd sdk && pytest` (133 passed),
+`pnpm verify:plugins`, and the generated-ABI drift check — all six suite commands
+exited 0, alongside 16/16 feature evals.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.
 
 ## Gate 2 checklist (human)
 
