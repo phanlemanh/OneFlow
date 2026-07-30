@@ -402,9 +402,11 @@ def test_hit_reputs_blobs_into_current_run_store(tmp_path):
     }
 
     calls: list[dict] = []
+    frame_calls: list[dict] = []
 
     def inv(plugin_id, slot, business_input, plugin_dir, model):
         if slot == "get-first-frame":
+            frame_calls.append(business_input)
             # No `file_key` here: `_normalize_file_ref` treats a present
             # `file_key` as already-resolved and returns it as-is, ignoring
             # `bytesBase64` entirely -- so raw bytes are the only way to force
@@ -426,7 +428,13 @@ def test_hit_reputs_blobs_into_current_run_store(tmp_path):
                                 invoker=inv, auto_install=False)
 
     r1 = once()
+    # AC-2's hit premise, asserted: n1 (get-first-frame) is tier A, so it must
+    # be invoked exactly once cold. A `NodeCache.get` stubbed to always miss
+    # would still pass every assertion below it if this were skipped.
+    assert len(frame_calls) == 1
     r2 = once()
+    # ... and zero more times warm -- the actual HIT this test is named for.
+    assert len(frame_calls) == 1
     assert r1["status"] == "success" and r2["status"] == "success"
     # n2 (image-describe) is outside TIER_A_SLOTS, so it is invoked fresh on
     # both runs regardless of n1's cache state -- the point is WHAT it got.
@@ -468,26 +476,84 @@ def _batch_workflow(items: list[str]) -> dict:
 
 def test_batch_partial_hit_calls_only_the_misses(tmp_path):
     # AC-11. This is what a per-node cache cannot do, so it is also the test
-    # that proves the hook really is per-call.
+    # that proves the hook really is per-call. It also carries AC-15's second
+    # half: a/b/c are three distinct in-batch keys written on a cold cache
+    # (if they collided, run 1 would show fewer than 3 invoker calls) -- keep
+    # that half in mind if this test is ever trimmed.
     _, c1 = _run(_batch_workflow(["a", "b", "c"]), tmp_path)
     assert len([x for x in c1 if x["slot"] == "split-text"]) == 3
-    _, c2 = _run(_batch_workflow(["a", "b", "c", "d", "e"]), tmp_path)
+    r2, c2 = _run(_batch_workflow(["a", "b", "c", "d", "e"]), tmp_path)
     # a/b/c are cached; only d/e run.
     assert len([x for x in c2 if x["slot"] == "split-text"]) == 2
+    # AC-11's order/completeness half: the merged output must carry all 5
+    # items IN BATCH ORDER, not just the 2 that were actually invoked. A
+    # runner that only appends cached results for unbatched nodes would
+    # silently drop the 3 hits here -- gộp kết quả sai thứ tự là hỏng dữ liệu
+    # chứ không phải chậm.
+    assert [x["text"] for x in r2["outputs"]["n1"]] == [
+        "out:a", "out:b", "out:c", "out:d", "out:e",
+    ]
+
+
+def _three_node_workflow(text: str) -> dict:
+    """`_two_node_workflow`'s n1 (combine-text) -> n2 (split-text), plus an
+    independent n3 (combine-text) sharing no data node with n1.
+
+    AC-15's second half needs a node that is NOT downstream of the edited
+    one: n3 has its own static binding and no dependency on n1, so it must
+    make zero calls when only n1's business field changes -- the exact
+    opposite of whole-workflow invalidation, which would rerun n3 too. A
+    local builder rather than a change to `_two_node_workflow`: Task 3's
+    tests depend on that fixture's exact shape.
+    """
+    return {
+        "executableNodes": [
+            {"id": "n1", "feature": "combine-text", "pluginId": "oneflow-text",
+             "bindings": {"text": {"kind": "static", "value": text}},
+             "outputs": [{"sourceField": "text", "nodeType": "textNode",
+                          "dataField": "texts", "downstreamDataNodeId": "d1"}],
+             "level": 0, "dependencies": []},
+            {"id": "n2", "feature": "split-text", "pluginId": "oneflow-text",
+             "bindings": {"text": {"kind": "handle", "consumerShape": "scalar",
+                                    "sources": [{"fromNodeId": "d1",
+                                                 "fromField": "texts"}]}},
+             "outputs": [], "level": 1, "dependencies": ["n1"]},
+            {"id": "n3", "feature": "combine-text", "pluginId": "oneflow-text",
+             "bindings": {"text": {"kind": "static", "value": "independent"}},
+             "outputs": [], "level": 0, "dependencies": []},
+        ],
+        "dataNodes": [{"id": "d1", "nodeType": "textNode"}],
+        "executionLevels": [["n1", "n3"], ["n2"]],
+        "inputs": [],
+    }
 
 
 def test_changing_one_node_input_reruns_only_it_and_downstream(tmp_path):
     # AC-15 — the criterion the parent spec is NAMED after, and the one the
     # clean-context critique found missing. An implementation keying on
     # node-level params instead of the per-call materialized input passes
-    # AC-1/AC-6/AC-11/AC-13 while serving stale output on every edit.
-    wf1 = _two_node_workflow("first")
-    _, c1 = _run(wf1, tmp_path)
-    assert len(c1) == 2
+    # AC-1/AC-6/AC-11/AC-13 while serving stale output on every edit. Three
+    # allowlisted nodes so a whole-workflow-digest implementation can be told
+    # apart from a real per-call key: n3 shares no data node with n1, so if
+    # editing n1 also reran n3, that would be whole-workflow invalidation
+    # wearing a partial-rerender costume.
+    wf1 = _three_node_workflow("first")
+    r1, c1 = _run(wf1, tmp_path)
+    assert len(c1) == 3
     _, c2 = _run(wf1, tmp_path)
     assert len(c2) == 0
-    wf2 = _two_node_workflow("second")                  # one business field changed
+    wf2 = _three_node_workflow("second")                # one business field changed
     r3, c3 = _run(wf2, tmp_path)
-    # n1 changed -> n1 reruns; n2 is downstream of it -> n2 reruns too.
+    # n1 changed -> n1 reruns; n2 is downstream of it -> n2 reruns too;
+    # n3 -- independent of n1 -- must stay a hit: 0 calls.
+    combine_text_calls = [c for c in c3 if c["slot"] == "combine-text"]
+    split_text_calls = [c for c in c3 if c["slot"] == "split-text"]
+    n3_calls = [c for c in combine_text_calls
+                if c["input"].get("text") == "independent"]
+    n1_calls = [c for c in combine_text_calls
+                if c["input"].get("text") != "independent"]
+    assert len(n1_calls) == 1
+    assert len(split_text_calls) == 1
+    assert len(n3_calls) == 0
     assert len(c3) == 2
-    assert r3["outputs"]["n1"] != _run(wf1, tmp_path)[0]["outputs"]["n1"]
+    assert r3["outputs"]["n1"] != r1["outputs"]["n1"]
