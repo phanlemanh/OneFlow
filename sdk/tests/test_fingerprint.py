@@ -45,6 +45,8 @@ def _fp(**over):
         "plugin_id": "oneflow-image",
         "plugin_rev": "a" * 40,
         "plugin_dirty": False,
+        "tenant": "local",
+        "abi_digest": "0" * 64,
         "model": None,
         "business_input": {"text": "a cat"},
     }
@@ -146,7 +148,8 @@ def test_stable_across_processes_with_different_hashseed():
     script = (
         "from tongflow.engine.fingerprint import node_fingerprint;"
         "print(node_fingerprint(slot='image-gen', plugin_id='oneflow-image',"
-        "plugin_rev='a'*40, plugin_dirty=False, model=None,"
+        "plugin_rev='a'*40, plugin_dirty=False, tenant='local',"
+        "abi_digest='0'*64, model=None,"
         "business_input={'text':'a cat','seed':7,'width':512}))"
     )
     keys = []
@@ -354,6 +357,32 @@ def test_sdk_version_patch_same_minor_diff():
         sdk_major("1")
 
 
+def test_tenant_participates_in_the_key():
+    # AC-9's unit half. Two tenants, everything else identical.
+    a = _fp(tenant="user:a")
+    b = _fp(tenant="user:b")
+    _assert_valid_key(a)
+    _assert_valid_key(b)
+    assert a != b
+
+
+def test_missing_tenant_is_not_cacheable():
+    # AC-8's unit half. Empty string and None are both "not declared"; the
+    # single-tenant OSS build must send an explicit sentinel instead.
+    assert _fp(tenant="") is None
+    assert _fp(tenant=None) is None
+
+
+def test_abi_digest_participates_in_the_key():
+    # AC-13's unit half. The ABI is an input to the computation: both
+    # materialize_asset_inputs and convert_asset_outputs_to_file_refs read it.
+    a = _fp(abi_digest="a" * 64)
+    b = _fp(abi_digest="b" * 64)
+    _assert_valid_key(a)
+    _assert_valid_key(b)
+    assert a != b
+
+
 def test_dict_key_insertion_order_does_not_change_key():
     # AC-16. Python dict equality ignores insertion order, but serializing
     # without sort_keys would still hash two "equal" dicts to different byte
@@ -404,6 +433,8 @@ def test_dict_key_insertion_order_does_not_change_key():
             plugin_id="oneflow-image",
             plugin_rev="a" * 40,
             plugin_dirty=False,
+            tenant="local",
+            abi_digest="0" * 64,
             model=None,
             business_input=order_a,
         )
@@ -412,6 +443,8 @@ def test_dict_key_insertion_order_does_not_change_key():
             plugin_id="oneflow-image",
             plugin_rev="a" * 40,
             plugin_dirty=False,
+            tenant="local",
+            abi_digest="0" * 64,
             model=None,
             business_input=order_b,
         )

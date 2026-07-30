@@ -21,7 +21,11 @@ from .callog import normalize_call
 # Bumping this invalidates every existing cache entry on purpose. Change it
 # whenever the meaning of any key component changes, and say so in the
 # changelog (R6).
-KEY_SCHEMA_VERSION = 1
+#
+# 1 -> 2 (L2, 2026-07-30): `tenant` and `abiDigest` joined the payload. Bumped
+# while no entry had ever been written, which is why it cost nothing; doing it
+# after L2 ships would mean invalidating a cache that is running for real.
+KEY_SCHEMA_VERSION = 2
 
 
 def digest_form(slot: str, business_input: dict[str, Any]) -> dict[str, Any]:
@@ -71,6 +75,8 @@ def node_fingerprint(
     plugin_id: str,
     plugin_rev: str | None,
     plugin_dirty: bool,
+    tenant: str | None,
+    abi_digest: str,
     model: str | None,
     business_input: dict[str, Any],
     sdk_version: str | None = None,
@@ -87,14 +93,27 @@ def node_fingerprint(
     where a static checker makes L2's caller handle it. ``plugin_dirty`` has
     no default -- it must always be computed by the caller, never silently
     assumed false.
+
+    ``tenant`` is required and an empty string counts as not declared. It is in
+    the key rather than only in the cache directory path because ``scope = ""``
+    is BOTH a legitimate value in the single-tenant build AND the symptom of a
+    misconfigured cloud, and a path cannot tell those two apart. In the key,
+    two tenants that share a data dir still cannot serve each other.
+
+    ``abi_digest`` is the sha256 of the ABI file in use. The ABI is an input to
+    the computation -- both ``materialize_asset_inputs`` and
+    ``convert_asset_outputs_to_file_refs`` read it -- so omitting it is the
+    same bug class as a compiler cache that does not hash the compiler.
     """
-    if not plugin_rev or plugin_dirty:
+    if not plugin_rev or plugin_dirty or not tenant:
         return None
     payload = {
         "v": KEY_SCHEMA_VERSION,
         "slot": slot,
         "pluginId": plugin_id,
         "pluginRev": plugin_rev,
+        "tenant": tenant,
+        "abiDigest": abi_digest,
         "model": model,
         "sdkMajor": sdk_major(sdk_version),
         "input": digest_form(slot, business_input),
