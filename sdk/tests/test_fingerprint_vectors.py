@@ -140,6 +140,8 @@ def test_vectors_match_character_for_character():
             plugin_id=case["pluginId"],
             plugin_rev=case["pluginRev"],
             plugin_dirty=case["pluginDirty"],
+            tenant=case["tenant"],
+            abi_digest=case["abiDigest"],
             model=case["model"],
             business_input=case["businessInput"],
             # Pinned per-entry -- never the running tongflow.__version__.

@@ -1,5 +1,5 @@
 {
-    "keySchemaVersion": 1,
+    "keySchemaVersion": 2,
     "cases": [
         {
             "name": "scalar-only",
@@ -12,7 +12,9 @@
             "businessInput": {
                 "text": "xin chào"
             },
-            "expected": "8c50dedb19b8185eb71bdeab8f9cb10d5ab05b569425178b8fcf0025a749e052"
+            "expected": "42cd6654ef7b39c5b58827759fb8ca44ed1c2f1a5d80920eeb7f3eb2d82e2fd8",
+            "tenant": "local",
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
         },
         {
             "name": "with-model",
@@ -28,7 +30,9 @@
                 "width": 512,
                 "height": 512
             },
-            "expected": "7067ecb4021ca91c0d2f21e17b0d2b2d8cecc178730ea7ad0be65858fbb7e28a"
+            "expected": "3c5e799e31f1268ca89ebb383b28ce00a6d0367a954cd3fd49f4e8264f1b4086",
+            "tenant": "local",
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
         },
         {
             "name": "inline-asset",
@@ -45,7 +49,9 @@
                     "bytesBase64": "iVBORw0KGgogZmFrZSBwaXhlbHM="
                 }
             },
-            "expected": "d6c6d71538b5cacad1e02001e7471356382995c92b79572071fa773e07b2ba75"
+            "expected": "68f110098f0efae44c9d2c01e726fbf4ead5b570d7aeba9a59786a5202e4e657",
+            "tenant": "local",
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
         },
         {
             "name": "nested-asset-list",
@@ -67,7 +73,9 @@
                     }
                 ]
             },
-            "expected": "42fea0216c76050d48029cd586d46d554f51e9d7d7b7924848f04dbacfc7c66a"
+            "expected": "ee2cd2f228d7c0e5708586e06862832016ffcf9bdbbd18b9895134540873ca49",
+            "tenant": "local",
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
         },
         {
             "name": "unicode-and-empty-dropped",
@@ -81,7 +89,9 @@
                 "text": "Giá: 199.000đ",
                 "userPrompt": ""
             },
-            "expected": "85aceaeecefd24892929c6593457c72015a325392e3983f19819d75f13ec62ac"
+            "expected": "aef209eff754353e87f475bc43788b4463a1b588902989e2a5e396874626f3b2",
+            "tenant": "local",
+            "abiDigest": "0000000000000000000000000000000000000000000000000000000000000000"
         }
     ]
 }
