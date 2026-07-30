@@ -1,0 +1,78 @@
+{
+  "feature_plain": "Nửa còn lại của lời hứa 'sửa miễn phí': phần ĐẮT — video/ảnh/nhạc đã sinh bằng AI — được giữ lại theo từng workflow. Đổi giá thì phần overlay rẻ chạy lại, còn video đã sinh KHÔNG sinh lại. Mở cho 23 loại việc sinh nội dung có núm ngẫu nhiên, trong phạm vi một workflow của một người dùng. Kèm một fix an toàn từ lát trước.",
+  "will_do": [
+    {
+      "id": "AC-1",
+      "p": "Sẽ chạy lại một workflow trộn (sinh AI + cơ khí) mà không gọi plugin lần nào khi không có gì đổi."
+    },
+    {
+      "id": "AC-2",
+      "p": "Sẽ giữ nguyên video đã sinh khi bạn chỉ sửa phần rẻ phía sau nó — đây chính là 'đổi giá không tốn GPU'."
+    },
+    {
+      "id": "AC-4",
+      "p": "Sẽ sinh MỚI khi bạn nhân đôi một node để xin biến thể — hai node giống nhau không bị ép chung một kết quả."
+    },
+    {
+      "id": "AC-14",
+      "p": "Sẽ sinh đủ N bản khi bạn xin N biến thể cùng một prompt trong một lô — không gộp thành một bản nhân N."
+    },
+    {
+      "id": "AC-6",
+      "p": "Sẽ tự đối chiếu danh sách 23 loại việc với hợp đồng kỹ thuật — thêm loại việc mới có núm ngẫu nhiên mà quên phân loại là kiểm thử đỏ ngay."
+    },
+    {
+      "id": "AC-10",
+      "p": "Sẽ chạy lại TOÀN BỘ bằng chứng của ba tính năng bị chạm (lát 0, lát 1, lát 2) — ba chữ ký lại đứng trên bằng chứng thật, không phải carry tự động."
+    }
+  ],
+  "wont_do": [
+    {
+      "id": "AC-3",
+      "p": "Sẽ KHÔNG đưa bản sinh của workflow này cho workflow khác — cùng người dùng cũng không."
+    },
+    {
+      "id": "AC-11",
+      "p": "Sẽ KHÔNG đưa bản sinh của người dùng này cho người dùng khác, kể cả khi hai workflow trùng số định danh."
+    },
+    {
+      "id": "AC-5",
+      "p": "Sẽ KHÔNG dùng lại gì cho phần sinh AI khi chạy ngoài workflow (task đơn lẻ) — 'ghi nhớ theo workflow' không có nghĩa khi không có workflow; phần cơ khí vẫn được cache bình thường."
+    },
+    {
+      "id": "AC-8",
+      "p": "Sẽ CHẶN một lỗ an toàn của lát trước: khi không kiểm được plugin có đang bị sửa dở hay không, coi là ĐANG sửa và tắt cache — trước đây lại coi là sạch."
+    }
+  ],
+  "scope_plain": "Chỉ 23 loại việc sinh nội dung có núm ngẫu nhiên. Chưa làm: nhóm sinh nội dung không có núm (gen-text, mô tả ảnh/video — cố ý chờ tiếng nói người dùng), cơ chế ghim seed để một việc sinh chuyển sang nhóm dùng-chung, giới hạn dung lượng kho (lát sau), và hai hàng đợi cũ giữ nguyên.",
+  "decisions_plain": [
+    {
+      "id": "d-20260730T120001Z-8101",
+      "p": "Đã chọn tính 'cái đã tạo ra' theo TỪNG NODE — nhân đôi node là xin biến thể mới; đổi lại copy node rồi xoá node cũ thì mất phần đã lưu của node đó."
+    },
+    {
+      "id": "d-20260730T120002Z-8238",
+      "p": "Đã chọn nâng phiên bản công thức vân tay ngay bây giờ khi kho cache chỉ mới có trên máy dev — để sau là phải huỷ kho đang chạy thật."
+    },
+    {
+      "id": "d-20260730T120003Z-8375",
+      "p": "KHÔNG mở nhóm sinh-nội-dung-không-núm — cố ý bỏ lỡ tiết kiệm thật vì kỳ vọng người dùng với lời gọi AI lặp lại chưa rõ; mở lại chỉ là thêm một dòng."
+    },
+    {
+      "id": "d-20260730T120004Z-8512",
+      "p": "Đã gộp fix an toàn của lát trước vào lát này — không tốn thêm chữ ký nào vì lát trước đằng nào cũng ký lại."
+    },
+    {
+      "id": "d-20260730T120005Z-8649",
+      "p": "Đã báo giá CẢ BA chữ ký lại ngay từ đầu — lát trước từng phát hiện muộn một chi phí, lần này tính trước."
+    },
+    {
+      "id": "d-20260730T123001Z-8801",
+      "p": "Đã thêm hai tiêu chí sau vòng phản biện: cách ly người dùng trên chính phần sinh AI, và ba bộ bằng chứng chạy lại đầy đủ."
+    },
+    {
+      "id": "d-20260730T123002Z-8938",
+      "p": "Đã chọn mỗi lần gọi trong một lô có dấu riêng — xin 4 biến thể phải ra 4 bản khác nhau; đổi lại đảo thứ tự trong lô làm mất phần đã lưu."
+    }
+  ]
+}
