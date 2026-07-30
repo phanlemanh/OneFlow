@@ -1,0 +1,123 @@
+# 15 eval / 14 tiêu chí — AC-9 (cross-layer) có đôi eval: TS + backend-effect.
+# Kế thừa chuẩn L2: một executor key mỗi tiêu chí, mọi eval khai paths.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_mixed_warm_run
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; workflow image-gen-video(B) -> concat-videos(A) chạy hai lần cùng data_dir/tenant/workflow_id: lần hai invoker 0 lần cho CẢ hai node, outputs byte-identical (chuẩn hoá duy nhất cho handle đục). Đếm lời gọi per-slot, không đếm tổng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_downstream_edit_keeps_gen
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; workflow ấm, đổi một input của node tầng A HẠ NGUỒN rồi chạy lại: node tầng B 0 lời gọi (bản sinh được giữ), node tầng A chạy lại đúng 1 lần. Đây là mệnh đề kinh tế của cả spec — sửa phần rẻ không kéo sinh lại phần đắt; một khoá tầng B nuốt input node khác phải làm eval này đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_workflow_isolation
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; cùng tenant, cùng input, cùng nodeId, KHÁC workflow_id, DÙNG CHUNG data_dir: workflow thứ hai invoker vẫn được gọi cho slot B và hai entry riêng tồn tại. Chung data_dir là điều kiện bắt buộc — tách là eval xanh mà không chứng minh workflowScope nằm trong khoá"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_duplicate_node_fresh
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; MỘT workflow có hai node tầng B khác nodeId mang input giống hệt: invoker gọi cho CẢ hai, hai entry riêng. Guard trực tiếp của quyết định nodeId-vào-khoá 30/07 — bỏ nodeId khỏi workflowScope phải làm eval này đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_no_workflow_id_scoped_off
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; BỐN ca kiểm riêng — workflow_id vắng hẳn, là None, là chuỗi rỗng, và chỉ toàn khoảng trắng (cổng tầng B khoá theo chuỗi KHÔNG rỗng đã strip, không theo sự hiện diện của field — chuỗi rỗng lọt qua sẽ tạo workflowScope 'wf::node:n1' dùng chung cho MỌI run không-workflow của node đó): slot tầng B không đọc không ghi (cả hai chiều, invoker đủ cả hai lần) TRONG KHI slot tầng A cùng run VẪN trúng cache ở lần hai. Fail-closed có phạm vi: tắt nhầm cả tầng A là eval này đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_allowlists_disjoint
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; TIER_B_SLOTS bằng đúng 23 slot liệt kê trong design §3 (so frozenset literal), giao TIER_A ∩ TIER_B rỗng, và gen-text/image-describe/video-describe/audio-describe/music-brief không thuộc list nào"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_workflow_scope_unconditional
+    paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py"]
+    expected: "exit 0; payload v=3 phát workflowScope VÔ ĐIỀU KIỆN — tầng A mang null tường minh chứ không vắng field (kiểm trên chuỗi JSON canonical trước khi băm, không chỉ trên dict); cùng input, workflow_scope=None vs 'wf:1:node:n1' cho hai khoá khác nhau, cả hai non-None 64-hex"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_git_status_failure_is_dirty
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; thư mục có .git nhưng git status --porcelain exit khác 0 (mock/subprocess giả lập): plugin_is_dirty trả True, và end-to-end không đọc không ghi entry, invoker đủ cả hai lần. Chiều fail khớp mọi đường lỗi khác của file: về phía tắt cache"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_l3_workflow_id_sentinel
+    paths: ["src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-delegate.test.ts", "src/lib/task/runner.ts"]
+    expected: "exit 0; nửa TS của AC-9, khẳng định trên chính object của engineOptionsFor: task có workflowId số -> options.workflow_id là chuỗi số đó; task không thuộc workflow -> null, KHÔNG BAO GIỜ chuỗi rỗng. Mutation xoá dòng workflow_id khỏi options phải làm eval này đỏ (bài học wiring-vs-helper của L2)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-9
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_l3_bridge_workflow_id
+    paths: ["sdk/tongflow/engine/__main__.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; nửa backend-effect của AC-9: gọi bridge NDJSON hai lần với options mang workflow_id -> lần hai slot tầng B 0 lời gọi; và cùng request bỏ workflow_id -> tầng B không cache. Chứng minh giá trị TỚI ĐƯỢC run_workflow qua đúng đường host dùng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_l1_l2_evals_on_new_tree
+    paths: ["sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_fingerprint.py", "sdk/tests/test_fingerprint_vectors.py", "sdk/tests/fixtures/fingerprint_vectors.json"]
+    expected: "exit 0; toàn bộ test_fingerprint_vectors.py pass trên cây mới với vector sinh lại dưới v=3, gồm guard AC-14 của L1 (bump 3->4 trong bản copy temp, đỏ-rồi-xanh). Hai feature ký lại phải ký trên bằng chứng chạy lại thật"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_tenant_in_tier_b_key
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; cùng workflow_id, cùng nodeId, cùng input, KHÁC tenant, chung data_dir: tenant thứ hai invoker vẫn được gọi cho slot B, hai entry riêng. Guard P0 của gap-probe — không eval nào khác biến thiên tenant trên slot tầng B"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_l2_full_rerun
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_node_cache.py", "src/lib/task/engine-delegate.server.ts", "src/lib/task/engine-delegate.test.ts"]
+    expected: "exit 0; TOÀN BỘ test_node_cache.py + vitest engine-delegate.test.ts pass trên cây L3 — bằng chứng chạy lại thật cho chữ ký lại của cache-l2-store, một tiêu chí một exit code"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.test.l3_conformance_l0_full_rerun
+    paths: ["sdk/tongflow/engine/runner.py", "src/lib/task/engine-delegate.server.ts", "sdk/tests/test_engine_batch.py", "sdk/tests/conformance/harness.py"]
+    expected: "exit 0; toàn bộ bộ eval của conformance-l0 (pytest batch/conformance/plugin-rev, 3 file vitest, 2 script guard gồm discriminating suite) pass trên cây L3 — bằng chứng chạy lại thật cho chữ ký lại của conformance-l0"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-14
+    executor: test
+    cmd: config:executors.test.sdk_pytest_l3_batch_duplicate_variants
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/fingerprint.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; node tầng B chia lô với >=2 call_params GIỐNG HỆT nhau (xin N biến thể cùng prompt): plugin được gọi một lần cho MỖI call — ordinal của call trong batch tham gia workflowScope của lời gọi tầng B. Nếu gộp call trùng, 4 biến thể thành 4 bản y hệt và eval này đỏ. Tầng A giữ nguyên hành vi gộp (tất định thì gộp là đúng)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

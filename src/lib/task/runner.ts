@@ -115,7 +115,12 @@ export async function dispatchTask(taskId: string): Promise<void> {
             );
             return;
         }
-        return executeWorkflowViaEngine(taskId, wf.executable, {});
+        return executeWorkflowViaEngine(
+            taskId,
+            wf.executable,
+            {},
+            task.workflowId,
+        );
     }
 
     return executeTask(taskId);

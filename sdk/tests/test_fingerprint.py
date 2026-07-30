@@ -1,5 +1,7 @@
 import base64
+import hashlib
 import importlib.util
+import json
 import os
 import re
 import subprocess
@@ -12,7 +14,7 @@ import pytest
 
 from tongflow import __version__ as SDK_VERSION
 from tongflow.engine.callog import normalize_call
-from tongflow.engine.fingerprint import digest_form, node_fingerprint, sdk_major
+from tongflow.engine.fingerprint import KEY_SCHEMA_VERSION, digest_form, node_fingerprint, sdk_major
 
 _HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
 SDK_ROOT = Path(__file__).parent.parent
@@ -49,6 +51,7 @@ def _fp(**over):
         "abi_digest": "0" * 64,
         "model": None,
         "business_input": {"text": "a cat"},
+        "workflow_scope": None,
     }
     args.update(over)
     return node_fingerprint(**args)
@@ -149,7 +152,7 @@ def test_stable_across_processes_with_different_hashseed():
         "from tongflow.engine.fingerprint import node_fingerprint;"
         "print(node_fingerprint(slot='image-gen', plugin_id='oneflow-image',"
         "plugin_rev='a'*40, plugin_dirty=False, tenant='local',"
-        "abi_digest='0'*64, model=None,"
+        "abi_digest='0'*64, model=None, workflow_scope=None,"
         "business_input={'text':'a cat','seed':7,'width':512}))"
     )
     keys = []
@@ -253,7 +256,10 @@ def test_dirty_plugin_is_not_cacheable():
 
     # plugin_dirty has no default -- omitting it must raise TypeError, not
     # silently degrade to False (a flag that can be forgotten is not "always
-    # computed").
+    # computed"). Every other required kwarg (including the new
+    # workflow_scope) is passed explicitly so this guard stays isolated to
+    # the one kwarg under test -- omitting more than one here would let a
+    # missing-workflow_scope regression hide behind this same assertion.
     with pytest.raises(TypeError):
         node_fingerprint(  # type: ignore[call-arg]
             slot="image-gen",
@@ -263,6 +269,7 @@ def test_dirty_plugin_is_not_cacheable():
             abi_digest="0" * 64,
             model=None,
             business_input={"text": "a cat"},
+            workflow_scope=None,
         )
 
     # tenant has no default -- omitting it must raise TypeError.
@@ -275,6 +282,7 @@ def test_dirty_plugin_is_not_cacheable():
             abi_digest="0" * 64,
             model=None,
             business_input={"text": "a cat"},
+            workflow_scope=None,
         )
 
     # abi_digest has no default -- omitting it must raise TypeError.
@@ -285,6 +293,24 @@ def test_dirty_plugin_is_not_cacheable():
             plugin_rev="a" * 40,
             plugin_dirty=False,
             tenant="local",
+            model=None,
+            business_input={"text": "a cat"},
+            workflow_scope=None,
+        )
+
+    # workflow_scope has no default -- omitting it must raise TypeError, just
+    # like every other required kwarg above. This is the guard L2's Task 1
+    # review caught missing: adding a new required kwarg without a dedicated
+    # omit-only-this-one case leaves that kwarg's "always computed, never
+    # silently assumed" contract unverified.
+    with pytest.raises(TypeError):
+        node_fingerprint(  # type: ignore[call-arg]
+            slot="image-gen",
+            plugin_id="oneflow-image",
+            plugin_rev="a" * 40,
+            plugin_dirty=False,
+            tenant="local",
+            abi_digest="0" * 64,
             model=None,
             business_input={"text": "a cat"},
         )
@@ -409,6 +435,78 @@ def test_abi_digest_participates_in_the_key():
     assert a != b
 
 
+def test_workflow_scope_emitted_unconditionally():
+    # AC-7. workflow_scope is a REQUIRED keyword and None is a legitimate
+    # value (tier A), not a "not cacheable" bail like `tenant` or
+    # `plugin_rev`. The key schema invariant carried over from L1 is that
+    # every payload component is emitted unconditionally -- no field is ever
+    # *absent* depending on a value -- so tier A's canonical JSON blob must
+    # contain the literal `"workflowScope":null`, not omit the key entirely.
+    # A bare key-comparison (`k1 != k2`) cannot tell "field present but null"
+    # apart from "field absent"; only inspecting the actual serialized string
+    # before hashing can, which is why this test rebuilds that string itself
+    # rather than trusting the hash alone.
+    slot = "image-gen"
+    plugin_id = "oneflow-image"
+    plugin_rev = "a" * 40
+    tenant = "local"
+    abi_digest = "0" * 64
+    business_input = {"text": "a cat"}
+
+    payload_tier_a = {
+        "v": KEY_SCHEMA_VERSION,
+        "slot": slot,
+        "pluginId": plugin_id,
+        "pluginRev": plugin_rev,
+        "tenant": tenant,
+        "abiDigest": abi_digest,
+        "model": None,
+        "sdkMajor": sdk_major(SDK_VERSION),
+        "input": digest_form(slot, business_input),
+        "workflowScope": None,
+    }
+    blob_tier_a = json.dumps(payload_tier_a, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    assert '"workflowScope":null' in blob_tier_a, (
+        "tier A's canonical JSON blob must contain the literal "
+        '"workflowScope":null -- the field present but null -- not omit the '
+        "key entirely."
+    )
+
+    k_tier_a = _fp(
+        slot=slot,
+        plugin_id=plugin_id,
+        plugin_rev=plugin_rev,
+        plugin_dirty=False,
+        tenant=tenant,
+        abi_digest=abi_digest,
+        model=None,
+        business_input=business_input,
+        workflow_scope=None,
+    )
+    _assert_valid_key(k_tier_a)
+    # Load-bearing: this is what binds the blob this test hand-rebuilt above
+    # to the actual hash node_fingerprint() produces in production -- without
+    # it, everything above only proves this test's own blob construction is
+    # self-consistent, never that it matches what node_fingerprint() hashes.
+    assert k_tier_a == hashlib.sha256(blob_tier_a.encode("utf-8")).hexdigest()
+
+    # Same input, only workflow_scope differs (None vs a tier-B scope
+    # string) -> two different keys, both passing _assert_valid_key.
+    k_tier_b = _fp(
+        slot=slot,
+        plugin_id=plugin_id,
+        plugin_rev=plugin_rev,
+        plugin_dirty=False,
+        tenant=tenant,
+        abi_digest=abi_digest,
+        model=None,
+        business_input=business_input,
+        workflow_scope="wf:1:node:n1",
+    )
+    _assert_valid_key(k_tier_b)
+    assert k_tier_a != k_tier_b
+
+
 def test_dict_key_insertion_order_does_not_change_key():
     # AC-16. Python dict equality ignores insertion order, but serializing
     # without sort_keys would still hash two "equal" dicts to different byte
@@ -462,6 +560,7 @@ def test_dict_key_insertion_order_does_not_change_key():
             tenant="local",
             abi_digest="0" * 64,
             model=None,
+            workflow_scope=None,
             business_input=order_a,
         )
         key_b = module.node_fingerprint(
@@ -472,6 +571,7 @@ def test_dict_key_insertion_order_does_not_change_key():
             tenant="local",
             abi_digest="0" * 64,
             model=None,
+            workflow_scope=None,
             business_input=order_b,
         )
         return key_a, key_b

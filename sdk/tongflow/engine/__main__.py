@@ -10,7 +10,8 @@ Request shape::
      "inputs": {<name>: ...},
      "options": {"plugins_dir", "data_dir", "out_dir", "abi_path",
                  "file_key_base", "inline_outputs", "asset_endpoint",
-                 "asset_token", "auto_install", "org", "task_id", "tenant"}}
+                 "asset_token", "auto_install", "org", "task_id", "tenant",
+                 "workflow_id"}}
 
 The TongFlow desktop app uses this to delegate workflow execution to the SDK
 engine (one execution core) while keeping its own DB / SSE / abort shell. The
@@ -68,6 +69,7 @@ def main() -> int:
             on_progress=on_progress,
             task_id=opts.get("task_id") or "tongflow-engine",
             tenant=opts.get("tenant"),
+            workflow_id=opts.get("workflow_id"),
         )
     except Exception as e:  # noqa: BLE001 - report as a final error line
         _emit({"error": str(e)})

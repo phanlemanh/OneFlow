@@ -144,6 +144,7 @@ def test_vectors_match_character_for_character():
             abi_digest=case["abiDigest"],
             model=case["model"],
             business_input=case["businessInput"],
+            workflow_scope=case["workflowScope"],
             # Pinned per-entry -- never the running tongflow.__version__.
             # Otherwise an ordinary SDK minor/patch bump would turn every
             # vector red for a reason that has nothing to do with the key

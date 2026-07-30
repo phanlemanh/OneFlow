@@ -1,0 +1,138 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · cache-l3-tier-b</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Cache L3 — tier B, per-workflow memo for nondeterministic slots</h1><div class="sub">Trang bằng chứng · <span class="mono">cache-l3-tier-b</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E1-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E2-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E3-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E4-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E5-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E6-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E7-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E8-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E9-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E10-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E11-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E12-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-12</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E13-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-13</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E14-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-14</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-cache-l3-tier-b-E15-r1</td><td class="mono">2026-07-30T09:15:00Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · test</h3><p class="crit">AC-1: Given workflow hai node `image-gen-video`(tầng B) → `concat-videos`(tầng A) đã chạy với `workflow_id` và `tenant` hợp lệ, When chạy lại y hệt cùng `data_dir`/`workflow_id`, Then invoker **0 lần** cho CẢ hai node và outputs byte-identical (chuẩn hoá duy nhất cho handle đục của store, kế thừa AC-1 của L2). *Kịch bản §4 thu nhỏ, nửa &quot;trúng&quot;: tầng B trúng CÙNG tầng A trong một run trộn.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E1-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_mixed_warm_run</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.16s</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · test</h3><p class="crit">AC-2: Given workflow ở AC-1 đã ấm, When đổi một input của **node tầng A hạ nguồn** rồi chạy lại, Then node tầng B **0 lời gọi** (bản sinh được giữ) và node tầng A chạy lại đúng 1 lần. *Đây là toàn bộ mệnh đề kinh tế: sửa phần rẻ không kéo sinh lại phần đắt. Nếu khoá tầng B vô tình nuốt input của node khác (khoá theo mức workflow thay vì per-call), tiêu chí này đỏ.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E2-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_downstream_edit_keeps_gen</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.26s</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · test</h3><p class="crit">AC-3: Given cùng tenant, cùng input, cùng `nodeId`, nhưng **`workflow_id` khác nhau**, When chạy workflow thứ hai, Then invoker **vẫn được gọi** cho slot tầng B và hai entry riêng tồn tại. *Memo theo workflow nghĩa là bản sinh của workflow này không phục vụ workflow kia — dùng chung `data_dir` là điều kiện bắt buộc của ca kiểm, như AC-9 của L2.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E3-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_workflow_isolation</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · test</h3><p class="crit">AC-4: Given một workflow có **hai node tầng B khác `nodeId`** mang input giống hệt nhau, When chạy, Then invoker được gọi cho **cả hai** và hai entry riêng tồn tại. *Quyết định nodeId-vào-khoá: nhân đôi node để mong biến thể phải sinh mới. Nếu khoá bỏ nodeId, tiêu chí này đỏ — nó là guard trực tiếp của quyết định 30/07.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E4-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_duplicate_node_fresh</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · test</h3><p class="crit">AC-5: Given task **không có `workflow_id` dùng được** — field vắng, `None`, chuỗi rỗng, hay chỉ toàn khoảng trắng (bốn ca kiểm riêng; cổng tầng B khoá theo chuỗi KHÔNG rỗng, không theo sự hiện diện của field), When chạy hai lần một workflow chứa slot tầng B và slot tầng A, Then slot tầng B **không đọc không ghi** (cả hai chiều, cả hai lần invoker gọi đủ) còn slot tầng A **vẫn cache bình thường**. *Fail-closed có phạm vi: thiếu scope tầng B chỉ tắt tầng B — tắt cả tầng A là phạt nhầm.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E5-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_no_workflow_id_scoped_off</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.13s</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · test</h3><p class="crit">AC-6: Given hằng số `TIER_B_SLOTS`, When kiểm nội dung, Then nó bằng đúng 23 slot có núm liệt kê trong design §3 **và** `TIER_A_SLOTS ∩ TIER_B_SLOTS = ∅` **và** nhóm sinh-nội-dung-không-núm (`gen-text`, `image-describe`, `video-describe`, `audio-describe`, `music-brief`) **không** thuộc list nào. *Một slot ở cả hai tầng là hai ngữ nghĩa cache cho một phép tính; slot descope lọt vào là mở rộng scope không qua gate.* **Và** When test đọc `config/tongflow.abi.json` lúc chạy test (không phải lúc runtime — giữ nguyên luật không-suy-lúc-chạy), Then {slot có `seed`/`temperature`/`top_p`} ⊆ `TIER_B_SLOTS` ∪ {tập descope tường minh} và giao với `TIER_A_SLOTS` rỗng. *Gap-probe P1: so hằng với literal thiết kế là tự-xác-nhận — một slot có núm bị sót lúc dẫn xuất 30/07 mà đang nằm ở TIER_A sẽ được cache chéo workflow như thể tất định; guard này biến cả ABI-thêm-slot tương lai thành test đỏ thay vì phân loại sai âm thầm.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E6-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_allowlists_disjoint</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.03s</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · test</h3><p class="crit">AC-7: Given khoá tầng A ở v=3, When so payload với v=2, Then thành phần `workflowScope` phát **vô điều kiện** bằng `null` cho tầng A (không phải vắng field), và hai input y hệt chỉ khác tầng cho khoá khác nhau. *Giữ bất biến L1 &quot;mọi thành phần phát vô điều kiện, không có trục absence-collision&quot;; đồng thời chứng minh v=3 thật sự đổi khoá tầng A (invalidation có chủ đích, R6).*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E7-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_workflow_scope_unconditional</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.10s</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · test</h3><p class="crit">AC-8: Given thư mục plugin có `.git` nhưng `git status --porcelain` **exit khác 0** (mô phỏng index hỏng/lỗi quyền), When chạy hai lần, Then coi là **dirty** — không đọc, không ghi, invoker gọi đủ cả hai lần. *Fix fail-open gộp từ Known limits của L2: rev đọc được mà độ bẩn không biết được thì code đã-sửa bị cache dưới khoá rev-sạch — hiểm hoạ R1. Chiều fail phải khớp mọi đường lỗi khác của file: về phía tắt cache.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E8-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_git_status_failure_is_dirty</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.32s</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · test</h3><p class="crit">AC-9</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E9-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_l3_workflow_id_sentinel</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>green</b></span></div>
+<pre class="out">Tests  1 passed | 2 skipped (3)
+Start at  15:59:07
+Duration  262ms (transform 37ms, setup 0ms, import 22ms, tests 136ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · test</h3><p class="crit">AC-9</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E10-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_bridge_workflow_id</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.19s</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · test</h3><p class="crit">AC-10: Given vector L1 sinh lại dưới v=3, When chạy toàn bộ `test_fingerprint.py` + `test_fingerprint_vectors.py` gồm guard AC-14 của L1 (bump 3→4 trong bản copy temp), Then tất cả pass và guard đỏ-rồi-xanh đúng chiều. *Chữ ký lại của L1 đứng trên bằng chứng chạy lại thật; AC-12/AC-13 lo hai feature còn lại — ba chữ ký, ba tiêu chí, ba exit code riêng.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E11-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_l1_l2_evals_on_new_tree</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">....................                                                     [100%]
+20 passed in 0.37s</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · test</h3><p class="crit">AC-11: Given cùng `workflow_id`, cùng `nodeId`, cùng input, **khác `tenant`**, dùng chung một `data_dir`, When tenant thứ hai chạy, Then invoker **vẫn được gọi** cho slot tầng B và hai entry riêng tồn tại. *Gap-probe P0: AC-9 của L2 chỉ đo tenant ở khoá tầng A — tầng B chưa tồn tại lúc đó. Không có tiêu chí này, một implementation coi `workflowScope` là duy-nhất-toàn-cục có thể bỏ tenant khỏi nhánh tầng B, và tenant T2 nhân bản workflow giữ nguyên id sẽ nhận video T1 đã sinh — mọi eval khác vẫn xanh vì không eval nào biến thiên tenant trên slot B.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E12-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_tenant_in_tier_b_key</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.04s</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · test</h3><p class="crit">AC-12: Given bộ eval của **`cache-l2-store`** (toàn bộ `test_node_cache.py` + vitest `engine-delegate.test.ts`), When chạy lại trên cây L3, Then tất cả pass. *Chữ ký lại của L2 phải đứng trên bằng chứng chạy lại thật — L3 đổi cấu trúc nhánh cache trong `runner.py` nên chính các test &quot;slot ngoài allowlist&quot; của L2 là thứ dễ vỡ nhất.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E13-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_l2_full_rerun</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  3 passed (3)
+Start at  15:59:22
+Duration  348ms (transform 85ms, setup 0ms, import 45ms, tests 198ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · script</h3><p class="crit">AC-13: Given bộ eval của **`conformance-l0`** (batch/conformance/plugin-rev pytest + 3 file vitest + 2 script guard), When chạy lại trên cây L3, Then tất cả pass. *Cùng lý do — nó sở hữu `runner.py` và `engine-delegate.server.ts`; guard discriminating của nó là bằng chứng ngữ nghĩa fan-out không bị cache branch làm lệch.*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E14-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.l3_conformance_l0_full_rerun</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: the conformance suite discriminates on all three perturbation kinds
+OK: TypeScript install -&gt; Python scan preserved pluginRev 5419fbba4c1bd525be60028fdc7201345d1db009</pre>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge pass">PASS</span> &nbsp;E15 · test</h3><p class="crit">AC-14: Given một node tầng B chia lô có **≥2 `call_params` giống hệt nhau** (người dùng xin N biến thể cùng prompt), When chạy, Then plugin được gọi **một lần cho mỗi call** — thứ tự call (ordinal) tham gia `workflowScope` của lời gọi tầng B trong batch. *Gap-probe P1: per-call fan-out của L2 viết cho tầng A tất định, nơi gộp call trùng là ĐÚNG; ở tầng B nó đảo ngược đúng kỳ vọng mà AC-4 bảo vệ — 4 biến thể thành 4 bản y hệt. Nhất quán với quyết định nodeId-vào-khoá: trùng input mà mong khác nhau thì phải sinh riêng. Giá đã nhận: đảo thứ tự item trong batch làm miss (đó là một lần sửa bài, chấp nhận).*</p>
+<div class="kv"><span>run_id <b>minted-cache-l3-tier-b-E15-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_batch_duplicate_variants</b></span><span>verified_at <b>2026-07-30T09:15:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.06s</pre>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">E9 (AC-9, nửa TS của cặp E9/E10) — pass trên cả HEAD lẫn baseline diffBase, nên tự thân không phân biệt được feature mới: `engineOptionsFor` với `workflow_id`/`null` đã đúng shape cả trước khi tier-B được thêm. Nên viết lại assertion để ép cụ thể hành vi workflow_id mới liên quan tier-B, hoặc xác nhận đây là regression-guard có chủ ý (guard giữ hành vi cũ không đổi) và giữ nguyên.
+**Định đoạt (main loop):** giữ nguyên có chủ ý — E9 là regression-guard cho sentinel shape (hành vi `engineOptionsFor` có từ L2, nên pass trên baseline là kỳ vọng). Guard PHÂN BIỆT cho wiring AC-9 không phải E9 mà là type system: fix I1 của final review làm `workflowId` thành tham số bắt buộc của `executeWorkflowViaEngine` — xoá wiring ở bất kỳ hop nào là lỗi compile (đã chứng minh TS2554/TS2345 trong `.superpowers/sdd/final-review-fix-report.md`), và `pnpm typecheck` nằm trong suite commands của chính round này. Nửa hành-vi của AC-9 do E10 (backend-effect qua bridge) đảm nhiệm.</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: all 15 evals (E1-E15) passed on first run; suite reruns (pnpm build/typecheck/lint/test, full sdk pytest, verify:plugins, gen:abi diff-check) also green — no return to implementation needed.</li></ul>
+<h2>Checklist Cổng 2 (bạn)</h2><div class="card"><ul class="ck"><li><input type="checkbox" id="ck0"><label for="ck0">Read the table + spot-check 1-2 evidence blocks</label></li><li><input type="checkbox" id="ck1"><label for="ck1">Personally verify every judgment item marked UNCERTAIN, then fill its</label></li><li><input type="checkbox" id="ck2"><label for="ck2">T3 only: personally verify ALL judgment items and fill `human_override`</label></li><li><input type="checkbox" id="ck3"><label for="ck3">If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when</label></li><li><input type="checkbox" id="ck4"><label for="ck4">Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract</label></li></ul><div class="note">Tick để theo dõi — chỉ lưu trong trình duyệt; quyết định THẬT vào human_signoff / human_override của report.</div></div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

@@ -68,6 +68,65 @@ TIER_A_SLOTS = frozenset({
     "arrange-group",
 })
 
+# Tier B is also a hand-maintained allowlist, NOT derived from the ABI at
+# runtime (same rule as Tier A above) -- but it WAS derived once, on
+# 2026-07-30, from the ABI (every slot whose `inputs.properties` carries
+# `seed`/`temperature`/`top_p`) and then pinned here for review. Reused
+# within one workflow+node scope (`workflowScope`), never across workflows or
+# tenants: "same input -> reuse what you already generated", not "same input
+# -> same output" (impossible for a model with no seed to pin).
+#
+# `image-upscale` / `video-upscale` DO have a `seed` field, so they land here
+# rather than Tier A despite spec D3's example -- that example assumed the
+# seed gets pinned somewhere, but nothing in this slice pins it yet. Move
+# them to Tier A once a seed-pinning mechanism exists.
+TIER_B_SLOTS = frozenset({
+    "audio-video-lip-sync",
+    "gen-music",
+    "image-edit",
+    "image-fusion",
+    "image-gen",
+    "image-gen-model",
+    "image-gen-text",
+    "image-gen-video",
+    "image-image-gen-video",
+    "image-upscale",
+    "images-gen-video",
+    "music-complete",
+    "music-cover",
+    "music-extract",
+    "music-lego",
+    "music-repaint",
+    "speech-text-gen-video",
+    "speech-video-gen-video",
+    "text-gen-video",
+    "video-edit",
+    "video-gen-text",
+    "video-image-gen-video-move",
+    "video-upscale",
+})
+
+# The generative-no-knob group: nondeterministic (an LLM/generative call) but
+# with no seed/temperature/top_p knob to call "unpinned" -- so they fit
+# neither tier's rationale as written. Caching them is desirable in principle
+# (an unchanged prompt re-running gen-text is wasted spend) but user
+# expectations around a repeated LLM call are not yet settled, so this slice
+# deliberately leaves them uncached. Kept as an explicit constant (rather than
+# just "absent from both lists") so the ABI drift guard below has a concrete
+# reference set to check against, and so opening this group later is a
+# one-line move, not a rediscovery.
+DESCOPED_GENERATIVE_SLOTS = frozenset({
+    "gen-text",
+    "image-describe",
+    "video-describe",
+    "audio-describe",
+    "music-brief",
+    "text-gen-speech-preset",
+    "text-gen-speech-clone",
+    "text-gen-speech-instruct",
+    "text-audio-gen-speech",
+})
+
 _BLOB_KEY = "__cache_blob"
 _SIZE_KEY = "__cache_size"
 _EXT_KEY = "__cache_ext"
@@ -92,9 +151,18 @@ def plugin_is_dirty(plugin_dir: Path) -> bool:
     plugin keeps its rev and the cache would serve its old result forever —
     the blocking condition conformance-l0 recorded for this slice.
 
-    Not a checkout, or no git binary, or git failing for any reason: return
-    False. Those states are already uncacheable via a missing `plugin_rev`, and
-    reporting them as "dirty" too would conflate two independent reasons.
+    Not a checkout, or no git binary: return False. Those states are already
+    uncacheable via a missing `plugin_rev`, and reporting them as "dirty" too
+    would conflate two independent reasons -- keep them distinguishable rather
+    than folding a third failure mode into the same signal.
+
+    But `git status --porcelain` itself running and exiting non-zero (index
+    corruption, a permissions error) is a THIRD, different case: unlike the
+    two above, the rev IS readable here -- `plugin_rev` is present and would
+    key a cache entry -- while dirtiness is simply unknown. Reporting that as
+    clean is the R1 scenario this fix closes: edited plugin code gets cached
+    under a clean-rev key and served back forever. So this branch alone
+    returns True (dirty), while the two branches above keep returning False.
 
     Deliberate choice: `git status --porcelain` reports untracked files
     (`??`) as dirty too, not just modified-tracked files. That is fail-safe
@@ -118,7 +186,7 @@ def plugin_is_dirty(plugin_dir: Path) -> bool:
     except OSError:
         return False
     if r.returncode != 0:
-        return False
+        return True
     return bool(r.stdout.strip())
 
 

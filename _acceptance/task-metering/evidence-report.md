@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent (round 14)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2
-human_signoff: Manh 2026-07-25
+verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
+human_signoff: Manh 2026-07-30
 ---
 
 # Evidence Report: task-metering
@@ -811,3 +811,9 @@ The human signature line in frontmatter was not touched.
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+
+---
+
+Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code changed on this branch, so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to 77fb83f9cc25c9d65e0021563203aafd899928e0. A FRESH human signature is required at cache-l3-tier-b's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): its own eval commands rerun locally on this tree, 2026-07-30 — `pnpm vitest run src/db/metering-schema.test.ts` (4 passed, exit 0) and `pnpm vitest run src/lib/task/metering.test.ts` (6 passed, exit 0); standing checks E10/E11/E12 covered by cache-l3-tier-b S4 round 1 suite (full vitest 350 passed, build+typecheck, lint — run-log `_acceptance/cache-l3-tier-b/run-log.jsonl`). The touched file is `src/lib/task/runner.ts`: L3 added the `task.workflowId` argument to the engine delegate call inside dispatchTask; the metering measurement window and update payloads are unchanged, and E4-E9's suite proves it.

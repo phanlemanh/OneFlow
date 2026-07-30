@@ -55,6 +55,7 @@ describe("engine delegate options", () => {
             assetOptions: {},
             autoInstall: true,
             taskId: "task-1",
+            workflowId: null,
         };
         expect(engineOptionsFor("", extras).tenant).toBe("local");
         expect(engineOptionsFor("abc", extras).tenant).toBe("user:abc");
@@ -82,10 +83,43 @@ describe("engine delegate options", () => {
             assetOptions: {},
             autoInstall: true,
             taskId: "task-1",
+            workflowId: null,
         };
         const optsA = engineOptionsFor("abc", extras);
         const optsB = engineOptionsFor("abc", extras);
         expect(optsA.data_dir).toBe(scopedDataDirFor("abc"));
         expect(optsA.data_dir).toBe(optsB.data_dir);
+    });
+
+    it("emits options.workflow_id as a numeric string, or null — never an empty string", async () => {
+        // AC-9 (cross-layer): runner.ts threads task.workflowId through
+        // engineOptionsFor into options.workflow_id. Assert on the actual
+        // built OBJECT (not a standalone helper) so deleting the
+        // `workflow_id` line from the builder reddens this test.
+        //
+        // `workflowId` is a REQUIRED field of `EngineOptionsExtras` (I1
+        // fix): a non-workflow task must pass `workflowId: null` explicitly,
+        // there is no "omitted" case to test here anymore — omitting it is
+        // now a `pnpm typecheck` failure, not a runtime null. See the I1
+        // mutation proof (delete `workflowId,` from the extras object in
+        // engine-delegate.server.ts) for that guarantee.
+        const { engineOptionsFor } = await import("./engine-delegate.server");
+        const baseExtras = {
+            pluginsDir: "/plugins",
+            assetOptions: {},
+            autoInstall: true,
+            taskId: "task-1",
+        };
+
+        const withId = engineOptionsFor("", { ...baseExtras, workflowId: 41 });
+        expect(withId.workflow_id).toBe("41");
+        expect(withId.workflow_id).not.toBe("");
+
+        const withNull = engineOptionsFor("", {
+            ...baseExtras,
+            workflowId: null,
+        });
+        expect(withNull.workflow_id).toBeNull();
+        expect(withNull.workflow_id).not.toBe("");
     });
 });

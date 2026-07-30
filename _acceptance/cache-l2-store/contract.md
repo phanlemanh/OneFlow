@@ -5,7 +5,7 @@ slug: cache-l2-store
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, api]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-07-30
 time_human_minutes: {gate1: 25, gate2: 20}
@@ -71,6 +71,11 @@ Không gian ≈ 5×5×3×4 = 300 ô → quét **pairwise** theo Pareto của pre
 - **`engineOptionsFor` spread `assetOptions` SAU `tenant`/`data_dir`**: một key tương lai trùng tên sẽ âm thầm đè giá trị dẫn xuất từ scope — đúng lớp regression mà seam này sinh ra để chặn, và test hiện truyền `assetOptions: {}` nên không bắt được. Sửa = đảo thứ tự spread hoặc assert không trùng key.
 - **`NodeCache.get/put` nuốt mọi ngoại lệ không một dòng log**: cache hỏng vĩnh viễn (sai quyền sau migration) không phân biệt được với cache lạnh. Degrade-to-miss là đúng spec §8; thiếu là tính quan sát được — một warning memo hoá mỗi run là đủ.
 - **Comment `node_cached` trong `runner.py` nói L2 phát event đó — L2 không phát.** Cache hit đi qua `node_completed` như run thường; wiring `engine-events.ts` cho `node_cached` vẫn là dead code. Hoặc phát event ở đường hit, hoặc sửa comment nói lát nào sở hữu nó.
+- **L3 (`cache-l3-tier-b`, 2026-07-30, nhánh `feat/cache-l3-tier-b`) sửa `node_cache.py`** — thêm
+  `TIER_B_SLOTS`, `DESCOPED_GENERATIVE_SLOTS`, và sửa `plugin_is_dirty` để coi `git status` exit
+  khác 0 là dirty, đóng đúng known limit **đầu tiên** ở mục này — **và** sửa cổng cache của
+  `runner.py`. Cả hai file feature này sở hữu. Theo luật per-file (AGENTS.md §2), chữ ký Cổng 2
+  của feature này **không carry-forward được**: phải verify lại và ký lại cùng PR của L3.
 
 ## Notes`.
 - Hai run ghi song song cùng một entry — atomic write đã phủ phần nguy hiểm; không đáng một AC riêng ở L2.
