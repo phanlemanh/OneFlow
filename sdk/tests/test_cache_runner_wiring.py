@@ -124,7 +124,7 @@ def test_reuse_off_touches_nothing(tmp_path, monkeypatch):
 
 
 def test_invalid_reuse_value_raises(tmp_path):
-    # AC-9. Validated before any preflight work: the invoker must never run.
+    # AC-10. Validated before any preflight work: the invoker must never run.
     wf = _two_node_workflow("hello")
     calls: list[str] = []
 
@@ -254,7 +254,7 @@ def _events_workflow(items: list[str]) -> dict:
 
 
 def test_full_hit_emits_node_cached_partial_does_not(tmp_path):
-    # AC-16. Prime: "full" gets cached, "batch" gets a/b/c cached (cold node
+    # AC-12. Prime: "full" gets cached, "batch" gets a/b/c cached (cold node
     # ignored -- it is never cacheable regardless of priming).
     _run(_events_workflow(["a", "b", "c"]), tmp_path)
 
@@ -281,7 +281,7 @@ def test_full_hit_emits_node_cached_partial_does_not(tmp_path):
 
 
 def test_run_workflow_auto_sweeps_to_cap_param_env_default(tmp_path, monkeypatch):
-    # AC-10/AC-12. Cap resolution chain (param -> env -> default) plus the
+    # AC-16. Cap resolution chain (param -> env -> default) plus the
     # end-of-run sweep actually running, on both the success and failure paths.
     monkeypatch.delenv("TONGFLOW_CACHE_MAX_BYTES", raising=False)
     assert resolve_cache_max_bytes(None) == DEFAULT_CACHE_MAX_BYTES

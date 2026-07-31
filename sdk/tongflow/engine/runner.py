@@ -428,7 +428,7 @@ def run_workflow(
                 plugin_dir = plugins_dir / cfg["localSubdir"]
 
                 results: list[dict[str, Any]] = []
-                # Per-node `node_cached` bookkeeping (AC-16): a full hit needs
+                # Per-node `node_cached` bookkeeping (AC-12): a full hit needs
                 # every call in this node's loop to have been a HIT, and the
                 # emitted `fingerprint` is the FIRST hit's key, not the last --
                 # reset per node, not per run.
@@ -637,7 +637,7 @@ def run_workflow(
 
     status = "success" if not error_summaries else "failed"
 
-    # End-of-run maintenance sweep (AC-12): on BOTH the success path and the
+    # End-of-run maintenance sweep (AC-16): on BOTH the success path and the
     # error_summaries (failure) path -- they converge here, above the final
     # emit, which is exactly why the sweep sits at this one spot rather than
     # duplicated at each `break`. No-op when the cache was never active

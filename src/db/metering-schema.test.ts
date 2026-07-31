@@ -247,4 +247,71 @@ describe("cache counters", () => {
 
         sqlite.close();
     });
+
+    it("computes % partial across all rows in one SQL query, excluding NULL rows (AC-13)", () => {
+        const dir = mkdtempSync(join(tmpdir(), "oneflow-cache-partial-"));
+        const { sqlite, db } = openDb(join(dir, "test.db"));
+        migrate(db, { migrationsFolder: MIGRATIONS_DIR });
+
+        const insert = sqlite.prepare(
+            "INSERT INTO tasks (id, node_id, feature, plugin_id, prompt, status, progress, cache_calls_total, cache_calls_cached, created_at, updated_at) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        );
+
+        // Two rows with real, non-zero counters.
+        insert.run(
+            "task-cache-1",
+            "node-1",
+            "image-gen",
+            "tongflow-modal-z-image",
+            '{"text":"a cat"}',
+            "completed",
+            100,
+            4,
+            1,
+            1700000000,
+            1700000000,
+        );
+        insert.run(
+            "task-cache-2",
+            "node-2",
+            "image-gen",
+            "tongflow-modal-z-image",
+            '{"text":"a dog"}',
+            "completed",
+            100,
+            2,
+            2,
+            1700000001,
+            1700000001,
+        );
+        // A row that never reported cache telemetry (older engine, cache off,
+        // reuse="off") — NULL, not a measured 0, and must be excluded from
+        // the denominator by the WHERE clause below.
+        insert.run(
+            "task-cache-3",
+            "node-3",
+            "image-gen",
+            "tongflow-modal-z-image",
+            '{"text":"a fox"}',
+            "completed",
+            100,
+            null,
+            null,
+            1700000002,
+            1700000002,
+        );
+
+        const row = sqlite
+            .prepare(
+                "SELECT sum(cache_calls_cached) * 1.0 / sum(cache_calls_total) AS partial_ratio FROM tasks WHERE cache_calls_total IS NOT NULL",
+            )
+            .get() as { partial_ratio: number };
+
+        // (1 + 2) / (4 + 2) = 3 / 6 = 0.5. The NULL row must not have
+        // widened the denominator.
+        expect(row.partial_ratio).toBe(0.5);
+
+        sqlite.close();
+    });
 });

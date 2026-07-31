@@ -87,7 +87,7 @@ evals:
     criterion: AC-9
     executor: test
     cmd: config:executors.test.sdk_pytest_l4_reuse_off
-    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_sweep.py"]
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_runner_wiring.py"]
     expected: "exit 0; reuse='off' trên cache đã ấm: invoker gọi đủ (không đọc), cây node-cache byte-identical trước/sau (không ghi, không sweep), kết quả run đúng — cả ba phủ định đều kiểm"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -95,7 +95,7 @@ evals:
     criterion: AC-10
     executor: test
     cmd: config:executors.test.sdk_pytest_l4_reuse_invalid
-    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_sweep.py"]
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_runner_wiring.py", "sdk/tongflow/engine/__main__.py"]
     expected: "exit 0; reuse ngoài {'auto','off'} (gồm 'force') → ValueError TRƯỚC khi node nào chạy; reuse='auto' giữ hành vi hiện tại (suite L2/L3 xanh nguyên)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -103,7 +103,7 @@ evals:
     criterion: AC-11
     executor: test
     cmd: config:executors.test.sdk_pytest_l4_counters
-    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_sweep.py"]
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_runner_wiring.py"]
     expected: "exit 0; result.cache.calls_total/calls_cached đúng cho 5 kịch bản: full hit / partial batch hit / all miss / run fail giữa chừng (call fail không đếm cached, block vẫn có mặt) / reuse='off' → block VẮNG (không phải {N,0} — benchmark không được pha loãng mẫu số % partial); tenant vắng → block vắng"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -111,7 +111,7 @@ evals:
     criterion: AC-12
     executor: test
     cmd: config:executors.test.sdk_pytest_l4_node_cached_event
-    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_sweep.py"]
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_cache_runner_wiring.py"]
     expected: "exit 0; node full-hit phát node_cached đúng shape L0 (nodeId/feature/label/fingerprint/tier/output=merged) BÊN CẠNH node_completed; node lạnh hoặc partial-hit KHÔNG phát node_cached. Cặp nguyên tử với E20 (nửa consumer TS) — cùng round"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -127,7 +127,7 @@ evals:
     criterion: AC-13
     executor: test
     cmd: config:executors.test.unit_l4_schema_columns
-    paths: ["src/db/workspace.schema.ts", "src/db/metering-schema.test.ts"]
+    paths: ["src/db/workspace.schema.ts", "src/db/metering-schema.test.ts", "drizzle/0003_clammy_blazing_skull.sql", "drizzle/meta/0003_snapshot.json", "drizzle/meta/_journal.json"]
     expected: "exit 0; bảng tasks có hai cột integer nullable cache_calls_total/cache_calls_cached + migration drizzle; câu SQL % partial chạy được trên schema (layer: backend-effect của AC-13)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -135,7 +135,7 @@ evals:
     criterion: AC-14
     executor: script
     cmd: config:executors.script.cache_test_layout
-    paths: ["sdk/tests/test_node_cache.py", "sdk/tests/test_node_cache_tier_b.py", "sdk/tests/test_cache_sweep.py", "scripts/cache/check-test-layout.sh"]
+    paths: ["sdk/tests/test_node_cache.py", "sdk/tests/test_node_cache_tier_b.py", "sdk/tests/test_cache_sweep.py", "scripts/cache/check-test-layout.sh", "sdk/tests/cache_helpers.py"]
     expected: "exit 0; mọi file test cache ≤800 dòng VÀ mọi pytest node-id họ l2/l3/l4 trong config.yaml collect đúng 1 test; guard discriminating: file >800 dòng → đỏ, node-id collect 0 hoặc ≥2 → đỏ"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -151,7 +151,7 @@ evals:
     criterion: AC-16
     executor: test
     cmd: config:executors.test.sdk_pytest_l4_sweep_wired
-    paths: ["sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/node_cache.py", "sdk/tests/test_cache_sweep.py"]
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tongflow/engine/node_cache.py", "sdk/tests/test_cache_runner_wiring.py"]
     expected: "exit 0; cache vượt trần + run_workflow(reuse='auto') → đĩa ≤ trần SAU KHI run trả về, cả case success lẫn case fail giữa chừng (sweep thực sự được cắm dây, không chỉ tồn tại unit-level); chuỗi resolve trần đủ 3 nấc: param thắng env, env thắng default 20GiB. Gap-probe P0 — cùng họ I1 của L3"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 

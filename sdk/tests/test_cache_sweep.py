@@ -59,7 +59,7 @@ def test_sweep_evicts_least_recently_used_first(tmp_path):
 
 
 def test_sweep_brings_usage_under_cap(tmp_path):
-    # AC-1. Total on-disk usage (entries + blobs) must be <= cap after sweep.
+    # AC-2. Total on-disk usage (entries + blobs) must be <= cap after sweep.
     cache = NodeCache(tmp_path)
     store = MemoryStore()
     for i in range(5):
@@ -109,7 +109,7 @@ def test_sweep_under_cap_deletes_nothing(tmp_path):
 
 
 def test_shared_blob_survives_eviction_of_one_referrer(tmp_path):
-    # AC-1 + D6. Two entries share one blob (byte-identical asset). Evicting
+    # AC-3 + D6. Two entries share one blob (byte-identical asset). Evicting
     # one referrer must not delete the blob while the other still points at
     # it, and the survivor must still resolve real bytes afterward.
     cache = NodeCache(tmp_path)
