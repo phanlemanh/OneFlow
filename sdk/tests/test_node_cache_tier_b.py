@@ -64,6 +64,38 @@ def test_tier_lists_are_disjoint_and_pinned():
     assert knobbed & TIER_A_SLOTS == frozenset()
 
 
+def test_abi_guard_catches_both_directions():
+    # AC-15 / E18. `test_tier_lists_are_disjoint_and_pinned` above already
+    # asserts direction (a) -- ABI knob -> constants -- as one clause among
+    # several; this test isolates the ABI<->allowlist relationship on its own
+    # node-id so it can be re-run standalone as re-pin evidence, and adds the
+    # new direction (b): every hand-maintained slot name in TIER_A_SLOTS /
+    # TIER_B_SLOTS / DESCOPED_GENERATIVE_SLOTS must still be a real slot in
+    # the ABI. A slot renamed or removed from the ABI would otherwise leave a
+    # stale allowlist entry that silently matches nothing, forever, instead
+    # of failing loudly.
+    from tongflow.engine.abi_schema import resolve_abi_path
+    abi = json.loads(resolve_abi_path(None).read_text(encoding="utf-8"))
+    abi_slots = {node["nodeSlot"] for node in abi["nodes"]}
+    knobbed = {
+        node["nodeSlot"]
+        for node in abi["nodes"]
+        if any(k in node.get("inputs", {}).get("properties", {})
+               for k in ("seed", "temperature", "top_p"))
+    }
+
+    # (a) ABI -> constants: every knobbed slot lands in tier B or the
+    # descoped generative group (never uncached-and-unnamed, never tier A).
+    assert knobbed <= (TIER_B_SLOTS | DESCOPED_GENERATIVE_SLOTS)
+
+    # (b) constants -> ABI: every hand-maintained slot name still resolves
+    # to a real ABI node. Catches config drift the other direction can't --
+    # e.g. an ABI slot rename that leaves `DESCOPED_GENERATIVE_SLOTS` or
+    # `TIER_B_SLOTS` holding a name the ABI no longer has.
+    all_named_slots = TIER_A_SLOTS | TIER_B_SLOTS | DESCOPED_GENERATIVE_SLOTS
+    assert all_named_slots <= abi_slots
+
+
 def test_git_status_failure_reads_as_dirty(tmp_path):
     # E8 / AC-8, unit half. A real checkout (so `.git` truly exists and the
     # early-return branch is not what's under test), then force `git status`
