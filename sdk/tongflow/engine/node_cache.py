@@ -271,8 +271,9 @@ class NodeCache:
         from an earlier run is a dead pointer. Downstream nodes must see a
         `file_key` valid in the store THIS run is using.
 
-        `log` is accepted now (default `None`, so existing positional callers
-        are unaffected) but not yet wired to anything -- that lands in Task 3.
+        `log` (default `None`) is one of the four closed-list swallow
+        branches (AC-6): an unusable entry -> miss logs exactly one line per
+        `get()` call that hits this path.
         """
         try:
             entry_path = self._entry(key)
@@ -288,9 +289,11 @@ class NodeCache:
             except Exception:
                 pass
             return rehydrated
-        except Exception:
+        except Exception as e:
             # Any unusable entry is a miss: missing file, unparseable JSON,
             # missing or truncated blob, permission error.
+            if log is not None:
+                log(f"cache get unusable for {key}: {e}")
             return None
 
     def put(
@@ -301,6 +304,7 @@ class NodeCache:
         *,
         tenant: Optional[str] = None,
         workflow_scope: Optional[str] = None,
+        log: Optional[Callable[[str], None]] = None,
     ) -> None:
         """Write one entry. Never raises — a cache that cannot write must not
         fail the run (spec section 8).
@@ -315,6 +319,9 @@ class NodeCache:
         HIT-able entry with no sidecar on a failed meta write: exactly the
         harm d-...-S2 forbids (an entry `purge` can never see is worse than
         a miss).
+
+        `log` (default `None`) is one of the four closed-list swallow
+        branches (AC-6): a refused `put()` logs exactly one line.
         """
         try:
             payload = self._dehydrate(result, store)
@@ -330,7 +337,9 @@ class NodeCache:
                 entry_path,
                 json.dumps(payload, ensure_ascii=False).encode("utf-8"),
             )
-        except Exception:
+        except Exception as e:
+            if log is not None:
+                log(f"cache put refused for {key}: {e}")
             return
 
     def _capture_bytes(self, fk: str, store: AssetStore) -> bytes:
@@ -526,20 +535,78 @@ class NodeCache:
             # Unconditional orphan-blob GC: runs every sweep, evictions or
             # not -- pre-existing orphans (the L3 monotonic-growth known
             # limit) must not survive behind the cap condition.
-            surviving: set[str] = set()
-            for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
-                try:
-                    surviving.update(
-                        _blob_shas_of(json.loads(result_json.read_text(encoding="utf-8")))
-                    )
-                except Exception:
-                    pass
-            for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
-                if blob.name not in surviving:
-                    try:
-                        blob.unlink()
-                    except OSError:
-                        pass
+            self._collect_orphan_blobs()
         except Exception as e:
             if log is not None:
                 log(f"cache sweep failed: {e}")
+
+    def _collect_orphan_blobs(self) -> None:
+        """Delete every blob under `blobs/` that no surviving entry references.
+
+        Shared by `sweep()` (its unconditional GC pass) and `purge()` (the
+        cleanup after deleting a workflow's entries) -- both need the exact
+        same "walk every surviving `result.json`, diff against every blob on
+        disk" pass, so it lives once here rather than duplicated per caller.
+        Caller-scoped try/except (this method itself never raises for a
+        single bad file -- only per-item guards, same pattern as the rest of
+        this module).
+        """
+        surviving: set[str] = set()
+        for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
+            try:
+                surviving.update(
+                    _blob_shas_of(json.loads(result_json.read_text(encoding="utf-8")))
+                )
+            except Exception:
+                pass
+        for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
+            if blob.name not in surviving:
+                try:
+                    blob.unlink()
+                except OSError:
+                    pass
+
+    def purge(
+        self, tenant: str, workflow_id: str, log: Optional[Callable[[str], None]] = None
+    ) -> None:
+        """Delete every entry scoped to one tenant + workflow, then GC orphan blobs.
+
+        Never raises (spec section 8, same rule as `sweep`/`get`/`put`): the
+        whole body runs inside one try/except. A `meta.json` this can't read
+        (missing -- a legacy pre-`meta.json` entry, per AC-5 -- or corrupt)
+        is a silent per-entry skip: purge cannot know what it should have
+        matched without a readable sidecar, so it leaves the entry alone
+        rather than guessing. That is a best-effort miss of the walk, NOT
+        one of AC-6's four closed-list branches -- only a failure of the
+        `purge()` call itself (e.g. an unreadable root) logs, exactly once,
+        at the end.
+
+        The scope match is `startswith(f"wf:{workflow_id}:")`, WITH the
+        trailing colon -- not a bare substring/`in` check of `workflow_id`
+        against `workflow_scope`. Dropping the colon lets workflow "1"
+        cross-match workflow "11"'s entries (AC-7); the colon is what keeps
+        the match anchored to a whole workflow id.
+
+        Shares `sweep()`'s stale-entry-dir prune's microsecond multi-process
+        race: a prune landing between a concurrent `put()`'s meta write and
+        its result write can yield a legacy-shaped, purge-invisible entry
+        (AC-5 keeps it sweepable regardless) -- `purge` shares that
+        best-effort posture rather than trying to close the window.
+        """
+        try:
+            prefix = f"wf:{workflow_id}:"
+            for meta_path in self.root.glob("[0-9a-f][0-9a-f]/*/meta.json"):
+                try:
+                    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                if meta.get("tenant") != tenant:
+                    continue
+                scope = meta.get("workflow_scope")
+                if not isinstance(scope, str) or not scope.startswith(prefix):
+                    continue
+                shutil.rmtree(meta_path.parent, ignore_errors=True)
+            self._collect_orphan_blobs()
+        except Exception as e:
+            if log is not None:
+                log(f"cache purge failed for tenant={tenant} workflow={workflow_id}: {e}")

@@ -13,7 +13,10 @@ import hashlib
 import os
 import shutil
 import time
+from pathlib import Path
 from unittest.mock import patch
+
+import pytest
 
 from tongflow.engine import node_cache as node_cache_mod
 from tongflow.engine.node_cache import NodeCache
@@ -194,8 +197,7 @@ def test_orphan_blobs_deleted_including_pre_l4(tmp_path):
 def test_legacy_entry_without_meta_sweepable_and_purge_skips(tmp_path):
     # AC-5. A legacy (pre-meta.json) entry must still be sweepable by mtime
     # and blob refs derived from `result.json` alone -- no crash, no special
-    # casing required. (Purge half is Task 3's; asserted there once `purge()`
-    # exists, per the brief.)
+    # casing required.
     cache = NodeCache(tmp_path)
     store = MemoryStore()
     key = "a" * 64
@@ -206,6 +208,169 @@ def test_legacy_entry_without_meta_sweepable_and_purge_skips(tmp_path):
 
     cache.sweep(1)  # cap far below anything -> must evict it cleanly
     assert not cache._entry(key).parent.exists()
+
+    # Purge half (Task 3, E6): a legacy entry has no meta.json to read, so
+    # purge cannot know its tenant/workflow_scope -- it must skip the entry
+    # rather than guess, even when the (tenant, workflow_id) purge is called
+    # with would have matched the entry's original scope had meta.json
+    # survived. No crash, no deletion.
+    key2 = "b" * 64
+    cache.put(key2, {"success": True, "text": "legacy2"}, store,
+              tenant="user:1", workflow_scope="wf:1:node:n1")
+    meta_path2 = cache._entry(key2).parent / "meta.json"
+    assert meta_path2.exists()
+    meta_path2.unlink()  # simulate an L2/L3-era entry, pre-meta.json
+
+    cache.purge("user:1", "1")
+    assert cache._entry(key2).parent.exists()  # purge skips it: tenant unknown
+
+
+def test_purge_removes_only_matching_workflow_entries(tmp_path):
+    # AC-7. One data_dir, four entries: tier-B workflow "1" (target), tier-B
+    # workflow "11" (decoy -- also embeds "wf:1:" INSIDE its node id, not at
+    # the start of its scope, so a substring/`in` match instead of an
+    # anchored `startswith` would wrongly delete it too), tier-A with
+    # scope=None (same tenant), and tier-B workflow "1" under a DIFFERENT
+    # tenant. purge(tenant, "1") must remove only the first; the other three
+    # must still HIT via get() afterward (positive check, not just "files
+    # gone" -- per AC-7).
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    tenant = "user:1"
+    other_tenant = "user:2"
+
+    key_target = "1" * 64
+    key_decoy_wf11 = "2" * 64
+    key_tier_a = "3" * 64
+    key_other_tenant = "4" * 64
+
+    cache.put(key_target, {"success": True, "text": "target"}, store,
+              tenant=tenant, workflow_scope="wf:1:node:n1")
+    cache.put(key_decoy_wf11, {"success": True, "text": "decoy"}, store,
+              tenant=tenant, workflow_scope="wf:11:node:wf:1:trap")
+    cache.put(key_tier_a, {"success": True, "text": "tier-a"}, store,
+              tenant=tenant, workflow_scope=None)
+    cache.put(key_other_tenant, {"success": True, "text": "other-tenant"}, store,
+              tenant=other_tenant, workflow_scope="wf:1:node:n1")
+
+    cache.purge(tenant, "1")
+
+    assert cache.get(key_target, MemoryStore()) is None
+    assert cache.get(key_decoy_wf11, MemoryStore()) is not None
+    assert cache.get(key_tier_a, MemoryStore()) is not None
+    assert cache.get(key_other_tenant, MemoryStore()) is not None
+
+
+def test_purge_twice_safe_and_collects_orphans(tmp_path):
+    # AC-8. purge() removes its target entry and, in the SAME call, GCs the
+    # blob that entry alone referenced. A second call with identical
+    # arguments must not raise and must not delete anything further -- the
+    # on-disk tree is byte-identical before/after the second call.
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    tenant = "user:1"
+    key = "a" * 64
+    ref = store.put(b"purge-me-bytes", mime="video/mp4", filename="a.mp4")
+    cache.put(key, {"success": True, "video": ref}, store,
+              tenant=tenant, workflow_scope="wf:1:node:n1")
+    blob_sha = hashlib.sha256(b"purge-me-bytes").hexdigest()
+    blob_path = cache._blob(blob_sha)
+    assert blob_path.exists()
+
+    cache.purge(tenant, "1")
+    assert not cache._entry(key).parent.exists()
+    assert not blob_path.exists()  # orphaned by the purge, collected same call
+
+    root = tmp_path / ".tongflow" / "node-cache"
+    before = sorted(
+        (str(p.relative_to(root)), p.stat().st_size)
+        for p in root.rglob("*") if p.is_file()
+    )
+
+    cache.purge(tenant, "1")  # second call, same args: no raise, no-op
+
+    after = sorted(
+        (str(p.relative_to(root)), p.stat().st_size)
+        for p in root.rglob("*") if p.is_file()
+    )
+    assert after == before
+
+
+def test_sweep_failure_never_breaks_the_run(tmp_path):
+    # AC-6. root unreadable/unwritable (permission error, or the dir vanishing
+    # mid-run) -> sweep()/purge() must not raise; the run's outcome is the
+    # same as a run with no cache at all.
+    if os.name == "nt":
+        pytest.skip("chmod-based permission denial is not portable to Windows")
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    cache.put("a" * 64, {"success": True, "text": "x"}, store,
+              tenant="user:1", workflow_scope="wf:1:node:n1")
+    root = tmp_path / ".tongflow" / "node-cache"
+    original_mode = root.stat().st_mode
+    os.chmod(root, 0)
+    try:
+        cache.sweep(1)  # must not raise
+        cache.purge("user:1", "1")  # must not raise
+    finally:
+        os.chmod(root, original_mode)
+
+
+def test_swallowed_cache_errors_emit_one_log_line(tmp_path):
+    # AC-6. The closed list of four swallow branches -- (1) get() hits an
+    # unusable entry -> miss, (2) put() is refused, (3) sweep() fails,
+    # (4) purge() fails -- each emit EXACTLY one log(...) line per
+    # activation. The one explicit exemption: os.utime's recency touch on a
+    # HIT stays silent even when it fails, so a read-only root doesn't spam
+    # one log line per hit.
+    if os.name == "nt":
+        pytest.skip("chmod-based permission denial is not portable to Windows")
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    root = tmp_path / ".tongflow" / "node-cache"
+
+    # (1) get() on a corrupt/unparseable entry -> exactly one line, still a miss.
+    key_corrupt = "a" * 64
+    cache.put(key_corrupt, {"success": True, "text": "x"}, store)
+    cache._entry(key_corrupt).write_bytes(b"{ not valid json ")
+    get_logs: list[str] = []
+    assert cache.get(key_corrupt, MemoryStore(), log=get_logs.append) is None
+    assert len(get_logs) == 1
+
+    # (2) put() refused (read-only root) -> exactly one line.
+    original_mode = root.stat().st_mode
+    os.chmod(root, 0o555)
+    put_logs: list[str] = []
+    try:
+        cache.put("b" * 64, {"success": True, "text": "y"}, store, log=put_logs.append)
+    finally:
+        os.chmod(root, original_mode)
+    assert len(put_logs) == 1
+
+    # (3) sweep() fails ("broken root") -> exactly one line. `Path.glob`
+    # silently returns an empty iterator (not an exception) on a chmod-0
+    # directory on this platform, so a chmod alone can't force this branch
+    # deterministically and portably -- patch `Path.glob` itself to raise,
+    # simulating a root that is genuinely broken (e.g. vanished mid-walk).
+    sweep_logs: list[str] = []
+    with patch.object(Path, "glob", side_effect=OSError("simulated broken root")):
+        cache.sweep(10**9, log=sweep_logs.append)
+    assert len(sweep_logs) == 1
+
+    # (4) purge() fails ("broken root") -> exactly one line. Same mechanism.
+    purge_logs: list[str] = []
+    with patch.object(Path, "glob", side_effect=OSError("simulated broken root")):
+        cache.purge("user:1", "1", log=purge_logs.append)
+    assert len(purge_logs) == 1
+
+    # Exemption: a HIT whose recency os.utime touch fails stays silent.
+    key_hit = "c" * 64
+    cache.put(key_hit, {"success": True, "text": "z"}, store)
+    utime_logs: list[str] = []
+    with patch("os.utime", side_effect=OSError("blocked")):
+        result = cache.get(key_hit, MemoryStore(), log=utime_logs.append)
+    assert result is not None
+    assert len(utime_logs) == 0
 
 
 def test_meta_write_failure_refuses_the_entry(tmp_path):
