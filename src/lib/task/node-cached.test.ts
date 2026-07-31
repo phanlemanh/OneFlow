@@ -158,3 +158,41 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
         expect(mapEngineEvent(ev)?.data.fingerprint).toBe("");
     });
 });
+
+describe("applies output once — node_cached then the same node's node_completed", () => {
+    it("maps node_cached to NODE_CACHED carrying output verbatim, not NODE_COMPLETED", () => {
+        const cachedEvent = { ...engineEvent(), output: { texts: ["reused"] } };
+        const mapped = mapEngineEvent(cachedEvent);
+        expect(mapped?.status).toBe(NodeStatus.NODE_CACHED);
+        expect(mapped?.status).not.toBe(NodeStatus.NODE_COMPLETED);
+        expect(mapped?.data.output).toEqual({ texts: ["reused"] });
+    });
+
+    it("leaves node_completed to the delegate's own switch — mapEngineEvent returns null", () => {
+        // mapEngineEvent owns node_cached only (see its doc comment above); a
+        // node_completed for the same node must fall through untouched so the
+        // delegate's `case "node_completed":` in engine-delegate.server.ts is
+        // the sole place that maps it — exactly one completion notification
+        // per node, never two.
+        const completedEvent = {
+            type: "node_completed",
+            nodeId: "node-1",
+            output: { texts: ["reused"] },
+            label: "Generate",
+        };
+        expect(mapEngineEvent(completedEvent)).toBeNull();
+    });
+
+    it("a merged-results ARRAY output (batched node) passes through node_cached without throw", () => {
+        const batchedEvent = {
+            ...engineEvent(),
+            output: [{ texts: ["a"] }, { texts: ["b"] }],
+        };
+        expect(() => mapEngineEvent(batchedEvent)).not.toThrow();
+        const mapped = mapEngineEvent(batchedEvent);
+        expect(mapped?.data.output).toEqual([
+            { texts: ["a"] },
+            { texts: ["b"] },
+        ]);
+    });
+});

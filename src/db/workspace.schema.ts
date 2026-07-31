@@ -55,6 +55,10 @@ export const tasks = sqliteTable(
         durationMs: integer("duration_ms"),
         costUsd: real("cost_usd"),
         gpuType: text("gpu_type"),
+        // % partial telemetry (cache-l4-eviction). NULL = engine reported nothing
+        // (older engine, cache off, reuse="off") — never conflate with measured 0.
+        cacheCallsTotal: integer("cache_calls_total"),
+        cacheCallsCached: integer("cache_calls_cached"),
         createdAt: integer("created_at", { mode: "timestamp" })
             .defaultNow()
             .notNull(),

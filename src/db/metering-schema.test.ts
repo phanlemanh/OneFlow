@@ -188,3 +188,27 @@ describe("upgrading an existing database (AC-2)", () => {
         upgraded.sqlite.close();
     });
 });
+
+const CACHE_COLUMNS = ["cache_calls_total", "cache_calls_cached"] as const;
+
+describe("cache counters", () => {
+    it("declares both cache counter columns nullable integers on a fresh database", () => {
+        const dir = mkdtempSync(join(tmpdir(), "oneflow-cache-cols-"));
+        const { sqlite, db } = openDb(join(dir, "test.db"));
+        migrate(db, { migrationsFolder: MIGRATIONS_DIR });
+
+        const byName = new Map(
+            tableInfo(sqlite, "tasks").map((c) => [c.name, c]),
+        );
+
+        for (const col of CACHE_COLUMNS) {
+            expect(byName.has(col), `missing column ${col}`).toBe(true);
+            // notnull=0 → nullable. NULL must stay distinguishable from a
+            // measured 0 (older engine, cache off, reuse="off").
+            expect(byName.get(col)?.notnull).toBe(0);
+            expect(byName.get(col)?.type.toLowerCase()).toBe("integer");
+        }
+
+        sqlite.close();
+    });
+});

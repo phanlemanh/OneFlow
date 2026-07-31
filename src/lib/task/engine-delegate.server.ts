@@ -117,6 +117,21 @@ function num(v: unknown): number | undefined {
     return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
+/** Cache-counter columns from an engine final result. Absent/malformed block
+ *  → both null (NULL ≠ 0 — see workspace.schema.ts). */
+export function cacheColumnsFrom(result: Record<string, unknown> | null): {
+    cacheCallsTotal: number | null;
+    cacheCallsCached: number | null;
+} {
+    const c = result ? asRecord(result.cache) : null;
+    const total = c ? num(c.calls_total) : undefined;
+    const cached = c ? num(c.calls_cached) : undefined;
+    return {
+        cacheCallsTotal: total ?? null,
+        cacheCallsCached: cached ?? null,
+    };
+}
+
 function handleEvent(taskId: string, ev: Record<string, unknown>): void {
     const type = str(ev.type);
     const nodeId = str(ev.nodeId);
@@ -370,6 +385,7 @@ export async function executeWorkflowViaEngine(
                             .set({
                                 status: "completed",
                                 result: JSON.stringify(outputs),
+                                ...cacheColumnsFrom(result),
                             })
                             .where(eq(tasks.id, taskId));
                     } else {
@@ -395,6 +411,7 @@ export async function executeWorkflowViaEngine(
                                         failures,
                                     ),
                                 ),
+                                ...cacheColumnsFrom(result),
                             })
                             .where(eq(tasks.id, taskId));
                     }
