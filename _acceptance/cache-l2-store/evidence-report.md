@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
+verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
 human_signoff: Manh 2026-07-30
 ---
 
@@ -243,3 +243,10 @@ Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code
 Evidence (real rerun on this tree): eval E13 of cache-l3-tier-b — the complete `tests/test_node_cache.py` (33 tests) plus `pnpm vitest run src/lib/task/engine-delegate.test.ts`, one exit code, run_id minted-cache-l3-tier-b-E13-r1, exit 0. Run-log: `_acceptance/cache-l3-tier-b/run-log.jsonl`.
 
 Signed: Manh, 2026-07-30 — fresh signature at cache-l3-tier-b Gate 2 (re-verify path, evidence above).
+
+
+---
+
+Re-verify on branch feat/cache-l4-eviction (2026-07-31). This feature's owned code changed on this branch (sdk/tests/test_node_cache.py · sdk/tongflow/engine/__main__.py · sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py · src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts), so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to c000b4b6b32f29eea6217f8de26596a052737128. A FRESH human signature is required at cache-l4-eviction's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): its own eval surface rerun locally on this tree, 2026-07-31 — `(cd sdk && ... pytest -q tests/test_node_cache.py)` (23 passed, exit 0; the tier-A/store suite that carries every sdk_pytest_l2_* node-id after the cache-l4-eviction file split) and `pnpm vitest run src/lib/task/engine-delegate.test.ts` (exit 0; carries unit_l2_tenant_sentinel / unit_l2_data_dir_stable). Touched files are the L4 wiring: put() gained keyword-only tenant/workflow_scope/log, get() a recency touch + log, runner gained reuse/counters/sweep-at-end — every L2 behavior re-proven by the reran suite on the split files.
+Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.

@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 80f9702996007f13608e3d6031ada91a6a2f12d8
+verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
 human_signoff: Manh 2026-07-30
 ---
 
@@ -208,3 +208,10 @@ Round 1: all 15 evals (E1-E15) passed on first run; suite reruns (pnpm build/typ
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+
+---
+
+Re-verify on branch feat/cache-l4-eviction (2026-07-31). This feature's owned code changed on this branch (sdk/tests/test_node_cache.py · sdk/tongflow/engine/__main__.py · sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py · src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts), so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to c000b4b6b32f29eea6217f8de26596a052737128. A FRESH human signature is required at cache-l4-eviction's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): its own eval surface rerun locally on this tree, 2026-07-31 — `(cd sdk && ... pytest -q tests/test_node_cache_tier_b.py tests/test_cache_sweep.py tests/test_cache_runner_wiring.py tests/test_fingerprint.py tests/test_fingerprint_vectors.py)` (49 passed, exit 0; carries every sdk_pytest_l3_* node-id at their post-split paths) plus `pnpm vitest run src/lib/task/engine-delegate.test.ts` (exit 0; carries unit_l3_workflow_id_sentinel). L4 added meta.json/sweep around the tier-B write path; scope strings and key computation unchanged (fingerprint.py untouched on this branch).
+Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.

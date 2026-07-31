@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
+verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
 human_signoff: Manh 2026-07-30
 ---
 
@@ -274,3 +274,10 @@ Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code
 Evidence (real rerun on this tree): eval E14 of cache-l3-tier-b — the full conformance-l0 eval set (pytest batch/conformance/plugin-rev, 3 vitest files, discriminating-suite guard, rev-joined-path guard), one exit code, run_id minted-cache-l3-tier-b-E14-r1, exit 0. Run-log: `_acceptance/cache-l3-tier-b/run-log.jsonl`.
 
 Signed: Manh, 2026-07-30 — fresh signature at cache-l3-tier-b Gate 2 (re-verify path, evidence above).
+
+
+---
+
+Re-verify on branch feat/cache-l4-eviction (2026-07-31). This feature's owned code changed on this branch (sdk/tongflow/engine/runner.py · src/lib/task/engine-delegate.server.ts · src/lib/task/node-cached.test.ts), so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to c000b4b6b32f29eea6217f8de26596a052737128. A FRESH human signature is required at cache-l4-eviction's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): its own eval surface rerun locally on this tree, 2026-07-31 — `(cd sdk && ... pytest -q tests/test_engine_batch.py tests/conformance tests/test_plugin_rev.py)` (28 passed, exit 0), `pnpm vitest run src/lib/abi/conformance.test.ts src/lib/task/node-cached.test.ts src/lib/plugins/plugin-rev.test.ts` (exit 0), `bash scripts/conformance/check-suite-discriminating.sh` (exit 0) and `pnpm tsx scripts/plugins/check-rev-joined-path.ts` (exit 0). Ops note, disclosed: both guards first failed with a broken pnpm deps-check (the same pnpm-workspace.yaml artifact hit at the L3 wave); repaired with `CI=true pnpm install --frozen-lockfile` (lockfile shasum unchanged) and both guards then passed — environment, not regression. L4's touches: runner.py (cache branch inside the per-call loop; fan-out/merge semantics untouched), node-cached.test.ts (additive 'applies output once' describe), engine-delegate.server.ts (cache-counter columns on the terminal updates).
+Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
