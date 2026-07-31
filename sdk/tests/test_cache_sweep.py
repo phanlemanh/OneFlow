@@ -226,14 +226,15 @@ def test_legacy_entry_without_meta_sweepable_and_purge_skips(tmp_path):
 
 
 def test_purge_removes_only_matching_workflow_entries(tmp_path):
-    # AC-7. One data_dir, four entries: tier-B workflow "1" (target), tier-B
+    # AC-7. One data_dir, five entries: tier-B workflow "1" (target), tier-B
     # workflow "11" (decoy -- also embeds "wf:1:" INSIDE its node id, not at
     # the start of its scope, so a substring/`in` match instead of an
     # anchored `startswith` would wrongly delete it too), tier-A with
-    # scope=None (same tenant), and tier-B workflow "1" under a DIFFERENT
-    # tenant. purge(tenant, "1") must remove only the first; the other three
-    # must still HIT via get() afterward (positive check, not just "files
-    # gone" -- per AC-7).
+    # scope=None (same tenant), tier-B workflow "1" under a DIFFERENT
+    # tenant, and tier-B workflow "1" with a NULL tenant (`tenant=None`).
+    # purge(tenant, "1") must remove only the first; the other four must
+    # still HIT via get() afterward (positive check, not just "files gone"
+    # -- per AC-7).
     cache = NodeCache(tmp_path)
     store = MemoryStore()
     tenant = "user:1"
@@ -243,6 +244,7 @@ def test_purge_removes_only_matching_workflow_entries(tmp_path):
     key_decoy_wf11 = "2" * 64
     key_tier_a = "3" * 64
     key_other_tenant = "4" * 64
+    key_null_tenant = "5" * 64
 
     cache.put(key_target, {"success": True, "text": "target"}, store,
               tenant=tenant, workflow_scope="wf:1:node:n1")
@@ -252,6 +254,23 @@ def test_purge_removes_only_matching_workflow_entries(tmp_path):
               tenant=tenant, workflow_scope=None)
     cache.put(key_other_tenant, {"success": True, "text": "other-tenant"}, store,
               tenant=other_tenant, workflow_scope="wf:1:node:n1")
+    # A null-tenant entry that WOULD match workflow "1"'s scope if the
+    # tenant comparison didn't also require both sides to be a non-empty
+    # string -- `meta.get("tenant") != tenant` alone is `None != None ->
+    # False` for a caller that (mis)calls `purge(None, "1")`, which would
+    # wrongly delete every null-tenant entry across ALL callers, not just
+    # the one requesting a null tenant. Rule fix round 1, item 1.
+    cache.put(key_null_tenant, {"success": True, "text": "null-tenant"}, store,
+              tenant=None, workflow_scope="wf:1:node:n1")
+
+    # Probe: purge(None, "1") and purge("", "1") must delete NOTHING -- a
+    # null/empty tenant is refused outright (mirrors the runner's
+    # `NodeCache(data_dir) if tenant else None` gate), not treated as "no
+    # tenant filter".
+    cache.purge(None, "1")
+    cache.purge("", "1")
+    assert cache.get(key_null_tenant, MemoryStore()) is not None
+    assert cache.get(key_target, MemoryStore()) is not None
 
     cache.purge(tenant, "1")
 
@@ -259,6 +278,7 @@ def test_purge_removes_only_matching_workflow_entries(tmp_path):
     assert cache.get(key_decoy_wf11, MemoryStore()) is not None
     assert cache.get(key_tier_a, MemoryStore()) is not None
     assert cache.get(key_other_tenant, MemoryStore()) is not None
+    assert cache.get(key_null_tenant, MemoryStore()) is not None
 
 
 def test_purge_twice_safe_and_collects_orphans(tmp_path):
@@ -266,6 +286,14 @@ def test_purge_twice_safe_and_collects_orphans(tmp_path):
     # blob that entry alone referenced. A second call with identical
     # arguments must not raise and must not delete anything further -- the
     # on-disk tree is byte-identical before/after the second call.
+    #
+    # A SURVIVING decoy entry (different tenant, own blob) is included so
+    # the "byte-identical" snapshot below is non-empty and non-trivial --
+    # without it, both purge calls empty the tree completely and the
+    # before/after comparison (`[] == []`) can't distinguish "purge is
+    # idempotent" from "purge deletes everything every time" (fix round 1,
+    # item 2; the reviewer's `shutil.rmtree(self.root)`-after-the-loop
+    # mutation stayed green against the vacuous version of this test).
     cache = NodeCache(tmp_path)
     store = MemoryStore()
     tenant = "user:1"
@@ -277,15 +305,25 @@ def test_purge_twice_safe_and_collects_orphans(tmp_path):
     blob_path = cache._blob(blob_sha)
     assert blob_path.exists()
 
+    decoy_key = "b" * 64
+    decoy_ref = store.put(b"decoy-survivor-bytes", mime="video/mp4", filename="b.mp4")
+    cache.put(decoy_key, {"success": True, "video": decoy_ref}, store,
+              tenant="user:2", workflow_scope="wf:1:node:n1")
+    decoy_blob_path = cache._blob(hashlib.sha256(b"decoy-survivor-bytes").hexdigest())
+    assert decoy_blob_path.exists()
+
     cache.purge(tenant, "1")
     assert not cache._entry(key).parent.exists()
     assert not blob_path.exists()  # orphaned by the purge, collected same call
+    assert cache._entry(decoy_key).parent.exists()  # different tenant, untouched
+    assert decoy_blob_path.exists()
 
     root = tmp_path / ".tongflow" / "node-cache"
     before = sorted(
         (str(p.relative_to(root)), p.stat().st_size)
         for p in root.rglob("*") if p.is_file()
     )
+    assert before  # non-empty: the decoy entry + its blob + its meta.json
 
     cache.purge(tenant, "1")  # second call, same args: no raise, no-op
 
@@ -371,6 +409,14 @@ def test_swallowed_cache_errors_emit_one_log_line(tmp_path):
         result = cache.get(key_hit, MemoryStore(), log=utime_logs.append)
     assert result is not None
     assert len(utime_logs) == 0
+
+    # Exemption: a plain COLD miss (never put(), so `result.json` was never
+    # written -- `FileNotFoundError`) stays silent too. Design branch (1) is
+    # "unusable entry", not "absent entry" -- a cold run must not emit one
+    # log line per node. Fix round 1, item 4.
+    cold_miss_logs: list[str] = []
+    assert cache.get("d" * 64, MemoryStore(), log=cold_miss_logs.append) is None
+    assert len(cold_miss_logs) == 0
 
 
 def test_meta_write_failure_refuses_the_entry(tmp_path):

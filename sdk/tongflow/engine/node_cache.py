@@ -272,8 +272,14 @@ class NodeCache:
         `file_key` valid in the store THIS run is using.
 
         `log` (default `None`) is one of the four closed-list swallow
-        branches (AC-6): an unusable entry -> miss logs exactly one line per
-        `get()` call that hits this path.
+        branches (AC-6): an UNUSABLE entry -> miss logs exactly one line per
+        `get()` call that hits this path. A plain COLD miss (no entry ever
+        written for this key -- `FileNotFoundError` reading `result.json`)
+        is a different thing: design branch (1) is "unusable entry", not
+        "absent entry", and a cold run would otherwise emit one log line per
+        node per call. Every other exception (corrupt JSON, a
+        truncated/missing blob referenced by an entry that DOES exist,
+        permission error) still logs.
         """
         try:
             entry_path = self._entry(key)
@@ -289,9 +295,13 @@ class NodeCache:
             except Exception:
                 pass
             return rehydrated
+        except FileNotFoundError:
+            # A cold miss, not an unusable entry -- silent (see docstring).
+            return None
         except Exception as e:
-            # Any unusable entry is a miss: missing file, unparseable JSON,
-            # missing or truncated blob, permission error.
+            # Any OTHER unusable entry is a miss: unparseable JSON, a
+            # truncated/missing blob referenced by a real entry, permission
+            # error.
             if log is not None:
                 log(f"cache get unusable for {key}: {e}")
             return None
@@ -435,7 +445,7 @@ class NodeCache:
             return [self._rehydrate(v, store) for v in node]
         return node
 
-    def sweep(self, max_bytes: int, log: Optional[Callable[[str], None]] = None) -> None:
+    def sweep(self, max_bytes: int, *, log: Optional[Callable[[str], None]] = None) -> None:
         """Size-capped LRU eviction + unconditional orphan-blob GC (design §4).
 
         Never raises: the whole body runs inside one try/except so a bad
@@ -567,7 +577,7 @@ class NodeCache:
                     pass
 
     def purge(
-        self, tenant: str, workflow_id: str, log: Optional[Callable[[str], None]] = None
+        self, tenant: str, workflow_id: str, *, log: Optional[Callable[[str], None]] = None
     ) -> None:
         """Delete every entry scoped to one tenant + workflow, then GC orphan blobs.
 
@@ -581,11 +591,24 @@ class NodeCache:
         `purge()` call itself (e.g. an unreadable root) logs, exactly once,
         at the end.
 
-        The scope match is `startswith(f"wf:{workflow_id}:")`, WITH the
-        trailing colon -- not a bare substring/`in` check of `workflow_id`
-        against `workflow_scope`. Dropping the colon lets workflow "1"
-        cross-match workflow "11"'s entries (AC-7); the colon is what keeps
-        the match anchored to a whole workflow id.
+        `tenant` is required to be a non-empty string, same gate the runner
+        uses (`NodeCache(data_dir) if tenant else None`): `purge(None, ...)`
+        or `purge("", ...)` matches -- and therefore deletes -- nothing,
+        rather than treating a null/empty tenant as "no tenant filter" and
+        wiping every tenant's entries for that workflow.
+
+        `workflow_id` is normalized with `str(workflow_id).strip()` before
+        building the match prefix, mirroring the runner's `wf_id_clean`
+        (`str(workflow_id).strip()`) used when it ORIGINALLY built the
+        `workflow_scope` string at `put()` time -- otherwise
+        `purge(t, " 1 ")` silently matches nothing even though `put()` wrote
+        the entry under the trimmed id.
+
+        The scope match is `startswith(f"wf:{workflow_id_clean}:")`, WITH
+        the trailing colon -- not a bare substring/`in` check of
+        `workflow_id` against `workflow_scope`. Dropping the colon lets
+        workflow "1" cross-match workflow "11"'s entries (AC-7); the colon
+        is what keeps the match anchored to a whole workflow id.
 
         Shares `sweep()`'s stale-entry-dir prune's microsecond multi-process
         race: a prune landing between a concurrent `put()`'s meta write and
@@ -594,13 +617,14 @@ class NodeCache:
         best-effort posture rather than trying to close the window.
         """
         try:
-            prefix = f"wf:{workflow_id}:"
+            workflow_id_clean = str(workflow_id).strip()
+            prefix = f"wf:{workflow_id_clean}:"
             for meta_path in self.root.glob("[0-9a-f][0-9a-f]/*/meta.json"):
                 try:
                     meta = json.loads(meta_path.read_text(encoding="utf-8"))
                 except Exception:
                     continue
-                if meta.get("tenant") != tenant:
+                if not isinstance(tenant, str) or not tenant or meta.get("tenant") != tenant:
                     continue
                 scope = meta.get("workflow_scope")
                 if not isinstance(scope, str) or not scope.startswith(prefix):
