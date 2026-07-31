@@ -70,7 +70,13 @@ def main() -> int:
             task_id=opts.get("task_id") or "tongflow-engine",
             tenant=opts.get("tenant"),
             workflow_id=opts.get("workflow_id"),
-            reuse=opts.get("reuse") or "auto",
+            # `opts.get("reuse") or "auto"` would silently fold an explicit
+            # "" into "auto" -- the one boundary where an invalid
+            # host-supplied value failed quiet instead of raising. JSON
+            # `null` (Python `None`, including plain omission) maps to
+            # "auto"; anything else, including "", is forwarded as-is and
+            # let `run_workflow`'s own validation raise on it.
+            reuse=opts.get("reuse") if opts.get("reuse") is not None else "auto",
             cache_max_bytes=opts.get("cache_max_bytes"),
         )
     except Exception as e:  # noqa: BLE001 - report as a final error line

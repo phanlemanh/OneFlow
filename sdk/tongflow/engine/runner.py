@@ -434,6 +434,7 @@ def run_workflow(
                 # reset per node, not per run.
                 all_calls_hit = True
                 first_hit_key: Optional[str] = None
+                first_hit_tier: Optional[str] = None
                 for idx, call_params in enumerate(per_call_params):
                     business_input = materialize_asset_inputs(
                         slot, call_params, abi, search_dirs, store
@@ -443,11 +444,19 @@ def run_workflow(
                     # `cache_key` below (None for tier A, the tier-B scope
                     # string otherwise) -- `put()` needs the same value, and
                     # rebuilding it there would risk drifting from what was
-                    # actually hashed into the key.
+                    # actually hashed into the key. `key_tier` is the same
+                    # anti-drift discipline for the `node_cached` emission's
+                    # "A"/"B" field -- set alongside `cache_key` in the SAME
+                    # branch that computed it, instead of re-deriving it later
+                    # from `slot in TIER_A_SLOTS`, which could silently drift
+                    # from whichever branch actually fired if the two allowlist
+                    # checks above and below ever diverged.
                     key_scope: Optional[str] = None
+                    key_tier: Optional[str] = None
                     if node_cache is not None and slot in TIER_A_SLOTS:
                         if plugin_dir not in dirty_by_dir:
                             dirty_by_dir[plugin_dir] = plugin_is_dirty(plugin_dir)
+                        key_tier = "A"
                         cache_key = node_fingerprint(
                             slot=slot,
                             plugin_id=plugin_id,
@@ -477,6 +486,7 @@ def run_workflow(
                         if batch_field_of(node) is not None:
                             scope = f"{scope}:call:{idx}"
                         key_scope = scope
+                        key_tier = "B"
                         cache_key = node_fingerprint(
                             slot=slot,
                             plugin_id=plugin_id,
@@ -505,6 +515,7 @@ def run_workflow(
                     if cached is not None:
                         if first_hit_key is None:
                             first_hit_key = cache_key
+                            first_hit_tier = key_tier
                         results.append(cached)
                         continue
                     all_calls_hit = False
@@ -583,7 +594,7 @@ def run_workflow(
                             "feature": slot,
                             "label": label,
                             "fingerprint": first_hit_key,
-                            "tier": "A" if slot in TIER_A_SLOTS else "B",
+                            "tier": first_hit_tier,
                             "output": merge_fanout_results(results),
                         }
                     )
