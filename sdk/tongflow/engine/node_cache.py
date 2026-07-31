@@ -26,10 +26,11 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from ._subproc import utf8_env
 from .assets import _ext_from_filename, _ext_from_mime
@@ -130,6 +131,48 @@ DESCOPED_GENERATIVE_SLOTS = frozenset({
 _BLOB_KEY = "__cache_blob"
 _SIZE_KEY = "__cache_size"
 _EXT_KEY = "__cache_ext"
+_META_NAME = "meta.json"
+
+# 20 GiB (spec R2). A global cap, not per-tenant -- a shared cloud disk lets
+# one tenant's churn evict another's entries (known limit, revisit with
+# cloud P2; see design doc §11).
+DEFAULT_CACHE_MAX_BYTES = 20 * 1024**3
+
+
+def resolve_cache_max_bytes(param: Optional[int]) -> int:
+    """Cap resolution chain: explicit param -> env -> default (design §4).
+
+    A non-int or non-positive env value is ignored in favor of the default
+    rather than raising -- this module has no logger of its own to report the
+    bad value; the caller decides whether/how to log at wiring time (Task 4).
+    """
+    if isinstance(param, int) and param > 0:
+        return param
+    env = os.environ.get("TONGFLOW_CACHE_MAX_BYTES", "").strip()
+    if env.isdigit() and int(env) > 0:
+        return int(env)
+    return DEFAULT_CACHE_MAX_BYTES
+
+
+def _blob_shas_of(node: Any) -> list[str]:
+    """Recursively collect every `__cache_blob` sha in a cached payload.
+
+    Same dict/list walk shape as `NodeCache._rehydrate` -- blob references are
+    NOT stored in `meta.json` (design §3): they are derivable from
+    `result.json` alone, so a legacy entry with no sidecar is still GC-able.
+    """
+    shas: list[str] = []
+    if isinstance(node, dict):
+        sha = node.get(_BLOB_KEY)
+        if isinstance(sha, str):
+            shas.append(sha)
+        else:
+            for v in node.values():
+                shas.extend(_blob_shas_of(v))
+    elif isinstance(node, list):
+        for v in node:
+            shas.extend(_blob_shas_of(v))
+    return shas
 
 
 def abi_digest_of(abi_file: Path) -> str:
@@ -218,33 +261,68 @@ class NodeCache:
     def _blob(self, sha: str) -> Path:
         return self.root / "blobs" / sha[:2] / sha
 
-    def get(self, key: str, store: AssetStore) -> Optional[dict[str, Any]]:
+    def get(
+        self, key: str, store: AssetStore, *, log: Optional[Callable[[str], None]] = None
+    ) -> Optional[dict[str, Any]]:
         """The cached result with its blobs re-put into ``store``, or None.
 
         Re-putting is the correctness crux of D6: `MemoryStore` hands back a
         `mem://<uuid>` that only lives inside one process, so a cached handle
         from an earlier run is a dead pointer. Downstream nodes must see a
         `file_key` valid in the store THIS run is using.
+
+        `log` is accepted now (default `None`, so existing positional callers
+        are unaffected) but not yet wired to anything -- that lands in Task 3.
         """
         try:
-            raw = self._entry(key).read_text(encoding="utf-8")
+            entry_path = self._entry(key)
+            raw = entry_path.read_text(encoding="utf-8")
             payload = json.loads(raw)
-            return self._rehydrate(payload, store)
+            rehydrated = self._rehydrate(payload, store)
+            # Recency touch for the LRU sweep. Best-effort: a read-only root
+            # must not turn a HIT into a crash, and this one failure mode is
+            # the sole logged-swallow exemption (design §4) -- silent on
+            # purpose, unlike every other swallow branch.
+            try:
+                os.utime(entry_path)
+            except OSError:
+                pass
+            return rehydrated
         except Exception:
             # Any unusable entry is a miss: missing file, unparseable JSON,
             # missing or truncated blob, permission error.
             return None
 
-    def put(self, key: str, result: dict[str, Any], store: AssetStore) -> None:
+    def put(
+        self,
+        key: str,
+        result: dict[str, Any],
+        store: AssetStore,
+        *,
+        tenant: Optional[str] = None,
+        workflow_scope: Optional[str] = None,
+    ) -> None:
         """Write one entry. Never raises — a cache that cannot write must not
-        fail the run (spec section 8)."""
+        fail the run (spec section 8).
+
+        Writes `meta.json` in the SAME try as `result.json`: a failed meta
+        write refuses the whole entry rather than leaving a result with no
+        sidecar (d-...-S2 -- an entry `purge` can never see is worse than a
+        miss, so a partially-written entry must not exist at all).
+        """
         try:
             payload = self._dehydrate(result, store)
+            entry_path = self._entry(key)
             # No explicit mkdir here: `_atomic_write` already creates the
             # parent directory before writing.
             _atomic_write(
-                self._entry(key),
+                entry_path,
                 json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+            )
+            _atomic_write(
+                entry_path.parent / _META_NAME,
+                json.dumps({"v": 1, "tenant": tenant,
+                            "workflow_scope": workflow_scope}).encode("utf-8"),
             )
         except Exception:
             return
@@ -341,3 +419,73 @@ class NodeCache:
         if isinstance(node, list):
             return [self._rehydrate(v, store) for v in node]
         return node
+
+    def sweep(self, max_bytes: int, log: Optional[Callable[[str], None]] = None) -> None:
+        """Size-capped LRU eviction + unconditional orphan-blob GC (design §4).
+
+        Never raises: the whole body runs inside one try/except so a bad
+        sweep degrades to "no maintenance this run", not a failed run (spec
+        section 8, same rule as `get`/`put`). Works on legacy entries (no
+        `meta.json`) exactly as well as new ones -- recency and blob refs
+        come from `result.json` alone, never from the sidecar.
+        """
+        try:
+            entries = []  # (mtime, entry_dir, entry_bytes, blob_shas)
+            for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
+                entry_dir = result_json.parent
+                try:
+                    payload = json.loads(result_json.read_text(encoding="utf-8"))
+                    shas = _blob_shas_of(payload)
+                    stat = result_json.stat()
+                    size = sum(p.stat().st_size for p in entry_dir.iterdir())
+                    entries.append((stat.st_mtime, entry_dir, size, shas))
+                except Exception:
+                    entries.append((0.0, entry_dir, 0, ()))  # unreadable: evict first
+
+            blob_sizes: dict[str, int] = {}
+            refcount: dict[str, int] = {}
+            for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
+                blob_sizes[blob.name] = blob.stat().st_size
+                refcount[blob.name] = 0
+            for _, _, _, shas in entries:
+                for s in shas:
+                    if s in refcount:
+                        refcount[s] += 1
+
+            usage = sum(e[2] for e in entries) + sum(blob_sizes.values())
+            victims = []
+            entries.sort(key=lambda e: e[0])  # oldest mtime first
+            for mtime, entry_dir, size, shas in entries:
+                if usage <= max_bytes:
+                    break
+                victims.append(entry_dir)
+                usage -= size
+                for s in shas:
+                    if s in refcount:
+                        refcount[s] -= 1
+                        if refcount[s] == 0:
+                            usage -= blob_sizes.get(s, 0)
+
+            for entry_dir in victims:
+                shutil.rmtree(entry_dir, ignore_errors=True)
+
+            # Unconditional orphan-blob GC: runs every sweep, evictions or
+            # not -- pre-existing orphans (the L3 monotonic-growth known
+            # limit) must not survive behind the cap condition.
+            surviving: set[str] = set()
+            for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
+                try:
+                    surviving.update(
+                        _blob_shas_of(json.loads(result_json.read_text(encoding="utf-8")))
+                    )
+                except Exception:
+                    pass
+            for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
+                if blob.name not in surviving:
+                    try:
+                        blob.unlink()
+                    except OSError:
+                        pass
+        except Exception as e:
+            if log is not None:
+                log(f"cache sweep failed: {e}")
