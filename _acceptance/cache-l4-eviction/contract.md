@@ -8,6 +8,7 @@ surfaces: [sdk, api, db]
 status: approved
 approved_by: Manh
 approved_at: 2026-07-31
+time_human_minutes: {gate1: 10}
 ---
 
 # Acceptance Contract: cache-l4-eviction
