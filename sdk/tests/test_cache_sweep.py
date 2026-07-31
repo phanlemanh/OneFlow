@@ -13,7 +13,9 @@ import hashlib
 import os
 import shutil
 import time
+from unittest.mock import patch
 
+from tongflow.engine import node_cache as node_cache_mod
 from tongflow.engine.node_cache import NodeCache
 from tongflow.engine.store import MemoryStore
 
@@ -110,7 +112,16 @@ def test_shared_blob_survives_eviction_of_one_referrer(tmp_path):
     ref2 = store.put(same_bytes, mime="video/mp4", filename="b.mp4")
     cache.put("b" * 64, {"success": True, "video": ref2}, store)
 
-    # Touch "b" so it's MRU, leaving "a" as the sole eviction target.
+    # Force explicit, distinct mtimes (same technique as the LRU test) so
+    # eviction order is deterministic regardless of filesystem mtime
+    # granularity -- relying on insertion order plus a same-second get()
+    # touch is flaky on 1-second-granularity filesystems.
+    now = time.time()
+    os.utime(cache._entry("a" * 64), (now - 300, now - 300))
+    os.utime(cache._entry("b" * 64), (now - 200, now - 200))
+
+    # Touch "b" so it's unambiguously MRU, leaving "a" as the sole eviction
+    # target.
     assert cache.get("b" * 64, MemoryStore()) is not None
 
     entry_b_size = sum(p.stat().st_size for p in cache._entry("b" * 64).parent.iterdir())
@@ -132,31 +143,49 @@ def test_shared_blob_survives_eviction_of_one_referrer(tmp_path):
 
 def test_orphan_blobs_deleted_including_pre_l4(tmp_path):
     # AC-2/AC-4. Orphans from BEFORE sweep() existed (pre-L4 leftovers) must
-    # go on an under-cap sweep; orphans CREATED by the sweep's own evictions
-    # must also be gone by the end of that same sweep call.
+    # go, WITHOUT counting against the cap (IMPORTANT-1): a big orphan must
+    # not out-compete live entries for eviction, since its bytes are freed
+    # by GC regardless of cap pressure. Orphans CREATED by the sweep's own
+    # evictions must also be gone by the end of that same sweep call.
     cache = NodeCache(tmp_path)
     store = MemoryStore()
 
-    pre_l4_bytes = b"pre-l4-orphan"
+    # A "big" pre-L4 orphan: put a real entry, then rmtree just the entry
+    # dir, leaving a real, sizeable blob with zero referrers -- the exact
+    # shape L2/L3 left behind before sweep() existed.
+    pre_l4_bytes = b"o" * 5000
     pre_l4_ref = store.put(pre_l4_bytes, mime="video/mp4", filename="old.mp4")
     cache.put("a" * 64, {"success": True, "video": pre_l4_ref}, store)
     shutil.rmtree(cache._entry("a" * 64).parent)  # simulate an L2/L3 leftover
     pre_l4_sha = hashlib.sha256(pre_l4_bytes).hexdigest()
     assert cache._blob(pre_l4_sha).exists()
 
+    # A small, live entry referencing its own small blob.
     live_ref = store.put(b"live-bytes", mime="video/mp4", filename="live.mp4")
     cache.put("b" * 64, {"success": True, "video": live_ref}, store)
 
-    # Under-cap sweep: no eviction pressure, but the pre-existing orphan must
-    # still be collected -- orphan GC is unconditional.
-    cache.sweep(10**9)
-    assert not cache._blob(pre_l4_sha).exists()
-    assert cache._entry("b" * 64).parent.exists()
+    root = tmp_path / ".tongflow" / "node-cache"
+    live_usage = sum(
+        p.stat().st_size for p in root.rglob("*")
+        if p.is_file() and pre_l4_sha not in str(p)
+    )
+
+    # Cap sized to fit ONLY the live entry + its own blob -- far below what
+    # would be needed if the 5000-byte orphan were also counted against the
+    # cap. If usage accounting counted orphan bytes, this would over-evict
+    # the live entry to make room for garbage already scheduled for
+    # deletion (the IMPORTANT-1 regression); it must not.
+    cap = live_usage + 10
+
+    cache.sweep(cap)
+
+    assert cache._entry("b" * 64).parent.exists()   # live entry survives
+    b_blob_sha = hashlib.sha256(b"live-bytes").hexdigest()
+    assert cache._blob(b_blob_sha).exists()          # its own blob survives
+    assert not cache._blob(pre_l4_sha).exists()      # the orphan is GC'd
 
     # Over-cap sweep: evict "b" itself via cap pressure, which orphans its
     # own blob in the process -- that blob must be gone by sweep's return.
-    b_blob_sha = hashlib.sha256(b"live-bytes").hexdigest()
-    assert cache._blob(b_blob_sha).exists()
     cache.sweep(1)  # cap far below anything -> evict everything
     assert not cache._entry("b" * 64).parent.exists()
     assert not cache._blob(b_blob_sha).exists()
@@ -177,3 +206,26 @@ def test_legacy_entry_without_meta_sweepable_and_purge_skips(tmp_path):
 
     cache.sweep(1)  # cap far below anything -> must evict it cleanly
     assert not cache._entry(key).parent.exists()
+
+
+def test_meta_write_failure_refuses_the_entry(tmp_path):
+    # SPEC FAILURE fix. `put()` writes meta.json BEFORE result.json so a
+    # meta-write failure aborts before result.json is ever written --
+    # leaving NO entry at all, not a HIT-able result.json with no sidecar
+    # (which a `purge()` could never see -- d-...-S2). Not a config-declared
+    # node-id; plain suite coverage.
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    real_atomic_write = node_cache_mod._atomic_write
+
+    def failing_atomic_write(path, data):
+        if path.name == "meta.json":
+            raise OSError("simulated meta write failure")
+        return real_atomic_write(path, data)
+
+    with patch.object(node_cache_mod, "_atomic_write", side_effect=failing_atomic_write):
+        cache.put("a" * 64, {"success": True, "text": "x"}, store)
+
+    assert cache.get("a" * 64, MemoryStore()) is None
+    root = tmp_path / ".tongflow" / "node-cache"
+    assert not (root.exists() and list(root.rglob("result.json")))

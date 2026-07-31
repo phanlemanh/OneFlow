@@ -285,7 +285,7 @@ class NodeCache:
             # purpose, unlike every other swallow branch.
             try:
                 os.utime(entry_path)
-            except OSError:
+            except Exception:
                 pass
             return rehydrated
         except Exception:
@@ -305,10 +305,15 @@ class NodeCache:
         """Write one entry. Never raises — a cache that cannot write must not
         fail the run (spec section 8).
 
-        Writes `meta.json` in the SAME try as `result.json`: a failed meta
-        write refuses the whole entry rather than leaving a result with no
-        sidecar (d-...-S2 -- an entry `purge` can never see is worse than a
-        miss, so a partially-written entry must not exist at all).
+        Writes `meta.json` BEFORE `result.json`, in the SAME try: a
+        meta-only leftover (this write lands, the `result.json` write below
+        then fails) is invisible to `get()` (reads `result.json`) and to
+        `sweep()`'s entry glob (matches on `result.json`) -- harmless, GC'd
+        as an ordinary orphan-adjacent leftover on the next sweep. The
+        reverse order -- `result.json` first -- would instead leave a fully
+        HIT-able entry with no sidecar on a failed meta write: exactly the
+        harm d-...-S2 forbids (an entry `purge` can never see is worse than
+        a miss).
         """
         try:
             payload = self._dehydrate(result, store)
@@ -316,13 +321,13 @@ class NodeCache:
             # No explicit mkdir here: `_atomic_write` already creates the
             # parent directory before writing.
             _atomic_write(
-                entry_path,
-                json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-            )
-            _atomic_write(
                 entry_path.parent / _META_NAME,
                 json.dumps({"v": 1, "tenant": tenant,
                             "workflow_scope": workflow_scope}).encode("utf-8"),
+            )
+            _atomic_write(
+                entry_path,
+                json.dumps(payload, ensure_ascii=False).encode("utf-8"),
             )
         except Exception:
             return
@@ -437,25 +442,54 @@ class NodeCache:
                     payload = json.loads(result_json.read_text(encoding="utf-8"))
                     shas = _blob_shas_of(payload)
                     stat = result_json.stat()
-                    size = sum(p.stat().st_size for p in entry_dir.iterdir())
+                    # Per-file guard: a `.part` temp file from a concurrent
+                    # `_atomic_write` in this same dir, or any file that
+                    # loses a stat/unlink race between `iterdir()` and
+                    # `stat()`, must not fail this entry's classification --
+                    # only that one file's bytes are skipped, not the whole
+                    # entry demoted to "unreadable, evict first".
+                    size = 0
+                    for p in entry_dir.iterdir():
+                        if p.suffix == ".part":
+                            continue
+                        try:
+                            size += p.stat().st_size
+                        except OSError:
+                            continue
                     entries.append((stat.st_mtime, entry_dir, size, shas))
                 except Exception:
-                    entries.append((0.0, entry_dir, 0, ()))  # unreadable: evict first
+                    entries.append((0.0, entry_dir, 0, []))  # unreadable: evict first
 
             blob_sizes: dict[str, int] = {}
             refcount: dict[str, int] = {}
             for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
-                blob_sizes[blob.name] = blob.stat().st_size
+                # A blob that loses a stat race (dangling symlink, deleted
+                # concurrently between glob and stat) must not abort the
+                # whole sweep -- skip just that blob, same rule as the
+                # per-file guard above.
+                try:
+                    blob_sizes[blob.name] = blob.stat().st_size
+                except OSError:
+                    continue
                 refcount[blob.name] = 0
             for _, _, _, shas in entries:
                 for s in shas:
                     if s in refcount:
                         refcount[s] += 1
 
-            usage = sum(e[2] for e in entries) + sum(blob_sizes.values())
+            # Usage counts entry bytes plus only REFERENCED blob bytes.
+            # Pre-existing orphans (refcount 0 -- an L2/L3 leftover, or one
+            # this very sweep's eviction loop below creates) are freed by
+            # the unconditional orphan-GC pass at the end, not by eviction:
+            # counting them here would make eviction pressure proportional
+            # to garbage already scheduled for deletion, over-evicting live
+            # entries to make room for bytes about to vanish anyway.
+            usage = sum(e[2] for e in entries) + sum(
+                size for sha, size in blob_sizes.items() if refcount.get(sha, 0) > 0
+            )
             victims = []
             entries.sort(key=lambda e: e[0])  # oldest mtime first
-            for mtime, entry_dir, size, shas in entries:
+            for _mtime, entry_dir, size, shas in entries:
                 if usage <= max_bytes:
                     break
                 victims.append(entry_dir)
