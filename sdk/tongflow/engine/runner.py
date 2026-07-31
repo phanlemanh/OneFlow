@@ -34,7 +34,14 @@ from .batch import (
 from .bindings import resolve_node_params
 from .fingerprint import node_fingerprint
 from .invoker import invoke_plugin
-from .node_cache import TIER_A_SLOTS, TIER_B_SLOTS, NodeCache, abi_digest_of, plugin_is_dirty
+from .node_cache import (
+    TIER_A_SLOTS,
+    TIER_B_SLOTS,
+    NodeCache,
+    abi_digest_of,
+    plugin_is_dirty,
+    resolve_cache_max_bytes,
+)
 from .paths import resolve_data_dir, resolve_plugins_dir
 from .plugins import (
     DEFAULT_ORG,
@@ -190,6 +197,8 @@ def run_workflow(
     tenant: Optional[str] = None,
     workflow_id: Optional[str] = None,
     invoker: Optional[InvokerCb] = None,
+    reuse: str = "auto",
+    cache_max_bytes: Optional[int] = None,
 ) -> dict[str, Any]:
     """Execute an exported workflow and return its results.
 
@@ -227,12 +236,25 @@ def run_workflow(
             B memoization to activate (`"wf:<workflow_id>:node:<nodeId>"`);
             absent, None, empty, or whitespace-only disables tier B caching
             only -- tier A caching is unaffected either way.
+        reuse: `"auto"` (default) lets the node cache serve hits as usual;
+            `"off"` is the single kill point -- the cache is never
+            constructed, so no `get`/`put`/`sweep` happens anywhere in this
+            run, regardless of `tenant`. Any other value raises `ValueError`
+            immediately, before any preflight work starts.
+        cache_max_bytes: end-of-run sweep cap, resolved through
+            `resolve_cache_max_bytes` (explicit param -> `TONGFLOW_CACHE_MAX_BYTES`
+            env -> `DEFAULT_CACHE_MAX_BYTES`). Only consulted when the cache is
+            active (`reuse="auto"` and `tenant` set).
 
     Returns:
-        ``{"status", "outputs", "outputs_by_name", "errors", "failures"}``.
-        ``outputs`` maps node id -> raw plugin output; in inline mode asset
-        fields are ``{bytesBase64, ...}``, otherwise ``file_key`` paths.
+        ``{"status", "outputs", "outputs_by_name", "errors", "failures"}``,
+        plus ``"cache": {"calls_total", "calls_cached"}`` iff the node cache is
+        active for this run. ``outputs`` maps node id -> raw plugin output; in
+        inline mode asset fields are ``{bytesBase64, ...}``, otherwise
+        ``file_key`` paths.
     """
+    if reuse not in ("auto", "off"):
+        raise ValueError(f"invalid reuse={reuse!r}; expected 'auto' or 'off'")
     inputs = inputs or {}
     wf = _load_workflow(workflow)
 
@@ -254,6 +276,12 @@ def run_workflow(
         node_cache = None
     else:
         node_cache = NodeCache(data_dir) if tenant else None
+    # `reuse="off"` is the single kill point (see docstring): overriding here,
+    # after both branches above, means no other code path needs to consult
+    # `reuse` again -- every `get`/`put`/`sweep` call below is already gated
+    # on `node_cache is not None`.
+    if reuse == "off":
+        node_cache = None
     # One `git status` per plugin dir per run (memoized here); a plugin that
     # goes dirty mid-run keeps the verdict computed at its first cache lookup
     # -- acceptable for a single run.
@@ -279,23 +307,23 @@ def run_workflow(
     else:
         store = DiskStore(out_path, fk_base)
 
-    # Event shapes this loop emits. `node_cached` is declared here while there
-    # is still no cache to hit: adding fields to an event already running in
-    # production costs far more than declaring them up front, and the host side
-    # (engine-events.ts -> SSE -> canvas) is wired for it as of L0. L2 fills in
-    # fingerprint/tier/output and calls emit() with exactly this shape.
+    # Event shapes this loop emits. `node_cached` is real as of L4: emitted
+    # once per node, after that node's per-call loop, when `results` is
+    # non-empty and every call in it was a cache hit (a partial hit -- some
+    # calls missed -- gets no `node_cached` at all, only the ordinary
+    # `node_completed` below). It always precedes `node_completed` for the
+    # same node.
     #
     #   {"type": "node_cached", "nodeId": str, "feature": str,
     #    "label": str, "fingerprint": str, "tier": "A" | "B",
     #    "output": dict | None}
     #
-    # `output` is the reused artifact itself, and it is declared here for the
-    # same reason as the rest: the canvas applies a completed node's result from
-    # this payload alone (use-workflow-execution.ts -> applyNodeOutput), so an
-    # event without it would flip the node to "completed" showing nothing. It is
-    # optional because L0 has no cache to hit; omitting it costs nothing on the
-    # wire, whereas discovering the gap at L2 costs a second pass over three
-    # layers.
+    # `fingerprint` is the first hit's cache key; `tier` is "A"/"B" by which
+    # allowlist (`TIER_A_SLOTS`/`TIER_B_SLOTS`) the node's slot belongs to.
+    # `output` is `merge_fanout_results(results)` -- the same reused artifact
+    # `node_completed` carries -- so the canvas can apply a fully-cached node
+    # from this event alone (use-workflow-execution.ts -> applyNodeOutput)
+    # without waiting on `node_completed` to learn what was reused.
     def emit(event: dict[str, Any]) -> None:
         if on_progress is not None:
             on_progress(event)
@@ -343,6 +371,12 @@ def run_workflow(
     node_outputs: dict[str, Any] = {}
     error_summaries: list[str] = []
     failures: list[dict[str, str]] = []
+    # Run-wide cache counters (AC-11/AC-16), surfaced in the result iff the
+    # cache is active. Incremented per per-call loop iteration, not per node
+    # -- a batched node's N calls each count individually, which is what
+    # makes `calls_cached` a meaningful hit rate rather than a per-node flag.
+    calls_total = 0
+    calls_cached = 0
 
     emit(
         {
@@ -394,11 +428,23 @@ def run_workflow(
                 plugin_dir = plugins_dir / cfg["localSubdir"]
 
                 results: list[dict[str, Any]] = []
+                # Per-node `node_cached` bookkeeping (AC-16): a full hit needs
+                # every call in this node's loop to have been a HIT, and the
+                # emitted `fingerprint` is the FIRST hit's key, not the last --
+                # reset per node, not per run.
+                all_calls_hit = True
+                first_hit_key: Optional[str] = None
                 for idx, call_params in enumerate(per_call_params):
                     business_input = materialize_asset_inputs(
                         slot, call_params, abi, search_dirs, store
                     )
                     cache_key = None
+                    # `key_scope` mirrors whichever `workflow_scope` fed
+                    # `cache_key` below (None for tier A, the tier-B scope
+                    # string otherwise) -- `put()` needs the same value, and
+                    # rebuilding it there would risk drifting from what was
+                    # actually hashed into the key.
+                    key_scope: Optional[str] = None
                     if node_cache is not None and slot in TIER_A_SLOTS:
                         if plugin_dir not in dirty_by_dir:
                             dirty_by_dir[plugin_dir] = plugin_is_dirty(plugin_dir)
@@ -430,6 +476,7 @@ def run_workflow(
                         # variant's key distinct within this node's scope.
                         if batch_field_of(node) is not None:
                             scope = f"{scope}:call:{idx}"
+                        key_scope = scope
                         cache_key = node_fingerprint(
                             slot=slot,
                             plugin_id=plugin_id,
@@ -447,13 +494,20 @@ def run_workflow(
                     # unchanged.
 
                     cached = (
-                        node_cache.get(cache_key, store)
+                        node_cache.get(cache_key, store, log=log)
                         if (node_cache is not None and cache_key)
                         else None
                     )
+                    if node_cache is not None:
+                        calls_total += 1
+                        if cached is not None:
+                            calls_cached += 1
                     if cached is not None:
+                        if first_hit_key is None:
+                            first_hit_key = cache_key
                         results.append(cached)
                         continue
+                    all_calls_hit = False
 
                     if invoker is not None:
                         raw = invoker(plugin_id, slot, business_input, plugin_dir, model)
@@ -480,7 +534,10 @@ def run_workflow(
                     # failure, and a transient error cached as a permanent one
                     # is the worst outcome in this family.
                     if node_cache is not None and cache_key:
-                        node_cache.put(cache_key, one, store)
+                        node_cache.put(
+                            cache_key, one, store,
+                            tenant=tenant, workflow_scope=key_scope, log=log,
+                        )
                     results.append(one)
 
                 # A batched node's raw output is the list of its calls; an
@@ -512,6 +569,24 @@ def run_workflow(
                     else:
                         slot_state["fileKeys"] = channel["values"]
                     data_node_state[target] = slot_state
+
+                # Full-hit node_cached: every call this node made was a cache
+                # HIT (all_calls_hit) and it actually made at least one
+                # (results non-empty -- an empty batch trivially satisfies
+                # all_calls_hit with nothing to report). A partial hit gets
+                # no node_cached, only the node_completed below.
+                if results and all_calls_hit and first_hit_key is not None:
+                    emit(
+                        {
+                            "type": "node_cached",
+                            "nodeId": node_id,
+                            "feature": slot,
+                            "label": label,
+                            "fingerprint": first_hit_key,
+                            "tier": "A" if slot in TIER_A_SLOTS else "B",
+                            "output": merge_fanout_results(results),
+                        }
+                    )
 
                 emit(
                     {
@@ -550,6 +625,15 @@ def run_workflow(
         outputs_by_name = _inline_outputs_in_obj(outputs_by_name, store)
 
     status = "success" if not error_summaries else "failed"
+
+    # End-of-run maintenance sweep (AC-12): on BOTH the success path and the
+    # error_summaries (failure) path -- they converge here, above the final
+    # emit, which is exactly why the sweep sits at this one spot rather than
+    # duplicated at each `break`. No-op when the cache was never active
+    # (`reuse="off"`, no tenant, or the ABI couldn't be hashed).
+    if node_cache is not None:
+        node_cache.sweep(resolve_cache_max_bytes(cache_max_bytes), log=log)
+
     emit(
         {
             "type": "workflow_completed" if status == "success" else "workflow_failed",
@@ -559,10 +643,13 @@ def run_workflow(
         }
     )
 
-    return {
+    result: dict[str, Any] = {
         "status": status,
         "outputs": node_outputs,
         "outputs_by_name": outputs_by_name,
         "errors": error_summaries,
         "failures": failures,
     }
+    if node_cache is not None:
+        result["cache"] = {"calls_total": calls_total, "calls_cached": calls_cached}
+    return result
