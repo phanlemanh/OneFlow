@@ -274,16 +274,28 @@ class NodeCache:
         `log` (default `None`) is one of the four closed-list swallow
         branches (AC-6): an UNUSABLE entry -> miss logs exactly one line per
         `get()` call that hits this path. A plain COLD miss (no entry ever
-        written for this key -- `FileNotFoundError` reading `result.json`)
-        is a different thing: design branch (1) is "unusable entry", not
-        "absent entry", and a cold run would otherwise emit one log line per
-        node per call. Every other exception (corrupt JSON, a
-        truncated/missing blob referenced by an entry that DOES exist,
-        permission error) still logs.
+        written for this key -- `FileNotFoundError` reading `result.json`
+        itself) is a different thing: design branch (1) is "unusable
+        entry", not "absent entry", and a cold run would otherwise emit one
+        log line per node per call. The cold-miss exemption is scoped to
+        JUST the entry-file read, not the whole method -- an entry that
+        exists and parses but whose BLOB is gone (exactly the state the
+        orphan-GC race can produce) also raises `FileNotFoundError`
+        (`_rehydrate`'s `blob.read_bytes()`), and THAT case is a genuinely
+        unusable entry, not a cold miss, so it still logs. Every other
+        exception (corrupt JSON, a truncated blob referenced by an entry
+        that DOES exist, permission error) also still logs.
         """
         try:
             entry_path = self._entry(key)
-            raw = entry_path.read_text(encoding="utf-8")
+            try:
+                raw = entry_path.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                # Cold miss: no entry was ever written for this key -- silent
+                # (see docstring). Scoped to only this read, not blob reads
+                # below, which raise the same exception type for a different,
+                # loggable reason.
+                return None
             payload = json.loads(raw)
             rehydrated = self._rehydrate(payload, store)
             # Recency touch for the LRU sweep. Best-effort: a read-only root
@@ -295,9 +307,6 @@ class NodeCache:
             except Exception:
                 pass
             return rehydrated
-        except FileNotFoundError:
-            # A cold miss, not an unusable entry -- silent (see docstring).
-            return None
         except Exception as e:
             # Any OTHER unusable entry is a miss: unparseable JSON, a
             # truncated/missing blob referenced by a real entry, permission

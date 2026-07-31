@@ -272,7 +272,11 @@ def test_purge_removes_only_matching_workflow_entries(tmp_path):
     assert cache.get(key_null_tenant, MemoryStore()) is not None
     assert cache.get(key_target, MemoryStore()) is not None
 
-    cache.purge(tenant, "1")
+    # workflow_id " 1 " (whitespace-padded) must still match "1"'s entries --
+    # purge() normalizes with str(workflow_id).strip(), mirroring the
+    # runner's wf_id_clean used when the scope was originally written.
+    # Fix round 1, item 3.
+    cache.purge(tenant, " 1 ")
 
     assert cache.get(key_target, MemoryStore()) is None
     assert cache.get(key_decoy_wf11, MemoryStore()) is not None
@@ -374,6 +378,23 @@ def test_swallowed_cache_errors_emit_one_log_line(tmp_path):
     get_logs: list[str] = []
     assert cache.get(key_corrupt, MemoryStore(), log=get_logs.append) is None
     assert len(get_logs) == 1
+
+    # (1b) get() on an entry that EXISTS and parses but whose referenced
+    # blob is gone (exactly the shape the orphan-GC race can leave: entry
+    # survives, blob raced away underneath it) -> exactly one line, still a
+    # miss. This is the case fix round 2 restores: an earlier version of
+    # the cold-miss exemption wrapped `FileNotFoundError` around the WHOLE
+    # try, so `_rehydrate`'s `blob.read_bytes()` raising `FileNotFoundError`
+    # for a missing blob was silently swallowed as if it were a cold miss --
+    # it is not: the entry is real and unusable, not absent.
+    key_missing_blob = "e" * 64
+    ref = store.put(b"will-vanish", mime="video/mp4", filename="gone.mp4")
+    cache.put(key_missing_blob, {"success": True, "video": ref}, store)
+    blob_sha = hashlib.sha256(b"will-vanish").hexdigest()
+    cache._blob(blob_sha).unlink()
+    missing_blob_logs: list[str] = []
+    assert cache.get(key_missing_blob, MemoryStore(), log=missing_blob_logs.append) is None
+    assert len(missing_blob_logs) == 1
 
     # (2) put() refused (read-only root) -> exactly one line.
     original_mode = root.stat().st_mode
