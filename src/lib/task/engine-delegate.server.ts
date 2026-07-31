@@ -117,8 +117,9 @@ function num(v: unknown): number | undefined {
     return typeof v === "number" && Number.isFinite(v) ? v : undefined;
 }
 
-/** Cache-counter columns from an engine final result. Absent/malformed block
- *  → both null (NULL ≠ 0 — see workspace.schema.ts). */
+/** Cache-counter columns from an engine final result. Each counter falls to
+ *  null independently when absent or malformed; a missing `cache` block
+ *  yields both null (NULL ≠ 0 — see workspace.schema.ts). */
 export function cacheColumnsFrom(result: Record<string, unknown> | null): {
     cacheCallsTotal: number | null;
     cacheCallsCached: number | null;

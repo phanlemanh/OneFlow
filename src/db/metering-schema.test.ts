@@ -22,6 +22,7 @@ import { describe, expect, it } from "vitest";
 
 const MIGRATIONS_DIR = join(process.cwd(), "drizzle");
 const NEW_COLUMNS = ["duration_ms", "cost_usd", "gpu_type"] as const;
+const CACHE_COLUMNS = ["cache_calls_total", "cache_calls_cached"] as const;
 
 type JournalEntry = { idx: number; when: number; tag: string };
 type Journal = { version: string; dialect: string; entries: JournalEntry[] };
@@ -38,6 +39,17 @@ function migrationsMentioningMetering(): string[] {
         .filter((f) => f.endsWith(".sql"))
         .filter((f) =>
             NEW_COLUMNS.some((c) =>
+                readFileSync(join(MIGRATIONS_DIR, f), "utf8").includes(c),
+            ),
+        );
+}
+
+/** Migration files that introduce the cache counter columns. */
+function migrationsMentioningCacheColumns(): string[] {
+    return readdirSync(MIGRATIONS_DIR)
+        .filter((f) => f.endsWith(".sql"))
+        .filter((f) =>
+            CACHE_COLUMNS.some((c) =>
                 readFileSync(join(MIGRATIONS_DIR, f), "utf8").includes(c),
             ),
         );
@@ -177,8 +189,9 @@ describe("upgrading an existing database (AC-2)", () => {
         expect(row.prompt).toBe('{"text":"a cat"}');
         expect(row.plugin_id).toBe("tongflow-modal-z-image");
         // Historical rows were never measured — they must read as unknown,
-        // not as zero.
-        for (const col of NEW_COLUMNS) {
+        // not as zero. Cache counters land in a later migration than
+        // metering but the same upgrade-path guarantee applies to them.
+        for (const col of [...NEW_COLUMNS, ...CACHE_COLUMNS]) {
             expect(
                 row[col],
                 `${col} should be NULL for legacy rows`,
@@ -189,9 +202,32 @@ describe("upgrading an existing database (AC-2)", () => {
     });
 });
 
-const CACHE_COLUMNS = ["cache_calls_total", "cache_calls_cached"] as const;
-
 describe("cache counters", () => {
+    it("introduces the two cache columns in exactly one migration, purely additive — two ADDs, no DROP, no RENAME", () => {
+        const files = migrationsMentioningCacheColumns();
+        expect(files).toHaveLength(1);
+        const [file] = files;
+        const sql = readFileSync(join(MIGRATIONS_DIR, file), "utf8");
+
+        const statements = sql
+            .split("--> statement-breakpoint")
+            .map((s) => s.trim())
+            .filter(Boolean);
+
+        expect(statements).toHaveLength(2);
+        for (const stmt of statements) {
+            expect(stmt).toMatch(/^ALTER TABLE `tasks` ADD /);
+        }
+
+        // The suppression half: a migration that drops or renames an
+        // existing column would silently destroy live task history.
+        expect(sql).not.toMatch(/\bDROP\b/i);
+        expect(sql).not.toMatch(/\bRENAME\b/i);
+
+        expect(sql).toContain("ADD `cache_calls_total` integer");
+        expect(sql).toContain("ADD `cache_calls_cached` integer");
+    });
+
     it("declares both cache counter columns nullable integers on a fresh database", () => {
         const dir = mkdtempSync(join(tmpdir(), "oneflow-cache-cols-"));
         const { sqlite, db } = openDb(join(dir, "test.db"));
