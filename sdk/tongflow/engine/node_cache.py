@@ -308,8 +308,9 @@ class NodeCache:
         Writes `meta.json` BEFORE `result.json`, in the SAME try: a
         meta-only leftover (this write lands, the `result.json` write below
         then fails) is invisible to `get()` (reads `result.json`) and to
-        `sweep()`'s entry glob (matches on `result.json`) -- harmless, GC'd
-        as an ordinary orphan-adjacent leftover on the next sweep. The
+        `sweep()`'s entry glob (matches on `result.json`) -- harmless, and
+        pruned outright by `sweep()`'s stale-entry-dir pass (any
+        `<shard>/<key>/` dir with no `result.json`) on the next sweep. The
         reverse order -- `result.json` first -- would instead leave a fully
         HIT-able entry with no sidecar on a failed meta write: exactly the
         harm d-...-S2 forbids (an entry `purge` can never see is worse than
@@ -438,17 +439,20 @@ class NodeCache:
             entries = []  # (mtime, entry_dir, entry_bytes, blob_shas)
             for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
                 entry_dir = result_json.parent
+                # Size computed FIRST, ahead of the JSON parse below, so a
+                # corrupt/unparseable result.json (caught by the `except`)
+                # still contributes its REAL on-disk bytes to `usage` -- a
+                # corrupt entry occupies real space and must count as
+                # eviction pressure, not silently vanish from accounting
+                # while it sits on disk forever.
+                #
+                # Per-file guard: a `.part` temp file from a concurrent
+                # `_atomic_write` in this same dir, or any file that loses a
+                # stat/unlink race between `iterdir()` and `stat()`, must
+                # not fail this entry's classification -- only that one
+                # file's bytes are skipped.
+                size = 0
                 try:
-                    payload = json.loads(result_json.read_text(encoding="utf-8"))
-                    shas = _blob_shas_of(payload)
-                    stat = result_json.stat()
-                    # Per-file guard: a `.part` temp file from a concurrent
-                    # `_atomic_write` in this same dir, or any file that
-                    # loses a stat/unlink race between `iterdir()` and
-                    # `stat()`, must not fail this entry's classification --
-                    # only that one file's bytes are skipped, not the whole
-                    # entry demoted to "unreadable, evict first".
-                    size = 0
                     for p in entry_dir.iterdir():
                         if p.suffix == ".part":
                             continue
@@ -456,9 +460,15 @@ class NodeCache:
                             size += p.stat().st_size
                         except OSError:
                             continue
+                    payload = json.loads(result_json.read_text(encoding="utf-8"))
+                    shas = _blob_shas_of(payload)
+                    stat = result_json.stat()
                     entries.append((stat.st_mtime, entry_dir, size, shas))
                 except Exception:
-                    entries.append((0.0, entry_dir, 0, []))  # unreadable: evict first
+                    # Unreadable: evict first, but the bytes it occupies
+                    # still count (`size` was computed above, outside this
+                    # try's failure-prone steps).
+                    entries.append((0.0, entry_dir, size, []))
 
             blob_sizes: dict[str, int] = {}
             refcount: dict[str, int] = {}
@@ -502,6 +512,16 @@ class NodeCache:
 
             for entry_dir in victims:
                 shutil.rmtree(entry_dir, ignore_errors=True)
+
+            # Unconditional stale-entry-dir prune: a dir with no
+            # `result.json` (e.g. a meta-only leftover from a `put()` whose
+            # `result.json` write then failed -- see `put()`'s docstring)
+            # is invisible to `get()`/the entries glob above and would
+            # otherwise sit forever. `ignore_errors=True` is the per-item
+            # guard -- one dir failing to remove must not abort the sweep.
+            for stale_dir in self.root.glob("[0-9a-f][0-9a-f]/*"):
+                if stale_dir.is_dir() and not (stale_dir / "result.json").exists():
+                    shutil.rmtree(stale_dir, ignore_errors=True)
 
             # Unconditional orphan-blob GC: runs every sweep, evictions or
             # not -- pre-existing orphans (the L3 monotonic-growth known

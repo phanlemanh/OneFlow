@@ -229,3 +229,29 @@ def test_meta_write_failure_refuses_the_entry(tmp_path):
     assert cache.get("a" * 64, MemoryStore()) is None
     root = tmp_path / ".tongflow" / "node-cache"
     assert not (root.exists() and list(root.rglob("result.json")))
+
+
+def test_corrupt_entry_bytes_still_count_toward_cap(tmp_path):
+    # IMPORTANT fix (fix round 2). A corrupt/unparseable result.json still
+    # occupies real on-disk bytes. The unreadable branch previously recorded
+    # size=0, so a big corrupt entry silently UNDER-counted usage and, as
+    # the sole entry, was never even considered over cap -- it would sit on
+    # disk forever. Not a config-declared node-id; plain suite coverage.
+    cache = NodeCache(tmp_path)
+    store = MemoryStore()
+    key = "a" * 64
+    cache.put(key, {"success": True, "text": "x"}, store)
+    entry_path = cache._entry(key)
+    # Corrupt result.json with unparseable JSON, but a REAL 100KB file
+    # actually sitting on disk (well over the cap used below).
+    entry_path.write_bytes(b"{ not valid json " + b"x" * (100 * 1024))
+
+    root = tmp_path / ".tongflow" / "node-cache"
+    before_size = sum(p.stat().st_size for p in root.rglob("*") if p.is_file())
+    assert before_size > 100 * 1024
+
+    cache.sweep(128)  # cap far below the corrupt entry's real on-disk size
+
+    after_size = sum(p.stat().st_size for p in root.rglob("*") if p.is_file())
+    assert after_size <= 128
+    assert not entry_path.parent.exists()
