@@ -1,30 +1,15 @@
 {
-  "feature_plain": "Lát cuối của trục cache: đặt trần dung lượng (mặc định 20GB) và tự dọn theo nguyên tắc 'lâu không dùng thì bỏ' — đóng lỗ 'đĩa phình vô hạn' mà lát L3 để lại. Thêm lệnh xoá cache theo từng workflow, công tắc tắt cache cho benchmark, và lần đầu ĐO ĐƯỢC bao nhiêu phần trăm render là sửa-không-tốn-tiền — đúng con số mà gate G2 (≥25%) sẽ đọc.",
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ dọn theo 'lâu không DÙNG' thật sự: entry cũ nhưng vừa được dùng lại sống sót, entry nguội bị bỏ — không phải xoá theo thứ tự tạo." },
-    { "id": "AC-2", "p": "Sẽ đưa tổng dung lượng về dưới trần sau mỗi lần dọn; dưới trần thì không đụng vào bất kỳ kết quả còn dùng được nào." },
-    { "id": "AC-3", "p": "Sẽ giữ nguyên file dữ liệu dùng chung khi chỉ một trong hai entry tham chiếu nó bị dọn — entry còn lại vẫn dùng được nguyên vẹn." },
-    { "id": "AC-4", "p": "Sẽ dọn cả những file mồ côi tích tụ từ TRƯỚC lát này — lỗ 'máy sinh mồ côi' của L3 được đóng hồi tố, không chỉ cho entry mới." },
-    { "id": "AC-5", "p": "Sẽ dọn được cả cache cũ từ các lát trước mà không cần chuyển đổi dữ liệu, không crash." },
-    { "id": "AC-8", "p": "Sẽ cho gọi xoá-theo-workflow hai lần liên tiếp an toàn, và tự dọn phần dữ liệu vừa trở thành mồ côi ngay trong lần gọi đó." },
-    { "id": "AC-11", "p": "Sẽ đếm đúng số lần gọi plugin và số lần dùng lại cache trong mọi kịch bản — kể cả lần chạy lỗi giữa chừng; lần chạy lỗi không bao giờ được tính là 'dùng lại'." },
-    { "id": "AC-12", "p": "Sẽ phát tín hiệu 'node này dùng lại từ cache' lên canvas lần đầu tiên — đường ống đã xây sẵn 4 lát trước nay mới có sự kiện thật, và kết quả chỉ hiển thị một lần, không nhân đôi." },
-    { "id": "AC-13", "p": "Sẽ lưu hai con số đếm vào bảng tasks (theo đúng khuôn task-metering): tỷ lệ % sửa-miễn-phí truy vấn được bằng một câu SQL; 'không đo' giữ là NULL, không bao giờ lẫn với 'đo ra 0'." },
-    { "id": "AC-14", "p": "Sẽ tách file test 1101 dòng thành các file ≤800 dòng mà không làm gãy bất kỳ tham chiếu eval nào đã ký — có guard tự kiểm chứng." },
-    { "id": "AC-15", "p": "Sẽ canh danh sách phân loại cache theo CẢ hai chiều: slot mới trong ABI quên phân loại → test đỏ, slot đã chết còn nằm trong danh sách → test đỏ." },
-    { "id": "AC-16", "p": "Sẽ chứng minh việc dọn dẹp THỰC SỰ chạy ở cuối mỗi lần render (kể cả lần render lỗi), và trần chỉnh được đủ ba nấc: tham số > biến môi trường > mặc định 20GB." }
-  ],
-  "wont_do": [
-    { "id": "AC-6", "p": "Sẽ KHÔNG bao giờ làm hỏng một lần render vì lỗi của chính cache — mọi lỗi được nuốt nhưng để lại đúng một dòng log (hết thời im lặng của L2)." },
-    { "id": "AC-7", "p": "Sẽ KHÔNG xoá lố khi xoá cache theo workflow: workflow khác, người dùng khác, và tầng cache dùng chung đều còn nguyên và vẫn dùng lại được." },
-    { "id": "AC-9", "p": "Sẽ KHÔNG đọc, KHÔNG ghi, KHÔNG dọn gì khi tắt cache để benchmark — thư mục cache y nguyên từng byte." },
-    { "id": "AC-10", "p": "Chặn ngay giá trị công tắc cache không hợp lệ (kể cả 'force' đã hoãn) bằng lỗi rõ ràng trước khi chạy node nào — không âm thầm hiểu thành chế độ khác." }
-  ],
-  "scope_plain": "Hoãn: chế độ debug 'force' · nút xoá cache trên giao diện · khoá dọn dẹp đa tiến trình · trần riêng từng người dùng trên cloud. Nợ hàng đợi giữ nguyên chỗ: mime/filename vào khoá (1.1-L1b), cache cho desktop-delegation (1.1-L2b).",
+  "feature_plain": "Lát cuối trục cache đã xong và PASS toàn bộ 20 bài kiểm ngay vòng 1: cache giờ có trần dung lượng 20GB tự dọn theo 'lâu không dùng thì bỏ', dọn được cả rác tồn đọng từ các lát trước, có lệnh xoá theo từng workflow, công tắc tắt cache cho benchmark, và lần đầu ĐO ĐƯỢC % render là sửa-không-tốn-tiền — hai cột mới trong bảng tasks, một câu SQL ra con số mà gate G2 (≥25%) sẽ đọc.",
+  "analyst_plain": "Ba lệnh kiểm phía TS (E15/E16/E20) chạy qua bộ lọc tên test, nên trên cây KHÔNG có feature chúng chọn 0 test và vẫn xanh — tức là màu xanh của riêng chúng không tự chứng minh feature tồn tại. Sức phân biệt của chúng đến từ bằng chứng mutation đã ghi trong report từng task (mỗi test đã được chứng minh đỏ khi hành vi nó canh bị phá). Cùng mẫu đã từng chấp nhận ở L3 (E9).",
   "decisions_plain": [
-    { "id": "d-20260731T014332Z-16174", "p": "Chọn file metadata nhỏ cạnh mỗi entry + dọn dẹp cuối mỗi lần chạy, thư mục cache vẫn là nguồn sự thật duy nhất — đổi lại lần dọn phải đọc mọi manifest để đếm tham chiếu." },
-    { "id": "d-20260731T014332Z-32155", "p": "KHÔNG làm chế độ debug 'force' — tiết kiệm một nhánh phức tạp chưa ai cần; khi cần thật sẽ mở hợp đồng riêng." },
-    { "id": "d-20260731T014332Z-1233", "p": "Chọn ghi 2 cột đếm vào bảng tasks để đo % sửa-miễn-phí bằng SQL — đổi lại một migration nhỏ và task-metering phải ký lại." },
-    { "id": "d-20260731T014332Z-22762", "p": "KHÔNG khoá liên tiến trình khi dọn — tránh khoá kẹt âm thầm tắt luôn việc dọn; hai tiến trình đụng nhau thì tự lành qua cơ chế coi-như-chưa-có-cache." }
-  ]
+    { "id": "d-20260731T014332Z-16174", "p": "Chọn file metadata nhỏ cạnh mỗi entry + dọn cuối mỗi lần chạy — thư mục cache là nguồn sự thật duy nhất; đổi lại lần dọn phải đọc mọi manifest để đếm tham chiếu." },
+    { "id": "d-20260731T014332Z-32155", "p": "KHÔNG làm chế độ debug 'force' — cần thật thì mở hợp đồng riêng; spec đã ghi chú 1 dòng." },
+    { "id": "d-20260731T014332Z-1233", "p": "Chọn ghi 2 cột đếm vào bảng tasks — % sửa-miễn-phí truy vấn bằng SQL; đổi lại một migration nhỏ và task-metering ký lại." },
+    { "id": "d-20260731T014332Z-22762", "p": "KHÔNG khoá liên tiến trình khi dọn — tránh khoá kẹt âm thầm tắt việc dọn; hai tiến trình đụng nhau tự lành qua cơ chế coi-như-chưa-có-cache." },
+    { "id": "d-20260731T023523Z-5370", "p": "Ghi metadata TRƯỚC kết quả khi lưu cache — nếu metadata ghi hỏng thì từ chối lưu cả entry, vì một entry mà lệnh xoá-theo-workflow không nhìn thấy còn tệ hơn một lần không trúng cache." },
+    { "id": "d-20260731T054227Z-4623", "p": "Mẫu số của % sửa-miễn-phí đếm TOÀN BỘ lời gọi plugin (kể cả loại việc chưa cache được) — con số trung thực với 'bao nhiêu phần công việc được tiết kiệm', không thổi phồng; đã ghim bằng test." },
+    { "id": "d-20260731T060542Z-*paths", "p": "Sửa danh sách file-theo-dõi của 5 bài kiểm sau khi tách file test (thuần metadata phạm vi — không đổi bài kiểm nào); thiếu nó thì file mới không được theo dõi staleness và cổng merge tự chặn." },
+    { "id": "d-*-layer", "p": "Khai nhãn 'backend-effect' cho 2 bài kiểm nửa-backend của 2 tiêu chí xuyên lớp (thuần khai báo — cổng merge đòi cặp xuyên lớp ghi rõ nửa nào là backend)." }
+  ],
+  "scope_plain": "Hoãn có chủ đích: chế độ debug 'force' · nút xoá cache trên giao diện · khoá dọn đa tiến trình · trần riêng từng người dùng cloud. Nợ hàng đợi giữ chỗ: mime/filename vào khoá (1.1-L1b), cache cho desktop-delegation (1.1-L2b)."
 }

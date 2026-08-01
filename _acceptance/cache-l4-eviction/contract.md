@@ -63,4 +63,14 @@ Từ morphological scan 31/07 (preset test-matrix + risk-premortem; chân ngành
 
 ## Notes
 
-(Known limits sẽ được điền ở Cổng 2 nếu có.)
+**Known limits — chốt tại Cổng 2 (Manh Phan, option (a) cho 2 finding ngoài hợp đồng):**
+
+- **`cache_max_bytes` từ host không được kiểm tra kiểu** (2 finding review gộp một gốc, `node_cache.py:142` + wiring): giá trị không hợp lệ (chuỗi, số âm) → âm thầm rơi về mặc định 20GiB, không log — deferral trong docstring chưa bao giờ được thực hiện; boolean `true` → `isinstance(True, int)` cho trần **1 byte** → sweep cuối run xoá gần hết cache không cảnh báo. Chưa chạm được từ đường chạy thật nào (delegate không gửi trường này). **Revisit:** sửa cùng lát kế tiếp mở lại `node_cache.py` (L5 eviction-extraction hoặc 1.1-L2b) — guard `not isinstance(param, bool)` + log một dòng khi bỏ qua giá trị, hoặc raise như `reuse`.
+- **Race đa tiến trình của sweep/purge** — descope có chủ đích (D-L4-4, không lockfile): 2 tiến trình cùng dọn là best-effort, race tự lành qua ngữ nghĩa miss; cửa sổ micro giây prune-giữa-meta-và-result tạo entry dạng-legacy (AC-5 vẫn sweep được). Revisit cloud P2.
+- **Trần dung lượng là MỘT trần chung** — cloud multi-tenant chung đĩa: churn của tenant này evict được entry của tenant kia. Revisit P2 (per-tenant cap).
+- **Preflight raise (thiếu plugin/venv) thoát trước sweep** — run đó không put gì nên không phình; cache đang vượt trần thì đợi run auto kế tiếp.
+- **Purge để lại thư mục shard 2-ký-tự rỗng** (chỉ inode; sweep prune mức entry-dir).
+- **`cacheColumnsFrom` nhận float/âm** — engine chỉ phát int; SQLite dynamic typing lưu vô hại.
+- **E20 (apply-đúng-một-lần)**: một thông báo hoàn thành mỗi node + shape mảng an toàn đo trên code thật; idempotency double-apply ghim ở seam contract `payload.ts` bằng model mutation-proven của `expands` — reuse thật sống trong Zustand store, repo không có React test harness.
+- **E15/E16/E20 không tự phân biệt qua bộ lọc `-t`** (0 test trên cây không feature → xanh trống): sức phân biệt nằm ở bằng chứng mutation trong report từng task (mẫu E9 của L3).
+- **`run_workflow` ~485 dòng** — extraction khối cache per-call xếp hàng lát kế.

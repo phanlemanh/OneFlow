@@ -27,7 +27,9 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**`cache-l3-tier-b — SIGNED OFF (Manh 30/07, gate2 15m) cùng 4 re-sign (L1/L2/conformance-l0/task-metering); PR mở, chờ merge
+**`cache-l4-eviction` — SIGNED OFF (Manh Phan 01/08, gate2 15m) cùng 4 re-sign (L2/L3/conformance-l0/task-metering; L1 carry-forward nhờ không đụng `test_fingerprint*`); PR mở, chờ merge.** Trục cache 1.1 ĐÓNG: LRU theo trần 20GiB (param→env→default), blob GC reachability + dọn orphan hồi tố (đóng "monotonic orphan generator" của L3), `purge(tenant, workflow_id)`, `reuse=auto/off` (force descope, spec §7 amendment), telemetry % partial end-to-end: engine đếm + phát `node_cached` lần đầu → 2 cột `cache_calls_*` trong `tasks` → 1 câu SQL. S4 PASS vòng 1 (20/20). Known limits đáng nhớ: validation `cache_max_bytes` (option (a), revisit lát kế), race đa tiến trình descope, trần chung giữa tenant (P2). Hàng đợi sau merge: 1.1-L1b (mime vào digest) · 1.1-L2b (file_key_base) · extraction `run_workflow` · **`compose-overlay` (Phase 1.2 — hạng mục không được cắt thứ hai)**.
+
+**`cache-l3-tier-b` đã merge ([PR #33](https://github.com/phanlemanh/OneFlow/pull/33), 30/07).**
 
 **`cache-l2-store` (lát L2) đã ký Cổng 2 (30/07) — [PR #32](https://github.com/phanlemanh/OneFlow/pull/32) mở, `pre-merge-check` sạch cả 11 feature.** Cache thật sự đọc/ghi lần đầu: chạy lại workflow không đổi → 0 lời gọi plugin; sửa một node → chỉ node đó + hạ nguồn chạy lại. S4 PASS ngay vòng 1 (18/18 eval — lần đầu trong repo). Kèm PR: `cache-l1-fingerprint` và `conformance-l0` **ký lại** (luật per-file — L2 sửa `fingerprint.py` và `runner.py`/`engine-delegate.server.ts`; chi phí thứ hai KHÔNG được báo giá ở Cổng 1, đã disclose trong re-verify note); 7 feature carry-forward; `stale-scope-by-paths` không cần gì nhờ scope hẹp — cơ chế 0.5 trả công lần đầu.
 
@@ -136,7 +138,8 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | **1.1-L2b** | **Dạy cache `file_key_base`** để desktop-delegation (DiskStore, file_key tương đối) cache được kết quả mang asset | 🔴 hàng đợi mới từ final review L2: hiện fail-closed → desktop 0% hit cho 9/11 slot tầng A; DoD chỉ đạt trên MemoryStore/HttpStore |
 | **1.1-L1b** | **`mime`/`filename` của asset vào digest khoá cache** | 🔴 **contract riêng, quyết ở Cổng 2 của L1**. Cùng bytes + metadata khác → **cùng một khoá** (`denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên ở L2 plugin chọn decoder theo `input.mime` bị phục vụ entry của loại kia. Sửa nằm trong `callog.py` — **của `conformance-l0`** — nên feature đó phải verify lại + ký lại. AC-4/AC-5 chỉ phủ trục `file_key` vs bytes |
 | **1.1-L2** | Store cache trên đĩa + blob dedupe, chỉ tầng A, per-call | ✅ **ký 30/07** — 16 tiêu chí / 18 eval, S4 PASS vòng 1, PR #32. Known limits: `plugin_is_dirty` fail-open khi `git status` lỗi (ứng viên sửa đầu của lát kế) · cache nuốt lỗi không log · spread-order `assetOptions` · comment `node_cached` stale |
-| **1.1-L3** | Tầng B (memo theo workflow + tenant) | ◐ đang bay — nhánh feat/cache-l3-tier-b, ký Cổng 1 30/07 |
+| **1.1-L3** | Tầng B (memo theo workflow + tenant) | ✅ **ký 30/07**, merge PR #33 |
+| **1.1-L4** | LRU eviction + purge + reuse API + telemetry % partial | ✅ **ký 01/08** (Manh Phan, gate2 15m) — S4 PASS vòng 1 (20/20), PR mở. Trục cache 1.1 đóng |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
