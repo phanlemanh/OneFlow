@@ -5,10 +5,10 @@ slug: cache-l4-eviction
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, api, db]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-07-31
-time_human_minutes: {gate1: 10}
+time_human_minutes: {gate1: 10, gate2: 15}
 ---
 
 # Acceptance Contract: cache-l4-eviction
