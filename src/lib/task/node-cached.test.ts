@@ -2,7 +2,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { mapSSEStatusToTaskStatus, NodeStatus } from "@/constants/task-status";
+import type { ResolvedOutputRoute } from "@/lib/schema/tongflow-abi";
 import { mapEngineEvent } from "@/lib/task/engine-events";
+import { applyResolvedOutputRoutes } from "@/lib/task/payload";
 import type { SSEMessage } from "@/types/sse";
 
 /**
@@ -158,3 +160,189 @@ describe("node_cached across delegate, SSE payload, and client parser", () => {
         expect(mapEngineEvent(ev)?.data.fingerprint).toBe("");
     });
 });
+
+describe("applies output once — node_cached then the same node's node_completed", () => {
+    it("maps node_cached to NODE_CACHED carrying output verbatim, not NODE_COMPLETED", () => {
+        const cachedEvent = { ...engineEvent(), output: { texts: ["reused"] } };
+        const mapped = mapEngineEvent(cachedEvent);
+        expect(mapped?.status).toBe(NodeStatus.NODE_CACHED);
+        expect(mapped?.status).not.toBe(NodeStatus.NODE_COMPLETED);
+        expect(mapped?.data.output).toEqual({ texts: ["reused"] });
+    });
+
+    it("leaves node_completed to the delegate's own switch — mapEngineEvent returns null", () => {
+        // mapEngineEvent owns node_cached only (see its doc comment above); a
+        // node_completed for the same node must fall through untouched so the
+        // delegate's `case "node_completed":` in engine-delegate.server.ts is
+        // the sole place that maps it — exactly one completion notification
+        // per node, never two.
+        const completedEvent = {
+            type: "node_completed",
+            nodeId: "node-1",
+            output: { texts: ["reused"] },
+            label: "Generate",
+        };
+        expect(mapEngineEvent(completedEvent)).toBeNull();
+    });
+
+    it("a merged-results ARRAY output (batched node) passes through node_cached without throw", () => {
+        const batchedEvent = {
+            ...engineEvent(),
+            output: [{ texts: ["a"] }, { texts: ["b"] }],
+        };
+        expect(() => mapEngineEvent(batchedEvent)).not.toThrow();
+        const mapped = mapEngineEvent(batchedEvent);
+        expect(mapped?.data.output).toEqual([
+            { texts: ["a"] },
+            { texts: ["b"] },
+        ]);
+    });
+
+    it("applying node_cached then node_completed's SAME output yields the same canvas state as applying it once", () => {
+        // The client's switch in use-workflow-execution.ts:244-261
+        // deliberately falls NODE_CACHED through into NODE_COMPLETED
+        // handling — a full-hit node emits BOTH events with the same
+        // `output` (Task 4's engine emits node_cached BESIDE
+        // node_completed, not instead of it), so `applyNodeOutput` ->
+        // `applyResolvedOutputRoutes` (payload.ts) runs TWICE for one
+        // logical completion. The only thing keeping the canvas from
+        // double-appending a downstream node is that the real `expands`
+        // (src/hooks/use-flow.ts) reuses the existing same-type sibling
+        // in order instead of always spawning a new one. That `expands`
+        // lives in a Zustand store and can't be exercised without
+        // mounting React, so this pins the idempotency at the pure
+        // payload.ts seam with a fake `expands` that models the same
+        // reuse-by-type-and-cursor contract (see the mutation note on
+        // `makeReuseExpands` below).
+        const sharedOutput = { texts: ["reused"] };
+        const cachedEvent = { ...engineEvent(), output: sharedOutput };
+        const completedEvent = {
+            type: "node_completed",
+            nodeId: "node-1",
+            output: sharedOutput,
+            label: "Generate",
+        };
+
+        // Layer 1: node_cached is mapped through mapEngineEvent's own
+        // seam; node_completed returns null there (pinned above) and is
+        // handled by the delegate's `case "node_completed":` switch arm
+        // with `output: ev.output` verbatim — either way the client ends
+        // up with the identical output payload for both events.
+        const cachedOutput = mapEngineEvent(cachedEvent)?.data.output as
+            | Record<string, unknown>
+            | undefined;
+        expect(mapEngineEvent(completedEvent)).toBeNull();
+        expect(cachedOutput).toEqual(completedEvent.output);
+
+        const routes: ResolvedOutputRoute[] = [
+            {
+                sourceField: "texts",
+                nodeType: "textNode",
+                dataField: "texts",
+                expandEach: false,
+            },
+        ];
+
+        // A single logical apply.
+        const appliedOnce = makeReuseExpands();
+        applyResolvedOutputRoutes(
+            "node-1",
+            cachedOutput,
+            routes,
+            appliedOnce.expands,
+        );
+
+        // The real double apply: node_cached's output, then
+        // node_completed's — same source node, same payload.
+        const appliedTwice = makeReuseExpands();
+        applyResolvedOutputRoutes(
+            "node-1",
+            cachedOutput,
+            routes,
+            appliedTwice.expands,
+        );
+        applyResolvedOutputRoutes(
+            "node-1",
+            completedEvent.output,
+            routes,
+            appliedTwice.expands,
+        );
+
+        expect(appliedTwice.snapshot()).toEqual(appliedOnce.snapshot());
+        // Not just equal content — exactly one downstream node, never two.
+        expect(appliedTwice.snapshot().get("node-1")).toHaveLength(1);
+    });
+});
+
+/**
+ * Fake `expands` mirroring the reuse-by-type-and-cursor contract of the real
+ * `expands` in src/hooks/use-flow.ts: a possible node whose type already has
+ * an existing same-type sibling for this source node gets its data merged
+ * into that sibling (`{ ...existing.data, ...data }`); only once every
+ * existing sibling of that type is consumed does a new one get appended.
+ * That reuse is what keeps a node applied twice from producing two
+ * downstream nodes — this fake exists because the real `expands` is a
+ * Zustand store action that can't be driven without mounting React.
+ *
+ * Mutation proof (Fix round 1, item 1): changing the `existingChild ?`
+ * branch below to always append reddens
+ * "applying the same output twice ... yields the same canvas state as
+ * applying it once" — both the deep-equal and the length-1 assertion fail,
+ * confirming the test is not vacuous.
+ */
+interface FakeChildNode {
+    id: string;
+    type: string;
+    data: Record<string, unknown>;
+}
+
+function makeReuseExpands() {
+    let nextId = 0;
+    const childrenBySource = new Map<string, FakeChildNode[]>();
+
+    const expands = (
+        nodeId: string | null,
+        possibleNodes: { type: string; data?: Record<string, unknown> }[],
+    ): string[] => {
+        if (!nodeId) return [];
+        const existing = childrenBySource.get(nodeId) ?? [];
+        const byType = new Map<string, FakeChildNode[]>();
+        for (const child of existing) {
+            const bucket = byType.get(child.type);
+            if (bucket) bucket.push(child);
+            else byType.set(child.type, [child]);
+        }
+        const cursorByType = new Map<string, number>();
+        const ids: string[] = [];
+        const updated = [...existing];
+
+        for (const { type, data = {} } of possibleNodes) {
+            const bucket = byType.get(type);
+            const cursor = cursorByType.get(type) ?? 0;
+            const existingChild =
+                bucket && cursor < bucket.length ? bucket[cursor] : undefined;
+
+            if (existingChild) {
+                cursorByType.set(type, cursor + 1);
+                ids.push(existingChild.id);
+                const idx = updated.findIndex((c) => c.id === existingChild.id);
+                updated[idx] = {
+                    ...existingChild,
+                    data: { ...existingChild.data, ...data },
+                };
+            } else {
+                const id = `child-${nextId++}`;
+                ids.push(id);
+                updated.push({ id, type, data });
+            }
+        }
+
+        childrenBySource.set(nodeId, updated);
+        return ids;
+    };
+
+    return {
+        expands,
+        snapshot: () => new Map(childrenBySource),
+    };
+}

@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent (round 14)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
-human_signoff: Manh 2026-07-30
+verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
+human_signoff: Manh Phan 2026-08-01
 ---
 
 # Evidence Report: task-metering
@@ -817,3 +817,10 @@ The human signature line in frontmatter was not touched.
 
 Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code changed on this branch, so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to 77fb83f9cc25c9d65e0021563203aafd899928e0. A FRESH human signature is required at cache-l3-tier-b's Gate 2 — the old signature attests to the old tree only.
 Evidence (real rerun on this tree): its own eval commands rerun locally on this tree, 2026-07-30 — `pnpm vitest run src/db/metering-schema.test.ts` (4 passed, exit 0) and `pnpm vitest run src/lib/task/metering.test.ts` (6 passed, exit 0); standing checks E10/E11/E12 covered by cache-l3-tier-b S4 round 1 suite (full vitest 350 passed, build+typecheck, lint — run-log `_acceptance/cache-l3-tier-b/run-log.jsonl`). The touched file is `src/lib/task/runner.ts`: L3 added the `task.workflowId` argument to the engine delegate call inside dispatchTask; the metering measurement window and update payloads are unchanged, and E4-E9's suite proves it.
+
+
+---
+
+Re-verify on branch feat/cache-l4-eviction (2026-07-31). This feature's owned code changed on this branch (drizzle/meta/_journal.json · src/db/metering-schema.test.ts · src/db/workspace.schema.ts), so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to c000b4b6b32f29eea6217f8de26596a052737128. A FRESH human signature is required at cache-l4-eviction's Gate 2 — the old signature attests to the old tree only.
+Evidence (real rerun on this tree): its own eval commands rerun locally on this tree, 2026-07-31 — `pnpm vitest run src/db/metering-schema.test.ts` (7 passed, exit 0) and `pnpm vitest run src/lib/task/metering.test.ts` (exit 0). L4's touches: two additive nullable cache-counter columns after the metering trio in workspace.schema.ts, additive migration 0004-era journal entry (0003), and additive 'cache counters' describes in metering-schema.test.ts; the metering columns, measurement window and NULL semantics are unchanged and re-proven by the reran suite.
+Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.

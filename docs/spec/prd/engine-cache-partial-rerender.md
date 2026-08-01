@@ -234,6 +234,8 @@ bật cache mặc định.
 | **Q2** | Cache có dùng chung giữa desktop (self-host) và cloud không? | **Chốt 29/07: KHÔNG** — hệ quả của việc tầng A khoá theo tenant, không còn là phán đoán |
 | **Q3** | Cửa sổ sống của tầng B bao lâu? | **Chốt 29/07: LRU theo dung lượng là cơ chế thu hồi duy nhất** (chung cho A và B), cộng `purge(tenant, workflowId)` best-effort. **Không TTL** — hai cơ chế thu hồi thì khi cache mất phải điều tra xem cái nào đã ăn |
 
+> **Tu chỉnh (cache-l4-eviction, Gate 1, 31/07):** `reuse="force"` (D7) bị descope khỏi lát này — không triển khai (ledger `d-20260731T014332Z-32155`). `auto` và `off` đã lên hàng.
+
 ## 8. Phác tiêu chí nghiệm thu (cho lúc build từng lát)
 
 - Workflow ffmpeg thuần chạy hai lần → lần hai trúng cache 100%, output byte-identical.

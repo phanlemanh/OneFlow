@@ -26,10 +26,11 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 from ._subproc import utf8_env
 from .assets import _ext_from_filename, _ext_from_mime
@@ -130,6 +131,48 @@ DESCOPED_GENERATIVE_SLOTS = frozenset({
 _BLOB_KEY = "__cache_blob"
 _SIZE_KEY = "__cache_size"
 _EXT_KEY = "__cache_ext"
+_META_NAME = "meta.json"
+
+# 20 GiB (spec R2). A global cap, not per-tenant -- a shared cloud disk lets
+# one tenant's churn evict another's entries (known limit, revisit with
+# cloud P2; see design doc §11).
+DEFAULT_CACHE_MAX_BYTES = 20 * 1024**3
+
+
+def resolve_cache_max_bytes(param: Optional[int]) -> int:
+    """Cap resolution chain: explicit param -> env -> default (design §4).
+
+    A non-int or non-positive env value is ignored in favor of the default
+    rather than raising -- this module has no logger of its own to report the
+    bad value; the caller decides whether/how to log at wiring time (Task 4).
+    """
+    if isinstance(param, int) and param > 0:
+        return param
+    env = os.environ.get("TONGFLOW_CACHE_MAX_BYTES", "").strip()
+    if env.isdigit() and int(env) > 0:
+        return int(env)
+    return DEFAULT_CACHE_MAX_BYTES
+
+
+def _blob_shas_of(node: Any) -> list[str]:
+    """Recursively collect every `__cache_blob` sha in a cached payload.
+
+    Same dict/list walk shape as `NodeCache._rehydrate` -- blob references are
+    NOT stored in `meta.json` (design §3): they are derivable from
+    `result.json` alone, so a legacy entry with no sidecar is still GC-able.
+    """
+    shas: list[str] = []
+    if isinstance(node, dict):
+        sha = node.get(_BLOB_KEY)
+        if isinstance(sha, str):
+            shas.append(sha)
+        else:
+            for v in node.values():
+                shas.extend(_blob_shas_of(v))
+    elif isinstance(node, list):
+        for v in node:
+            shas.extend(_blob_shas_of(v))
+    return shas
 
 
 def abi_digest_of(abi_file: Path) -> str:
@@ -218,35 +261,104 @@ class NodeCache:
     def _blob(self, sha: str) -> Path:
         return self.root / "blobs" / sha[:2] / sha
 
-    def get(self, key: str, store: AssetStore) -> Optional[dict[str, Any]]:
+    def get(
+        self, key: str, store: AssetStore, *, log: Optional[Callable[[str], None]] = None
+    ) -> Optional[dict[str, Any]]:
         """The cached result with its blobs re-put into ``store``, or None.
 
         Re-putting is the correctness crux of D6: `MemoryStore` hands back a
         `mem://<uuid>` that only lives inside one process, so a cached handle
         from an earlier run is a dead pointer. Downstream nodes must see a
         `file_key` valid in the store THIS run is using.
+
+        `log` (default `None`) is one of the four closed-list swallow
+        branches (AC-6): an UNUSABLE entry -> miss logs exactly one line per
+        `get()` call that hits this path. A plain COLD miss (no entry ever
+        written for this key -- `FileNotFoundError` reading `result.json`
+        itself) is a different thing: design branch (1) is "unusable
+        entry", not "absent entry", and a cold run would otherwise emit one
+        log line per node per call. The cold-miss exemption is scoped to
+        JUST the entry-file read, not the whole method -- an entry that
+        exists and parses but whose BLOB is gone (exactly the state the
+        orphan-GC race can produce) also raises `FileNotFoundError`
+        (`_rehydrate`'s `blob.read_bytes()`), and THAT case is a genuinely
+        unusable entry, not a cold miss, so it still logs. Every other
+        exception (corrupt JSON, a truncated blob referenced by an entry
+        that DOES exist, permission error) also still logs.
         """
         try:
-            raw = self._entry(key).read_text(encoding="utf-8")
+            entry_path = self._entry(key)
+            try:
+                raw = entry_path.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                # Cold miss: no entry was ever written for this key -- silent
+                # (see docstring). Scoped to only this read, not blob reads
+                # below, which raise the same exception type for a different,
+                # loggable reason.
+                return None
             payload = json.loads(raw)
-            return self._rehydrate(payload, store)
-        except Exception:
-            # Any unusable entry is a miss: missing file, unparseable JSON,
-            # missing or truncated blob, permission error.
+            rehydrated = self._rehydrate(payload, store)
+            # Recency touch for the LRU sweep. Best-effort: a read-only root
+            # must not turn a HIT into a crash, and this one failure mode is
+            # the sole logged-swallow exemption (design §4) -- silent on
+            # purpose, unlike every other swallow branch.
+            try:
+                os.utime(entry_path)
+            except Exception:
+                pass
+            return rehydrated
+        except Exception as e:
+            # Any OTHER unusable entry is a miss: unparseable JSON, a
+            # truncated/missing blob referenced by a real entry, permission
+            # error.
+            if log is not None:
+                log(f"cache get unusable for {key}: {e}")
             return None
 
-    def put(self, key: str, result: dict[str, Any], store: AssetStore) -> None:
+    def put(
+        self,
+        key: str,
+        result: dict[str, Any],
+        store: AssetStore,
+        *,
+        tenant: Optional[str] = None,
+        workflow_scope: Optional[str] = None,
+        log: Optional[Callable[[str], None]] = None,
+    ) -> None:
         """Write one entry. Never raises — a cache that cannot write must not
-        fail the run (spec section 8)."""
+        fail the run (spec section 8).
+
+        Writes `meta.json` BEFORE `result.json`, in the SAME try: a
+        meta-only leftover (this write lands, the `result.json` write below
+        then fails) is invisible to `get()` (reads `result.json`) and to
+        `sweep()`'s entry glob (matches on `result.json`) -- harmless, and
+        pruned outright by `sweep()`'s stale-entry-dir pass (any
+        `<shard>/<key>/` dir with no `result.json`) on the next sweep. The
+        reverse order -- `result.json` first -- would instead leave a fully
+        HIT-able entry with no sidecar on a failed meta write: exactly the
+        harm d-...-S2 forbids (an entry `purge` can never see is worse than
+        a miss).
+
+        `log` (default `None`) is one of the four closed-list swallow
+        branches (AC-6): a refused `put()` logs exactly one line.
+        """
         try:
             payload = self._dehydrate(result, store)
+            entry_path = self._entry(key)
             # No explicit mkdir here: `_atomic_write` already creates the
             # parent directory before writing.
             _atomic_write(
-                self._entry(key),
+                entry_path.parent / _META_NAME,
+                json.dumps({"v": 1, "tenant": tenant,
+                            "workflow_scope": workflow_scope}).encode("utf-8"),
+            )
+            _atomic_write(
+                entry_path,
                 json.dumps(payload, ensure_ascii=False).encode("utf-8"),
             )
-        except Exception:
+        except Exception as e:
+            if log is not None:
+                log(f"cache put refused for {key}: {e}")
             return
 
     def _capture_bytes(self, fk: str, store: AssetStore) -> bytes:
@@ -341,3 +453,193 @@ class NodeCache:
         if isinstance(node, list):
             return [self._rehydrate(v, store) for v in node]
         return node
+
+    def sweep(self, max_bytes: int, *, log: Optional[Callable[[str], None]] = None) -> None:
+        """Size-capped LRU eviction + unconditional orphan-blob GC (design §4).
+
+        Never raises: the whole body runs inside one try/except so a bad
+        sweep degrades to "no maintenance this run", not a failed run (spec
+        section 8, same rule as `get`/`put`). Works on legacy entries (no
+        `meta.json`) exactly as well as new ones -- recency and blob refs
+        come from `result.json` alone, never from the sidecar.
+        """
+        try:
+            entries = []  # (mtime, entry_dir, entry_bytes, blob_shas)
+            for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
+                entry_dir = result_json.parent
+                # Size computed FIRST, ahead of the JSON parse below, so a
+                # corrupt/unparseable result.json (caught by the `except`)
+                # still contributes its REAL on-disk bytes to `usage` -- a
+                # corrupt entry occupies real space and must count as
+                # eviction pressure, not silently vanish from accounting
+                # while it sits on disk forever.
+                #
+                # Per-file guard: a `.part` temp file from a concurrent
+                # `_atomic_write` in this same dir, or any file that loses a
+                # stat/unlink race between `iterdir()` and `stat()`, must
+                # not fail this entry's classification -- only that one
+                # file's bytes are skipped.
+                size = 0
+                try:
+                    for p in entry_dir.iterdir():
+                        if p.suffix == ".part":
+                            continue
+                        try:
+                            size += p.stat().st_size
+                        except OSError:
+                            continue
+                    payload = json.loads(result_json.read_text(encoding="utf-8"))
+                    shas = _blob_shas_of(payload)
+                    stat = result_json.stat()
+                    entries.append((stat.st_mtime, entry_dir, size, shas))
+                except Exception:
+                    # Unreadable: evict first, but the bytes it occupies
+                    # still count (`size` was computed above, outside this
+                    # try's failure-prone steps).
+                    entries.append((0.0, entry_dir, size, []))
+
+            blob_sizes: dict[str, int] = {}
+            refcount: dict[str, int] = {}
+            for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
+                # A blob that loses a stat race (dangling symlink, deleted
+                # concurrently between glob and stat) must not abort the
+                # whole sweep -- skip just that blob, same rule as the
+                # per-file guard above.
+                try:
+                    blob_sizes[blob.name] = blob.stat().st_size
+                except OSError:
+                    continue
+                refcount[blob.name] = 0
+            for _, _, _, shas in entries:
+                for s in shas:
+                    if s in refcount:
+                        refcount[s] += 1
+
+            # Usage counts entry bytes plus only REFERENCED blob bytes.
+            # Pre-existing orphans (refcount 0 -- an L2/L3 leftover, or one
+            # this very sweep's eviction loop below creates) are freed by
+            # the unconditional orphan-GC pass at the end, not by eviction:
+            # counting them here would make eviction pressure proportional
+            # to garbage already scheduled for deletion, over-evicting live
+            # entries to make room for bytes about to vanish anyway.
+            usage = sum(e[2] for e in entries) + sum(
+                size for sha, size in blob_sizes.items() if refcount.get(sha, 0) > 0
+            )
+            victims = []
+            entries.sort(key=lambda e: e[0])  # oldest mtime first
+            for _mtime, entry_dir, size, shas in entries:
+                if usage <= max_bytes:
+                    break
+                victims.append(entry_dir)
+                usage -= size
+                for s in shas:
+                    if s in refcount:
+                        refcount[s] -= 1
+                        if refcount[s] == 0:
+                            usage -= blob_sizes.get(s, 0)
+
+            for entry_dir in victims:
+                shutil.rmtree(entry_dir, ignore_errors=True)
+
+            # Unconditional stale-entry-dir prune: a dir with no
+            # `result.json` (e.g. a meta-only leftover from a `put()` whose
+            # `result.json` write then failed -- see `put()`'s docstring)
+            # is invisible to `get()`/the entries glob above and would
+            # otherwise sit forever. `ignore_errors=True` is the per-item
+            # guard -- one dir failing to remove must not abort the sweep.
+            for stale_dir in self.root.glob("[0-9a-f][0-9a-f]/*"):
+                if stale_dir.is_dir() and not (stale_dir / "result.json").exists():
+                    shutil.rmtree(stale_dir, ignore_errors=True)
+
+            # Unconditional orphan-blob GC: runs every sweep, evictions or
+            # not -- pre-existing orphans (the L3 monotonic-growth known
+            # limit) must not survive behind the cap condition.
+            self._collect_orphan_blobs()
+        except Exception as e:
+            if log is not None:
+                log(f"cache sweep failed: {e}")
+
+    def _collect_orphan_blobs(self) -> None:
+        """Delete every blob under `blobs/` that no surviving entry references.
+
+        Shared by `sweep()` (its unconditional GC pass) and `purge()` (the
+        cleanup after deleting a workflow's entries) -- both need the exact
+        same "walk every surviving `result.json`, diff against every blob on
+        disk" pass, so it lives once here rather than duplicated per caller.
+        Caller-scoped try/except (this method itself never raises for a
+        single bad file -- only per-item guards, same pattern as the rest of
+        this module).
+        """
+        surviving: set[str] = set()
+        for result_json in self.root.glob("[0-9a-f][0-9a-f]/*/result.json"):
+            try:
+                surviving.update(
+                    _blob_shas_of(json.loads(result_json.read_text(encoding="utf-8")))
+                )
+            except Exception:
+                pass
+        for blob in self.root.glob("blobs/[0-9a-f][0-9a-f]/*"):
+            if blob.name not in surviving:
+                try:
+                    blob.unlink()
+                except OSError:
+                    pass
+
+    def purge(
+        self, tenant: str, workflow_id: str, *, log: Optional[Callable[[str], None]] = None
+    ) -> None:
+        """Delete every entry scoped to one tenant + workflow, then GC orphan blobs.
+
+        Never raises (spec section 8, same rule as `sweep`/`get`/`put`): the
+        whole body runs inside one try/except. A `meta.json` this can't read
+        (missing -- a legacy pre-`meta.json` entry, per AC-5 -- or corrupt)
+        is a silent per-entry skip: purge cannot know what it should have
+        matched without a readable sidecar, so it leaves the entry alone
+        rather than guessing. That is a best-effort miss of the walk, NOT
+        one of AC-6's four closed-list branches -- only a failure of the
+        `purge()` call itself (e.g. an unreadable root) logs, exactly once,
+        at the end.
+
+        `tenant` is required to be a non-empty string, same gate the runner
+        uses (`NodeCache(data_dir) if tenant else None`): `purge(None, ...)`
+        or `purge("", ...)` matches -- and therefore deletes -- nothing,
+        rather than treating a null/empty tenant as "no tenant filter" and
+        wiping every tenant's entries for that workflow.
+
+        `workflow_id` is normalized with `str(workflow_id).strip()` before
+        building the match prefix, mirroring the runner's `wf_id_clean`
+        (`str(workflow_id).strip()`) used when it ORIGINALLY built the
+        `workflow_scope` string at `put()` time -- otherwise
+        `purge(t, " 1 ")` silently matches nothing even though `put()` wrote
+        the entry under the trimmed id.
+
+        The scope match is `startswith(f"wf:{workflow_id_clean}:")`, WITH
+        the trailing colon -- not a bare substring/`in` check of
+        `workflow_id` against `workflow_scope`. Dropping the colon lets
+        workflow "1" cross-match workflow "11"'s entries (AC-7); the colon
+        is what keeps the match anchored to a whole workflow id.
+
+        Shares `sweep()`'s stale-entry-dir prune's microsecond multi-process
+        race: a prune landing between a concurrent `put()`'s meta write and
+        its result write can yield a legacy-shaped, purge-invisible entry
+        (AC-5 keeps it sweepable regardless) -- `purge` shares that
+        best-effort posture rather than trying to close the window.
+        """
+        try:
+            workflow_id_clean = str(workflow_id).strip()
+            prefix = f"wf:{workflow_id_clean}:"
+            for meta_path in self.root.glob("[0-9a-f][0-9a-f]/*/meta.json"):
+                try:
+                    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                if not isinstance(tenant, str) or not tenant or meta.get("tenant") != tenant:
+                    continue
+                scope = meta.get("workflow_scope")
+                if not isinstance(scope, str) or not scope.startswith(prefix):
+                    continue
+                shutil.rmtree(meta_path.parent, ignore_errors=True)
+            self._collect_orphan_blobs()
+        except Exception as e:
+            if log is not None:
+                log(f"cache purge failed for tenant={tenant} workflow={workflow_id}: {e}")

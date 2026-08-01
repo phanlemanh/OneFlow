@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 77fb83f9cc25c9d65e0021563203aafd899928e0
+verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
 human_signoff: Manh 2026-07-27
 ---
 
@@ -382,6 +382,36 @@ with fresh rerun evidence and fresh signatures, the half of the rule this note
 does not license.
 
 (2) Standing checks green on the new tree (S4 round 1 of cache-l3-tier-b, run-log `_acceptance/cache-l3-tier-b/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (350 passed), full sdk pytest (170 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
+
+The human signature line in frontmatter was not touched — it attests to the same
+code it originally did.
+
+
+---
+
+Carry-forward re-pin (2026-07-31, branch feat/cache-l4-eviction):
+`verified_commit` moved to c000b4b6b32f29eea6217f8de26596a052737128 with NO re-verify, under the carry-forward rule in AGENTS.md.
+Both conditions were checked, not assumed.
+
+(1) This feature's own code is unchanged. The branch's gated diff is exactly the
+17 files of **cache-l4-eviction**:
+drizzle/0003_clammy_blazing_skull.sql · drizzle/meta/0003_snapshot.json ·
+drizzle/meta/_journal.json · scripts/cache/check-test-layout.sh ·
+sdk/tests/cache_helpers.py · sdk/tests/test_cache_runner_wiring.py ·
+sdk/tests/test_cache_sweep.py · sdk/tests/test_node_cache.py ·
+sdk/tests/test_node_cache_tier_b.py · sdk/tongflow/engine/__main__.py ·
+sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py ·
+src/db/metering-schema.test.ts · src/db/workspace.schema.ts ·
+src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts ·
+src/lib/task/node-cached.test.ts
+Ownership was computed, not eyeballed: each merged feature's owned set was taken
+from the gated diff of the merge commit that landed it, then intersected with
+this branch's gated diff. This feature's intersection is empty. Four features
+have non-empty intersections — cache-l2-store, cache-l3-tier-b, conformance-l0
+and task-metering — all four are on the re-verify path with fresh rerun evidence
+and fresh signatures, the half of the rule this note does not license.
+
+(2) Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.

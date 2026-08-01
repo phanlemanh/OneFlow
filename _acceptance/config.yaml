@@ -89,24 +89,47 @@ executors:
     sdk_pytest_l2_bridge_same_data_dir_hits: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_bridge_reuses_cache_across_two_invocations"
     # cache-l3-tier-b Gate 1 (2026-07-30): files land during implementation.
     # One key per criterion via pytest node-ids (standing rule).
-    sdk_pytest_l3_mixed_warm_run: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_mixed_tier_workflow_full_hit"
-    sdk_pytest_l3_downstream_edit_keeps_gen: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_editing_downstream_a_keeps_tier_b_generation"
-    sdk_pytest_l3_workflow_isolation: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_two_workflows_do_not_share_tier_b"
-    sdk_pytest_l3_duplicate_node_fresh: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_duplicated_node_generates_fresh"
-    sdk_pytest_l3_no_workflow_id_scoped_off: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_missing_workflow_id_disables_only_tier_b"
-    sdk_pytest_l3_allowlists_disjoint: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_tier_lists_are_disjoint_and_pinned"
+    sdk_pytest_l3_mixed_warm_run: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_mixed_tier_workflow_full_hit"
+    sdk_pytest_l3_downstream_edit_keeps_gen: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_editing_downstream_a_keeps_tier_b_generation"
+    sdk_pytest_l3_workflow_isolation: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_two_workflows_do_not_share_tier_b"
+    sdk_pytest_l3_duplicate_node_fresh: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_duplicated_node_generates_fresh"
+    sdk_pytest_l3_no_workflow_id_scoped_off: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_missing_workflow_id_disables_only_tier_b"
+    sdk_pytest_l3_allowlists_disjoint: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_tier_lists_are_disjoint_and_pinned"
     sdk_pytest_l3_workflow_scope_unconditional: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py::test_workflow_scope_emitted_unconditionally"
-    sdk_pytest_l3_git_status_failure_is_dirty: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_git_status_failure_reads_as_dirty"
-    sdk_pytest_l3_bridge_workflow_id: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_bridge_forwards_workflow_id"
+    sdk_pytest_l3_git_status_failure_is_dirty: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_git_status_failure_reads_as_dirty"
+    sdk_pytest_l3_bridge_workflow_id: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_bridge_forwards_workflow_id"
     sdk_pytest_l3_l1_l2_evals_on_new_tree: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_fingerprint.py tests/test_fingerprint_vectors.py"
     # AC-9 TS half reuses the engineOptionsFor seam; -t scopes to its own test.
     unit_l3_workflow_id_sentinel: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'workflow_id'"
-    sdk_pytest_l3_tenant_in_tier_b_key: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_two_tenants_do_not_share_tier_b"
+    sdk_pytest_l3_tenant_in_tier_b_key: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_two_tenants_do_not_share_tier_b"
     # Subshell on purpose: a bare `cd sdk && ... && pnpm vitest` leaves the shell in
     # sdk/, where vitest finds zero test files and exits 1 (found at L3 Task 5).
-    sdk_pytest_l3_l2_full_rerun: "(cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py) && pnpm vitest run src/lib/task/engine-delegate.test.ts"
+    sdk_pytest_l3_l2_full_rerun: "(cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py tests/test_node_cache_tier_b.py) && pnpm vitest run src/lib/task/engine-delegate.test.ts"
     l3_conformance_l0_full_rerun: "(cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py tests/conformance tests/test_plugin_rev.py) && pnpm vitest run src/lib/abi/conformance.test.ts src/lib/task/node-cached.test.ts src/lib/plugins/plugin-rev.test.ts && bash scripts/conformance/check-suite-discriminating.sh && pnpm tsx scripts/plugins/check-rev-joined-path.ts"
-    sdk_pytest_l3_batch_duplicate_variants: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache.py::test_tier_b_batch_duplicates_generate_per_call"
+    sdk_pytest_l3_batch_duplicate_variants: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_tier_b_batch_duplicates_generate_per_call"
+    # cache-l4-eviction Gate 1 (2026-07-31): every file below lands during
+    # implementation. One key per criterion via pytest node-ids (standing rule).
+    sdk_pytest_l4_lru_recency: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_sweep_evicts_least_recently_used_first"
+    sdk_pytest_l4_cap_converges: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_sweep_brings_usage_under_cap"
+    sdk_pytest_l4_under_cap_noop: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_sweep_under_cap_deletes_nothing"
+    sdk_pytest_l4_shared_blob_survives: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_shared_blob_survives_eviction_of_one_referrer"
+    sdk_pytest_l4_orphan_blob_gc: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_orphan_blobs_deleted_including_pre_l4"
+    sdk_pytest_l4_legacy_entry: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_legacy_entry_without_meta_sweepable_and_purge_skips"
+    sdk_pytest_l4_sweep_failsafe: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_sweep_failure_never_breaks_the_run"
+    sdk_pytest_l4_cache_errors_logged: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_swallowed_cache_errors_emit_one_log_line"
+    sdk_pytest_l4_purge_scope: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_purge_removes_only_matching_workflow_entries"
+    sdk_pytest_l4_purge_idempotent: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_sweep.py::test_purge_twice_safe_and_collects_orphans"
+    sdk_pytest_l4_reuse_off: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_runner_wiring.py::test_reuse_off_touches_nothing"
+    sdk_pytest_l4_reuse_invalid: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_runner_wiring.py::test_invalid_reuse_value_raises"
+    sdk_pytest_l4_counters: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_runner_wiring.py::test_cache_counters_full_partial_miss_and_failure"
+    sdk_pytest_l4_node_cached_event: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_runner_wiring.py::test_full_hit_emits_node_cached_partial_does_not"
+    sdk_pytest_l4_abi_guard_bidirectional: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_tier_b.py::test_abi_guard_catches_both_directions"
+    sdk_pytest_l4_sweep_wired: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_cache_runner_wiring.py::test_run_workflow_auto_sweeps_to_cap_param_env_default"
+    # AC-12 is (cross-layer): consumer half below; the engine half is sdk_pytest_l4_node_cached_event.
+    unit_l4_node_cached_consumer: "pnpm vitest run src/lib/task/node-cached.test.ts -t 'applies output once'"
+    # AC-13 is (cross-layer): TS halves below; the engine half is sdk_pytest_l4_counters.
+    unit_l4_delegate_persists: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'cache counters'"
+    unit_l4_schema_columns: "pnpm vitest run src/db/metering-schema.test.ts -t 'cache counters'"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
@@ -151,6 +174,8 @@ executors:
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
+    # cache-l4-eviction Gate 1 (2026-07-31): guard lands during implementation.
+    cache_test_layout: "bash scripts/cache/check-test-layout.sh"
     # conformance-l0 Gate 1 (2026-07-28).
     conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
     plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
