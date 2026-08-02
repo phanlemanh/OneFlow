@@ -5,7 +5,7 @@ slug: compose-overlay
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: approved
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-02
 time_human_minutes: {gate1: 10}
