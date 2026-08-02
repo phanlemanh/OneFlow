@@ -1,0 +1,176 @@
+{
+    "case": "compose-overlay",
+    "note": "compose-overlay is Tier A and has NO batchField: one media + one text + one logo + two ops must become exactly ONE call on both runtimes. The ops array travels through untouched — op[0].text keeps its literal {text} placeholder and op[1] stays a bare logo op; substitution/compositing is plugin-side, neither runtime pre-substitutes. Assets are inlined as data: URLs so no file store is needed; both halves render them as content digests. The node type here is deliberately NOT the shipped composeOverlayNode: the canvas mount lands in a sibling task, and the TS adapter forbids a fixture sourceSpec from shadowing a mounted type — so this fixture pins the same field classification (media/logo = handle by ABI default, text = handle override, ops = config) under a type the registry never mounts.",
+    "slot": "compose-overlay",
+    "sourceSpec": {
+        "text": {
+            "kind": "handle",
+            "nodeType": "textNode",
+            "path": "texts[0]"
+        }
+    },
+    "stubOutput": {
+        "success": true,
+        "image": {
+            "bytesBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGPgOlEBAAIqAUuGJJD5AAAAAElFTkSuQmCC"
+        }
+    },
+    "workflow": {
+        "name": "conformance-compose-overlay",
+        "version": "1.0",
+        "exportedAt": "2026-08-02T00:00:00Z",
+        "inputs": [],
+        "outputs": [],
+        "dataNodes": [
+            {
+                "id": "dn-media",
+                "type": "addImageNode",
+                "dataType": "image",
+                "isInput": false,
+                "staticData": {
+                    "fileKeys": [
+                        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGO4o6EBAAMQAS0ujiXaAAAAAElFTkSuQmCC"
+                    ]
+                },
+                "level": 0
+            },
+            {
+                "id": "dn-text",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["50%"]
+                },
+                "level": 0
+            },
+            {
+                "id": "dn-logo",
+                "type": "addImageNode",
+                "dataType": "image",
+                "isInput": false,
+                "staticData": {
+                    "fileKeys": [
+                        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGOQs7kDAAGyATf/cv8XAAAAAElFTkSuQmCC"
+                    ]
+                },
+                "level": 0
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "exec-overlay",
+                "type": "conformanceComposeOverlayNode",
+                "feature": "compose-overlay",
+                "pluginId": "oneflow-conformance-stub",
+                "bindings": {
+                    "media": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-media",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:media"
+                    },
+                    "text": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-text",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text"
+                    },
+                    "logo": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-logo",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:logo"
+                    },
+                    "ops": {
+                        "kind": "config",
+                        "value": [
+                            {
+                                "type": "text",
+                                "x": 0.5,
+                                "y": 0.86,
+                                "anchor": "bottom-center",
+                                "text": "GIẢM {text} HÔM NAY",
+                                "size": 0.06,
+                                "color": "#ffffff",
+                                "align": "center"
+                            },
+                            {
+                                "type": "logo",
+                                "x": 0.94,
+                                "y": 0.06,
+                                "anchor": "top-right",
+                                "width": 0.18,
+                                "opacity": 0.9
+                            }
+                        ]
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "image",
+                        "nodeType": "imageNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false
+                    }
+                ],
+                "dependencies": ["dn-media", "dn-text", "dn-logo"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [
+            ["dn-media", "dn-text", "dn-logo"],
+            ["exec-overlay"]
+        ],
+        "dataNodeEdges": []
+    },
+    "expectedCalls": [
+        {
+            "slot": "compose-overlay",
+            "input": {
+                "logo": {
+                    "__asset": "5a321fc31816015db375442ec07179e4e622feaef9ffc7aadb67966a28566efa"
+                },
+                "media": {
+                    "__asset": "83b6d0a86d76892697017a8b04e1d43f1bf4fb58a4d7d370e8355b8a5df363d0"
+                },
+                "ops": [
+                    {
+                        "type": "text",
+                        "x": 0.5,
+                        "y": 0.86,
+                        "anchor": "bottom-center",
+                        "text": "GIẢM {text} HÔM NAY",
+                        "size": 0.06,
+                        "color": "#ffffff",
+                        "align": "center"
+                    },
+                    {
+                        "type": "logo",
+                        "x": 0.94,
+                        "y": 0.06,
+                        "anchor": "top-right",
+                        "width": 0.18,
+                        "opacity": 0.9
+                    }
+                ],
+                "text": "50%"
+            }
+        }
+    ]
+}

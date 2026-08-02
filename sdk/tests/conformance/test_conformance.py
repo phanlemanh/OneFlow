@@ -45,6 +45,40 @@ def test_python_call_log_matches_fixture(case: str, tmp_path: Path) -> None:
     assert call_log(fixture, tmp_path) == fixture["expectedCalls"]
 
 
+def test_compose_overlay_single_call_ops_and_placeholder_pass_through(
+    tmp_path: Path,
+) -> None:
+    """AC-13: compose-overlay enters the suite at birth, as a NON-batch slot.
+
+    The parametrized glob test already holds both halves to the fixture's
+    expectedCalls; this named test states the properties that comparison is
+    supposed to carry, so a fixture edit cannot quietly weaken them:
+
+    - exactly ONE call — the slot declares no batchField, so two ops and three
+      connected handles must not fan out;
+    - the ops array reaches the plugin untouched, op[0].text still holding its
+      literal ``{text}`` placeholder while the ``text`` input travels beside it
+      — substitution is plugin-side, the runtime never pre-substitutes;
+    - the bare logo op passes through with no logo material inlined into it;
+      the logo asset arrives only as the ``logo`` input.
+    """
+    fixture = load_fixture("compose-overlay")
+    calls = call_log(fixture, tmp_path)
+
+    assert len(calls) == 1
+    (call,) = calls
+    assert call["slot"] == "compose-overlay"
+
+    ops = call["input"]["ops"]
+    assert ops == fixture["workflow"]["executableNodes"][0]["bindings"]["ops"]["value"]
+    assert "{text}" in ops[0]["text"]
+    assert call["input"]["text"] == "50%"
+    # The logo op names no asset; the logo travels only as the input field,
+    # digested like every other asset.
+    assert set(ops[1]) == {"type", "x", "y", "anchor", "width", "opacity"}
+    assert set(call["input"]["logo"]) == {"__asset"}
+
+
 def test_non_batch_log_still_matches_the_pre_change_baseline(tmp_path: Path) -> None:
     """AC-3: the fan-out change must not have moved the non-batch path at all.
 
