@@ -78,6 +78,7 @@ export const NODE_TYPE_TO_ABI_FEATURE = {
     musicExtractNode: "music-extract",
     musicLegoNode: "music-lego",
     musicCompleteNode: "music-complete",
+    composeOverlayNode: "compose-overlay",
 
     // batch/
     dropVideoNode: "drop-video",
@@ -224,6 +225,17 @@ export const NODE_TYPE_SOURCE_SPEC = {
     // Transfer variant of `speech-text-gen-video`: only the audio is wired,
     // the scene text stays a config field.
     speechGenVideoNode: { audio: handle({ nodeType: "audioNode" }) },
+    // `media` / `logo` are Asset $refs → upstream handles by ABI default
+    // (declared explicitly for `logo` to pin the imageNode upstream type;
+    // `media` accepts image or video, so the generic default stays). `text`
+    // is a scalar string promoted to a textNode-fed handle — it feeds the
+    // `{text}` placeholder substituted plugin-side. `ops` is the overlay
+    // instruction list edited in the node's own ops-editor form.
+    composeOverlayNode: {
+        text: textScalar(),
+        logo: handle({ nodeType: "imageNode" }),
+        ops: configField(),
+    },
 
     /* ---------------- batch/ ---------------- */
     dropVideoNode: { videos: collectAll() },

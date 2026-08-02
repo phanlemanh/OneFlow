@@ -2550,7 +2550,12 @@
                             "properties": {
                                 "type": {
                                     "type": "string",
-                                    "enum": ["text", "price_tag", "logo", "safe_zone"]
+                                    "enum": [
+                                        "text",
+                                        "price_tag",
+                                        "logo",
+                                        "safe_zone"
+                                    ]
                                 },
                                 "x": {
                                     "type": "number",
@@ -2564,7 +2569,17 @@
                                 },
                                 "anchor": {
                                     "type": "string",
-                                    "enum": ["top-left", "top-center", "top-right", "center-left", "center", "center-right", "bottom-left", "bottom-center", "bottom-right"]
+                                    "enum": [
+                                        "top-left",
+                                        "top-center",
+                                        "top-right",
+                                        "center-left",
+                                        "center",
+                                        "center-right",
+                                        "bottom-left",
+                                        "bottom-center",
+                                        "bottom-right"
+                                    ]
                                 },
                                 "text": {
                                     "type": "string"
