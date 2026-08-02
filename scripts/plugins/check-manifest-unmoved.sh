@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# E7 / AC-6: this change is a capability, not a migration. The shipped manifest
-# must still be 38 plain string entries under the upstream org — the mechanism
-# lands here, the first actual fork is a separate decision.
+# E7 / AC-6 (per-plugin-origin): capability-not-migration snapshot. Bumped
+# 38 -> 39 on 2026-08-02 when oneflow-modal-compose-overlay registered (the
+# per-plugin-origin contract explicitly priced this bump in). Still all plain
+# strings under the default org — the first {id, origin} fork stays a
+# separate decision.
 set -euo pipefail
 
 manifest=config/official-plugins.json
 expected_org='https://github.com/tong-io'
-expected_count=38
+expected_count=39
 
 read -r org total strings <<EOF
 $(node -e '

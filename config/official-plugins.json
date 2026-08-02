@@ -38,6 +38,7 @@
         "tongflow-modal-paddle",
         "tongflow-modal-unlimited-ocr",
         "tongflow-modal-crawl4ai",
-        "tongflow-modal-scrapling"
+        "tongflow-modal-scrapling",
+        "oneflow-modal-compose-overlay"
     ]
 }

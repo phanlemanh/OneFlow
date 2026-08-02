@@ -138,6 +138,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - ✅ **キャラクター置換**: 動画 + 参照（シーン融合 / キャラクター置換）、Animate Mix スタイルの生成。
 - ✅ **モーション転送**: 動画 + 参照（モーション / リターゲット）、Animate Move スタイルの生成。
 - ✅ **テキスト結合**: 複数のテキストノードを1つに結合。
+- ✅ **テキスト / 価格タグ / ロゴ オーバーレイ**: 画像・動画にテキスト・価格タグ・ロゴを合成 — 複数行ベトナム語テキスト、op ごとの時間ウィンドウ、TikTok セーフゾーン自動クランプ。
 
 ### その他
 
@@ -205,6 +206,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited-OCR 長文ドキュメント / PDF → テキスト
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / リンク → テキスト
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling ステルスブラウザ URL / リンク → テキスト
+- [oneflow-modal-compose-overlay](https://github.com/tong-io/oneflow-modal-compose-overlay) — 画像・動画にテキスト / 価格タグ / ロゴをオーバーレイ（単一 Pillow テキスト描画パス、ベトナム語完全対応フォント、TikTok セーフゾーン制約）
 
 ## ソースコードから起動
 
