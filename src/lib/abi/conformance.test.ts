@@ -54,6 +54,43 @@ describe("TS↔Python conformance", () => {
     }
 });
 
+describe("compose-overlay (AC-13): in the suite from birth, as a non-batch slot", () => {
+    // The parametrized case above already holds this log to expectedCalls;
+    // these assertions state the properties that comparison must keep
+    // carrying, so a fixture edit cannot quietly weaken them. The Python
+    // mirror is test_compose_overlay_single_call_ops_and_placeholder_pass_through.
+    const fixture = loadFixture("compose-overlay");
+    const log = callLogForFixture(fixture);
+
+    it("makes exactly one call — no batchField, so nothing fans out", () => {
+        expect(log).toHaveLength(1);
+        expect(log[0].slot).toBe("compose-overlay");
+    });
+
+    it("passes ops through untouched, {text} placeholder unsubstituted", () => {
+        const bindings = fixture.workflow.executableNodes[0].bindings;
+        const ops = log[0].input.ops as { type: string; text?: string }[];
+        // Substitution is plugin-side: the text input travels beside the ops,
+        // and op[0].text still holds the literal placeholder.
+        expect(ops).toEqual((bindings.ops as { value: unknown }).value);
+        expect(ops[0].text).toContain("{text}");
+        expect(log[0].input.text).toBe("50%");
+    });
+
+    it("keeps the logo op bare — the logo asset arrives only as the input", () => {
+        const ops = log[0].input.ops as Record<string, unknown>[];
+        expect(Object.keys(ops[1]).sort()).toEqual([
+            "anchor",
+            "opacity",
+            "type",
+            "width",
+            "x",
+            "y",
+        ]);
+        expect(Object.keys(log[0].input.logo as object)).toEqual(["__asset"]);
+    });
+});
+
 describe("call-log normalization", () => {
     it("keeps every business field, not just the batched one", () => {
         // The scope of the comparison is the whole point: a log carrying only
