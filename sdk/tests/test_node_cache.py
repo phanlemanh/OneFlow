@@ -91,10 +91,13 @@ def test_shared_asset_stores_one_blob(tmp_path):
     assert len(_blob_files(tmp_path)) == 1
 
 
-def test_allowlist_holds_exactly_the_eleven_mechanical_slots():
+def test_allowlist_holds_exactly_the_twelve_mechanical_slots():
     # Guard on the constant itself: the deferred three must NOT be in it until
     # 1.1-L1b lands, and a new slot must not be added silently.
+    # compose-overlay joined 2026-08-02: deterministic CPU overlay
+    # compositing, byte-identity evidence in the plugin repo's golden suite.
     assert TIER_A_SLOTS == frozenset({
+        "compose-overlay",
         "concat-videos", "extract-audio", "remove-video-audio",
         "merge-video-audio", "get-first-frame", "get-last-frame",
         "split-video", "drop-video", "split-text", "combine-text",
