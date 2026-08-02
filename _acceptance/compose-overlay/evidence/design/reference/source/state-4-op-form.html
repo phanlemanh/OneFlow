@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>compose-overlay — state 4: text op form expanded</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="node selected">
+  <span class="handle in" style="top:56px"></span>
+  <span class="handle in" style="top:96px"></span>
+  <span class="handle in" style="top:136px"></span>
+  <span class="handle out" style="top:76px"></span>
+  <span class="handle out" style="top:116px"></span>
+
+  <div class="node-header">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M7 21h10M12 17v4"/></svg>
+    Dán chữ / logo
+    <span class="spacer"></span>
+    <span class="menu">⋯</span>
+  </div>
+
+  <div class="plugin-select">
+    <div class="select">oneflow-modal-compose-overlay</div>
+  </div>
+
+  <div class="ops">
+    <div class="ops-label">Ops · media: video</div>
+    <div class="op-form">
+      <div class="field">
+        <label>Nội dung (hỗ trợ nhiều dòng, {text} lấy từ in:text)</label>
+        <div class="textarea">Ưu đãi có hạn —&#10;chỉ còn {text}</div>
+      </div>
+      <div class="row">
+        <div class="field"><label>x (0–1)</label><div class="input">0.5</div></div>
+        <div class="field"><label>y (0–1)</label><div class="input">0.12</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Anchor</label><div class="select">top-center</div></div>
+        <div class="field"><label>Cỡ chữ (tỷ lệ)</label><div class="input">0.05</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Màu</label><div class="swatch"></div></div>
+        <div class="field"><label>Căn dòng</label><div class="select">center</div></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Bề rộng tối đa (0–1)</label><div class="input">0.8</div></div>
+        <div class="field"><label>Hiện (giây)</label><div class="input">0 → 3.5</div></div>
+      </div>
+    </div>
+    <div class="op-row">
+      <span class="op-type">SAFE</span>
+      <span class="op-summary">tiktok-portrait</span>
+      <span class="op-act">✎ ✕</span>
+    </div>
+    <button class="btn-add" type="button">+ Thêm op</button>
+  </div>
+
+  <div class="execute">
+    <button class="btn-primary" type="button">✦ Dán lên media</button>
+  </div>
+</div>
+</body>
+</html>

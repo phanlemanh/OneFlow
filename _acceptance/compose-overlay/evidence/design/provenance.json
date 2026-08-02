@@ -1,0 +1,12 @@
+{
+  "slug": "compose-overlay",
+  "design_repo": "_acceptance/compose-overlay/evidence/design/reference/source",
+  "commit": "sha256:9688d1c7725ed89157d2172382a22843c7a6d336943a257b2aa9e050c4392286",
+  "captured_at": "2026-08-02T06:20:31.647Z",
+  "breakpoints": [
+    390,
+    1024,
+    1440
+  ],
+  "reference_dir": "_acceptance/compose-overlay/evidence/design/reference"
+}

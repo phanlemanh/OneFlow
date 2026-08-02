@@ -131,6 +131,13 @@ executors:
     unit_l4_delegate_persists: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'cache counters'"
     unit_l4_schema_columns: "pnpm vitest run src/db/metering-schema.test.ts -t 'cache counters'"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
+    # compose-overlay Gate 1 (2026-08-02): test files land during implementation.
+    # One key per criterion via pytest node-ids (standing rule).
+    sdk_pytest_overlay_tier_a_hit: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_overlay.py::test_overlay_second_run_full_hit_zero_plugin_calls"
+    sdk_pytest_overlay_partial_rerun: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_overlay.py::test_changing_text_reruns_only_overlay"
+    sdk_pytest_overlay_conformance: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance -k compose_overlay"
+    unit_overlay_node: "pnpm vitest run src/components/workspace/nodes/transfer/compose-overlay.test.tsx"
+    unit_overlay_exporter: "pnpm vitest run src/lib/workflow/compose-overlay-export.test.ts"
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
     sdk_pytest_plugin_rev: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_plugin_rev.py
@@ -176,6 +183,26 @@ executors:
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
     # cache-l4-eviction Gate 1 (2026-07-31): guard lands during implementation.
     cache_test_layout: "bash scripts/cache/check-test-layout.sh"
+    # compose-overlay Gate 1 (2026-08-02): guard scripts land during implementation.
+    # Render evals run in the PLUGIN repo (outside this tree) via a clone-and-pytest
+    # wrapper — one key per criterion, each a distinct pytest node-id (standing rule).
+    # Network-dependent by design, same class as the ci_* keys above.
+    abi_python_gen_clean: "bash scripts/abi/check-python-gen-clean.sh"
+    overlay_diacritics: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_vietnamese_diacritics_golden_image_video_identical"
+    overlay_multiline: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_multiline_and_wrap_golden"
+    overlay_price_tag: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_price_tag_verbatim_golden"
+    overlay_logo: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_placement_golden"
+    overlay_logo_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_op_without_logo_input_fails_cleanly"
+    overlay_safe_zone: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_safe_zone_clamps_intruding_op_only"
+    overlay_placeholder: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_substitution_verbatim"
+    overlay_placeholder_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_without_input_text_fails_cleanly"
+    overlay_time_window: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_only_between"
+    overlay_time_window_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_ignored_for_image"
+    overlay_modality_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_image_in_image_out_video_absent"
+    overlay_modality_video: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_video_in_video_out_audio_duration_preserved"
+    overlay_determinism: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_two_runs_byte_identical"
+    overlay_registration_synced: "bash scripts/plugins/check-overlay-registration.sh"
+    overlay_sdk_train: "bash scripts/abi/check-overlay-sdk-train.sh"
     # conformance-l0 Gate 1 (2026-07-28).
     conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
     plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
