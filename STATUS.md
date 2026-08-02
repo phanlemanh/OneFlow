@@ -2,11 +2,11 @@
 
 > Trạng thái sống của repo — cập nhật cuối mỗi gói việc. Handoff giữa máy/agent đọc **file này + `_acceptance/`**, không đọc lịch sử chat.
 
-## Hiện trạng (2026-07-30)
+## Hiện trạng (2026-08-02)
 
 - **Nền tảng:** fork TongFlow (AGPL-3.0, không CLA, không dual-license — README §License). Đã rebrand OneFlow: logo pixel (`public/logo.svg`, `logo_icon.svg`), xoá COMMERCIAL-LICENSE.md/CLA.md.
 - **i18n:** tiếng Việt đủ (`src/i18n/messages/vi.json`). Lưu ý `ja.json` thiếu **76 khoá** so với `en.json` — có sẵn từ upstream, chưa sửa. TTS tầng model vẫn chưa có tiếng Việt (Qwen3-TTS không hỗ trợ → kế hoạch dùng plugin ElevenLabs, P1).
-- **Acceptance-Gate Kit:** đang chạy strict/strict. **10 feature đã ký** (9 trên `main`, `cache-l1-fingerprint` chờ merge). CI 5 job, gate là job thứ 5.
+- **Acceptance-Gate Kit:** đang chạy strict/strict. **14 feature đã ký, tất cả trên `main`** — trục cache 1.1 đóng trọn (L0 conformance → L1 fingerprint → L2 store → L3 tier-B → L4 eviction). CI 5 job, gate là job thứ 5.
 - **SDK:** `oneflow-sdk` **0.2.17 đã publish lên PyPI** (2026-07-26). Cài bằng `pip install oneflow-sdk`, import bằng `import tongflow` (phương án C: chỉ đổi tên distribution).
 - **Chiến lược sản phẩm:** đã chốt và vật chất hoá — [docs/strategy/vision.md](docs/strategy/vision.md) (tầm nhìn), [docs/roadmap.md](docs/roadmap.md) (lộ trình 24 tuần), [docs/adr/](docs/adr/README.md) (10 quyết định bất biến), [docs/strategy/council-2026-07.md](docs/strategy/council-2026-07.md) (biên bản hội đồng). Ngách beachhead quyết ở G0; kiến trúc không đổi theo ngách.
 
@@ -27,7 +27,11 @@
 
 ## Đang dở — bắt máy A tiếp ở đây
 
-**`cache-l4-eviction` — SIGNED OFF (Manh Phan 01/08, gate2 15m) cùng 4 re-sign (L2/L3/conformance-l0/task-metering; L1 carry-forward nhờ không đụng `test_fingerprint*`); PR mở, chờ merge.** Trục cache 1.1 ĐÓNG: LRU theo trần 20GiB (param→env→default), blob GC reachability + dọn orphan hồi tố (đóng "monotonic orphan generator" của L3), `purge(tenant, workflow_id)`, `reuse=auto/off` (force descope, spec §7 amendment), telemetry % partial end-to-end: engine đếm + phát `node_cached` lần đầu → 2 cột `cache_calls_*` trong `tasks` → 1 câu SQL. S4 PASS vòng 1 (20/20). Known limits đáng nhớ: validation `cache_max_bytes` (option (a), revisit lát kế), race đa tiến trình descope, trần chung giữa tenant (P2). Hàng đợi sau merge: 1.1-L1b (mime vào digest) · 1.1-L2b (file_key_base) · extraction `run_workflow` · **`compose-overlay` (Phase 1.2 — hạng mục không được cắt thứ hai)**.
+**Trục cache 1.1 ĐÓNG và đã lên `main`.** `cache-l4-eviction` ký 01/08 (Manh Phan, gate2 15m) cùng 4 re-sign (L2/L3/conformance-l0/task-metering; L1 carry-forward nhờ không đụng `test_fingerprint*`), **merge qua [PR #34](https://github.com/phanlemanh/OneFlow/pull/34), merge commit `459d95f`**. Nội dung: LRU theo trần 20GiB (param→env→default), blob GC reachability + dọn orphan hồi tố (đóng "monotonic orphan generator" của L3), `purge(tenant, workflow_id)`, `reuse=auto/off` (force descope, spec §7 amendment), telemetry % partial end-to-end: engine đếm + phát `node_cached` lần đầu → 2 cột `cache_calls_*` trong `tasks` → 1 câu SQL. S4 PASS vòng 1 (20/20). Known limits đáng nhớ: validation `cache_max_bytes` (option (a), revisit lát kế), race đa tiến trình descope, trần chung giữa tenant (P2).
+
+**Việc kế tiếp (làn B — máy):** **`compose-overlay` (Phase 1.2 — hạng mục không được cắt thứ hai)**: ABI slot `media + ops[]` typed (text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. Sau đó theo thứ tự roadmap Phase 1: `normalize-text-vi` → plugin TTS ElevenLabs ([ADR-0009](docs/adr/0009-tts-vi-eleven-v3.md)) → skill system v1 + skill #1 + KG v0 (khối này chờ chốt ngách). Nợ kỹ thuật xen kẽ giữa các feature lớn, theo giá: contract CI-vitest (rẻ, hiệu lực lớn) · 1.1-L1b (mime vào digest) · 1.1-L2b (file_key_base) · extraction `run_workflow` · 0.6 · 0.7.
+
+**Chặn G0 (làn A — cần NGƯỜI VẬN HÀNH, máy không tự làm được, không chặn làn B):** ① clip thực địa + bản chép tay tham chiếu → [`measure/wer-corpus/`](measure/wer-corpus/README.md) (WER) · ② task chạy thật + hoá đơn (COGS) · ③ quyết định ngách seller e-commerce ↔ môi giới BĐS. Chi tiết điều kiện ở [docs/roadmap.md](docs/roadmap.md) Phase 0.
 
 **`cache-l3-tier-b` đã merge ([PR #33](https://github.com/phanlemanh/OneFlow/pull/33), 30/07).**
 
@@ -139,7 +143,8 @@ Bản chuẩn duy nhất: **[docs/roadmap.md](docs/roadmap.md)** (4 phase, gate 
 | **1.1-L1b** | **`mime`/`filename` của asset vào digest khoá cache** | 🔴 **contract riêng, quyết ở Cổng 2 của L1**. Cùng bytes + metadata khác → **cùng một khoá** (`denoise_audio`, `audio/wav` vs `audio/mpeg` → `dd316ad8…`). Plugin *thấy* hai field đó, nên ở L2 plugin chọn decoder theo `input.mime` bị phục vụ entry của loại kia. Sửa nằm trong `callog.py` — **của `conformance-l0`** — nên feature đó phải verify lại + ký lại. AC-4/AC-5 chỉ phủ trục `file_key` vs bytes |
 | **1.1-L2** | Store cache trên đĩa + blob dedupe, chỉ tầng A, per-call | ✅ **ký 30/07** — 16 tiêu chí / 18 eval, S4 PASS vòng 1, PR #32. Known limits: `plugin_is_dirty` fail-open khi `git status` lỗi (ứng viên sửa đầu của lát kế) · cache nuốt lỗi không log · spread-order `assetOptions` · comment `node_cached` stale |
 | **1.1-L3** | Tầng B (memo theo workflow + tenant) | ✅ **ký 30/07**, merge PR #33 |
-| **1.1-L4** | LRU eviction + purge + reuse API + telemetry % partial | ✅ **ký 01/08** (Manh Phan, gate2 15m) — S4 PASS vòng 1 (20/20), PR mở. Trục cache 1.1 đóng |
+| **1.1-L4** | LRU eviction + purge + reuse API + telemetry % partial | ✅ **ký 01/08** (Manh Phan, gate2 15m) — S4 PASS vòng 1 (20/20), **merge 01/08 ([PR #34](https://github.com/phanlemanh/OneFlow/pull/34), `459d95f`)**. Trục cache 1.1 đóng |
+| **1.2** | Slot `compose-overlay` (media + ops[] typed) → plugin CPU font tiếng Việt → node UI | 🔜 **kế tiếp** — hạng mục không được cắt thứ hai; không phụ thuộc G0 |
 
 ## Nghi thức bắt buộc (AGENTS.md)
 
