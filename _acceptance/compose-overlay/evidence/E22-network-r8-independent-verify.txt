@@ -1,0 +1,66 @@
+=== Independent verifier round 8 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Verified at HEAD commit cd1816f78affdf8a83803494ebd0d1002d1afd5a.
+Self-started dev server: `pnpm dev` (background), polled http://localhost:3000/workspace until 200
+(ready after ~2s — server was already warm-cached, not a stale server: log shows
+"Ready in 1293ms" / "Compiled /workspace in 2.2s" in this session's own nohup log).
+
+Method:
+1. Ran the P0 design gate (`design-gate.mjs --mode dom --jsdom <repo-root> --fail-on P0`) fresh,
+   directly against the 6 committed captures under evidence/design/captures/:
+     state-1-empty.html      -> exit=0 PASS p0_count=0
+     state-2-ops-image.html  -> exit=0 PASS p0_count=0
+     state-3-ops-video.html  -> exit=0 PASS p0_count=0
+     state-4-op-form.html    -> exit=0 PASS p0_count=0
+     state-5-error.html      -> exit=0 PASS p0_count=0
+     state-6-running.html    -> exit=0 PASS p0_count=0
+   (First attempt without --jsdom <repo-root> returned BLOCKED/exit=3 -- jsdom lives in the repo's
+   own node_modules, not the plugin cache dir; re-ran with --jsdom pointed at the repo root and all
+   6 passed cleanly.)
+2. Confirmed PNG dimensions via `file`: all 6 = 1000x1100 (>= 900x1000 required, --full used).
+3. Read all 6 committed PNGs directly (Read tool, not from memory) and confirmed each shows a
+   distinct, real state matching the design-doc matrix: (1) empty shell, "No ops yet..." + 4 disabled
+   add-op buttons + greyed Apply Overlay; (2) real blue 64x64 image thumbnail + TEXT op row + enabled
+   Apply Overlay; (3) real green 64x64 video thumbnail + TEXT op scoped "entire video"; (4) same video
+   node with the op-edit form expanded (content/x/y/anchor/font-size/color/alignment/max-width/start-end
+   fields, focus ring on the card); (5) red destructive-styled error banner "A logo op needs an image on
+   in:logo -- connect an image node." + matching red LOGO op row "logo image missing (in:logo not
+   conn...)" + greyed Apply Overlay; (6) rotating rainbow-gradient left border + spinner + "Task started"
+   + "3s" timer overlay + greyed/disabled Add op and Apply Overlay. No broken images, no placeholder
+   boxes, no lorem-ipsum -- confirms this round independently, does not just trust prior rounds' prose.
+4. Self-started dev server, opened http://localhost:3000/workspace live in the Browser pane:
+   curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/workspace -> 200
+   Console (read_console_messages, onlyErrors:true) -> "No console logs." (0 errors).
+   Full console log (not filtered) shows only [log]/[info] Fast Refresh/Task-Store/WorkflowRecovery
+   chatter plus two [warn] "[React Flow]: Node with id ... does not exist" lines -- these are not
+   [error] level and are tied to a stray click-target reference on a since-removed node id
+   ("1ae5e1dd-..."), not to any of the 6 compose-overlay states under test.
+5. Network (read_network_requests): every request is to http://localhost:3000 (app-scope per
+   dev_server.url). All 200 OK except two: GET /api/uploads/tasks/e22-fixture/vid-src.mp4 and
+   GET /api/uploads/tasks/e22-fixture/vid-src.png -> 404. Both are static-asset (image/video file)
+   requests even though app-origin, so per the scoping rule they are note-only, never FAIL-eligible
+   regardless of status. They also match, file-name for file-name, the SAME "e22-fixture" stub-plugin
+   debris already documented and classified as out-of-scope in evidence/E22-network.txt (rounds 2-3)
+   and evidence/E22-network-r6-independent-verify.txt (round 6) -- leftover throwaway nodes
+   (ids co-1-empty..co-5-error) on the shared dev DB canvas from an earlier capture session, distinct
+   from node "ov1" used by the actual checked-in 6-state evidence. Confirmed again this round: the
+   live canvas at /workspace shows exactly 5 stray "Overlay Text/Logo" cards (co-1..co-5, no running
+   state persisted -- consistent with "running" being ephemeral/task-scoped, matching round 6's
+   finding). This debris is unrelated to compose-overlay.tsx itself and does not change the verdict.
+6. Additionally ran `pnpm ui:capture` myself against the live http://localhost:3000/workspace page
+   (--full --w 1000 --h 1100) to prove the capture tool + dev server render cleanly end-to-end this
+   round -- saved to evidence/E22-live-workspace-r8-independent-verify.png (1000x1100 PNG confirmed
+   via `file`). This is a supplementary live frame; it is NOT a replacement for the 6 canonical
+   state captures (which require staged fixtures -- uploaded image/video, a triggered validation
+   error, a mid-flight task -- that a verify-only round should not fabricate fresh without touching
+   product code/data). The 6 canonical captures under evidence/design/captures/ are unchanged at
+   HEAD (git status/log confirm no uncommitted diff) and independently re-verified above.
+
+networkObserved: app-fail is NOT applicable here -- the only non-200s are static-asset 404s
+(note-only per scoping rule), so overall this session's network truth = clean (app-scope traffic
+seen, all non-static-asset requests 200/OK).
+
+Dev server self-started by this verifier round; stopped after evidence capture (see run notes).
+
+Verdict this round: E22 PASS (exit 0). No CRITICAL/blocking issue found; the two 404s and two
+console [warn] lines are pre-existing, previously-classified, out-of-scope debris unrelated to the
+6-state evidence chain under test.

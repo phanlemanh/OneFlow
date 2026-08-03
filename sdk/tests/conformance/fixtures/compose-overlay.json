@@ -1,14 +1,7 @@
 {
     "case": "compose-overlay",
-    "note": "compose-overlay is Tier A and has NO batchField: one media + one text + one logo + two ops must become exactly ONE call on both runtimes. The ops array travels through untouched — op[0].text keeps its literal {text} placeholder and op[1] stays a bare logo op; substitution/compositing is plugin-side, neither runtime pre-substitutes. Assets are inlined as data: URLs so no file store is needed; both halves render them as content digests. The node type here is deliberately NOT the shipped composeOverlayNode: the canvas mount lands in a sibling task, and the TS adapter forbids a fixture sourceSpec from shadowing a mounted type — so this fixture pins the same field classification (media/logo = handle by ABI default, text = handle override, ops = config) under a type the registry never mounts.",
+    "note": "compose-overlay is Tier A and has NO batchField: one media + one text + one logo + two ops must become exactly ONE call on both runtimes. The ops array travels through untouched — op[0].text keeps its literal {text} placeholder and op[1] stays a bare logo op; substitution/compositing is plugin-side, neither runtime pre-substitutes. Assets are inlined as data: URLs so no file store is needed; both halves render them as content digests. The node type is the SHIPPED composeOverlayNode and the fixture declares NO sourceSpec of its own: the TS adapter reads NODE_TYPE_SOURCE_SPEC.composeOverlayNode, so this suite compares the real classification against Python rather than a hand-written copy that could drift.",
     "slot": "compose-overlay",
-    "sourceSpec": {
-        "text": {
-            "kind": "handle",
-            "nodeType": "textNode",
-            "path": "texts[0]"
-        }
-    },
     "stubOutput": {
         "success": true,
         "image": {
@@ -40,7 +33,9 @@
                 "dataType": "text",
                 "isInput": false,
                 "staticData": {
-                    "texts": ["50%"]
+                    "texts": [
+                        "50%"
+                    ]
                 },
                 "level": 0
             },
@@ -60,7 +55,7 @@
         "executableNodes": [
             {
                 "id": "exec-overlay",
-                "type": "conformanceComposeOverlayNode",
+                "type": "composeOverlayNode",
                 "feature": "compose-overlay",
                 "pluginId": "oneflow-conformance-stub",
                 "bindings": {
@@ -129,13 +124,23 @@
                         "expandEach": false
                     }
                 ],
-                "dependencies": ["dn-media", "dn-text", "dn-logo"],
+                "dependencies": [
+                    "dn-media",
+                    "dn-text",
+                    "dn-logo"
+                ],
                 "level": 1
             }
         ],
         "executionLevels": [
-            ["dn-media", "dn-text", "dn-logo"],
-            ["exec-overlay"]
+            [
+                "dn-media",
+                "dn-text",
+                "dn-logo"
+            ],
+            [
+                "exec-overlay"
+            ]
         ],
         "dataNodeEdges": []
     },
