@@ -301,3 +301,5 @@ dev_server:
 # reference + `pnpm add -D puppeteer-core`, then set:
 #   capture:
 #     ui: "node scripts/ui-capture.mjs"
+capture:
+  ui: pnpm ui:capture

@@ -31,10 +31,17 @@ function urlOf(
 }
 
 describe("string entries — today's manifest (AC-1)", () => {
-    it("resolves every id to the top-level org", () => {
-        const manifest = normalizeOfficialManifest(shipped());
+    type RawManifest = { plugins: (string | { id: string })[] };
+
+    it("resolves every string entry to the top-level org", () => {
+        const raw = shipped() as RawManifest;
+        const manifest = normalizeOfficialManifest(raw);
+        const plainIds = new Set(
+            raw.plugins.filter((p): p is string => typeof p === "string"),
+        );
         expect(manifest.org).toBe(DEFAULT_ORG);
         for (const entry of manifest.entries) {
+            if (!plainIds.has(entry.id)) continue;
             expect(entry.origin).toBe(DEFAULT_ORG);
             expect(officialGitUrl(entry)).toBe(
                 `${DEFAULT_ORG}/${entry.id}.git`,
@@ -43,9 +50,12 @@ describe("string entries — today's manifest (AC-1)", () => {
     });
 
     it("preserves the id list element for element, in order", () => {
-        const raw = shipped() as { plugins: string[] };
+        const raw = shipped() as RawManifest;
         const manifest = normalizeOfficialManifest(raw);
-        expect(manifest.entries.map((e) => e.id)).toEqual(raw.plugins);
+        const rawIds = raw.plugins.map((p) =>
+            typeof p === "string" ? p : p.id,
+        );
+        expect(manifest.entries.map((e) => e.id)).toEqual(rawIds);
     });
 });
 
