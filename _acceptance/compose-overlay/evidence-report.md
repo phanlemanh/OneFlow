@@ -1,13 +1,13 @@
 ---
 schema_version: 2
 feature_slug: compose-overlay
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 4031783a45c8f6a5c2ca5385f238cbb50ae29355
-human_signoff:
+human_signoff: Manh 2026-08-03
 ---
 
 # Evidence Report: compose-overlay
@@ -354,7 +354,7 @@ Round 7. Every machine/ui eval below exited 0 (E1a–E22, 26 commands) and the E
     - domain-correctness: PASS — Ca 6 capture deu tai lap dung cau truc shell + ops-editor cua design-of-record: header icon/title/menu, khoi "Implementation" (plugin select), ops-empty voi 2x2 add-menu (state 1), op-row voi badge/summary/pin sua-xoa va op-time chi xuat hien o media=video (state 2 vs 3), op-form day du field x/y/anchor/font/color/align/max-width/start-end (state 4, doi chieu file .html xac nhan khong bi cat), banner-error + op-row.error dung mau danger token (state 5), va overlay loading dung dung rotate-border + spinner + nut Cancel execution ma reference da cap nhat 03/08 de khop shell that (state 6). Cac khac biet con lai (EN vs VI text, badge LOGO to mau nhe hon o state 5, icon hamburger thay vi ⋯) la bien the noi dung/thuc thi hop ly, khong pha vo ngon ngu thiet ke workspace hay lech cau truc so voi cac node transfer khac.
     - operational-feasibility: PASS — Ca 6 capture khop dung mo ta trang thai trong manifest.json: state-1 (Ops rong, Apply Overlay disabled xam), state-2/3 phan biet dung media=image (khong co time) vs media=video (badge "entire video"), state-4 co day du form (content multi-line, x/y, anchor, font size, color, alignment, max width, Start/End(s)), state-5 co ca banner do lan inline error dung "logo op needs an image on in:logo", state-6 dung treatment loading chung cua BaseNodeShell (vien gradient, spinner, nhan "Task started", dong ho 3s) nhu reading_notes da giai thich truoc. Header/icon/card cua node Overlay Text/Logo (icon-title trai, hamburger phai, khung bo tron, nut CTA den) khop voi chrome cua cac node Image/Video xuat hien cung canvas trong cung anh, cho thay no la "nguoi nha" cua he thong node hien co; khong thay yeu to nao pha ngon ngu thiet ke (mau sac dung ngu nghia: do=loi, den=CTA chinh, xam=disabled).
     - spec-alignment: PASS — Ca 6 state capture khop cau truc design-of-record: header icon+title+menu, khoi Implementation, nhan "Ops" + op-row (badge loai + summary + time + edit/delete), nut "+ Add op", nut Execute (disabled khi rong/loi, enabled khi hop le), banner loi va op-row.error mau do dung token, va overlay loading dung rotating-border + spinner + timer + Cancel giong shell chung — cac lech nho (ten "api-e22-r5-stub" thay vi plugin id, ngon ngu Anh thay vi Viet, op-start/op-end tach rieng, cancel button bi PNG cat) deu duoc manifest reading_notes va file .html cung ten xac nhan la artefact moi truong/viewport, khong phai lech thiet ke. Ngon ngu shell (bg trang, bo tron, shadow, ring xanh khi selected, nut den) nhat quan voi cac node transfer khac trong anh nen, khong thay yeu to nao pha vo he thong.
-  human_override:
+  human_override: Manh 2026-08-03 — Dat: node ra dang nguoi nha cua cac node transfer san co; dong y voi panel.
 
 ## Analyst
 
