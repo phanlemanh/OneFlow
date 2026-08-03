@@ -54,16 +54,17 @@ function singleEdgeHandlesForTarget(targetNodeId: string): ReadonlySet<string> {
 }
 
 /** Modality (RF nodeType) that a specific ABI target handle expects, if resolvable. */
-function expectedTargetHandleType(
+function expectedTargetHandleTypes(
     targetNodeId: string,
     targetHandle: string | null | undefined,
-): string | undefined {
+): string[] | undefined {
     const field = parseTargetHandleId(targetHandle);
     if (!field) return undefined;
     const spec = resolveSpecForNode(targetNodeId);
     if (!spec) return undefined;
     const f = spec.fields[field];
-    return f?.kind === "handle" ? f.nodeType : undefined;
+    if (f?.kind !== "handle") return undefined;
+    return [f.nodeType, ...(f.alsoAccepts ?? [])];
 }
 
 /** Set of upstream node types this target accepts on any handle. */
@@ -175,11 +176,11 @@ export function isValidFlowConnection(
     // Modality gate: a resolvable ABI target handle dictates the exact upstream
     // modality. XRef/Asset schemas are isomorphic across media types, so the
     // schema-level check below cannot distinguish image/video/audio — enforce it here.
-    const expected = expectedTargetHandleType(
+    const expected = expectedTargetHandleTypes(
         targetNode.id,
         connection.targetHandle,
     );
-    if (expected && expected !== outType) return false;
+    if (expected?.length && !expected.includes(outType)) return false;
 
     const abiDecision = tryAbiCompatibility(connection, nodes);
     if (abiDecision !== undefined) return abiDecision;

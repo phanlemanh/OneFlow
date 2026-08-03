@@ -22,6 +22,14 @@ export interface HandleOverride {
     /** Upstream node type accepted on this handle. */
     nodeType?: DataNodeType;
     /**
+     * Extra upstream node types this handle also accepts, for the rare ABI field
+     * that is genuinely modality-agnostic (e.g. `compose-overlay.media`, which
+     * stamps overlays onto either an image or a video). `nodeType` stays the
+     * primary type — it is what handle rendering and prompt extraction use;
+     * these only widen the connection validator.
+     */
+    alsoAccepts?: DataNodeType[];
+    /**
      * Data-extraction path on the upstream node's data, e.g. "fileKeys[0]" or "texts".
      * If omitted, defaults are: `fileKeys[0]` (file refs, scalar), `fileKeys` (array),
      * `texts[0]` (text scalar), `texts` (text array).
@@ -71,6 +79,7 @@ export type FieldSourceOverride =
 /** Mark a field as fed from an upstream handle. Pass options to refine type/path. */
 export function handle(opts?: {
     nodeType?: DataNodeType;
+    alsoAccepts?: DataNodeType[];
     path?: string;
     batch?: boolean;
     manual?: boolean;

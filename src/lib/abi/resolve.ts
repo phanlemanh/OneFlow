@@ -33,6 +33,8 @@ export type ResolvedField =
     | {
           kind: "handle";
           nodeType: NonNullable<HandleOverride["nodeType"]>;
+          /** Additional upstream types the connection validator accepts here. */
+          alsoAccepts?: HandleOverride["alsoAccepts"];
           path: NonNullable<HandleOverride["path"]>;
           batch?: boolean;
           collect?: boolean;
@@ -142,6 +144,7 @@ export function resolveSpec(
                 fields[fieldName] = {
                     kind: "handle",
                     nodeType,
+                    alsoAccepts: override.alsoAccepts,
                     path,
                     batch: override.batch,
                     collect: override.collect,

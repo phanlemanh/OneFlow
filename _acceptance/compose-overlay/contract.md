@@ -48,7 +48,8 @@ trường: Modal image / venv khoá phiên bản Pillow-freetype-ffmpeg); "verba
 từng ký tự — node không bao giờ format lại số/chuỗi (format là việc của
 `normalize-text-vi` thượng nguồn).
 
-- AC-1: Given ABI có slot `compose-overlay` đúng thiết kế (media+ops oneOf 4 loại+text+logo;
+- AC-1 *(sửa lời 03/08 — xem Amendment 2)*: Given ABI có slot `compose-overlay` đúng thiết kế
+  (media + ops[] **4 loại phân biệt bằng trường `type` (enum)** + text+logo;
   outputs image/video; **không** seed/temperature/top_p), When chạy trọn codegen train
   (`pnpm gen:abi` → `gen_models.py` → `gen_node_slots.py`), Then không drift: generated TS,
   `_data` copy, `models/compose_overlay.py`, `node_slots.py` đều đã commit khớp
@@ -134,6 +135,19 @@ AC-14 đổi từ plain-string-thứ-39 sang **entry origin đầu tiên** (xem 
 (1) nút "mở repo" trong plugin manager và (2) standalone SDK engine vẫn build URL từ
 org mặc định → trỏ sai với plugin này (in-app installer đã hỗ trợ origin, có eval
 parity). Ghi Known limits ở Cổng 2; vá hai lỗ là contract riêng nếu muốn.
+
+## Amendment 2 (2026-08-03 — bookkeeping của quyết định đã duyệt ở Gate 1.5)
+
+AC-1 nguyên văn viết "ops oneOf 4 loại". Tại **Gate 1.5** (duyệt plan, 02/08) đã trình và
+được duyệt lệch này: `sdk/tongflow/gen_models.py` **không hỗ trợ `oneOf`/`enum`**, và mở rộng
+nó kéo theo union-construct trong `slots.py` — chokepoint đã ký của họ cache. Hình dạng ship
+là **một object schema với `type` là enum 4 giá trị** (TS vẫn ra literal union; Python ra một
+class `ComposeOverlayInputRootOpsItem` field-optional). Ledger:
+`d-20260802T...` type `approach`, có điều kiện `revisit` khi generator hỗ trợ `oneOf`.
+Sửa lời AC-1 ở đây để văn bản khớp thực tế đã duyệt, **không** nới lỏng yêu cầu nào khác.
+
+**Hệ quả còn mở (trình Cổng 2, không tự sửa):** schema gộp không ràng buộc field theo loại op
+— `safe_zone` phải mang `x:0,y:0` vô nghĩa, và không gì chặn op `logo` mang `bg_color`.
 
 ## Coverage
 

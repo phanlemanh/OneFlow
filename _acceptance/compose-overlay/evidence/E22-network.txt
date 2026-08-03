@@ -1,67 +1,72 @@
-E22 network truth dump — raw, unfiltered from Claude_Browser tab-1 during the whole capture session
-(app-scope = http://localhost:3000, per _acceptance/config.yaml dev_server.url)
-Captured 2026-08-03.
+E22 round 2 — network truth dump (read_network_requests + read_console_messages, tab-1)
+Scope: http://localhost:3000 (dev_server.url)
+Captured: 2026-08-03, after states 1-6 were driven on /workspace via Import-JSON + real clicks.
 
-== read_network_requests (tab-1, full session) ==
-[53070.7] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1785724437050 -> 200 OK
-[53070.8] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1785724437050 -> 200 OK
-[53070.9] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-[53070.10] GET http://localhost:3000/_next/static/chunks/app/workspace/page.js -> 200 OK
-[53070.11] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-[53070.38] GET http://localhost:3000/api/feature/list -> 200 OK
-[53070.40] GET http://localhost:3000/api/plugins/registry -> 200 OK
-[53070.41] GET http://localhost:3000/api/task/pending -> 200 OK
-[53070.42] GET http://localhost:3000/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]  (RSC prefetch, client self-cancelled — see note below)
-[53070.43..55] static chunks / hot-update / css -> all 200 OK (Fast Refresh churn from repeated Import-JSON re-renders)
-[53070.50] GET http://localhost:3000/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]
-[53070.69] GET http://localhost:3000/api/uploads/e22-sample-image.png -> 200 OK
-[53070.73..78] static chunks / hot-update / css -> 200 OK
-[53070.92] GET http://localhost:3000/api/uploads/e22-sample-video.mp4 -> 200 OK
-[53070.93] GET http://localhost:3000/api/uploads/e22-sample-video.mp4 -> 200 OK
-[53070.94..96] GET data: URIs (inline SVG icons) -> 200 OK (not app-origin, static asset — note only)
-[53070.97] GET http://localhost:3000/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]
-[53070.98..102] static chunks / hot-update / css -> 200 OK
-[53070.116] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK (Next.js dev overlay plumbing)
-[53070.36] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
-[53070.117..122] static chunks / hot-update / css -> 200 OK
-[53070.136] GET http://localhost:3000/api/uploads/e22-sample-image.png -> 200 OK
-[53070.138..143] workspace RSC + hot-update / css (1 more ERR_ABORTED at .138) -> 200 OK
-[53070.157] GET http://localhost:3000/api/uploads/e22-sample-video.mp4 -> 206 Partial Content
-[53070.158] GET http://localhost:3000/api/uploads/e22-sample-video.mp4 -> 200 OK
-[53070.159] POST http://localhost:3000/api/task/create -> 200 OK   (state-6 Execute click)
-[53070.160..164] hot-update chunks -> 200 OK
-[53070.162] GET http://localhost:3000/api/task/wait?taskId=d__oWMCT4yzpQpcVhOb0O -> 200 OK
-[53070.165..199] workspace RSC + hot-update / css (several more ERR_ABORTED, same self-cancel pattern) -> 200 OK
-[53070.224] POST http://localhost:3000/api/task/update-status -> 200 OK  (stub plugin reporting its deliberate failure)
-[53070.225] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK
-[53070.226..233] hot-update chunks -> 200 OK
+=== FAIL-eligible request classes seen (fetch/XHR to app origin) ===
+GET  /api/plugins/registry                -> 200 OK (multiple)
+GET  /api/feature/list                    -> 200 OK
+GET  /api/task/pending                    -> 200 OK (multiple)
+POST /api/task/create                     -> 200 OK x4 (2 pre-fix attempts that failed inside
+                                              the harness before reaching the plugin: 1) fake
+                                              fileKey ENOENT during asset-prep, 2) stub venv
+                                              first-install polluted stdout with pip banner ->
+                                              "non-JSON stdout"; 2 post-fix attempts that DID
+                                              reach the plugin and produced the real RUNNING
+                                              state captured for state-6, then failed on
+                                              purpose per the stub's own design (E22 capture
+                                              stub — not a real render))
+GET  /api/task/wait?taskId=...            -> 200 OK x4
+POST /api/task/update-status              -> 200 OK x4
+POST /__nextjs_original-stack-frames      -> 200 OK (dev-only diagnostics, informational)
+GET  /workspace?_rsc=...                  -> 200 OK, several show [FAILED: net::ERR_ABORTED]
+                                              (RSC prefetch cancelled by a newer navigation —
+                                              standard Next dev pattern, not a 4xx/5xx/
+                                              connection-error; same pattern round-1 flagged
+                                              as non-failing)
 
-Note on [FAILED: net::ERR_ABORTED] rows: these are Next.js App Router RSC prefetch
-requests (`/workspace?_rsc=...`) that the browser's own router cancels when a newer
-prefetch/navigation supersedes an in-flight one — a stock Next.js dev-mode pattern,
-not a 4xx/5xx and not a connection error. Confirmed 200 OK before the client-side
-abort in every occurrence. Not treated as FAIL-eligible.
+=== Static-asset requests (note-only, never FAIL-eligible per scoping rules) ===
+GET /api/uploads/tasks/e22-fixture/img-src.png   -> 404 Not Found (early loads, before the
+GET /api/uploads/tasks/e22-fixture/vid-src.png   -> 404 Not Found  synthetic 1x1 PNG fixtures
+GET /api/uploads/tasks/e22-fixture/logo-src.png  -> 404 Not Found  were written to
+GET /api/uploads/tasks/e22-fixture/vid-src.mp4   -> 404 Not Found  data/uploads/tasks/e22-fixture/;
+                                                                    these are the modality-node
+                                                                    thumbnail <img> fetches for
+                                                                    OUR throwaway harness fixture
+                                                                    nodes (img-src/vid-src/logo-src),
+                                                                    not compose-overlay itself.
+                                                                    Task execution reads the same
+                                                                    files server-side via
+                                                                    readUploadFileByFileKey (fs read,
+                                                                    not this API route) and DID
+                                                                    succeed once the fixtures were
+                                                                    written — see the 2 post-fix
+                                                                    /api/task/create runs above.
+GET /_next/static/... (js/css/webpack hot-update)  -> 200 OK, static
+GET data:image/svg+xml;base64,...                  -> 200 OK, inline data URI icons (lucide)
+GET /__nextjs_font/geist-latin.woff2                -> 200 OK, static
 
-== read_console_messages (tab-1, onlyErrors, cumulative across all 6 states) ==
-States 1-5: zero console errors on each check (verified individually after each
-Import-JSON + before capture).
-State 6 (running, after clicking Apply Overlay against the E22 capture-only stub
-plugin installed solely for this verification session — see main report):
-  [error] [useAbiExecution] Task failed for node co: Object
-This is the app's own task-failure logger reporting the stub's deliberate
-`success: false` return (message: "E22 capture stub — not a real render"). It is a
-direct, expected consequence of the throwaway stub plugin this verifier installed
-under gitignored plugins/ to reach a genuine "running" state — not a defect in
-compose-overlay's own code, and not reproducible with states 1-5 or with no
-execution attempt. Plugin dir and uploaded sample files were deleted after capture
-(see main report cleanup section).
+=== Console (read_console_messages) ===
+Pre-existing, NOT reproduced by any of the 6 compose-overlay states, present at first mount
+before any of this session's nodes existed:
+  [error] "A tree hydrated but some attributes of the server rendered HTML didn't match the
+          client properties..." (Radix tooltip-trigger id mismatch, id="radix-_R_i..." vs
+          "radix-_R_295...") — pre-existing hydration-id nondeterminism unrelated to
+          compose-overlay; occurs on every /workspace mount regardless of canvas contents.
 
-One other console line, present on EVERY /workspace load including a totally clean
-new-tab load with no compose-overlay node at all (see main report):
-  [warn] [React Flow]: The parent container needs a width and a height to render
-  the graph. Help: https://reactflow.dev/error#004
-Warning-level, not an error; pre-existing / app-wide, unrelated to compose-overlay.
+Introduced by THIS harness (not the product): 4x
+  [error] "[useAbiExecution] Task failed for node co-2-image: [object Object]" / "...: Object"
+  — one pair per Apply-Overlay click on the co-2-image fixture node. The first 2 pairs are
+  harness setup failures (missing fixture bytes; first-run venv install polluting the plugin's
+  stdout) that were root-caused and fixed (real PNG bytes written under
+  data/uploads/tasks/e22-fixture/, entry.py given a stdin/stdout __main__ dispatcher). The last
+  2 pairs are the E22-stub plugin's own designed behavior: it sleeps ~25s (giving the RUNNING
+  capture window used for state-6-running.html/.png) then returns success=False with
+  error="E22 capture stub — not a real render". Same pattern and same conclusion as round 1:
+  this is an artifact of the verification harness (a capture-only stub plugin, deleted after
+  capture), not a defect in compose-overlay or NodeLoadingOverlay.
 
-verdict: networkObserved = clean (app-scope traffic present, all FAIL-eligible
-requests 200/206/OK; the one console [error] is attributable to this verifier's
-own disposable test-harness stub, not to product code).
+No other console errors observed across states 1-5 (0 new errors per state on import/click).
+
+networkObserved = clean (app-scope traffic seen; every FAIL-eligible request is 200 OK; the
+only non-2xx are static-image 404s from the harness's own throwaway fixture nodes, which the
+scoping rule exempts as static-asset/note-only).

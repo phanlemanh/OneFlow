@@ -225,13 +225,15 @@ export const NODE_TYPE_SOURCE_SPEC = {
     // Transfer variant of `speech-text-gen-video`: only the audio is wired,
     // the scene text stays a config field.
     speechGenVideoNode: { audio: handle({ nodeType: "audioNode" }) },
-    // `media` / `logo` are Asset $refs → upstream handles by ABI default
-    // (declared explicitly for `logo` to pin the imageNode upstream type;
-    // `media` accepts image or video, so the generic default stays). `text`
+    // `media` / `logo` are Asset $refs → upstream handles. The generic Asset
+    // default resolves to `imageNode` (field name carries no modality token),
+    // which would reject every video source — so `media` declares videoNode via
+    // `alsoAccepts`: this slot stamps overlays onto an image OR a video. `text`
     // is a scalar string promoted to a textNode-fed handle — it feeds the
     // `{text}` placeholder substituted plugin-side. `ops` is the overlay
     // instruction list edited in the node's own ops-editor form.
     composeOverlayNode: {
+        media: handle({ nodeType: "imageNode", alsoAccepts: ["videoNode"] }),
         text: textScalar(),
         logo: handle({ nodeType: "imageNode" }),
         ops: configField(),
