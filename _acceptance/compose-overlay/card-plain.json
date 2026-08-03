@@ -4,7 +4,7 @@
     {
       "id": "E23",
       "q": "Node dán chữ trông đã 'ra dáng người nhà' của các node sẵn có chưa?",
-      "why": "Ba người soi độc lập (chỉ xem 6 ảnh chụp thật, đối chiếu bản thiết kế chuẩn) đều nói ĐẠT — vòng thứ ba liên tiếp. Bạn xem ảnh rồi gật hoặc nêu chỗ chướng; đổi giao diện sau này rẻ, không đụng dữ liệu."
+      "why": "Ba người soi độc lập (chỉ xem 6 ảnh chụp thật, đối chiếu bản thiết kế chuẩn) đều nói ĐẠT — vòng thứ tư liên tiếp. Bạn xem ảnh rồi gật hoặc nêu chỗ chướng; đổi giao diện sau này rẻ, không đụng dữ liệu."
     }
   ],
   "scope_plain": "Đã chốt để sau: sinh phụ đề tự động, kéo-thả vị trí bằng chuột, font tuỳ chọn, nhiều logo, chỉnh codec — cùng hai lỗ hổng UI cũ của per-plugin-origin.",
@@ -61,6 +61,14 @@
     {
       "id": "d-20260803T094431Z-1836",
       "p": "Vòng kiểm 7: gom luật 'ô này nhận loại nào' về MỘT chỗ cho cả 5 nơi, và làm việc giải loại an toàn với thứ tự render (trước đây workflow mở lại bị mất ô giờ vì đọc sổ đăng ký lúc sổ còn rỗng) — đổi lại có đụng tầng dùng chung của mọi node ABI, bù lại xoá được nguồn tái phát của 4 vòng trước."
+    },
+    {
+      "id": "d-20260803T143000Z-8821",
+      "p": "Vòng kiểm 10: sửa nốt nửa còn lại của luật nới rộng — đầu ra của node đi theo loại media thật sự đi vào, thay vì luôn lấy đầu ra khai báo đầu tiên; đóng lỗ mất kết quả video im lặng qua trợ lý dựng workflow."
+    },
+    {
+      "id": "d-20260803T150500Z-4417",
+      "p": "Vòng kiểm 11: khoá luật nới rộng theo ĐÚNG ô đã nới (logo cũng là ảnh, nối trước thì trước đây nó quyết sai loại đầu ra), và bộ sinh mã không còn để file sinh ra ở trạng thái chưa định dạng trên đĩa — hết bị báo đỏ giả khi kiểm tra chạy song song."
     }
   ]
 }
