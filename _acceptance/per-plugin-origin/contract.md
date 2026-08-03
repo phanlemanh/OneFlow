@@ -57,7 +57,13 @@ Source input: prompt (bắt đầu (a) luôn)
 - AC-3: Given the URL rule has three consumers — the in-app manager, the CLI installer, and the update checker, which today calls `checkPluginUpdate(manifest.org, id)` for every installed plugin — When each builds a remote for the same id, Then all three produce the **same URL from the same resolver** — no second copy of the rule survives this change, and a plugin that overrides its origin must not be update-checked against the default one.
 - AC-4: Given a malformed entry (unknown key, missing `id`, non-string `origin`, empty string, duplicate id), When the manifest is loaded, Then loading **fails with a message naming the offending entry** — a typo must not silently clone from the default origin.
 - AC-5: Given an origin that is not an `http(s)` URL (`git@github.com:x`, `../etc`, `javascript:`), When the manifest is loaded, Then it is rejected — an origin is a clone target, and the installer already refuses non-http(s) remotes for custom URLs.
-- AC-6: Given this change is a capability and not a migration, When the shipped manifest is inspected, Then it still holds **38 plain string entries and the same default org** — no plugin is repointed here, and the two guards from `oneflow-plugin-prefix` that assert this stay green.
+- AC-6 *(amended 2026-08-03 — first fork landed; see Amendment)*: Given this change is a
+  capability and not a migration, When the shipped manifest is inspected, Then **no plugin
+  that existed at sign-off has been repointed**: all 38 original entries are still plain
+  strings under the same default org. The guard `check-manifest-unmoved.sh` enforces exactly
+  that, now in its second edition — it additionally requires the one origin entry the
+  capability was built for (`oneflow-modal-compose-overlay` → `https://github.com/phanlemanh`,
+  landed by the compose-overlay feature). The two guards from `oneflow-plugin-prefix` stay green.
 
 ## Coverage
 
@@ -143,6 +149,17 @@ change files outside this feature's approved scope.
   plugin, or on the first real fork — both of which are intended future work.
   The coupling is now called out in CLAUDE.md's "Registering an official plugin"
   checklist so that failure arrives with an explanation attached.
+
+## Amendment (2026-08-03 — first fork landed, prescribed by CLAUDE.md)
+
+AC-6's original wording froze the manifest at "38 plain string entries". CLAUDE.md's
+"Registering an official plugin" section always described that count as **a snapshot of this
+PR, not a standing invariant**, and told the next registrant to *"bump `expected_count` (or
+retire the guard once the first fork lands)"*. The first fork landed with `compose-overlay`
+(approved by Manh at its Gate 1, 2026-08-03): the manifest now carries 38 plain strings **plus
+one origin entry**. AC-6's intent — *this capability repoints no existing plugin* — is
+unchanged and still enforced; only the count wording is updated so the criterion describes the
+guard that actually runs.
 
 ## Notes
 
