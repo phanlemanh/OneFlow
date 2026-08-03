@@ -73,7 +73,12 @@ function collectUpstreamTypesForTarget(targetNodeId: string): Set<string> {
     if (!spec) return new Set();
     const out = new Set<string>();
     for (const f of Object.values(spec.fields)) {
-        if (f.kind === "handle") out.add(f.nodeType);
+        if (f.kind !== "handle") continue;
+        out.add(f.nodeType);
+        // A modality-agnostic handle (e.g. compose-overlay `media`) accepts more
+        // than its primary type; without this the fallback below rejects those
+        // upstreams even though the modality gate already allowed them.
+        for (const extra of f.alsoAccepts ?? []) out.add(extra);
     }
     return out;
 }

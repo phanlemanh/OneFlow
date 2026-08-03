@@ -86,7 +86,7 @@ try {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
     await new Promise((r) => setTimeout(r, waitMs));
     await page.screenshot({ path: out, fullPage });
-    console.log("saved " + out);
+    console.log(`saved ${out}`);
 } finally {
     await browser.close();
 }

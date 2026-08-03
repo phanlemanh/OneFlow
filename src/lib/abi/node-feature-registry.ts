@@ -30,6 +30,7 @@ import {
     batchOn,
     collectAll,
     configField,
+    type FieldSourceOverride,
     handle,
     type SourceSpec,
 } from "./sources";
@@ -379,16 +380,40 @@ export function resolveEdgeHandles(args: {
                       return feature ? getAbiTopology(feature).inputOrder : [];
                   })()
                 : []);
+        // A handle may accept more than its primary nodeType (`alsoAccepts`),
+        // e.g. compose-overlay `media` takes an image OR a video. Matching on
+        // `nodeType` alone leaves such an edge without a targetHandle, which
+        // reads as "connected" on the canvas but never delivers a value.
         const isHandleForUpstream = (field: string): boolean => {
             if (targetSpec) {
                 const f = targetSpec.fields[field];
-                return f?.kind === "handle" && f.nodeType === upstreamNodeType;
+                if (f?.kind !== "handle") return false;
+                return (
+                    f.nodeType === upstreamNodeType ||
+                    !!f.alsoAccepts?.includes(upstreamNodeType)
+                );
             }
             if (!targetType) return false;
             const feature = featureForNodeType(targetType);
             if (!feature) return false;
             const f = getAbiTopology(feature).inputs[field];
-            return f?.kind === "handle" && f.nodeType === upstreamNodeType;
+            if (f?.kind !== "handle") return false;
+            const override = (
+                NODE_TYPE_SOURCE_SPEC as Record<
+                    string,
+                    Record<string, FieldSourceOverride | undefined> | undefined
+                >
+            )[targetType]?.[field];
+            const declared =
+                override?.kind === "handle"
+                    ? (override.nodeType ?? f.nodeType)
+                    : f.nodeType;
+            const extra =
+                override?.kind === "handle" ? (override.alsoAccepts ?? []) : [];
+            return (
+                declared === upstreamNodeType ||
+                extra.includes(upstreamNodeType)
+            );
         };
 
         let firstMatch: string | undefined;

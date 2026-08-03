@@ -127,7 +127,19 @@ body {
 }
 .dark .banner-error { background: transparent; }
 
-/* loading overlay (shell-inherited) */
+/* loading overlay (shell-inherited — mirrors NodeLoadingOverlay + the
+   rotating gradient border BaseNodeShell already applies to every executing
+   node; the reference must describe the real shared shell, not a simplified
+   one) */
+.rotate-border {
+  position: absolute; inset: -2px; border-radius: calc(var(--radius-node) + 2px);
+  background: conic-gradient(from 0deg, #3b82f6, #a855f7, #ec4899, #f59e0b, #3b82f6);
+  z-index: 40;
+}
+.rotate-border::after {
+  content: ""; position: absolute; inset: 2px;
+  border-radius: var(--radius-node); background: var(--color-surface);
+}
 .overlay {
   position: absolute; inset: 0; z-index: 50; border-radius: var(--radius-node);
   background: color-mix(in srgb, var(--color-surface) 82%, transparent);

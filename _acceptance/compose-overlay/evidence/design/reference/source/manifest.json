@@ -1,14 +1,46 @@
 {
   "surface": "canvas node transfer/compose-overlay (BaseNodeShell chrome inherited; new UI = ops-editor panel)",
   "breakpoint": "desktop canvas — node width 340px, capture page 1440",
-  "themes": ["light (primary)", "dark (token layer .dark in styles.css)"],
-  "states": [
-    {"id": 1, "file": "state-1-empty.html",     "name": "empty — no media, no ops, execute disabled"},
-    {"id": 2, "file": "state-2-ops-image.html", "name": "ops list, media=image — no time fields"},
-    {"id": 3, "file": "state-3-ops-video.html", "name": "ops list, media=video — time fields visible"},
-    {"id": 4, "file": "state-4-op-form.html",   "name": "text op form expanded (multi-line, {text}, coords, time)"},
-    {"id": 5, "file": "state-5-error.html",     "name": "logo op present but in:logo missing — inline + banner error"},
-    {"id": 6, "file": "state-6-running.html",   "name": "running — shell loading overlay"}
+  "themes": [
+    "light (primary)",
+    "dark (token layer .dark in styles.css)"
   ],
-  "note": "Portable-reference path: checked-in HTML/CSS is the design-of-record; pixel captures happen at S4 via the design gate. Token layer lives in styles.css only."
+  "states": [
+    {
+      "id": 1,
+      "file": "state-1-empty.html",
+      "name": "empty — no media, no ops, execute disabled"
+    },
+    {
+      "id": 2,
+      "file": "state-2-ops-image.html",
+      "name": "ops list, media=image — no time fields"
+    },
+    {
+      "id": 3,
+      "file": "state-3-ops-video.html",
+      "name": "ops list, media=video — time fields visible"
+    },
+    {
+      "id": 4,
+      "file": "state-4-op-form.html",
+      "name": "text op form expanded (multi-line, {text}, coords, time)"
+    },
+    {
+      "id": 5,
+      "file": "state-5-error.html",
+      "name": "logo op present but in:logo missing — inline + banner error"
+    },
+    {
+      "id": 6,
+      "file": "state-6-running.html",
+      "name": "running — shell loading overlay"
+    }
+  ],
+  "note": "Portable-reference path: checked-in HTML/CSS is the design-of-record; pixel captures happen at S4 via the design gate. Token layer lives in styles.css only.",
+  "reading_notes": [
+    "Vung plugin-select hien khoi 'Implementation: No plugin implementations were scanned' khi may verify KHONG cai plugin nao (thu muc plugins/ la gitignored, populate luc chay). Day la artefact moi truong chup, KHONG phai sai lech thiet ke — cho diem theo cau truc con lai cua shell.",
+    "Anh PNG chup theo viewport nen op-form dai (state-4) co the bi cat duoi. Doc kem file .html cung ten trong captures/ truoc khi ket luan 'thieu field': vi du state-4 CO du op-start/op-end (data-testid) va state-6 CO nut 'Cancel execution'.",
+    "State-6 dung nguyen treatment loading dung chung cua BaseNodeShell (vien gradient xoay + spinner + nhan + dong ho + nut huy). Reference da duoc sua 03/08 cho khop shell that — ban ve dau tien mo ta mot overlay don gian hon thuc te."
+  ]
 }

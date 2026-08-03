@@ -101,6 +101,43 @@ describe("isValidFlowConnection — multi-modality handle (alsoAccepts)", () => 
         ).toBe(false);
     });
 
+    /**
+     * Data-node sources take a different branch than ABI-node sources: they skip
+     * `tryAbiCompatibility` and land on the `collectUpstreamTypesForTarget`
+     * fallback, which is where `alsoAccepts` was originally dropped. The
+     * abiNode-sourced cases above never reach it.
+     */
+    const dataNode = (id: string, type: string): Node => ({
+        id,
+        type,
+        position: { x: 0, y: 0 },
+        data: {},
+    });
+
+    it("accepts a real videoNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("v", "out:videoNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [dataNode("v", "videoNode"), abiNode("ov")], []),
+        ).toBe(true);
+    });
+
+    it("accepts a real imageNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("i", "out:imageNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [dataNode("i", "imageNode"), abiNode("ov")], []),
+        ).toBe(true);
+    });
+
+    it("rejects a real audioNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("a", "out:audioNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [dataNode("a", "audioNode"), abiNode("ov")], []),
+        ).toBe(false);
+    });
+
     it("keeps in:logo image-only — alsoAccepts is per handle, not per node", () => {
         register("vid2", "image-gen-video"); // out:video
         registerOverlay("ov");

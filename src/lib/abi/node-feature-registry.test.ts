@@ -20,6 +20,7 @@ import { describe, expect, it } from "vitest";
 import {
     NODE_TYPE_SOURCE_SPEC,
     NODE_TYPE_TO_ABI_FEATURE,
+    resolveEdgeHandles,
     resolvedSpecForNodeType,
 } from "./node-feature-registry";
 
@@ -134,5 +135,54 @@ describe("registry integrity", () => {
                 `${nodeType}: ${batched.map(([k]) => k)}`,
             ).toBeLessThanOrEqual(1);
         }
+    });
+});
+
+describe("resolveEdgeHandles — multi-modality handles (alsoAccepts)", () => {
+    /**
+     * A handle that accepts more than its primary nodeType must be matched by
+     * edge creation too, not only by the connection validator: an edge built
+     * without a `targetHandle` looks connected on the canvas but never delivers
+     * a value, so the node stays unexecutable with no error shown.
+     */
+    const overlaySpec = resolvedSpecForNodeType("composeOverlayNode");
+
+    it("routes a videoNode source to in:media (spec path)", () => {
+        expect(
+            resolveEdgeHandles({
+                sourceType: "videoNode",
+                targetType: "composeOverlayNode",
+                targetSpec: overlaySpec,
+            }),
+        ).toEqual({ sourceHandle: "out:videoNode", targetHandle: "in:media" });
+    });
+
+    it("routes a videoNode source to in:media (topology path, no spec)", () => {
+        expect(
+            resolveEdgeHandles({
+                sourceType: "videoNode",
+                targetType: "composeOverlayNode",
+            }),
+        ).toEqual({ sourceHandle: "out:videoNode", targetHandle: "in:media" });
+    });
+
+    it("still routes an imageNode source to in:media", () => {
+        expect(
+            resolveEdgeHandles({
+                sourceType: "imageNode",
+                targetType: "composeOverlayNode",
+                targetSpec: overlaySpec,
+            }).targetHandle,
+        ).toBe("in:media");
+    });
+
+    it("does not route an audioNode source anywhere on compose-overlay", () => {
+        expect(
+            resolveEdgeHandles({
+                sourceType: "audioNode",
+                targetType: "composeOverlayNode",
+                targetSpec: overlaySpec,
+            }).targetHandle,
+        ).toBeUndefined();
     });
 });
