@@ -114,3 +114,15 @@
 {"ts":"2026-08-03T06:55:00Z","round":9,"evalId":"E10","run_id":"minted-per-plugin-origin-E10-r9","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
 {"ts":"2026-08-03T06:55:00Z","round":9,"evalId":"E11","run_id":"minted-per-plugin-origin-E11-r9","exit_code":0,"cmd":"pnpm lint:check"}
 {"ts":"2026-08-03T06:55:00Z","round":9,"evalId":"E12","run_id":"minted-per-plugin-origin-E12-r9","exit_code":0,"cmd":"pnpm verify:plugins"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E1","run_id":"minted-per-plugin-origin-E1-r10","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E2","run_id":"minted-per-plugin-origin-E2-r10","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E3","run_id":"minted-per-plugin-origin-E3-r10","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E4","run_id":"minted-per-plugin-origin-E4-r10","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E5","run_id":"minted-per-plugin-origin-E5-r10","exit_code":0,"cmd":"bash scripts/plugins/check-single-url-rule.sh"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E6","run_id":"minted-per-plugin-origin-E6-r10","exit_code":0,"cmd":"pnpm tsx scripts/plugins/check-installer-parity.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E7","run_id":"minted-per-plugin-origin-E7-r10","exit_code":0,"cmd":"bash scripts/plugins/check-manifest-unmoved.sh"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E8","run_id":"minted-per-plugin-origin-E8-r10","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E9","run_id":"minted-per-plugin-origin-E9-r10","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E10","run_id":"minted-per-plugin-origin-E10-r10","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E11","run_id":"minted-per-plugin-origin-E11-r10","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-03T16:10:00Z","round":10,"evalId":"E12","run_id":"minted-per-plugin-origin-E12-r10","exit_code":0,"cmd":"pnpm verify:plugins"}
