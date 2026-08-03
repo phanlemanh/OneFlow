@@ -363,3 +363,43 @@ describe("sameGitRemote — cosmetic differences are the same repository", () =>
         expect(sameGitRemote(undefined, undefined)).toBe(false);
     });
 });
+
+describe("browsable repo URL follows the entry's own origin (AC-2 consumer)", () => {
+    // The plugins dialog used to build `${org}/${id}`, which 404s for any entry
+    // carrying its own origin — the first such entry is compose-overlay.
+    it("resolves a forked entry to its origin, not the default org", () => {
+        const manifest = normalizeOfficialManifest({
+            org: DEFAULT_ORG,
+            plugins: [
+                "tongflow-api-gemini",
+                { id: "oneflow-api-openai", origin: FORK_ORIGIN },
+            ],
+        });
+        const browsable = (id: string) =>
+            officialGitUrl(findOfficialEntry(manifest, id)!).replace(
+                /\.git$/,
+                "",
+            );
+        expect(browsable("oneflow-api-openai")).toBe(
+            `${FORK_ORIGIN}/oneflow-api-openai`,
+        );
+        expect(browsable("tongflow-api-gemini")).toBe(
+            `${DEFAULT_ORG}/tongflow-api-gemini`,
+        );
+    });
+
+    it("the shipped manifest's origin entry does not resolve under the default org", () => {
+        const manifest = normalizeOfficialManifest(shipped());
+        const entry = findOfficialEntry(
+            manifest,
+            "oneflow-modal-compose-overlay",
+        );
+        expect(entry).toBeDefined();
+        if (!entry) return;
+        const browsable = officialGitUrl(entry).replace(/\.git$/, "");
+        expect(browsable.startsWith(DEFAULT_ORG)).toBe(false);
+        expect(browsable).toBe(
+            "https://github.com/phanlemanh/oneflow-modal-compose-overlay",
+        );
+    });
+});

@@ -36,6 +36,13 @@ export {
 export interface OfficialPluginInfo {
     id: string;
     installed: boolean;
+    /**
+     * Browsable repo URL for this entry, resolved through the manifest's
+     * per-entry `origin`. Consumers must use this instead of joining the
+     * default org with the id — a forked entry lives elsewhere and the joined
+     * form 404s.
+     */
+    repoUrl: string;
     /** Presentation metadata (from an installed plugin's manifest). */
     name?: string;
     description?: string;
@@ -86,13 +93,16 @@ export function listOfficialPlugins(): {
     const metaMap = loadPluginMetaMap();
     return {
         org: manifest.org,
-        plugins: manifest.entries.map(({ id }) => {
+        plugins: manifest.entries.map((entry) => {
+            const { id } = entry;
             const meta = metaMap[id];
             // Manifest icon wins; otherwise fall back to the public convention
             // so even not-yet-installed plugins can show an icon.
             const icon = meta?.icon ?? publicIconPath(id) ?? undefined;
             return {
                 id,
+                // Strip the `.git` suffix: this is the human-browsable URL.
+                repoUrl: officialGitUrl(entry).replace(/\.git$/, ""),
                 installed: isPluginInstalled(id),
                 name: meta?.name,
                 description: meta?.description,
