@@ -6,80 +6,58 @@ _Không có phát hiện nào ánh xạ được vào AC vòng này._
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **compose-overlay node placed in transfer/ (1→1) though it is an N→1 compose node — contradicts CLAUDE.md directory convention and the repo's own README**
-  Người dùng thấy gì: Vi tri luu node trong ma nguon khong khop quy uoc noi bo cua du an; nguoi dung cuoi khong bi anh huong truc tiep, nhung viec bao tri/tim kiem code ve sau co the kho hon.
-  file: `src/components/workspace/nodes/transfer/compose-overlay.tsx`
-  severity: high
+- **CI never runs the TypeScript test suite that this diff massively expands**
+  Người dùng thấy gì: Nhiều bài kiểm thử mới được thêm cho tính năng này không tự động chạy mỗi khi có thay đổi code, nên một lỗi có thể lọt qua mà không ai phát hiện trước khi phát hành.
+  file: `.github/workflows/ci.yml`
   Đề xuất: known-limits
 
-- **Fifth consumer of the widened-handle rule left unconverted: Director safe-slot filter still tests only the primary nodeType**
-  Người dùng thấy gì: Neu sau nay mot slot ghep noi dung khai bao uu tien nhan video truoc anh, tinh nang do co the bien mat hoan toan khoi goi y tu dong cua tro ly dung workflow ma khong co canh bao nao cho nguoi dung.
-  file: `src/lib/director/vocabulary.ts`
-  severity: medium
-  Đề xuất: known-limits
-
-- **CLAUDE.md §"Registering an official plugin" is now stale — it documents a guard shape that no longer exists**
-  Người dùng thấy gì: Tai lieu huong dan noi bo mo ta sai cach hoat dong hien tai cua mot co che kiem tra; khong anh huong truc tiep nguoi dung cuoi nhung co the khien nguoi them plugin moi sau nay lam theo huong dan da loi thoi.
+- **CLAUDE.md still documents the first-edition manifest guard the diff replaced**
+  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ về cách đăng ký plugin mới đang mô tả sai quy trình hiện tại, có thể khiến người làm theo sau bị nhầm bước.
   file: `CLAUDE.md`
-  severity: medium
   Đề xuất: known-limits
 
-- **SDK version hardcoded in run-overlay-plugin-tests.sh while the sibling guard derives it from pyproject.toml**
-  Người dùng thấy gì: Khi SDK duoc nang len phien ban moi, bo kiem thu plugin overlay co the van bao 'dat' du dang kiem tra bang phien ban SDK cu, khien nguoi doc bao cao lam tuong ban moi da duoc xac nhan hoat dong tot.
-  file: `scripts/plugins/run-overlay-plugin-tests.sh`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Vendor-specific preset name added to the cross-plugin ABI contract**
-  Người dùng thấy gì: Mot ten cau hinh dinh dang danh rieng cho mot nen tang ben thu ba duoc dua vao hop dong du lieu dung chung cho moi plugin tuong lai, co the gay kho khan neu sau nay co plugin khac can tuan thu cung hop dong ma khong dung dinh dang do.
-  file: `config/tongflow.abi.json`
-  severity: low
-  Đề xuất: known-limits
-
-- **Op-form uses a raw <select> with untranslated ABI enum labels, bypassing the shared UI Select component**
-  Người dùng thấy gì: Nguoi dung giao dien tieng Viet/Trung/Nhat/Han se thay mot so lua chon trong form dan chu/logo hien thi bang tieng Anh thay vi duoc dich, lam trai nghiem khong nhat quan.
+- **Raw <select> instead of the repo's shadcn Select, with untranslated enum labels**
+  Người dùng thấy gì: Người dùng ở các ngôn ngữ khác ngoài tiếng Anh sẽ thấy một số lựa chọn cấu hình (vị trí, kiểu canh) hiển thị bằng tiếng Anh chưa dịch, và ô chọn này trông khác biệt so với phần còn lại của giao diện.
   file: `src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx`
-  severity: low
   Đề xuất: known-limits
 
-- **Dead shell variables after the manifest-guard rewrite duplicate constants the inlined node script hardcodes**
-  Người dùng thấy gì: Khong anh huong nguoi dung cuoi; day la mot chi tiet thua trong script noi bo co the gay nham lan cho nguoi bao tri sau nay.
-  file: `scripts/plugins/check-manifest-unmoved.sh`
-  severity: low
+- **ui-capture.mjs shipped with its upstream template header intact**
+  Người dùng thấy gì: Một tệp kịch bản dùng nội bộ vẫn còn ghi hướng dẫn cài đặt cũ và sai (nhắc tới công cụ quản lý gói khác với công cụ dự án đang dùng), có thể khiến người bảo trì sau này làm theo chỉ dẫn lỗi thời — không ảnh hưởng người dùng cuối.
+  file: `scripts/ui-capture.mjs`
   Đề xuất: known-limits
 
-- **Director compiles every compose-overlay step to an imageNode output, even when the media is a video**
-  Người dùng thấy gì: Khi tro ly tu dong ghep chu/logo len mot video, ket qua co the bi gan nham la anh tinh, khien du lieu video dau ra bi bo trong va cac buoc xu ly video tiep theo co the bi tu choi ket noi mot cach kho hieu.
-  file: `src/lib/director/compile.ts`
-  severity: high
+- **Merged ops schema gives the plugin no static discrimination per op kind**
+  Người dùng thấy gì: Giao diện có thể cho phép nhập một trường thông tin không phù hợp với loại hiệu ứng đang chọn (ví dụ nhập màu nền cho logo) mà không cảnh báo trước khi chạy.
+  file: `config/tongflow.abi.json`
   Đề xuất: known-limits
 
-- **vocabulary.hasUnsatisfiableRequiredInput is the one consumer of the widened-handle rule the refactor missed**
-  Người dùng thấy gì: Neu sau nay mot slot ghep noi dung khai bao uu tien nhan video truoc anh, tinh nang do co the bien mat khoi goi y tu dong cua tro ly dung workflow ma khong co canh bao nao cho nguoi dung.
-  file: `src/lib/director/vocabulary.ts`
-  severity: medium
+- **canSwapOntoHandle re-derives the handle-id → field mapping instead of using the shared parser**
+  Người dùng thấy gì: Không ảnh hưởng trực tiếp đến người dùng ngay bây giờ; đây là rủi ro bảo trì nội bộ — nếu sau này chỉ sửa một trong hai chỗ tính toán tương tự, hai nơi có thể lệch nhau.
+  file: `src/lib/abi/edge-target-options.ts`
   Đề xuất: known-limits
 
-- **Director always emits a compose-overlay node with no `ops`, and nothing reports it**
-  Người dùng thấy gì: Khi tro ly tu dong tao san mot node dan chu/logo/khung gia, node do co the xuat hien tren canvas o trang thai khong the chay duoc va khong he giai thich ly do, khien nguoi dung phai tu mo de sua.
-  file: `src/lib/director/compile.ts`
-  severity: medium
+- **Refused edge swap is a completely silent no-op in the inline edge select**
+  Người dùng thấy gì: Khi người dùng thử đổi một kết nối dây nối và thao tác đó bị từ chối ngầm, lựa chọn tự động quay lại trạng thái cũ mà không có thông báo giải thích lý do, khiến người dùng bối rối không biết vì sao thao tác không có tác dụng.
+  file: `src/components/workspace/edges/custom-edge.tsx`
+  Đề xuất: known-limits
+
+- **price_tag ops ship a literal `{text}` default with no guard when `in:text` is unconnected**
+  Người dùng thấy gì: Nếu người dùng thêm một khung giá lên ảnh/video nhưng quên nối nguồn chữ giá, hệ thống vẫn báo chạy thành công trong khi kết quả xuất ra lại in chữ giữ chỗ vô nghĩa thay vì con số giá thật.
+  file: `src/components/workspace/nodes/transfer/compose-overlay.tsx`
+  Đề xuất: known-limits
+
+- **gen-abi CI guard uses `git diff` without HEAD, so staged regeneration drift reads as clean**
+  Người dùng thấy gì: Trên máy cá nhân của người phát triển (không phải trên hệ thống kiểm tra tự động chính thức), việc rà soát 'các tệp sinh tự động đã khớp với cấu hình' có thể báo sạch dù thực ra chưa khớp, khiến sai lệch lọt qua trước khi đưa lên hệ thống chung.
+  file: `scripts/abi/check-python-gen-clean.sh`
+  Đề xuất: known-limits
+
+- **spawnSync failure cause is dropped from the gen-abi error message**
+  Người dùng thấy gì: Khi công cụ sinh mã nội bộ gặp sự cố hệ thống (ví dụ thiếu một công cụ định dạng code), thông báo lỗi hiển thị ra trống rỗng, khiến người gặp lỗi khó biết nguyên nhân thật để tự khắc phục.
+  file: `scripts/gen-abi-types.ts`
+  Đề xuất: known-limits
+
+- **Unclassifiable media upstream silently reports as `image`, hiding all per-op time controls**
+  Người dùng thấy gì: Nếu hệ thống không nhận diện được loại tệp đầu vào (ảnh hay video), giao diện âm thầm coi đó là ảnh và ẩn các ô điều khiển theo thời gian (mốc bắt đầu/kết thúc hiệu ứng), dù dữ liệu thời gian người dùng đã nhập trước đó vẫn được gửi đi ẩn phía sau — có thể gây kết quả không như mong đợi.
+  file: `src/components/workspace/nodes/transfer/compose-overlay.tsx`
   Đề xuất: new-contract
 
-- **Inline edge-handle swap aborts silently with no user feedback**
-  Người dùng thấy gì: Khi nguoi dung co doi mot ket noi anh/video sang mot diem nhan khong tuong thich, thao tac chi lang le khong co gi xay ra ma khong co bat ky thong bao giai thich nao, khien nguoi dung tuong ung dung bi treo hoac thao tac bi loi.
-  file: `src/components/workspace/edges/custom-edge.tsx`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Conformance data-URL materialization keys off the resolved path, not the ABI $ref, so it can diverge from the Python side it mirrors**
-  Người dùng thấy gì: Khong anh huong nguoi dung cuoi; day la rui ro trong bo kiem thu noi bo dung de doi chieu hai he thong, co the khien ket qua kiem thu tu dong bao sai (dat gia hoac truot gia) ma khong tac dong toi san pham thuc te.
-  file: `src/lib/abi/conformance.ts`
-  severity: low
-  Đề xuất: known-limits
-
-## Chưa adversarial-verify (refuter chết)
-
-_Không có._
-
-⚠ Cụm ngoài vùng phủ: 4/12 lỗi rơi vào file không bộ đo nào phủ (CLAUDE.md, scripts/plugins/run-overlay-plugin-tests.sh, src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx, src/lib/abi/conformance.ts) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

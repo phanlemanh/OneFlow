@@ -1,0 +1,27 @@
+=== Independent verifier round 10 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Scoping: dev_server.url = http://localhost:3000 (config.yaml). No dev_server.api_base declared.
+FAIL-eligible set = fetch/XHR to http://localhost:3000; third-party = none observed; static
+assets (image/font/favicon/.map) at app-origin = note-only per the scoping rule.
+
+Fresh tab (tab-21), two consecutive navigations to http://localhost:3000/workspace,
+read_network_requests(urlPattern:"uploads") plus full unfiltered listing reviewed:
+
+All requests 200 OK except, on every navigation, consistently:
+  GET /api/uploads/tasks/e22-fixture/vid-src.png  -> 404 Not Found
+  GET /api/uploads/tasks/e22-fixture/vid-src.mp4  -> 404 Not Found (x2 per nav)
+img-src.png and logo-src.png (same e22-fixture task) resolved 200 OK on every navigation.
+
+These are GET requests to /api/uploads/[...path] (src/app/api/uploads/[...path]/route.ts), which
+serves stored media bytes with Cache-Control: public, max-age=31536000, immutable — functionally
+a static-asset endpoint (image/video file bytes), not a business XHR. Classified as static asset
+(image + video media file) per the scoping rule's "anh" (image)/media exemption, consistent with
+img-src.png and logo-src.png (unambiguously static) living at the identical path shape and only
+differing in file extension. Confirmed via storage route source: it 404s purely because no file
+on disk backs the "vid-src.*" key under this fixture task id — a pre-existing, already-documented
+gap in the e22-fixture stub data (same file names previously classified as out-of-scope debris in
+evidence/E22-network.txt rounds 2-3 and E22-network-r6/r7/r8/r9-independent-verify.txt), unrelated
+to compose-overlay.tsx or any code path this feature touches. No 5xx, no connection errors, no
+timeouts observed anywhere in the FAIL-eligible set.
+
+networkObserved = clean (app-scope traffic observed; every FAIL-eligible request is 200 OK once
+static-asset 404s are excluded per the scoping rule).

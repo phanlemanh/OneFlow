@@ -1,0 +1,19 @@
+=== Independent verifier round 12 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Repo: /Users/manh-macmini/dev/oneflow, branch main, HEAD 16cff3a.
+
+Console check methodology: brand-new browser tab (tab-23, created fresh this round), navigated to
+http://localhost:3000/workspace, then navigated to the same URL a second time (two independent
+loads). read_console_messages(onlyErrors:true) on both loads: "No console logs." — zero errors/
+warnings on either load of this fresh tab. read_console_messages(onlyErrors:false) shows only
+expected info-level app logs (Task Store handler registration for nodes co-1-empty, co-2-image,
+co-3-video, co-4-form, co-5-error; WorkflowRecovery "No pending workflow task found"; Fast Refresh
+rebuild notices from the dev server) — no warnings, no hydration mismatches, no thrown errors.
+
+The live workspace page renders the persisted e22-fixture workflow: multiple compose-overlay
+("Overlay Text/Logo") node instances visible on canvas (screenshot taken), including one
+error-state instance with a pink/red-highlighted op row and error banner — matching the fixture
+used to produce the 6 state captures under evidence/design/captures/.
+
+Verdict: console clean on fresh navigation (basic a11y / P0 console-cleanliness criterion of E22
+holds). No hydration warnings, no runtime errors observed on this fresh tab across two consecutive
+loads.

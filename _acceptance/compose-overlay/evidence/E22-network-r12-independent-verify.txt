@@ -1,0 +1,35 @@
+=== Independent verifier round 12 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Repo: /Users/manh-macmini/dev/oneflow, branch main, HEAD 16cff3a (no code changes to
+compose-overlay.tsx / compose-overlay-ops-editor.tsx / compose-overlay-op-form.tsx since the
+4447f41 media-kind-resolver fix that round 10 already verified; the only commit landed after the
+round-11 evidence, 16cff3a "fix(director): a widened output is not evidence that its modality is
+producible", touches only src/lib/director/vocabulary.ts(.test.ts) — outside E22's declared paths).
+
+Scoping: dev_server.url = http://localhost:3000 (config.yaml). No dev_server.api_base declared.
+FAIL-eligible set = fetch/XHR to http://localhost:3000; no third-party requests observed; static
+assets (image/video/font/.map/favicon) at app-origin = note-only per the scoping rule.
+
+Self-started dev server: `pnpm dev` (background nohup on port 3000; predev hook ran `pnpm gen:abi`
+first), polled http://localhost:3000 with curl until non-000 status — ready after 1 poll (~1s, log
+shows "Ready in 1394ms").
+
+Fresh tab (tab-23, created new this round), two consecutive navigations to
+http://localhost:3000/workspace. Full request listing reviewed both times via
+read_network_requests:
+
+All requests 200 OK except, on every navigation:
+  GET /api/uploads/tasks/e22-fixture/vid-src.png -> 404 Not Found
+  GET /api/uploads/tasks/e22-fixture/vid-src.mp4 -> 404 Not Found (x2 per nav)
+img-src.png and logo-src.png (same e22-fixture task) resolve 200 OK on every navigation.
+
+These are GET requests to /api/uploads/[...path] (src/app/api/uploads/[...path]/route.ts), a
+static-asset-serving endpoint (raw stored media bytes, long-lived Cache-Control), not a business
+XHR — same path shape as img-src.png/logo-src.png which resolve fine. Classified as static asset
+per the scoping rule's media exemption. This is the same pre-existing e22-fixture stub-data gap
+documented in every prior round's network evidence (rounds 2-3 through r6..r11-independent-verify)
+— unrelated to compose-overlay.tsx or any code path this feature touches.
+
+No 5xx, no connection errors, no timeouts observed anywhere in the FAIL-eligible set.
+
+networkObserved = clean (app-scope traffic observed; every FAIL-eligible request is 200 OK once
+static-asset 404s are excluded per the scoping rule).

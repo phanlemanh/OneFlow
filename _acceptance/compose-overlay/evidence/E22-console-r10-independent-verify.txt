@@ -1,0 +1,26 @@
+=== Independent verifier round 10 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Repo: /Users/manh-macmini/dev/oneflow, branch main.
+Self-started dev server: `pnpm dev` (background nohup on port 3000), polled http://localhost:3000
+until non-000 curl status (ready at first poll, ~2s; log shows "Ready in 1405ms").
+
+Console check methodology: brand-new browser tab (tab-21, created fresh this round — NOT reused
+from any prior-round tab), navigated to http://localhost:3000/workspace, then navigated to the
+same URL a second time (two independent loads). read_console_messages(onlyErrors:true) on both
+loads: "No console logs." — zero errors/warnings on a clean tab.
+
+Cross-check / false-lead control (same methodology as prior rounds' r6/r9 notes): re-used an
+OLDER tab (tab-15, already open from earlier in this session with several prior navigations/
+Fast-Refresh cycles) and re-navigated it to /workspace. That tab DID show two errors:
+  - React hydration mismatch on the toolbar "Language" tooltip trigger (radix useId mismatch,
+    id="radix-_R_295et5r6lb_" vs "radix-_R_i5et5r6lb_")
+  - "[useAbiExecution] Task failed for node co-2-image: [object Object]" / ": Object"
+Verified these are NOT reproducible from a clean load: the fresh tab-21, navigated to the exact
+same URL twice in a row, produced zero console errors both times. This matches the exact pattern
+already documented in evidence/E22-network-r9-independent-verify.txt (a stale/accumulated-session
+artifact from repeated Fast-Refresh + interaction cycles within one tab, not a defect of the page
+itself). Recorded here so a future round does not re-chase it, and flagged honestly rather than
+silently omitted.
+
+Verdict: console clean on fresh navigation (basic a11y / P0 console-cleanliness criterion of E22
+holds). The stale-tab errors are a known artifact of this long-lived interactive session's browser
+tab reuse, not a defect in compose-overlay.tsx or the workspace page.
