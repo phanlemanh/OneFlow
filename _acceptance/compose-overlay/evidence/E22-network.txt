@@ -70,3 +70,73 @@ No other console errors observed across states 1-5 (0 new errors per state on im
 networkObserved = clean (app-scope traffic seen; every FAIL-eligible request is 200 OK; the
 only non-2xx are static-image 404s from the harness's own throwaway fixture nodes, which the
 scoping rule exempts as static-asset/note-only).
+
+=== ROUND 3 (independent verifier, fresh-context, dedupe cmd) ===
+Scope: http://localhost:3000 (dev_server.url). Driver: mcp__Claude_Browser (read_network_requests
++ read_console_messages, tab-15) plus a scratchpad puppeteer script for the batch capture.
+Verified commit: 36929d4 ("fix(verify): round-2 in-contract rejects — video sources on in:media,
+discriminating guards, AC-1 wording"), one commit ahead of round 2's verified_commit f8ba042.
+Dev server started fresh by this verifier (pnpm dev, not reused), stopped at the end.
+
+Methodology note (full disclosure, independent of round-2's own harness): this round did NOT
+reuse round 2's saved evidence files — states 1/2/3/5 were re-extracted live via
+document.querySelector(...).outerHTML on the SAME persisted "New Idea" localStorage fixture
+(nodes/edges keys), state 4 was produced by clicking the real op-edit button on co-3-video
+(media: video, so the expanded form legitimately includes the time field — round 2's state-4
+capture also used media: video for the same reason). State 6 required a plugin to be resolvable
+client-side (resolveActivePluginId only returns non-empty when the id is in the scanned
+nodePluginMap), so this round independently recreated the same throwaway
+plugins/oneflow-api-e22stub/entry.py (sleep-then-fail stub) + the 2 fixture PNGs under
+data/uploads/tasks/e22-fixture/ that round 2 used, clicked Apply Overlay on co-2-image for real,
+captured the live NodeLoadingOverlay mid-run, then deleted the plugin dir + fixture bytes and
+reloaded before re-capturing states 1/2/3/5 so those five reflect the actual default shipped
+state (no plugins scanned) rather than the transient stub-plugin-present state.
+
+=== FAIL-eligible request classes seen (fetch/XHR to app origin) ===
+GET  /api/plugins/registry                -> 200 OK (multiple; empty registry before/after,
+                                              1 entry {"compose-overlay":["oneflow-api-e22stub"]}
+                                              only during the state-6 capture window)
+GET  /api/feature/list                    -> 200 OK
+GET  /api/task/pending                    -> 200 OK (multiple)
+POST /api/task/create                     -> 200 OK x1 (the one real Apply-Overlay click on
+                                              co-2-image; reached the stub plugin, which slept
+                                              ~11s+ under observation then returned success=false
+                                              by design)
+GET  /api/task/wait?taskId=...            -> 200 OK x1
+POST /api/task/update-status              -> 200 OK x1
+GET  /workspace?_rsc=...                  -> 200 OK, several show [FAILED: net::ERR_ABORTED]
+                                              (RSC prefetch cancelled by newer navigation/HMR —
+                                              same non-failing pattern rounds 1-2 already flagged)
+
+=== Static-asset requests (note-only, never FAIL-eligible per scoping rules) ===
+GET /api/uploads/tasks/e22-fixture/img-src.png   -> 200 OK (this round's own fixture bytes)
+GET /api/uploads/tasks/e22-fixture/logo-src.png  -> 200 OK
+GET /api/uploads/tasks/e22-fixture/vid-src.png   -> 404 Not Found (never created this round —
+GET /api/uploads/tasks/e22-fixture/vid-src.mp4   -> 404 Not Found  vid-src/vid-src-2 thumbnails
+                                                                    are decorative source nodes
+                                                                    on the canvas, not touched by
+                                                                    the co-2-image run; same
+                                                                    static-asset class as round 2)
+GET /_next/static/... (js/css/webpack hot-update)  -> 200 OK, static
+
+=== Console (read_console_messages, onlyErrors) ===
+1. Hydration-id mismatch on the top toolbar's "Language" tooltip trigger
+   (radix-_R_i5et5r6lb_ vs radix-_R_295et5r6lb_) — reproduced ONCE during the active capture
+   session (which had heavy Fast-Refresh/HMR churn from this verifier's own file edits under
+   plugins/). Isolated with a control check: a brand-new tab, fresh /workspace load, idle
+   dev server (no concurrent file edits) -> 0 console errors. Same conclusion as round 2's
+   own network doc: pre-existing Radix useId SSR/client nondeterminism, unrelated to
+   compose-overlay, not reproducible outside HMR churn.
+2. "[useAbiExecution] Task failed for node co-2-image: [object Object]" / "...: Object" x1 pair
+   — the E22-stub plugin's designed failure (same harness-only pattern as round 2), from the one
+   real Apply-Overlay click used to capture state-6-running. Not a compose-overlay defect.
+
+No other console errors observed. design-gate.mjs run against all 6 freshly captured HTML files
+(--mode dom --jsdom ., --fail-on P0): PASS / exit_code 0 / p0_count 0 for all six
+(state-1-empty, state-2-ops-image, state-3-ops-video, state-4-op-form, state-5-error,
+state-6-running). Only P1/P2 warnings (cramped-padding, nested-cards, single-font,
+ai-color-palette-on-the-spinner-border) — none of them P0.
+
+networkObserved = clean (app-scope traffic seen; every FAIL-eligible request is 200 OK; the only
+non-2xx are the two static-image 404s for fixture nodes this round never wrote — note-only per
+scoping rules, same as round 2).
