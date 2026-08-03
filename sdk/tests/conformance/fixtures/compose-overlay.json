@@ -33,9 +33,7 @@
                 "dataType": "text",
                 "isInput": false,
                 "staticData": {
-                    "texts": [
-                        "50%"
-                    ]
+                    "texts": ["50%"]
                 },
                 "level": 0
             },
@@ -124,23 +122,13 @@
                         "expandEach": false
                     }
                 ],
-                "dependencies": [
-                    "dn-media",
-                    "dn-text",
-                    "dn-logo"
-                ],
+                "dependencies": ["dn-media", "dn-text", "dn-logo"],
                 "level": 1
             }
         ],
         "executionLevels": [
-            [
-                "dn-media",
-                "dn-text",
-                "dn-logo"
-            ],
-            [
-                "exec-overlay"
-            ]
+            ["dn-media", "dn-text", "dn-logo"],
+            ["exec-overlay"]
         ],
         "dataNodeEdges": []
     },
