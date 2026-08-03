@@ -1,13 +1,13 @@
 ---
 schema_version: 2
 feature_slug: compose-overlay
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: af66de5993b9225ce8b26472b2660d3d8a16d827
-human_signoff:
+human_signoff: Manh 2026-08-03
 ---
 
 # Evidence Report: compose-overlay
@@ -350,7 +350,7 @@ human_signoff:
     - domain-correctness: PASS — Doi chieu ca 6 state PNG (kem HTML cung ten) voi design-of-record: header/icon/menu, khung "Implementation", nhan ops-label, thu tu badge TEXT/PRICE/LOGO/SAFE, cap truong toa do/mau/canh, banner loi va treatment loading (vien gradient xoay + spinner + dong ho + nut Cancel, xac nhan qua grep "Cancel execution" trong state-6-running.html) deu khop cau truc reference va token trong styles.css (BaseNodeShell chrome). Ba diem manifest canh bao truoc (khoi "No plugin implementations" la artefact moi truong, op-form state-4 co du op-start/op-end, state-6 dung dung treatment shell) deu kiem chung dung nhu ghi chu, khong phai sai lech thiet ke. Khac biet con lai (ngon ngu Anh/Viet, state-5 capture chi minh hoa 1 op loi thay vi 2 op nhu reference) la du lieu demo, khong pha ngon ngu thiet ke he thong.
     - operational-feasibility: PASS — Ca 6 capture the hien du 6 state cua ma tran (empty/disabled CTA, ops-image khong co time field, ops-video co time field, op-form mo rong, error banner+inline, running-overlay) va doi chieu file .html cung ten xac nhan 2 diem manifest luu y la dung: state-4 co du op-start/op-end (0 va 3.5), state-6 co nut "Cancel execution" (chi bi PNG cat, khong thieu trong DOM); khoi "No plugin implementations..." la artefact moi truong nhu manifest giai thich. Shell dung chung BaseNodeShell (header icon+title+menu, the placeholder net dut, ops-row bo-tron/border/bg-muted dong nhat, CTA full-width) va state-6 dung dung treatment loading (vien gradient xoay + spinner + nhan + dong ho + nut huy) khop voi reference da cap nhat 03/08 — nhin nhu nguoi nha cua cac node transfer khac, khong pha ngon ngu thiet ke workspace. Chenh lech duy nhat quan sat duoc la copy tieng Viet o reference (vd "Dan len media", "Op logo can anh...") so voi tieng Anh o capture ("Apply Overlay", "A logo op needs...") — day la khac biet ngon ngu/copy, khong phai sai lech cau truc/khop-ma-tran nen khong anh huong lens operational-feasibility.
     - spec-alignment: PASS — Ca 6 anh capture khop dung 6 state cua ma tran (empty/no-ops → ops-image khong time field → ops-video co time field ("0–3.5s","3.5–7s","entire video") → op-form mo rong voi day du field theo doi chieu HTML (op-start/op-end co that) → error co ca banner do va inline tren dong LOGO → running dung dung overlay loading chung cua BaseNodeShell (vien gradient xoay, spinner, nhan tien trinh, dong ho "11s", nut Cancel — xac nhan qua HTML dan .lucide-loader-circle + title="Cancel execution"). Shell (card bo tron, header icon+title+menu, badge pill cho tung loai op, CTA den "Apply Overlay") nhat quan xuyen suot 6 state, dung ngon ngu component chung (data-slot=card, badge bg-primary/10) nen "nhin nhu nguoi nha" cua cac node transfer khac; khoi "Implementation: No plugin..." theo reading_notes la artefact moi truong khong plugin, khong tinh la loi thiet ke.
-  human_override:
+  human_override: Manh 2026-08-03 — Đạt: node ra dáng người nhà của các node transfer sẵn có; đồng ý với panel.
 
 ## Analyst
 

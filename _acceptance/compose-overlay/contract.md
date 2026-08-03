@@ -5,10 +5,10 @@ slug: compose-overlay
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-02
-time_human_minutes: {gate1: 10}
+time_human_minutes: {gate1: 10, gate2: 10}
 ---
 
 # Acceptance Contract: compose-overlay
@@ -179,3 +179,30 @@ safe-zone ⏱ verify-current lúc implement):
 - UI preview WYSIWYG kéo-thả vị trí op trên canvas (v1 nhập số + preview tĩnh sau chạy;
   kéo-thả là contract riêng nếu dogfood đòi).
 - Đưa compose-overlay vào template/skill (skill system v1 là hạng mục roadmap #5).
+
+## Notes — Known limits chốt tại Cổng 2 (03/08, Manh)
+
+Ship bản này với các hạn chế đã biết dưới đây. **Ba mục nặng nhất tách thành hợp đồng
+riêng** (quyết định Cổng 2: "mở hợp đồng mới cho cả ba"), phần còn lại ghi nhận và để đó.
+
+**Tách sang hợp đồng mới (`overlay-canvas-reach`, chưa mở):**
+- Không có nút/menu nào thêm node overlay từ một ảnh/video đang có trên canvas — node chỉ
+  xuất hiện khi Director tự sinh, nên gần như vô hình với người thao tác tay.
+- Node do Director sinh ra hạ cánh ở trạng thái không chạy được, không báo lý do.
+- Ô nhập số nhận giá trị ngoài khoảng ABI (`độ mờ = 100`, `x = 5`) và chạy luôn — loại ràng
+  buộc mà cơ chế kiểm-lúc-biên-dịch của repo không phủ được, nên giao diện là biên duy nhất.
+
+**Known limits (không mở việc):**
+- `ops[]` là một schema gộp: không chặn được trường thừa đặt nhầm loại op (hệ quả của quyết
+  định type-enum đã duyệt ở Gate 1.5; revisit khi generator hỗ trợ `oneOf`).
+- Node nằm ở `transfer/` dù có 3 đầu vào (đúng quy ước phải là `compose/`).
+- `CLAUDE.md` §"Registering an official plugin" còn mô tả `check-manifest-unmoved.sh` bản cũ
+  (`expected_count`) — guard đã viết lại thế hệ 2.
+- `getEdgeTargetOptions` chưa biết `alsoAccepts` (vô hại hôm nay: compose-overlay chỉ có một
+  handle nhận video, nên không có tình huống phải chọn giữa hai đích).
+- `NEW_OP[kind]` đẩy object mẫu dùng chung vào state (an toàn nhờ patch bằng spread).
+- Hai lỗ hổng per-plugin-origin thành live với plugin này (nút "mở kho" + engine chạy độc lập
+  trỏ org mặc định) — hệ quả đã báo giá khi đổi origin sang phanlemanh.
+- Nhãn "đang chạy" của MỌI node đổi hình thức (bỏ shimmer chữ trong suốt, sang chữ đậm +
+  nhấp nháy) để đạt sàn tương phản; chỗ tương tự ở `execution-status-line.tsx` cố ý giữ
+  nguyên — cần thống nhất sau nếu thấy chướng.

@@ -1,30 +1,24 @@
 {
   "feature_plain": "Node 'dán chữ' cho canvas: đóng chữ, khung giá, logo lên ảnh hoặc video — đúng dấu tiếng Việt, né vùng bị TikTok che — và là node rẻ duy nhất phải chạy lại khi đổi giá hàng loạt (video AI đắt tiền giữ nguyên từ cache).",
-  "will_do": [
-    {"id": "AC-1", "p": "Sẽ nối slot mới vào đủ 4 tầng sinh mã (TS, Python, bản SDK đóng gói) — không tầng nào lệch nhau."},
-    {"id": "AC-2", "p": "Sẽ in chữ tiếng Việt đủ dấu, đúng từng pixel so với ảnh chuẩn — chữ trên ảnh và trên video là MỘT bản in (so ở tầng canvas, video kiểm qua đường lossless để codec nén không làm sai phép đo)."},
-    {"id": "AC-3", "p": "Sẽ xuống dòng và tự ngắt dòng trong khung — đủ cho disclaimer tài chính, địa chỉ dự án BĐS."},
-    {"id": "AC-4", "p": "Sẽ in khung giá đúng từng ký tự cái được đưa vào (1.999.000₫ ra đúng 1.999.000₫) — node không bao giờ tự format lại số."},
-    {"id": "AC-5", "p": "Sẽ dán logo đúng chỗ, đúng cỡ, giữ trong suốt; thiếu ảnh logo thì báo lỗi rõ thay vì lặng lẽ bỏ qua."},
-    {"id": "AC-6", "p": "Sẽ tự đẩy chữ/giá lấn vùng bị nút TikTok che vào trong — op không lấn thì tuyệt đối không bị xê dịch."},
-    {"id": "AC-7", "p": "Sẽ thay chỗ trống {text} bằng đúng chuỗi từ node thượng nguồn — đây chính là sợi dây 'đổi giá 200 video'; nguồn chưa nối mà op cần thì báo lỗi rõ, không in chữ {text} lên video khách."},
-    {"id": "AC-8", "p": "Sẽ cho từng op có giờ xuất hiện/biến mất trên video (nhãn theo cảnh, lót đường phụ đề); với ảnh thì giờ được bỏ qua êm."},
-    {"id": "AC-10", "p": "Sẽ cho kết quả giống hệt từng byte khi chạy lại cùng input — điều kiện để cache dám tin node này."},
-    {"id": "AC-11", "p": "Sẽ đấu vào hệ cache đúng kịch bản chủ lực: chạy lại không đổi gì = 0 lần gọi plugin; chỉ đổi giá = video AI không sinh lại, chỉ node dán chữ chạy."},
-    {"id": "AC-12", "p": "Sẽ có node thật trên canvas: đủ cổng nối, bảng ops thêm/xoá/sửa 4 loại, ô giờ chỉ hiện khi media là video, trạng thái lỗi thiếu-logo hiển thị đúng mockup đã duyệt."},
-    {"id": "AC-13", "p": "Sẽ được kiểm 'hai máy chạy giống nhau' (canvas TS vs engine Python) ngay từ ngày đầu — không nợ như vụ batchField cũ."},
-    {"id": "AC-14", "p": "Sẽ đăng ký plugin chính thức thứ 39 trọn bộ giấy tờ: manifest, guard đếm 38→39, cả 3 README + bảng năng lực, chuỗi dịch 4 ngôn ngữ."},
-    {"id": "AC-15", "p": "Sẽ phát hành SDK 0.2.18 đúng trình tự: hai file version khớp nhau, lên PyPI trước, plugin pin đúng bản đó."}
+  "decisions": [
+    {
+      "id": "E23",
+      "q": "Node dán chữ trông đã 'ra dáng người nhà' của các node sẵn có chưa?",
+      "why": "Ba người soi độc lập (không thấy code, chỉ xem 6 ảnh chụp thật đối chiếu bản thiết kế chuẩn) đều nói ĐẠT. Bạn xem ảnh rồi gật hoặc nêu chỗ chướng mắt; đổi giao diện sau này rẻ, không đụng dữ liệu."
+    }
   ],
-  "wont_do": [
-    {"id": "AC-9", "p": "Chặn trả nhầm loại: ảnh vào chỉ ra ảnh, video vào chỉ ra video — và video ra giữ nguyên âm thanh + thời lượng gốc."}
-  ],
-  "scope_plain": "Để sau/không làm: sinh phụ đề tự động (node khác đổ vào), kéo-thả vị trí bằng chuột (v1 nhập số), font tuỳ chọn, nhiều logo, chỉnh codec/fps, và hai lỗ hổng UI cũ của per-plugin-origin.",
+  "scope_plain": "Đã chốt để sau: sinh phụ đề tự động, kéo-thả vị trí bằng chuột, font tuỳ chọn, nhiều logo, chỉnh codec — cùng hai lỗ hổng UI cũ của per-plugin-origin.",
+  "analyst_plain": "Bốn phép đo (mã sinh sạch, hai guard cache, conformance TS) vốn đã xanh trước khi có tính năng này — chúng là lưới an toàn chống hồi quy, không phải bằng chứng riêng cho compose-overlay. Các phép đo còn lại đều đo đúng phần mới.",
   "decisions_plain": [
-    {"id": "d-20260802T053436Z-17932", "p": "Chọn một 'máy in chữ' duy nhất cho cả ảnh lẫn video — đổi lại thêm một bước ghép trung gian, nhưng dấu tiếng Việt chỉ phải kiểm một lần và sau này đổi cách vẽ không ảnh hưởng ai."},
-    {"id": "d-20260802T053436Z-23202", "p": "Chọn nâng v1 lên nhiều-dòng + giờ-xuất-hiện — mở được BĐS/tài chính và phụ đề, đổi lại hợp đồng dày hơn 4 phép đo."},
-    {"id": "d-20260802T053436Z-20715", "p": "Chọn ship plugin chính thức ngay trong vòng này — trọn gói Phase 1.2, đổi lại phải ký lại per-plugin-origin và evals có khâu mạng (PyPI, clone)."},
-    {"id": "d-20260802T053436Z-31630", "p": "KHÔNG làm kéo-thả vị trí bằng chuột ở v1 — tiết kiệm cả một tầng UI phức tạp, đổi lại đặt vị trí kém trực quan; dogfood kêu thì mở hợp đồng riêng."},
-    {"id": "d-20260802T061627Z-18439", "p": "Chọn vẽ mockup chuẩn đầy đủ cho node + bảng ops (bạn đã chọn ceremony) — có chuẩn thị giác để máy so ở khâu verify, đổi lại tốn công vẽ + duyệt trước cổng này."}
+    {"id": "d-20260802T053436Z-17932", "p": "Chọn một 'máy in chữ' duy nhất cho cả ảnh lẫn video — dấu tiếng Việt chỉ phải kiểm một lần; đổi lại thêm một bước ghép trung gian, và đổi cách vẽ sau này không ảnh hưởng ai."},
+    {"id": "d-20260802T053436Z-23202", "p": "Chọn nâng v1 lên nhiều dòng + giờ xuất hiện — mở được bất động sản/tài chính và lót đường phụ đề; đổi lại hợp đồng dày thêm 4 phép đo."},
+    {"id": "d-20260802T053436Z-20715", "p": "Chọn phát hành plugin chính thức ngay trong vòng này — trọn gói Phase 1.2; đổi lại phải ký lại per-plugin-origin và evals có khâu phụ thuộc mạng."},
+    {"id": "d-20260802T053436Z-31630", "p": "KHÔNG làm kéo-thả vị trí bằng chuột ở v1 — tiết kiệm cả một tầng giao diện phức tạp; đổi lại đặt vị trí kém trực quan, mở hợp đồng riêng nếu dùng thật thấy vướng."},
+    {"id": "d-20260802T061627Z-18439", "p": "Chọn vẽ bản thiết kế chuẩn đầy đủ cho node (bạn chọn ở Cổng 1) — có chuẩn để máy so; đổi lại tốn công vẽ và duyệt trước."},
+    {"id": "d-20260802T110045Z-23040", "p": "Chọn mô tả 4 loại overlay bằng một trường 'loại' thay vì bốn khuôn riêng — vì bộ sinh mã hiện chưa làm được khuôn riêng; đổi lại hệ thống không tự chặn được trường thừa đặt nhầm loại (bạn đã duyệt ở Cổng 1.5)."},
+    {"id": "d-20260803T010940Z-679", "p": "Chọn đặt kho plugin dưới tài khoản phanlemanh, dùng cơ chế 'nguồn riêng' lần đầu tiên — khỏi phụ thuộc tài khoản thứ hai; đổi lại nút 'mở kho' và bộ máy chạy độc lập vẫn trỏ về tổ chức mặc định (bạn đã duyệt giữa chừng)."},
+    {"id": "d-20260803T030032Z-28883", "p": "Vòng kiểm 1: nới bộ kiểm cũ cho hợp cơ chế nguồn riêng, đổi nhãn 'đang chạy' sang chữ đậm + nhấp nháy cho đọc được, và nhận công cụ chụp màn hình từ bộ kit — đổi lại nhãn 'đang chạy' của MỌI node đổi hình thức (chỗ tương tự ở thanh trạng thái cố ý giữ nguyên)."},
+    {"id": "d-20260803T035106Z-25000", "p": "Vòng kiểm 2: mở cho nguồn video nối được vào node, và vá hai bộ kiểm vốn không bao giờ báo đỏ được — đổi lại thêm một khái niệm 'nhận thêm loại' vào tầng dùng chung, chỉ node này khai nên không ảnh hưởng node khác."},
+    {"id": "d-20260803T050402Z-12023", "p": "Vòng kiểm 4 (bạn cho phép vượt trần 3 vòng): đấu nốt 'nhận thêm loại' vào chỗ tạo dây và nhánh dự phòng, sửa 1 lỗi lint, và sửa bản thiết kế chuẩn cho đúng hiệu ứng 'đang chạy' có sẵn — đổi lại bản chuẩn bị sửa sau khi code (ghi rõ ở đây để bạn thấy)."}
   ]
 }
