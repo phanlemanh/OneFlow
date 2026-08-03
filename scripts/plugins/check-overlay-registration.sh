@@ -10,10 +10,10 @@ m = json.load(open('config/official-plugins.json'))
 ids = [e if isinstance(e, str) else e['id'] for e in m['plugins']]
 assert 'oneflow-modal-compose-overlay' in ids, 'manifest entry missing'
 assert len(ids) == 39, f'expected 39 entries, got {len(ids)}'
+entry = [e for e in m['plugins'] if not isinstance(e, str)]
+assert len(entry) == 1 and entry[0]['origin'] == 'https://github.com/phanlemanh', 'origin entry wrong'
 PY
 
-grep -q 'expected_count=39' scripts/plugins/check-manifest-unmoved.sh \
-  || { echo "FAIL: manifest guard not bumped to 39"; exit 1; }
 bash scripts/plugins/check-manifest-unmoved.sh >/dev/null \
   || { echo "FAIL: manifest guard red"; exit 1; }
 

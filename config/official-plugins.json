@@ -39,6 +39,9 @@
         "tongflow-modal-unlimited-ocr",
         "tongflow-modal-crawl4ai",
         "tongflow-modal-scrapling",
-        "oneflow-modal-compose-overlay"
+        {
+            "id": "oneflow-modal-compose-overlay",
+            "origin": "https://github.com/phanlemanh"
+        }
     ]
 }

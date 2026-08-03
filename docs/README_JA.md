@@ -206,7 +206,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited-OCR 長文ドキュメント / PDF → テキスト
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / リンク → テキスト
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling ステルスブラウザ URL / リンク → テキスト
-- [oneflow-modal-compose-overlay](https://github.com/tong-io/oneflow-modal-compose-overlay) — 画像・動画にテキスト / 価格タグ / ロゴをオーバーレイ（単一 Pillow テキスト描画パス、ベトナム語完全対応フォント、TikTok セーフゾーン制約）
+- [oneflow-modal-compose-overlay](https://github.com/phanlemanh/oneflow-modal-compose-overlay) — 画像・動画にテキスト / 価格タグ / ロゴをオーバーレイ（単一 Pillow テキスト描画パス、ベトナム語完全対応フォント、TikTok セーフゾーン制約）
 
 ## ソースコードから起動
 

@@ -11,7 +11,7 @@ curl -sf "https://pypi.org/pypi/oneflow-sdk/${V_TOML}/json" >/dev/null \
   || { echo "FAIL: PyPI has no oneflow-sdk ${V_TOML}"; exit 1; }
 
 # Plugin pin must match the released version exactly.
-REPO_URL="${OVERLAY_PLUGIN_REPO:-https://github.com/tong-io/oneflow-modal-compose-overlay.git}"
+REPO_URL="${OVERLAY_PLUGIN_REPO:-https://github.com/phanlemanh/oneflow-modal-compose-overlay.git}"
 CACHE_DIR="${TMPDIR:-/tmp}/oneflow-overlay-plugin-ci"
 if [ ! -d "$CACHE_DIR/.git" ]; then
   git clone --depth 1 "$REPO_URL" "$CACHE_DIR"

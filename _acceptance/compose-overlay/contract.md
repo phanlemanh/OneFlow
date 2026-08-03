@@ -108,11 +108,14 @@ từng ký tự — node không bao giờ format lại số/chuỗi (format là 
   runtime không lệch (cùng số call, cùng shape input tới plugin — media single, không
   batch fan-out). *Slot mới đầu tiên sinh sau conformance suite: phải vào suite ngay,
   không nợ như batchField.*
-- AC-14: Given plugin đã đăng ký official, When kiểm đồng bộ, Then
-  `official-plugins.json` có entry thứ 39 `oneflow-modal-compose-overlay`;
-  `check-manifest-unmoved.sh` expected_count = 39 (bump đúng như contract per-plugin-origin
-  dặn); **cả 3 README** (EN/ZH/JA) có plugin trong danh sách + hàng capability matrix mới
-  cho slot; i18n keys node có đủ 4 ngôn ngữ (en/zh/ja/ko).
+- AC-14 *(sửa 03/08 — Gate-1 re-approve, xem Amendment)*: Given plugin đã đăng ký
+  official, When kiểm đồng bộ, Then `official-plugins.json` có entry thứ 39 dạng
+  `{"id": "oneflow-modal-compose-overlay", "origin": "https://github.com/phanlemanh"}` —
+  **entry origin đầu tiên**, đúng cơ chế per-plugin-origin; `check-manifest-unmoved.sh`
+  chuyển ngữ nghĩa thành "38 chuỗi trơn dưới org mặc định + đúng 1 entry origin này"
+  (contract per-plugin-origin đã dặn retire/bump khi fork đầu hạ cánh); **cả 3 README**
+  (EN/ZH/JA) có plugin trong danh sách (link phanlemanh) + hàng capability matrix mới;
+  i18n keys node đủ 4 ngôn ngữ (en/zh/ja/ko).
 - AC-15: Given SDK release train, When kiểm, Then `sdk/pyproject.toml` và
   `sdk/tongflow/__init__.py` cùng phiên bản mới (0.2.18); phiên bản đó **đã publish lên
   PyPI**; repo plugin pin `oneflow-sdk==` đúng phiên bản đó; models/node_slots trong bản
@@ -122,6 +125,15 @@ từng ký tự — node không bao giờ format lại số/chuỗi (format là 
   người/panel soi capture HTML + screenshot theo ngôn ngữ thiết kế workspace hiện có, Then
   node "nhìn như người nhà" của các node transfer sẵn có (shell, spacing, states), ops-editor
   đủ trạng thái empty/1-op/nhiều-op, không lỗi console, đạt sàn P0 design gate.
+
+## Amendment (2026-08-03 — duyệt lại tại chỗ bởi Manh)
+
+Chủ nhân quyết định plugin sống dưới **phanlemanh**, không dùng tài khoản tong-io:
+AC-14 đổi từ plain-string-thứ-39 sang **entry origin đầu tiên** (xem AC-14). Hệ quả
+được chấp nhận: hai known-limit của per-plugin-origin thành LIVE với plugin này —
+(1) nút "mở repo" trong plugin manager và (2) standalone SDK engine vẫn build URL từ
+org mặc định → trỏ sai với plugin này (in-app installer đã hỗ trợ origin, có eval
+parity). Ghi Known limits ở Cổng 2; vá hai lỗ là contract riêng nếu muốn.
 
 ## Coverage
 
