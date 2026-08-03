@@ -155,23 +155,25 @@ export function renderVocabulary(slots: NodeSlot[]): string {
 
 /**
  * Modality node types some step in a plan can actually produce: DSL v1's
- * only source kind is `text` (-> textNode, spec §5), plus every output each
- * slot in `slots` can yield as a "gen" step. A slot with a widened handle
- * yields more than its first declared output, so reading `outputs[0]` here
- * would hide a producer and wrongly mark its consumers unsatisfiable. A slot
- * whose required input needs a modality outside this set can never be fed by
- * any legal plan — see `installedSafeSlots`.
+ * only source kind is `text` (-> textNode, spec §5), plus each slot's own
+ * primary output as a "gen" step. A slot whose required input needs a
+ * modality outside this set can never be fed by any legal plan — see
+ * `installedSafeSlots`.
+ *
+ * A widened output deliberately does NOT count here, even though
+ * `renderVocabulary` advertises it. compose-overlay yields a video only when
+ * it is *fed* a video, so counting `videoNode` as producible because
+ * compose-overlay is installed is circular: it makes the slot its own
+ * evidence, and the fixed-point loop below can never drop it. Conditioning
+ * the widened type on its own modality being producible elsewhere is the
+ * correct rule, and it reduces to exactly this — a widened output can never
+ * be the *sole* producer of anything, so it never enlarges the set.
  */
 function producibleModalities(slots: NodeSlot[]): Set<string> {
     const modalities = new Set<string>(["textNode"]);
     for (const slot of slots) {
-        const nodeType = SLOT_TO_NODE_TYPE[slot];
-        const spec = nodeType
-            ? resolveSpec(slot, sourceSpecOverridesFor(nodeType))
-            : undefined;
-        for (const type of producibleOutputTypes(spec, getAbiTopology(slot))) {
-            modalities.add(type);
-        }
+        const primary = getAbiTopology(slot).outputs[0];
+        if (primary) modalities.add(primary.nodeType);
     }
     return modalities;
 }

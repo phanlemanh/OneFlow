@@ -236,3 +236,37 @@ describe("installedSafeSlots", () => {
         expect(withImageProducer).toEqual(["image-gen", "image-gen-model"]);
     });
 });
+
+describe("installedSafeSlots — a widened output is not its own evidence", () => {
+    it("drops a video consumer when the only 'video producer' is a widened slot", () => {
+        // get-first-frame requires a video and produces an image, so it can
+        // never bootstrap itself (unlike concat-videos, which produces video
+        // and is therefore self-satisfying under every version of this code —
+        // that made it useless as a repro). compose-overlay ADVERTISES
+        // image|video but only yields a video when fed one, so counting it as
+        // a video producer is circular and kept get-first-frame alive here.
+        expect(
+            installedSafeSlots({
+                "image-gen": ["p1"],
+                "compose-overlay": ["p2"],
+                "get-first-frame": ["p3"],
+            }),
+        ).toEqual(["compose-overlay", "image-gen"]);
+    });
+
+    it("keeps that consumer once a real video producer is installed", () => {
+        expect(
+            installedSafeSlots({
+                "image-gen": ["p1"],
+                "image-gen-video": ["p2"],
+                "compose-overlay": ["p3"],
+                "get-first-frame": ["p4"],
+            }),
+        ).toEqual([
+            "compose-overlay",
+            "get-first-frame",
+            "image-gen",
+            "image-gen-video",
+        ]);
+    });
+});
