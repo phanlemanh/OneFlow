@@ -60,14 +60,60 @@ export function getEdgeTargetOptions(
     const options: EdgeTargetOption[] = [];
     for (const field of spec.topology.inputOrder) {
         const f = spec.fields[field];
-        if (f?.kind === "handle" && f.nodeType === upstreamType) {
-            options.push({
-                handleId: targetHandleId(field),
-                field,
-                single: !f.array && !f.collect,
-                feature: reg.feature,
-            });
-        }
+        if (f?.kind !== "handle") continue;
+        // `alsoAccepts` widens a handle beyond its primary modality (e.g.
+        // compose-overlay `media` takes image or video). This is the fourth
+        // consumer of that rule after resolveEdgeHandles and the two gates in
+        // connection-rules; matching on nodeType alone hid the widened handle
+        // from the inline select.
+        if (!handleAccepts(f, upstreamType)) continue;
+        options.push({
+            handleId: targetHandleId(field),
+            field,
+            single: !f.array && !f.collect,
+            feature: reg.feature,
+        });
     }
     return options;
+}
+
+/** True when `handle` accepts an upstream of `upstreamType`. */
+function handleAccepts(
+    handle: { nodeType: string; alsoAccepts?: readonly string[] },
+    upstreamType: string,
+): boolean {
+    return (
+        handle.nodeType === upstreamType ||
+        !!handle.alsoAccepts?.includes(upstreamType)
+    );
+}
+
+/**
+ * True when the edge currently occupying `fromHandleId` could legally be moved
+ * onto `toHandleId` of the same node.
+ *
+ * The inline select swaps two edges when the chosen handle is already taken;
+ * without this the displaced edge lands on a handle its modality is not allowed
+ * on (a video pushed onto an image-only `in:logo`), producing exactly the edge
+ * `isValidFlowConnection` refuses — silently, because the swap writes to the
+ * store directly.
+ */
+export function canSwapOntoHandle(
+    targetNodeId: string,
+    occupantUpstreamType: string | undefined,
+    toHandleId: string,
+): boolean {
+    if (!occupantUpstreamType) return false;
+    const reg = getAbiNodeRegistration(targetNodeId);
+    if (!reg) return false;
+    const spec = resolveSpec(
+        reg.feature,
+        reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
+    );
+    for (const field of spec.topology.inputOrder) {
+        if (targetHandleId(field) !== toHandleId) continue;
+        const f = spec.fields[field];
+        return f?.kind === "handle" && handleAccepts(f, occupantUpstreamType);
+    }
+    return false;
 }

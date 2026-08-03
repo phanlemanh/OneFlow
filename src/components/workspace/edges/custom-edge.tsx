@@ -16,7 +16,11 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useFlow } from "@/hooks/use-flow";
-import { getEdgeTargetOptions } from "@/lib/abi/edge-target-options";
+import {
+    canSwapOntoHandle,
+    getEdgeTargetOptions,
+} from "@/lib/abi/edge-target-options";
+import { getEffectiveOutputType } from "@/lib/workflow/flow-connection-shared";
 
 const CustomEdge = ({
     id,
@@ -80,6 +84,30 @@ const CustomEdge = ({
                         e.targetHandle === newHandle,
                 );
 
+            // The displaced edge must itself be legal on the handle it lands
+            // on, or the swap silently writes a connection the validator
+            // refuses (e.g. a video pushed off a widened `media` onto an
+            // image-only `logo`). Refuse the whole swap rather than reroute.
+            if (occupant) {
+                const nodes = getNodes();
+                const occupantSource = nodes.find(
+                    (n) => n.id === occupant.source,
+                );
+                const occupantType = occupantSource
+                    ? getEffectiveOutputType(
+                          occupantSource.id,
+                          occupantSource.type,
+                          occupant.sourceHandle,
+                      )
+                    : undefined;
+                if (
+                    !targetHandle ||
+                    !canSwapOntoHandle(target, occupantType, targetHandle)
+                ) {
+                    return;
+                }
+            }
+
             const next = edges.map((e) => {
                 if (e.id === id) return { ...e, targetHandle: newHandle };
                 if (occupant && e.id === occupant.id) {
@@ -89,7 +117,7 @@ const CustomEdge = ({
             });
             setEdges(next);
         },
-        [id, target, targetHandle, options],
+        [id, target, targetHandle, options, getNodes],
     );
 
     return (
