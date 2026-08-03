@@ -5,10 +5,10 @@ slug: compose-overlay
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-02
-time_human_minutes: {gate1: 10, gate2: 10}
+time_human_minutes: {gate1: 10, gate2: 30}
 ---
 
 # Acceptance Contract: compose-overlay
@@ -148,6 +148,25 @@ Sửa lời AC-1 ở đây để văn bản khớp thực tế đã duyệt, **k
 
 **Hệ quả còn mở (trình Cổng 2, không tự sửa):** schema gộp không ràng buộc field theo loại op
 — `safe_zone` phải mang `x:0,y:0` vô nghĩa, và không gì chặn op `logo` mang `bg_color`.
+
+### Known limits bổ sung (chốt tại Cổng 2 lần 2, 03/08)
+
+Bảy vòng verify; ba vòng cuối do lỗi phát sinh sau chữ ký lần đầu. Ngoài danh sách trên:
+
+**Gộp vào hợp đồng kế tiếp (`overlay-canvas-reach`) — quyết định Cổng 2:**
+- Ô nhập số không chặn khoảng ABI khai (gõ `độ mờ = 100`, `x = 5` vẫn chạy tới plugin).
+- Nợ gộp: khái niệm "ô này nhận loại nào" đã gom về một predicate ở `resolve.ts`, nhưng
+  `mediaKind` vẫn trả `"image"` cho trường hợp không giải được loại thay vì `null`.
+
+**Known limits:**
+- `scripts/plugins/run-overlay-plugin-tests.sh` ghi cứng `oneflow-sdk==0.2.18` — lần bump SDK
+  tới, 13 eval overlay_* có thể xanh mà không chứng minh gì. Nên derive từ `sdk/pyproject.toml`
+  như `check-overlay-sdk-train.sh` đang làm.
+- `CLAUDE.md` §"Registering an official plugin" vẫn mô tả guard bản cũ (`expected_count`).
+- `compose-overlay-op-form.tsx` dùng `<select>` thô + nhãn enum chưa dịch (5 locale thấy
+  `top-left`, `tiktok-portrait`… bằng tiếng Anh).
+- Vài trường hợp hiếm: workflow nhập từ ngoài / sửa tay có thể còn dây video ở ô `logo`,
+  hoặc dropdown hiện giá trị không có trong danh sách.
 
 ## Coverage
 
