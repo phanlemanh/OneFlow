@@ -20,8 +20,8 @@ import { describe, expect, it } from "vitest";
 import {
     NODE_TYPE_SOURCE_SPEC,
     NODE_TYPE_TO_ABI_FEATURE,
-    resolveEdgeHandles,
     resolvedSpecForNodeType,
+    resolveEdgeHandles,
 } from "./node-feature-registry";
 
 const NODES_DIR = "src/components/workspace/nodes";

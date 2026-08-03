@@ -118,7 +118,11 @@ describe("isValidFlowConnection — multi-modality handle (alsoAccepts)", () => 
         registerOverlay("ov");
         const c = conn("v", "out:videoNode", "ov", "in:media");
         expect(
-            isValidFlowConnection(c, [dataNode("v", "videoNode"), abiNode("ov")], []),
+            isValidFlowConnection(
+                c,
+                [dataNode("v", "videoNode"), abiNode("ov")],
+                [],
+            ),
         ).toBe(true);
     });
 
@@ -126,7 +130,11 @@ describe("isValidFlowConnection — multi-modality handle (alsoAccepts)", () => 
         registerOverlay("ov");
         const c = conn("i", "out:imageNode", "ov", "in:media");
         expect(
-            isValidFlowConnection(c, [dataNode("i", "imageNode"), abiNode("ov")], []),
+            isValidFlowConnection(
+                c,
+                [dataNode("i", "imageNode"), abiNode("ov")],
+                [],
+            ),
         ).toBe(true);
     });
 
@@ -134,7 +142,11 @@ describe("isValidFlowConnection — multi-modality handle (alsoAccepts)", () => 
         registerOverlay("ov");
         const c = conn("a", "out:audioNode", "ov", "in:media");
         expect(
-            isValidFlowConnection(c, [dataNode("a", "audioNode"), abiNode("ov")], []),
+            isValidFlowConnection(
+                c,
+                [dataNode("a", "audioNode"), abiNode("ov")],
+                [],
+            ),
         ).toBe(false);
     });
 
