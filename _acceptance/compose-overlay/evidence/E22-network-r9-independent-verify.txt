@@ -1,0 +1,80 @@
+=== Independent verifier round 9 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Repo: /Users/manh-macmini/dev/oneflow, branch main.
+Self-started dev server: `pnpm dev` (background nohup), polled http://localhost:3000/workspace
+until HTTP 200 (ready ~4s: log shows "Ready in 1317ms" / "Compiled /workspace in 2.6s").
+
+Console (fresh tab tab-20, read_console_messages, onlyErrors:true, two consecutive reloads):
+  "No console logs." (0 errors) on both reloads.
+Full (unfiltered) console on the same fresh tab: only [log] lines —
+  [useNodeTaskUpdate]/[Task Store] register/unregister chatter for nodes
+  co-1-empty..co-5-error, plus [WorkflowRecovery] Checking/No pending workflow task found.
+  No [warn]/[error] entries.
+
+NOTE on a false lead this round: an OLDER tab (tab-18) that I had used earlier for manual
+UI interaction (expanding op-forms, clicking Apply Overlay) showed a repeated [error]
+React hydration-mismatch on the toolbar's "Language" tooltip trigger (radix useId mismatch,
+id="radix-_R_295et5r6lb_" vs "radix-_R_i5et5r6lb_") on every reload of that tab. Verified this
+is NOT a real defect: a brand-new tab (tab-20) navigated to the same http://localhost:3000/workspace
+URL, twice in a row, shows zero console errors both times. The hydration warning was specific to
+tab-18's accumulated session state (residue from many Fast-Refresh cycles + interactive clicks
+during this same round), not a defect reproducible from a clean load. Recorded here so a future
+round does not re-chase it.
+
+Network (read_network_requests, fresh tab tab-20, two navigations to /workspace):
+  All requests are to http://localhost:3000 (app-scope, matches dev_server.url in config.yaml).
+  All 200 OK except:
+    GET /api/uploads/tasks/e22-fixture/vid-src.png  -> 404 Not Found
+    GET /api/uploads/tasks/e22-fixture/vid-src.mp4  -> 404 Not Found (x2, one per nav)
+  These are static-asset (image/video file) requests, even though app-origin — per the scoping
+  rule they are note-only and never FAIL-eligible regardless of status. Matches the exact same
+  file names previously classified as out-of-scope debris in evidence/E22-network.txt (rounds 2-3),
+  E22-network-r6/r7/r8-independent-verify.txt (rounds 6-8): leftover stub-plugin fixture nodes
+  (ids co-1-empty..co-5-error) on the shared dev DB canvas, unrelated to compose-overlay.tsx itself.
+  img-src.png and logo-src.png (same fixture) DID resolve 200 OK; only the video ones 404.
+
+networkObserved = clean (app-scope traffic observed this round; every FAIL-eligible request is
+200 OK; the two 404s are static-asset, note-only, previously classified, unrelated to the code
+under test).
+
+Design gate (design-gate.mjs --mode dom --jsdom <repo-root> --fail-on P0), run fresh this round
+against the 6 committed captures under _acceptance/compose-overlay/evidence/design/captures/:
+  state-1-empty.html      -> exit=0 PASS p0_count=0
+  state-2-ops-image.html  -> exit=0 PASS p0_count=0
+  state-3-ops-video.html  -> exit=0 PASS p0_count=0
+  state-4-op-form.html    -> exit=0 PASS p0_count=0
+  state-5-error.html      -> exit=0 PASS p0_count=0
+  state-6-running.html    -> exit=0 PASS p0_count=0
+All 6 PNGs confirmed 1000x1100 via `sips` (>= 900x1000 required, --full used). `git status --short`
+on evidence/design/captures/ is empty — files are unchanged at HEAD, no uncommitted drift.
+
+Additionally ran `pnpm ui:capture` against the live http://localhost:3000/workspace page this round
+(--full --w 1000 --h 1100), saved to evidence/E22-live-workspace-r9-independent-verify.png (1000x1100
+confirmed via sips) — proves the capture tool + dev server render cleanly end-to-end this round. This
+is a supplementary live frame, not a replacement for the 6 canonical state captures (which require
+staged fixtures/interactions — uploaded image/video, a triggered validation error, an expanded op-form,
+a mid-flight task — that this verify-only round reproduced via live interaction for spot-checking
+(see reasoning below) but does not overwrite the checked-in canonical evidence with).
+
+Live spot-check via direct interaction (Claude Browser tools) against the persisted dev-DB fixture
+nodes co-1-empty..co-5-error (confirmed via `document.querySelectorAll('.react-flow__node')`
+data-id attributes) cross-validated 5 of 6 states are still live and rendering correctly:
+  co-1-empty  -> empty shell, "No ops yet..." + 4 disabled add-op buttons + greyed Apply Overlay.
+  co-2-image  -> media:image, TEXT/PRICE/LOGO/SAFE ops populated, Apply Overlay enabled (black).
+  co-3-video  -> media:video, ops show time windows (0-3.5s / 3.5-7s / entire video).
+  co-4-form   -> media:image; clicking its TEXT op's Edit button live-expands the op-form
+                 (Content/x/y/Anchor/Font size/Color/Alignment/Max width fields) — reproduces the
+                 op-form-expanded state interactively (this state is ephemeral React component
+                 state, not persisted, so a cold `pnpm ui:capture <url>` load cannot show it
+                 expanded — confirmed by reading compose-overlay-ops-editor.tsx: `expanded` is a
+                 plain useState(null), no URL/query-driven auto-expand).
+  co-5-error  -> red destructive banner "A logo op needs an image on in:logo — connect an image
+                 node." + red LOGO op row, Apply Overlay greyed/disabled.
+  No co-6-running fixture node exists — "running" is confirmed ephemeral/task-scoped (matches
+  rounds 6-8's finding); clicking Apply Overlay on the stub-registered nodes ("No plugin
+  implementations were scanned") did not visibly enter a loading state in this round's attempts
+  (no task-store "Task started" text appeared via get_page_text), consistent with there being no
+  registered plugin to actually start a task against in this dev environment.
+
+Verdict this round: console clean (fresh tab), network clean (app-scope, no FAIL-eligible
+failures), design gate PASS on all 6 committed captures (exit 0, p0_count=0), PNG dimensions
+satisfy >=900x1000, live spot-check of 5/6 fixture states matches the checked-in evidence content.

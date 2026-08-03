@@ -1,55 +1,85 @@
 ## Trong hợp đồng
 
-### Conformance fixture pins a phantom node type, so the shipped sourceSpec is never exercised
-- file: `/Users/manh-macmini/dev/oneflow/sdk/tests/conformance/fixtures/compose-overlay.json:5`
-- severity: medium
-- detail: The fixture declares `"type": "conformanceComposeOverlayNode"` (line 63) plus its own `sourceSpec` (line 5). src/lib/abi/conformance.ts:142-148 deliberately THROWS when a fixture declares a sourceSpec for a node type that is mounted in NODE_TYPE_SOURCE_SPEC — precisely to stop a fixture copy from shadowing the real classification. Using a type the registry never mounts bypasses that guard permanently, and the fixture's own note justifies it with "the canvas mount lands in a sibling task" — a rationale that went stale inside this same diff, since composeOverlayNode landed here (commit 2184bf0). Net effect: the TS↔Python conformance suite compares a hand-written copy of the field classification against Python, not the shipped NODE_TYPE_SOURCE_SPEC.composeOverlayNode. If someone later flips `ops` to a handle or `text` to configField in the real spec, conformance stays green while the canvas and engine diverge — the exact class of drift the suite exists to catch. Now that the mount exists, the fixture should switch to `composeOverlayNode` and drop its own sourceSpec, letting the adapter read the mounted one.
-- source: conventions
-- AC: AC-13
-- rationale: AC-13 requires the fixture to compare the two runtimes using the real shipped classification and explicitly states the new slot 'phải vào suite ngay' (must properly enter the suite); using a phantom node type with a hand-copied sourceSpec to dodge the anti-shadow guard means the suite never actually exercises the shipped spec, defeating exactly what AC-13 demands.
+_Không có phát hiện nào ánh xạ được vào AC vòng này._
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **CLAUDE.md still documents the deleted first edition of check-manifest-unmoved.sh**
-  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ cho đội ngũ phát triển vẫn mô tả cơ chế kiểm tra phiên bản cũ đã bị thay thế, có thể khiến người bảo trì sau này làm theo hướng dẫn không còn đúng khi gặp lỗi không liên quan tới tính năng này.
-  file: `/Users/manh-macmini/dev/oneflow/CLAUDE.md`
-  severity: medium
-  Đề xuất: known-limits
-
-- **compose-overlay is an N→1 node but was filed under transfer/ (1→1)**
-  Người dùng thấy gì: Node ghép overlay được xếp sai nhóm phân loại trong tổ chức mã nguồn nội bộ; điều này không ảnh hưởng tới cách người dùng thao tác trên node, chỉ có thể gây nhầm lẫn nhẹ cho đội ngũ khi mở rộng tính năng sau này.
-  file: `/Users/manh-macmini/dev/oneflow/src/components/workspace/nodes/transfer/compose-overlay.tsx`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Raw <select> element instead of the shared ui/select component**
-  Người dùng thấy gì: Ô chọn thuộc tính (như vị trí safe-zone) trong form chỉnh sửa overlay dùng kiểu giao diện mặc định của trình duyệt thay vì đồng bộ với các ô chọn khác trong sản phẩm, và có thể ngầm hiển thị một lựa chọn dù người dùng chưa thực sự chọn gì — dễ gây hiểu nhầm về giá trị đang được áp dụng.
-  file: `/Users/manh-macmini/dev/oneflow/src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx`
-  severity: low
-  Đề xuất: known-limits
-
-- **Adopted ui-capture script still carries its "reference implementation, copy me" header**
-  Người dùng thấy gì: Một tệp công cụ nội bộ dùng để chụp ảnh màn hình khi kiểm thử vẫn còn giữ phần ghi chú hướng dẫn cũ dành cho việc thiết lập ban đầu; đây là chi tiết nội bộ cho đội ngũ kỹ thuật, không ảnh hưởng tới người dùng sản phẩm.
-  file: `/Users/manh-macmini/dev/oneflow/scripts/ui-capture.mjs`
-  severity: low
-  Đề xuất: known-limits
-
-- **Plugins dialog "open repo" link ignores the per-entry origin (404 for compose-overlay)**
-  Người dùng thấy gì: Trong cửa sổ quản lý plugin, bấm nút 'mở kho mã nguồn' của plugin overlay này sẽ dẫn tới một địa chỉ web không tồn tại thay vì đúng trang chứa mã nguồn thực tế của plugin.
-  file: `src/components/workspace/plugins-dialog.tsx`
+- **compose-overlay node placed in transfer/ (1→1) though it is an N→1 compose node — contradicts CLAUDE.md directory convention and the repo's own README**
+  Người dùng thấy gì: Vi tri luu node trong ma nguon khong khop quy uoc noi bo cua du an; nguoi dung cuoi khong bi anh huong truc tiep, nhung viec bao tri/tim kiem code ve sau co the kho hon.
+  file: `src/components/workspace/nodes/transfer/compose-overlay.tsx`
   severity: high
   Đề xuất: known-limits
 
-- **compose-overlay mediaKind silently falls back to "image" when the upstream modality cannot be resolved**
-  Người dùng thấy gì: Khi hệ thống chưa xác định được node nguồn là ảnh hay video, node overlay tạm thời hiển thị như thể đó là ảnh, khiến các tuỳ chọn thời gian bắt đầu/kết thúc bị ẩn khỏi giao diện dù các giá trị đó người dùng đã nhập vẫn được gửi đi khi chạy — dễ khiến người dùng không biết cài đặt của mình vẫn đang có hiệu lực.
-  file: `src/components/workspace/nodes/transfer/compose-overlay.tsx`
+- **Fifth consumer of the widened-handle rule left unconverted: Director safe-slot filter still tests only the primary nodeType**
+  Người dùng thấy gì: Neu sau nay mot slot ghep noi dung khai bao uu tien nhan video truoc anh, tinh nang do co the bien mat hoan toan khoi goi y tu dong cua tro ly dung workflow ma khong co canh bao nao cho nguoi dung.
+  file: `src/lib/director/vocabulary.ts`
+  severity: medium
+  Đề xuất: known-limits
+
+- **CLAUDE.md §"Registering an official plugin" is now stale — it documents a guard shape that no longer exists**
+  Người dùng thấy gì: Tai lieu huong dan noi bo mo ta sai cach hoat dong hien tai cua mot co che kiem tra; khong anh huong truc tiep nguoi dung cuoi nhung co the khien nguoi them plugin moi sau nay lam theo huong dan da loi thoi.
+  file: `CLAUDE.md`
+  severity: medium
+  Đề xuất: known-limits
+
+- **SDK version hardcoded in run-overlay-plugin-tests.sh while the sibling guard derives it from pyproject.toml**
+  Người dùng thấy gì: Khi SDK duoc nang len phien ban moi, bo kiem thu plugin overlay co the van bao 'dat' du dang kiem tra bang phien ban SDK cu, khien nguoi doc bao cao lam tuong ban moi da duoc xac nhan hoat dong tot.
+  file: `scripts/plugins/run-overlay-plugin-tests.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Vendor-specific preset name added to the cross-plugin ABI contract**
+  Người dùng thấy gì: Mot ten cau hinh dinh dang danh rieng cho mot nen tang ben thu ba duoc dua vao hop dong du lieu dung chung cho moi plugin tuong lai, co the gay kho khan neu sau nay co plugin khac can tuan thu cung hop dong ma khong dung dinh dang do.
+  file: `config/tongflow.abi.json`
+  severity: low
+  Đề xuất: known-limits
+
+- **Op-form uses a raw <select> with untranslated ABI enum labels, bypassing the shared UI Select component**
+  Người dùng thấy gì: Nguoi dung giao dien tieng Viet/Trung/Nhat/Han se thay mot so lua chon trong form dan chu/logo hien thi bang tieng Anh thay vi duoc dich, lam trai nghiem khong nhat quan.
+  file: `src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx`
+  severity: low
+  Đề xuất: known-limits
+
+- **Dead shell variables after the manifest-guard rewrite duplicate constants the inlined node script hardcodes**
+  Người dùng thấy gì: Khong anh huong nguoi dung cuoi; day la mot chi tiet thua trong script noi bo co the gay nham lan cho nguoi bao tri sau nay.
+  file: `scripts/plugins/check-manifest-unmoved.sh`
+  severity: low
+  Đề xuất: known-limits
+
+- **Director compiles every compose-overlay step to an imageNode output, even when the media is a video**
+  Người dùng thấy gì: Khi tro ly tu dong ghep chu/logo len mot video, ket qua co the bi gan nham la anh tinh, khien du lieu video dau ra bi bo trong va cac buoc xu ly video tiep theo co the bi tu choi ket noi mot cach kho hieu.
+  file: `src/lib/director/compile.ts`
+  severity: high
+  Đề xuất: known-limits
+
+- **vocabulary.hasUnsatisfiableRequiredInput is the one consumer of the widened-handle rule the refactor missed**
+  Người dùng thấy gì: Neu sau nay mot slot ghep noi dung khai bao uu tien nhan video truoc anh, tinh nang do co the bien mat khoi goi y tu dong cua tro ly dung workflow ma khong co canh bao nao cho nguoi dung.
+  file: `src/lib/director/vocabulary.ts`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Director always emits a compose-overlay node with no `ops`, and nothing reports it**
+  Người dùng thấy gì: Khi tro ly tu dong tao san mot node dan chu/logo/khung gia, node do co the xuat hien tren canvas o trang thai khong the chay duoc va khong he giai thich ly do, khien nguoi dung phai tu mo de sua.
+  file: `src/lib/director/compile.ts`
   severity: medium
   Đề xuất: new-contract
 
+- **Inline edge-handle swap aborts silently with no user feedback**
+  Người dùng thấy gì: Khi nguoi dung co doi mot ket noi anh/video sang mot diem nhan khong tuong thich, thao tac chi lang le khong co gi xay ra ma khong co bat ky thong bao giai thich nao, khien nguoi dung tuong ung dung bi treo hoac thao tac bi loi.
+  file: `src/components/workspace/edges/custom-edge.tsx`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Conformance data-URL materialization keys off the resolved path, not the ABI $ref, so it can diverge from the Python side it mirrors**
+  Người dùng thấy gì: Khong anh huong nguoi dung cuoi; day la rui ro trong bo kiem thu noi bo dung de doi chieu hai he thong, co the khien ket qua kiem thu tu dong bao sai (dat gia hoac truot gia) ma khong tac dong toi san pham thuc te.
+  file: `src/lib/abi/conformance.ts`
+  severity: low
+  Đề xuất: known-limits
+
 ## Chưa adversarial-verify (refuter chết)
 
-(không có)
+_Không có._
 
-⚠ Cụm ngoài vùng phủ: 5/7 lỗi rơi vào file không bộ đo nào phủ (CLAUDE.md, sdk/tests/conformance/fixtures/compose-overlay.json, src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx, scripts/ui-capture.mjs, src/components/workspace/plugins-dialog.tsx) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 4/12 lỗi rơi vào file không bộ đo nào phủ (CLAUDE.md, scripts/plugins/run-overlay-plugin-tests.sh, src/components/workspace/nodes/transfer/compose-overlay-op-form.tsx, src/lib/abi/conformance.ts) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

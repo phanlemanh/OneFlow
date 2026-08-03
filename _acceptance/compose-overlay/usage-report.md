@@ -314,3 +314,63 @@
 - **claude-opus-5**: 2 agent · 105 calls · out 59,941 · in 456 · cache_read 15,563,814 · cache_create 389,990
 - **claude-haiku-4-5-20251001**: 30 agent · 71 calls · out 18,297 · in 628 · cache_read 2,419,724 · cache_create 1,227,727
 
+### S4 round 9 — wf_0826ef6a-363 (51 agent, 162,265 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| ui:E22 | claude-sonnet-5 | 94 | 26,244 | 295 | 16,418,659 | 1001 |
+| review:conventions | claude-opus-5 | 20 | 23,929 | 993 | 2,453,140 | 359 |
+| review:bugs | claude-opus-5 | 52 | 20,225 | 102 | 7,536,757 | 536 |
+| refute:custom-edge.tsx | claude-sonnet-5 | 19 | 10,061 | 38 | 1,671,089 | 212 |
+| refute:conformance.ts | claude-sonnet-5 | 24 | 10,007 | 48 | 2,238,773 | 232 |
+| refute:compile.ts | claude-sonnet-5 | 18 | 6,484 | 214 | 1,588,830 | 164 |
+| refute:tongflow.abi.json | claude-sonnet-5 | 15 | 6,347 | 30 | 1,267,631 | 189 |
+| judge:E23:spec-alignment | claude-sonnet-5 | 9 | 6,281 | 18 | 721,284 | 159 |
+| judge:E23:operational-feasibility | claude-sonnet-5 | 12 | 6,073 | 24 | 1,002,638 | 147 |
+| refute:vocabulary.ts | claude-sonnet-5 | 17 | 4,924 | 34 | 1,427,204 | 135 |
+| refute:run-overlay-plugin-tests.sh | claude-sonnet-5 | 10 | 4,822 | 20 | 693,198 | 87 |
+| refute:compile.ts | claude-sonnet-5 | 22 | 4,696 | 44 | 1,848,941 | 165 |
+| refute:compose-overlay.tsx | claude-sonnet-5 | 18 | 4,186 | 999 | 1,536,562 | 209 |
+| refute:compose-overlay-op-form.tsx | claude-sonnet-5 | 10 | 3,805 | 20 | 749,925 | 90 |
+| refute:check-manifest-unmoved.sh | claude-sonnet-5 | 5 | 1,783 | 10 | 325,289 | 43 |
+| judge:E23:domain-correctness | claude-sonnet-5 | 5 | 1,474 | 10 | 315,256 | 91 |
+| refute:vocabulary.ts | claude-sonnet-5 | 14 | 1,322 | 28 | 1,091,675 | 109 |
+| capture:provenance | claude-sonnet-5 | 2 | 1,028 | 4 | 70,426 | 19 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 1,024 | 18 | 49,034 | 19 |
+| refute:CLAUDE.md | claude-sonnet-5 | 6 | 897 | 12 | 407,239 | 57 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 854 | 18 | 66,377 | 16 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 816 | 18 | 66,343 | 15 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 792 | 18 | 66,351 | 38 |
+| machine:bash scripts/plugins/check-overlay-regis | claude-haiku-4-5-20251001 | 3 | 770 | 26 | 118,951 | 16 |
+| machine:bash scripts/abi/check-python-gen-clean. | claude-haiku-4-5-20251001 | 4 | 755 | 34 | 154,186 | 19 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 739 | 18 | 66,373 | 16 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 724 | 18 | 66,379 | 14 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 712 | 18 | 66,416 | 12 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 705 | 18 | 49,028 | 15 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 698 | 18 | 49,025 | 16 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 681 | 18 | 66,339 | 15 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 651 | 18 | 66,375 | 18 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 644 | 18 | 49,029 | 15 |
+| machine:bash scripts/abi/check-overlay-sdk-train | claude-haiku-4-5-20251001 | 2 | 642 | 18 | 66,359 | 13 |
+| machine:pnpm vitest run src/lib/abi/conformance. | claude-haiku-4-5-20251001 | 2 | 641 | 18 | 66,365 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 633 | 18 | 66,411 | 11 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 579 | 18 | 66,387 | 21 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 576 | 18 | 66,396 | 10 |
+| machine:pnpm vitest run src/components/workspace | claude-haiku-4-5-20251001 | 2 | 509 | 18 | 66,365 | 16 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 502 | 18 | 66,417 | 9 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 479 | 18 | 49,032 | 21 |
+| machine:pnpm vitest run src/lib/workflow/compose | claude-haiku-4-5-20251001 | 2 | 356 | 18 | 66,365 | 12 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 348 | 18 | 49,034 | 16 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 347 | 18 | 66,380 | 18 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 337 | 18 | 66,373 | 14 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 2 | 317 | 18 | 66,374 | 16 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 313 | 18 | 66,413 | 10 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 282 | 18 | 66,343 | 12 |
+| machine:bash scripts/plugins/run-overlay-plugin- | claude-haiku-4-5-20251001 | 3 | 150 | 26 | 101,712 | 19 |
+| triage | claude-sonnet-5 | 2 | 97 | 4 | 77,730 | 155 |
+| synthesize:report | claude-sonnet-5 | 2 | 4 | 4 | 95,054 | 295 |
+
+- **claude-sonnet-5**: 19 agent · 304 calls · out 100,535 · in 1,856 · cache_read 33,547,403 · cache_create 1,766,446
+- **claude-opus-5**: 2 agent · 72 calls · out 44,154 · in 1,095 · cache_read 9,989,897 · cache_create 334,894
+- **claude-haiku-4-5-20251001**: 30 agent · 64 calls · out 17,576 · in 572 · cache_read 2,062,932 · cache_create 1,206,602
+
