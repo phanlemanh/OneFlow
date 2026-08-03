@@ -19,6 +19,7 @@ import {
     type AbiTopology,
     type FieldClass,
     getAbiTopology,
+    type OutputHandle,
     parseTargetHandleId,
     targetHandleId,
 } from "./handle-introspect";
@@ -79,6 +80,62 @@ export function handleAcceptsUpstream(
 ): boolean {
     if (!field || field.kind !== "handle" || !upstreamType) return false;
     return acceptedUpstreamTypes(field).includes(upstreamType);
+}
+
+/**
+ * Every accepted upstream type of every widened handle on `spec`. Empty for a
+ * spec with no `alsoAccepts` anywhere, which is what keeps the two functions
+ * below inert for the slots that never widened anything.
+ */
+function widenedUpstreamTypes(spec: ResolvedSpec | undefined): string[] {
+    if (!spec) return [];
+    const types: string[] = [];
+    for (const field of Object.values(spec.fields)) {
+        if (field.kind !== "handle" || !field.alsoAccepts?.length) continue;
+        types.push(...acceptedUpstreamTypes(field));
+    }
+    return types;
+}
+
+/**
+ * Output half of the widening rule. Widening a handle also widens the result:
+ * compose-overlay hands back a video when it was fed a video. Reading
+ * `topo.outputs[0]` instead pins such a slot to its first declared output, so
+ * the video result is routed nowhere and every downstream step is told the
+ * step produced an image.
+ *
+ * `upstreamTypes` are the types that actually arrived on this step's handles.
+ * A slot with no widened handle keeps `outputs[0]` — the single primary output
+ * it has always had.
+ */
+export function outputForUpstreamTypes(
+    spec: ResolvedSpec | undefined,
+    topo: AbiTopology,
+    upstreamTypes: readonly string[],
+): OutputHandle | undefined {
+    const widened = widenedUpstreamTypes(spec);
+    for (const type of upstreamTypes) {
+        if (!widened.includes(type)) continue;
+        const match = topo.outputs.find((o) => o.nodeType === type);
+        if (match) return match;
+    }
+    return topo.outputs[0];
+}
+
+/**
+ * Every output type the slot can produce across all its legal inputs — what a
+ * planner must be told, since it has no concrete upstream yet. Same rule as
+ * `outputForUpstreamTypes`, quantified over inputs instead of applied to one.
+ */
+export function producibleOutputTypes(
+    spec: ResolvedSpec | undefined,
+    topo: AbiTopology,
+): string[] {
+    const widened = widenedUpstreamTypes(spec);
+    const matched = topo.outputs.filter((o) => widened.includes(o.nodeType));
+    if (matched.length > 0) return matched.map((o) => o.nodeType);
+    const primary = topo.outputs[0];
+    return primary ? [primary.nodeType] : [];
 }
 
 export interface ResolvedSpec {

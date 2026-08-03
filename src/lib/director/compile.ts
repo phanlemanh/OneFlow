@@ -71,6 +71,7 @@ import {
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import {
     acceptedUpstreamTypes,
+    outputForUpstreamTypes,
     type ResolvedSpec,
     resolveSpec,
 } from "@/lib/abi/resolve";
@@ -392,6 +393,11 @@ export function compilePlan(
         // mirrors the `texts` caching below, but for image/video/audio/file
         // refs whose real value only exists after the upstream step runs.
         let hasMediaHandleInput = false;
+        // What actually arrived on this step's handles, in wiring order. A
+        // slot with a widened handle produces the modality it was fed, so the
+        // output node below is chosen from these rather than pinned to the
+        // first declared output.
+        const arrivedUpstreamTypes: DataNodeType[] = [];
 
         for (const { field, value } of step.inputs) {
             const fc = classifyField(slot, nodeType, field);
@@ -498,6 +504,7 @@ export function compilePlan(
                 if (fc.nodeType !== "textNode") {
                     hasMediaHandleInput = true;
                 }
+                arrivedUpstreamTypes.push(src.nodeType);
                 sourceIds.add(src.nodeId);
                 pendingEdges.push({
                     id: idFn(),
@@ -565,7 +572,11 @@ export function compilePlan(
         });
         edges.push(...pendingEdges);
 
-        const primaryOut = topo.outputs[0];
+        const primaryOut = outputForUpstreamTypes(
+            resolvedSpecFor(slot, nodeType),
+            topo,
+            arrivedUpstreamTypes,
+        );
         if (primaryOut) {
             const outId = idFn();
             nodes.push({

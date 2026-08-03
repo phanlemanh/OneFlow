@@ -21,6 +21,22 @@ describe("renderVocabulary", () => {
         expect(v).toMatch(/media:\s*image\|video/);
     });
 
+    it("advertises every modality a widened slot can produce", () => {
+        // The output half of the same rule. Advertising `-> image` alone told
+        // the planner a video overlay yields an image, so it never chained one
+        // into a video-consuming slot.
+        const v = renderVocabulary(["compose-overlay"]);
+        expect(v).toMatch(/->\s*image\|video/);
+    });
+
+    it("leaves a slot with no widened handle on its single primary output", () => {
+        // separate-sound declares two audio outputs and image-gen one image;
+        // neither widened anything, so both keep exactly what they always
+        // advertised — this is the guard on the new rule's blast radius.
+        expect(renderVocabulary(["image-gen"])).toMatch(/->\s*image$/m);
+        expect(renderVocabulary(["separate-sound"])).toMatch(/->\s*audio$/m);
+    });
+
     it("is byte-stable regardless of input order", () => {
         expect(renderVocabulary(["image-gen", "image-fusion"])).toBe(
             renderVocabulary(["image-fusion", "image-gen"]),

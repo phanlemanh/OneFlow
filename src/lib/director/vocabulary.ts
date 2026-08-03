@@ -15,7 +15,11 @@
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { type AbiTopology, getAbiTopology } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { acceptedUpstreamTypes, resolveSpec } from "@/lib/abi/resolve";
+import {
+    acceptedUpstreamTypes,
+    producibleOutputTypes,
+    resolveSpec,
+} from "@/lib/abi/resolve";
 import type { AnySourceSpec } from "@/lib/abi/sources";
 import { isDirectorSafeSlot } from "./safe-slots";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
@@ -133,11 +137,17 @@ export function renderVocabulary(slots: NodeSlot[]): string {
             );
         }
 
-        const out = topo.outputs[0];
+        // Same reason as the input line above: a widened handle also widens
+        // the result, and the planner only chains what the vocabulary claims
+        // the slot produces.
+        const outTypes = producibleOutputTypes(spec, topo);
+        const out = outTypes.length
+            ? outTypes.map(modalityName).join("|")
+            : "none";
         lines.push(
             `- slot "${slot}": inputs(${inputs.join(", ")}) params(${params.join(
                 ", ",
-            )}) -> ${out ? modalityName(out.nodeType) : "none"}`,
+            )}) -> ${out}`,
         );
     }
     return lines.join("\n");
@@ -145,16 +155,23 @@ export function renderVocabulary(slots: NodeSlot[]): string {
 
 /**
  * Modality node types some step in a plan can actually produce: DSL v1's
- * only source kind is `text` (-> textNode, spec §5), plus whatever each
- * slot in `slots` itself outputs as a "gen" step (`topo.outputs[0]`). A
- * slot whose required input needs a modality outside this set can never be
- * fed by any legal plan — see `installedSafeSlots`.
+ * only source kind is `text` (-> textNode, spec §5), plus every output each
+ * slot in `slots` can yield as a "gen" step. A slot with a widened handle
+ * yields more than its first declared output, so reading `outputs[0]` here
+ * would hide a producer and wrongly mark its consumers unsatisfiable. A slot
+ * whose required input needs a modality outside this set can never be fed by
+ * any legal plan — see `installedSafeSlots`.
  */
 function producibleModalities(slots: NodeSlot[]): Set<string> {
     const modalities = new Set<string>(["textNode"]);
     for (const slot of slots) {
-        const out = getAbiTopology(slot).outputs[0];
-        if (out) modalities.add(out.nodeType);
+        const nodeType = SLOT_TO_NODE_TYPE[slot];
+        const spec = nodeType
+            ? resolveSpec(slot, sourceSpecOverridesFor(nodeType))
+            : undefined;
+        for (const type of producibleOutputTypes(spec, getAbiTopology(slot))) {
+            modalities.add(type);
+        }
     }
     return modalities;
 }
@@ -181,7 +198,10 @@ function hasUnsatisfiableRequiredInput(
         const resolved = spec.fields[field];
         if (resolved?.kind !== "handle") return false;
         if (!resolved.required || resolved.manual) return false;
-        return !producible.has(resolved.nodeType);
+        // A widened handle is satisfiable if ANY accepted modality is
+        // producible — testing only the primary type drops a slot whose
+        // image-primary handle would happily take the video a plan can make.
+        return !acceptedUpstreamTypes(resolved).some((t) => producible.has(t));
     });
 }
 

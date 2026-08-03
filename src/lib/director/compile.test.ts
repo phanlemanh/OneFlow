@@ -1367,3 +1367,101 @@ describe("compilePlan — widened handle accepts more than its primary modality"
         );
     });
 });
+
+describe("compilePlan — a widened handle also widens the emitted output", () => {
+    const OVERLAY_PLUGINS = {
+        ...DEMO_PLUGINS,
+        "compose-overlay": "oneflow-modal-compose-overlay",
+        "concat-videos": "tongflow-modal-ffmpeg",
+    };
+
+    /** text -> image-gen -> image-gen-video -> compose-overlay(media=@s3) */
+    const VIDEO_INTO_OVERLAY: DirectorPlan["steps"] = [
+        { id: "s1", kind: "text", text: "a cute cat" },
+        {
+            id: "s2",
+            kind: "gen",
+            slot: "image-gen" as NodeSlot,
+            inputs: [{ field: "text", value: "@s1" }],
+            params: [],
+        },
+        {
+            id: "s3",
+            kind: "gen",
+            slot: "image-gen-video" as NodeSlot,
+            inputs: [{ field: "image", value: "@s2" }],
+            params: [],
+        },
+        {
+            id: "s4",
+            kind: "gen",
+            slot: "compose-overlay" as NodeSlot,
+            inputs: [{ field: "media", value: "@s3" }],
+            params: [],
+        },
+    ];
+
+    function compile(steps: DirectorPlan["steps"]) {
+        return compilePlan(
+            { dslVersion: 1, name: "overlay", description: "", steps },
+            { slotDefaultPlugin: OVERLAY_PLUGINS, idFn: seqId() },
+        );
+    }
+
+    it("routes a video result to a video node, not the first declared output", () => {
+        const result = compile(VIDEO_INTO_OVERLAY);
+        const overlay = byType(result.nodes).composeOverlayNode[0];
+        const fromOverlay = result.edges.filter(
+            (e: Edge) => e.source === overlay.id,
+        );
+        expect(fromOverlay).toHaveLength(1);
+        expect(fromOverlay[0].sourceHandle).toBe("out:video");
+        const sink = result.nodes.find((n) => n.id === fromOverlay[0].target);
+        expect(sink?.type).toBe("videoNode");
+    });
+
+    it("still routes an image result to an image node", () => {
+        const result = compile([
+            { id: "s1", kind: "text", text: "a cute cat" },
+            {
+                id: "s2",
+                kind: "gen",
+                slot: "image-gen" as NodeSlot,
+                inputs: [{ field: "text", value: "@s1" }],
+                params: [],
+            },
+            {
+                id: "s3",
+                kind: "gen",
+                slot: "compose-overlay" as NodeSlot,
+                inputs: [{ field: "media", value: "@s2" }],
+                params: [],
+            },
+        ]);
+        const overlay = byType(result.nodes).composeOverlayNode[0];
+        const fromOverlay = result.edges.filter(
+            (e: Edge) => e.source === overlay.id,
+        );
+        expect(fromOverlay).toHaveLength(1);
+        expect(fromOverlay[0].sourceHandle).toBe("out:image");
+        expect(
+            result.nodes.find((n) => n.id === fromOverlay[0].target)?.type,
+        ).toBe("imageNode");
+    });
+
+    it("lets a later step consume the overlay's video result", () => {
+        const result = compile([
+            ...VIDEO_INTO_OVERLAY,
+            {
+                id: "s5",
+                kind: "gen",
+                slot: "concat-videos" as NodeSlot,
+                inputs: [{ field: "videos", value: "@s4" }],
+                params: [],
+            },
+        ]);
+        expect(
+            result.issues.filter((i) => i.code === "MODALITY_MISMATCH"),
+        ).toEqual([]);
+    });
+});
