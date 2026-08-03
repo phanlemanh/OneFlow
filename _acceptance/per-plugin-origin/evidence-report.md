@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
-human_signoff: Manh 2026-07-27
+verified_commit: a96d5d860e827e4e352c194ffe8264da878d1d9c
+human_signoff:
 ---
 
 # Evidence Report: per-plugin-origin
@@ -31,126 +31,126 @@ human_signoff: Manh 2026-07-27
 ## Evidence
 
 - eval: E1
-  run_id: minted-per-plugin-origin-E1-r8
+  run_id: minted-per-plugin-origin-E1-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:06Z
   output: |
          Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+      Start at  13:47:06
+      Duration  148ms (transform 23ms, setup 0ms, import 32ms, tests 6ms, environment 0ms)
 
 - eval: E2
-  run_id: minted-per-plugin-origin-E2-r8
+  run_id: minted-per-plugin-origin-E2-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:06Z
   output: |
          Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+      Start at  13:47:06
+      Duration  148ms (transform 23ms, setup 0ms, import 32ms, tests 6ms, environment 0ms)
 
 - eval: E3
-  run_id: minted-per-plugin-origin-E3-r8
+  run_id: minted-per-plugin-origin-E3-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:06Z
   output: |
          Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+      Start at  13:47:06
+      Duration  148ms (transform 23ms, setup 0ms, import 32ms, tests 6ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-per-plugin-origin-E4-r8
+  run_id: minted-per-plugin-origin-E4-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:06Z
   output: |
          Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+      Start at  13:47:06
+      Duration  148ms (transform 23ms, setup 0ms, import 32ms, tests 6ms, environment 0ms)
 
 - eval: E5
-  run_id: minted-per-plugin-origin-E5-r8
+  run_id: minted-per-plugin-origin-E5-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_single_impl
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:07Z
   output: |
     OK: one URL rule across src/ and scripts/, in src/lib/plugins/official-manifest.ts; the CLI installer imports it (the SDK engine's Python copy is out of this scan's scope — see the contract's known limits)
 
 - eval: E6
-  run_id: minted-per-plugin-origin-E6-r8
+  run_id: minted-per-plugin-origin-E6-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_installer_parity
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:07Z
   output: |
     OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward
 
 - eval: E7
-  run_id: minted-per-plugin-origin-E7-r8
+  run_id: minted-per-plugin-origin-E7-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_manifest_unmoved
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:07Z
   output: |
-    OK: 38 plain string entries, default org unchanged
+    OK: 38 plain strings under default org + 1 origin entry (compose-overlay)
 
 - eval: E8
-  run_id: minted-per-plugin-origin-E8-r8
+  run_id: minted-per-plugin-origin-E8-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:08Z
   output: |
-         Tests  75 passed (75)
-      Start at  17:36:45
-      Duration  133ms (transform 19ms, setup 0ms, import 28ms, tests 3ms, environment 0ms)
+         Tests  76 passed (76)
+      Start at  13:47:08
+      Duration  123ms (transform 18ms, setup 0ms, import 26ms, tests 3ms, environment 0ms)
 
 - eval: E9
-  run_id: minted-per-plugin-origin-E9-r8
+  run_id: minted-per-plugin-origin-E9-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:11Z
   output: |
-         Tests  329 passed (329)
-      Start at  17:36:42
-      Duration  1.32s (transform 2.48s, setup 0ms, import 4.97s, tests 740ms, environment 1ms)
+         Tests  388 passed (388)
+      Start at  13:47:11
+      Duration  1.64s (transform 1.87s, setup 0ms, import 3.67s, tests 1.45s, environment 669ms)
 
 - eval: E10
-  run_id: minted-per-plugin-origin-E10-r8
+  run_id: minted-per-plugin-origin-E10-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:12Z
   output: |
-    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new settings.
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The "onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
     $ tsc --noEmit
 
 - eval: E11
-  run_id: minted-per-plugin-origin-E11-r8
+  run_id: minted-per-plugin-origin-E11-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:13Z
   output: |
-    Checked 402 files in 86ms. No fixes applied.
+    $ pnpm exec biome check --error-on-warnings .
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+    Checked 424 files in 98ms. No fixes applied.
 
 - eval: E12
-  run_id: minted-per-plugin-origin-E12-r8
+  run_id: minted-per-plugin-origin-E12-r9
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T13:47:14Z
   output: |
-    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
-    $ tsx scripts/verify-plugins-scan.ts
     [verify-plugins-scan] OK
 
 ### Additional runs (not mapped to any eval / AC)
@@ -159,15 +159,15 @@ Two further commands were run as supplementary guards but are not attached to
 any eval id in this contract, so they do not appear in the table above and do
 not affect the verdict:
 
-- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — 1 run, passed (89 passed in 3.19s), baseline n-a.
-- `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — 1 run, passed (wrote src/generated/abi/index.ts and sdk/tongflow/_data/tongflow.abi.json, no diff — files in sync), baseline n-a.
+- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — 1 run, passed (193 passed in 7.95s), baseline n-a.
+- `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — 1 run, passed (regenerated and fixed one file — "Checked 1 file in 40ms. Fixed 1 file." — then wrote src/generated/abi/index.ts and sdk/tongflow/_data/tongflow.abi.json with no resulting diff), baseline n-a.
 
 ## Analyst
 
 carried tu round truoc — baseline khong do lai round nay (P2 — evals.yaml
 khong doi tu lan baseline cuoi).
 
-none — no non-discriminating evals reported for round 8 (baseline was not
+none — no non-discriminating evals reported for round 9 (baseline was not
 re-measured this round; see round 1's Analyst findings for the last measured
 baseline classification of E8/E9/E12 as intended regression-guards).
 
@@ -256,7 +256,33 @@ baseline run); the Analyst section carries forward round 1's classification.
 No judgment items are pending for this contract this round (judge panel list
 is empty). Verdict: PASS.
 
-Carry-forward re-pin (2026-07-29, branch feat/stale-scope-by-paths):
+Round 9: all evals E1-E12 pass again (exit 0) against the re-verified tree at
+commit a96d5d860e827e4e352c194ffe8264da878d1d9c. E1-E4's suite holds at 57
+tests (same as round 8); E8's suite grew to 76 tests (was 75); the whole-repo
+suite E9 grew to 388 (was 329 in round 8). Build/typecheck, lint, and the
+plugins scan verifier remain green, and the two unmapped supplementary guards
+(SDK pytest, now 193 passed; ABI-generation diff check, which this round
+again regenerated and fixed one file with no resulting diff) stay green.
+Baseline was not re-measured this round (P2 — evals.yaml unchanged since
+round 1's baseline run); the Analyst section carries forward round 1's
+classification. No judgment items are pending for this contract this round
+(judge panel list is empty). Verdict: PASS.
+
+## Gate 2 checklist (human)
+
+- [ ] Read the table + spot-check 1-2 evidence blocks
+- [ ] Personally verify every judgment item marked UNCERTAIN, then fill its
+      `human_override: <name> <date>` line
+- [ ] T3 only: personally verify ALL judgment items and fill `human_override`
+      on each (judge verdicts are advisory; the hook blocks PASS without them)
+- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
+      the hook re-validates evidence + overrides)
+- [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+
+---
+
+Carry-forward re-pin (2026-07-30, branch feat/stale-scope-by-paths):
 `verified_commit` moved from 70457b5f0eaf43bd6fe7db5265ffc39df6b74b62 to
 4dcb419d5d7d4612c10339bede6219662721d7e0 with NO re-verify, under the carry-forward
 rule in AGENTS.md. Both of its conditions were checked, not assumed.
@@ -344,17 +370,6 @@ lint, unit 349, sdk pytest 159, verify:plugins, ABI drift) exited 0 alongside
 18/18 feature evals.
 
 The human signature line in frontmatter was not touched.
-
-## Gate 2 checklist (human)
-
-- [ ] Read the table + spot-check 1-2 evidence blocks
-- [ ] Personally verify every judgment item marked UNCERTAIN, then fill its
-      `human_override: <name> <date>` line
-- [ ] T3 only: personally verify ALL judgment items and fill `human_override`
-      on each (judge verdicts are advisory; the hook blocks PASS without them)
-- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
-      the hook re-validates evidence + overrides)
-- [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
 
 
 ---
