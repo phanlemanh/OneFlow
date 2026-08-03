@@ -1,0 +1,252 @@
+E22 round 4 — network truth dump (custom puppeteer instrumentation)
+Scope: http://localhost:3001 (actual dev server this round; port 3000 was occupied by an unrelated project 'ap-media-roadmap')
+Captured: 2026-08-03T05:36:38.914Z
+
+=== state-1-empty ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  404 GET http://localhost:3001/api/uploads/tasks/82xfBRQHs2mC-WJjPgpEM/CKtGcdc8YMrouNZtpjbzN.png
+  404 GET http://localhost:3001/api/uploads/tasks/YNiEkIqDHWzCdKu3EGMtT/etz5lwKJ1aXJKm4Y5kVHA.png
+  404 GET http://localhost:3001/api/uploads/tasks/iokJb-SC1DeiM0S_PQv0r/pU8sgnY8F8-hKd5L-OPBl.png
+  404 GET http://localhost:3001/api/uploads/tasks/02dBZ5ZhgPJLEbyLaOkRZ/thatFeeVupFMbRpFH8_eg.mp4
+  404 GET http://localhost:3001/api/uploads/tasks/02dBZ5ZhgPJLEbyLaOkRZ/thatFeeVupFMbRpFH8_eg.mp4
+-- all app-origin requests seen (41) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735398963
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735398963
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735398963
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735398963
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/example.json
+  200 GET http://localhost:3001/api/feature/list
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=
+  404 GET http://localhost:3001/api/uploads/tasks/82xfBRQHs2mC-WJjPgpEM/CKtGcdc8YMrouNZtpjbzN.png
+  404 GET http://localhost:3001/api/uploads/tasks/YNiEkIqDHWzCdKu3EGMtT/etz5lwKJ1aXJKm4Y5kVHA.png
+  404 GET http://localhost:3001/api/uploads/tasks/iokJb-SC1DeiM0S_PQv0r/pU8sgnY8F8-hKd5L-OPBl.png
+  200 GET http://localhost:3001/api/plugins/registry
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=
+  404 GET http://localhost:3001/api/uploads/tasks/02dBZ5ZhgPJLEbyLaOkRZ/thatFeeVupFMbRpFH8_eg.mp4
+  404 GET http://localhost:3001/api/uploads/tasks/02dBZ5ZhgPJLEbyLaOkRZ/thatFeeVupFMbRpFH8_eg.mp4
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735400168
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735400168
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735400168
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735400168
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  304 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+
+=== state-2-ops-image ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  (none)
+-- all app-origin requests seen (28) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735402358
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735402358
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735402358
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735402358
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735403469
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735403469
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735403469
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735403469
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/uploads/PYXUW__XM7p8thWPfi9Tn.png
+  200 GET http://localhost:3001/api/plugins/registry
+  304 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+
+=== state-3-ops-video ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  (none)
+-- all app-origin requests seen (36) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735405666
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735405666
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735405666
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735405666
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/uploads/PYXUW__XM7p8thWPfi9Tn.png
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735406802
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735406802
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735406802
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735406802
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+
+=== state-4-op-form ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  (none)
+-- all app-origin requests seen (43) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735408941
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735408941
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735408941
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735408941
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735410085
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735410085
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735410085
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735410085
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  304 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+
+=== state-5-error ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  (none)
+-- all app-origin requests seen (36) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735412790
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735412790
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735412790
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735412790
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  206 GET http://localhost:3001/api/uploads/t5tVscRnUQMNTxdXLN0ZK.mp4
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==
+  200 GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K
+  200 GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735413878
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735413878
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735413878
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735413878
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/uploads/PYXUW__XM7p8thWPfi9Tn.png
+  200 GET http://localhost:3001/api/plugins/registry
+  304 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+
+=== state-6-running ===
+-- FAIL-eligible / failed requests (status>=400 or connection error) --
+  (none)
+-- all app-origin requests seen (31) --
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735416022
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735416022
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735416022
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735416022
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/uploads/PYXUW__XM7p8thWPfi9Tn.png
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  200 GET http://localhost:3001/workspace
+  200 GET http://localhost:3001/_next/static/media/22a5144ee8d83bca-s.p.woff2
+  200 GET http://localhost:3001/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+  200 GET http://localhost:3001/_next/static/css/app/workspace/page.css?v=1785735417102
+  200 GET http://localhost:3001/_next/static/css/app/layout.css?v=1785735417102
+  200 GET http://localhost:3001/_next/static/chunks/webpack.js?v=1785735417102
+  200 GET http://localhost:3001/_next/static/chunks/app-pages-internals.js
+  200 GET http://localhost:3001/_next/static/chunks/app/layout.js
+  200 GET http://localhost:3001/_next/static/chunks/main-app.js?v=1785735417102
+  200 GET http://localhost:3001/_next/static/chunks/app/workspace/page.js
+  200 GET http://localhost:3001/api/uploads/PYXUW__XM7p8thWPfi9Tn.png
+  200 GET http://localhost:3001/api/feature/list
+  200 GET http://localhost:3001/api/plugins/registry
+  304 GET http://localhost:3001/apple-touch-icon.png
+  304 GET http://localhost:3001/apple-touch-icon.png
+  200 GET http://localhost:3001/api/task/pending
+  200 POST http://localhost:3001/api/task/create
+  200 GET http://localhost:3001/api/task/wait?taskId=LYqj0uQmgk0gj4BUMyoZN
