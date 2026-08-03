@@ -71,6 +71,7 @@ import {
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import {
     acceptedUpstreamTypes,
+    type HandleArrival,
     outputForUpstreamTypes,
     type ResolvedSpec,
     resolveSpec,
@@ -393,11 +394,13 @@ export function compilePlan(
         // mirrors the `texts` caching below, but for image/video/audio/file
         // refs whose real value only exists after the upstream step runs.
         let hasMediaHandleInput = false;
-        // What actually arrived on this step's handles, in wiring order. A
-        // slot with a widened handle produces the modality it was fed, so the
-        // output node below is chosen from these rather than pinned to the
-        // first declared output.
-        const arrivedUpstreamTypes: DataNodeType[] = [];
+        // What actually arrived on this step's handles, paired with the field
+        // it arrived on. A slot with a widened handle produces the modality
+        // that fed THAT field, so the output node below is chosen from these
+        // rather than pinned to the first declared output. The field matters:
+        // compose-overlay's `logo` is an image too, and keying on type alone
+        // would let it decide the result whenever it was wired first.
+        const arrivedUpstreamTypes: HandleArrival[] = [];
 
         for (const { field, value } of step.inputs) {
             const fc = classifyField(slot, nodeType, field);
@@ -504,7 +507,7 @@ export function compilePlan(
                 if (fc.nodeType !== "textNode") {
                     hasMediaHandleInput = true;
                 }
-                arrivedUpstreamTypes.push(src.nodeType);
+                arrivedUpstreamTypes.push([field, src.nodeType]);
                 sourceIds.add(src.nodeId);
                 pendingEdges.push({
                     id: idFn(),

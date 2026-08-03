@@ -97,6 +97,9 @@ function widenedUpstreamTypes(spec: ResolvedSpec | undefined): string[] {
     return types;
 }
 
+/** A type that actually arrived, and the handle field it arrived on. */
+export type HandleArrival = readonly [field: string, upstreamType: string];
+
 /**
  * Output half of the widening rule. Widening a handle also widens the result:
  * compose-overlay hands back a video when it was fed a video. Reading
@@ -104,19 +107,26 @@ function widenedUpstreamTypes(spec: ResolvedSpec | undefined): string[] {
  * the video result is routed nowhere and every downstream step is told the
  * step produced an image.
  *
- * `upstreamTypes` are the types that actually arrived on this step's handles.
+ * Keyed on the WIDENED FIELD, never on the set of types the slot accepts
+ * anywhere: compose-overlay's `logo` is an imageNode too, so matching by type
+ * alone let a logo wired before the media decide the result modality — the
+ * answer would then depend on input ordering rather than on what fed `media`.
+ *
  * A slot with no widened handle keeps `outputs[0]` — the single primary output
  * it has always had.
  */
 export function outputForUpstreamTypes(
     spec: ResolvedSpec | undefined,
     topo: AbiTopology,
-    upstreamTypes: readonly string[],
+    arrivals: readonly HandleArrival[],
 ): OutputHandle | undefined {
-    const widened = widenedUpstreamTypes(spec);
-    for (const type of upstreamTypes) {
-        if (!widened.includes(type)) continue;
-        const match = topo.outputs.find((o) => o.nodeType === type);
+    for (const [field, upstreamType] of arrivals) {
+        const resolved = spec?.fields[field];
+        if (resolved?.kind !== "handle" || !resolved.alsoAccepts?.length) {
+            continue;
+        }
+        if (!handleAcceptsUpstream(resolved, upstreamType)) continue;
+        const match = topo.outputs.find((o) => o.nodeType === upstreamType);
         if (match) return match;
     }
     return topo.outputs[0];
