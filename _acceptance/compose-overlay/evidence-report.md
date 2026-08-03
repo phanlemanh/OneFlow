@@ -1,17 +1,18 @@
 ---
 schema_version: 2
 feature_slug: compose-overlay
-verdict: PENDING-JUDGMENT
+verdict: REJECT
 failed_evals: []
-reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: b750a3afbb1395b89f3fa960dad6ba07cb296d59
+verified_commit: 4447f4119fb379a25522a2769138155734be064e
 human_signoff:
 ---
 
 # Evidence Report: compose-overlay
+
+Round 6. Every machine eval below exited 0 and the E23 judge panel is a unanimous PASS across all three lenses — but code review (see `review-findings.md`) found an in-contract defect mapped to AC-12 (mediaKind resolves the wrong media type on first render for an ABI video upstream, because it memoizes a read of a non-reactive registry populated only after render) that the current E12a test suite does not catch. `failed_evals` is empty because no eval command itself failed; the REJECT comes from that review finding, not from a red eval.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -41,318 +42,330 @@ human_signoff:
 | E20 | AC-14 | script | PASS |
 | E21 | AC-15 | script | PASS |
 | E22 | AC-16 | ui-check | PASS |
-| E23 | AC-16 | judgment | UNCERTAIN |
+| E23 | AC-16 | judgment | PASS |
 
 ## Evidence
 
 - eval: E1a
-  run_id: minted-compose-overlay-E1a-r5
+  run_id: minted-compose-overlay-E1a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.gen_abi_clean
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
+    Checked 1 file in 92ms. Fixed 1 file.
     Wrote src/generated/abi/index.ts
     Wrote sdk/tongflow/_data/tongflow.abi.json
 
 - eval: E1b
-  run_id: minted-compose-overlay-E1b-r5
+  run_id: minted-compose-overlay-E1b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.abi_python_gen_clean
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    EXIT_CODE: 0
+    Script passed silently. Generated Python artifacts (sdk/tongflow/models/ and sdk/tongflow/node_slots.py) match committed code. No diffs detected and no untracked files.
 
 - eval: E2
-  run_id: minted-compose-overlay-E2-r5
+  run_id: minted-compose-overlay-E2-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_diacritics
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.86s
+    1 passed in 0.33s
 
 - eval: E3
-  run_id: minted-compose-overlay-E3-r5
+  run_id: minted-compose-overlay-E3-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_multiline
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.25s
+    1 passed in 0.12s
 
 - eval: E4
-  run_id: minted-compose-overlay-E4-r5
+  run_id: minted-compose-overlay-E4-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_price_tag
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.08s
+    1 passed in 0.12s
 
 - eval: E5a
-  run_id: minted-compose-overlay-E5a-r5
+  run_id: minted-compose-overlay-E5a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_logo
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
+    plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.20s
+    1 passed in 0.07s
 
 - eval: E5b
-  run_id: minted-compose-overlay-E5b-r5
+  run_id: minted-compose-overlay-E5b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_logo_missing
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
     1 passed in 0.06s
 
 - eval: E6
-  run_id: minted-compose-overlay-E6-r5
+  run_id: minted-compose-overlay-E6-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_safe_zone
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.15s
+    1 passed in 0.07s
 
 - eval: E7a
-  run_id: minted-compose-overlay-E7a-r5
+  run_id: minted-compose-overlay-E7a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_placeholder
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.19s
+    1 passed in 0.06s
 
 - eval: E7b
-  run_id: minted-compose-overlay-E7b-r5
+  run_id: minted-compose-overlay-E7b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_placeholder_missing
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.07s
+    1 passed in 0.17s
 
 - eval: E8a
-  run_id: minted-compose-overlay-E8a-r5
+  run_id: minted-compose-overlay-E8a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_time_window
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.35s
+    1 passed in 0.33s
 
 - eval: E8b
-  run_id: minted-compose-overlay-E8b-r5
+  run_id: minted-compose-overlay-E8b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_time_window_image
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.07s
+    1 passed in 0.20s
 
 - eval: E9a
-  run_id: minted-compose-overlay-E9a-r5
+  run_id: minted-compose-overlay-E9a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_modality_image
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
     1 passed in 0.07s
 
 - eval: E9b
-  run_id: minted-compose-overlay-E9b-r5
+  run_id: minted-compose-overlay-E9b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_modality_video
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.19s
+    1 passed in 0.27s
 
 - eval: E10
-  run_id: minted-compose-overlay-E10-r5
+  run_id: minted-compose-overlay-E10-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_determinism
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
+  plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
     .                                                                        [100%]
-    1 passed in 0.34s
+    1 passed in 0.33s
 
 - eval: E14
-  run_id: minted-compose-overlay-E14-r5
+  run_id: minted-compose-overlay-E14-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_tier_a_hit
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    1 passed in 0.14s
+    .                                                                        [100%]
+    1 passed in 0.03s
 
 - eval: E15
-  run_id: minted-compose-overlay-E15-r5
+  run_id: minted-compose-overlay-E15-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_partial_rerun
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    1 passed in 0.04s
+    .                                                                        [100%]
+    1 passed in 0.16s
 
 - eval: E16
-  run_id: minted-compose-overlay-E16-r5
+  run_id: minted-compose-overlay-E16-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l3_allowlists_disjoint
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    .                                                                        [100%]\n1 passed in 0.02s
+    1 passed in 0.02s
 
 - eval: E17
-  run_id: minted-compose-overlay-E17-r5
+  run_id: minted-compose-overlay-E17-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_abi_guard_bidirectional
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E12a
-  run_id: minted-compose-overlay-E12a-r5
+  run_id: minted-compose-overlay-E12a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_overlay_node
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
-    Tests  6 passed (6)
-    Start at  14:35:37
-    Duration  1.58s (transform 316ms, setup 0ms, import 728ms, tests 302ms, environment 449ms)
-    (round 5 additions run + reported separately per instruction: connection-rules.test.ts alsoAccepts group, node-feature-registry.test.ts resolveEdgeHandles group, edge-target-options.test.ts inline-select + canSwapOntoHandle two-direction refusal group — all three included in the 6 passed above.)
+    pnpm vitest run src/components/workspace/nodes/transfer/compose-overlay.test.tsx
+    Tests  7 passed (7)
+    Start at  15:25:07
+    Duration  1.94s (transform 423ms, setup 0ms, import 834ms, tests 384ms, environment 556ms)
 
 - eval: E12b
-  run_id: minted-compose-overlay-E12b-r5
+  run_id: minted-compose-overlay-E12b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_overlay_exporter
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
+    pnpm vitest run src/lib/workflow/compose-overlay-export.test.ts
     Tests  3 passed (3)
-    Start at  14:35:38
-    Duration  268ms (transform 105ms, setup 0ms, import 151ms, tests 4ms, environment 0ms)
+    Start at  15:25:08
+    Duration  372ms (transform 176ms, setup 0ms, import 228ms, tests 7ms, environment 0ms)
 
 - eval: E18
-  run_id: minted-compose-overlay-E18-r5
+  run_id: minted-compose-overlay-E18-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_conformance
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
     .                                                                        [100%]
-    1 passed, 6 deselected in 0.02s
+    1 passed, 6 deselected in 0.03s
 
 - eval: E19
-  run_id: minted-compose-overlay-E19-r5
+  run_id: minted-compose-overlay-E19-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
+    pnpm vitest run src/lib/abi/conformance.test.ts
     Tests  12 passed (12)
-    Start at  14:35:42
-    Duration  205ms (transform 86ms, setup 0ms, import 108ms, tests 4ms, environment 0ms)
+    Start at  15:25:10
+    Duration  193ms (transform 61ms, setup 0ms, import 82ms, tests 4ms, environment 0ms)
 
 - eval: E20
-  run_id: minted-compose-overlay-E20-r5
+  run_id: minted-compose-overlay-E20-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_registration_synced
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
     OK: compose-overlay registered (origin entry), docs matrix rows + i18n coherent
 
 - eval: E21
-  run_id: minted-compose-overlay-E21-r5
+  run_id: minted-compose-overlay-E21-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_sdk_train
-  verified_at: 2026-08-02T14:40:00Z
+  verified_at: 2026-08-03T15:25:00Z
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
     published wheel carries compose-overlay types
     sdk train OK: 0.2.18
 
 - eval: E22
-  run_id: e22-round5-independent-verify
+  run_id: e22-round6-independent-verify
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.design.gate
-  verified_at: 2026-08-02T14:40:00Z
-  screenshot: evidence/design/captures/state-1-empty.png
+  verified_at: 2026-08-03T15:25:00Z
+  screenshot: _acceptance/compose-overlay/evidence/design/captures/state-1-empty.png
   observed: |
-    Read all 6 saved PNG frames directly (Read tool, images) — each opened and compared against the 6-state matrix / round-4 baseline:
-    state-1-empty.png (1000x1100): "Overlay Text/Logo" header, Implementation picker showing the throwaway stub "api-e22-r5-stub" (only plugin installed in this run's registry), "No ops yet. Add text, a price tag, a logo or a safe zone.", 4 enabled add-op buttons (Text/Price tag/Logo/Safe zone), disabled gray "Apply Overlay" — matches empty/no-media/no-ops/execute-disabled.
-    state-2-ops-image.png: real uploaded 64x64 image node connected via a real edge into "media" handle, "Ops · media: image" label, one TEXT op row with no time badge, enabled solid-black "Apply Overlay" — matches, no time badge for image media confirmed.
-    state-3-ops-video.png: real generated 64x64 mp4 connected the same way, "Ops · media: video", TEXT row now shows an "entire video" time badge — matches, video-conditional time badge confirmed working post-fix.
-    state-4-op-form.png (fullPage, video media): TEXT op's inline form fully expanded and un-clipped top-to-bottom — Content textarea, x/y, Anchor, Font size, Color, Alignment, Max width, and Start (s)/End (s) fields both fully visible (also grepped into the paired .html: data-testid="op-start"/"op-end" both present) — matches round-4's fixed (non-cropped) capture.
-    state-5-error.png: red top banner "A logo op needs an image on in:logo — connect an image node.", inline red LOGO row "logo image missing (in:logo not conn...)", disabled gray "Apply Overlay" — matches.
-    state-6-running.png: a genuine live task (real POST /api/task/create -> 200, taskId returned, /api/task/wait polled and returned 200) rendered on the node — rotating rainbow conic-gradient border, dimmed overlay, blue spinner, "Task started" label, "3s" elapsed counter — matches the loading-state treatment. Grepped the paired state-6-running.html: aria-label="Cancel execution" present in the DOM (hover-only affordance, not visible in the static non-hover screenshot, same as round 4's note). No state was cropped; all 6 rendered within the 1000x1100 viewport with room to spare.
+    Read all 6 committed PNGs directly (evidence/design/captures/state-*.png, 1000x1100px each). state-1-empty.png: clean "Overlay Text/Logo" shell, "Implementation: api-e22-r5-stub", "No ops yet" copy, 4 disabled add-op buttons (Text/Price tag/Logo/Safe zone), gray disabled "Apply Overlay" — no errors, no clutter. state-2-ops-image.png: real 64x64 blue image thumbnail wired via a "media" edge into the overlay node, one configured TEXT op ("E22 round-5 capture" · 0.5, 0.12), enabled black "Apply Overlay" — no broken-image icon. state-3-ops-video.png: real 64x64 green video thumbnail wired in, TEXT op scoped "entire video" (time-window controls present, confirming the getEffectiveOutputType fix path renders correctly for video). state-4-op-form.png: the same video node's TEXT op expanded into a full edit form — content textarea, x/y, anchor select, font size, color swatch+hex, alignment select, max width, start/end(s) — all fields legible, no overlap. state-5-error.png: red destructive-styled banner "A logo op needs an image on in:logo — connect an image node." plus a red-bordered LOGO op row "logo image missing (in:logo not conn...)" — clear, on-brand error state. state-6-running.png: rotating rainbow-gradient border around the node, spinner icon, "Task started" tooltip, "3s" timer, grayed/disabled "Apply Overlay" — matches the round-4 decision to use a real animated loading shell (not a shimmer skeleton). All 6 states are visually distinct, internally consistent, and match the ma trận design-doc names (empty/ops-image/ops-video/op-form/error/running) with no cross-contamination between states.
   network_observed: clean
   output: |
-    state-5-error.png / .html
-    state-6-running.png / .html
-    Plus: _acceptance/compose-overlay/evidence/E22-console-r5.txt, _acceptance/compose-overlay/evidence/E22-network-r5.txt
+    Dev-server handling: no server was listening on :3000 at session start (curl -> 000, lsof empty). Started `pnpm dev` myself in the background, polled http://localhost:3000/workspace every 2s (ready after ~4s), and killed only the two PIDs I started (next dev + pnpm dev wrapper) at the end — confirmed port 3000 no longer responds afterward. No code files were touched; only new evidence .txt files were added (git status shows only the 2 new evidence files + the pre-existing untracked pnpm-workspace.yaml that was already untracked before this session started).
+
+    Overall: exit 0. All 6 states pass the P0 design gate, console is clean, network is clean (app-scope) for the actual "ov1"-based evidence chain under test for E22/E23; a co-located but out-of-scope stale fixture ("e22-fixture") on the shared dev DB was found, cross-checked against already-documented prior-round explanation, and does not affect this verdict.
 
 - eval: E23
-  judged_by: judge panel (fresh context) — lenses: domain-correctness, operational-feasibility, spec-alignment
-  proposal: PASS
-  verdict: UNCERTAIN
-  verified_at: 2026-08-02T14:40:00Z
-  votes:
-    - domain-correctness: PASS — Cả 6 capture khớp đúng cấu trúc state trong manifest: state-1 disabled Apply + empty-ops message, state-2 (media=image) không có time field, state-3 (media=video) có badge "entire video", state-4 op-form đủ các field (content/x/y/anchor/font/color/alignment/max-width/start-end) không bị thiếu như lo ngại, state-5 có cả banner lỗi và inline chip lỗi đỏ cho logo thiếu, state-6 dùng đúng overlay loading dùng chung (viền gradient xoay + spinner + nhãn + đồng hồ) như reading_notes mô tả. Panel Overlay Text/Logo dùng chung chrome với các node transfer khác trên canvas (card bo góc trắng, header icon+title+hamburger, nút CTA đen có icon), không thấy artefact "No plugin implementations were scanned" hay dấu hiệu phá ngôn ngữ thiết kế workspace trong 6 ảnh đã cho.
-    - operational-feasibility: FAIL — State-6 (running) co loi lop de: chu dem gio "5s" de thang len tren van ban ops-row phia duoi ("0,5, 0.12"), khien ca hai deu khong doc duoc — backdrop lam mo/toi cua overlay (theo spec la inset:0 phu het node, background+blur) chi phu duoc phan tren (select "api-e22-capture-stub" nhat mau) con hang Ops/TEXT ben duoi van hien ro net, khong duoc lam mo dong bo, dan den overlay va noi dung nen chong len nhau. Day la loi hien thi that, thay ro trong pixel capture, khong nam trong 3 dien giai cua reading_notes (moi truong scan plugin, anh bi cat do viewport, hay treatment loading dung chung) nen khong the bo qua. 5 state con lai (1,2,3,4,5) khop cau truc voi design-of-record va giu dung ngon ngu BaseNodeShell, nhung rieng state-6 pha vo tinh chuyen nghiep/doc duoc cua workspace nen tong the fail lens operational-feasibility.
-    - spec-alignment: PASS — Ca 6 capture the hien dung cau truc mo ta trong manifest: state-1 co CTA "Apply Overlay" bi disable (xam) khi chua co ops; state-2/3 chuyen tiep dung "no time fields" -> badge "entire video" khi media=video; state-4 co day du textarea multi-line + x/y + anchor + font size + color + alignment + max width + Start/End(s); state-5 co ca banner do lan chip inline do "logo image missing (in:logo not conn...)"; state-6 dung spinner + vien gradient xoay + nhan trang thai + dong ho dem, dung "shared BaseNodeShell loading treatment" nhu reading_notes da luu y truoc. Toan bo 6 anh dung chung mot BaseNodeShell chrome (header icon+title+hamburger, khung Implementation, toolbar canvas duoi) nen doc nhu mot node-hang-cung-nha voi cac node transfer khac, khong thay pha vo ngon ngu thiet ke; phan chu overlap nhe o state-6 (nhan trang thai de len noi dung nen) khop voi ghi chu "treatment dung chung", khong phai loi rieng cua compose-overlay.
-  rationale: Panel split 2 PASS (domain-correctness, spec-alignment) / 1 FAIL (operational-feasibility) on the same state-6 capture — the dissenting lens found a genuine, pixel-visible overlap between the elapsed-time label and the Ops/TEXT row text beneath it that the other two lenses did not weigh as disqualifying. This is a real rendering defect, not a capture artefact, so it needs a human call rather than an averaged verdict.
+  judged_by: 3-lens panel (fresh context) — domain-correctness, operational-feasibility, spec-alignment
+  verdict: PASS
+  rationale: |
+    - domain-correctness: PASS — Ca 6 state deu khop cau truc voi design-of-record: header icon+title+menu, khoi plugin-select ("Implementation" + dropdown chip) giong het pattern cua cac node transfer khac (vd Text-to-Image trong workspace), ops list voi op-type badge/summary/act, 2x2 add-menu, banner-error + op-row.error o state-5, va op-form o state-4 co du cac field (content, x/y, anchor, font-size, color, alignment, max-width, start/end) dung nhu manifest mo ta. State-6 co du 5 yeu to cua shared BaseNodeShell loading treatment (vien gradient xoay, spinner, nhan "Task started", dong ho "3s", nut huy theo reading_notes) du vi tri overlay hoi lech tam so voi ban ve, khong du de xem la pha ngon ngu thiet ke. Khong thay mau sac/border-radius/spacing la ngoai token cua styles.css.
+    - operational-feasibility: PASS — Ca 6 capture khop cau truc voi design-of-record: state-1 (empty, 2x2 add-menu, execute disabled), state-2/3 (op-row voi badge/summary/actions, state-3 co the hien thi thoi luong "entire video" dung yeu cau "time fields visible"), state-4 (form day du truong — cross-check DOM xac nhan co ca op-start/op-end du bi crop trong PNG), state-5 (banner-error + op-row.error mau do dung token), state-6 (rotating-gradient border + spinner + "Task started"/timer, va DOM xac nhan co nut "Cancel execution" du bi crop khoi anh — dung nhu reading_notes mo ta ve treatment loading chung cua BaseNodeShell). Node dung chung header/rounded-card/shadow voi cac node Image/Video sibling xuat hien cung canvas trong cac anh, khong thay yeu to nao pha ngon ngu thiet ke workspace.
+    - spec-alignment: PASS — Ca 6 state khop cau truc voi design-of-record: state-1 giu grid 2x2 nut add-op + Apply disabled xam; state-2/3 dung dung quy tac an/hien op-time theo media (anh: khong co, video: co nhan "entire video"); state-4 co du truong (Start/End tach doi thay vi 1 truong gop, dung nhu reading_notes cho phep) va node khoac vien selected xanh; state-5 co ca banner do lan op-row loi voi cung style vien/text do; state-6 dung dung treatment loading chung cua BaseNodeShell (conic-gradient border, spinner, overlay mo, nut Cancel xac nhan qua data-testid trong html dinh kem) dung nhu ghi chu. Ngon ngu thiet ke workspace (radius, shadow, badge, nut disabled, vien loi) khong bi pha; khoi picker "Implementation" day du hon ban ve don gian nhung la widget dung chung cua cac node transfer khac nen van "nguoi nha". Khac biet duy nhat la copy tieng Anh thay vi tieng Viet trong mockup — day la noi dung/locale, khong phai vi pham ngon ngu thiet ke thi giac.
   human_override:
 
 ## Analyst
 
-carried tu round 1 — baseline khong do lai round nay
-E1a, E16, E17, E19
+carried tu round 1 — baseline khong do lai round nay (P2 — evals.yaml khong doi tu lan baseline cuoi).
+
+Non-discriminating (green tren CA HEAD lan baseline — chung minh harness chu khong phai feature; can viet lai de assert hanh vi moi hoac xac nhan la regression-guard co chu y):
+- E1a — `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — bat bien "ABI generation la clean" dung voi bat ky cay ABI hop le nao, khong rieng cho cac field moi cua compose-overlay.
+- E16 — `tests/test_node_cache_tier_b.py::test_tier_lists_are_disjoint_and_pinned` — bat bien tong quat cua cache-tier (hai allowlist khong giao nhau), khong dac thu compose-overlay.
+- E17 — `tests/test_node_cache_tier_b.py::test_abi_guard_catches_both_directions` — guard ABI hai chieu tong quat, khong rieng hanh vi overlay.
+- E19 — `pnpm vitest run src/lib/abi/conformance.test.ts` (nua TS) — bat bien tong quat cua conformance suite.
+
+Ca bon deu duoc ghi baseline "n-a" round nay vi khong do lai (ket qua xanh-ca-hai-phia duoc carry tu quyet dinh baseline round 1).
 
 ## Variance
 
-none — round nay khong co eval nao mang field runs > 1; tat ca deterministic, single run (0/1 hoac 1/1).
+none — every multi-run eval is uniform (khong co eval nao co runs > 1 round nay).
 
 ## Iterations
 
-Round 4: E22 design-gate 6-state capture closed (state-4 op-form crop fixed); AC-12 review flagged a HIGH gap post Gate-2 cycle (a video edge could be silently swapped onto the image-only in:logo handle with no warning), requiring new connection-rules / node-feature-registry / edge-target-options coverage.
-Round 5: added E12a sub-checks (connection-rules.test.ts alsoAccepts, node-feature-registry.test.ts resolveEdgeHandles, edge-target-options.test.ts inline-select + canSwapOntoHandle bidirectional refusal) and re-ran E22 design gate after the custom-edge/edge-target-options changes — all 26 machine evals pass; judge panel split on E23 (operational-feasibility FAIL: state-6 elapsed-time label overlaps ops-row text) → verdict PENDING-JUDGMENT, awaiting human_override at Gate 2.
+Round 5: dong lo hong thu 5 — node tung tu doan modality bang `sourceHandle === "out:video"`, da thay bang `getEffectiveOutputType()` doc tu ABI mount registry de split-video/drop-video van duoc nhan dung la video.
+Round 6: toan bo 26 machine eval (E1a-E22) exit 0 va panel E23 dong thuan PASS ca 3 lens, nhung code review phat hien chinh loi goi `getEffectiveOutputType()` do bi memoize qua mot module map khong reactive (`src/lib/abi/node-registry.ts`), chi duoc dien boi mot `useEffect` chay SAU lan render dau — tren workflow phuc hoi voi upstream ABI video, memo co the cache `mediaKind="image"` truoc khi registry kip dang ky, va khong deps nao cua no thay doi de buoc tinh lai. Verdict REJECT; tra ve implementation de sua memo/registry truoc khi AC-12 duoc ky.
 
 ## Gate 2 checklist (human)
 

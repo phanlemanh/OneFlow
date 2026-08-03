@@ -1,0 +1,30 @@
+=== Independent verifier (fresh) round: design-gate.mjs re-run against committed 6-state HTML captures ===
+Gate: $HOME/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/1.24.0/scripts/design-gate.mjs --mode dom --fail-on P0
+state-1-empty.html      -> verdict PASS, exit_code 0, p0_count 0
+state-2-ops-image.html  -> verdict PASS, exit_code 0, p0_count 0
+state-3-ops-video.html  -> verdict PASS, exit_code 0, p0_count 0
+state-4-op-form.html    -> verdict PASS, exit_code 0, p0_count 0
+state-5-error.html      -> verdict PASS, exit_code 0, p0_count 0
+state-6-running.html    -> verdict PASS, exit_code 0, p0_count 0
+
+=== Re-check of committed console/network logs (evidence/E22-console-r5.txt, evidence/E22-network-r5.txt) ===
+console-r5: 65 lines total, 0 [error]/[warn] lines besides benign "React DevTools" info banner.
+network-r5: 94x200, 2x206 (video range), 6x304 (cache revalidation) -- 0 requests >= 400. All localhost:3000 app-scope.
+PNG dims verified via PNG header: all 6 = 1000x1100 (>= 900x1000 required).
+HTML DOM cross-check: <img src="/api/uploads/s9qsuIaZ6u6iU3ETbdY6i.png"> (state-2) and
+<video src="/api/uploads/HcLNvEYNskM4s1TWRv7iD.mp4"> (state-3) reference genuinely-uploaded files that
+returned 200/206 in network-r5.txt -- not placeholder/broken sources.
+
+=== Supplementary live browser check (this session, http://localhost:3000/workspace) ===
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/workspace -> 200
+console: 0 [error], 0 [warn] besides React DevTools info banner and expected Fast Refresh/Task Store/
+WorkflowRecovery info logs.
+network: found UNRELATED stale nodes on the shared dev DB canvas (node ids co-1-empty..co-5-error,
+distinct from the node id "ov1" used by the actual checked-in evidence) referencing
+/api/uploads/tasks/e22-fixture/{img-src,vid-src,logo-src}.{png,mp4} -- vid-src.png and vid-src.mp4
+404 Not Found (img-src.png and logo-src.png 200 OK). These "e22-fixture" nodes and their broken
+media references are NOT part of the required 6-state evidence chain (that chain uses node "ov1" +
+genuinely-uploaded /api/uploads/<id>.{png,mp4} files, all 200/206, see above). Judged out-of-scope
+debris left on the shared dev DB by an earlier/different capture attempt; flagged for cleanup but
+not counted as an E22 network failure since it is unrelated to the compose-overlay evidence under
+test. Recorded here for transparency per verifier network-truth rule.
