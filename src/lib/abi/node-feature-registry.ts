@@ -24,13 +24,16 @@ import {
     sourceHandleId,
     targetHandleId,
 } from "./handle-introspect";
-import { type ResolvedSpec, resolveSpec } from "./resolve";
+import {
+    handleAcceptsUpstream,
+    type ResolvedSpec,
+    resolveSpec,
+} from "./resolve";
 import {
     type AnySourceSpec,
     batchOn,
     collectAll,
     configField,
-    type FieldSourceOverride,
     handle,
     type SourceSpec,
 } from "./sources";
@@ -313,7 +316,11 @@ export function resolvedSpecForNodeType(
               nodeType
           ]
         : undefined;
-    if (!feature || !overrides) return undefined;
+    // Overrides are optional: an ABI node type with no sourceSpec entry still
+    // has a resolvable spec (pure ABI defaults). Requiring both made this
+    // return undefined for most nodes, which pushed callers back onto the
+    // registry — the map that is empty during first render.
+    if (!feature) return undefined;
     return resolveSpec(feature, overrides);
 }
 
@@ -380,41 +387,16 @@ export function resolveEdgeHandles(args: {
                       return feature ? getAbiTopology(feature).inputOrder : [];
                   })()
                 : []);
-        // A handle may accept more than its primary nodeType (`alsoAccepts`),
-        // e.g. compose-overlay `media` takes an image OR a video. Matching on
-        // `nodeType` alone leaves such an edge without a targetHandle, which
-        // reads as "connected" on the canvas but never delivers a value.
-        const isHandleForUpstream = (field: string): boolean => {
-            if (targetSpec) {
-                const f = targetSpec.fields[field];
-                if (f?.kind !== "handle") return false;
-                return (
-                    f.nodeType === upstreamNodeType ||
-                    !!f.alsoAccepts?.includes(upstreamNodeType)
-                );
-            }
-            if (!targetType) return false;
-            const feature = featureForNodeType(targetType);
-            if (!feature) return false;
-            const f = getAbiTopology(feature).inputs[field];
-            if (f?.kind !== "handle") return false;
-            const override = (
-                NODE_TYPE_SOURCE_SPEC as Record<
-                    string,
-                    Record<string, FieldSourceOverride | undefined> | undefined
-                >
-            )[targetType]?.[field];
-            const declared =
-                override?.kind === "handle"
-                    ? (override.nodeType ?? f.nodeType)
-                    : f.nodeType;
-            const extra =
-                override?.kind === "handle" ? (override.alsoAccepts ?? []) : [];
-            return (
-                declared === upstreamNodeType ||
-                extra.includes(upstreamNodeType)
+        // One question, one answer: resolve the target's spec (registry first,
+        // static map when the node has not mounted yet) and ask the shared
+        // predicate. The rule lives in resolve.ts — encoding it here as well is
+        // what let a widened handle stay invisible to some consumers.
+        const effectiveSpec = targetSpec ?? resolvedSpecForNodeType(targetType);
+        const isHandleForUpstream = (field: string): boolean =>
+            handleAcceptsUpstream(
+                effectiveSpec?.fields[field],
+                upstreamNodeType,
             );
-        };
 
         let firstMatch: string | undefined;
         for (const field of fieldOrder) {

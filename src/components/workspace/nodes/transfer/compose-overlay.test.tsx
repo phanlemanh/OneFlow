@@ -125,6 +125,8 @@ const NODE_ID = "co1";
 
 interface FlowOptions {
     media?: "image" | "video" | "abi-video-parts";
+    /** Warm the ABI mount registry before render (default: cold). */
+    registerUpstream?: boolean;
     logoConnected?: boolean;
     textConnected?: boolean;
     ops?: OverlayOp[];
@@ -147,12 +149,16 @@ function buildGraph(opts: FlowOptions): { nodes: Node[]; edges: Edge[] } {
         // An ABI upstream whose VideoRef output field is NOT named `video`
         // (`split-video` -> `out:video_parts`). Only the shared
         // getEffectiveOutputType resolver classifies this as videoNode.
-        registerAbiNode({
-            nodeId: "m1",
-            feature: "split-video" as never,
-            sourceSpec: {} as never,
-        });
-        abiRegistered.push("m1");
+        // Registering is OPT-IN: the default leaves the mount registry cold,
+        // which is what a restored workflow looks like on its first render.
+        if (opts.registerUpstream) {
+            registerAbiNode({
+                nodeId: "m1",
+                feature: "split-video" as never,
+                sourceSpec: {} as never,
+            });
+            abiRegistered.push("m1");
+        }
         nodes.push({
             id: "m1",
             type: "splitVideoNode",
@@ -330,11 +336,26 @@ describe("compose-overlay node", () => {
         expect(screen.getByTestId("op-end")).not.toBeNull();
     });
 
+    it("classifies an ABI video upstream before it mounts (cold registry)", async () => {
+        // The mount registry is filled by a post-render effect, so on the first
+        // render of a restored workflow it is empty. Resolving through it and
+        // memoizing the miss cached "image" forever, hiding the time controls
+        // for every ABI video upstream.
+        renderFlow({ media: "abi-video-parts", ops: [TEXT_OP] });
+
+        const badge = await screen.findByTestId("op-time");
+        expect(badge.textContent).toContain("0");
+    });
+
     it("treats an ABI video upstream whose field is not named `video` as video", async () => {
         // Regression: the node used to test `sourceHandle === "out:video"` by
         // hand, so `split-video` (out:video_parts) fell through to the silent
         // `image` fallback and the time controls vanished for a real video.
-        renderFlow({ media: "abi-video-parts", ops: [TEXT_OP] });
+        renderFlow({
+            media: "abi-video-parts",
+            ops: [TEXT_OP],
+            registerUpstream: true,
+        });
 
         const badge = await screen.findByTestId("op-time");
         expect(badge.textContent).toContain("0");

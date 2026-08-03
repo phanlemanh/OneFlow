@@ -3,8 +3,9 @@
  * `connection-validator.ts`).
  */
 
+import { resolvedSpecForNodeType } from "@/lib/abi/node-feature-registry";
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
-import { resolveSpec } from "@/lib/abi/resolve";
+import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { DATA_NODE_TYPES } from "@/lib/workflow/executable-workflow";
 
@@ -36,13 +37,19 @@ export function getEffectiveOutputType(
     if (!nodeType) return undefined;
     if (nodeType in DATA_NODE_TYPES) return nodeType;
 
+    // The mount registry is a plain module Map filled by a post-render effect,
+    // so it is EMPTY on the first render of a restored workflow. Falling back to
+    // the static node-type -> spec map keeps every caller (validator, edge
+    // creation, node UI) correct at first paint instead of silently resolving
+    // to undefined and caching a wrong answer.
     const reg = getAbiNodeRegistration(nodeId);
-    if (reg) {
-        const spec = resolveSpec(
-            reg.feature,
-            reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
-        );
-
+    const spec: ResolvedSpec | undefined = reg
+        ? resolveSpec(
+              reg.feature,
+              reg.sourceSpec as Record<string, FieldSourceOverride> | undefined,
+          )
+        : resolvedSpecForNodeType(nodeType);
+    if (spec) {
         if (sourceHandle?.startsWith("out:")) {
             const field = sourceHandle.slice("out:".length);
             const match = spec.topology.outputs.find((o) => o.field === field);

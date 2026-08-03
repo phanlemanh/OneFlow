@@ -13,7 +13,7 @@ import {
     targetHandleId,
 } from "@/lib/abi/handle-introspect";
 import { getAbiNodeRegistration } from "@/lib/abi/node-registry";
-import { resolveSpec } from "@/lib/abi/resolve";
+import { acceptedUpstreamTypes, resolveSpec } from "@/lib/abi/resolve";
 import type { FieldSourceOverride } from "@/lib/abi/sources";
 import { tryAbiCompatibility } from "@/lib/workflow/connection-validator";
 import { DATA_NODE_TYPES } from "./executable-workflow";
@@ -64,7 +64,7 @@ function expectedTargetHandleTypes(
     if (!spec) return undefined;
     const f = spec.fields[field];
     if (f?.kind !== "handle") return undefined;
-    return [f.nodeType, ...(f.alsoAccepts ?? [])];
+    return acceptedUpstreamTypes(f);
 }
 
 /** Set of upstream node types this target accepts on any handle. */
@@ -73,12 +73,7 @@ function collectUpstreamTypesForTarget(targetNodeId: string): Set<string> {
     if (!spec) return new Set();
     const out = new Set<string>();
     for (const f of Object.values(spec.fields)) {
-        if (f.kind !== "handle") continue;
-        out.add(f.nodeType);
-        // A modality-agnostic handle (e.g. compose-overlay `media`) accepts more
-        // than its primary type; without this the fallback below rejects those
-        // upstreams even though the modality gate already allowed them.
-        for (const extra of f.alsoAccepts ?? []) out.add(extra);
+        for (const t of acceptedUpstreamTypes(f)) out.add(t);
     }
     return out;
 }

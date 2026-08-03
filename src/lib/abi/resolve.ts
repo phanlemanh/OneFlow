@@ -59,6 +59,28 @@ export type ResolvedField =
     | { kind: "static"; value: unknown; required: boolean }
     | { kind: "input"; inputName?: string; required: boolean };
 
+/**
+ * The one place that answers "does this handle accept an upstream of type X".
+ *
+ * A handle's primary `nodeType` plus any `alsoAccepts` widening (e.g.
+ * compose-overlay `media`, which takes an image or a video). Every consumer —
+ * the connection validator, edge creation, the inline edge select — must ask
+ * here; encoding the rule per call site is what let a widened handle stay
+ * invisible to some of them.
+ */
+export function acceptedUpstreamTypes(field: ResolvedField): string[] {
+    if (field.kind !== "handle") return [];
+    return [field.nodeType, ...(field.alsoAccepts ?? [])];
+}
+
+export function handleAcceptsUpstream(
+    field: ResolvedField | undefined,
+    upstreamType: string | undefined,
+): boolean {
+    if (!field || field.kind !== "handle" || !upstreamType) return false;
+    return acceptedUpstreamTypes(field).includes(upstreamType);
+}
+
 export interface ResolvedSpec {
     topology: AbiTopology;
     fields: Record<string, ResolvedField>;

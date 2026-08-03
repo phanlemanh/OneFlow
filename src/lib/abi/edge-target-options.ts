@@ -12,7 +12,7 @@ import type { Edge, Node } from "@xyflow/react";
 import { getEffectiveOutputType } from "@/lib/workflow/flow-connection-shared";
 import { targetHandleId } from "./handle-introspect";
 import { getAbiNodeRegistration } from "./node-registry";
-import { resolveSpec } from "./resolve";
+import { handleAcceptsUpstream, resolveSpec } from "./resolve";
 import type { FieldSourceOverride } from "./sources";
 
 export interface EdgeTargetOption {
@@ -66,7 +66,7 @@ export function getEdgeTargetOptions(
         // consumer of that rule after resolveEdgeHandles and the two gates in
         // connection-rules; matching on nodeType alone hid the widened handle
         // from the inline select.
-        if (!handleAccepts(f, upstreamType)) continue;
+        if (!handleAcceptsUpstream(f, upstreamType)) continue;
         options.push({
             handleId: targetHandleId(field),
             field,
@@ -75,17 +75,6 @@ export function getEdgeTargetOptions(
         });
     }
     return options;
-}
-
-/** True when `handle` accepts an upstream of `upstreamType`. */
-function handleAccepts(
-    handle: { nodeType: string; alsoAccepts?: readonly string[] },
-    upstreamType: string,
-): boolean {
-    return (
-        handle.nodeType === upstreamType ||
-        !!handle.alsoAccepts?.includes(upstreamType)
-    );
 }
 
 /**
@@ -113,7 +102,7 @@ export function canSwapOntoHandle(
     for (const field of spec.topology.inputOrder) {
         if (targetHandleId(field) !== toHandleId) continue;
         const f = spec.fields[field];
-        return f?.kind === "handle" && handleAccepts(f, occupantUpstreamType);
+        return handleAcceptsUpstream(f, occupantUpstreamType);
     }
     return false;
 }
