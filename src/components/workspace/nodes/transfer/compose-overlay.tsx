@@ -15,6 +15,7 @@ import { memo, useMemo } from "react";
 
 import { useAbiForm } from "@/hooks/use-abi-form";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
+import { getEffectiveOutputType } from "@/lib/workflow/flow-connection-shared";
 import type { TongflowPluginNodeProps } from "@/types/tongflow-flow";
 
 import { AbiNodeShell } from "../base/abi-node-shell";
@@ -64,11 +65,18 @@ const ComposeOverlayNode = ({
 
     const mediaKind: OverlayMediaKind = useMemo(() => {
         if (!mediaSourceId) return null;
-        if (mediaNode?.type === "videoNode") return "video";
-        if (mediaNode?.type === "imageNode") return "image";
-        // ABI upstream (e.g. another compose-overlay): disambiguate by the
-        // source handle; default to image for generic Asset producers.
-        if (mediaSourceHandle === "out:video") return "video";
+        // Same resolver the connection validator and the inline edge select
+        // use. A hand-rolled `sourceHandle === "out:video"` test misses every
+        // slot whose VideoRef field is named otherwise (`split-video` ->
+        // `out:video_parts`, `drop-video` -> `out:clips`), which silently hid
+        // the per-op time controls for those upstreams.
+        const outType = getEffectiveOutputType(
+            mediaSourceId,
+            mediaNode?.type,
+            mediaSourceHandle,
+        );
+        if (outType === "videoNode") return "video";
+        if (outType === "imageNode") return "image";
         return "image";
     }, [mediaSourceId, mediaNode, mediaSourceHandle]);
 

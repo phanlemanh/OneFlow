@@ -33,6 +33,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { ComposeOverlayInput } from "@/generated/abi";
 import useFlow from "@/hooks/use-flow";
 import messages from "@/i18n/messages/en.json";
+import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 
 import ComposeOverlayNode from "./compose-overlay";
 
@@ -123,11 +124,13 @@ const NODE_TYPES = {
 const NODE_ID = "co1";
 
 interface FlowOptions {
-    media?: "image" | "video";
+    media?: "image" | "video" | "abi-video-parts";
     logoConnected?: boolean;
     textConnected?: boolean;
     ops?: OverlayOp[];
 }
+
+const abiRegistered: string[] = [];
 
 function buildGraph(opts: FlowOptions): { nodes: Node[]; edges: Edge[] } {
     const nodes: Node[] = [
@@ -140,7 +143,30 @@ function buildGraph(opts: FlowOptions): { nodes: Node[]; edges: Edge[] } {
     ];
     const edges: Edge[] = [];
 
-    if (opts.media) {
+    if (opts.media === "abi-video-parts") {
+        // An ABI upstream whose VideoRef output field is NOT named `video`
+        // (`split-video` -> `out:video_parts`). Only the shared
+        // getEffectiveOutputType resolver classifies this as videoNode.
+        registerAbiNode({
+            nodeId: "m1",
+            feature: "split-video" as never,
+            sourceSpec: {} as never,
+        });
+        abiRegistered.push("m1");
+        nodes.push({
+            id: "m1",
+            type: "splitVideoNode",
+            position: { x: -300, y: 0 },
+            data: {},
+        });
+        edges.push({
+            id: "e-media",
+            source: "m1",
+            sourceHandle: "out:video_parts",
+            target: NODE_ID,
+            targetHandle: "in:media",
+        });
+    } else if (opts.media) {
         const type = opts.media === "video" ? "videoNode" : "imageNode";
         nodes.push({
             id: "m1",
@@ -219,6 +245,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+    for (const id of abiRegistered.splice(0)) unregisterAbiNode(id);
     cleanup();
 });
 
@@ -301,6 +328,16 @@ describe("compose-overlay node", () => {
         fireEvent.click(screen.getByTestId("op-edit-0"));
         expect(await screen.findByTestId("op-start")).not.toBeNull();
         expect(screen.getByTestId("op-end")).not.toBeNull();
+    });
+
+    it("treats an ABI video upstream whose field is not named `video` as video", async () => {
+        // Regression: the node used to test `sourceHandle === "out:video"` by
+        // hand, so `split-video` (out:video_parts) fell through to the silent
+        // `image` fallback and the time controls vanished for a real video.
+        renderFlow({ media: "abi-video-parts", ops: [TEXT_OP] });
+
+        const badge = await screen.findByTestId("op-time");
+        expect(badge.textContent).toContain("0");
     });
 
     it("hides time badge and start/end inputs for image media", async () => {

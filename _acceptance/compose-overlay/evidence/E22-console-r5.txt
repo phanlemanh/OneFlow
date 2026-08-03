@@ -1,0 +1,65 @@
+[state-1-empty] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-1-empty] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-1-empty] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-1-empty] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-1-empty] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-1-empty] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-1-empty] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-1-empty] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-1-empty] [log] [WorkflowRecovery] No pending workflow task found
+[state-2-ops-image] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-2-ops-image] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-2-ops-image] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-2-ops-image] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-2-ops-image] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-2-ops-image] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-2-ops-image] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-2-ops-image] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-2-ops-image] [log] [WorkflowRecovery] No pending workflow task found
+[state-3-ops-video] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-3-ops-video] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-3-ops-video] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-3-ops-video] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-3-ops-video] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-3-ops-video] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-3-ops-video] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-3-ops-video] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-3-ops-video] [log] [WorkflowRecovery] No pending workflow task found
+[state-4-op-form] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-4-op-form] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-4-op-form] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-4-op-form] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-4-op-form] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-4-op-form] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-4-op-form] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-4-op-form] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-4-op-form] [log] [WorkflowRecovery] No pending workflow task found
+[state-4-op-form] [log] [Fast Refresh] rebuilding
+[state-5-error] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-5-error] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-5-error] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-5-error] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-5-error] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-5-error] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-5-error] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-5-error] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-5-error] [log] [WorkflowRecovery] No pending workflow task found
+[state-6-running] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[state-6-running] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-6-running] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-6-running] [log] [useNodeTaskUpdate] Unregistering task update handler for node: ov1
+[state-6-running] [log] [Task Store] Unregistered handler for node ov1, remaining handlers: 0
+[state-6-running] [log] [useNodeTaskUpdate] Registering task update handler for node: ov1
+[state-6-running] [log] [Task Store] Registered handler for node ov1, total handlers: 1
+[state-6-running] [log] [WorkflowRecovery] Checking for pending workflow tasks...
+[state-6-running] [log] [WorkflowRecovery] No pending workflow task found
+[state-6-running] [log] [Fast Refresh] rebuilding
+[state-6-running] [log] [Task Store] Task b3XRSWkhrhYkmnPXWUmpB tracked to node ov1
+[state-6-running] [log] [Fast Refresh] done in 333ms
+[state-6-running] [log] [Fast Refresh] rebuilding
+[state-6-running] [log] [SSE Batch] Connected for task b3XRSWkhrhYkmnPXWUmpB
+[state-6-running] [log] [emitSSETaskMessage] Emitting: [object Object]
+[state-6-running] [log] [SSE Batch] Message for task b3XRSWkhrhYkmnPXWUmpB: [object Object]
+[state-6-running] [log] [emitSSETaskMessage] Emitting: [object Object]
+[state-6-running] [log] [Task Router] Routing task b3XRSWkhrhYkmnPXWUmpB (status: PROCESSING) to node ov1, handlers: 1
+[state-6-running] [log] [Fast Refresh] done in 317ms
