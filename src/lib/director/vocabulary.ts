@@ -15,7 +15,7 @@
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { type AbiTopology, getAbiTopology } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { resolveSpec } from "@/lib/abi/resolve";
+import { acceptedUpstreamTypes, resolveSpec } from "@/lib/abi/resolve";
 import type { AnySourceSpec } from "@/lib/abi/sources";
 import { isDirectorSafeSlot } from "./safe-slots";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
@@ -109,8 +109,15 @@ export function renderVocabulary(slots: NodeSlot[]): string {
                     resolved.required ? "required" : null,
                     resolved.manual ? "manual" : null,
                 ].filter((t): t is string => t !== null);
+                // Advertise every accepted modality, not just the primary
+                // one: the planner only proposes what the vocabulary lists, so
+                // a widened handle read as image-only means video plans are
+                // never even attempted.
+                const modality = acceptedUpstreamTypes(resolved)
+                    .map(modalityName)
+                    .join("|");
                 inputs.push(
-                    `${field}: ${modalityName(resolved.nodeType)}${isArray ? "[]" : ""}${
+                    `${field}: ${modality}${isArray ? "[]" : ""}${
                         tags.length ? ` (${tags.join(", ")})` : ""
                     }`,
                 );

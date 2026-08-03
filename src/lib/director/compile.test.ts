@@ -1257,3 +1257,113 @@ describe("compilePlan — MISSING_REQUIRED_INPUT", () => {
 // pathological idFn that reuses ids across distinct nodes) — that tests the
 // defensive fallback, not compiler behavior on any real DSL input, so per
 // the task brief it is left uncovered rather than faked.
+
+// --- Widened handles: compose-overlay's `media` accepts image OR video
+// (`alsoAccepts`). The compiler used to compare the primary nodeType only, so a
+// perfectly legal video plan was rejected with a bogus MODALITY_MISMATCH — the
+// exact failure safe-slots.ts claims is structurally gone. ---
+
+describe("compilePlan — widened handle accepts more than its primary modality", () => {
+    const OVERLAY_PLUGINS = {
+        ...DEMO_PLUGINS,
+        "compose-overlay": "oneflow-modal-compose-overlay",
+    };
+
+    function planWithMedia(mediaStep: DirectorPlan["steps"][number]) {
+        return {
+            dslVersion: 1 as const,
+            name: "overlay",
+            description: "",
+            steps: [
+                { id: "s1", kind: "text" as const, text: "a cute cat" },
+                mediaStep,
+                {
+                    id: "s3",
+                    kind: "gen" as const,
+                    slot: "compose-overlay" as NodeSlot,
+                    inputs: [{ field: "media", value: "@s2" }],
+                    params: [],
+                },
+            ],
+        };
+    }
+
+    it("accepts a video upstream on media", () => {
+        // text -> image-gen (image) -> image-gen-video (video) -> overlay.media
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "overlay",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "a cute cat" },
+                    {
+                        id: "s2",
+                        kind: "gen",
+                        slot: "image-gen" as NodeSlot,
+                        inputs: [{ field: "text", value: "@s1" }],
+                        params: [],
+                    },
+                    {
+                        id: "s3",
+                        kind: "gen",
+                        slot: "image-gen-video" as NodeSlot,
+                        inputs: [{ field: "image", value: "@s2" }],
+                        params: [],
+                    },
+                    {
+                        id: "s4",
+                        kind: "gen",
+                        slot: "compose-overlay" as NodeSlot,
+                        inputs: [{ field: "media", value: "@s3" }],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: OVERLAY_PLUGINS, idFn: seqId() },
+        );
+        expect(
+            result.issues.filter((i) => i.code === "MODALITY_MISMATCH"),
+        ).toEqual([]);
+    });
+
+    it("accepts an image upstream on media", () => {
+        const result = compilePlan(
+            planWithMedia({
+                id: "s2",
+                kind: "gen",
+                slot: "image-gen" as NodeSlot,
+                inputs: [{ field: "text", value: "@s1" }],
+                params: [],
+            }),
+            { slotDefaultPlugin: OVERLAY_PLUGINS, idFn: seqId() },
+        );
+        expect(
+            result.issues.filter((i) => i.code === "MODALITY_MISMATCH"),
+        ).toEqual([]);
+    });
+
+    it("still rejects an upstream modality the handle does not accept", () => {
+        const result = compilePlan(
+            {
+                dslVersion: 1,
+                name: "overlay",
+                description: "",
+                steps: [
+                    { id: "s1", kind: "text", text: "hello" },
+                    {
+                        id: "s2",
+                        kind: "gen",
+                        slot: "compose-overlay" as NodeSlot,
+                        inputs: [{ field: "media", value: "@s1" }],
+                        params: [],
+                    },
+                ],
+            },
+            { slotDefaultPlugin: OVERLAY_PLUGINS, idFn: seqId() },
+        );
+        expect(result.issues.some((i) => i.code === "MODALITY_MISMATCH")).toBe(
+            true,
+        );
+    });
+});

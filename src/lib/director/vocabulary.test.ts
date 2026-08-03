@@ -13,6 +13,14 @@ describe("renderVocabulary", () => {
         expect(v).toMatch(/images:\s*image\[\]/);
     });
 
+    it("advertises every accepted modality of a widened handle", () => {
+        // compose-overlay's `media` takes an image OR a video (alsoAccepts).
+        // Listing only the primary type meant the planner never proposed a
+        // video for it and the compiler then rejected one as a mismatch.
+        const v = renderVocabulary(["compose-overlay"]);
+        expect(v).toMatch(/media:\s*image\|video/);
+    });
+
     it("is byte-stable regardless of input order", () => {
         expect(renderVocabulary(["image-gen", "image-fusion"])).toBe(
             renderVocabulary(["image-fusion", "image-gen"]),
