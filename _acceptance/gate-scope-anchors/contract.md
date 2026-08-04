@@ -5,7 +5,7 @@ slug: gate-scope-anchors
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, scripts]
-status: approved
+status: implemented
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-04T12:36:51Z
 time_human_minutes:
