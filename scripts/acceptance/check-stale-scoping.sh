@@ -229,7 +229,7 @@ case_in_scope() {
   base4="$(mk_subdir_fixture "$d4" fx 'src/covered/**')"
   ( cd "$d4" && echo drift > pkg/src/covered/new.txt && git add -A && git commit -q -m drift )
   out4="$(bash "$GATE" "$d4/pkg" --base "$base4" 2>&1)"
-  printf '%s\n' "$out4" | grep -q 'NOTE \[fx\]: declared eval paths match no tracked file' \
+  printf '%s\n' "$out4" | grep -q 'NOTE \[fx\]: declared eval paths match no gated file' \
     || fail in-scope "subdir root, \$ROOT-relative paths: match-nothing declaration was NOT refused: $out4"
   printf '%s\n' "$out4" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail in-scope "subdir root, \$ROOT-relative paths: refused scope did NOT fall back to whole-tree staleness: $out4"
@@ -262,7 +262,7 @@ case_out_of_scope() {
   # match a tracked file (src/covered/seed.txt, seeded by mk_fixture) — the
   # match-nothing guard must not misfire on a legitimately-matching
   # declaration and fall back to whole-tree scope.
-  printf '%s\n' "$out" | grep -q 'match no tracked file' \
+  printf '%s\n' "$out" | grep -q 'match no gated file' \
     && fail out-of-scope "match-nothing guard wrongly refused a declaration whose globs DO match a tracked file: $out"
   pass out-of-scope
 }

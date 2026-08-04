@@ -635,6 +635,17 @@ scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
   # is precisely the fail-open this function exists to close, so it must ask
   # the question in the same namespace the answer is used in.
   #
+  # The two EXEMPTIONS below are load-bearing for the same reason --full-name is,
+  # and were the fifth variant of this family (fail-open, HIGH), left open by
+  # stale-scope-by-paths with an explicit "do not patch this piecemeal".
+  # stale_files() drops gate artifacts and t1_skip_globs BEFORE it applies scope,
+  # so those files are not in the universe any answer is ever drawn from. Asking
+  # about them here — where the question is "could this union ever report
+  # anything?" — makes a wholly honest declaration like paths: ["docs/**"] pass,
+  # and then filter out every real change forever, on every later PR, silently.
+  # The filter must therefore be identical in both places: same exclusions, same
+  # order, same matcher.
+  #
   # Any doubt (git missing, not a repo, ls-files unusable) is "cannot verify"
   # and returns rc 1 — refuse narrow scope, same as every other doubt in this
   # function. Stops at the first match rather than scanning every tracked file.
@@ -644,6 +655,8 @@ scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
     hit=1
     while IFS= read -r f; do
       [ -n "$f" ] || continue
+      case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
+      match_globs "$f" "$T1_GLOBS" && continue
       if match_globs "$f" "$2"; then
         hit=0
         break
@@ -1173,7 +1186,7 @@ GLOBS2
     # tracked in the repo is exactly that. Silent for an undeclared feature:
     # scope is already empty there, so this guard never fires (AC-3).
     if [ -n "$scope" ] && ! scope_has_any_match "$ROOT" "$scope"; then
-      echo "NOTE [$slug]: declared eval paths match no tracked file in the repository — treating the declaration as a typo/stale path; narrow staleness scope refused, whole-tree applied"
+      echo "NOTE [$slug]: declared eval paths match no gated file in the repository (a typo, a stale path, or a union every match of which is _acceptance/** or t1-exempt — none of which staleness can ever report) — narrow staleness scope refused, whole-tree applied. Declare a glob pointing at code this feature's evals actually exercise."
       scope=""
     fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"
