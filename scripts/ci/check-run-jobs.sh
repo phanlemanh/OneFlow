@@ -28,8 +28,12 @@ workflow_file "$KEY" >/dev/null
 SHA="$(head_sha)"
 RUN_ID="$(find_run "$KEY" "" "$SHA")"
 JSON="$(run_json "$RUN_ID")"
+# Report the commit the RUN actually ran at, not the local head: anchored, the
+# run is a historical one and labelling it with wherever this branch happens to
+# sit would make the evidence say something false.
+RUN_SHA="$(printf '%s' "$JSON" | jq -r '.headSha')"
 
-echo "run $(printf '%s' "$JSON" | jq -r '.url') @ ${SHA}"
+echo "run $(printf '%s' "$JSON" | jq -r '.url') @ ${RUN_SHA}"
 
 fail=0
 for name in "$@"; do
@@ -54,4 +58,4 @@ done
 assert_run_finished "$JSON"
 
 [ "$fail" -eq 0 ] || exit 1
-echo "all requested jobs succeeded at ${SHA}"
+echo "all requested jobs succeeded at ${RUN_SHA}"

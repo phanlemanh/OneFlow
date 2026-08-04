@@ -33,6 +33,12 @@ esac
 require_gh
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 RUN_ID="$(find_run "$KEY" workflow_dispatch "" "$BRANCH")"
+# The tree this run must match is "the tree that got merged". Unanchored that is
+# HEAD; anchored it is the merge commit — comparing against HEAD on a later
+# branch would fail this guard for a second, unrelated reason after the run
+# lookup itself was anchored. find_run ignores the branch argument whenever an
+# anchor is present (a merged branch may not exist any more).
+TIP="$(anchor_tip)"
 JSON="$(run_json "$RUN_ID")"
 
 RUN_SHA="$(printf '%s' "$JSON" | jq -r '.headSha')"
@@ -49,15 +55,15 @@ if ! run_tree="$(git rev-parse --verify --quiet "${RUN_SHA}:.github/workflows")"
     echo "cannot read .github/workflows at the run's commit ${RUN_SHA} — fetch it first" >&2
     exit 2
 fi
-head_tree="$(git rev-parse --verify "HEAD:.github/workflows")"
+head_tree="$(git rev-parse --verify "${TIP}:.github/workflows")"
 if [ "$run_tree" != "$head_tree" ]; then
     echo "FAIL: the dispatched run used a different .github/workflows tree" >&2
     echo "      run  ${RUN_SHA}: ${run_tree}" >&2
-    echo "      HEAD:            ${head_tree}" >&2
+    echo "      ${TIP}: ${head_tree}" >&2
     echo "      re-dispatch after pushing the current workflows" >&2
     fail=1
 else
-    echo "  workflow tree matches HEAD: ${head_tree}"
+    echo "  workflow tree matches ${TIP}: ${head_tree}"
 fi
 
 assert_run_complete "$JSON" || fail=1

@@ -224,6 +224,59 @@ case_unanchored_compat() {
   pass unanchored-compat
 }
 
+case_no_run_exit2() {
+  # AC-10 / E10: a valid anchor whose commits carry NO run must read as "could
+  # not look" (exit 2), never as a pass. Offline: `gh` is stubbed on PATH, so the
+  # assertion is about this library's control flow, not about GitHub.
+  d="$(new_tmp)"
+  mkdir -p "$d/bin"
+  cat > "$d/bin/gh" <<'STUB'
+#!/usr/bin/env bash
+case "$1 $2" in
+  "auth status") exit 0 ;;
+  "run list") echo '[]'; exit 0 ;;   # authenticated, looked, found nothing
+esac
+exit 0
+STUB
+  chmod +x "$d/bin/gh"
+
+  out="$(cd "$ROOT" && PATH="$d/bin:$PATH" ACCEPTANCE_SLUG=ci-actions-bump bash -c '
+      . scripts/ci/gh-run-lib.sh
+      find_run ci "" "" ""
+  ' 2>&1)"
+  rc=$?
+  [ "$rc" -eq 2 ] \
+    || fail no-run-exit2 "find_run exited $rc when no run exists at any anchored commit (want 2)"
+  case "$out" in
+    *"ci-actions-bump"*) ;;
+    *) fail no-run-exit2 "the anchored miss did not name the pull request it looked at — that message is what distinguishes it from an unanchored miss: $out" ;;
+  esac
+  case "$out" in
+    *"must actually have run"*) ;;
+    *) fail no-run-exit2 "exit 2 carried no explanation of what could not be seen" ;;
+  esac
+
+  # AC-12, the gh-run-lib half: unanchored, still exit 2, and still by the
+  # pre-existing message. The no-anchor path is not allowed to change shape.
+  out2="$(cd "$ROOT" && PATH="$d/bin:$PATH" bash -c '
+      . scripts/ci/gh-run-lib.sh
+      find_run ci "" "" "some-branch"
+  ' 2>&1)"
+  rc2=$?
+  [ "$rc2" -eq 2 ] || fail no-run-exit2 "unanchored find_run exited $rc2 with no runs (want 2)"
+  case "$out2" in
+    *"on branch some-branch"*) ;;
+    *) fail no-run-exit2 "unanchored miss no longer reports the branch it looked on: $out2" ;;
+  esac
+
+  # And anchor_tip() must still resolve to HEAD when unanchored — a tip that
+  # silently became something else would move every provenance comparison.
+  tip="$(cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; anchor_tip' 2>/dev/null)"
+  [ "$tip" = "$(git -C "$ROOT" rev-parse HEAD)" ] \
+    || fail no-run-exit2 "unanchored anchor_tip is '$tip', not HEAD"
+  pass no-run-exit2
+}
+
 case_case_completeness() {
   # A case that was never implemented must be loud, not absent — and a case that
   # exists but is wired nowhere never runs (the indent-drift lesson).
