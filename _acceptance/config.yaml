@@ -159,7 +159,7 @@ executors:
     # dependency-refresh-2026-07 Gate 1 (2026-07-26).
     deps_manifest_intact: "bash scripts/deps/check-manifest.sh"
     deps_lockfile_clean: "pnpm install --frozen-lockfile"
-    deps_no_t3_drift: "bash scripts/deps/check-no-t3-drift.sh origin/main"
+    deps_no_t3_drift: "ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"
     # ci-actions-bump Gate 1 (2026-07-26). The run-reading keys query real
     # Actions runs via `gh` rather than re-running the work locally — a bumped
     # action can only be proved by the runner that executes it.
@@ -167,16 +167,16 @@ executors:
     # Narrowed after Gate 1 (see contract "Amendment"): the gate job's colour is
     # dominated by acceptance bookkeeping, so it cannot serve as evidence about
     # a checkout bump. This asserts the plumbing instead.
-    ci_gate_plumbing: "bash scripts/ci/check-gate-plumbing.sh"
-    ci_jobs_green: "bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
+    ci_gate_plumbing: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh"
+    ci_jobs_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
     ci_docker_dryrun_guard: "bash scripts/ci/check-docker-dryrun.sh"
-    ci_docker_dispatch_green: "bash scripts/ci/check-dispatch-run.sh docker"
-    ci_ghcr_untouched: "bash scripts/ci/check-ghcr-untouched.sh"
-    ci_desktop_dispatch_green: "bash scripts/ci/check-dispatch-run.sh desktop"
-    ci_no_behaviour_drift: "bash scripts/ci/check-workflow-drift.sh origin/main"
+    ci_docker_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker"
+    ci_ghcr_untouched: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    ci_desktop_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    ci_no_behaviour_drift: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh origin/main"
     # oneflow-plugin-prefix Gate 1 (2026-07-26).
     docs_plugin_prefix: "bash scripts/plugins/check-prefix-docs.sh"
-    prefix_no_config_drift: "bash scripts/plugins/check-no-config-drift.sh origin/main"
+    prefix_no_config_drift: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh origin/main"
     # per-plugin-origin Gate 1 (2026-07-27).
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
@@ -229,6 +229,8 @@ executors:
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
     stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
+    scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
     # gate-scope-anchors (0.6): same-universe scope check + historical anchors.
     # b2_* and ghcr_anchored hit the network (gh) — local verify only, not CI.
     gate_ns_exempt_refused: bash scripts/acceptance/test-scope-namespace.sh exempt-refused

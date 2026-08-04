@@ -277,6 +277,38 @@ STUB
   pass no-run-exit2
 }
 
+case_backfill_integration() {
+  # AC-11 / E12 — OFFLINE ONLY, with each assertion named individually so a
+  # check that never ran cannot hide behind a shared exit code. The network
+  # guards of ci-actions-bump belong to E9/E11 and are deliberately absent here.
+  for pair in "ci-actions-bump 8477f8a" "dependency-refresh-2026-07 4d89b58" "oneflow-plugin-prefix dd39da8"; do
+    slug="${pair%% *}"
+    want="${pair##* }"
+    out="$(bash "$RESOLVER" "$slug" --root "$ROOT")" \
+      || fail backfill-integration "own-range.sh could not resolve the anchor of '$slug'"
+    got="$(field "$out" range_to)"
+    [ "$got" = "$(git -C "$ROOT" rev-parse "$want")" ] \
+      || fail backfill-integration "$slug resolves to $got, expected $want"
+    # NOT a bare grep for "ACCEPTANCE_SLUG=$slug" anywhere in the file: this
+    # contract's OWN executor keys carry those strings, so such a grep passes
+    # while the feature's own keys still run unanchored — a vacuous green of
+    # exactly the kind these guards exist to refuse. Resolve the keys the
+    # feature's evals.yaml actually references, and require every one of them
+    # that invokes an anchored guard to carry that feature's slug.
+    unanchored="$(FEATURE_SLUG="$slug" python3 "$HERE/lib/anchored-keys.py" "$ROOT")" \
+      || fail backfill-integration "could not cross-check $slug's executor keys"
+    [ -z "$unanchored" ] \
+      || fail backfill-integration "$slug's own eval keys invoke an anchored guard without ACCEPTANCE_SLUG=$slug: $unanchored"
+  done
+  ( cd "$ROOT" && ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh >/dev/null 2>&1 ) \
+    || fail backfill-integration "check-no-config-drift is not green under its own anchor"
+  ( cd "$ROOT" && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh >/dev/null 2>&1 ) \
+    || fail backfill-integration "check-no-t3-drift is not green under its own anchor"
+  ( cd "$ROOT" && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh >/dev/null 2>&1 ) \
+    || fail backfill-integration "check-workflow-drift is not green under its own anchor"
+  pass backfill-integration
+}
+
 case_case_completeness() {
   # A case that was never implemented must be loud, not absent — and a case that
   # exists but is wired nowhere never runs (the indent-drift lesson).

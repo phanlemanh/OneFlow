@@ -9,6 +9,11 @@ status: signed-off
 approved_by: Manh
 approved_at: 2026-07-26
 time_human_minutes: {gate1: 0, gate2: 0}
+# The merge commit that carried this feature into main (PR #16). Every eval here
+# asks about THIS pull request; scripts/acceptance/own-range.sh turns this into
+# the commit range and commit set they ask over, so re-running on a later branch
+# still grades this feature's own diff. See _acceptance/gate-scope-anchors/.
+landed_merge: 4d89b58
 ---
 
 # Acceptance Contract: dependency-refresh-2026-07
