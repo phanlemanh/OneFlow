@@ -91,6 +91,41 @@ anchor_commits() {
     printf '%s' "$out" | sed -n 's/^commits=//p' | tr ' ' '\n' | grep -v '^$'
 }
 
+# anchor_landed — the landed merge sha when this feature actually HAS one, empty
+# otherwise. Deliberately NOT the same question as anchor_tip: an anchored but
+# still-open feature has a tip (its HEAD) and no landing moment at all. Anything
+# that means "when this feature came to rest" must ask THIS, because keying such
+# a question on "was a slug supplied" silently answers it with today's HEAD.
+anchor_landed() {
+    [ -n "${ACCEPTANCE_SLUG:-}" ] || return 0
+    local dir out
+    dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../acceptance" && pwd)"
+    if ! out="$(bash "$dir/own-range.sh" "$ACCEPTANCE_SLUG" --print-anchor)"; then
+        echo "could not read the anchor of '${ACCEPTANCE_SLUG}'" >&2
+        printf '%s' "$ANCHOR_UNRESOLVED"
+        return 2
+    fi
+    printf '%s' "$out"
+}
+
+# assert_window_sane <since> <until> — both ISO-8601 UTC (trailing Z), <until>
+# may be empty for an open-ended window.
+#
+# A window whose end precedes its start selects nothing, and "selected nothing"
+# is indistinguishable from "nothing happened" at the point of decision. That is
+# not a clean result, it is an unanswerable question, so it exits 2. Both bounds
+# are normalised to Z before they get here; comparing mixed offsets as strings is
+# its own bug (see check-ghcr-untouched.sh).
+assert_window_sane() {
+    local since="$1" until="$2"
+    [ -n "$until" ] || return 0
+    if [ "$until" \< "$since" ]; then
+        echo "the observation window [${since} .. ${until}] ends before it starts, so it can never select anything" >&2
+        echo "refusing to read an impossible window as evidence that nothing happened" >&2
+        exit 2
+    fi
+}
+
 # anchor_tip — the commit that plays HEAD's role. The provenance checks in
 # check-dispatch-run.sh and check-ghcr-untouched.sh compare a run's workflow
 # tree against "the tree that got merged"; on a later branch that is the anchor,

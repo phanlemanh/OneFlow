@@ -68,20 +68,34 @@ echo "ok  run's workflow tree matches ${TIP}"
 # blames on a feature that had nothing to do with it. UNTIL closes the window at
 # the moment the feature landed. Empty when unanchored, where the open-ended
 # question is still the right one — there is no "landed" yet.
+# Ask whether this feature LANDED, not whether a slug was supplied. anchor_tip
+# answers "which tree" and falls back to HEAD for a still-open feature; using it
+# here made UNTIL today's commit date, which precedes the dispatched run it is
+# supposed to bound — an empty window that selects nothing and reads as clean.
 UNTIL=""
-if [ -n "${ACCEPTANCE_SLUG:-}" ]; then
+LANDED="$(anchor_landed)"
+case "$LANDED" in
+    "$ANCHOR_UNRESOLVED"*)
+        echo "could not resolve the anchor for '${ACCEPTANCE_SLUG}' — refusing to bound the window by guess" >&2
+        exit 2
+        ;;
+esac
+if [ -n "$LANDED" ]; then
     # Normalised to UTC on purpose. `--format=%cI` emits the committer's LOCAL
     # offset (+07:00 here) while GHCR's created_at is always Zulu, and the jq
     # comparison below is lexicographic — so a publish at 10:00Z would compare
     # "less than" a 16:23+07:00 boundary that is really 09:23Z, and land inside a
     # window it happened after. Same class of bug as the rest of this contract:
     # two values compared in different frames of reference.
-    if ! UNTIL="$(TZ=UTC git show -s --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$TIP" 2>/dev/null)" \
+    if ! UNTIL="$(TZ=UTC git show -s --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$LANDED" 2>/dev/null)" \
         || [ -z "$UNTIL" ]; then
-        echo "could not read the committer date of ${TIP} — refusing to bound the window by guess" >&2
+        echo "could not read the committer date of ${LANDED} — refusing to bound the window by guess" >&2
         exit 2
     fi
 fi
+# Belt and braces: whatever produced the bounds, an impossible window is a
+# question that cannot be answered, not an answer of "clean".
+assert_window_sane "$SINCE" "$UNTIL"
 
 # ---------------------------------------------------------------- decisive half
 log=""

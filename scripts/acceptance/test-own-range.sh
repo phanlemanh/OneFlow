@@ -188,6 +188,24 @@ case_malformed() {
   done
   [ -z "$no_set_e" ] \
     || fail malformed "these scripts source gh-run-lib.sh without set -e, so a refusal raised inside a command substitution would be swallowed:$no_set_e"
+
+  # "A slug was supplied" is not "this feature landed". anchor_tip answers WHICH
+  # TREE and falls back to HEAD while a feature is still open; anything asking
+  # WHEN IT CAME TO REST must use anchor_landed, or it silently gets today. That
+  # confusion produced an empty registry window that read as clean.
+  landed="$(cd "$ROOT" && ACCEPTANCE_SLUG=ci-actions-bump bash -c '. scripts/ci/gh-run-lib.sh; anchor_landed' 2>/dev/null)"
+  [ -n "$landed" ] || fail malformed "anchor_landed returned nothing for a LANDED feature (ci-actions-bump)"
+  open_feat="$(cd "$ROOT" && ACCEPTANCE_SLUG=gate-scope-anchors bash -c '. scripts/ci/gh-run-lib.sh; anchor_landed' 2>/dev/null)"
+  [ -z "$open_feat" ] \
+    || fail malformed "anchor_landed returned '$open_feat' for a feature with no landed_merge — an open feature has no landing moment"
+
+  # And an impossible window must be "cannot answer", never "nothing happened".
+  ( cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; assert_window_sane "2026-08-04T14:30:00Z" "2026-08-04T14:09:29Z"' >/dev/null 2>&1 )
+  [ "$?" -eq 2 ] || fail malformed "a window ending before it starts did not exit 2 — it selects nothing, which reads as clean"
+  ( cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; assert_window_sane "2026-08-04T14:00:00Z" "2026-08-04T15:00:00Z"' >/dev/null 2>&1 )
+  [ "$?" -eq 0 ] || fail malformed "a valid window was rejected"
+  ( cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; assert_window_sane "2026-08-04T14:00:00Z" ""' >/dev/null 2>&1 )
+  [ "$?" -eq 0 ] || fail malformed "an open-ended window (unanchored) was rejected"
   pass malformed
 }
 
