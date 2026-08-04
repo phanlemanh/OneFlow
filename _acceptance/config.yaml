@@ -229,6 +229,21 @@ executors:
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
     stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    # gate-scope-anchors (0.6): same-universe scope check + historical anchors.
+    # b2_* and ghcr_anchored hit the network (gh) — local verify only, not CI.
+    gate_ns_exempt_refused: bash scripts/acceptance/test-scope-namespace.sh exempt-refused
+    gate_ns_variants_red: bash scripts/acceptance/test-scope-namespace.sh variants-discriminating
+    gate_ns_legit_granted: bash scripts/acceptance/test-scope-namespace.sh legit-granted
+    own_range_anchored: bash scripts/acceptance/test-own-range.sh anchored
+    own_range_unlanded: bash scripts/acceptance/test-own-range.sh unlanded
+    own_range_malformed: bash scripts/acceptance/test-own-range.sh malformed
+    b1_anchored_green: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh"
+    b1_violation_red: bash scripts/acceptance/test-own-range.sh b1-red
+    b2_runs_found: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    b2_no_run_exit2: bash scripts/acceptance/test-own-range.sh no-run-exit2
+    ghcr_anchored: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    anchors_backfilled: bash scripts/acceptance/test-own-range.sh backfill-integration
+    b1_unanchored_compat: bash scripts/acceptance/test-own-range.sh unanchored-compat
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
