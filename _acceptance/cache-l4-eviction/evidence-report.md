@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: eb87881a2122e8a7a2faef23423d3977f19b76d7
-human_signoff: Manh Phan 2026-08-01
+verified_commit: 410db0048feeea18d2e04c29c7cb963074fc8dae
+human_signoff:
 ---
 
 # Evidence Report: cache-l4-eviction
@@ -39,209 +39,211 @@ human_signoff: Manh Phan 2026-08-01
 ## Evidence
 
 - eval: E1
-  run_id: minted-cache-l4-eviction-E1-r1
+  run_id: minted-cache-l4-eviction-E1-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_lru_recency
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.03s
 
 - eval: E2
-  run_id: minted-cache-l4-eviction-E2-r1
+  run_id: minted-cache-l4-eviction-E2-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_cap_converges
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.02s
 
 - eval: E3
-  run_id: minted-cache-l4-eviction-E3-r1
+  run_id: minted-cache-l4-eviction-E3-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_under_cap_noop
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.20s
+    1 passed in 0.03s
 
 - eval: E4
-  run_id: minted-cache-l4-eviction-E4-r1
+  run_id: minted-cache-l4-eviction-E4-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_shared_blob_survives
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.22s
+    1 passed in 0.02s
 
 - eval: E5
-  run_id: minted-cache-l4-eviction-E5-r1
+  run_id: minted-cache-l4-eviction-E5-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_orphan_blob_gc
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.02s
 
 - eval: E6
-  run_id: minted-cache-l4-eviction-E6-r1
+  run_id: minted-cache-l4-eviction-E6-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_legacy_entry
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.05s
 
 - eval: E7
-  run_id: minted-cache-l4-eviction-E7-r1
+  run_id: minted-cache-l4-eviction-E7-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_sweep_failsafe
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.18s
+    1 passed in 0.03s
 
 - eval: E8
-  run_id: minted-cache-l4-eviction-E8-r1
+  run_id: minted-cache-l4-eviction-E8-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_cache_errors_logged
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
     1 passed in 0.04s
 
 - eval: E9
-  run_id: minted-cache-l4-eviction-E9-r1
+  run_id: minted-cache-l4-eviction-E9-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_purge_scope
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
-    1 passed in 0.05s
+    .                                                                        [100%]
+    1 passed in 0.03s
 
 - eval: E10
-  run_id: minted-cache-l4-eviction-E10-r1
+  run_id: minted-cache-l4-eviction-E10-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_purge_idempotent
-  verified_at: 2026-07-30T13:47:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
-
-- eval: E11
-  run_id: minted-cache-l4-eviction-E11-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_l4_reuse_off
-  verified_at: 2026-07-30T13:47:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.25s
-
-- eval: E12
-  run_id: minted-cache-l4-eviction-E12-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_l4_reuse_invalid
-  verified_at: 2026-07-30T13:47:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
-
-- eval: E13
-  run_id: minted-cache-l4-eviction-E13-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_l4_counters
-  verified_at: 2026-07-30T13:47:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.06s
-
-- eval: E14
-  run_id: minted-cache-l4-eviction-E14-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_l4_node_cached_event
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:40:55Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
-- eval: E15
-  run_id: minted-cache-l4-eviction-E15-r1
+- eval: E11
+  run_id: minted-cache-l4-eviction-E11-r2
   exit_code: 0
-  baseline: green
-  verifier: config:executors.test.unit_l4_delegate_persists
-  verified_at: 2026-07-30T13:46:39Z
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l4_reuse_off
+  verified_at: 2026-08-04T10:41:00Z
   output: |
-          Tests  6 passed | 3 skipped (9)
-       Start at  13:46:39
-       Duration  465ms (transform 66ms, setup 0ms, import 28ms, tests 323ms, environment 0ms)
+    .                                                                        [100%]
+    1 passed in 0.03s
+
+- eval: E12
+  run_id: minted-cache-l4-eviction-E12-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l4_reuse_invalid
+  verified_at: 2026-08-04T10:41:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.05s
+
+- eval: E13
+  run_id: minted-cache-l4-eviction-E13-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l4_counters
+  verified_at: 2026-08-04T10:41:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.04s
+
+- eval: E14
+  run_id: minted-cache-l4-eviction-E14-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l4_node_cached_event
+  verified_at: 2026-08-04T10:41:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.04s
+
+- eval: E15
+  run_id: minted-cache-l4-eviction-E15-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.unit_l4_delegate_persists
+  verified_at: 2026-08-04T10:41:09Z
+  output: |
+         Tests  6 passed | 3 skipped (9)
+      Start at  10:41:09
+      Duration  536ms (transform 78ms, setup 0ms, import 63ms, tests 342ms, environment 0ms)
 
 - eval: E16
-  run_id: minted-cache-l4-eviction-E16-r1
+  run_id: minted-cache-l4-eviction-E16-r2
   exit_code: 0
-  baseline: green
+  baseline: n-a
   verifier: config:executors.test.unit_l4_schema_columns
-  verified_at: 2026-07-30T13:46:40Z
+  verified_at: 2026-08-04T10:41:11Z
   output: |
           Tests  3 passed | 4 skipped (7)
-       Start at  13:46:40
-       Duration  276ms (transform 14ms, setup 0ms, import 178ms, tests 9ms, environment 0ms)
+       Start at  10:41:11
+       Duration  348ms (transform 18ms, setup 0ms, import 225ms, tests 17ms, environment 0ms)
 
 - eval: E17
-  run_id: minted-cache-l4-eviction-E17-r1
+  run_id: minted-cache-l4-eviction-E17-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.script.cache_test_layout
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:41:05Z
   output: |
     OK: cache test layout
 
 - eval: E18
-  run_id: minted-cache-l4-eviction-E18-r1
+  run_id: minted-cache-l4-eviction-E18-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_abi_guard_bidirectional
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:41:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E19
-  run_id: minted-cache-l4-eviction-E19-r1
+  run_id: minted-cache-l4-eviction-E19-r2
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_sweep_wired
-  verified_at: 2026-07-30T13:47:00Z
+  verified_at: 2026-08-04T10:41:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.03s
 
 - eval: E20
-  run_id: minted-cache-l4-eviction-E20-r1
+  run_id: minted-cache-l4-eviction-E20-r2
   exit_code: 0
-  baseline: green
+  baseline: n-a
   verifier: config:executors.test.unit_l4_node_cached_consumer
-  verified_at: 2026-07-30T13:46:51Z
+  verified_at: 2026-08-04T10:41:11Z
   output: |
           Tests  4 passed | 7 skipped (11)
-       Start at  13:46:51
-       Duration  128ms (transform 21ms, setup 0ms, import 28ms, tests 3ms, environment 0ms)
+       Start at  10:41:11
+       Duration  135ms (transform 24ms, setup 0ms, import 31ms, tests 3ms, environment 0ms)
 
 ## Analyst
 
-E15, E16, E20 — all three pass on both HEAD and the diffBase (baseline: green), so they do not by themselves discriminate this feature from the pre-feature tree. They are the intentional TS-side consumer half of atomic pairs whose SDK-side counterpart is red-on-baseline (E13/E14 pairs with E15; E14 pairs with E20; E16's schema-column addition is additive so an empty/absent-column baseline naturally still "passes" a query written to tolerate NULLs) — treat these three as regression-guards written deliberately to hold once the SDK half lands, not as accidental non-discriminating tests. No rewrite needed; confirmed intended.
+carried tu round truoc — baseline khong do lai round nay
+none — baseline not re-measured this round (see Round 1 Analyst: E15, E16, E20 were confirmed intended regression-guards, non-discriminating by design; that classification stands unchanged here)
 
 ## Variance
 
@@ -250,6 +252,7 @@ none — every multi-run eval is uniform (no eval in this round carries runs > 1
 ## Iterations
 
 Round 1: all 20 evals passed on first attempt (E1-E20, exit 0, no failures returned to implementation). Full-repo verification also green in the same round: `pnpm build`, `pnpm typecheck`, `pnpm lint:check` (Biome, 416 files, no fixes), `pnpm test` (363 passed), the full SDK pytest suite (189 passed), `pnpm verify:plugins`, and `pnpm gen:abi` (no diff against committed generated files).
+Round 2: re-verify on the current tree (commit 410db0048feeea18d2e04c29c7cb963074fc8dae) — all 20 evals passed again on first attempt, no regressions, no evals returned to implementation. Full-repo checks also green: `pnpm build && pnpm typecheck`, `pnpm lint:check` (426 files, no fixes), `pnpm test` (413 passed), full SDK pytest suite (193 passed), `pnpm verify:plugins`, and `pnpm gen:abi` (no diff against committed generated files).
 
 ## Gate 2 checklist (human)
 
