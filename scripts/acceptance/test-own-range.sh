@@ -134,6 +134,96 @@ case_malformed() {
   pass malformed
 }
 
+b1_guard() { printf '%s' "$ROOT/scripts/plugins/check-no-config-drift.sh"; }
+
+# A manifest the guard will accept as intact: >=30 plugins and the upstream org.
+write_manifest() { # <path>
+  python3 - "$1" <<'MANIFEST'
+import json, sys
+json.dump({"org": "https://github.com/tong-io",
+           "plugins": ["p%d" % i for i in range(31)]},
+          open(sys.argv[1], "w"), indent=2)
+MANIFEST
+}
+
+case_b1_red() {
+  # AC-7 red half / E8: anchoring must not turn a guard into a nodding machine.
+  # A fixture whose OWN merge touched a forbidden path must still exit 1, even
+  # when the branch has moved on since.
+  d="$(new_tmp)"
+  (
+    cd "$d" || exit 1
+    git init -q -b main .
+    git config user.email t@t
+    git config user.name t
+    mkdir -p config scripts/acceptance scripts/plugins _acceptance/guilty
+    printf 'seed\n' > seed.txt
+    git add -A && git commit -qm base
+    git checkout -qb pr
+    git add -A 2>/dev/null
+    git commit -qm noop --allow-empty
+    git checkout -q main
+  ) >/dev/null 2>&1 || fail b1-red "could not build the fixture repo"
+  write_manifest "$d/config/official-plugins.json"
+  (
+    cd "$d" || exit 1
+    git add -A && git commit -qm manifest
+    git checkout -qb pr2
+    printf '\n' >> config/official-plugins.json   # the forbidden touch
+    git add -A && git commit -qm "pr touches config/"
+    git checkout -q main
+    git merge -q --no-ff pr2 -m "Merge pull request #1 from t/pr2"
+    anchor="$(git rev-parse HEAD)"
+    printf -- '---\nslug: guilty\nlanded_merge: %s\n---\n' "$anchor" > _acceptance/guilty/contract.md
+    git add -A && git commit -qm contract
+    printf 'unrelated\n' > later.txt
+    git add -A && git commit -qm "later work by someone else"
+  ) >/dev/null 2>&1 || fail b1-red "could not land the guilty pull request"
+  cp "$RESOLVER" "$d/scripts/acceptance/own-range.sh"
+  cp "$(b1_guard)" "$d/scripts/plugins/check-no-config-drift.sh"
+  ( cd "$d" && ACCEPTANCE_SLUG=guilty bash scripts/plugins/check-no-config-drift.sh >/dev/null 2>&1 )
+  rc=$?
+  [ "$rc" -eq 1 ] \
+    || fail b1-red "anchored guard exited $rc on a pull request that DID touch config/ (want 1)"
+  pass b1-red
+}
+
+case_unanchored_compat() {
+  # AC-12 / E13: with ACCEPTANCE_SLUG unset the guard must behave exactly as it
+  # does today. An anchoring bug that yielded an empty range would make every
+  # open pull request green — the same fail-open family this contract closes.
+  d="$(new_tmp)"
+  (
+    cd "$d" || exit 1
+    git init -q -b main .
+    git config user.email t@t
+    git config user.name t
+    mkdir -p config scripts/acceptance scripts/plugins
+    printf 'seed\n' > seed.txt
+    git add -A && git commit -qm seed
+  ) >/dev/null 2>&1 || fail unanchored-compat "could not build the fixture repo"
+  write_manifest "$d/config/official-plugins.json"
+  (
+    cd "$d" || exit 1
+    git add -A && git commit -qm base
+    git branch -q origin-main
+    git checkout -qb work
+    printf '\n' >> config/official-plugins.json
+    git add -A && git commit -qm "open pull request touches config/"
+  ) >/dev/null 2>&1 || fail unanchored-compat "could not build the open pull request"
+  cp "$RESOLVER" "$d/scripts/acceptance/own-range.sh"
+  cp "$(b1_guard)" "$d/scripts/plugins/check-no-config-drift.sh"
+  # A real violation, env unset -> exit 1, exactly today's behaviour.
+  ( cd "$d" && bash scripts/plugins/check-no-config-drift.sh origin-main >/dev/null 2>&1 )
+  rc=$?
+  [ "$rc" -eq 1 ] || fail unanchored-compat "unanchored guard exited $rc on a real violation (want 1)"
+  # A clean tree, env unset -> exit 0.
+  ( cd "$d" && git checkout -q origin-main && bash scripts/plugins/check-no-config-drift.sh origin-main >/dev/null 2>&1 )
+  rc=$?
+  [ "$rc" -eq 0 ] || fail unanchored-compat "unanchored guard exited $rc on a clean tree (want 0)"
+  pass unanchored-compat
+}
+
 case_case_completeness() {
   # A case that was never implemented must be loud, not absent — and a case that
   # exists but is wired nowhere never runs (the indent-drift lesson).
