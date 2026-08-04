@@ -1,0 +1,38 @@
+run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
+ok job 'Lint': success
+ok job 'Type Check': success
+ok job 'Build': success
+ok job 'SDK Tests (Python)': success
+all requested jobs succeeded at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
+run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
+ok  checkout ran with fetch-depth: 0
+ok  the checkout under test is v7
+ok  pre-merge-check emitted 5 per-feature verdict line(s)
+ok  no shallow-history or unresolvable-base complaint anywhere in the log
+fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
+dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168
+  branch under test: feat/compose-overlay   run head: b48699c612fab479deede3d7d1d9959e110d7335
+  workflow tree matches 8477f8a08f26b792b313ff4461a978591024c33e: c2bd8c61cfc2a159cd3287783e750dfd72ce02b9
+ok job 'Build & push (amd64 + arm64)': success
+   ok step 'Set up QEMU': success
+   ok step 'Log in to GHCR': success
+   ok step 'Build & push': success
+ok  linux/amd64 build stages present in the log
+ok  linux/arm64 build stages present in the log
+dispatched docker dry run succeeded, and reached every step that carries a bumped action
+dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190355369
+  branch under test: feat/compose-overlay   run head: b48699c612fab479deede3d7d1d9959e110d7335
+  workflow tree matches 8477f8a08f26b792b313ff4461a978591024c33e: c2bd8c61cfc2a159cd3287783e750dfd72ce02b9
+ok job 'build (macos-14, --targets universal --camera --microphone --user-agent "Mozilla/5.0 (Macintosh; ...': success
+   ok step 'Cache cargo registry': success
+   ok step 'Sanity-check installer': success
+   ok step 'Upload as Actions artifact (dry run)': success
+   ok step 'Upload to draft GitHub Release': not taken on a dispatch
+ok job 'build (windows-latest, --targets x64, *.msi, TongFlow-win-x64.msi)': success
+   ok step 'Cache cargo registry': success
+   ok step 'Sanity-check installer': success
+   ok step 'Upload as Actions artifact (dry run)': success
+   ok step 'Upload to draft GitHub Release': not taken on a dispatch
+-- job 'prepare': skipped (tag-only path, expected on a dispatch)
+-- job 'publish': skipped (tag-only path, expected on a dispatch)
+dispatched desktop dry run succeeded, and reached every step that carries a bumped action

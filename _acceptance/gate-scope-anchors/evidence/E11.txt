@@ -1,0 +1,9 @@
+dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168 (started 2026-07-26T06:01:26Z)
+ok  run's workflow tree matches 8477f8a08f26b792b313ff4461a978591024c33e
+ok  runner resolved 'push: false'
+ok  no registry write anywhere in 3575 log lines
+ok  buildx invoked without --push
+--  registry cross-check unavailable: the token cannot read packages.
+    Not treated as evidence either way — a 404 from the versions endpoint
+    is indistinguishable from a package this token simply cannot see.
+no publish occurred during the dry run

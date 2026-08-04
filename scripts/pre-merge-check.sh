@@ -651,7 +651,17 @@ scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
   # function. Stops at the first match rather than scanning every tracked file.
   command -v git >/dev/null 2>&1 || return 1
   git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
-  git -C "$1" ls-files --full-name 2>/dev/null | {
+  # `-c core.quotePath=false` for the same reason stale_files() sets it, and it
+  # is part of "the same namespace" this function exists to enforce: quotePath
+  # defaults ON, so ls-files spells a non-ASCII path "src/caf\303\251.ts" while
+  # diff --name-only (which stale_files reads, with the setting off) spells it
+  # src/café.ts. Without this the two disagree about a file BOTH can see, and a
+  # declaration whose only match is such a path gets narrow scope refused —
+  # fail-closed, so not a hole, but the header above claims the two ask in one
+  # namespace and that claim has to be true. A path that STILL arrives quoted
+  # despite the setting simply does not match, which keeps the doubt on the
+  # refuse-narrow-scope side.
+  git -c core.quotePath=false -C "$1" ls-files --full-name 2>/dev/null | {
     hit=1
     while IFS= read -r f; do
       [ -n "$f" ] || continue

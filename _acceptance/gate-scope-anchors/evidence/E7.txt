@@ -1,0 +1,4 @@
+no drift vs the range oneflow-plugin-prefix owns (8477f8a08f26b792b313ff4461a978591024c33e..dd39da82b8aaedb17729c0022aa2b146a8219c12): config src/lib/plugins/plugins-registry-schema.ts src/lib/plugins/plugins-registry.server.ts src/db untouched
+manifest intact: 39 plugins, org still https://github.com/tong-io
+no T3 drift: src/lib/abi src/app/api untouched vs the range dependency-refresh-2026-07 owns (1e81ac216e46efc9946b47887ae32e496e87e1a4..4d89b584fcfd3dfafd03823a14c9b81406db6e9b)
+workflow drift vs the range ci-actions-bump owns (4d89b584fcfd3dfafd03823a14c9b81406db6e9b..8477f8a08f26b792b313ff4461a978591024c33e): 16 declared pin line(s), comments, and the dry-run guard (-1 +1); no file added, deleted or renamed

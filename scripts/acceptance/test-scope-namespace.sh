@@ -103,6 +103,17 @@ CHANGELOG.md"
   # A mixed union is legitimate too: it can still report something.
   scope_has_any_match "$d" 'docs/**
 src/lib/**' || fail legit-granted "mixed union refused although it matches real code"
+
+  # A non-ASCII filename is the same namespace question in a different disguise:
+  # git quotes such paths in ls-files by default while stale_files() reads them
+  # unquoted from diff. If the two disagree, a declaration whose only match is
+  # such a file is refused narrow scope even though staleness could report it.
+  ( cd "$d" && printf 's\n' > "src/lib/café.ts" && git add -A && git commit -qm accented ) >/dev/null 2>&1 \
+    || fail legit-granted "could not add a non-ASCII fixture file"
+  ( cd "$d" && git rm -q --cached src/lib/real.ts && git commit -qm "leave only the accented file" ) >/dev/null 2>&1 \
+    || fail legit-granted "could not isolate the non-ASCII file"
+  scope_has_any_match "$d" 'src/lib/**' \
+    || fail legit-granted "a union whose only match is a non-ASCII path was refused — ls-files and diff are spelling it differently"
   pass legit-granted
 }
 
