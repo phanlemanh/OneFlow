@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: dfb9dde9d243c861064e4a335b3fcc57e508cc4e
-human_signoff:
+human_signoff: Manh 2026-08-04
 ---
 
 # Evidence Report: task-metering

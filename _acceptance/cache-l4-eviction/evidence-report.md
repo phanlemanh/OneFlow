@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 410db0048feeea18d2e04c29c7cb963074fc8dae
-human_signoff:
+human_signoff: Manh 2026-08-04
 ---
 
 # Evidence Report: cache-l4-eviction

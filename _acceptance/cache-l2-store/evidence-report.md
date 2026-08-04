@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: f8edaa16e6b6af8c322548215e4c8f73f5445e3f
-human_signoff:
+human_signoff: Manh 2026-08-04
 ---
 
 # Evidence Report: cache-l2-store
