@@ -39,6 +39,11 @@ head_sha() {
     printf '%s' "$sha"
 }
 
+# Values that can never be a commit sha, a range, or a run id. Each exists
+# because `exit` inside a pipeline or command substitution — how every one of
+# these helpers is reached — kills only that subshell, so a refusal has to travel
+# as DATA to reach the decision. See _own_range and _run_id_at.
+LOOKUP_FAILED="LOOKUP_FAILED"
 # A value that can never be a commit sha or a range. See _own_range.
 ANCHOR_UNRESOLVED="ANCHOR_UNRESOLVED"
 
@@ -144,6 +149,10 @@ find_run() {
         while IFS= read -r c; do
             [ -n "$c" ] || continue
             id="$(_run_id_at "$file" "$event" "$c" "")"
+            if [ "$id" = "$LOOKUP_FAILED" ]; then
+                echo "could not query runs for ${ACCEPTANCE_SLUG} at commit ${c} — refusing to move on to another commit and grade whatever it finds there" >&2
+                exit 2
+            fi
             if [ -n "$id" ]; then
                 printf '%s' "$id"
                 return 0
@@ -158,6 +167,10 @@ COMMITS
     fi
 
     id="$(_run_id_at "$file" "$event" "$sha" "$branch")"
+    if [ "$id" = "$LOOKUP_FAILED" ]; then
+        echo "could not query ${file} runs — refusing to report anything about them" >&2
+        exit 2
+    fi
     if [ -z "$id" ]; then
         echo "no ${file} run found${event:+ for event ${event}}${sha:+ at commit ${sha}}${branch:+ on branch ${branch}}" >&2
         echo "the workflow must actually have run before this eval can say anything" >&2
@@ -167,10 +180,17 @@ COMMITS
 }
 
 # _run_id_at <workflow-file> <event> <sha> <branch>
-# The databaseId of the newest matching run, or EMPTY when there is none. Only a
-# gh FAILURE exits 2 here: "looked and found none" is a legitimate answer its
-# caller interprets (it may have more commits to try), while "could not look" is
-# never the caller's to soften.
+# The databaseId of the newest matching run; EMPTY when the query succeeded and
+# matched nothing; the poison value $LOOKUP_FAILED when gh itself failed.
+#
+# Those last two must stay distinguishable, and a bare `exit 2` cannot keep them
+# apart here: both call sites are command substitutions, where `exit` ends only
+# its own subshell and leaves the caller holding an empty string. The anchored
+# loop would then read "the rate limiter bit at commit A" as "no run at commit A"
+# and happily return a run from commit B — a DIFFERENT run of the same pull
+# request, graded green, with the refusal printed to stderr and discarded. Third
+# time this file has needed a poison value for the same reason; see
+# UNKNOWN_WORKFLOW_KEY and ANCHOR_UNRESOLVED above.
 _run_id_at() {
     local file="$1" event="$2" sha="$3" branch="$4" args runs
     args=(run list --workflow "$file" --limit 20 --json databaseId,headSha,event,status,conclusion)
@@ -179,8 +199,9 @@ _run_id_at() {
     # Without this the newest dispatch on ANY branch answers the query.
     [ -n "$branch" ] && args+=(--branch "$branch")
     if ! runs="$(gh "${args[@]}")"; then
-        echo "gh run list failed for ${file} — refusing to guess" >&2
-        exit 2
+        echo "gh run list failed for ${file}${sha:+ at commit ${sha}} — refusing to guess" >&2
+        printf '%s' "$LOOKUP_FAILED"
+        return 2
     fi
     printf '%s' "$runs" | jq -r 'sort_by(.databaseId) | reverse | .[0].databaseId // empty'
 }

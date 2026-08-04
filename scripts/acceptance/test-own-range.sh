@@ -173,6 +173,21 @@ case_malformed() {
   rm -rf "$broken"
   [ -z "$bad" ] \
     || fail malformed "an unresolvable anchor did not read as 'could not look' (want exit 2 / a poison value):$bad"
+
+  # gh-run-lib still has helpers whose refusal is a bare `exit` reached through a
+  # command substitution — head_sha and run_json, both pre-dating this contract.
+  # They stop their callers only because every consumer runs under `set -e`, so
+  # that is an invariant rather than a coincidence, and an invariant nobody
+  # states is one a fifth consumer will break. State it here: a new script that
+  # sources this library without `set -e` would turn every one of those refusals
+  # into an empty string and carry on.
+  no_set_e=""
+  for consumer in $(grep -l "gh-run-lib.sh" "$ROOT"/scripts/ci/*.sh); do
+    case "$consumer" in */gh-run-lib.sh) continue ;; esac
+    grep -qE '^set -[a-z]*e' "$consumer" || no_set_e="$no_set_e $(basename "$consumer")"
+  done
+  [ -z "$no_set_e" ] \
+    || fail malformed "these scripts source gh-run-lib.sh without set -e, so a refusal raised inside a command substitution would be swallowed:$no_set_e"
   pass malformed
 }
 
@@ -316,6 +331,41 @@ STUB
   tip="$(cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; anchor_tip' 2>/dev/null)"
   [ "$tip" = "$(git -C "$ROOT" rev-parse HEAD)" ] \
     || fail no-run-exit2 "unanchored anchor_tip is '$tip', not HEAD"
+
+  # "gh failed" is NOT "gh looked and found nothing", and the anchored loop is
+  # exactly where the two get confused: a transient failure at one commit must
+  # not become a reason to move on and grade a DIFFERENT run of the same pull
+  # request. Stub gh so it fails at the newest commit while an older one does
+  # hold a run — the shape that returns the wrong run when this is unguarded.
+  cat > "$d/bin/gh" <<'FLAKY'
+#!/usr/bin/env bash
+case "$1 $2" in
+  "auth status") exit 0 ;;
+  "run list")
+     prev=""; sha=""
+     for a in "$@"; do [ "$prev" = "--commit" ] && sha="$a"; prev="$a"; done
+     if [ "${sha}" = "$FAIL_SHA" ]; then echo "gh: API rate limit exceeded" >&2; exit 1; fi
+     if [ "${sha}" = "$HIT_SHA" ]; then
+       echo '[{"databaseId":999,"headSha":"'"$sha"'","event":"","status":"completed","conclusion":"success"}]'
+       exit 0
+     fi
+     echo '[]'; exit 0 ;;
+esac
+exit 0
+FLAKY
+  chmod +x "$d/bin/gh"
+  newest="$(git -C "$ROOT" rev-list 8477f8a^1..8477f8a^2 | head -1)"
+  older="$(git -C "$ROOT" rev-list 8477f8a^1..8477f8a^2 | tail -1)"
+  [ -n "$newest" ] && [ -n "$older" ] && [ "$newest" != "$older" ] \
+    || fail no-run-exit2 "fixture needs at least two commits in PR #17's set"
+  flaky_out="$(cd "$ROOT" && PATH="$d/bin:$PATH" FAIL_SHA="$newest" HIT_SHA="$older" \
+      ACCEPTANCE_SLUG=ci-actions-bump bash -c '. scripts/ci/gh-run-lib.sh; find_run ci "" "" ""' 2>&1)"
+  flaky_rc=$?
+  [ "$flaky_rc" -eq 2 ] \
+    || fail no-run-exit2 "a gh FAILURE at one commit exited $flaky_rc (want 2) — it was read as 'no run here' and the walk continued: $flaky_out"
+  case "$flaky_out" in
+    *999*) fail no-run-exit2 "a gh failure at one commit still returned another commit's run id — that grades the wrong run green" ;;
+  esac
   pass no-run-exit2
 }
 
