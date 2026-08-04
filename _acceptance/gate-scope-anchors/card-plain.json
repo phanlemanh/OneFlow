@@ -1,26 +1,34 @@
 {
-  "feature_plain": "Sửa hai chỗ cân đo sai của cổng nghiệm thu: (1) bịt lỗ 'khai vùng kiểm toàn file miễn trừ thì không bao giờ bị báo cũ', và (2) cho các phép đo kiểu 'PR của tôi có đụng X không' một cái neo về đúng PR của chúng — để ba hồ sơ đã ký từ tháng 7 thôi bị chấm oan bằng bài của nhánh khác, và nhánh compose-overlay merge được.",
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ từ chối cấp vùng-kiểm-hẹp cho hồ sơ mà vùng khai chỉ gồm file miễn trừ — có nói rõ lý do, không im lặng." },
-    { "id": "AC-2", "p": "Sẽ chứng minh 4 lỗi cân đo đã sửa đợt trước vẫn còn bị bắt nếu ai đó vô tình đưa chúng quay lại." },
-    { "id": "AC-3", "p": "Sẽ vẫn cấp vùng-kiểm-hẹp cho hồ sơ khai thành thật trỏ vào code thật — bản sửa không trừng phạt người ngay." },
-    { "id": "AC-4", "p": "Sẽ có một bộ giải duy nhất trả lời 'feature này sở hữu khoảng thay đổi nào' — kiểm bằng chính PR #17 thật, gồm cả hai lần chạy thử máy nằm ở commit khác nhau." },
-    { "id": "AC-5", "p": "Sẽ giữ nguyên từng byte hành vi hiện tại cho feature CHƯA merge — vòng kiểm đầu đời không đổi gì." },
-    { "id": "AC-7", "p": "Sẽ làm ba phép đo 'không lem sang vùng cấm' chấm đúng bài PR của chúng: hai phép đang đỏ oan trên nhánh này sẽ xanh, và cả ba vẫn đỏ được khi PR gốc thật sự vi phạm (kiểm bằng fixture)." },
-    { "id": "AC-8", "p": "Sẽ tìm lại được các lần chạy CI lịch sử của PR gốc — kể cả hai lần chạy thử phát hành nằm ở commit khác với lần chạy CI chính." },
-    { "id": "AC-9", "p": "Sẽ đóng khung phép kiểm 'không lỡ tay phát hành Docker' vào đúng cửa sổ thời gian của PR gốc, thay vì trôi theo hiện tại." },
-    { "id": "AC-11", "p": "Sẽ điền neo cho cả ba hồ sơ đang kẹt (PR #16/#17/#18 — đã xác minh đều là merge thật) để chúng vào được vòng kiểm lại trung thực." },
-    { "id": "AC-12", "p": "Sẽ giữ nguyên từng byte đường không-neo của các phép đo — không được biến 'thiếu neo' thành 'mọi PR đang mở đều xanh oan'." }
+  "feature_plain": "Sửa hai chỗ cân đo sai của cổng nghiệm thu: bịt lỗ 'khai vùng kiểm toàn file miễn trừ thì không bao giờ bị báo cũ', và cho các phép đo kiểu 'PR của tôi có đụng X không' một cái neo về đúng PR của chúng — để ba hồ sơ đã ký từ tháng 7 thôi bị chấm oan bằng bài của nhánh khác.",
+  "decisions": [
+    { "id": "E1", "q": "Hồ sơ khai vùng kiểm rỗng nghĩa có bị từ chối, kèm lý do rõ?" },
+    { "id": "E2", "q": "Bốn lỗi cân đo cũ vẫn bị bắt nếu ai đó đưa chúng quay lại?" },
+    { "id": "E3", "q": "Người khai thành thật vẫn được hưởng vùng kiểm hẹp?" },
+    { "id": "E4", "q": "Neo về đúng PR gốc, gồm cả hai lần chạy máy ở commit khác nhau?" },
+    { "id": "E5", "q": "Hồ sơ chưa merge vẫn hành xử y như hôm nay?" },
+    { "id": "E6", "q": "Neo hỏng thì mọi phép đo đều báo 'không nhìn được', không đoán?" },
+    { "id": "E7", "q": "Ba phép đo từng chặn merge nay chạy trung thực và xanh?" },
+    { "id": "E8", "q": "Neo có biến phép đo thành máy gật đầu không?" },
+    { "id": "E9", "q": "Tìm lại được các lần chạy máy lịch sử của PR gốc?" },
+    { "id": "E10", "q": "Mạng hỏng có bị đọc nhầm thành 'không có gì để xem'?" },
+    { "id": "E11", "q": "Phép kiểm 'không lỡ tay phát hành' đóng khung đúng thời điểm PR gốc?" },
+    { "id": "E12", "q": "Cả ba hồ sơ kẹt nay vào được vòng kiểm lại trung thực?" },
+    { "id": "E13", "q": "Mọi PR đang mở có bị biến thành xanh oan không?" }
   ],
-  "wont_do": [
-    { "id": "AC-6", "p": "Chặn neo hỏng: neo trỏ commit không tồn tại hay không phải merge thì báo 'không nhìn được' rõ ràng — KHÔNG bao giờ đoán rồi báo xanh." },
-    { "id": "AC-10", "p": "Chặn đọc-vắng-thành-xanh: neo hợp lệ mà GitHub không còn lưu lần chạy nào thì báo 'không nhìn được' — KHÔNG lấy sự im lặng làm bằng chứng." }
+  "analyst_plain": "Ba vòng nghiệm thu độc lập, mỗi vòng tìm đúng một lỗi thật trong code của chính hạng mục này — và cả ba là cùng một sai lầm: gắn một câu hỏi vào điều kiện gần đúng thay vì điều kiện thật. Cả ba đã sửa và chứng minh bằng cách đưa lỗi quay lại để xem phép đo có đỏ không. Vòng 4 không chạy, theo quyết định của bạn sau khi cân chi phí.",
+  "decisions_approved": [
+    { "id": "d-20260804T063000Z-11201", "p": "Làm cả hai nửa trong MỘT hồ sơ — một lần nghiệm thu, một lượt ký; đổi lại nhánh compose-overlay đợi cả nửa (a) xong mới merge." },
+    { "id": "d-20260804T063001Z-11202", "p": "Phép đo per-PR sau khi merge mang nghĩa 'sự thật lịch sử' — hỏi lại bao giờ cũng cùng đáp án; đổi lại nó không canh vi phạm mới sau merge." },
+    { "id": "d-20260804T063002Z-11203", "p": "Một bộ giải dùng chung + neo ghi trong hồ sơ; loại phương án rải hằng số theo từng phép đo." },
+    { "id": "d-20260804T063003Z-11204", "p": "Giữ phép kiểm Docker-registry trong phạm vi, kèm điều kiện rút lui nếu chi phí vượt giá trị." }
   ],
-  "scope_plain": "Không đụng: hai script kiểm danh sách plugin (thuộc gói nợ khác), cơ chế mang-bằng-chứng-qua-vòng, việc khai vùng kiểm cho các hồ sơ cũ, và hạng mục 0.7 (tiếng Việt trong file vendor).",
-  "decisions_plain": [
-    { "id": "d-20260804T063000Z-11201", "p": "Chọn làm cả hai nửa trong MỘT hợp đồng đúng như hàng đợi — một lần nghiệm thu, một lượt ký; đổi lại nhánh compose-overlay đợi cả nửa (a) xong mới merge." },
-    { "id": "d-20260804T063001Z-11202", "p": "Chọn ngữ nghĩa 'sự thật lịch sử' cho phép đo per-PR — hỏi lại bao giờ cũng cùng đáp án; đổi lại nó không canh vi phạm MỚI sau merge (việc đó thuộc loại phép đo khác)." },
-    { "id": "d-20260804T063002Z-11203", "p": "Chọn một bộ giải dùng chung + neo ghi trong hồ sơ (điền một lần lúc ship) — một chỗ hiện thực luật; loại phương án rải hằng số theo từng phép đo (đã từng làm một guard khác giòn)." },
-    { "id": "d-20260804T063003Z-11204", "p": "Giữ phép kiểm Docker-registry trong phạm vi với cửa sổ thời gian đóng — kèm điều kiện rút lui: nếu chi phí vượt giá trị thì hạ thành hạn-chế-đã-biết có chữ ký, không kéo cả hợp đồng." }
+  "decisions_provisional": [
+    { "id": "d-20260804T124500Z-11206", "p": "Đường không-neo giữ nguyên TỪNG DÒNG code (nhánh có-neo là khối thêm vào) — để 'PR đang mở không đổi gì' đúng bằng cấu trúc chứ không chỉ bằng test." },
+    { "id": "d-20260804T124502Z-11208", "p": "Mở rộng phạm vi một chút khi phát hiện hai phép đo còn so cây workflow với HEAD chứ không chỉ tra theo tên nhánh — không sửa thì chúng vẫn đỏ vì lý do khác." },
+    { "id": "d-20260804T133000Z-11211", "p": "Chuẩn hoá mốc thời gian về UTC — tự bắt lỗi của chính mình: mốc giờ địa phương so chuỗi với giờ Zulu sẽ cho một bản phát hành lọt vào cửa sổ nó xảy ra sau." },
+    { "id": "d-20260804T211501Z-11215", "p": "Tự quét cả họ lỗi thay vì chờ vòng sau tìm ra cái tiếp theo: biến bất biến 'mọi script gọi thư viện này đều bật set -e' từ đi mượn thành được kiểm." },
+    { "id": "d-20260804T220001Z-11217", "p": "Dừng ở vòng 3, không chạy vòng 4 — bạn đã quyết sau khi cân chi phí ~2.8M token/vòng với việc cả ba lỗi đã quy về một họ nay có guard." },
+    { "id": "d-20260804T130500Z-11210", "p": "Ghi nhận: một phép kiểm golden của hồ sơ khác ĐÃ đỏ sẵn trước mọi thay đổi ở đây — vòng kiểm lại của hồ sơ đó không hoàn toàn cơ học như đã báo giá." },
+    { "id": "d-20260804T134500Z-11212", "p": "Sửa con số đã báo ở Cổng 1: 13 hồ sơ cần kiểm lại, không phải 6–7 — nhóm cache không thoát như dự đoán." }
   ]
 }
