@@ -7,7 +7,7 @@ reason:
 verified_by: acceptance-verify workflow, 3 rounds of fresh-context agents + a final re-run on the signed tree
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4513df1cee6dd1c395bea60b479758d01d150116
+verified_commit: 9cebc5682ef51ff21a657118b83ff2581160407b
 rounds: 3
 network_dependent_evals: [E9, E11]
 ---
@@ -221,5 +221,10 @@ sẽ xanh trong khi key thật vẫn chạy không neo.
 - **`head_sha` và `run_json`** (có trước hợp đồng này) vẫn dùng `exit` trần
   trong ngữ cảnh subshell; an toàn vì mọi consumer khai `set -e`, và nay có
   guard kiểm chính điều đó. Sửa chúng nằm ngoài phạm vi 0.6.
+- **Sau vòng 3** còn một finding LOW trong hợp đồng được đóng thêm:
+  `scope_has_any_match` đọc `ls-files` không đặt `core.quotePath=false` nên
+  đánh vần đường dẫn phi-ASCII khác `stale_files`. Hướng lệch là fail-closed
+  (từ chối scope oan), nhưng chính chú thích của hàm khẳng định hai bên hỏi
+  cùng một không gian — đã sửa + E3 phủ + mutation-test.
 - **Vòng 4 không chạy** — quyết định của Manh 04/08 sau khi cân chi phí
   (~2.8M token/vòng) với việc cả ba lỗi đã quy về một họ nay có guard.
