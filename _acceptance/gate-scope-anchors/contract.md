@@ -5,11 +5,12 @@ slug: gate-scope-anchors
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, scripts]
-status: verified
+status: signed-off
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-04T12:36:51Z
 time_human_minutes:
   gate1: 5
+  gate2: 10
 ---
 
 # Acceptance Contract: gate-scope-anchors
@@ -160,6 +161,28 @@ Quét Zwicky 3 trục (04/08):
 - Khai `paths` bổ sung cho các feature whole-tree (việc của vòng re-verify
   sau hợp đồng này, có thể làm hoặc không).
 - 0.7 — English-only vs văn bản vendor của kit.
+
+## Known limits (chấp nhận tại Cổng 2, Manh 2026-08-04)
+
+Từ review-findings.md, các mục ký nhận là hạn chế đã biết — ship bản này:
+
+- `head_sha` / `run_json` (có trước hợp đồng này) vẫn dùng `exit` trần trong
+  ngữ cảnh subshell; an toàn vì mọi consumer khai `set -e`, và E6 nay kiểm
+  chính bất biến đó.
+- Nửa đối chứng registry của E11 là "không nhìn được" với token hiện tại
+  (thiếu `read:packages`); verdict tựa trên nửa quyết định bằng log.
+- Node `compose-overlay` là N→1 nhưng nằm ở `transfer/` — đã ghi trong
+  known-limits của chính hồ sơ compose-overlay.
+- Thêm op đẩy một đối tượng dùng chung cấp module vào state (chưa gây lỗi).
+- Bình luận tiếng Việt trong `lib/evidence-core.js`; CLAUDE.md mô tả
+  `check-manifest-unmoved.sh` đã lỗi thời; chú thích `alsoAccepts` nói nhẹ
+  hơn thực tế; header vendor trong `scripts/ui-capture.mjs`.
+- `check-python-gen-clean.sh` để file bẩn trong cây khi thất bại.
+
+Các mục đề xuất **hợp đồng mới** (không ship trong 0.6): chặn biên số ở
+op-form, `<select>` i18n, phản hồi khi từ chối đổi đích kết nối, ghim SDK
+trong `run-overlay-plugin-tests.sh`, cache clone dùng chung thư mục cố định,
+và chuyện `pnpm-workspace.yaml` chưa commit.
 
 ## Notes
 

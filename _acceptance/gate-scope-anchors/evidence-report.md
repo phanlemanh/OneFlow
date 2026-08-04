@@ -9,6 +9,7 @@ enforcement_mode: strict
 bypass_used: false
 verified_commit: 9cebc5682ef51ff21a657118b83ff2581160407b
 rounds: 3
+human_signoff: Manh 2026-08-04
 network_dependent_evals: [E9, E11]
 ---
 
