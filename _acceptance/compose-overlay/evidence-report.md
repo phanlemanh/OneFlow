@@ -1,14 +1,14 @@
 ---
 schema_version: 2
 feature_slug: compose-overlay
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 16cff3a65f60df00a3161ba20a719aa8a281d20d
-human_signoff:
+human_signoff: Manh 2026-08-03
 ---
 
 # Evidence Report: compose-overlay
@@ -328,7 +328,7 @@ human_signoff:
     - operational-feasibility: PASS — Cả 6 capture khớp đúng mô tả state trong manifest: state-1 disable nút Apply khi chưa có ops, state-2 (image) không có time-field còn state-3 (video) có thêm badge "entire video" cho op, state-4 mở form đầy đủ multi-line content + x/y/anchor/font/color/align + Start(s)/End(s), state-5 vừa có banner đỏ "in:logo not connected" vừa có inline error trên op row, state-6 dùng đúng overlay loading dùng chung của shell (viền gradient xoay + spinner + nhãn + đồng hồ). Shell node (icon + title + hamburger, khối "Implementation" có avatar dropdown, danh sách "Ops" + nút hành động đen/xám) nhất quán xuyên suốt 6 ảnh và không có yếu tố nào (màu, bo góc, spacing, typography) phá vỡ ngôn ngữ thiết kế chung của canvas/top-bar xuất hiện đồng nhất ở mọi state.
     - spec-alignment: PASS — Doi chieu 6 file HTML design-of-record voi 6 PNG capture: shell BaseNodeShell (icon+title+hamburger, khung bo goc, plugin-select box) giong nhau xuyen suot; state-1 khop dung 2x2 add-menu + nut disabled xam; state-2/3 khop op-row dang badge+summary+edit/x; state-4 giu border xanh "selected" va day du truong (Start/End co that, chi khac cach nhom so voi 1 truong "Hien (giay)" gop cua design — khac biet noi dung nho, khong pha shell); state-5 khop banner-error do + op-row vien do; state-6 khop dung dac tinh loading rieng cua BaseNodeShell (vien gradient xoay, spinner, nhan, dong ho, nut Cancel — da xac nhan co trong HTML du bi cat o viewport chup). Sai khac con lai chi la ngon ngu hien thi (VI trong design vs EN trong capture) va cach nhom truong form, khong phai vi pham ngon ngu thiet ke workspace.
   rationale: Panel 3-lens dong thuan tuyet doi PASS — khong dissent nao duoc ghi nhan. Verdict tong the van la PENDING-JUDGMENT vi day la judgment item cho AC-16 (ngon ngu thiet ke), can human tu xac nhan va dien human_override truoc khi nang overall len PASS o Gate 2.
-  human_override:
+  human_override: Manh 2026-08-03
 
 ## Analyst
 
