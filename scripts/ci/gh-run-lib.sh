@@ -39,6 +39,9 @@ head_sha() {
     printf '%s' "$sha"
 }
 
+# A value that can never be a commit sha or a range. See _own_range.
+ANCHOR_UNRESOLVED="ANCHOR_UNRESOLVED"
+
 # _own_range — the resolver's output for the anchored feature, or nothing when
 # unanchored. ACCEPTANCE_SLUG is the only switch; the anchoring RULE lives in
 # scripts/acceptance/own-range.sh and nowhere else, so this is a call rather
@@ -49,15 +52,38 @@ _own_range() {
     dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../acceptance" && pwd)"
     if ! out="$(bash "$dir/own-range.sh" "$ACCEPTANCE_SLUG")"; then
         echo "could not resolve the commit range owned by '${ACCEPTANCE_SLUG}' — refusing to report a run green" >&2
+        # The `exit` below only kills THIS shell, and every caller reaches this
+        # function through a pipeline or a command substitution — both subshells.
+        # Today the guards still stop, but only because each of them runs under
+        # `set -euo pipefail` and the failed substitution aborts them: the
+        # fail-closed property is inherited from the callers rather than owned
+        # here. So emit a POISON value as well. It cannot be mistaken for a
+        # commit, and every consumer below refuses it explicitly — the same
+        # tactic find_run already uses for UNKNOWN_WORKFLOW_KEY, and for the same
+        # reason (see its comment: `exit` inside a command substitution kills
+        # only its own subshell).
+        printf '%s' "$ANCHOR_UNRESOLVED"
         exit 2
     fi
     printf '%s' "$out"
 }
 
 # anchor_commits — the commit set this feature's pull request owns, newest
-# first, or nothing when unanchored.
+# first, or nothing when unanchored. An unresolvable anchor propagates the poison
+# value rather than an empty list: empty is indistinguishable from "unanchored",
+# which would send find_run down its by-branch path and answer with a run
+# belonging to whatever branch this happens to be — precisely the wrong-pull-
+# request reading this whole contract exists to end.
 anchor_commits() {
-    _own_range | sed -n 's/^commits=//p' | tr ' ' '\n' | grep -v '^$'
+    local out
+    out="$(_own_range)"
+    case "$out" in
+        "$ANCHOR_UNRESOLVED"*)
+            printf '%s\n' "$ANCHOR_UNRESOLVED"
+            return 2
+            ;;
+    esac
+    printf '%s' "$out" | sed -n 's/^commits=//p' | tr ' ' '\n' | grep -v '^$'
 }
 
 # anchor_tip — the commit that plays HEAD's role. The provenance checks in
@@ -67,17 +93,22 @@ anchor_commits() {
 # reason after the run lookup itself was fixed.
 anchor_tip() {
     local out to
-    out="$(_own_range)"
-    if [ -n "$out" ]; then
-        to="$(printf '%s' "$out" | sed -n 's/^range_to=//p')"
-        if [ -z "$to" ]; then
-            echo "own-range.sh printed no range_to for '${ACCEPTANCE_SLUG}'" >&2
-            exit 2
-        fi
-        printf '%s' "$to"
+    # Branch on whether an anchor was ASKED FOR, never on whether resolving it
+    # produced output. Keying on emptiness meant an unresolvable anchor fell
+    # through to the local HEAD — silently comparing a historical run against
+    # whatever tree this branch is sitting on.
+    if [ -z "${ACCEPTANCE_SLUG:-}" ]; then
+        head_sha
         return 0
     fi
-    head_sha
+    out="$(_own_range)"
+    to="$(printf '%s' "$out" | sed -n 's/^range_to=//p')"
+    case "$out" in "$ANCHOR_UNRESOLVED"*) to="" ;; esac
+    if [ -z "$to" ]; then
+        echo "could not resolve the anchor tip for '${ACCEPTANCE_SLUG}' — refusing to fall back to the local HEAD" >&2
+        exit 2
+    fi
+    printf '%s' "$to"
 }
 
 # find_run <workflow-key> [event] [commit-sha] [branch]

@@ -131,6 +131,48 @@ case_malformed() {
   mine="$(bash "$RESOLVER" bad --root "$d" --print-anchor 2>/dev/null || true)"
   [ "$twin" = "$mine" ] \
     || fail malformed "frontmatter readers disagree: gate says '$twin', resolver says '$mine'"
+
+  # AC-6 second half — "and the consuming guard also exits 2". Asserting only the
+  # resolver leaves the claim untested where it matters: the guards reach the
+  # anchor through pipelines and command substitutions, and `exit` inside either
+  # kills only that subshell. Every consumer is checked here, in the real repo,
+  # against a deliberately unresolvable anchor. anchor_commits/anchor_tip are
+  # checked WITHOUT set -e too, because the guards' fail-closed behaviour must be
+  # owned by this library rather than inherited from each caller's shell options.
+  broken="$ROOT/_acceptance/zz-own-range-broken-anchor"
+  mkdir -p "$broken"
+  printf -- '---\nslug: zz-own-range-broken-anchor\nlanded_merge: deadbeefdeadbeefdeadbeefdeadbeefdeadbeef\n---\n' \
+    > "$broken/contract.md"
+  broken_rc() { # <script> [args...] — exit code with the unresolvable anchor
+    ( cd "$ROOT" && ACCEPTANCE_SLUG=zz-own-range-broken-anchor bash "$@" >/dev/null 2>&1 )
+    printf '%s' "$?"
+  }
+  bad=""
+  for guard in \
+    "scripts/plugins/check-no-config-drift.sh" \
+    "scripts/deps/check-no-t3-drift.sh" \
+    "scripts/ci/check-workflow-drift.sh" \
+    "scripts/ci/check-gate-plumbing.sh" \
+    "scripts/ci/check-ghcr-untouched.sh" \
+    "scripts/ci/check-dispatch-run.sh docker"; do
+    # shellcheck disable=SC2086
+    rc="$(broken_rc $guard)"
+    [ "$rc" = "2" ] || bad="$bad ${guard%% *}=$rc"
+  done
+  rc="$(broken_rc scripts/ci/check-run-jobs.sh ci Lint)"
+  [ "$rc" = "2" ] || bad="$bad check-run-jobs=$rc"
+
+  head_now="$(git -C "$ROOT" rev-parse HEAD)"
+  tip_out="$(cd "$ROOT" && ACCEPTANCE_SLUG=zz-own-range-broken-anchor bash -c '. scripts/ci/gh-run-lib.sh; anchor_tip' 2>/dev/null || true)"
+  [ "$tip_out" != "$head_now" ] \
+    || bad="$bad anchor_tip-fell-back-to-local-HEAD"
+  commits_out="$(cd "$ROOT" && ACCEPTANCE_SLUG=zz-own-range-broken-anchor bash -c '. scripts/ci/gh-run-lib.sh; anchor_commits' 2>/dev/null || true)"
+  [ -n "$commits_out" ] \
+    || bad="$bad anchor_commits-returned-empty-which-reads-as-unanchored"
+
+  rm -rf "$broken"
+  [ -z "$bad" ] \
+    || fail malformed "an unresolvable anchor did not read as 'could not look' (want exit 2 / a poison value):$bad"
   pass malformed
 }
 
