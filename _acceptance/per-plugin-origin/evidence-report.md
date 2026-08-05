@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+verified_commit: f39723a228be90031eb1e3e423664c84829851db
 human_signoff: Manh 2026-08-03
 ---
 
@@ -188,3 +188,9 @@ thành cũ theo cơ chế staleness. Đã chạy lại: **12/12 eval xanh** ở
 sơ bị ảnh hưởng — không hồ sơ nào đỏ.
 
 Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
+
+## Ghim lại 2026-08-05 (nhánh `chore/landed-merge-anchors`)
+
+Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
+bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
+bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.

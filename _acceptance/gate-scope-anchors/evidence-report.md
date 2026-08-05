@@ -7,7 +7,7 @@ reason:
 verified_by: acceptance-verify workflow, 3 rounds of fresh-context agents + a final re-run on the signed tree
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 41ae5af84812414e3f5eb1918ef1aca2a66ff444
+verified_commit: f39723a228be90031eb1e3e423664c84829851db
 rounds: 3
 human_signoff: Manh 2026-08-04
 network_dependent_evals: [E9, E11]
@@ -239,3 +239,9 @@ kích hoạt và từ chối scope hẹp. Đúng cơ chế đã mô tả ở ph�
 sửa" bên trên, chỉ lần này nạn nhân là chính nó.
 
 Đã chạy lại **13/13 eval xanh** ở `41ae5af84812`.
+
+## Ghim lại 2026-08-05 (nhánh `chore/landed-merge-anchors`)
+
+Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
+bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
+bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
