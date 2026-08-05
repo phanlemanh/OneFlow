@@ -75,7 +75,19 @@ no-softening)
     ;;
 
 teeth)
-    # AC-3: prove the command the job runs actually fails on a failing test.
+    # AC-3: prove the command THE JOB RUNS actually fails on a failing test.
+    #
+    # The command is READ OUT OF ci.yml, never hardcoded here. An earlier version
+    # ran `pnpm test` directly and the clean-context verifier caught it: that
+    # version stayed green on a tree with no CI job at all, so it proved the test
+    # runner had teeth while saying nothing about the job. Deriving the command
+    # from the workflow is what ties this criterion back to CI.
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'unit-tests:' job in $WF — nothing to prove teeth about"
+    job_cmd=$(printf '%s\n' "$block" | sed -n 's/^[[:space:]]*run:[[:space:]]*\(pnpm .*\)$/\1/p' | tail -1)
+    [ -n "$job_cmd" ] || fail "could not read a run: command out of the unit-tests job in $WF"
+    echo "job command under test (read from $WF): $job_cmd"
+
     # In-process perturbation: a temp spec file inside the repo (so vitest picks
     # it up), removed on every exit path — the tree is never left dirty.
     probe="src/__civ_teeth_probe.test.ts"
@@ -93,22 +105,22 @@ test("civ teeth probe — intentional failure", () => {
 EOF
 
     set +e
-    pnpm test >/tmp/civ-teeth-red.log 2>&1
+    eval "$job_cmd" >/tmp/civ-teeth-red.log 2>&1
     red_rc=$?
     set -e
     [ "$red_rc" -ne 0 ] \
-        || fail "pnpm test exited 0 with a deliberately failing test present — the CI job would be vacuous"
+        || fail "'$job_cmd' exited 0 with a deliberately failing test present — the CI job would be vacuous"
 
     cleanup
     trap - EXIT
     set +e
-    pnpm test >/tmp/civ-teeth-green.log 2>&1
+    eval "$job_cmd" >/tmp/civ-teeth-green.log 2>&1
     green_rc=$?
     set -e
     [ "$green_rc" -eq 0 ] \
-        || fail "pnpm test did not return to a passing state after the probe was removed (exit $green_rc)"
+        || fail "'$job_cmd' did not return to a passing state after the probe was removed (exit $green_rc)"
 
-    echo "OK: pnpm test fails with the probe present and passes once removed — the job has teeth"
+    echo "OK: '$job_cmd' (from $WF) fails with the probe present and passes once removed — the job has teeth"
     ;;
 
 *)
