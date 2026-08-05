@@ -9,6 +9,12 @@ status: signed-off
 approved_by: Manh
 approved_at: 2026-08-02
 time_human_minutes: {gate1: 10, gate2: 30}
+# The merge commit that carried this feature into main (PR #43).
+# scripts/acceptance/own-range.sh turns this into the commit range and commit set
+# this feature owns, so any eval that asks about "my pull request" keeps grading
+# this feature's own diff when re-run on a later branch. Filled once at ship time,
+# per _acceptance/gate-scope-anchors/.
+landed_merge: 7976bd8
 ---
 
 # Acceptance Contract: compose-overlay
