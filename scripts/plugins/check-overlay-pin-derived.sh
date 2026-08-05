@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# ci-vitest-sdk-pin (CI-a) — guards for AC-5..AC-8.
+#
+# Usage: check-overlay-pin-derived.sh <shape|teeth|override|single-impl>
+#
+# One sub-command per criterion, never one shared exit code: a suite that
+# answers four questions through a single status cannot say WHICH half broke
+# (stale-scope-by-paths lesson F1).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+# This guard reads the version the same way everyone else does. Re-deriving it
+# here with its own grep would make the guard the second copy of the law it
+# forbids — single-impl caught exactly that on the first run.
+. scripts/lib/sdk-version.sh
+
+RUNNER=scripts/plugins/run-overlay-plugin-tests.sh
+TRAIN=scripts/abi/check-overlay-sdk-train.sh
+LIB=scripts/lib/sdk-version.sh
+MODE="${1:?usage: check-overlay-pin-derived.sh <shape|teeth|override|single-impl>}"
+
+fail() { echo "FAIL: $*" >&2; exit 1; }
+
+# Ask the runner what it WOULD install, without cloning or hitting the network.
+resolved_spec() { bash "$RUNNER" --print-spec; }
+
+case "$MODE" in
+shape)
+    # AC-5: no version literal survives, and the derived value is the one in pyproject.
+    [ -f "$RUNNER" ] || fail "missing $RUNNER"
+    if grep -nE 'oneflow-sdk==[0-9]' "$RUNNER"; then
+        fail "$RUNNER still carries a hardcoded version specifier (lines above)"
+    fi
+    # Catch a bare literal too: a stray 0.2.18 anywhere in the file is the same bug
+    # wearing a different shape.
+    if grep -nE '[0-9]+\.[0-9]+\.[0-9]+' "$RUNNER" | grep -v '^\s*#'; then
+        fail "$RUNNER still carries a version-looking literal outside comments"
+    fi
+    expected=$(sdk_version)
+    got=$(OVERLAY_SDK_SPEC= resolved_spec)
+    [ "$got" = "oneflow-sdk==$expected" ] \
+        || fail "resolved spec '$got' != 'oneflow-sdk==$expected' from sdk/pyproject.toml"
+    echo "OK: no literal pin; runner resolves oneflow-sdk==$expected from sdk/pyproject.toml"
+    ;;
+
+teeth)
+    # AC-6: the derivation must FOLLOW pyproject, not merely agree with it today.
+    # Perturb a COPY in a temp root; the real tree is never touched.
+    current=$(sdk_version)
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    mkdir -p "$tmp/sdk"
+    # A version that is deliberately NOT the current one, and not 0.2.18 either —
+    # so a runner that kept the old literal cannot pass by coincidence.
+    fake="9.9.9"
+    sed "s/^version = .*/version = \"$fake\"/" sdk/pyproject.toml >"$tmp/sdk/pyproject.toml"
+
+    perturbed=$(SDK_VERSION_ROOT="$tmp" OVERLAY_SDK_SPEC= resolved_spec)
+    [ "$perturbed" = "oneflow-sdk==$fake" ] \
+        || fail "perturbed pyproject says $fake but runner resolved '$perturbed' — the pin does not follow pyproject (this is the fail-open CI-a exists to close)"
+
+    restored=$(OVERLAY_SDK_SPEC= resolved_spec)
+    [ "$restored" = "oneflow-sdk==$current" ] \
+        || fail "after perturbation the runner resolved '$restored', expected 'oneflow-sdk==$current'"
+    echo "OK: perturbed pyproject ($fake) moved the spec; real tree still resolves $current"
+    ;;
+
+override)
+    # AC-7: the local-wheel escape hatch still wins over the derived value.
+    got=$(OVERLAY_SDK_SPEC="oneflow-sdk @ file:///tmp/does-not-exist.whl" resolved_spec)
+    [ "$got" = "oneflow-sdk @ file:///tmp/does-not-exist.whl" ] \
+        || fail "OVERLAY_SDK_SPEC was ignored; runner resolved '$got'"
+    echo "OK: OVERLAY_SDK_SPEC takes precedence over the derived pin"
+    ;;
+
+single-impl)
+    # AC-8: exactly one definition of the parsing law, and both consumers use it.
+    [ -f "$LIB" ] || fail "missing $LIB — the shared law must live in one file"
+    # The parsing expression may appear only inside the shared lib. Guards that
+    # merely *call* it are fine; a second copy of the sed/grep pair is not.
+    copies=$(grep -rlE "grep -E '\^version = '" scripts/ --include='*.sh' | grep -v "^$LIB$" || true)
+    if [ -n "$copies" ]; then
+        fail "second copy of the version-parsing law in: $copies"
+    fi
+    for consumer in "$RUNNER" "$TRAIN"; do
+        grep -q 'scripts/lib/sdk-version.sh' "$consumer" \
+            || fail "$consumer does not source the shared $LIB"
+    done
+    echo "OK: one parsing law in $LIB; both $RUNNER and $TRAIN source it"
+    ;;
+
+*)
+    fail "unknown mode '$MODE' (shape|teeth|override|single-impl)"
+    ;;
+esac

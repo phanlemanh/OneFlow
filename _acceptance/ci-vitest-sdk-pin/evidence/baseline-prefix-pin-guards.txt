@@ -1,0 +1,17 @@
+# Pre-fix baseline — ci-vitest-sdk-pin, captured on 65b5529 before any production edit
+# Purpose: prove the AC-5/AC-6 guards are RED against the fail-open they exist to close.
+
+$ bash scripts/plugins/check-overlay-pin-derived.sh shape
+18:SDK_SPEC="${OVERLAY_SDK_SPEC:-oneflow-sdk==0.2.18}"
+FAIL: scripts/plugins/run-overlay-plugin-tests.sh still carries a hardcoded version specifier (lines above)
+-> exit_code: 1
+
+$ bash scripts/plugins/check-overlay-pin-derived.sh teeth
+python -m pytest: error: unrecognized arguments: --print-spec
+  inifile: None
+  rootdir: /private/var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-overlay-plugin-ci
+-> exit_code: 4
+
+$ bash scripts/plugins/check-manifest-doc-synced.sh   # BEFORE the CLAUDE.md fix
+FAIL: CLAUDE.md still tells the reader to bump `expected_count`, a knob scripts/plugins/check-manifest-unmoved.sh no longer has
+-> exit_code: 1

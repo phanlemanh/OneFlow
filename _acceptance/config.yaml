@@ -246,6 +246,22 @@ executors:
     ghcr_anchored: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
     anchors_backfilled: bash scripts/acceptance/test-own-range.sh backfill-integration
     b1_unanchored_compat: bash scripts/acceptance/test-own-range.sh unanchored-compat
+    # ci-vitest-sdk-pin (CI-a) Gate 1 (2026-08-05): both guard scripts land during
+    # implementation; keys declared now so eval refs stay portable.
+    # One key per criterion — sub-commands rather than one shared exit code, per the
+    # stale-scope-by-paths F1 lesson (merging exit codes destroys which half failed).
+    # civ_run_jobs_green hits the network (gh): local verify only, never wired into CI.
+    civ_job_shape: bash scripts/ci/check-vitest-job.sh shape
+    civ_job_no_softening: bash scripts/ci/check-vitest-job.sh no-softening
+    civ_job_teeth: bash scripts/ci/check-vitest-job.sh teeth
+    civ_run_jobs_green: "ACCEPTANCE_SLUG=ci-vitest-sdk-pin bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' 'Unit Tests (vitest)'"
+    civ_pin_derived: bash scripts/plugins/check-overlay-pin-derived.sh shape
+    civ_pin_teeth: bash scripts/plugins/check-overlay-pin-derived.sh teeth
+    civ_pin_override: bash scripts/plugins/check-overlay-pin-derived.sh override
+    civ_pin_single_impl: bash scripts/plugins/check-overlay-pin-derived.sh single-impl
+    civ_docs_guard_synced: bash scripts/plugins/check-manifest-doc-synced.sh
+    civ_eval_keys_intact: bash scripts/ci/check-eval-keys-intact.sh origin/main
+    civ_gate_clean: bash scripts/pre-merge-check.sh . --base origin/main
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
