@@ -7,7 +7,7 @@ reason:
 verified_by: acceptance-verify workflow, 3 rounds of fresh-context agents + a final re-run on the signed tree
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 9cebc5682ef51ff21a657118b83ff2581160407b
+verified_commit: 41ae5af84812414e3f5eb1918ef1aca2a66ff444
 rounds: 3
 human_signoff: Manh 2026-08-04
 network_dependent_evals: [E9, E11]
@@ -229,3 +229,13 @@ sẽ xanh trong khi key thật vẫn chạy không neo.
   cùng một không gian — đã sửa + E3 phủ + mutation-test.
 - **Vòng 4 không chạy** — quyết định của Manh 04/08 sau khi cân chi phí
   (~2.8M token/vòng) với việc cả ba lỗi đã quy về một họ nay có guard.
+
+## Vòng ghim lại 2026-08-04 (sau khi regen golden)
+
+Hồ sơ này bị chính commit regen `scripts/acceptance/fixtures/baseline-gate-output.txt`
+làm cũ — file đó nằm ngoài mọi glob `paths` của 13 eval, nhưng vì
+`_acceptance/gate-scope-anchors/` nằm trong diff của PR nên cross-check độ phủ
+kích hoạt và từ chối scope hẹp. Đúng cơ chế đã mô tả ở phần "hai con số phải
+sửa" bên trên, chỉ lần này nạn nhân là chính nó.
+
+Đã chạy lại **13/13 eval xanh** ở `41ae5af84812`.
