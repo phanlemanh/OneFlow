@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a1bc936039ecf81b9591ffb88f179859bbb9adca
+verified_commit: 28c1a7d6202ce2a8cd40eeae7eb55a8145264891
 human_signoff: Manh 2026-08-04
 ---
 
@@ -38,11 +38,11 @@ human_signoff: Manh 2026-08-04
 ## Evidence
 
 - eval: E1
-  run_id: measure-harness-E1-20260805103318
+  run_id: measure-harness-E1-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -51,11 +51,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E2
-  run_id: measure-harness-E2-20260805103318
+  run_id: measure-harness-E2-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -64,11 +64,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E3
-  run_id: measure-harness-E3-20260805103318
+  run_id: measure-harness-E3-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -77,11 +77,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E4
-  run_id: measure-harness-E4-20260805103318
+  run_id: measure-harness-E4-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -90,11 +90,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E5
-  run_id: measure-harness-E5-20260805103318
+  run_id: measure-harness-E5-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -103,11 +103,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E6
-  run_id: measure-harness-E6-20260805103318
+  run_id: measure-harness-E6-20260805124016
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.smoke_measure_wer
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:16Z
   output: |
     clip-01                    38.5%    1    0    4      1
     clip-02                     7.7%    1    0    0      0
@@ -117,11 +117,11 @@ human_signoff: Manh 2026-08-04
     numbers are never converted automatically, so a price read aloud shows up here for a human to judge.
 
 - eval: E7
-  run_id: measure-harness-E7-20260805103318
+  run_id: measure-harness-E7-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -130,11 +130,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E8
-  run_id: measure-harness-E8-20260805103318
+  run_id: measure-harness-E8-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -143,11 +143,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E9
-  run_id: measure-harness-E9-20260805103318
+  run_id: measure-harness-E9-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -156,11 +156,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E10
-  run_id: measure-harness-E10-20260805103318
+  run_id: measure-harness-E10-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -169,11 +169,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E11
-  run_id: measure-harness-E11-20260805103318
+  run_id: measure-harness-E11-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -182,11 +182,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E12
-  run_id: measure-harness-E12-20260805103318
+  run_id: measure-harness-E12-20260805124016
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.smoke_measure_mos
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:16Z
   output: |
     system                    n     MOS     sd      95% CI
     -----------------------------------------------------
@@ -196,11 +196,11 @@ human_signoff: Manh 2026-08-04
     selftest-mos: ok
 
 - eval: E13
-  run_id: measure-harness-E13-20260805103318
+  run_id: measure-harness-E13-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -209,11 +209,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E14
-  run_id: measure-harness-E14-20260805103318
+  run_id: measure-harness-E14-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -222,11 +222,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E15
-  run_id: measure-harness-E15-20260805103318
+  run_id: measure-harness-E15-20260805124018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_measure
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:18Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  3 passed (3)
@@ -235,11 +235,11 @@ human_signoff: Manh 2026-08-04
        Duration  93ms (transform 58ms, setup 0ms, import 77ms, tests 10ms, environment 0ms)
 
 - eval: E16
-  run_id: measure-harness-E16-20260805103318
+  run_id: measure-harness-E16-20260805124017
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:17Z
   output: |
     api-openrouter / gen-text                   1     1       0     0.5s     0.5s     0.5s
     1 task(s) have no measured duration — history from before metering, or aborted runs.
@@ -249,11 +249,11 @@ human_signoff: Manh 2026-08-04
     selftest-cogs: ok
 
 - eval: E17
-  run_id: measure-harness-E17-20260805103318
+  run_id: measure-harness-E17-20260805124036
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:36Z
   output: |
     > vitest run
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
@@ -263,11 +263,11 @@ human_signoff: Manh 2026-08-04
        Duration  1.32s (transform 1.81s, setup 0ms, import 3.19s, tests 1.31s, environment 512ms)
 
 - eval: E18
-  run_id: measure-harness-E18-20260805103318
+  run_id: measure-harness-E18-20260805124038
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:38Z
   output: |
       ├ chunks/620846f1-92c416bf2f09796f.js  54.2 kB
       ├ chunks/8336-0e84acaf04d00d35.js      46.2 kB
@@ -277,11 +277,11 @@ human_signoff: Manh 2026-08-04
     > tsc --noEmit
 
 - eval: E19
-  run_id: measure-harness-E19-20260805103318
+  run_id: measure-harness-E19-20260805124035
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:35Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
@@ -329,10 +329,32 @@ bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
 
 ## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
 
-Nhánh `feat/ci-vitest-sdk-pin` (hạng mục CI-a) chạm `.github/workflows/ci.yml`
-(thêm job `Unit Tests (vitest)`) và `scripts/plugins/run-overlay-plugin-tests.sh`
-(rút pin SDK từ `sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`), nên
-`pre-merge-check.sh` báo hồ sơ này cũ. Đã chạy lại **19/19 eval — tất cả xanh**
-ở `a1bc936039ec`, ghim `verified_commit` sang mốc mới.
+Nhánh CI-a làm ba việc cho hạ tầng verify, không thêm tính năng sản phẩm nào:
+thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi
+cứng trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ
+`sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`); và thêm các guard đi kèm.
+Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
+này cũ.
 
-Kiểm tra quyền sở hữu tự làm lại: contract **không có** `landed_merge`, nên không dựng được tập file sở hữu; theo nguyên tắc thận trọng, coi như phải verify lại toàn bộ chứ không carry-forward — và đã chạy lại thật.
+**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này **không có**
+`landed_merge:` trong frontmatter — toàn repo chỉ có năm hồ sơ mang trường đó
+(`ci-actions-bump`, `compose-overlay`, `dependency-refresh-2026-07`,
+`oneflow-plugin-prefix`, `gate-scope-anchors`), và đây không phải một trong số
+đó. Không dựng được tập file sở hữu thì cũng không chứng minh được carry-forward
+là hợp lệ, nên theo nguyên tắc thận trọng hồ sơ này đi đường re-verify: chạy lại
+toàn bộ eval, không ghi công thừa kế cho eval nào.
+
+**Hai lượt chạy trong cùng một đợt.** Lượt thứ nhất chạy ở `a1bc936` và cho
+**19/19 eval xanh** cho hồ sơ này. Lượt đó phát hiện hai lỗi thật ở chỗ khác
+trong đợt — `scripts/lib/sdk-version.sh` giải gốc repo bằng
+`git rev-parse --show-toplevel` lúc gọi nên chết khi caller đã `cd` vào bản clone
+plugin, và `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi
+job vitest mới nâng số điểm checkout lên 8 (eval E1 của `ci-actions-bump` đỏ vì
+việc này). Commit `28c1a7d` sửa cả hai.
+
+**Lượt chạy này, ở `28c1a7d`: 19/19 eval xanh**, tất cả thoát 0. Mỗi `cmd` được
+giải lại từng dòng theo `_acceptance/config.yaml` trước khi chạy; các lệnh dùng
+chung được chạy **một lần** và ghi công cho mọi eval ràng buộc nó, mỗi eval một
+`run_id` riêng, còn `verified_at` của các eval chung lệnh cố tình trùng nhau vì
+chúng ghi lại cùng một lần chạy. `verified_commit` chuyển sang `28c1a7d6202c`.
+Dòng chữ ký người trong frontmatter không bị đụng tới.

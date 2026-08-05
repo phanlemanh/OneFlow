@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 10)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a1bc936039ecf81b9591ffb88f179859bbb9adca
+verified_commit: 28c1a7d6202ce2a8cd40eeae7eb55a8145264891
 human_signoff: Manh 2026-07-26
 ---
 
@@ -39,11 +39,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-E1-20260805103318
+  run_id: dependency-refresh-2026-07-E1-20260805124010
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:10Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
@@ -51,11 +51,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     repo scripts intact: hooks:install, sdk:publish, gen:abi
 
 - eval: E2
-  run_id: dependency-refresh-2026-07-E2-20260805103318
+  run_id: dependency-refresh-2026-07-E2-20260805123908
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:39:08Z
   output: |
     │   Ignored build scripts: @google/genai.                                      │
     │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
@@ -65,22 +65,22 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     Done in 499ms using pnpm v10.12.1
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-E3-20260805103318
+  run_id: dependency-refresh-2026-07-E3-20260805124035
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:35Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
     Checked 425 files in 101ms. No fixes applied.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-E4-20260805103318
+  run_id: dependency-refresh-2026-07-E4-20260805124036
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:36Z
   output: |
     > vitest run
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
@@ -90,11 +90,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
        Duration  1.32s (transform 1.81s, setup 0ms, import 3.19s, tests 1.31s, environment 512ms)
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-E5-20260805103318
+  run_id: dependency-refresh-2026-07-E5-20260805124029
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:29Z
   output: |
     ........................................................................ [ 37%]
     ........................................................................ [ 74%]
@@ -102,11 +102,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     193 passed in 5.26s
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-E6-20260805103318
+  run_id: dependency-refresh-2026-07-E6-20260805124038
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:38Z
   output: |
       ├ chunks/620846f1-92c416bf2f09796f.js  54.2 kB
       ├ chunks/8336-0e84acaf04d00d35.js      46.2 kB
@@ -116,11 +116,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     > tsc --noEmit
 
 - eval: E7
-  run_id: dependency-refresh-2026-07-E7-20260805103318
+  run_id: dependency-refresh-2026-07-E7-20260805124017
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:17Z
   output: |
     api-openrouter / gen-text                   1     1       0     0.5s     0.5s     0.5s
     1 task(s) have no measured duration — history from before metering, or aborted runs.
@@ -130,11 +130,11 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
     selftest-cogs: ok
 
 - eval: E8
-  run_id: dependency-refresh-2026-07-E8-20260805103318
+  run_id: dependency-refresh-2026-07-E8-20260805124010
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:10Z
   output: |
     no T3 drift: src/lib/abi src/app/api untouched vs the range dependency-refresh-2026-07 owns (1e81ac216e46efc9946b47887ae32e496e87e1a4..4d89b584fcfd3dfafd03823a14c9b81406db6e9b)
 
@@ -807,14 +807,39 @@ bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
 
 ## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
 
-Nhánh `feat/ci-vitest-sdk-pin` (hạng mục CI-a) chạm `.github/workflows/ci.yml`
-(thêm job `Unit Tests (vitest)`) và `scripts/plugins/run-overlay-plugin-tests.sh`
-(rút pin SDK từ `sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`), nên
-`pre-merge-check.sh` báo hồ sơ này cũ. Đã chạy lại **8/8 eval — tất cả xanh**
-ở `a1bc936039ec`, ghim `verified_commit` sang mốc mới.
+Nhánh CI-a làm ba việc cho hạ tầng verify, không thêm tính năng sản phẩm nào:
+thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi
+cứng trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ
+`sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`); và thêm các guard đi kèm.
+Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
+này cũ.
 
-Kiểm tra quyền sở hữu tự làm lại: `git diff --name-only 4d89b58^1 4d89b58` giao với diff của nhánh chỉ ra đúng một file — `_acceptance/config.yaml`, vốn nằm trong `t1_skip_globs`. Không file sản phẩm nào của hồ sơ bị chạm, nên carry-forward là hợp lệ; vẫn chạy lại toàn bộ eval để chắc.
+**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này có
+`landed_merge: 4d89b58`, nên tập file sở hữu là
+`git diff --name-only 4d89b58^1 4d89b58` giao với diff của nhánh. Giao thô có
+vẻ khác rỗng, nhưng mọi phần tử của nó đều nằm dưới `_acceptance/**` — trong đó
+file duy nhất nhánh này thật sự sửa là `_acceptance/config.yaml`, vốn thuộc
+`t1_skip_globs`. Sau khi lọc theo `t1_skip_globs`, giao **rỗng**: không file sản
+phẩm nào của hồ sơ bị chạm, nên carry-forward là hợp lệ. Phép thử "giao rỗng"
+đọc thô sẽ kết luận ngược lại, và đó là kết luận sai — vẫn phải lọc t1 trước.
+Dù vậy toàn bộ eval vẫn được chạy lại thật, không ghi công thừa kế cho eval nào.
 
-Guard neo `deps_no_t3_drift` chạy với `ACCEPTANCE_SLUG=dependency-refresh-2026-07`
-và chấm đúng dải lịch sử của chính nó
-(`1e81ac21..4d89b584`), không chấm diff của nhánh hiện tại.
+Guard neo `deps_no_t3_drift` chạy với
+`ACCEPTANCE_SLUG=dependency-refresh-2026-07` và chấm đúng dải lịch sử của chính
+nó (`1e81ac21..4d89b584`), không chấm diff của nhánh hiện tại — đã đọc lại dòng
+kết quả để xác nhận.
+
+**Hai lượt chạy trong cùng một đợt.** Lượt thứ nhất chạy ở `a1bc936` và cho
+**8/8 eval xanh** cho hồ sơ này. Lượt đó phát hiện hai lỗi thật ở chỗ khác
+trong đợt — `scripts/lib/sdk-version.sh` giải gốc repo bằng
+`git rev-parse --show-toplevel` lúc gọi nên chết khi caller đã `cd` vào bản clone
+plugin, và `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi
+job vitest mới nâng số điểm checkout lên 8 (eval E1 của `ci-actions-bump` đỏ vì
+việc này). Commit `28c1a7d` sửa cả hai.
+
+**Lượt chạy này, ở `28c1a7d`: 8/8 eval xanh**, tất cả thoát 0. Mỗi `cmd` được
+giải lại từng dòng theo `_acceptance/config.yaml` trước khi chạy; các lệnh dùng
+chung được chạy **một lần** và ghi công cho mọi eval ràng buộc nó, mỗi eval một
+`run_id` riêng, còn `verified_at` của các eval chung lệnh cố tình trùng nhau vì
+chúng ghi lại cùng một lần chạy. `verified_commit` chuyển sang `28c1a7d6202c`.
+Dòng chữ ký người trong frontmatter không bị đụng tới.

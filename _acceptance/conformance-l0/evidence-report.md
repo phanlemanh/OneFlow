@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a1bc936039ecf81b9591ffb88f179859bbb9adca
+verified_commit: 28c1a7d6202ce2a8cd40eeae7eb55a8145264891
 human_signoff: Manh 2026-08-03
 ---
 
@@ -35,31 +35,31 @@ Round 6.
 ## Evidence
 
 - eval: E1
-  run_id: conformance-l0-E1-20260805103318
+  run_id: conformance-l0-E1-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     ................                                                         [100%]
     16 passed in 0.04s
 
 - eval: E2
-  run_id: conformance-l0-E2-20260805103318
+  run_id: conformance-l0-E2-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     ................                                                         [100%]
     16 passed in 0.04s
 
 - eval: E3
-  run_id: conformance-l0-E3-20260805103318
+  run_id: conformance-l0-E3-20260805124029
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:29Z
   output: |
     ........................................................................ [ 37%]
     ........................................................................ [ 74%]
@@ -67,41 +67,41 @@ Round 6.
     193 passed in 5.26s
 
 - eval: E4
-  run_id: conformance-l0-E4-20260805103318
+  run_id: conformance-l0-E4-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     ................                                                         [100%]
     16 passed in 0.04s
 
 - eval: E5
-  run_id: conformance-l0-E5-20260805103318
+  run_id: conformance-l0-E5-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     ................                                                         [100%]
     16 passed in 0.04s
 
 - eval: E6
-  run_id: conformance-l0-E6-20260805103318
+  run_id: conformance-l0-E6-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     .......                                                                  [100%]
     7 passed in 0.04s
 
 - eval: E7
-  run_id: conformance-l0-E7-20260805103318
+  run_id: conformance-l0-E7-20260805124021
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:21Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -110,11 +110,11 @@ Round 6.
        Duration  145ms (transform 57ms, setup 0ms, import 73ms, tests 4ms, environment 0ms)
 
 - eval: E8
-  run_id: conformance-l0-E8-20260805103318
+  run_id: conformance-l0-E8-20260805124012
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.conformance_discriminating
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:12Z
   output: |
         went RED as required
     ==> perturbation (c): corrupt a fixture and run the TypeScript half
@@ -124,31 +124,31 @@ Round 6.
     OK: the conformance suite discriminates on all three perturbation kinds
 
 - eval: E9
-  run_id: conformance-l0-E9-20260805103318
+  run_id: conformance-l0-E9-20260805124023
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:23Z
   output: |
     .......                                                                  [100%]
     7 passed in 0.66s
 
 - eval: E10
-  run_id: conformance-l0-E10-20260805103318
+  run_id: conformance-l0-E10-20260805124023
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:23Z
   output: |
     .......                                                                  [100%]
     7 passed in 0.66s
 
 - eval: E11
-  run_id: conformance-l0-E11-20260805103318
+  run_id: conformance-l0-E11-20260805124021
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_rev
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:21Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -157,11 +157,11 @@ Round 6.
        Duration  106ms (transform 13ms, setup 0ms, import 39ms, tests 3ms, environment 0ms)
 
 - eval: E12
-  run_id: conformance-l0-E12-20260805103318
+  run_id: conformance-l0-E12-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_node_cached
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -170,31 +170,31 @@ Round 6.
        Duration  133ms (transform 20ms, setup 0ms, import 27ms, tests 45ms, environment 0ms)
 
 - eval: E13
-  run_id: conformance-l0-E13-20260805103318
+  run_id: conformance-l0-E13-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     ................                                                         [100%]
     16 passed in 0.04s
 
 - eval: E14
-  run_id: conformance-l0-E14-20260805103318
+  run_id: conformance-l0-E14-20260805124022
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:22Z
   output: |
     .......                                                                  [100%]
     7 passed in 0.04s
 
 - eval: E15
-  run_id: conformance-l0-E15-20260805103318
+  run_id: conformance-l0-E15-20260805124015
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.plugin_rev_joined_path
-  verified_at: 2026-08-05T10:33:18Z
+  verified_at: 2026-08-05T12:40:15Z
   output: |
     OK: TypeScript install -> Python scan preserved pluginRev 4d560a893b7ba80470ef306521e11994636e29b8
 
@@ -235,10 +235,32 @@ Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
 
 ## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
 
-Nhánh `feat/ci-vitest-sdk-pin` (hạng mục CI-a) chạm `.github/workflows/ci.yml`
-(thêm job `Unit Tests (vitest)`) và `scripts/plugins/run-overlay-plugin-tests.sh`
-(rút pin SDK từ `sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`), nên
-`pre-merge-check.sh` báo hồ sơ này cũ. Đã chạy lại **15/15 eval — tất cả xanh**
-ở `a1bc936039ec`, ghim `verified_commit` sang mốc mới.
+Nhánh CI-a làm ba việc cho hạ tầng verify, không thêm tính năng sản phẩm nào:
+thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi
+cứng trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ
+`sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`); và thêm các guard đi kèm.
+Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
+này cũ.
 
-Kiểm tra quyền sở hữu tự làm lại: contract **không có** `landed_merge`, nên không dựng được tập file sở hữu; theo nguyên tắc thận trọng, coi như phải verify lại toàn bộ chứ không carry-forward — và đã chạy lại thật.
+**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này **không có**
+`landed_merge:` trong frontmatter — toàn repo chỉ có năm hồ sơ mang trường đó
+(`ci-actions-bump`, `compose-overlay`, `dependency-refresh-2026-07`,
+`oneflow-plugin-prefix`, `gate-scope-anchors`), và đây không phải một trong số
+đó. Không dựng được tập file sở hữu thì cũng không chứng minh được carry-forward
+là hợp lệ, nên theo nguyên tắc thận trọng hồ sơ này đi đường re-verify: chạy lại
+toàn bộ eval, không ghi công thừa kế cho eval nào.
+
+**Hai lượt chạy trong cùng một đợt.** Lượt thứ nhất chạy ở `a1bc936` và cho
+**15/15 eval xanh** cho hồ sơ này. Lượt đó phát hiện hai lỗi thật ở chỗ khác
+trong đợt — `scripts/lib/sdk-version.sh` giải gốc repo bằng
+`git rev-parse --show-toplevel` lúc gọi nên chết khi caller đã `cd` vào bản clone
+plugin, và `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi
+job vitest mới nâng số điểm checkout lên 8 (eval E1 của `ci-actions-bump` đỏ vì
+việc này). Commit `28c1a7d` sửa cả hai.
+
+**Lượt chạy này, ở `28c1a7d`: 15/15 eval xanh**, tất cả thoát 0. Mỗi `cmd` được
+giải lại từng dòng theo `_acceptance/config.yaml` trước khi chạy; các lệnh dùng
+chung được chạy **một lần** và ghi công cho mọi eval ràng buộc nó, mỗi eval một
+`run_id` riêng, còn `verified_at` của các eval chung lệnh cố tình trùng nhau vì
+chúng ghi lại cùng một lần chạy. `verified_commit` chuyển sang `28c1a7d6202c`.
+Dòng chữ ký người trong frontmatter không bị đụng tới.
