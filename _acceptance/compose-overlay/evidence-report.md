@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+verified_commit: f39723a228be90031eb1e3e423664c84829851db
 human_signoff: Manh 2026-08-03
 ---
 
@@ -369,3 +369,13 @@ src/components/workspace/nodes/transfer/compose-overlay.tsx`, và `git diff` t�
 mốc cũ cho thấy **không một file `src/**` nào đổi** — toàn bộ thay đổi nằm ở
 `scripts/**`, `docs/**`, `lib/evidence-core.js` và `_acceptance/**`. 12 file
 capture của vòng đã ký vẫn nguyên trên đĩa.
+
+## Ghim lại 2026-08-05 (nhánh `chore/landed-merge-anchors`)
+
+Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
+bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
+bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
+
+Riêng **E22** (design gate, cần app chạy) lại carry-forward: `git diff` từ mốc
+cũ cho thấy **không một file `src/**` nào đổi** — toàn bộ delta nằm ở
+`scripts/**` và `_acceptance/**`.

@@ -195,9 +195,18 @@ case_malformed() {
   # confusion produced an empty registry window that read as clean.
   landed="$(cd "$ROOT" && ACCEPTANCE_SLUG=ci-actions-bump bash -c '. scripts/ci/gh-run-lib.sh; anchor_landed' 2>/dev/null)"
   [ -n "$landed" ] || fail malformed "anchor_landed returned nothing for a LANDED feature (ci-actions-bump)"
-  open_feat="$(cd "$ROOT" && ACCEPTANCE_SLUG=gate-scope-anchors bash -c '. scripts/ci/gh-run-lib.sh; anchor_landed' 2>/dev/null)"
+  # The unlanded side uses a PURPOSE-BUILT fixture, not a real feature. An
+  # earlier version named gate-scope-anchors here as "the open feature" and went
+  # red the moment that feature shipped and got its own landed_merge — a test
+  # that depends on another record's lifecycle state fails for a reason that has
+  # nothing to do with what it claims to check.
+  unlanded="$ROOT/_acceptance/zz-own-range-unlanded"
+  mkdir -p "$unlanded"
+  printf -- '---\nslug: zz-own-range-unlanded\n---\n' > "$unlanded/contract.md"
+  open_feat="$(cd "$ROOT" && ACCEPTANCE_SLUG=zz-own-range-unlanded bash -c '. scripts/ci/gh-run-lib.sh; anchor_landed' 2>/dev/null)"
+  rm -rf "$unlanded"
   [ -z "$open_feat" ] \
-    || fail malformed "anchor_landed returned '$open_feat' for a feature with no landed_merge — an open feature has no landing moment"
+    || fail malformed "anchor_landed returned '$open_feat' for a contract with no landed_merge — an open feature has no landing moment"
 
   # And an impossible window must be "cannot answer", never "nothing happened".
   ( cd "$ROOT" && bash -c '. scripts/ci/gh-run-lib.sh; assert_window_sane "2026-08-04T14:30:00Z" "2026-08-04T14:09:29Z"' >/dev/null 2>&1 )
