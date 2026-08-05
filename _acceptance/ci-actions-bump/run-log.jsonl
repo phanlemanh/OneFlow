@@ -64,3 +64,11 @@
 {"ts":"2026-07-27T10:50:26Z","round":10,"evalId":"E1","run_id":"ci-actions-bump-r10-E1-20260727105026","exit_code":0,"cmd":"bash scripts/ci/check-action-pins.sh"}
 {"ts":"2026-07-27T10:50:26Z","round":10,"evalId":"E4","run_id":"ci-actions-bump-r10-E4-20260727105026","exit_code":0,"cmd":"bash scripts/ci/check-docker-dryrun.sh"}
 {"ts":"2026-07-27T10:50:26Z","round":10,"evalId":"E8","run_id":"ci-actions-bump-r10-E8-20260727105026","exit_code":0,"cmd":"bash scripts/ci/check-workflow-drift.sh origin/main"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E1", "run_id": "ci-actions-bump-E1-20260805103318", "exit_code": 1, "cmd": "bash scripts/ci/check-action-pins.sh"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E2", "run_id": "ci-actions-bump-E2-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E3", "run_id": "ci-actions-bump-E3-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E4", "run_id": "ci-actions-bump-E4-20260805103318", "exit_code": 0, "cmd": "bash scripts/ci/check-docker-dryrun.sh"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E5", "run_id": "ci-actions-bump-E5-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E6", "run_id": "ci-actions-bump-E6-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E7", "run_id": "ci-actions-bump-E7-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"}
+{"ts": "2026-08-05T10:33:18Z", "round": 11, "evalId": "E8", "run_id": "ci-actions-bump-E8-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh origin/main"}

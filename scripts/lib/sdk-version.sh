@@ -15,10 +15,25 @@
 # SDK_VERSION_ROOT overrides the repo root. It exists so a guard can perturb a
 # COPY of pyproject.toml in a temp dir and watch the derived value follow —
 # proving the derivation has teeth without ever dirtying the real tree.
+#
+# The default root is resolved ONCE, when this file is sourced, and never again.
+# Resolving it per call reads whatever repo the caller has since cd'd into:
+# run-overlay-plugin-tests.sh cds into the cloned plugin repo before installing,
+# so a call-time `git rev-parse --show-toplevel` returned the PLUGIN root, found
+# no sdk/pyproject.toml, and killed all 13 render evals under `set -e`. The
+# clean-context re-verification of compose-overlay caught it; this line is the
+# fix for the whole class, not just that one call site.
+#
+# Anchored to THIS FILE's location, not to the caller's cwd and not to
+# `git rev-parse`: the repo root is two levels above scripts/lib/. A cwd-derived
+# root is wrong from inside the plugin clone; a git-derived one is wrong from
+# inside any other repo. The file's own path is neither.
+_SDK_VERSION_DEFAULT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 sdk_version() {
     local root
-    root="${SDK_VERSION_ROOT:-$(git rev-parse --show-toplevel)}"
+    root="${SDK_VERSION_ROOT:-$_SDK_VERSION_DEFAULT_ROOT}"
+    [ -n "$root" ] || { echo "sdk-version: no repo root resolved at source time" >&2; return 2; }
     local toml="$root/sdk/pyproject.toml"
     [ -f "$toml" ] || { echo "sdk-version: no such file: $toml" >&2; return 2; }
 

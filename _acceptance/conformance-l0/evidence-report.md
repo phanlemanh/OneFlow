@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+verified_commit: a1bc936039ecf81b9591ffb88f179859bbb9adca
 human_signoff: Manh 2026-08-03
 ---
 
@@ -35,151 +35,168 @@ Round 6.
 ## Evidence
 
 - eval: E1
-  run_id: minted-conformance-l0-E1-r6
+  run_id: conformance-l0-E1-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    16 passed in 0.09s
+    ................                                                         [100%]
+    16 passed in 0.04s
 
 - eval: E2
-  run_id: minted-conformance-l0-E2-r6
+  run_id: conformance-l0-E2-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    16 passed in 0.09s
+    ................                                                         [100%]
+    16 passed in 0.04s
 
 - eval: E3
-  run_id: minted-conformance-l0-E3-r6
+  run_id: conformance-l0-E3-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
+    ........................................................................ [ 37%]
     ........................................................................ [ 74%]
     .................................................                        [100%]
-    193 passed in 8.20s
+    193 passed in 5.26s
 
 - eval: E4
-  run_id: minted-conformance-l0-E4-r6
+  run_id: conformance-l0-E4-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    16 passed in 0.09s
+    ................                                                         [100%]
+    16 passed in 0.04s
 
 - eval: E5
-  run_id: minted-conformance-l0-E5-r6
+  run_id: conformance-l0-E5-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    16 passed in 0.09s
+    ................                                                         [100%]
+    16 passed in 0.04s
 
 - eval: E6
-  run_id: minted-conformance-l0-E6-r6
+  run_id: conformance-l0-E6-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
     .......                                                                  [100%]
-    7 passed in 0.28s
+    7 passed in 0.04s
 
 - eval: E7
-  run_id: minted-conformance-l0-E7-r6
+  run_id: conformance-l0-E7-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    Tests  12 passed (12)
-    Start at  23:24:48
-    Duration  205ms (transform 64ms, setup 0ms, import 85ms, tests 4ms, environment 0ms)
+     RUN  v4.1.10 /Users/manhphan/dev/oneflow
+     Test Files  1 passed (1)
+          Tests  12 passed (12)
+       Start at  17:32:31
+       Duration  145ms (transform 57ms, setup 0ms, import 73ms, tests 4ms, environment 0ms)
 
 - eval: E8
-  run_id: minted-conformance-l0-E8-r6
+  run_id: conformance-l0-E8-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.conformance_discriminating
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
+        went RED as required
+    ==> perturbation (c): corrupt a fixture and run the TypeScript half
+        went RED as required
     ==> revert: both halves must be GREEN again
         green
     OK: the conformance suite discriminates on all three perturbation kinds
 
 - eval: E9
-  run_id: minted-conformance-l0-E9-r6
+  run_id: conformance-l0-E9-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    7 passed in 1.00s
+    .......                                                                  [100%]
+    7 passed in 0.66s
 
 - eval: E10
-  run_id: minted-conformance-l0-E10-r6
+  run_id: conformance-l0-E10-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    7 passed in 1.00s
+    .......                                                                  [100%]
+    7 passed in 0.66s
 
 - eval: E11
-  run_id: minted-conformance-l0-E11-r6
+  run_id: conformance-l0-E11-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_rev
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    Tests  3 passed (3)
-    Start at  23:24:48
-    Duration  206ms (transform 15ms, setup 0ms, import 39ms, tests 28ms, environment 0ms)
+     RUN  v4.1.10 /Users/manhphan/dev/oneflow
+     Test Files  1 passed (1)
+          Tests  3 passed (3)
+       Start at  17:32:32
+       Duration  106ms (transform 13ms, setup 0ms, import 39ms, tests 3ms, environment 0ms)
 
 - eval: E12
-  run_id: minted-conformance-l0-E12-r6
+  run_id: conformance-l0-E12-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_node_cached
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    Tests  11 passed (11)
-    Start at  23:24:48
-    Duration  302ms (transform 92ms, setup 0ms, import 122ms, tests 19ms, environment 0ms)
+     RUN  v4.1.10 /Users/manhphan/dev/oneflow
+     Test Files  1 passed (1)
+          Tests  11 passed (11)
+       Start at  17:32:32
+       Duration  133ms (transform 20ms, setup 0ms, import 27ms, tests 45ms, environment 0ms)
 
 - eval: E13
-  run_id: minted-conformance-l0-E13-r6
+  run_id: conformance-l0-E13-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    16 passed in 0.09s
+    ................                                                         [100%]
+    16 passed in 0.04s
 
 - eval: E14
-  run_id: minted-conformance-l0-E14-r6
+  run_id: conformance-l0-E14-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
     .......                                                                  [100%]
-    7 passed in 0.28s
+    7 passed in 0.04s
 
 - eval: E15
-  run_id: minted-conformance-l0-E15-r6
+  run_id: conformance-l0-E15-20260805103318
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.plugin_rev_joined_path
-  verified_at: 2026-08-03T23:24:48Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    OK: TypeScript install -> Python scan preserved pluginRev 62dc825e06c40c9608d999138400b86f74fa22c9
+    OK: TypeScript install -> Python scan preserved pluginRev 4d560a893b7ba80470ef306521e11994636e29b8
 
 ## Analyst
 
@@ -215,3 +232,13 @@ thành cũ theo cơ chế staleness. Đã chạy lại: **15/15 eval xanh** ở
 sơ bị ảnh hưởng — không hồ sơ nào đỏ.
 
 Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
+
+## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
+
+Nhánh `feat/ci-vitest-sdk-pin` (hạng mục CI-a) chạm `.github/workflows/ci.yml`
+(thêm job `Unit Tests (vitest)`) và `scripts/plugins/run-overlay-plugin-tests.sh`
+(rút pin SDK từ `sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`), nên
+`pre-merge-check.sh` báo hồ sơ này cũ. Đã chạy lại **15/15 eval — tất cả xanh**
+ở `a1bc936039ec`, ghim `verified_commit` sang mốc mới.
+
+Kiểm tra quyền sở hữu tự làm lại: contract **không có** `landed_merge`, nên không dựng được tập file sở hữu; theo nguyên tắc thận trọng, coi như phải verify lại toàn bộ chứ không carry-forward — và đã chạy lại thật.

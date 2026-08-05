@@ -39,7 +39,34 @@ shape)
     got=$(OVERLAY_SDK_SPEC= resolved_spec)
     [ "$got" = "oneflow-sdk==$expected" ] \
         || fail "resolved spec '$got' != 'oneflow-sdk==$expected' from sdk/pyproject.toml"
-    echo "OK: no literal pin; runner resolves oneflow-sdk==$expected from sdk/pyproject.toml"
+
+    # --- The half this guard was missing, and it cost 13 dead evals ---
+    #
+    # --print-spec returns BEFORE the runner cds into the cloned plugin repo, so
+    # asking it here proves only that the derivation works from the oneflow root.
+    # The production path derives AFTER that cd. Round-1 of the compose-overlay
+    # re-verification found the derivation blew up there while every civ_pin_*
+    # eval stayed green — the guard measured the side door.
+    #
+    # (a) Static: the spec must be computed before the cd, in file order.
+    spec_line=$(grep -nE '^SDK_SPEC=' "$RUNNER" | head -1 | cut -d: -f1)
+    cd_line=$(grep -nE '^cd "\$CACHE_DIR"' "$RUNNER" | head -1 | cut -d: -f1)
+    [ -n "$spec_line" ] && [ -n "$cd_line" ] \
+        || fail "could not locate the SDK_SPEC assignment and the cd in $RUNNER"
+    [ "$spec_line" -lt "$cd_line" ] \
+        || fail "$RUNNER computes SDK_SPEC (line $spec_line) AFTER cd into the clone (line $cd_line) — the derivation will resolve against the plugin repo and every render eval dies"
+
+    # (b) Dynamic: the derivation must survive being called from inside a
+    # DIFFERENT git repo, which is exactly what the cd creates.
+    other=$(mktemp -d)
+    ( cd "$other" && git init -q . && mkdir -p sdk )
+    runner_abs="$PWD/$RUNNER"
+    from_elsewhere=$( cd "$other" && OVERLAY_SDK_SPEC= bash "$runner_abs" --print-spec 2>&1 ) || true
+    rm -rf "$other"
+    [ "$from_elsewhere" = "oneflow-sdk==$expected" ] \
+        || fail "called from inside another git repo the runner resolved '$from_elsewhere' instead of 'oneflow-sdk==$expected' — the root is being read at call time, not pinned"
+
+    echo "OK: no literal pin; resolves oneflow-sdk==$expected before the cd (line $spec_line < $cd_line) and from inside a foreign git repo"
     ;;
 
 teeth)

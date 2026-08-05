@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 10)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f39723a228be90031eb1e3e423664c84829851db
+verified_commit: a1bc936039ecf81b9591ffb88f179859bbb9adca
 human_signoff: Manh 2026-07-26
 ---
 
@@ -39,128 +39,104 @@ to this feature; none of `package.json`, `pnpm-lock.yaml`, `biome.json` or
 ## Evidence
 
 - eval: E1
-  run_id: dependency-refresh-2026-07-r11-E1-20260727105026
+  run_id: dependency-refresh-2026-07-E1-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst` (a baseline is meaningless for this feature)
   verifier: config:executors.script.deps_manifest_intact
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
     dependencies.react = 19.2.8
     dependencies.drizzle-orm = 0.45.2
     devDependencies.@biomejs/biome = 2.5.5
     repo scripts intact: hooks:install, sdk:publish, gen:abi
 
-    Re-run this round on commit 8254c0bd. Both dependabot groups stay represented — react and drizzle-orm from the production group, @biomejs/biome from the development group — and the three repo scripts are still declared.
-
 - eval: E2
-  run_id: dependency-refresh-2026-07-r11-E2-20260727105026
+  run_id: dependency-refresh-2026-07-E2-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_lockfile_clean
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    Lockfile is up to date, resolution step is skipped
-    Progress: resolved 2, reused 2, downloaded 0, added 0, done
-    Done in 491ms using pnpm v10.12.1
-
-    Re-run this round on commit 8254c0bd. Under --frozen-lockfile pnpm refuses to proceed when the lockfile and the manifest disagree, so this is the proof that the lockfile still matches package.json. `git status --porcelain` was re-checked afterwards and pnpm-lock.yaml was unmodified.
+    │   Ignored build scripts: @google/genai.                                      │
+    │   Run "pnpm approve-builds" to pick which dependencies should be allowed     │
+    │   to run scripts.                                                            │
+    │                                                                              │
+    ╰──────────────────────────────────────────────────────────────────────────────╯
+    Done in 499ms using pnpm v10.12.1
 
 - eval: E3
-  run_id: dependency-refresh-2026-07-r11-E3-20260727105026
+  run_id: dependency-refresh-2026-07-E3-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.lint
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
-
-    Checked 398 files in 97ms. No fixes applied.
-
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:17Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    Checked 425 files in 101ms. No fixes applied.
 
 - eval: E4
-  run_id: dependency-refresh-2026-07-r11-E4-20260727105026
+  run_id: dependency-refresh-2026-07-E4-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.unit
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    > oneflow@0.2.1 test /Users/manhphan/dev/oneflow
     > vitest run
-
-    Test Files  22 passed (22)
-         Tests  270 passed (270)
-      Duration  682ms (transform 1.41s, setup 0ms, import 2.54s, tests 586ms, environment 1ms)
-
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:24Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+     RUN  v4.1.10 /Users/manhphan/dev/oneflow
+     Test Files  31 passed (31)
+          Tests  413 passed (413)
+       Start at  17:32:35
+       Duration  1.32s (transform 1.81s, setup 0ms, import 3.19s, tests 1.31s, environment 512ms)
 
 - eval: E5
-  run_id: dependency-refresh-2026-07-r11-E5-20260727105026
+  run_id: dependency-refresh-2026-07-E5-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    ........................................................................ [ 83%]
-    ..............                                                           [100%]
-    86 passed in 5.80s
-
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:44:28Z, and this eval is credited to it with its own run_id — see `## Iterations`.
+    ........................................................................ [ 37%]
+    ........................................................................ [ 74%]
+    .................................................                        [100%]
+    193 passed in 5.26s
 
 - eval: E6
-  run_id: dependency-refresh-2026-07-r11-E6-20260727105026
+  run_id: dependency-refresh-2026-07-E6-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    > oneflow@0.2.1 build /Users/manhphan/dev/oneflow
-    > next build --turbopack
-
-    (next build completed; route table printed in full)
-
+      ├ chunks/620846f1-92c416bf2f09796f.js  54.2 kB
+      ├ chunks/8336-0e84acaf04d00d35.js      46.2 kB
+      └ other shared chunks (total)          2.19 kB
+    ƒ  (Dynamic)  server-rendered on demand
     > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
     > tsc --noEmit
 
-    (tsc --noEmit produced no diagnostics)
-
-    Shared standing check: the resolved command was executed ONCE this round, at 2026-07-26T14:54:32Z, and this eval is credited to it with its own run_id — see `## Iterations`.
-
 - eval: E7
-  run_id: dependency-refresh-2026-07-r11-E7-20260727105026
+  run_id: dependency-refresh-2026-07-E7-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.smoke_measure_cogs
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    Plugin time from /var/folders/6x/1dlzszm51wzbt20dn5y1lgzh0000gn/T/oneflow-cogs-AekjfC/good.db (status: completed, failed) — 5 task(s)
-
-    plugin / slot                              n  meas  unmeas    total   median      p95
-    -------------------------------------------------------------------------------------------
-    modal-z-image / image-gen                   4     3       1    11.0s     4.0s     6.0s
     api-openrouter / gen-text                   1     1       0     0.5s     0.5s     0.5s
-
     1 task(s) have no measured duration — history from before metering, or aborted runs.
     They are counted but kept out of the statistics rather than averaged as zero.
-
     No --rates supplied, so no cost is reported. Pass a rate table derived from a real invoice:
       {"<pluginId>": <usdPerSecond>}
-
     selftest-cogs: ok
 
-    Re-run this round on commit 8254c0bd; the table above is this round's actual output. One execution, credited to measure-harness E16 and dependency-refresh-2026-07 E7 under separate run_ids.
-
 - eval: E8
-  run_id: dependency-refresh-2026-07-r11-E8-20260727105026
+  run_id: dependency-refresh-2026-07-E8-20260805103318
   exit_code: 0
   baseline: not measured — see `## Analyst`
   verifier: config:executors.script.deps_no_t3_drift
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-05T10:33:18Z
   output: |
-    no T3 drift: src/lib/abi src/app/api untouched vs origin/main
-
-    Re-run this round on commit 8254c0bd against origin/main. The guard names the T3 paths it inspected rather than announcing a bare clean, so an empty scan cannot read as a pass.
+    no T3 drift: src/lib/abi src/app/api untouched vs the range dependency-refresh-2026-07 owns (1e81ac216e46efc9946b47887ae32e496e87e1a4..4d89b584fcfd3dfafd03823a14c9b81406db6e9b)
 
 ## Analyst
 
@@ -828,3 +804,17 @@ Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
 Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
+
+## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
+
+Nhánh `feat/ci-vitest-sdk-pin` (hạng mục CI-a) chạm `.github/workflows/ci.yml`
+(thêm job `Unit Tests (vitest)`) và `scripts/plugins/run-overlay-plugin-tests.sh`
+(rút pin SDK từ `sdk/pyproject.toml` qua `scripts/lib/sdk-version.sh`), nên
+`pre-merge-check.sh` báo hồ sơ này cũ. Đã chạy lại **8/8 eval — tất cả xanh**
+ở `a1bc936039ec`, ghim `verified_commit` sang mốc mới.
+
+Kiểm tra quyền sở hữu tự làm lại: `git diff --name-only 4d89b58^1 4d89b58` giao với diff của nhánh chỉ ra đúng một file — `_acceptance/config.yaml`, vốn nằm trong `t1_skip_globs`. Không file sản phẩm nào của hồ sơ bị chạm, nên carry-forward là hợp lệ; vẫn chạy lại toàn bộ eval để chắc.
+
+Guard neo `deps_no_t3_drift` chạy với `ACCEPTANCE_SLUG=dependency-refresh-2026-07`
+và chấm đúng dải lịch sử của chính nó
+(`1e81ac21..4d89b584`), không chấm diff của nhánh hiện tại.
