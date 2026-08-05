@@ -54,6 +54,7 @@ import TextNode from "./nodes/modality/text-node";
 import VideoNode from "./nodes/modality/video-node";
 import AudioDescribeNode from "./nodes/transfer/audio-describe";
 import AudioGenTextSpeechRecognizeNode from "./nodes/transfer/audio-gen-text-speech-recognize";
+import ComposeOverlayNode from "./nodes/transfer/compose-overlay";
 import ConvertVoiceNode from "./nodes/transfer/convert-voice";
 import DenoiseAudioNode from "./nodes/transfer/denoise-audio";
 import ExtractAudioNode from "./nodes/transfer/extract-audio";
@@ -160,6 +161,7 @@ export const NODE_TYPES: NodeTypes = {
     musicExtractNode: MusicExtractNode,
     musicLegoNode: MusicLegoNode,
     musicCompleteNode: MusicCompleteNode,
+    composeOverlayNode: ComposeOverlayNode,
 
     // Batch nodes - Implemented
     dropVideoNode: DropVideoNode,
@@ -264,6 +266,7 @@ export const NODE_CATEGORIES = {
         "musicExtractNode",
         "musicLegoNode",
         "musicCompleteNode",
+        "composeOverlayNode",
     ],
     BATCH: ["dropVideoNode", "arrangeNode", "concatVideoNode"],
     COMPOSE: [

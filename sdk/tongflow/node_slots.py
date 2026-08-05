@@ -79,6 +79,7 @@ class NodeSlots:
     IMAGE_NORMAL: Final[str] = 'image-normal'
     IMAGE_MATTING: Final[str] = 'image-matting'
     VIDEO_GEN_MODEL: Final[str] = 'video-gen-model'
+    COMPOSE_OVERLAY: Final[str] = 'compose-overlay'
 
 
 ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
@@ -114,6 +115,7 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'music-repaint',
     'music-cover',
     'music-extract',
+    'separate-sound',
     'music-lego',
     'music-complete',
     'music-brief',
@@ -142,5 +144,6 @@ ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'image-normal',
     'image-matting',
     'video-gen-model',
+    'compose-overlay',
 )
 

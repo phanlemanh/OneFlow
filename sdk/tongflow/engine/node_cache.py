@@ -56,6 +56,10 @@ class _UncacheableAsset(Exception):
 # and L2 is what turns the mime/filename known limit (queue 1.1-L1b) from
 # theoretical into live. Re-add them once that lands.
 TIER_A_SLOTS = frozenset({
+    # compose-overlay: deterministic CPU overlay compositing (no model call,
+    # no seed to pin); byte-identity evidence lives in the plugin repo's
+    # golden suite (AC-10).
+    "compose-overlay",
     "concat-videos",
     "extract-audio",
     "remove-video-audio",

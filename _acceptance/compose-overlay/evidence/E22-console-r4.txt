@@ -1,0 +1,168 @@
+=== state-1-empty ===
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Registered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Registered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Registered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Registered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Unregistered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Registered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Unregistered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Registered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Unregistered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Registered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Unregistered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Registered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, total handlers: 1
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s1-co
+[log] [Task Store] Registered handler for node e22-s1-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s1-co
+[log] [Task Store] Unregistered handler for node e22-s1-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s1-co
+[log] [Task Store] Registered handler for node e22-s1-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+
+=== state-2-ops-image ===
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s1-co
+[log] [Task Store] Registered handler for node e22-s1-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s1-co
+[log] [Task Store] Unregistered handler for node e22-s1-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s1-co
+[log] [Task Store] Registered handler for node e22-s1-co, total handlers: 1
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s2-co
+[log] [Task Store] Registered handler for node e22-s2-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s2-co
+[log] [Task Store] Unregistered handler for node e22-s2-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s2-co
+[log] [Task Store] Registered handler for node e22-s2-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+
+=== state-3-ops-video ===
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s2-co
+[log] [Task Store] Registered handler for node e22-s2-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s2-co
+[log] [Task Store] Unregistered handler for node e22-s2-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s2-co
+[log] [Task Store] Registered handler for node e22-s2-co, total handlers: 1
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s3-co
+[log] [Task Store] Registered handler for node e22-s3-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s3-co
+[log] [Task Store] Unregistered handler for node e22-s3-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s3-co
+[log] [Task Store] Registered handler for node e22-s3-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+
+=== state-4-op-form ===
+[error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[pageerror] Error: SyntaxError: Unexpected end of JSON input
+JSON.parse (<anonymous>)
+loadManifest (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/load-manifest.external.js:43:25)
+loadManifestFromRelativePath (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/load-manifest.external.js:84:16)
+AppPageRouteModule.loadManifests (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:42:29713)
+AppPageRouteModule.prepare (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:42:37336)
+async handler (webpack-internal:///(rsc)/./node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/build/webpack/loaders/next-app-loader/index.js?name=app%2Fworkspace%2Fpage&page=%2Fworkspace%2Fpage&appPaths=%2Fworkspace%2Fpage&pagePath=private-next-app-dir%2Fworkspace%2Fpage.tsx&appDir=%2FUsers%2Fmanh-macmini%2Fdev%2Foneflow%2Fsrc%2Fapp&pageExtensions=tsx&pageExtensions=ts&pageExtensions=jsx&pageExtensions=js&rootDir=%2FUsers%2Fmanh-macmini%2Fdev%2Foneflow&isDev=true&tsconfigPath=tsconfig.json&basePath=&assetPrefix=&nextConfigOutput=standalone&preferredRegion=&middlewareConfig=e30%3D&isGlobalNotFoundEnabled=!:170:27)
+async DevServer.renderToResponseWithComponentsImpl (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/base-server.js:1430:9)
+async DevServer.renderPageComponent (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/base-server.js:1482:24)
+async DevServer.renderToResponseImpl (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/base-server.js:1522:32)
+async DevServer.pipeImpl (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/base-server.js:1026:25)
+async NextNodeServer.handleCatchallRenderRequest (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/next-server.js:394:17)
+async DevServer.handleRequestImpl (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/base-server.js:917:17)
+async (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/dev/next-dev-server.js:400:20)
+async Span.traceAsyncFn (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/trace/trace.js:157:20)
+async DevServer.handleRequest (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/dev/next-dev-server.js:396:24)
+async invokeRender (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/lib/router-server.js:240:21)
+async handleRequest (file:///Users/manh-macmini/dev/oneflow/node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/lib/router-server.js:437:24)
+[log] [HMR] connected
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s4-co
+[log] [Task Store] Registered handler for node e22-s4-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s4-co
+[log] [Task Store] Unregistered handler for node e22-s4-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s4-co
+[log] [Task Store] Registered handler for node e22-s4-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+
+=== state-5-error ===
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s4-co
+[log] [Task Store] Registered handler for node e22-s4-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s4-co
+[log] [Task Store] Unregistered handler for node e22-s4-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s4-co
+[log] [Task Store] Registered handler for node e22-s4-co, total handlers: 1
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s5-co
+[log] [Task Store] Registered handler for node e22-s5-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s5-co
+[log] [Task Store] Unregistered handler for node e22-s5-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s5-co
+[log] [Task Store] Registered handler for node e22-s5-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+
+=== state-6-running ===
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s5-co
+[log] [Task Store] Registered handler for node e22-s5-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s5-co
+[log] [Task Store] Unregistered handler for node e22-s5-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s5-co
+[log] [Task Store] Registered handler for node e22-s5-co, total handlers: 1
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s6-co
+[log] [Task Store] Registered handler for node e22-s6-co, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: e22-s6-co
+[log] [Task Store] Unregistered handler for node e22-s6-co, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: e22-s6-co
+[log] [Task Store] Registered handler for node e22-s6-co, total handlers: 1
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+[log] [Task Store] Task lB8fz0acY6dHDnZQG8gWx tracked to node e22-s6-co
+[log] [Fast Refresh] done in 413ms
+[log] [Fast Refresh] rebuilding
+[log] [SSE Batch] Connected for task lB8fz0acY6dHDnZQG8gWx
+[log] [emitSSETaskMessage] Emitting: [object Object]
+[log] [SSE Batch] Message for task lB8fz0acY6dHDnZQG8gWx: [object Object]
+[log] [emitSSETaskMessage] Emitting: [object Object]
+[log] [Task Router] Routing task lB8fz0acY6dHDnZQG8gWx (status: PROCESSING) to node e22-s6-co, handlers: 1
+[log] [Fast Refresh] done in 337ms
+[log] [Fast Refresh] rebuilding
+[log] [SSE Batch] Message for task lB8fz0acY6dHDnZQG8gWx: [object Object]
+[log] [emitSSETaskMessage] Emitting: [object Object]
+[log] [Task Router] Routing task lB8fz0acY6dHDnZQG8gWx (status: PROCESSING) to node e22-s6-co, handlers: 1
+[log] [Fast Refresh] done in 109ms
+[log] [Fast Refresh] rebuilding

@@ -47,7 +47,7 @@ evals:
     criterion: AC-6
     executor: script
     cmd: config:executors.script.origin_manifest_unmoved
-    expected: "exit 0; SUPPRESSION half — the shipped manifest still holds 38 plain string entries and the same default org, so no plugin was repointed by this change"
+    expected: "exit 0; SUPPRESSION half — no pre-existing plugin was repointed: the 38 original entries are still plain strings under the same default org (second-edition guard also pins the single origin entry that compose-overlay landed)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8

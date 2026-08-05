@@ -1,0 +1,74 @@
+{
+  "feature_plain": "Node 'dán chữ' cho canvas: đóng chữ, khung giá, logo lên ảnh hoặc video — đúng dấu tiếng Việt, né vùng bị TikTok che — và là node rẻ duy nhất phải chạy lại khi đổi giá hàng loạt (video AI đắt tiền giữ nguyên từ cache).",
+  "decisions": [
+    {
+      "id": "E23",
+      "q": "Node dán chữ trông đã 'ra dáng người nhà' của các node sẵn có chưa?",
+      "why": "Ba người soi độc lập (chỉ xem 6 ảnh chụp thật, đối chiếu bản thiết kế chuẩn) đều nói ĐẠT — vòng thứ tư liên tiếp. Bạn xem ảnh rồi gật hoặc nêu chỗ chướng; đổi giao diện sau này rẻ, không đụng dữ liệu."
+    }
+  ],
+  "scope_plain": "Đã chốt để sau: sinh phụ đề tự động, kéo-thả vị trí bằng chuột, font tuỳ chọn, nhiều logo, chỉnh codec — cùng hai lỗ hổng UI cũ của per-plugin-origin.",
+  "analyst_plain": "Bốn phép đo (mã sinh sạch, hai guard cache, conformance TS) vốn đã xanh trước khi có tính năng — chúng là lưới chống hồi quy, không phải bằng chứng riêng cho overlay. Các phép đo còn lại đo đúng phần mới.",
+  "decisions_plain": [
+    {
+      "id": "d-20260802T053436Z-17932",
+      "p": "Chọn một 'máy in chữ' duy nhất cho cả ảnh lẫn video — dấu tiếng Việt chỉ phải kiểm một lần; đổi lại thêm một bước ghép trung gian, và đổi cách vẽ sau này không ảnh hưởng ai."
+    },
+    {
+      "id": "d-20260802T053436Z-23202",
+      "p": "Chọn nâng v1 lên nhiều dòng + giờ xuất hiện — mở được bất động sản/tài chính và lót đường phụ đề; đổi lại hợp đồng dày thêm 4 phép đo."
+    },
+    {
+      "id": "d-20260802T053436Z-20715",
+      "p": "Chọn phát hành plugin chính thức ngay trong vòng này — trọn gói Phase 1.2; đổi lại phải ký lại per-plugin-origin và evals có khâu phụ thuộc mạng."
+    },
+    {
+      "id": "d-20260802T053436Z-31630",
+      "p": "KHÔNG làm kéo-thả vị trí bằng chuột ở v1 — tiết kiệm cả một tầng giao diện phức tạp; đổi lại đặt vị trí kém trực quan, mở hợp đồng riêng nếu dùng thật thấy vướng."
+    },
+    {
+      "id": "d-20260802T061627Z-18439",
+      "p": "Chọn vẽ bản thiết kế chuẩn đầy đủ cho node (bạn chọn ở Cổng 1) — có chuẩn để máy so; đổi lại tốn công vẽ và duyệt trước."
+    },
+    {
+      "id": "d-20260802T110045Z-23040",
+      "p": "Chọn mô tả 4 loại overlay bằng một trường 'loại' thay vì bốn khuôn riêng — vì bộ sinh mã hiện chưa làm được khuôn riêng; đổi lại hệ thống không tự chặn được trường thừa đặt nhầm loại (bạn đã duyệt ở Cổng 1.5)."
+    },
+    {
+      "id": "d-20260803T010940Z-679",
+      "p": "Chọn đặt kho plugin dưới tài khoản phanlemanh, dùng cơ chế 'nguồn riêng' lần đầu tiên — khỏi phụ thuộc tài khoản thứ hai; đổi lại nút 'mở kho' và bộ máy chạy độc lập vẫn trỏ về tổ chức mặc định (bạn đã duyệt giữa chừng)."
+    },
+    {
+      "id": "d-20260803T030032Z-28883",
+      "p": "Vòng kiểm 1: nới bộ kiểm cũ cho hợp cơ chế nguồn riêng, đổi nhãn 'đang chạy' sang chữ đậm + nhấp nháy cho đọc được, và nhận công cụ chụp màn hình từ bộ kit — đổi lại nhãn 'đang chạy' của MỌI node đổi hình thức (chỗ tương tự ở thanh trạng thái cố ý giữ nguyên)."
+    },
+    {
+      "id": "d-20260803T035106Z-25000",
+      "p": "Vòng kiểm 2: mở cho nguồn video nối được vào node, và vá hai bộ kiểm vốn không bao giờ báo đỏ được — đổi lại thêm một khái niệm 'nhận thêm loại' vào tầng dùng chung, chỉ node này khai nên không ảnh hưởng node khác."
+    },
+    {
+      "id": "d-20260803T050402Z-12023",
+      "p": "Vòng kiểm 4 (bạn cho phép vượt trần 3 vòng): đấu nốt 'nhận thêm loại' vào chỗ tạo dây và nhánh dự phòng, sửa 1 lỗi lint, và sửa bản thiết kế chuẩn cho đúng hiệu ứng 'đang chạy' có sẵn — đổi lại bản chuẩn bị sửa sau khi code (ghi rõ ở đây để bạn thấy)."
+    },
+    {
+      "id": "d-20260803T072049Z-14747",
+      "p": "Vòng kiểm 5: chặn thao tác đổi đích dây đẩy nhầm video sang ô logo — đóng lỗi âm thầm khiến plugin nhận video làm logo; đổi lại thêm một hàm kiểm hợp lệ trước khi hoán đổi."
+    },
+    {
+      "id": "d-20260803T081130Z-3691",
+      "p": "Vòng kiểm 6: node thôi tự đoán loại media bằng tên đầu ra — nay dùng bộ giải mã dùng chung, nên video cắt từ clip cũng hiện đúng ô giờ."
+    },
+    {
+      "id": "d-20260803T094431Z-1836",
+      "p": "Vòng kiểm 7: gom luật 'ô này nhận loại nào' về MỘT chỗ cho cả 5 nơi, và làm việc giải loại an toàn với thứ tự render (trước đây workflow mở lại bị mất ô giờ vì đọc sổ đăng ký lúc sổ còn rỗng) — đổi lại có đụng tầng dùng chung của mọi node ABI, bù lại xoá được nguồn tái phát của 4 vòng trước."
+    },
+    {
+      "id": "d-20260803T143000Z-8821",
+      "p": "Vòng kiểm 10: sửa nốt nửa còn lại của luật nới rộng — đầu ra của node đi theo loại media thật sự đi vào, thay vì luôn lấy đầu ra khai báo đầu tiên; đóng lỗ mất kết quả video im lặng qua trợ lý dựng workflow."
+    },
+    {
+      "id": "d-20260803T150500Z-4417",
+      "p": "Vòng kiểm 11: khoá luật nới rộng theo ĐÚNG ô đã nới (logo cũng là ảnh, nối trước thì trước đây nó quyết sai loại đầu ra), và bộ sinh mã không còn để file sinh ra ở trạng thái chưa định dạng trên đĩa — hết bị báo đỏ giả khi kiểm tra chạy song song."
+    }
+  ]
+}

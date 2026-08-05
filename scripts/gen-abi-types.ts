@@ -237,7 +237,14 @@ try {
     const abi = readAbi();
     const ts = generateTs(abi);
     fs.mkdirSync(outDir, { recursive: true });
-    fs.writeFileSync(outPath, ts, "utf8");
+    // Format through stdin, then write once. Writing the file and formatting
+    // it in place left a window where the generated file existed unformatted,
+    // which a concurrent `lint:check` reads as two genuine errors. Staging to a
+    // temp file on disk does not help: inside the linted tree biome reports the
+    // same errors against the temp file, and outside it biome refuses to
+    // process an ignored path at all. `--stdin-file-path` gets the same rules
+    // applied (the path decides them) without the content ever being on disk
+    // unformatted.
     const rel = path.relative(repoRoot, outPath);
     const biomeBin = path.join(
         repoRoot,
@@ -245,14 +252,22 @@ try {
         ".bin",
         process.platform === "win32" ? "biome.cmd" : "biome",
     );
-    const fmt = spawnSync(biomeBin, ["check", "--write", rel], {
-        cwd: repoRoot,
-        stdio: "inherit",
-        shell: process.platform === "win32",
-    });
-    if (fmt.status !== 0) {
-        throw new Error(`biome check --write failed for ${rel}`);
+    const fmt = spawnSync(
+        biomeBin,
+        ["check", "--write", `--stdin-file-path=${rel}`],
+        {
+            cwd: repoRoot,
+            input: ts,
+            encoding: "utf8",
+            shell: process.platform === "win32",
+        },
+    );
+    if (fmt.status !== 0 || !fmt.stdout) {
+        throw new Error(
+            `biome check --write failed for ${rel}: ${fmt.stderr ?? ""}`,
+        );
     }
+    fs.writeFileSync(outPath, fmt.stdout, "utf8");
     console.log(`Wrote ${rel}`);
 
     // Bundle the ABI with the Python SDK so a pip-installed `tongflow` can run
@@ -261,7 +276,17 @@ try {
     const sdkAbiDir = path.join(repoRoot, "sdk", "tongflow", "_data");
     const sdkAbiPath = path.join(sdkAbiDir, "tongflow.abi.json");
     fs.mkdirSync(sdkAbiDir, { recursive: true });
-    fs.copyFileSync(abiPath, sdkAbiPath);
+    // Same reason as above: copy then rename, never write the live path in
+    // place while another process may be reading it.
+    const sdkStagePath = `${sdkAbiPath}.stage.${process.pid}`;
+    try {
+        fs.copyFileSync(abiPath, sdkStagePath);
+        fs.renameSync(sdkStagePath, sdkAbiPath);
+    } finally {
+        if (fs.existsSync(sdkStagePath)) {
+            fs.rmSync(sdkStagePath, { force: true });
+        }
+    }
     console.log(`Wrote ${path.relative(repoRoot, sdkAbiPath)}`);
 } catch (e) {
     console.error("gen-abi-types failed:", e);

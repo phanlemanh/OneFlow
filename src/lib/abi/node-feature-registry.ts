@@ -24,7 +24,11 @@ import {
     sourceHandleId,
     targetHandleId,
 } from "./handle-introspect";
-import { type ResolvedSpec, resolveSpec } from "./resolve";
+import {
+    handleAcceptsUpstream,
+    type ResolvedSpec,
+    resolveSpec,
+} from "./resolve";
 import {
     type AnySourceSpec,
     batchOn,
@@ -78,6 +82,7 @@ export const NODE_TYPE_TO_ABI_FEATURE = {
     musicExtractNode: "music-extract",
     musicLegoNode: "music-lego",
     musicCompleteNode: "music-complete",
+    composeOverlayNode: "compose-overlay",
 
     // batch/
     dropVideoNode: "drop-video",
@@ -224,6 +229,19 @@ export const NODE_TYPE_SOURCE_SPEC = {
     // Transfer variant of `speech-text-gen-video`: only the audio is wired,
     // the scene text stays a config field.
     speechGenVideoNode: { audio: handle({ nodeType: "audioNode" }) },
+    // `media` / `logo` are Asset $refs → upstream handles. The generic Asset
+    // default resolves to `imageNode` (field name carries no modality token),
+    // which would reject every video source — so `media` declares videoNode via
+    // `alsoAccepts`: this slot stamps overlays onto an image OR a video. `text`
+    // is a scalar string promoted to a textNode-fed handle — it feeds the
+    // `{text}` placeholder substituted plugin-side. `ops` is the overlay
+    // instruction list edited in the node's own ops-editor form.
+    composeOverlayNode: {
+        media: handle({ nodeType: "imageNode", alsoAccepts: ["videoNode"] }),
+        text: textScalar(),
+        logo: handle({ nodeType: "imageNode" }),
+        ops: configField(),
+    },
 
     /* ---------------- batch/ ---------------- */
     dropVideoNode: { videos: collectAll() },
@@ -298,7 +316,11 @@ export function resolvedSpecForNodeType(
               nodeType
           ]
         : undefined;
-    if (!feature || !overrides) return undefined;
+    // Overrides are optional: an ABI node type with no sourceSpec entry still
+    // has a resolvable spec (pure ABI defaults). Requiring both made this
+    // return undefined for most nodes, which pushed callers back onto the
+    // registry — the map that is empty during first render.
+    if (!feature) return undefined;
     return resolveSpec(feature, overrides);
 }
 
@@ -365,17 +387,16 @@ export function resolveEdgeHandles(args: {
                       return feature ? getAbiTopology(feature).inputOrder : [];
                   })()
                 : []);
-        const isHandleForUpstream = (field: string): boolean => {
-            if (targetSpec) {
-                const f = targetSpec.fields[field];
-                return f?.kind === "handle" && f.nodeType === upstreamNodeType;
-            }
-            if (!targetType) return false;
-            const feature = featureForNodeType(targetType);
-            if (!feature) return false;
-            const f = getAbiTopology(feature).inputs[field];
-            return f?.kind === "handle" && f.nodeType === upstreamNodeType;
-        };
+        // One question, one answer: resolve the target's spec (registry first,
+        // static map when the node has not mounted yet) and ask the shared
+        // predicate. The rule lives in resolve.ts — encoding it here as well is
+        // what let a widened handle stay invisible to some consumers.
+        const effectiveSpec = targetSpec ?? resolvedSpecForNodeType(targetType);
+        const isHandleForUpstream = (field: string): boolean =>
+            handleAcceptsUpstream(
+                effectiveSpec?.fields[field],
+                upstreamNodeType,
+            );
 
         let firstMatch: string | undefined;
         for (const field of fieldOrder) {

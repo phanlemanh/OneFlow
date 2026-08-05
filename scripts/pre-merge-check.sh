@@ -635,15 +635,38 @@ scope_has_any_match() { # <root> <scope-globs> — rc 0 iff at least one file
   # is precisely the fail-open this function exists to close, so it must ask
   # the question in the same namespace the answer is used in.
   #
+  # The two EXEMPTIONS below are load-bearing for the same reason --full-name is,
+  # and were the fifth variant of this family (fail-open, HIGH), left open by
+  # stale-scope-by-paths with an explicit "do not patch this piecemeal".
+  # stale_files() drops gate artifacts and t1_skip_globs BEFORE it applies scope,
+  # so those files are not in the universe any answer is ever drawn from. Asking
+  # about them here — where the question is "could this union ever report
+  # anything?" — makes a wholly honest declaration like paths: ["docs/**"] pass,
+  # and then filter out every real change forever, on every later PR, silently.
+  # The filter must therefore be identical in both places: same exclusions, same
+  # order, same matcher.
+  #
   # Any doubt (git missing, not a repo, ls-files unusable) is "cannot verify"
   # and returns rc 1 — refuse narrow scope, same as every other doubt in this
   # function. Stops at the first match rather than scanning every tracked file.
   command -v git >/dev/null 2>&1 || return 1
   git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
-  git -C "$1" ls-files --full-name 2>/dev/null | {
+  # `-c core.quotePath=false` for the same reason stale_files() sets it, and it
+  # is part of "the same namespace" this function exists to enforce: quotePath
+  # defaults ON, so ls-files spells a non-ASCII path "src/caf\303\251.ts" while
+  # diff --name-only (which stale_files reads, with the setting off) spells it
+  # src/café.ts. Without this the two disagree about a file BOTH can see, and a
+  # declaration whose only match is such a path gets narrow scope refused —
+  # fail-closed, so not a hole, but the header above claims the two ask in one
+  # namespace and that claim has to be true. A path that STILL arrives quoted
+  # despite the setting simply does not match, which keeps the doubt on the
+  # refuse-narrow-scope side.
+  git -c core.quotePath=false -C "$1" ls-files --full-name 2>/dev/null | {
     hit=1
     while IFS= read -r f; do
       [ -n "$f" ] || continue
+      case "$f" in _acceptance/*|*/_acceptance/*) continue ;; esac
+      match_globs "$f" "$T1_GLOBS" && continue
       if match_globs "$f" "$2"; then
         hit=0
         break
@@ -1173,7 +1196,7 @@ GLOBS2
     # tracked in the repo is exactly that. Silent for an undeclared feature:
     # scope is already empty there, so this guard never fires (AC-3).
     if [ -n "$scope" ] && ! scope_has_any_match "$ROOT" "$scope"; then
-      echo "NOTE [$slug]: declared eval paths match no tracked file in the repository — treating the declaration as a typo/stale path; narrow staleness scope refused, whole-tree applied"
+      echo "NOTE [$slug]: declared eval paths match no gated file in the repository (a typo, a stale path, or a union every match of which is _acceptance/** or t1-exempt — none of which staleness can ever report) — narrow staleness scope refused, whole-tree applied. Declare a glob pointing at code this feature's evals actually exercise."
       scope=""
     fi
     stale="$(stale_files "$ROOT" "$vc" "$scope")"

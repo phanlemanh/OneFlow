@@ -1,6 +1,7 @@
 import type { Connection, Edge, Node } from "@xyflow/react";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 import { isValidFlowConnection } from "./connection-rules";
 
@@ -54,6 +55,108 @@ describe("isValidFlowConnection — modality gate", () => {
         expect(
             isValidFlowConnection(c, [abiNode("src"), abiNode("dst")], []),
         ).toBe(true);
+    });
+});
+
+describe("isValidFlowConnection — multi-modality handle (alsoAccepts)", () => {
+    /**
+     * `compose-overlay.media` stamps overlays onto an image OR a video, so its
+     * handle declares `alsoAccepts: ["videoNode"]`. The generic Asset default
+     * resolves to imageNode alone, which silently rejected every video source.
+     */
+    function registerOverlay(nodeId: string) {
+        registerAbiNode({
+            nodeId,
+            feature: "compose-overlay" as never,
+            sourceSpec:
+                NODE_TYPE_SOURCE_SPEC.composeOverlayNode as unknown as never,
+        });
+        registered.push(nodeId);
+    }
+
+    it("accepts a video source on in:media", () => {
+        register("vid", "image-gen-video"); // out:video
+        registerOverlay("ov");
+        const c = conn("vid", "out:video", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [abiNode("vid"), abiNode("ov")], []),
+        ).toBe(true);
+    });
+
+    it("still accepts an image source on in:media", () => {
+        register("img", "image-gen"); // out:image
+        registerOverlay("ov");
+        const c = conn("img", "out:image", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [abiNode("img"), abiNode("ov")], []),
+        ).toBe(true);
+    });
+
+    it("rejects an audio source on in:media — widening is not 'accept anything'", () => {
+        register("aud", "text-gen-speech-preset"); // out:audio
+        registerOverlay("ov");
+        const c = conn("aud", "out:audio", "ov", "in:media");
+        expect(
+            isValidFlowConnection(c, [abiNode("aud"), abiNode("ov")], []),
+        ).toBe(false);
+    });
+
+    /**
+     * Data-node sources take a different branch than ABI-node sources: they skip
+     * `tryAbiCompatibility` and land on the `collectUpstreamTypesForTarget`
+     * fallback, which is where `alsoAccepts` was originally dropped. The
+     * abiNode-sourced cases above never reach it.
+     */
+    const dataNode = (id: string, type: string): Node => ({
+        id,
+        type,
+        position: { x: 0, y: 0 },
+        data: {},
+    });
+
+    it("accepts a real videoNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("v", "out:videoNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(
+                c,
+                [dataNode("v", "videoNode"), abiNode("ov")],
+                [],
+            ),
+        ).toBe(true);
+    });
+
+    it("accepts a real imageNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("i", "out:imageNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(
+                c,
+                [dataNode("i", "imageNode"), abiNode("ov")],
+                [],
+            ),
+        ).toBe(true);
+    });
+
+    it("rejects a real audioNode (data node) source on in:media", () => {
+        registerOverlay("ov");
+        const c = conn("a", "out:audioNode", "ov", "in:media");
+        expect(
+            isValidFlowConnection(
+                c,
+                [dataNode("a", "audioNode"), abiNode("ov")],
+                [],
+            ),
+        ).toBe(false);
+    });
+
+    it("keeps in:logo image-only — alsoAccepts is per handle, not per node", () => {
+        register("vid2", "image-gen-video"); // out:video
+        registerOverlay("ov");
+        const c = conn("vid2", "out:video", "ov", "in:logo");
+        expect(
+            isValidFlowConnection(c, [abiNode("vid2"), abiNode("ov")], []),
+        ).toBe(false);
     });
 });
 

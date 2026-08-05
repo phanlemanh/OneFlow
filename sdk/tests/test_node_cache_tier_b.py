@@ -36,6 +36,16 @@ def test_tier_lists_are_disjoint_and_pinned():
         "text-gen-video", "video-edit", "video-gen-text",
         "video-image-gen-video-move", "video-upscale",
     })
+    # TIER_A_SLOTS pinned too (compose-overlay joined on 2026-08-02 --
+    # deterministic CPU overlay, byte-identity evidence in the plugin repo's
+    # golden suite): same rule as the tier-B literal above, a silent
+    # addition or drop must go red here, not slide in unreviewed.
+    assert TIER_A_SLOTS == frozenset({
+        "compose-overlay", "concat-videos", "extract-audio",
+        "remove-video-audio", "merge-video-audio", "get-first-frame",
+        "get-last-frame", "split-video", "drop-video", "split-text",
+        "combine-text", "arrange-group",
+    })
     assert TIER_A_SLOTS & TIER_B_SLOTS == frozenset()
     for descoped in DESCOPED_GENERATIVE_SLOTS:
         assert descoped not in TIER_A_SLOTS

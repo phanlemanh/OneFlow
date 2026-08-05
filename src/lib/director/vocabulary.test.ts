@@ -13,6 +13,30 @@ describe("renderVocabulary", () => {
         expect(v).toMatch(/images:\s*image\[\]/);
     });
 
+    it("advertises every accepted modality of a widened handle", () => {
+        // compose-overlay's `media` takes an image OR a video (alsoAccepts).
+        // Listing only the primary type meant the planner never proposed a
+        // video for it and the compiler then rejected one as a mismatch.
+        const v = renderVocabulary(["compose-overlay"]);
+        expect(v).toMatch(/media:\s*image\|video/);
+    });
+
+    it("advertises every modality a widened slot can produce", () => {
+        // The output half of the same rule. Advertising `-> image` alone told
+        // the planner a video overlay yields an image, so it never chained one
+        // into a video-consuming slot.
+        const v = renderVocabulary(["compose-overlay"]);
+        expect(v).toMatch(/->\s*image\|video/);
+    });
+
+    it("leaves a slot with no widened handle on its single primary output", () => {
+        // separate-sound declares two audio outputs and image-gen one image;
+        // neither widened anything, so both keep exactly what they always
+        // advertised — this is the guard on the new rule's blast radius.
+        expect(renderVocabulary(["image-gen"])).toMatch(/->\s*image$/m);
+        expect(renderVocabulary(["separate-sound"])).toMatch(/->\s*audio$/m);
+    });
+
     it("is byte-stable regardless of input order", () => {
         expect(renderVocabulary(["image-gen", "image-fusion"])).toBe(
             renderVocabulary(["image-fusion", "image-gen"]),
@@ -210,5 +234,39 @@ describe("installedSafeSlots", () => {
             "image-gen": ["demo-plugin"],
         });
         expect(withImageProducer).toEqual(["image-gen", "image-gen-model"]);
+    });
+});
+
+describe("installedSafeSlots — a widened output is not its own evidence", () => {
+    it("drops a video consumer when the only 'video producer' is a widened slot", () => {
+        // get-first-frame requires a video and produces an image, so it can
+        // never bootstrap itself (unlike concat-videos, which produces video
+        // and is therefore self-satisfying under every version of this code —
+        // that made it useless as a repro). compose-overlay ADVERTISES
+        // image|video but only yields a video when fed one, so counting it as
+        // a video producer is circular and kept get-first-frame alive here.
+        expect(
+            installedSafeSlots({
+                "image-gen": ["p1"],
+                "compose-overlay": ["p2"],
+                "get-first-frame": ["p3"],
+            }),
+        ).toEqual(["compose-overlay", "image-gen"]);
+    });
+
+    it("keeps that consumer once a real video producer is installed", () => {
+        expect(
+            installedSafeSlots({
+                "image-gen": ["p1"],
+                "image-gen-video": ["p2"],
+                "compose-overlay": ["p3"],
+                "get-first-frame": ["p4"],
+            }),
+        ).toEqual([
+            "compose-overlay",
+            "get-first-frame",
+            "image-gen",
+            "image-gen-video",
+        ]);
     });
 });

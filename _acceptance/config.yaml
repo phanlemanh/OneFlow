@@ -131,6 +131,13 @@ executors:
     unit_l4_delegate_persists: "pnpm vitest run src/lib/task/engine-delegate.test.ts -t 'cache counters'"
     unit_l4_schema_columns: "pnpm vitest run src/db/metering-schema.test.ts -t 'cache counters'"
     # conformance-l0 Gate 1 (2026-07-28): every file below lands during implementation.
+    # compose-overlay Gate 1 (2026-08-02): test files land during implementation.
+    # One key per criterion via pytest node-ids (standing rule).
+    sdk_pytest_overlay_tier_a_hit: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_overlay.py::test_overlay_second_run_full_hit_zero_plugin_calls"
+    sdk_pytest_overlay_partial_rerun: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_node_cache_overlay.py::test_changing_text_reruns_only_overlay"
+    sdk_pytest_overlay_conformance: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance -k compose_overlay"
+    unit_overlay_node: "pnpm vitest run src/components/workspace/nodes/transfer/compose-overlay.test.tsx"
+    unit_overlay_exporter: "pnpm vitest run src/lib/workflow/compose-overlay-export.test.ts"
     sdk_pytest_batch: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py
     sdk_pytest_conformance: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/conformance
     sdk_pytest_plugin_rev: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_plugin_rev.py
@@ -152,7 +159,7 @@ executors:
     # dependency-refresh-2026-07 Gate 1 (2026-07-26).
     deps_manifest_intact: "bash scripts/deps/check-manifest.sh"
     deps_lockfile_clean: "pnpm install --frozen-lockfile"
-    deps_no_t3_drift: "bash scripts/deps/check-no-t3-drift.sh origin/main"
+    deps_no_t3_drift: "ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"
     # ci-actions-bump Gate 1 (2026-07-26). The run-reading keys query real
     # Actions runs via `gh` rather than re-running the work locally — a bumped
     # action can only be proved by the runner that executes it.
@@ -160,22 +167,42 @@ executors:
     # Narrowed after Gate 1 (see contract "Amendment"): the gate job's colour is
     # dominated by acceptance bookkeeping, so it cannot serve as evidence about
     # a checkout bump. This asserts the plumbing instead.
-    ci_gate_plumbing: "bash scripts/ci/check-gate-plumbing.sh"
-    ci_jobs_green: "bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
+    ci_gate_plumbing: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh"
+    ci_jobs_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
     ci_docker_dryrun_guard: "bash scripts/ci/check-docker-dryrun.sh"
-    ci_docker_dispatch_green: "bash scripts/ci/check-dispatch-run.sh docker"
-    ci_ghcr_untouched: "bash scripts/ci/check-ghcr-untouched.sh"
-    ci_desktop_dispatch_green: "bash scripts/ci/check-dispatch-run.sh desktop"
-    ci_no_behaviour_drift: "bash scripts/ci/check-workflow-drift.sh origin/main"
+    ci_docker_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker"
+    ci_ghcr_untouched: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    ci_desktop_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    ci_no_behaviour_drift: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh origin/main"
     # oneflow-plugin-prefix Gate 1 (2026-07-26).
     docs_plugin_prefix: "bash scripts/plugins/check-prefix-docs.sh"
-    prefix_no_config_drift: "bash scripts/plugins/check-no-config-drift.sh origin/main"
+    prefix_no_config_drift: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh origin/main"
     # per-plugin-origin Gate 1 (2026-07-27).
     origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
     origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
     origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
     # cache-l4-eviction Gate 1 (2026-07-31): guard lands during implementation.
     cache_test_layout: "bash scripts/cache/check-test-layout.sh"
+    # compose-overlay Gate 1 (2026-08-02): guard scripts land during implementation.
+    # Render evals run in the PLUGIN repo (outside this tree) via a clone-and-pytest
+    # wrapper — one key per criterion, each a distinct pytest node-id (standing rule).
+    # Network-dependent by design, same class as the ci_* keys above.
+    abi_python_gen_clean: "bash scripts/abi/check-python-gen-clean.sh"
+    overlay_diacritics: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_vietnamese_diacritics_golden_image_video_identical"
+    overlay_multiline: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_multiline_and_wrap_golden"
+    overlay_price_tag: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_price_tag_verbatim_golden"
+    overlay_logo: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_placement_golden"
+    overlay_logo_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_op_without_logo_input_fails_cleanly"
+    overlay_safe_zone: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_safe_zone_clamps_intruding_op_only"
+    overlay_placeholder: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_substitution_verbatim"
+    overlay_placeholder_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_without_input_text_fails_cleanly"
+    overlay_time_window: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_only_between"
+    overlay_time_window_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_ignored_for_image"
+    overlay_modality_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_image_in_image_out_video_absent"
+    overlay_modality_video: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_video_in_video_out_audio_duration_preserved"
+    overlay_determinism: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_two_runs_byte_identical"
+    overlay_registration_synced: "bash scripts/plugins/check-overlay-registration.sh"
+    overlay_sdk_train: "bash scripts/abi/check-overlay-sdk-train.sh"
     # conformance-l0 Gate 1 (2026-07-28).
     conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
     plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
@@ -202,6 +229,23 @@ executors:
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
     stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
+    scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
+    # gate-scope-anchors (0.6): same-universe scope check + historical anchors.
+    # b2_* and ghcr_anchored hit the network (gh) — local verify only, not CI.
+    gate_ns_exempt_refused: bash scripts/acceptance/test-scope-namespace.sh exempt-refused
+    gate_ns_variants_red: bash scripts/acceptance/test-scope-namespace.sh variants-discriminating
+    gate_ns_legit_granted: bash scripts/acceptance/test-scope-namespace.sh legit-granted
+    own_range_anchored: bash scripts/acceptance/test-own-range.sh anchored
+    own_range_unlanded: bash scripts/acceptance/test-own-range.sh unlanded
+    own_range_malformed: bash scripts/acceptance/test-own-range.sh malformed
+    b1_anchored_green: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh"
+    b1_violation_red: bash scripts/acceptance/test-own-range.sh b1-red
+    b2_runs_found: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    b2_no_run_exit2: bash scripts/acceptance/test-own-range.sh no-run-exit2
+    ghcr_anchored: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    anchors_backfilled: bash scripts/acceptance/test-own-range.sh backfill-integration
+    b1_unanchored_compat: bash scripts/acceptance/test-own-range.sh unanchored-compat
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
@@ -274,3 +318,5 @@ dev_server:
 # reference + `pnpm add -D puppeteer-core`, then set:
 #   capture:
 #     ui: "node scripts/ui-capture.mjs"
+capture:
+  ui: pnpm ui:capture

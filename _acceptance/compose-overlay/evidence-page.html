@@ -1,0 +1,220 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · compose-overlay</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>compose-overlay — slot dán chữ/khung giá/logo/safe-zone lên ảnh &amp; video (Phase 1.2)</h1><div class="sub">Trang bằng chứng · <span class="mono">compose-overlay</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge pend">PENDING-JUDGMENT</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1a">E1a</a></td><td>AC-1</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E1a-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E1b">E1b</a></td><td>AC-1</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E1b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E2-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E3-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E4-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E5a">E5a</a></td><td>AC-5</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E5a-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E5b">E5b</a></td><td>AC-5</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E5b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E6-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E7a">E7a</a></td><td>AC-7</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E7a-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E7b">E7b</a></td><td>AC-7</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E7b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E8a">E8a</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E8a-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E8b">E8b</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E8b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E9a">E9a</a></td><td>AC-9</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E9b">E9b</a></td><td>AC-9</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E9b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E10-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E14-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E15-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E16-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E17-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E12a">E12a</a></td><td>AC-12</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E12a-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E12b">E12b</a></td><td>AC-12</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E12b-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E18">E18</a></td><td>AC-13</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E18-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E19">E19</a></td><td>AC-13</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E19-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E20">E20</a></td><td>AC-14</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E20-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E21">E21</a></td><td>AC-15</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-compose-overlay-E21-r12</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E22">E22</a></td><td>AC-16</td><td>ui-check</td><td><span class="badge pass">PASS</span></td><td class="mono">design-gate-908887ca23,design-gate-8f52c68794(pre-cssfix)→r12-final:E22-designgate-r12-independent-verify.txt</td><td class="mono">2026-08-03T09:00:00Z</td></tr>
+<tr><td><a href="#E23">E23</a></td><td>AC-16</td><td>judgment</td><td><span class="badge neutral">PASS (PANEL PROPOSAL — PENDING GATE 2 HUMAN_OVERRIDE)</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1a"><h3><span class="badge pass">PASS</span> &nbsp;E1a · script</h3><p class="crit">AC-1</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E1a-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.gen_abi_clean</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Wrote src/generated/abi/index.ts
+Wrote sdk/tongflow/_data/tongflow.abi.json
+EXIT_CODE=0</pre>
+</div>
+<div class="card eval" id="E1b"><h3><span class="badge pass">PASS</span> &nbsp;E1b · script</h3><p class="crit">AC-1</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E1b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.abi_python_gen_clean</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Check passed: generated Python artifacts (sdk/tongflow/models, sdk/tongflow/node_slots.py) match committed versions; no diffs and no untracked files detected.</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · script</h3><p class="crit">AC-2: Given op `text` chứa pangram phủ đủ bộ ký tự tiếng Việt có dấu (hoa + thường),</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E2-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_diacritics</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.28s</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · script</h3><p class="crit">AC-3: Given op text nhiều dòng (`\n`) và op text dài có `max_width`, When render, Then</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E3-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_multiline</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.13s</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · script</h3><p class="crit">AC-4: Given op `price_tag` với chuỗi giá kiểu `1.999.000₫`, When render, Then chuỗi in</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E4-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_price_tag</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.07s</pre>
+</div>
+<div class="card eval" id="E5a"><h3><span class="badge pass">PASS</span> &nbsp;E5a · script</h3><p class="crit">AC-5: Given op `logo` + input `logo` là ảnh PNG có alpha, When render, Then logo đặt đúng</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E5a-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_logo</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.06s</pre>
+</div>
+<div class="card eval" id="E5b"><h3><span class="badge pass">PASS</span> &nbsp;E5b · script</h3><p class="crit">AC-5: Given op `logo` + input `logo` là ảnh PNG có alpha, When render, Then logo đặt đúng</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E5b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_logo_missing</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.06s</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · script</h3><p class="crit">AC-6: Given op `safe_zone` (preset và custom) + một op đặt **lấn** vùng cấm + một op</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E6-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_safe_zone</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.05s</pre>
+</div>
+<div class="card eval" id="E7a"><h3><span class="badge pass">PASS</span> &nbsp;E7a · script</h3><p class="crit">AC-7: Given op text chứa placeholder `{text}` và input `text` = chuỗi giá, When render,</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E7a-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_placeholder</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.07s</pre>
+</div>
+<div class="card eval" id="E7b"><h3><span class="badge pass">PASS</span> &nbsp;E7b · script</h3><p class="crit">AC-7: Given op text chứa placeholder `{text}` và input `text` = chuỗi giá, When render,</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E7b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_placeholder_missing</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.06s</pre>
+</div>
+<div class="card eval" id="E8a"><h3><span class="badge pass">PASS</span> &nbsp;E8a · script</h3><p class="crit">AC-8: Given video + op có `start`/`end`, When render, Then op chỉ xuất hiện trong khoảng</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E8a-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_time_window</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.51s</pre>
+</div>
+<div class="card eval" id="E8b"><h3><span class="badge pass">PASS</span> &nbsp;E8b · script</h3><p class="crit">AC-8: Given video + op có `start`/`end`, When render, Then op chỉ xuất hiện trong khoảng</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E8b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_time_window_image</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.09s</pre>
+</div>
+<div class="card eval" id="E9a"><h3><span class="badge pass">PASS</span> &nbsp;E9a · script</h3><p class="crit">AC-9: Given media là ảnh, Then output `image` set và `video` vắng; Given media là video,</p>
+<div class="kv"><span>run_id <b>eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_modality_image</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.08s</pre>
+</div>
+<div class="card eval" id="E9b"><h3><span class="badge pass">PASS</span> &nbsp;E9b · script</h3><p class="crit">AC-9: Given media là ảnh, Then output `image` set và `video` vắng; Given media là video,</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E9b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_modality_video</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
+.                                                                        [100%]
+1 passed in 0.25s</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · script</h3><p class="crit">AC-10: Given cùng một bộ input chạy **2 lần** trong cùng môi trường pin, When so sánh</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E10-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_determinism</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">1 passed in 0.28s</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · test</h3><p class="crit">AC-11: (cross-layer) Given `compose-overlay` nằm trong `TIER_A_SLOTS` và một workflow</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E14-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_overlay_tier_a_hit</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.14s</pre>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge pass">PASS</span> &nbsp;E15 · test</h3><p class="crit">AC-11: (cross-layer) Given `compose-overlay` nằm trong `TIER_A_SLOTS` và một workflow</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E15-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_overlay_partial_rerun</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.13s</pre>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge pass">PASS</span> &nbsp;E16 · test</h3><p class="crit">AC-11: (cross-layer) Given `compose-overlay` nằm trong `TIER_A_SLOTS` và một workflow</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E16-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l3_allowlists_disjoint</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.02s</pre>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge pass">PASS</span> &nbsp;E17 · test</h3><p class="crit">AC-11: (cross-layer) Given `compose-overlay` nằm trong `TIER_A_SLOTS` và một workflow</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E17-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_l4_abi_guard_bidirectional</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed in 0.02s</pre>
+</div>
+<div class="card eval" id="E12a"><h3><span class="badge pass">PASS</span> &nbsp;E12a · test</h3><p class="crit">AC-12: Given node `compose-overlay` mount trên canvas, When render node và export,</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E12a-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_overlay_node</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">   Tests  8 passed (8)
+Start at  22:30:36
+Duration  1.21s (transform 231ms, setup 0ms, import 474ms, tests 359ms, environment 276ms)</pre>
+</div>
+<div class="card eval" id="E12b"><h3><span class="badge pass">PASS</span> &nbsp;E12b · test</h3><p class="crit">AC-12: Given node `compose-overlay` mount trên canvas, When render node và export,</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E12b-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_overlay_exporter</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">   Tests  3 passed (3)
+Start at  22:30:42
+Duration  241ms (transform 101ms, setup 0ms, import 138ms, tests 4ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E18"><h3><span class="badge pass">PASS</span> &nbsp;E18 · test</h3><p class="crit">AC-13: (cross-layer) Given fixture workflow chứa compose-overlay chạy qua **cả hai</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E18-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_overlay_conformance</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed, 6 deselected in 0.03s</pre>
+</div>
+<div class="card eval" id="E19"><h3><span class="badge pass">PASS</span> &nbsp;E19 · test</h3><p class="crit">AC-13: (cross-layer) Given fixture workflow chứa compose-overlay chạy qua **cả hai</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E19-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_conformance</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">   Tests  12 passed (12)
+Start at  22:30:50
+Duration  201ms (transform 64ms, setup 0ms, import 84ms, tests 4ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E20"><h3><span class="badge pass">PASS</span> &nbsp;E20 · script</h3><p class="crit">AC-14</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E20-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_registration_synced</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: compose-overlay registered (origin entry), docs matrix rows + i18n coherent</pre>
+</div>
+<div class="card eval" id="E21"><h3><span class="badge pass">PASS</span> &nbsp;E21 · script</h3><p class="crit">AC-15: Given SDK release train, When kiểm, Then `sdk/pyproject.toml` và</p>
+<div class="kv"><span>run_id <b>minted-compose-overlay-E21-r12</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.overlay_sdk_train</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
+published wheel carries compose-overlay types
+sdk train OK: 0.2.18</pre>
+</div>
+<div class="card eval" id="E22"><h3><span class="badge pass">PASS</span> &nbsp;E22 · ui-check</h3><p class="crit">AC-16: Given node compose-overlay + ops-editor trên canvas dev server, When</p>
+<div class="kv"><span>run_id <b>design-gate-908887ca23,design-gate-8f52c68794(pre-cssfix)→r12-final:E22-designgate-r12-independent-verify.txt</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.design.gate</b></span><span>verified_at <b>2026-08-03T09:00:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<div class="shot slide" data-n="4"><div class="frame"><img src="evidence/E22-live-workspace-r10-independent-verify.png" alt="frame 1" loading="lazy"></div><div class="frame"><img src="evidence/E22-live-workspace-r11-independent-verify.png" alt="frame 2" loading="lazy"></div><div class="frame"><img src="evidence/E22-live-workspace-r8-independent-verify.png" alt="frame 3" loading="lazy"></div><div class="frame"><img src="evidence/E22-live-workspace-r9-independent-verify.png" alt="frame 4" loading="lazy"></div></div><div class="slidebar"><button class="btn" data-toggle>⏸ Tạm dừng</button><span>4 frame · chạy như GIF</span></div>
+<pre class="out">Side note (out of my scope, not caused by my edits, not reverted): `git status` shows _acceptance/compose-overlay/contract.md (status: verified -&gt; implemented) and sdk/uv.lock modified — these are not files I touched; consistent with the known pattern that other acceptance-verify subagents mutate git concurrently (see MEMORY.md note &quot;acceptance-verify subagents mutate git&quot;). Left as-is; outside E22&#39;s declared paths (only src/components/workspace/nodes/transfer/compose-overlay.tsx).
+
+exitCode=0: every assertion above passed (HTTP 200, console clean x2, network clean per scoping, P0 gate PASS/exit 0/p0_count 0 on all 6 states, all 6 capture pairs present and content-verified against Expected).</pre>
+</div>
+<div class="card eval" id="E23"><h3><span class="badge neutral">PASS (PANEL PROPOSAL — PENDING GATE 2 HUMAN_OVERRIDE)</span> &nbsp;E23 · judgment</h3><p class="crit">AC-16: Given node compose-overlay + ops-editor trên canvas dev server, When</p>
+<div class="kv"><span>judged_by <b>3-lens panel (domain-correctness, operational-feasibility, spec-alignment) — fresh-context judge subagent</b></span></div>
+<p class="note"><b>Phán đoán:</b> Panel 3-lens dong thuan tuyet doi PASS — khong dissent nao duoc ghi nhan. Verdict tong the van la PENDING-JUDGMENT vi day la judgment item cho AC-16 (ngon ngu thiet ke), can human tu xac nhan va dien human_override truoc khi nang overall len PASS o Gate 2.</p>
+<div class="ov">human_override: CHƯA điền (việc của bạn ở Gate 2)</div>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">carried tu round truoc — baseline khong do lai round nay
+none — baseline not re-measured this round (P2); no non-discriminating evals identified this round.</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1-11: iterative fixes across ABI/codegen drift, golden-image render tests, cache tiering (L3/L4), UI ops-editor coverage, and the design gate (an earlier css issue was identified and fixed pre-final capture per E22&#39;s run_id provenance chain: design-gate-908887ca23 → design-gate-8f52c68794 (pre-cssfix) → r12-final); round-by-round detail not carried into this verify context.</li><li>Round 12: all 26 machine/ui-check evals (E1a-E22) PASS, exit 0, no variance; E23 design-language judgment panel (3 lenses) unanimously proposes PASS; baseline not re-measured this round (P2, carried); verdict PENDING-JUDGMENT pending Gate 2 human_override on E23.</li></ul>
+<h2>Checklist Cổng 2 (bạn)</h2><div class="card"><ul class="ck"><li><input type="checkbox" id="ck0"><label for="ck0">Read the table + spot-check 1-2 evidence blocks</label></li><li><input type="checkbox" id="ck1"><label for="ck1">Personally verify E23 (judgment item, panel proposal PASS), then fill its</label></li><li><input type="checkbox" id="ck2"><label for="ck2">If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when</label></li><li><input type="checkbox" id="ck3"><label for="ck3">Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract</label></li></ul><div class="note">Tick để theo dõi — chỉ lưu trong trình duyệt; quyết định THẬT vào human_signoff / human_override của report.</div></div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

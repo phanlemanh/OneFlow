@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
-human_signoff: Manh 2026-07-27
+verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+human_signoff: Manh 2026-08-03
 ---
 
 # Evidence Report: per-plugin-origin
@@ -31,319 +31,143 @@ human_signoff: Manh 2026-07-27
 ## Evidence
 
 - eval: E1
-  run_id: minted-per-plugin-origin-E1-r8
+  run_id: minted-per-plugin-origin-E1-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+    Tests  59 passed (59)
+    Start at  23:03:06
+    Duration  292ms (transform 56ms, setup 0ms, import 105ms, tests 7ms, environment 0ms)
 
 - eval: E2
-  run_id: minted-per-plugin-origin-E2-r8
+  run_id: minted-per-plugin-origin-E2-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+    Tests  59 passed (59)
+    Start at  23:03:06
+    Duration  292ms (transform 56ms, setup 0ms, import 105ms, tests 7ms, environment 0ms)
 
 - eval: E3
-  run_id: minted-per-plugin-origin-E3-r8
+  run_id: minted-per-plugin-origin-E3-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+    Tests  59 passed (59)
+    Start at  23:03:06
+    Duration  292ms (transform 56ms, setup 0ms, import 105ms, tests 7ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-per-plugin-origin-E4-r8
+  run_id: minted-per-plugin-origin-E4-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  57 passed (57)
-      Start at  17:36:47
-      Duration  136ms (transform 20ms, setup 0ms, import 28ms, tests 7ms, environment 0ms)
+    Tests  59 passed (59)
+    Start at  23:03:06
+    Duration  292ms (transform 56ms, setup 0ms, import 105ms, tests 7ms, environment 0ms)
 
 - eval: E5
-  run_id: minted-per-plugin-origin-E5-r8
+  run_id: minted-per-plugin-origin-E5-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_single_impl
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
     OK: one URL rule across src/ and scripts/, in src/lib/plugins/official-manifest.ts; the CLI installer imports it (the SDK engine's Python copy is out of this scan's scope — see the contract's known limits)
 
 - eval: E6
-  run_id: minted-per-plugin-origin-E6-r8
+  run_id: minted-per-plugin-origin-E6-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_installer_parity
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
     OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward
 
 - eval: E7
-  run_id: minted-per-plugin-origin-E7-r8
+  run_id: minted-per-plugin-origin-E7-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_manifest_unmoved
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-    OK: 38 plain string entries, default org unchanged
+    OK: 38 plain strings under default org + 1 origin entry (compose-overlay)
 
 - eval: E8
-  run_id: minted-per-plugin-origin-E8-r8
+  run_id: minted-per-plugin-origin-E8-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  75 passed (75)
-      Start at  17:36:45
-      Duration  133ms (transform 19ms, setup 0ms, import 28ms, tests 3ms, environment 0ms)
+    Tests  76 passed (76)
+    Start at  23:03:06
+    Duration  364ms (transform 73ms, setup 0ms, import 124ms, tests 5ms, environment 0ms)
 
 - eval: E9
-  run_id: minted-per-plugin-origin-E9-r8
+  run_id: minted-per-plugin-origin-E9-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-         Tests  329 passed (329)
-      Start at  17:36:42
-      Duration  1.32s (transform 2.48s, setup 0ms, import 4.97s, tests 740ms, environment 1ms)
+    Tests  413 passed (413)
+    Start at  23:03:07
+    Duration  2.50s (transform 5.05s, setup 0ms, import 9.51s, tests 2.28s, environment 1.20s)
 
 - eval: E10
-  run_id: minted-per-plugin-origin-E10-r8
+  run_id: minted-per-plugin-origin-E10-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new settings.
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
     $ tsc --noEmit
 
 - eval: E11
-  run_id: minted-per-plugin-origin-E11-r8
+  run_id: minted-per-plugin-origin-E11-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
-    Checked 402 files in 86ms. No fixes applied.
+    $ pnpm exec biome check --error-on-warnings .
+    [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
+    Checked 426 files in 255ms. No fixes applied.
 
 - eval: E12
-  run_id: minted-per-plugin-origin-E12-r8
+  run_id: minted-per-plugin-origin-E12-r10
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-07-27T10:36:08Z
+  verified_at: 2026-08-03T23:03:07Z
   output: |
     [WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.onlyBuiltDependencies". See https://pnpm.io/settings for the new home of each setting.
     $ tsx scripts/verify-plugins-scan.ts
     [verify-plugins-scan] OK
 
-### Additional runs (not mapped to any eval / AC)
-
-Two further commands were run as supplementary guards but are not attached to
-any eval id in this contract, so they do not appear in the table above and do
-not affect the verdict:
-
-- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — 1 run, passed (89 passed in 3.19s), baseline n-a.
-- `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — 1 run, passed (wrote src/generated/abi/index.ts and sdk/tongflow/_data/tongflow.abi.json, no diff — files in sync), baseline n-a.
-
 ## Analyst
 
-carried tu round truoc — baseline khong do lai round nay (P2 — evals.yaml
-khong doi tu lan baseline cuoi).
-
-none — no non-discriminating evals reported for round 8 (baseline was not
-re-measured this round; see round 1's Analyst findings for the last measured
-baseline classification of E8/E9/E12 as intended regression-guards).
+carried tu round truoc — baseline khong do lai round nay
+none — baseline not re-measured this round (see prior round's evidence report for the baseline classification)
 
 ## Variance
 
-none — every eval this round has `runs: 1` (deterministic); no eval carries
-`variance: true`.
+none — no stochastic evals this round (no eval carries runs > 1)
 
 ## Iterations
 
-Round 1: E11 failed — `pnpm lint:check` (biome, `--error-on-warnings`) exits 1.
-All other evals (E1-E10, E12) pass, including baseline-discriminating evals
-E1-E7 (red on the pre-feature tree, green on HEAD). Verdict: REJECT. Returned
-to implementation.
-
-Round 2: all evals E1-E12 pass (exit 0), including the previously-failing
-E11 (`pnpm lint:check`). Full suite (`pnpm test`, 304 passed), build +
-typecheck, and the plugins scan verifier are all green. The standalone SDK
-pytest suite (89 passed) and the ABI-generation diff check also pass as
-unmapped supplementary guards. No judgment items are pending for this
-contract this round (judge panel list is empty). Verdict: PASS.
-
-Round 3: all evals E1-E12 pass again (exit 0) against the re-verified tree.
-Unit test counts grew (E1-E4's suite now 40 tests, was 32; the whole-repo
-suite E9 now 312, was 304), build/typecheck, lint, and the plugins scan
-verifier remain green, and the two unmapped supplementary guards (SDK pytest
-89 passed; ABI-generation diff check) stay green. No judgment items pending
-(judge panel list is empty). Verdict: PASS.
-
-Round 4: all evals E1-E12 pass again (exit 0) against the re-verified tree at
-commit 015d196ec7199f89c3ff614869736775f59ca806. Unit test counts grew
-further (E1-E4's suite now 47 tests, was 40; the whole-repo suite E9 now 319,
-was 312; E8's suite holds at 75), build/typecheck, lint, and the plugins scan
-verifier remain green, and the two unmapped supplementary guards (SDK pytest
-89 passed; ABI-generation diff check) stay green. Baseline was not
-re-measured this round (P2 — evals.yaml unchanged since round 1's baseline
-run); the Analyst section carries forward round 1's classification. No
-judgment items are pending for this contract this round (judge panel list is
-empty). Verdict: PASS.
-
-Round 5: all evals E1-E12 pass again (exit 0) against the re-verified tree at
-commit a66a425b49fc0d0b3f12281173abd2412c797523. Unit test counts hold steady
-(E1-E4's suite at 47 tests, same as round 4; the whole-repo suite E9 at 319,
-same as round 4; E8's suite holds at 75), build/typecheck, lint, and the
-plugins scan verifier remain green, and the two unmapped supplementary guards
-(SDK pytest 89 passed; ABI-generation diff check, which this round also
-regenerated and fixed one file with no resulting diff) stay green. Baseline
-was not re-measured this round (P2 — evals.yaml unchanged since round 1's
-baseline run); the Analyst section carries forward round 1's classification.
-No judgment items are pending for this contract this round (judge panel list
-is empty). Verdict: PASS.
-
-Round 6: all evals E1-E12 pass again (exit 0) against the re-verified tree at
-commit abfba9b00180c607d116b12de497ba6f8136f221. Unit test counts hold steady
-(E1-E4's suite at 47 tests, same as rounds 4-5; the whole-repo suite E9 at
-319, same as rounds 4-5; E8's suite holds at 75), build/typecheck, lint, and
-the plugins scan verifier remain green, and the two unmapped supplementary
-guards (SDK pytest 89 passed; ABI-generation diff check, which this round
-also regenerated and fixed one file with no resulting diff) stay green.
-Baseline was not re-measured this round (P2 — evals.yaml unchanged since
-round 1's baseline run); the Analyst section carries forward round 1's
-classification. No judgment items are pending for this contract this round
-(judge panel list is empty). Verdict: PASS.
-
-Round 7: all evals E1-E12 pass again (exit 0) against the re-verified tree at
-commit 21eafc5ec0f3affa61cfb98bcfe542d782e5f907. Unit test counts hold steady
-(E1-E4's suite at 47 tests, same as rounds 4-6; the whole-repo suite E9 at
-319, same as rounds 4-6; E8's suite holds at 75), build/typecheck, lint, and
-the plugins scan verifier remain green, and the two unmapped supplementary
-guards (SDK pytest 89 passed; ABI-generation diff check, which this round
-also regenerated and fixed one file with no resulting diff) stay green.
-Baseline was not re-measured this round (P2 — evals.yaml unchanged since
-round 1's baseline run); the Analyst section carries forward round 1's
-classification. No judgment items are pending for this contract this round
-(judge panel list is empty). Verdict: PASS.
-
-Round 8: all evals E1-E12 pass again (exit 0) against the re-verified tree at
-commit 70457b5f0eaf43bd6fe7db5265ffc39df6b74b62. Unit test counts grew again
-(E1-E4's suite now 57 tests, was 47 in rounds 4-7; the whole-repo suite E9
-now 329, was 319 in rounds 4-7; E8's suite holds at 75), build/typecheck,
-lint, and the plugins scan verifier remain green, and the two unmapped
-supplementary guards (SDK pytest 89 passed; ABI-generation diff check, which
-this round also regenerated with no resulting diff) stay green. Baseline was
-not re-measured this round (P2 — evals.yaml unchanged since round 1's
-baseline run); the Analyst section carries forward round 1's classification.
-No judgment items are pending for this contract this round (judge panel list
-is empty). Verdict: PASS.
-
-Carry-forward re-pin (2026-07-29, branch feat/stale-scope-by-paths):
-`verified_commit` moved from 70457b5f0eaf43bd6fe7db5265ffc39df6b74b62 to
-4dcb419d5d7d4612c10339bede6219662721d7e0 with NO re-verify, under the carry-forward
-rule in AGENTS.md. Both of its conditions were checked, not assumed.
-
-(1) This feature's own code is unchanged. Filtered of `_acceptance/`, the files
-differing since the old pin are: the five `scripts/acceptance/**` guard files and
-`scripts/pre-merge-check.sh` — all owned by **stale-scope-by-paths**, the feature
-under review on this branch, and the only non-exempt changes the gate reports; plus
-t1-exempt documentation and config that reached main independently of this branch —
-`STATUS.md`, `.gitignore`, `docs/**` (ADRs, roadmap, strategy, G0 runbook),
-`measure/wer-corpus/README.md`, and `biome.json` + `lib/evidence-core.js` +
-`lib/gap-probe.js` (acceptance-gate kit 1.24.0, merged to main as PR #26).
-
-
-(2) Standing checks green on the new tree: `pnpm lint:check`, `pnpm test`
-(329 passed), `pnpm build && pnpm typecheck`.
-
-The human signature line in frontmatter was not touched — it attests to the same
-code it originally did.
-
-Carry-forward re-pin (2026-07-29, branch feat/conformance-l0):
-`verified_commit` moved from 4dcb419d5d7d4612c10339bede6219662721d7e0 to
-05fc9453fa561eaa60166c594974231459359db3 with NO re-verify, under the carry-forward
-rule in AGENTS.md. Both of its conditions were checked, not assumed.
-
-(1) This feature's own code is unchanged. Filtered of `_acceptance/`, the files
-differing since the old pin are the 31 gated files of **conformance-l0** — the
-feature under review on this branch — plus t1-exempt `STATUS.md` and
-`docs/superpowers/**`. Ownership was computed rather than eyeballed: for each
-merged feature, its owned set was taken from the diff of the merge commit that
-landed it, then intersected with this branch's gated diff. This feature's
-intersection is empty. Across the whole repo exactly one intersection is not
-empty — `sdk/tongflow/scan.py`, owned by **oneflow-plugin-prefix** — so that
-feature is deliberately NOT re-pinned here; it is on the re-verify path instead,
-which is the half of the rule this note does not license.
-
-(2) Standing checks green on the new tree: `pnpm lint:check` (413 files),
-`pnpm test` (347 passed), `pnpm build && pnpm typecheck` (run sequentially, per
-the config note about `.next/types`), and `cd sdk && pytest` (117 passed).
-
-The human signature line in frontmatter was not touched — it attests to the same
-code it originally did.
-
-Carry-forward re-pin (2026-07-30, branch feat/cache-l1-fingerprint):
-`verified_commit` moved from 05fc9453fa561eaa60166c594974231459359db3 to
-aba508a0edc61656b21d46bec6361cf4c6a0f927 with NO re-verify, under the carry-forward
-rule in AGENTS.md. Both conditions were checked, not assumed.
-
-(1) This feature's own code is unchanged. The branch's entire gated diff is FOUR
-NEW FILES — `sdk/tongflow/engine/fingerprint.py`, `sdk/tests/test_fingerprint.py`,
-`sdk/tests/test_fingerprint_vectors.py`, `sdk/tests/fixtures/fingerprint_vectors.json`
-— so no pre-existing feature can own any of them. Ownership was computed per file
-under the rule settled 2026-07-29, not inferred from the subtree: each feature's
-owned set is the gated diff of the merge commit that landed it, intersected with
-this branch's gated diff. All eight intersections are empty. Note in particular
-that conformance-l0 declares `paths: ["sdk/**"]`, so narrow scope does NOT save it
-— it is carried on ownership, not on scope.
-
-(2) Standing checks green on the new tree, measured by round 2 of this branch's
-own S4 verify rather than re-run by hand: `pnpm build && pnpm typecheck`,
-`pnpm lint:check`, `pnpm test`, `cd sdk && pytest` (133 passed),
-`pnpm verify:plugins`, and the generated-ABI drift check — all six suite commands
-exited 0, alongside 16/16 feature evals.
-
-The human signature line in frontmatter was not touched — it attests to the same
-code it originally did.
-
-Carry-forward re-pin (2026-07-30, branch feat/cache-l2-store):
-`verified_commit` moved from aba508a0edc61656b21d46bec6361cf4c6a0f927 to
-e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2 with NO re-verify, under the carry-forward rule in AGENTS.md.
-
-(1) This feature's own code is unchanged. The branch's gated diff is ten files:
-four owned by cache-l1-fingerprint (fingerprint.py + its tests + vectors), two
-owned by conformance-l0 (runner.py, engine-delegate.server.ts), and four NEW
-files owned by cache-l2-store (node_cache.py, test_node_cache.py, __main__.py's
-tenant hunk, engine-delegate.test.ts). Ownership computed per file: this
-feature's owned set (the gated diff of its landing merge commit) intersects the
-branch's gated diff EMPTY. The two features whose intersections are non-empty
-are deliberately NOT re-pinned here — they go to re-verify with fresh Gate 2
-signatures instead.
-
-(2) Standing checks green on the new tree, measured by this branch's own S4
-round 1 rather than re-run by hand: all six suite commands (build+typecheck,
-lint, unit 349, sdk pytest 159, verify:plugins, ABI drift) exited 0 alongside
-18/18 feature evals.
-
-The human signature line in frontmatter was not touched.
+Round 10: all 12 machine evals (E1-E12) passed on first run, zero failures, zero judgment items pending; baseline not re-measured this round (carried from prior round per P2).
 
 ## Gate 2 checklist (human)
 
@@ -356,62 +180,11 @@ The human signature line in frontmatter was not touched.
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
 
+## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
 
----
+Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
+thành cũ theo cơ chế staleness. Đã chạy lại: **12/12 eval xanh** ở
+`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
+sơ bị ảnh hưởng — không hồ sơ nào đỏ.
 
-Carry-forward re-pin (2026-07-30, branch feat/cache-l3-tier-b):
-`verified_commit` moved from e8fe1f26da983983f6ce5c5acf0d56217dfd1ae2 to
-77fb83f9cc25c9d65e0021563203aafd899928e0 with NO re-verify, under the carry-forward rule in AGENTS.md.
-Both conditions were checked, not assumed.
-
-(1) This feature's own code is unchanged. The branch's gated diff is exactly the
-11 files of **cache-l3-tier-b**:
-sdk/tests/fixtures/fingerprint_vectors.json · sdk/tests/test_fingerprint.py ·
-sdk/tests/test_fingerprint_vectors.py · sdk/tests/test_node_cache.py ·
-sdk/tongflow/engine/__main__.py · sdk/tongflow/engine/fingerprint.py ·
-sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py ·
-src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts ·
-src/lib/task/runner.ts
-Ownership was computed, not eyeballed: each merged feature's owned set was taken
-from the gated diff of the merge commit that landed it, then intersected with
-this branch's gated diff. This feature's intersection is empty. Four features
-have non-empty intersections — cache-l1-fingerprint, cache-l2-store,
-conformance-l0 (sdk/tongflow/engine/runner.py + src/lib/task/engine-delegate.server.ts),
-and task-metering (src/lib/task/runner.ts) — all four are on the re-verify path
-with fresh rerun evidence and fresh signatures, the half of the rule this note
-does not license.
-
-(2) Standing checks green on the new tree (S4 round 1 of cache-l3-tier-b, run-log `_acceptance/cache-l3-tier-b/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (350 passed), full sdk pytest (170 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
-
-The human signature line in frontmatter was not touched — it attests to the same
-code it originally did.
-
-
----
-
-Carry-forward re-pin (2026-07-31, branch feat/cache-l4-eviction):
-`verified_commit` moved to c000b4b6b32f29eea6217f8de26596a052737128 with NO re-verify, under the carry-forward rule in AGENTS.md.
-Both conditions were checked, not assumed.
-
-(1) This feature's own code is unchanged. The branch's gated diff is exactly the
-17 files of **cache-l4-eviction**:
-drizzle/0003_clammy_blazing_skull.sql · drizzle/meta/0003_snapshot.json ·
-drizzle/meta/_journal.json · scripts/cache/check-test-layout.sh ·
-sdk/tests/cache_helpers.py · sdk/tests/test_cache_runner_wiring.py ·
-sdk/tests/test_cache_sweep.py · sdk/tests/test_node_cache.py ·
-sdk/tests/test_node_cache_tier_b.py · sdk/tongflow/engine/__main__.py ·
-sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py ·
-src/db/metering-schema.test.ts · src/db/workspace.schema.ts ·
-src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts ·
-src/lib/task/node-cached.test.ts
-Ownership was computed, not eyeballed: each merged feature's owned set was taken
-from the gated diff of the merge commit that landed it, then intersected with
-this branch's gated diff. This feature's intersection is empty. Four features
-have non-empty intersections — cache-l2-store, cache-l3-tier-b, conformance-l0
-and task-metering — all four are on the re-verify path with fresh rerun evidence
-and fresh signatures, the half of the rule this note does not license.
-
-(2) Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
-
-The human signature line in frontmatter was not touched — it attests to the same
-code it originally did.
+Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.

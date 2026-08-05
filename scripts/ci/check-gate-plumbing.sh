@@ -26,11 +26,15 @@ assert_run_finished "$JSON"
 
 JOB_ID="$(printf '%s' "$JSON" | jq -r --arg n "$JOB_NAME" '.jobs[] | select(.name == $n) | .databaseId')"
 if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
-    echo "no '${JOB_NAME}' job in the run at ${SHA} — nothing to inspect" >&2
+    echo "no '${JOB_NAME}' job in the run found for this feature — nothing to inspect" >&2
     exit 2
 fi
 
-echo "run $(printf '%s' "$JSON" | jq -r '.url') @ ${SHA}"
+# Report the commit the RUN actually ran at, not the local head: anchored, the
+# run is a historical one and labelling it with wherever this branch happens to
+# sit would make the evidence say something false.
+RUN_SHA="$(printf '%s' "$JSON" | jq -r '.headSha')"
+echo "run $(printf '%s' "$JSON" | jq -r '.url') @ ${RUN_SHA}"
 
 log=""
 if ! log="$(gh run view --job "$JOB_ID" --log 2>&1)"; then
@@ -77,4 +81,4 @@ else
 fi
 
 [ "$fail" -eq 0 ] || exit 1
-echo "fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at ${SHA}"
+echo "fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at ${RUN_SHA}"

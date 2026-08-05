@@ -4142,6 +4142,216 @@ export type VideoGenModelOutput = FromSchema<
     typeof _slot_video_gen_model_outputs
 >;
 
+const _slot_compose_overlay_inputs = {
+    type: "object",
+    required: ["media", "ops"],
+    properties: {
+        media: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        text: {
+            type: "string",
+        },
+        logo: {
+            type: "object",
+            required: ["bytesBase64"],
+            properties: {
+                bytesBase64: {
+                    type: "string",
+                    minLength: 1,
+                },
+                filename: {
+                    type: "string",
+                },
+                mime: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        ops: {
+            type: "array",
+            minItems: 1,
+            items: {
+                type: "object",
+                required: ["type", "x", "y"],
+                properties: {
+                    type: {
+                        type: "string",
+                        enum: ["text", "price_tag", "logo", "safe_zone"],
+                    },
+                    x: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    y: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    anchor: {
+                        type: "string",
+                        enum: [
+                            "top-left",
+                            "top-center",
+                            "top-right",
+                            "center-left",
+                            "center",
+                            "center-right",
+                            "bottom-left",
+                            "bottom-center",
+                            "bottom-right",
+                        ],
+                    },
+                    text: {
+                        type: "string",
+                    },
+                    size: {
+                        type: "number",
+                        exclusiveMinimum: 0,
+                        maximum: 1,
+                    },
+                    color: {
+                        type: "string",
+                    },
+                    align: {
+                        type: "string",
+                        enum: ["left", "center", "right"],
+                    },
+                    max_width: {
+                        type: "number",
+                        exclusiveMinimum: 0,
+                        maximum: 1,
+                    },
+                    bg_color: {
+                        type: "string",
+                    },
+                    padding: {
+                        type: "number",
+                        minimum: 0,
+                    },
+                    radius: {
+                        type: "number",
+                        minimum: 0,
+                    },
+                    width: {
+                        type: "number",
+                        exclusiveMinimum: 0,
+                        maximum: 1,
+                    },
+                    opacity: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    preset: {
+                        type: "string",
+                        enum: ["tiktok-portrait", "custom"],
+                    },
+                    top: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    bottom: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    left: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    right: {
+                        type: "number",
+                        minimum: 0,
+                        maximum: 1,
+                    },
+                    start: {
+                        type: "number",
+                        minimum: 0,
+                    },
+                    end: {
+                        type: "number",
+                        exclusiveMinimum: 0,
+                    },
+                },
+                additionalProperties: false,
+            },
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ComposeOverlayInput = FromSchema<
+    typeof _slot_compose_overlay_inputs
+>;
+const _slot_compose_overlay_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        image: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        video: {
+            type: "object",
+            required: ["file_key"],
+            properties: {
+                file_key: {
+                    type: "string",
+                    minLength: 1,
+                },
+                mime: {
+                    type: "string",
+                },
+                filename: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type ComposeOverlayOutput = FromSchema<
+    typeof _slot_compose_overlay_outputs
+>;
+
 // --- NodeSlot union ---
 export type NodeSlot =
     | "gen-text"
@@ -4204,7 +4414,8 @@ export type NodeSlot =
     | "image-body-seg"
     | "image-normal"
     | "image-matting"
-    | "video-gen-model";
+    | "video-gen-model"
+    | "compose-overlay";
 
 // --- Lookup maps ---
 export type SlotInputsMap = {
@@ -4269,6 +4480,7 @@ export type SlotInputsMap = {
     "image-normal": ImageNormalInput;
     "image-matting": ImageMattingInput;
     "video-gen-model": VideoGenModelInput;
+    "compose-overlay": ComposeOverlayInput;
 };
 
 export type SlotOutputsMap = {
@@ -4333,6 +4545,7 @@ export type SlotOutputsMap = {
     "image-normal": ImageNormalOutput;
     "image-matting": ImageMattingOutput;
     "video-gen-model": VideoGenModelOutput;
+    "compose-overlay": ComposeOverlayOutput;
 };
 
 export type SlotInput<S extends NodeSlot> = SlotInputsMap[S];
@@ -6806,6 +7019,160 @@ export const ABI_NODES = {
                 },
                 model: {
                     $ref: "#/$defs/ModelRef",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "compose-overlay": {
+        inputs: {
+            type: "object",
+            required: ["media", "ops"],
+            properties: {
+                media: {
+                    $ref: "#/$defs/Asset",
+                },
+                text: {
+                    type: "string",
+                },
+                logo: {
+                    $ref: "#/$defs/Asset",
+                },
+                ops: {
+                    type: "array",
+                    minItems: 1,
+                    items: {
+                        type: "object",
+                        required: ["type", "x", "y"],
+                        properties: {
+                            type: {
+                                type: "string",
+                                enum: [
+                                    "text",
+                                    "price_tag",
+                                    "logo",
+                                    "safe_zone",
+                                ],
+                            },
+                            x: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            y: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            anchor: {
+                                type: "string",
+                                enum: [
+                                    "top-left",
+                                    "top-center",
+                                    "top-right",
+                                    "center-left",
+                                    "center",
+                                    "center-right",
+                                    "bottom-left",
+                                    "bottom-center",
+                                    "bottom-right",
+                                ],
+                            },
+                            text: {
+                                type: "string",
+                            },
+                            size: {
+                                type: "number",
+                                exclusiveMinimum: 0,
+                                maximum: 1,
+                            },
+                            color: {
+                                type: "string",
+                            },
+                            align: {
+                                type: "string",
+                                enum: ["left", "center", "right"],
+                            },
+                            max_width: {
+                                type: "number",
+                                exclusiveMinimum: 0,
+                                maximum: 1,
+                            },
+                            bg_color: {
+                                type: "string",
+                            },
+                            padding: {
+                                type: "number",
+                                minimum: 0,
+                            },
+                            radius: {
+                                type: "number",
+                                minimum: 0,
+                            },
+                            width: {
+                                type: "number",
+                                exclusiveMinimum: 0,
+                                maximum: 1,
+                            },
+                            opacity: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            preset: {
+                                type: "string",
+                                enum: ["tiktok-portrait", "custom"],
+                            },
+                            top: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            bottom: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            left: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            right: {
+                                type: "number",
+                                minimum: 0,
+                                maximum: 1,
+                            },
+                            start: {
+                                type: "number",
+                                minimum: 0,
+                            },
+                            end: {
+                                type: "number",
+                                exclusiveMinimum: 0,
+                            },
+                        },
+                        additionalProperties: false,
+                    },
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                image: {
+                    $ref: "#/$defs/ImageRef",
+                },
+                video: {
+                    $ref: "#/$defs/VideoRef",
                 },
             },
             additionalProperties: false,

@@ -14,18 +14,44 @@ set -euo pipefail
 BASE="${1:-origin/main}"
 WF_DIR=".github/workflows"
 
-if ! git rev-parse --verify --quiet "${BASE}^{commit}" >/dev/null; then
-    echo "cannot resolve base ref '${BASE}' — fetch it first (CI needs fetch-depth: 0)" >&2
-    exit 2
+# This guard asks a question about ONE pull request: "did it touch these paths?"
+# Re-run on a later branch it answers about somebody else's diff — which is how
+# it went permanently red after merging, blocking a branch it has nothing to do
+# with. ACCEPTANCE_SLUG anchors it back to its own pull request. Unset, every
+# line below behaves exactly as it did before anchoring existed, so an open pull
+# request sees no change at all. The anchoring rule itself lives in
+# scripts/acceptance/own-range.sh and nowhere else: this is one call, not a
+# second implementation of it.
+if [ -n "${ACCEPTANCE_SLUG:-}" ]; then
+    RESOLVER="$(cd "$(dirname "${BASH_SOURCE[0]}")/../acceptance" && pwd)/own-range.sh"
+    if ! own="$(bash "$RESOLVER" "$ACCEPTANCE_SLUG")"; then
+        echo "could not resolve the commit range owned by '${ACCEPTANCE_SLUG}' — refusing to report a clean tree" >&2
+        exit 2
+    fi
+    RANGE_FROM="$(printf '%s\n' "$own" | sed -n 's/^range_from=//p')"
+    RANGE_TO="$(printf '%s\n' "$own" | sed -n 's/^range_to=//p')"
+    if [ -z "$RANGE_FROM" ] || [ -z "$RANGE_TO" ]; then
+        echo "own-range.sh printed no range for '${ACCEPTANCE_SLUG}' — refusing to report a clean tree" >&2
+        exit 2
+    fi
+    RANGE="${RANGE_FROM}...${RANGE_TO}"
+    LABEL="the range ${ACCEPTANCE_SLUG} owns (${RANGE_FROM}..${RANGE_TO})"
+else
+    if ! git rev-parse --verify --quiet "${BASE}^{commit}" >/dev/null; then
+        echo "cannot resolve base ref '${BASE}' — fetch it first (CI needs fetch-depth: 0)" >&2
+        exit 2
+    fi
+    RANGE="${BASE}...HEAD"
+    LABEL="${BASE}"
 fi
 
-if ! diff="$(git diff --unified=0 "${BASE}...HEAD" -- "$WF_DIR")"; then
-    echo "git diff against '${BASE}' failed — refusing to report no drift" >&2
+if ! diff="$(git diff --unified=0 "$RANGE" -- "$WF_DIR")"; then
+    echo "git diff over '${RANGE}' failed — refusing to report no drift" >&2
     exit 2
 fi
 
 if [ -z "$diff" ]; then
-    echo "no workflow changes vs ${BASE}"
+    echo "no workflow changes vs ${LABEL}"
     exit 0
 fi
 
@@ -103,7 +129,7 @@ fi
 
 # A workflow file added, deleted or renamed changes what CI does without
 # changing a line inside it — moving ci.yml aside disables the suite entirely.
-if ! names="$(git diff --name-status "${BASE}...HEAD" -- "$WF_DIR")"; then
+if ! names="$(git diff --name-status "$RANGE" -- "$WF_DIR")"; then
     echo "git diff --name-status failed — refusing to report no drift" >&2
     exit 2
 fi
@@ -114,4 +140,4 @@ if [ -n "$notmod" ]; then
     exit 1
 fi
 
-echo "workflow drift vs ${BASE}: ${declared_pins} declared pin line(s), comments, and the dry-run guard (-${guard_removed} +${guard_added}); no file added, deleted or renamed"
+echo "workflow drift vs ${LABEL}: ${declared_pins} declared pin line(s), comments, and the dry-run guard (-${guard_removed} +${guard_added}); no file added, deleted or renamed"

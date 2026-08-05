@@ -40,17 +40,17 @@ export function NodeLoadingOverlay({
 
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-lg bg-white/80 dark:bg-gray-800/80 group/loading">
                 {progressLabel && (
+                    // Solid colour + opacity pulse rather than a bg-clip-text
+                    // shimmer: the shimmer's highlight stop (gray-200) drops
+                    // below the 4.5:1 contrast floor mid-sweep, and a
+                    // transparent text colour is unreadable to contrast
+                    // checkers. Opacity animates on the compositor.
                     <div
                         className={cn(
                             "mb-2 max-w-[80%] truncate px-2 text-center text-xs",
-                            "bg-clip-text text-transparent",
-                            "animate-[shimmer_2.4s_linear_infinite]",
+                            "text-gray-700 dark:text-gray-300",
+                            "animate-pulse",
                         )}
-                        style={{
-                            backgroundImage:
-                                "linear-gradient(90deg, rgb(107 114 128) 0%, rgb(107 114 128) 45%, rgb(229 231 235) 50%, rgb(107 114 128) 55%, rgb(107 114 128) 100%)",
-                            backgroundSize: "200% 100%",
-                        }}
                         title={progressLabel}
                     >
                         {progressLabel}

@@ -138,6 +138,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - ✅ **换角色**: 视频 + 参考（场景融合 / 角色替换），Animate Mix 风格生成。
 - ✅ **动作迁移**: 视频 + 参考（动作 / 重定向），Animate Move 风格生成。
 - ✅ **文本合并**: 将多个文本节点合并为一个。
+- ✅ **文字 / 价格牌 / logo 叠加**: 在图片或视频上叠加文字、价格牌和 logo — 多行越南语文本、按 op 的时间窗、TikTok 安全区自动收敛。
 
 ### 其他
 
@@ -205,6 +206,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited-OCR 长文档 / PDF → 文本
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / 链接 → 文本
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling 隐身浏览器 URL / 链接 → 文本
+- [oneflow-modal-compose-overlay](https://github.com/phanlemanh/oneflow-modal-compose-overlay) — 在图片或视频上叠加文字 / 价格牌 / logo（单一 Pillow 文字渲染路径，完整越南语字体，TikTok 安全区约束）
 
 ## 从源代码启动
 

@@ -1,0 +1,27 @@
+=== Independent verifier round 6 (fresh subagent, ui:E22 label) ===
+Verified at HEAD commit 4447f4119fb379a25522a2769138155734be064e
+("fix(ui): compose-overlay media kind must use the shared output-type resolver").
+
+Method: (1) re-ran design-gate.mjs fresh against the 6 committed HTML captures under
+evidence/design/captures/ (see E22-network-r6-independent-verify.txt for full output) --
+all 6 PASS, exit_code 0, p0_count 0. (2) Read the 6 committed PNGs directly and confirmed
+each shows the expected, distinct state (empty shell / real 64x64 image thumbnail with text
+op / real 64x64 video thumbnail with time-scoped text op / expanded op-edit form with full
+field set / red destructive-styled error banner "A logo op needs an image on in:logo --
+connect an image node." / rotating-gradient-border loading shell with "Task started" + timer
++ disabled Apply button) -- no broken images, no placeholder/fallback content. (3) started
+pnpm dev myself (stopped after), opened http://localhost:3000/workspace live, read
+console messages -- 0 [error]/[warn] besides the benign React DevTools info banner and
+expected Fast Refresh / Task Store / WorkflowRecovery info logs. (4) re-checked committed
+E22-console-r5.txt (65 lines, 0 error/warn besides same benign banner) and E22-network-r5.txt
+(94x200, 2x206, 6x304, 0x4xx/5xx, all localhost:3000) -- both consistent with a clean design
+gate.
+
+Cross-referenced this round's live network 404s (node ids co-1-empty..co-5-error,
+/api/uploads/tasks/e22-fixture/{vid-src.png,vid-src.mp4} 404) against the ALREADY-DOCUMENTED
+explanation in evidence/E22-network.txt rounds 2 and 3: these are the harness's own throwaway
+"e22-fixture" modality-node thumbnail fetches (a capture-only stub plugin + synthetic PNG/MP4
+fixtures used to stage state-6-running, later deleted), explicitly classified there as
+"static-asset, note-only, never FAIL-eligible" -- not a defect in compose-overlay.tsx. This
+round's observation matches that documented pattern exactly (same file names, same subset of
+files present/missing), so it does not change the verdict: E22 PASS.

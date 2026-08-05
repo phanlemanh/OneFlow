@@ -1,0 +1,692 @@
+=== state-1-empty ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743844727"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743844727"
+{
+  "run_id": "design-gate-9457632a84",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:45.953Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-1-empty.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"grid\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    }
+  ]
+}
+EXIT:0
+=== state-2-ops-image ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743847669"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743847669"
+{
+  "run_id": "design-gate-89131cd435",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:46.564Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-2-ops-image.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__edgelabel-renderer\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"nodrag\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    }
+  ]
+}
+EXIT:0
+=== state-3-ops-video ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743850729"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743850729"
+{
+  "run_id": "design-gate-dba18879e7",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:47.170Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-3-ops-video.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    }
+  ]
+}
+EXIT:0
+=== state-4-op-form ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743853607"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743853607"
+{
+  "run_id": "design-gate-218c387d8a",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:47.745Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-4-op-form.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards",
+    "single-font"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "single-font",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "only font used is depends on user agent"
+    }
+  ]
+}
+EXIT:0
+=== state-5-error ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743856944"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743856944"
+{
+  "run_id": "design-gate-2064bcf464",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:48.360Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-5-error.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    }
+  ]
+}
+EXIT:0
+=== state-6-running ===
+Could not load link: "file:///_next/static/css/app/layout.css?v=1785743859774"
+Could not load link: "file:///_next/static/css/app/workspace/page.css?v=1785743859774"
+{
+  "run_id": "design-gate-a0a486c441",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-03T15:07:48.906Z",
+  "target": "_acceptance/compose-overlay/evidence/design/captures/state-6-running.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards",
+    "ai-color-palette"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__edgelabel-renderer\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"nodrag\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-3\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"absolute\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "ai-color-palette",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Purple/violet accent colors detected"
+    }
+  ]
+}
+EXIT:0

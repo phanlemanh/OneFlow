@@ -1,0 +1,57 @@
+E22 round-7 independent verify — network + console dump
+Driver: Claude_Browser (mcp__Claude_Browser__*), live session against http://localhost:3000
+dev_server.url (config.yaml) = http://localhost:3000 — scope = this origin only.
+
+== Console messages (full buffer, onlyErrors=false) ==
+No [error] or [warn] level entries in the entire buffer. All entries are [log]
+(app debug logging: [useNodeTaskUpdate]/[Task Store] node handler registration
+churn from React StrictMode double-invoke + canvas re-renders, [WorkflowRecovery]
+pending-task check, "Fast Refresh rebuilding/done" from Next.js dev HMR) or
+[info] (React DevTools install reminder). onlyErrors=true query returned
+"No console logs." => console is clean (no error-level output).
+
+== Network requests (read_network_requests, live tab) ==
+App-scope (http://localhost:3000) fetch/XHR — FAIL-eligible set:
+  GET /api/feature/list              -> 200 OK
+  GET /api/plugins/registry          -> 200 OK
+  GET /api/task/pending              -> 200 OK
+  All FAIL-eligible (fetch/XHR to app origin) requests returned 200 OK. No
+  connection-error/timeout/5xx among them.
+
+App-scope static-asset requests (note-only per scoping rule, not FAIL-eligible):
+  GET /api/uploads/tasks/e22-fixture/img-src.png  -> 200 OK
+  GET /api/uploads/tasks/e22-fixture/logo-src.png -> 200 OK
+  GET /api/uploads/tasks/e22-fixture/vid-src.png  -> 404 Not Found  (NOTE)
+  GET /api/uploads/tasks/e22-fixture/vid-src.mp4  -> 404 Not Found  (NOTE, x2)
+    -> these are media-file GETs (image/video), not app data fetch/XHR; the
+       scoping rule exempts .map/favicon/image/font static assets even at
+       app-origin to "note" status. Treated video the same category (static
+       media byte fetch, not a data XHR). This is a known e22-fixture gap
+       (fixture references a video file that was never uploaded to
+       plugins-registry uploads dir) — cosmetically shows "Content unavailable"
+       thumbnails on the two video source nodes in this fixture; does not
+       affect the compose-overlay node UI itself.
+  GET /workspace?_rsc=... -> 200 OK but [FAILED: net::ERR_ABORTED] (x4)
+    -> Next.js RSC prefetch requests superseded/aborted by rapid HMR reloads
+       during my own manual page navigation/reload actions in this session.
+       net::ERR_ABORTED is a client-side abort of a superseded request, not a
+       connection-error/timeout/5xx — note-only, not FAIL-eligible.
+  _next/static/* (webpack HMR chunks, css, fonts) -> all 200 OK (dev-mode
+       infra, static assets).
+
+Verdict: networkObserved = clean (all FAIL-eligible app-scope fetch/XHR = 200
+OK; the two static-media 404s and the aborted RSC prefetches are note-only per
+scoping rule, not fail-eligible).
+
+== Scope note ==
+This live dump reflects the "e22-fixture" 5-node canvas fixture (nodes
+co-1-empty..co-5-error) that was already present client-side (localStorage)
+in the persistent Claude_Browser tab when this round's dev server was
+started — the SAME fixture round-6's own report flagged as "a co-located but
+out-of-scope stale fixture" relative to the canonical "ov1"-based fixture that
+produced evidence/design/captures/*.png+html. I used it here only as a LIVE
+app-health probe (confirms: app boots, compose-overlay node renders 5 of the
+6 target states with no console errors and no failed app-scope XHR) — it does
+NOT replace the design-gate assertions below, which were run fresh against
+the actual evidence/design/captures/*.html files (the canonical ov1-based
+evidence, unchanged from prior rounds' validated captures).

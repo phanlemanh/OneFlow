@@ -1,0 +1,216 @@
+# 27 eval / 16 tiêu chí — AC-1, AC-5, AC-7, AC-8, AC-9, AC-11, AC-12, AC-16 có nhiều eval.
+# Hai tiêu chí cross-layer nguyên tử (cùng round): AC-11 = E14..E17 (engine, layer backend-effect);
+# AC-13 = E18 (engine pytest, backend-effect) + E19 (TS vitest).
+# Họ eval render plugin-repo là E2..E10 (E5a/b, E7a/b, E8a/b, E9a/b tính từng entry) — chạy
+# qua guard clone-and-pytest, cố ý KHÔNG khai `paths`: code plugin nằm ngoài cây oneflow nên
+# round delta không nhìn thấy nó đổi; thiếu paths = luôn chạy lại (mặc định an toàn).
+# Guard clone PHẢI in commit sha của plugin repo — mỗi eval render ghi `plugin_commit_sha`
+# vào evidence, và E20 đối chiếu sha đó với rev được deploy (fix gap-probe F1).
+evals:
+  - id: E1a
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.gen_abi_clean
+    paths: ["config/tongflow.abi.json", "src/generated/abi/index.ts", "sdk/tongflow/_data/tongflow.abi.json", "scripts/gen-abi-types.ts"]
+    expected: "exit 0; generated TS + bản copy _data khớp ABI đã commit (git diff --exit-code)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E1b
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.abi_python_gen_clean
+    paths: ["config/tongflow.abi.json", "sdk/tongflow/models/compose_overlay.py", "sdk/tongflow/node_slots.py", "sdk/tongflow/gen_models.py", "sdk/tongflow/gen_node_slots.py", "scripts/abi/check-python-gen-clean.sh"]
+    expected: "exit 0; chạy lại gen_models.py + gen_node_slots.py rồi git diff --exit-code sdk/tongflow/models sdk/tongflow/node_slots.py — models Python đã commit khớp ABI, có ComposeOverlayInput/Output + COMPOSE_OVERLAY"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.overlay_diacritics
+    expected: "exit 0; pangram phủ đủ dấu Việt (hoa+thường): ảnh khớp golden pixel-for-pixel; điểm so hai modality là CANVAS RGBA trước composite (một canvas dùng chung); frame video kiểm qua pipeline lossless trong test (frame PNG/codec lossless) khớp golden — không so trên frame lossy (F2)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.overlay_multiline
+    expected: "exit 0; \\n xuống dòng đúng, max_width ngắt từ đúng golden, không tràn khung"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.overlay_price_tag
+    expected: "exit 0; chuỗi giá 1.999.000₫ in verbatim từng ký tự trên box bg/padding/radius khớp golden"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E5a
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.overlay_logo
+    expected: "exit 0; logo PNG alpha đặt đúng vị trí/anchor/scale giữ tỷ lệ, blend khớp golden"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E5b
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.overlay_logo_missing
+    expected: "exit 0; op logo mà input logo vắng → success:false + error nêu rõ thiếu logo, không crash"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.overlay_safe_zone
+    expected: "exit 0; op lấn vùng cấm bị clamp bbox vào trong, op không lấn giữ NGUYÊN toạ độ; clamp tất định, không phụ thuộc thứ tự ops; kiểm cả preset lẫn custom insets"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E7a
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.overlay_placeholder
+    expected: "exit 0; {text} thay verbatim từ input text"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E7b
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.overlay_placeholder_missing
+    expected: "exit 0; op có {text} mà input text vắng → success:false + error rõ, KHÔNG render literal"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E8a
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.overlay_time_window
+    expected: "exit 0; op có start/end chỉ hiện trong khoảng (kiểm frame trước/trong/sau); op không giờ hiện suốt"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E8b
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.overlay_time_window_image
+    expected: "exit 0; ảnh + op có start/end → giờ bị bỏ qua, render bình thường, không lỗi"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E9a
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.overlay_modality_image
+    expected: "exit 0; ảnh vào → output image set, video vắng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E9b
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.overlay_modality_video
+    expected: "exit 0; video vào → output video set, image vắng; thời lượng + audio track giữ nguyên"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.overlay_determinism
+    expected: "exit 0; cùng input chạy 2 lần trong môi trường pin → output byte-identical (điều kiện Tier A)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, plugin_commit_sha]
+
+  - id: E14
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_overlay_tier_a_hit
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache_overlay.py"]
+    expected: "exit 0; workflow 2-node fake qua engine, lần 2 không đổi gì → full hit, 0 plugin call"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_overlay_partial_rerun
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache_overlay.py"]
+    expected: "exit 0; chỉ đổi input text → node tầng B KHÔNG chạy lại, compose-overlay chạy lại — kịch bản PRD §4 đổi giá"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_l3_allowlists_disjoint
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache_tier_b.py"]
+    expected: "exit 0; pinned allowlist cập nhật chứa compose-overlay ở Tier A, hai list vẫn disjoint"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_l4_abi_guard_bidirectional
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache_tier_b.py", "config/tongflow.abi.json"]
+    expected: "exit 0; guard ABI hai chiều vẫn xanh sau khi thêm slot (slot mới không núm sinh ngẫu nhiên, tồn tại trong ABI)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12a
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_overlay_node
+    paths: ["src/components/workspace/nodes/transfer/compose-overlay.tsx", "src/components/workspace/nodes/transfer/compose-overlay.test.tsx", "src/lib/abi/node-feature-registry.ts"]
+    expected: "exit 0; node mount, handles đúng ABI (in:media,in:text,in:logo,out:image,out:video); ops-editor thêm/xoá/sửa 4 loại op, field giờ chỉ hiện cho video; state-5: có op logo mà in:logo chưa nối → row error + banner hiển thị (F3)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12b
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_overlay_exporter
+    paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/compose-overlay-export.test.ts", "src/lib/abi/node-feature-registry.ts"]
+    expected: "exit 0; exporter phát ExecutableNode pluginId top-level + prompt chỉ business fields, đọc từ sourceSpec/registry — không bindings tay"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-13
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_overlay_conformance
+    paths: ["sdk/tests/conformance/", "config/tongflow.abi.json", "sdk/tongflow/engine/"]
+    expected: "exit 0; fixture compose-overlay chạy qua đường engine-Python khớp đường canvas-TS: cùng số call, media single không batch fan-out"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E19
+    criterion: AC-13
+    executor: test
+    cmd: config:executors.test.unit_conformance
+    paths: ["src/lib/abi/conformance.test.ts", "config/tongflow.abi.json"]
+    expected: "exit 0; nửa TS của conformance suite xanh với fixture compose-overlay mới"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E20
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.overlay_registration_synced
+    paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-overlay-registration.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md"]
+    expected: "exit 0; manifest entry thứ 39 oneflow-modal-compose-overlay; expected_count=39; cả 3 README có plugin + hàng capability matrix; i18n keys đủ en/zh/ja/ko"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E21
+    criterion: AC-15
+    executor: script
+    cmd: config:executors.script.overlay_sdk_train
+    paths: ["sdk/pyproject.toml", "sdk/tongflow/__init__.py", "scripts/abi/check-overlay-sdk-train.sh"]
+    expected: "exit 0; hai file version khớp nhau (0.2.18); PyPI có bản đó; plugin repo pin oneflow-sdk==0.2.18; bản publish chứa ComposeOverlayInput/Output + COMPOSE_OVERLAY"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E22
+    criterion: AC-16
+    executor: ui-check
+    cmd: config:executors.design.gate
+    paths: ["src/components/workspace/nodes/transfer/compose-overlay.tsx"]
+    expected: "exit 0; sàn P0 design gate trên trang workspace có node compose-overlay (console sạch, a11y cơ bản); capture HTML + screenshot cho ĐỦ 6 state của ma trận design-doc (empty/ops-image/ops-video/op-form/error/running) lưu evidence/design/captures/ cho E23 (F3)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E23
+    criterion: AC-16
+    executor: judgment
+    question: "So capture 6 state với design-of-record (evidence/design/reference/source/): node compose-overlay + ops-editor có khớp cả 6 state của ma trận (empty / ops-image / ops-video / op-form / error / running) không? Có nhìn như người nhà của các node transfer hiện có (shell, spacing, states)? Có gì phá ngôn ngữ thiết kế workspace?"
+    inputs: ["evidence/design/captures/state-1-empty.png", "evidence/design/captures/state-2-ops-image.png", "evidence/design/captures/state-3-ops-video.png", "evidence/design/captures/state-4-op-form.png", "evidence/design/captures/state-5-error.png", "evidence/design/captures/state-6-running.png", "evidence/design/reference/source/manifest.json"]
+    expected: "Panel đồng thuận node đạt ngôn ngữ thiết kế workspace; UNCERTAIN → human quyết ở Cổng 2"
+    evidence_required: [run_id, verifier, verified_at, output]

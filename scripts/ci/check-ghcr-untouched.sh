@@ -31,6 +31,11 @@ require_gh
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 RUN_ID="$(find_run docker workflow_dispatch "" "$BRANCH")"
+# The tree this run must match, and the far end of the registry window below,
+# are both "where this feature landed". Unanchored that is HEAD; anchored it is
+# the merge commit. find_run ignores the branch argument whenever an anchor is
+# present — a merged branch may not exist any more.
+TIP="$(anchor_tip)"
 JSON="$(run_json "$RUN_ID")"
 SINCE="$(printf '%s' "$JSON" | jq -r '.createdAt')"
 URL="$(printf '%s' "$JSON" | jq -r '.url')"
@@ -51,11 +56,46 @@ if ! run_tree="$(git rev-parse --verify --quiet "${RUN_SHA}:.github/workflows")"
     echo "cannot read .github/workflows at the run's commit ${RUN_SHA} — fetch it first" >&2
     exit 2
 fi
-if [ "$run_tree" != "$(git rev-parse --verify 'HEAD:.github/workflows')" ]; then
-    echo "FAIL: this run used a different .github/workflows tree than HEAD" >&2
+if [ "$run_tree" != "$(git rev-parse --verify "${TIP}:.github/workflows")" ]; then
+    echo "FAIL: this run used a different .github/workflows tree than ${TIP}" >&2
     exit 1
 fi
-echo "ok  run's workflow tree matches HEAD"
+echo "ok  run's workflow tree matches ${TIP}"
+
+# The claim is historical: nothing was published DURING this feature's dry run.
+# Left open-ended, the registry question silently becomes "nothing has been
+# published SINCE", which a legitimate release months later answers wrongly and
+# blames on a feature that had nothing to do with it. UNTIL closes the window at
+# the moment the feature landed. Empty when unanchored, where the open-ended
+# question is still the right one — there is no "landed" yet.
+# Ask whether this feature LANDED, not whether a slug was supplied. anchor_tip
+# answers "which tree" and falls back to HEAD for a still-open feature; using it
+# here made UNTIL today's commit date, which precedes the dispatched run it is
+# supposed to bound — an empty window that selects nothing and reads as clean.
+UNTIL=""
+LANDED="$(anchor_landed)"
+case "$LANDED" in
+    "$ANCHOR_UNRESOLVED"*)
+        echo "could not resolve the anchor for '${ACCEPTANCE_SLUG}' — refusing to bound the window by guess" >&2
+        exit 2
+        ;;
+esac
+if [ -n "$LANDED" ]; then
+    # Normalised to UTC on purpose. `--format=%cI` emits the committer's LOCAL
+    # offset (+07:00 here) while GHCR's created_at is always Zulu, and the jq
+    # comparison below is lexicographic — so a publish at 10:00Z would compare
+    # "less than" a 16:23+07:00 boundary that is really 09:23Z, and land inside a
+    # window it happened after. Same class of bug as the rest of this contract:
+    # two values compared in different frames of reference.
+    if ! UNTIL="$(TZ=UTC git show -s --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$LANDED" 2>/dev/null)" \
+        || [ -z "$UNTIL" ]; then
+        echo "could not read the committer date of ${LANDED} — refusing to bound the window by guess" >&2
+        exit 2
+    fi
+fi
+# Belt and braces: whatever produced the bounds, an impossible window is a
+# question that cannot be answered, not an answer of "clean".
+assert_window_sane "$SINCE" "$UNTIL"
 
 # ---------------------------------------------------------------- decisive half
 log=""
@@ -133,17 +173,17 @@ else
             printf '%s\n' "$body" | head -3 >&2
         fi
     else
-        recent="$(printf '%s' "$body" | jq -r --arg since "$SINCE" '
-            [.[] | select(.created_at >= $since)]
+        recent="$(printf '%s' "$body" | jq -r --arg since "$SINCE" --arg until "$UNTIL" '
+            [.[] | select(.created_at >= $since) | select($until == "" or .created_at <= $until)]
             | map({created_at, tags: (.metadata.container.tags // [])})
             | .[] | "\(.created_at)  \(.tags | join(","))"
         ')"
         if [ -n "$recent" ]; then
-            echo "FAIL: GHCR versions created at or after the dry run started:" >&2
+            echo "FAIL: GHCR versions created inside the dry run's window (${SINCE} .. ${UNTIL:-now}):" >&2
             printf '%s\n' "$recent" >&2
             fail=1
         else
-            echo "ok  $(printf '%s' "$body" | jq -r 'length') pre-existing version(s), none since ${SINCE}"
+            echo "ok  $(printf '%s' "$body" | jq -r 'length') pre-existing version(s), none between ${SINCE} and ${UNTIL:-now}"
         fi
     fi
 fi

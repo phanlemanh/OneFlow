@@ -182,6 +182,28 @@ function upstreamValues(
     return out;
 }
 
+/**
+ * Mirror of the engine's `_strip_data_url` branch in
+ * `sdk/tongflow/engine/assets.py` (itself a translation of
+ * `prepare-asset-input.server.ts`): before a plugin is invoked, an asset
+ * reference becomes `{bytesBase64, mime?}`. Fixtures inline asset bytes as
+ * `data:` URLs precisely so this step needs no file store on either side —
+ * and without it the TS log would carry a reference string where the Python
+ * log carries a content digest, reading as drift where none exists.
+ */
+function materializeDataUrl(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(materializeDataUrl);
+    if (typeof value !== "string" || !value.startsWith("data:")) return value;
+    const comma = value.indexOf(",");
+    if (comma < 0) return value;
+    const mime = value.slice("data:".length, comma).split(";")[0].trim();
+    const out: Record<string, unknown> = {
+        bytesBase64: value.slice(comma + 1),
+    };
+    if (mime) out.mime = mime;
+    return out;
+}
+
 /** The canvas's call-log for one fixture, in the shared normalized shape. */
 export function callLogForFixture(
     fixture: ConformanceFixture,
@@ -203,9 +225,22 @@ export function callLogForFixture(
                 const wantsArray =
                     resolved?.kind === "handle" &&
                     (resolved.batch || resolved.collect || resolved.array);
+                // Only fileKeys-sourced handles carry asset references —
+                // that is the set materialize_asset_inputs walks, keyed by
+                // the ABI's `$ref: Asset` fields. A data: URL in a text
+                // handle stays a string on the Python side, so it must here
+                // too.
+                const isAssetHandle =
+                    resolved?.kind === "handle" &&
+                    resolved.path.startsWith("fileKeys");
+                const materialized = isAssetHandle
+                    ? values.map(materializeDataUrl)
+                    : values;
                 // A batched or collected handle keeps the whole list; a scalar
                 // handle takes the first value, exactly as the canvas reads it.
-                handleValues[field] = wantsArray ? values : values[0];
+                handleValues[field] = wantsArray
+                    ? materialized
+                    : materialized[0];
             } else {
                 configValues[field] = binding.value;
             }

@@ -145,6 +145,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 - ✅ **Character swap**: video + reference (scene blend / character replacement), Animate Mix-style generation.
 - ✅ **Motion transfer**: video + reference (motion / retarget), Animate Move-style generation.
 - ✅ **Combine text**: merge multiple text nodes into one.
+- ✅ **Text / price-tag / logo overlay**: stamp text, price tags, and logos onto an image or video — multi-line Vietnamese text, per-op time windows, TikTok safe-zone clamp.
 
 ### Other
 
@@ -212,6 +213,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 - [tongflow-modal-unlimited-ocr](https://github.com/tong-io/tongflow-modal-unlimited-ocr) — Unlimited-OCR long-horizon document / PDF → text
 - [tongflow-modal-crawl4ai](https://github.com/tong-io/tongflow-modal-crawl4ai) — Crawl4AI URL / link → text
 - [tongflow-modal-scrapling](https://github.com/tong-io/tongflow-modal-scrapling) — Scrapling stealth-browser URL / link → text
+- [oneflow-modal-compose-overlay](https://github.com/phanlemanh/oneflow-modal-compose-overlay) — Text / price-tag / logo overlay onto image or video (single Pillow text path, Vietnamese-complete font, TikTok safe-zone constraint)
 
 ## Run from source
 

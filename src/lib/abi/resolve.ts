@@ -19,6 +19,7 @@ import {
     type AbiTopology,
     type FieldClass,
     getAbiTopology,
+    type OutputHandle,
     parseTargetHandleId,
     targetHandleId,
 } from "./handle-introspect";
@@ -33,6 +34,8 @@ export type ResolvedField =
     | {
           kind: "handle";
           nodeType: NonNullable<HandleOverride["nodeType"]>;
+          /** Additional upstream types the connection validator accepts here. */
+          alsoAccepts?: HandleOverride["alsoAccepts"];
           path: NonNullable<HandleOverride["path"]>;
           batch?: boolean;
           collect?: boolean;
@@ -56,6 +59,94 @@ export type ResolvedField =
     | { kind: "config"; required: boolean }
     | { kind: "static"; value: unknown; required: boolean }
     | { kind: "input"; inputName?: string; required: boolean };
+
+/**
+ * The one place that answers "does this handle accept an upstream of type X".
+ *
+ * A handle's primary `nodeType` plus any `alsoAccepts` widening (e.g.
+ * compose-overlay `media`, which takes an image or a video). Every consumer —
+ * the connection validator, edge creation, the inline edge select — must ask
+ * here; encoding the rule per call site is what let a widened handle stay
+ * invisible to some of them.
+ */
+export function acceptedUpstreamTypes(field: ResolvedField): string[] {
+    if (field.kind !== "handle") return [];
+    return [field.nodeType, ...(field.alsoAccepts ?? [])];
+}
+
+export function handleAcceptsUpstream(
+    field: ResolvedField | undefined,
+    upstreamType: string | undefined,
+): boolean {
+    if (!field || field.kind !== "handle" || !upstreamType) return false;
+    return acceptedUpstreamTypes(field).includes(upstreamType);
+}
+
+/**
+ * Every accepted upstream type of every widened handle on `spec`. Empty for a
+ * spec with no `alsoAccepts` anywhere, which is what keeps the two functions
+ * below inert for the slots that never widened anything.
+ */
+function widenedUpstreamTypes(spec: ResolvedSpec | undefined): string[] {
+    if (!spec) return [];
+    const types: string[] = [];
+    for (const field of Object.values(spec.fields)) {
+        if (field.kind !== "handle" || !field.alsoAccepts?.length) continue;
+        types.push(...acceptedUpstreamTypes(field));
+    }
+    return types;
+}
+
+/** A type that actually arrived, and the handle field it arrived on. */
+export type HandleArrival = readonly [field: string, upstreamType: string];
+
+/**
+ * Output half of the widening rule. Widening a handle also widens the result:
+ * compose-overlay hands back a video when it was fed a video. Reading
+ * `topo.outputs[0]` instead pins such a slot to its first declared output, so
+ * the video result is routed nowhere and every downstream step is told the
+ * step produced an image.
+ *
+ * Keyed on the WIDENED FIELD, never on the set of types the slot accepts
+ * anywhere: compose-overlay's `logo` is an imageNode too, so matching by type
+ * alone let a logo wired before the media decide the result modality — the
+ * answer would then depend on input ordering rather than on what fed `media`.
+ *
+ * A slot with no widened handle keeps `outputs[0]` — the single primary output
+ * it has always had.
+ */
+export function outputForUpstreamTypes(
+    spec: ResolvedSpec | undefined,
+    topo: AbiTopology,
+    arrivals: readonly HandleArrival[],
+): OutputHandle | undefined {
+    for (const [field, upstreamType] of arrivals) {
+        const resolved = spec?.fields[field];
+        if (resolved?.kind !== "handle" || !resolved.alsoAccepts?.length) {
+            continue;
+        }
+        if (!handleAcceptsUpstream(resolved, upstreamType)) continue;
+        const match = topo.outputs.find((o) => o.nodeType === upstreamType);
+        if (match) return match;
+    }
+    return topo.outputs[0];
+}
+
+/**
+ * Every output type the slot can produce across all its legal inputs — what a
+ * planner must be told, since it has no concrete upstream yet. Same rule as
+ * `outputForUpstreamTypes`, quantified over inputs instead of applied to one.
+ */
+export function producibleOutputTypes(
+    spec: ResolvedSpec | undefined,
+    topo: AbiTopology,
+): string[] {
+    const widened = widenedUpstreamTypes(spec);
+    const matched = topo.outputs.filter((o) => widened.includes(o.nodeType));
+    if (matched.length > 0) return matched.map((o) => o.nodeType);
+    const primary = topo.outputs[0];
+    return primary ? [primary.nodeType] : [];
+}
 
 export interface ResolvedSpec {
     topology: AbiTopology;
@@ -142,6 +233,7 @@ export function resolveSpec(
                 fields[fieldName] = {
                     kind: "handle",
                     nodeType,
+                    alsoAccepts: override.alsoAccepts,
                     path,
                     batch: override.batch,
                     collect: override.collect,

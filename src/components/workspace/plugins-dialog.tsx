@@ -76,6 +76,8 @@ function PluginCardIcon({ icon, label }: { icon?: string; label: string }) {
 interface OfficialPlugin {
     id: string;
     installed: boolean;
+    /** Resolved from the manifest entry's own origin, not the default org. */
+    repoUrl: string;
     name?: string;
     description?: string;
     icon?: string;
@@ -110,7 +112,6 @@ export function PluginsDialog() {
     const t = useTranslations("Plugins");
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [org, setOrg] = useState("");
     const [plugins, setPlugins] = useState<OfficialPlugin[]>([]);
     const [community, setCommunity] = useState<string[]>([]);
     // Plugin id awaiting uninstall confirmation, or null when closed.
@@ -133,7 +134,6 @@ export function PluginsDialog() {
             const data = await apiGet<OfficialResponse>(
                 "/api/plugins/official",
             );
-            setOrg(data.org);
             setPlugins(data.plugins);
             setCommunity(data.community ?? []);
         } catch (error) {
@@ -322,7 +322,7 @@ export function PluginsDialog() {
                                         />
                                         <div className="min-w-0 flex-1">
                                             <a
-                                                href={`${org}/${p.id}`}
+                                                href={p.repoUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 title={t("openRepo")}

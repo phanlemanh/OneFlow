@@ -1,0 +1,83 @@
+console messages:
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Registered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Registered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Registered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Registered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Unregistered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 50344301-f536-44f1-97f0-b9c78cbff969
+[log] [Task Store] Registered handler for node 50344301-f536-44f1-97f0-b9c78cbff969, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Unregistered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 2a09baaa-0f59-4956-aabf-8329bd68913f
+[log] [Task Store] Registered handler for node 2a09baaa-0f59-4956-aabf-8329bd68913f, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Unregistered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: a1d0567f-bf5d-42e6-868d-643c3998fc87
+[log] [Task Store] Registered handler for node a1d0567f-bf5d-42e6-868d-643c3998fc87, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Unregistered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: 5889933c-62a7-45c6-ae40-ae06df6982e9
+[log] [Task Store] Registered handler for node 5889933c-62a7-45c6-ae40-ae06df6982e9, total handlers: 1
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-1-empty
+[log] [Task Store] Registered handler for node co-1-empty, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-2-image
+[log] [Task Store] Registered handler for node co-2-image, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-3-video
+[log] [Task Store] Registered handler for node co-3-video, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-4-form
+[log] [Task Store] Registered handler for node co-4-form, total handlers: 1
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-5-error
+[log] [Task Store] Registered handler for node co-5-error, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: co-1-empty
+[log] [Task Store] Unregistered handler for node co-1-empty, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-1-empty
+[log] [Task Store] Registered handler for node co-1-empty, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: co-2-image
+[log] [Task Store] Unregistered handler for node co-2-image, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-2-image
+[log] [Task Store] Registered handler for node co-2-image, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: co-3-video
+[log] [Task Store] Unregistered handler for node co-3-video, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-3-video
+[log] [Task Store] Registered handler for node co-3-video, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: co-4-form
+[log] [Task Store] Unregistered handler for node co-4-form, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-4-form
+[log] [Task Store] Registered handler for node co-4-form, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: co-5-error
+[log] [Task Store] Unregistered handler for node co-5-error, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: co-5-error
+[log] [Task Store] Registered handler for node co-5-error, total handlers: 1
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[log] [WorkflowRecovery] Checking for pending workflow tasks...
+[log] [WorkflowRecovery] No pending workflow task found
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 71ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 102ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 119ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 51ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 99ms
+[log] [Fast Refresh] rebuilding
+
+page errors:
+

@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
-human_signoff: Manh Phan 2026-08-01
+verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+human_signoff: Manh 2026-08-04
 ---
 
 # Evidence Report: cache-l2-store
@@ -37,185 +37,188 @@ human_signoff: Manh Phan 2026-08-01
 ## Evidence
 
 - eval: E1
-  run_id: minted-cache-l2-store-E1-r1
+  run_id: minted-cache-l2-store-E1-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_hit_after_miss
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.19s
+    1 passed in 0.04s
 
 - eval: E2
-  run_id: minted-cache-l2-store-E2-r1
+  run_id: minted-cache-l2-store-E2-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_blob_into_run_store
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:01Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.14s
+    1 passed in 0.03s
 
 - eval: E3
-  run_id: minted-cache-l2-store-E3-r1
+  run_id: minted-cache-l2-store-E3-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_no_entry_on_failure
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:02Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.02s
 
 - eval: E4
-  run_id: minted-cache-l2-store-E4-r1
+  run_id: minted-cache-l2-store-E4-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_unusable_entry_is_miss
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:03Z
   output: |
-    .                                                                        [100%]
-    1 passed in 0.14s
+    1 passed in 0.03s
 
 - eval: E5
-  run_id: minted-cache-l2-store-E5-r1
+  run_id: minted-cache-l2-store-E5-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_write_failure_survives
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:04Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.05s
+    1 passed in 0.03s
 
 - eval: E6
-  run_id: minted-cache-l2-store-E6-r1
+  run_id: minted-cache-l2-store-E6-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_deleted_dir_same_result
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:05Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.05s
+    1 passed in 0.03s
 
 - eval: E7
-  run_id: minted-cache-l2-store-E7-r1
+  run_id: minted-cache-l2-store-E7-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_slot_not_allowlisted
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:06Z
   output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
+    . [100%]
+    1 passed in 0.03s
 
 - eval: E8
-  run_id: minted-cache-l2-store-E8-r1
+  run_id: minted-cache-l2-store-E8-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_tenant_missing
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:07Z
   output: |
-    1 passed in 0.05s
+    .                                                                        [100%]
+    1 passed in 0.17s
 
 - eval: E9
-  run_id: minted-cache-l2-store-E9-r1
+  run_id: minted-cache-l2-store-E9-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_tenant_isolation
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:08Z
   output: |
     .                                                                        [100%]
     1 passed in 0.04s
 
 - eval: E10
-  run_id: minted-cache-l2-store-E10-r1
+  run_id: minted-cache-l2-store-E10-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_dirty_plugin
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:09Z
   output: |
-    .                                                                        [100%]
     1 passed in 0.13s
 
 - eval: E11
-  run_id: minted-cache-l2-store-E11-r1
+  run_id: minted-cache-l2-store-E11-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_batch_partial_hit
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:10Z
   output: |
-    1 passed in 0.12s
+    .                                                                        [100%]
+    1 passed in 0.04s
 
 - eval: E12
-  run_id: minted-cache-l2-store-E12-r1
+  run_id: minted-cache-l2-store-E12-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_blob_dedupe
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:11Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.03s
 
 - eval: E13
-  run_id: minted-cache-l2-store-E13-r1
+  run_id: minted-cache-l2-store-E13-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_abi_digest_in_key
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:12Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.03s
+
+- eval: E14
+  run_id: minted-cache-l2-store-E14-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l2_engine_rejects_empty_tenant
+  verified_at: 2026-08-04T10:01:13Z
+  output: |
+    1 passed in 0.03s
+
+- eval: E15
+  run_id: minted-cache-l2-store-E15-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.unit_l2_tenant_sentinel
+  verified_at: 2026-08-04T10:01:14Z
+  output: |
+    Tests  1 passed | 8 skipped (9)
+    Start at  10:01:14
+    Duration  450ms (transform 59ms, setup 0ms, import 36ms, tests 265ms, environment 0ms)
+
+- eval: E16
+  run_id: minted-cache-l2-store-E16-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_l2_input_change_partial_rerun
+  verified_at: 2026-08-04T10:01:15Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
-- eval: E14
-  run_id: minted-cache-l2-store-E14-r1
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_l2_engine_rejects_empty_tenant
-  verified_at: 2026-07-30T00:00:00Z
-  output: |
-    1 passed in 0.05s
-
-- eval: E15
-  run_id: minted-cache-l2-store-E15-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.unit_l2_tenant_sentinel
-  verified_at: 2026-07-30T00:00:00Z
-  output: |
-    Tests  1 passed | 1 skipped (2)
-    Start at  13:14:04
-    Duration  339ms (transform 72ms, setup 0ms, import 23ms, tests 207ms, environment 0ms)
-
-- eval: E16
-  run_id: minted-cache-l2-store-E16-r1
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_l2_input_change_partial_rerun
-  verified_at: 2026-07-30T00:00:00Z
-  output: |
-    1 passed in 0.06s
-
 - eval: E17
-  run_id: minted-cache-l2-store-E17-r1
+  run_id: minted-cache-l2-store-E17-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.unit_l2_data_dir_stable
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:15Z
   output: |
-    Tests  1 passed | 1 skipped (2)
-    Start at  13:14:03
-    Duration  353ms (transform 93ms, setup 0ms, import 22ms, tests 211ms, environment 0ms)
+    Tests  1 passed | 8 skipped (9)
+    Start at  10:01:15
+    Duration  385ms (transform 52ms, setup 0ms, import 34ms, tests 232ms, environment 0ms)
 
 - eval: E18
-  run_id: minted-cache-l2-store-E18-r1
+  run_id: minted-cache-l2-store-E18-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l2_bridge_same_data_dir_hits
-  verified_at: 2026-07-30T00:00:00Z
+  verified_at: 2026-08-04T10:01:16Z
   output: |
-    1 passed in 0.04s
+    .                                                                        [100%]
+    1 passed in 0.03s
 
 ## Analyst
 
-none — moi eval feature deu red tren baseline (co phan biet)
+carried tu round truoc — baseline khong do lai round nay
+none — every feature eval's baseline is n-a this round (not re-measured)
 
 ## Variance
 
@@ -223,7 +226,7 @@ none — every multi-run eval is uniform
 
 ## Iterations
 
-Round 1: all evals passed on first attempt (E1-E18 green); pnpm build/typecheck/lint/test, sdk pytest full suite, verify:plugins, and gen:abi diff all clean. No return to implementation needed.
+Round 3: E1-E18 all passed on the final tree; pnpm build/typecheck, pnpm lint:check, pnpm test (413 passed), the full sdk pytest suite (193 passed), pnpm verify:plugins, and pnpm gen:abi diff-check all green as regression guards.
 
 ## Gate 2 checklist (human)
 
@@ -236,17 +239,11 @@ Round 1: all evals passed on first attempt (E1-E18 green); pnpm build/typecheck/
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
 
+## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
 
----
+Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
+thành cũ theo cơ chế staleness. Đã chạy lại: **18/18 eval xanh** ở
+`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
+sơ bị ảnh hưởng — không hồ sơ nào đỏ.
 
-Re-verify on branch feat/cache-l3-tier-b (2026-07-30). This feature's owned code changed on this branch, so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to 77fb83f9cc25c9d65e0021563203aafd899928e0. A FRESH human signature is required at cache-l3-tier-b's Gate 2 — the old signature attests to the old tree only.
-Evidence (real rerun on this tree): eval E13 of cache-l3-tier-b — the complete `tests/test_node_cache.py` (33 tests) plus `pnpm vitest run src/lib/task/engine-delegate.test.ts`, one exit code, run_id minted-cache-l3-tier-b-E13-r1, exit 0. Run-log: `_acceptance/cache-l3-tier-b/run-log.jsonl`.
-
-Signed: Manh, 2026-07-30 — fresh signature at cache-l3-tier-b Gate 2 (re-verify path, evidence above).
-
-
----
-
-Re-verify on branch feat/cache-l4-eviction (2026-07-31). This feature's owned code changed on this branch (sdk/tests/test_node_cache.py · sdk/tongflow/engine/__main__.py · sdk/tongflow/engine/node_cache.py · sdk/tongflow/engine/runner.py · src/lib/task/engine-delegate.server.ts · src/lib/task/engine-delegate.test.ts), so the prior evidence and signature do not carry forward. `verified_commit` re-pinned to c000b4b6b32f29eea6217f8de26596a052737128. A FRESH human signature is required at cache-l4-eviction's Gate 2 — the old signature attests to the old tree only.
-Evidence (real rerun on this tree): its own eval surface rerun locally on this tree, 2026-07-31 — `(cd sdk && ... pytest -q tests/test_node_cache.py)` (23 passed, exit 0; the tier-A/store suite that carries every sdk_pytest_l2_* node-id after the cache-l4-eviction file split) and `pnpm vitest run src/lib/task/engine-delegate.test.ts` (exit 0; carries unit_l2_tenant_sentinel / unit_l2_data_dir_stable). Touched files are the L4 wiring: put() gained keyword-only tenant/workflow_scope/log, get() a recency touch + log, runner gained reuse/counters/sweep-at-end — every L2 behavior re-proven by the reran suite on the split files.
-Standing checks green on the new tree (S4 round 1 of cache-l4-eviction, run-log `_acceptance/cache-l4-eviction/run-log.jsonl`): `pnpm build && pnpm typecheck`, `pnpm lint:check`, `pnpm test` (363 passed), full sdk pytest (189 passed), `pnpm verify:plugins`, `pnpm gen:abi` diff-clean.
+Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.

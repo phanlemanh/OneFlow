@@ -69,7 +69,13 @@ import {
     targetHandleId,
 } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { type ResolvedSpec, resolveSpec } from "@/lib/abi/resolve";
+import {
+    acceptedUpstreamTypes,
+    type HandleArrival,
+    outputForUpstreamTypes,
+    type ResolvedSpec,
+    resolveSpec,
+} from "@/lib/abi/resolve";
 import type { AnySourceSpec, FieldSourceOverride } from "@/lib/abi/sources";
 import { parseWorkflow } from "@/lib/workflow/parser";
 import { type DirectorPlan, type GenStep, isRef, refId } from "./dsl";
@@ -166,6 +172,13 @@ interface EffectiveField {
     kind: "handle" | "config";
     /** Only meaningful when `kind === "handle"`. */
     nodeType?: DataNodeType;
+    /**
+     * Every upstream type the handle accepts — the primary `nodeType` plus any
+     * `alsoAccepts` widening. Dropping this made the gate below reject a legal
+     * plan (a video into compose-overlay's `media`) with a bogus
+     * MODALITY_MISMATCH, the exact failure `safe-slots.ts` claims is gone.
+     */
+    accepts?: readonly string[];
     /** True when this field accepts more than one upstream connection. */
     array: boolean;
     /** True when a literal falls back to `data.<field>` instead of an edge. */
@@ -189,6 +202,7 @@ function classifyField(
         return {
             kind: "handle",
             nodeType: resolved.nodeType,
+            accepts: acceptedUpstreamTypes(resolved),
             array: resolved.array || !!resolved.batch || !!resolved.collect,
             manual: !!resolved.manual,
         };
@@ -380,6 +394,13 @@ export function compilePlan(
         // mirrors the `texts` caching below, but for image/video/audio/file
         // refs whose real value only exists after the upstream step runs.
         let hasMediaHandleInput = false;
+        // What actually arrived on this step's handles, paired with the field
+        // it arrived on. A slot with a widened handle produces the modality
+        // that fed THAT field, so the output node below is chosen from these
+        // rather than pinned to the first declared output. The field matters:
+        // compose-overlay's `logo` is an image too, and keying on type alone
+        // would let it decide the result whenever it was wired first.
+        const arrivedUpstreamTypes: HandleArrival[] = [];
 
         for (const { field, value } of step.inputs) {
             const fc = classifyField(slot, nodeType, field);
@@ -467,11 +488,14 @@ export function compilePlan(
                     }
                     src = emitTextSource(v);
                 }
-                if (src.nodeType !== fc.nodeType) {
+                const acceptsSrc = fc.accepts
+                    ? fc.accepts.includes(src.nodeType)
+                    : src.nodeType === fc.nodeType;
+                if (!acceptsSrc) {
                     issues.push({
                         code: "MODALITY_MISMATCH",
                         stepId: step.id,
-                        message: `field "${field}" expects ${fc.nodeType}; "${v}" produces ${src.nodeType}`,
+                        message: `field "${field}" expects ${(fc.accepts ?? [fc.nodeType]).join(" or ")}; "${v}" produces ${src.nodeType}`,
                     });
                     continue;
                 }
@@ -483,6 +507,7 @@ export function compilePlan(
                 if (fc.nodeType !== "textNode") {
                     hasMediaHandleInput = true;
                 }
+                arrivedUpstreamTypes.push([field, src.nodeType]);
                 sourceIds.add(src.nodeId);
                 pendingEdges.push({
                     id: idFn(),
@@ -550,7 +575,11 @@ export function compilePlan(
         });
         edges.push(...pendingEdges);
 
-        const primaryOut = topo.outputs[0];
+        const primaryOut = outputForUpstreamTypes(
+            resolvedSpecFor(slot, nodeType),
+            topo,
+            arrivedUpstreamTypes,
+        );
         if (primaryOut) {
             const outId = idFn();
             nodes.push({

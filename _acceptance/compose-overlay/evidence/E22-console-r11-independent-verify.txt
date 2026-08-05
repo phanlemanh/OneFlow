@@ -1,0 +1,16 @@
+=== Independent verifier round 11 (wf-label ui:E22) — fresh subagent, doer != grader ===
+Repo: /Users/manh-macmini/dev/oneflow, branch feat/compose-overlay, HEAD 17b3eaf.
+
+Console check methodology: brand-new browser tab (tab-22, created fresh this round), navigated to
+http://localhost:3000/workspace, then navigated to the same URL a second time (two independent
+loads). read_console_messages(onlyErrors:true) on both loads: "No console logs." — zero errors/
+warnings on either load of this fresh tab.
+
+The live workspace page renders the persisted e22-fixture workflow: multiple compose-overlay
+("Overlay Text/Logo") node instances visible on canvas, including error-state instances (pink/red
+highlighted op rows), matching the fixture used to produce the 6 state captures under
+evidence/design/captures/.
+
+Verdict: console clean on fresh navigation (basic a11y / P0 console-cleanliness criterion of E22
+holds). No hydration warnings, no runtime errors, no failed task/log lines observed on this fresh
+tab across two consecutive loads.

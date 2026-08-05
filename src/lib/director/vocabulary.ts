@@ -15,7 +15,11 @@
 import { ABI_NODES, type NodeSlot } from "@/generated/abi";
 import { type AbiTopology, getAbiTopology } from "@/lib/abi/handle-introspect";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { resolveSpec } from "@/lib/abi/resolve";
+import {
+    acceptedUpstreamTypes,
+    producibleOutputTypes,
+    resolveSpec,
+} from "@/lib/abi/resolve";
 import type { AnySourceSpec } from "@/lib/abi/sources";
 import { isDirectorSafeSlot } from "./safe-slots";
 import { SLOT_TO_NODE_TYPE } from "./slot-node-type";
@@ -109,8 +113,15 @@ export function renderVocabulary(slots: NodeSlot[]): string {
                     resolved.required ? "required" : null,
                     resolved.manual ? "manual" : null,
                 ].filter((t): t is string => t !== null);
+                // Advertise every accepted modality, not just the primary
+                // one: the planner only proposes what the vocabulary lists, so
+                // a widened handle read as image-only means video plans are
+                // never even attempted.
+                const modality = acceptedUpstreamTypes(resolved)
+                    .map(modalityName)
+                    .join("|");
                 inputs.push(
-                    `${field}: ${modalityName(resolved.nodeType)}${isArray ? "[]" : ""}${
+                    `${field}: ${modality}${isArray ? "[]" : ""}${
                         tags.length ? ` (${tags.join(", ")})` : ""
                     }`,
                 );
@@ -126,11 +137,17 @@ export function renderVocabulary(slots: NodeSlot[]): string {
             );
         }
 
-        const out = topo.outputs[0];
+        // Same reason as the input line above: a widened handle also widens
+        // the result, and the planner only chains what the vocabulary claims
+        // the slot produces.
+        const outTypes = producibleOutputTypes(spec, topo);
+        const out = outTypes.length
+            ? outTypes.map(modalityName).join("|")
+            : "none";
         lines.push(
             `- slot "${slot}": inputs(${inputs.join(", ")}) params(${params.join(
                 ", ",
-            )}) -> ${out ? modalityName(out.nodeType) : "none"}`,
+            )}) -> ${out}`,
         );
     }
     return lines.join("\n");
@@ -138,16 +155,25 @@ export function renderVocabulary(slots: NodeSlot[]): string {
 
 /**
  * Modality node types some step in a plan can actually produce: DSL v1's
- * only source kind is `text` (-> textNode, spec §5), plus whatever each
- * slot in `slots` itself outputs as a "gen" step (`topo.outputs[0]`). A
- * slot whose required input needs a modality outside this set can never be
- * fed by any legal plan — see `installedSafeSlots`.
+ * only source kind is `text` (-> textNode, spec §5), plus each slot's own
+ * primary output as a "gen" step. A slot whose required input needs a
+ * modality outside this set can never be fed by any legal plan — see
+ * `installedSafeSlots`.
+ *
+ * A widened output deliberately does NOT count here, even though
+ * `renderVocabulary` advertises it. compose-overlay yields a video only when
+ * it is *fed* a video, so counting `videoNode` as producible because
+ * compose-overlay is installed is circular: it makes the slot its own
+ * evidence, and the fixed-point loop below can never drop it. Conditioning
+ * the widened type on its own modality being producible elsewhere is the
+ * correct rule, and it reduces to exactly this — a widened output can never
+ * be the *sole* producer of anything, so it never enlarges the set.
  */
 function producibleModalities(slots: NodeSlot[]): Set<string> {
     const modalities = new Set<string>(["textNode"]);
     for (const slot of slots) {
-        const out = getAbiTopology(slot).outputs[0];
-        if (out) modalities.add(out.nodeType);
+        const primary = getAbiTopology(slot).outputs[0];
+        if (primary) modalities.add(primary.nodeType);
     }
     return modalities;
 }
@@ -174,7 +200,10 @@ function hasUnsatisfiableRequiredInput(
         const resolved = spec.fields[field];
         if (resolved?.kind !== "handle") return false;
         if (!resolved.required || resolved.manual) return false;
-        return !producible.has(resolved.nodeType);
+        // A widened handle is satisfiable if ANY accepted modality is
+        // producible — testing only the primary type drops a slot whose
+        // image-primary handle would happily take the video a plan can make.
+        return !acceptedUpstreamTypes(resolved).some((t) => producible.has(t));
     });
 }
 

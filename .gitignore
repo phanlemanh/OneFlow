@@ -80,3 +80,10 @@ __pycache__/
 
 # Local media scratch — sample clips dropped in during development, never shipped
 /video/
+
+# pnpm 11 migrates package.json's `pnpm.onlyBuiltDependencies` into this file and
+# writes it locally. CI pins pnpm/action-setup at 10, which still reads the
+# package.json field, so package.json stays the single source of truth for
+# build-script approvals. Committing this file would put that list in two places
+# with two owners; ignore it until the toolchain is deliberately moved to 11.
+/pnpm-workspace.yaml
