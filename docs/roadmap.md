@@ -22,7 +22,7 @@
 
 | # | Hạng mục | DoD | Trạng thái |
 |---|---|---|---|
-| 0.1 | Độc lập upstream: SDK distribution riêng; plugin fork tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md), [ADR-0008](adr/0008-naming-and-distribution.md)); dừng build desktop tới khi tách khỏi `app.tongflow.com` | CI xanh trên SDK mới; scanner nhận diện đủ plugin | ◐ `oneflow-sdk` 0.2.17 đã publish; `per-plugin-origin` ký & merge 27/07 (PR #20); **desktop chưa tách** — chờ quyết định URL cloud |
+| 0.1 | Độc lập upstream: SDK distribution riêng; plugin fork tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md), [ADR-0008](adr/0008-naming-and-distribution.md)); dừng build desktop tới khi tách khỏi `app.tongflow.com` | CI xanh trên SDK mới; scanner nhận diện đủ plugin | ◐ `oneflow-sdk` 0.2.18 đã publish; `per-plugin-origin` ký & merge 27/07 (PR #20); **fork đầu tiên đã hạ cánh** — `oneflow-modal-compose-overlay` là entry origin đầu tiên (05/08, PR #43); **desktop chưa tách** — chờ quyết định URL cloud |
 | 0.2 | Metering + móng provenance: `cost_usd`, `duration_ms`, `gpu_type` vào bảng tasks | Mỗi task ghi đủ 3 cột | ✅ `task-metering` đã ký 25/07 |
 | 0.3 | Bộ đo chuẩn tái chạy được: WER Whisper-vi thực địa; ~~MOS TTS-vi mù~~ ([ADR-0009](adr/0009-tts-vi-eleven-v3.md) đóng bằng phán quyết); COGS pipeline P0 + ma trận 20 video | Script + báo cáo số trong repo | ◐ script đã ký (`measure-harness`, 26/07) · MOS **đóng** 27/07 · WER chờ **clip thực địa + ref chép tay** · COGS chờ task chạy thật + hoá đơn |
 | 0.4 | Spec cache content-addressed + partial re-render | Spec duyệt: khoá hash, dirty-propagation, API "chạy từ node X" | ◐ spec xong (PR #11): [engine-cache-partial-rerender](spec/prd/engine-cache-partial-rerender.md) — 3 câu hỏi mở (§7) chưa chốt |
@@ -33,8 +33,10 @@ repo, đánh đổi ghi trong ADR) · COGS/render trong khung mô hình 3 tier �
 **chốt ngách** (bộ thực thể KG v0).
 *Trượt WER → wedge chuyển sang phụ đề có bước sửa tay (đổi thiết kế skill, không đổi lộ trình).*
 
-**Còn lại để qua G0 (27/07):** ba điều kiện, và cả ba cần đầu vào từ người vận hành —
-clip thực địa + bản chép tay (WER) · task chạy thật + hoá đơn (COGS) · quyết định ngách.
+**Còn lại để qua G0 (cập nhật 05/08):** bốn điều kiện, cả bốn cần người vận hành —
+⓪ **ký ngưỡng số** ([g0-runbook §0](measure/g0-runbook.md) — đứng trước các chặn kia về logic:
+chốt vạch sau khi thấy số liệu là mất tính khách quan của gate) · ① clip thực địa + bản chép
+tay (WER) · ② task chạy thật + hoá đơn (COGS) · ③ quyết định ngách.
 Corpus WER chờ ở [`measure/wer-corpus/`](../measure/wer-corpus/).
 
 Theo [ADR-0010](adr/0010-mainstream-infra-and-models.md), "Whisper" trong DoD trên đọc là
@@ -44,8 +46,8 @@ nhắc ship nó. Kết quả trả lời luôn câu "giữ hay bỏ Modal khỏi
 
 ## Phase 1 — Năng lực P0 (T5–T10)
 
-1. **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1).
-2. **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI.
+1. ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
+2. ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
 3. **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template.
 4. **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
 5. **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch".
