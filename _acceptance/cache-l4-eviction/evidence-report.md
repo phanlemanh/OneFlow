@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 410db0048feeea18d2e04c29c7cb963074fc8dae
+verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
 human_signoff: Manh 2026-08-04
 ---
 
@@ -264,3 +264,12 @@ Round 2: re-verify on the current tree (commit 410db0048feeea18d2e04c29c7cb96307
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
+
+Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
+thành cũ theo cơ chế staleness. Đã chạy lại: **20/20 eval xanh** ở
+`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
+sơ bị ảnh hưởng — không hồ sơ nào đỏ.
+
+Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.

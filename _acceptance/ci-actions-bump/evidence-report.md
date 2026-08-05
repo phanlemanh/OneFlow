@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 9)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c000b4b6b32f29eea6217f8de26596a052737128
+verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
 human_signoff: Manh 2026-07-26
 ---
 
@@ -1011,3 +1011,12 @@ and fresh signatures, the half of the rule this note does not license.
 
 The human signature line in frontmatter was not touched — it attests to the same
 code it originally did.
+
+## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
+
+Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
+thành cũ theo cơ chế staleness. Đã chạy lại: **8/8 eval xanh** ở
+`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
+sơ bị ảnh hưởng — không hồ sơ nào đỏ.
+
+Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
