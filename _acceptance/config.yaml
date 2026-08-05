@@ -261,7 +261,12 @@ executors:
     civ_pin_single_impl: bash scripts/plugins/check-overlay-pin-derived.sh single-impl
     civ_docs_guard_synced: bash scripts/plugins/check-manifest-doc-synced.sh
     civ_eval_keys_intact: bash scripts/ci/check-eval-keys-intact.sh origin/main
-    civ_gate_clean: bash scripts/pre-merge-check.sh . --base origin/main
+    # AC-11 amended 2026-08-05 (Gate 2, Manh): the literal `pre-merge-check clean`
+    # is unreachable from inside a verify round — the check violates on the
+    # in-flight feature in all three states it can occupy, including a PASS whose
+    # human_signoff the verifier is forbidden to fill. civ_gate_residual asserts
+    # the reachable half; the post-signature half moved to the Gate-2 checklist.
+    civ_gate_residual: bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

@@ -6,9 +6,9 @@
 # GitHub, không ở file nào trong cây — thiếu paths = luôn chạy lại (mặc định an toàn),
 # đúng tiền lệ guard clone-and-pytest của compose-overlay.
 #
-# E11 (civ_gate_clean) cũng không khai paths: nó hỏi về TOÀN BỘ cây so với base, nên
-# bất kỳ scope hẹp nào cũng là câu trả lời sai không gian (đúng họ lỗi mà
-# gate-scope-anchors vừa đóng).
+# E11 (civ_gate_residual) cũng không khai paths: nó hỏi về TOÀN BỘ cây so với base,
+# nên bất kỳ scope hẹp nào cũng là câu trả lời sai không gian (đúng họ lỗi mà
+# gate-scope-anchors vừa đóng). Lời của E11 sửa 05/08 — xem Amendment trong contract.
 schema_version: 1
 feature_slug: ci-vitest-sdk-pin
 evals:
@@ -94,8 +94,8 @@ evals:
   - id: E11
     criterion: AC-11
     executor: script
-    cmd: config:executors.script.civ_gate_clean
-    expected: "exit 0, in `pre-merge-check: clean`; wave khớp báo giá Cổng 1 — 2 feature re-verify + ký lại (ci-actions-bump, compose-overlay), 7 carry-forward re-pin, 6 không đụng. Lệch bảng → disclose ở Cổng 2"
+    cmd: config:executors.script.civ_gate_residual
+    expected: "exit 0; violation duy nhất còn lại (nếu có) là chữ ký Cổng 2 đang chờ của CHÍNH feature này — mọi feature khác sạch, tức wave đã khớp báo giá Cổng 1 (2 re-verify + 7 carry-forward + 6 không đụng): nếu còn feature nào stale/đỏ/thiếu chữ ký thì violation của nó xuất hiện và guard TỪ CHỐI. Nửa sau của AC-11 (`clean` sau khi ký) là mục kiểm tay ở Cổng 2"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12

@@ -125,15 +125,60 @@ hạng mục dưới đây vì thế có một tiêu chí "răng" đi kèm tiêu
   *Should-NOT-fire: thêm một job vào `ci.yml` là đúng hình dạng thay đổi mà
   `check-workflow-drift.sh` từ chối; nếu nó đỏ ở đây thì neo `landed_merge` của
   `gate-scope-anchors` chưa thật sự hoạt động, và ta cần biết điều đó ngay.*
-- AC-11: Given nhánh này ở trạng thái sẵn sàng merge, When chạy
-  `bash scripts/pre-merge-check.sh . --base origin/main`, Then kết quả `clean`
-  với đúng cấu hình chi phí đã báo giá ở Cổng 1: **2 feature re-verify + ký lại**
-  (`ci-actions-bump`, `compose-overlay`), **7 feature carry-forward re-pin**,
-  **6 feature không đụng tới**. Lệch khỏi bảng này → phải disclose ở Cổng 2, không
-  âm thầm mở rộng.
+- AC-11 *(sửa lời 05/08 — xem Amendment)*: Given nhánh này sau khi wave ký lại đã
+  chạy, When chạy `bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin`,
+  Then exit 0: violation duy nhất còn lại (nếu có) là **chữ ký Cổng 2 đang chờ của
+  chính feature này**, mọi feature khác sạch. Đó tương đương khẳng định wave khớp
+  báo giá Cổng 1 (**2 re-verify** `ci-actions-bump` + `compose-overlay`, **7
+  carry-forward re-pin**, **6 không đụng**) — vì bất kỳ feature nào còn stale, đỏ,
+  hay thiếu chữ ký đều hiện thành violation và guard từ chối. Lệch khỏi bảng →
+  disclose ở Cổng 2, không âm thầm mở rộng. **Nửa sau — `pre-merge-check: clean`
+  sau khi ký — là mục kiểm tay trong checklist Cổng 2, không phải eval máy.**
 - AC-12: Given `_acceptance/config.yaml`, When kiểm sau thay đổi, Then **không có
   executor key `overlay_*` nào bị đổi hoặc gỡ**, và `feature_loop.suite_keys`
   giữ nguyên. *Boundary: gói này sửa cách guard tự chạy, không sửa tập guard.*
+
+## Amendment (2026-08-05 — duyệt tại chỗ bởi Manh, sau vòng verify 2)
+
+**AC-11 nguyên văn không thể thoả trong bất kỳ vòng verify nào** — không phải "chưa
+thoả", mà bất khả về cấu trúc. Vòng 2 chứng minh bằng máy: `pre-merge-check.sh`
+soi **mọi** feature trong `_acceptance/`, kể cả feature đang bay, và nó violation
+ở **cả ba** trạng thái feature đó có thể ở trong lúc S4 —
+
+1. chưa có `evidence-report.md`,
+2. có report nhưng `verdict` chưa PASS,
+3. `verdict: PASS` mà `human_signoff` còn rỗng (`signoff.required_for: [T2,T3]`,
+   `require_human_commit: true`).
+
+Verifier **bị cấm** điền `human_signoff`, nên trạng thái (3) là sàn không vượt được.
+Vòng 1 đọc cái đỏ này thành "wave chưa chạy" — đúng lúc đó, và nó che mất bản chất;
+wave chạy xong rồi thì phần còn lại lộ ra là cấu trúc.
+
+Đây đúng họ lỗi repo đã đặt tên ở `stale-scope-by-paths` và `gate-scope-anchors`:
+**hỏi câu hỏi ở một không gian, dùng câu trả lời ở không gian khác.** AC-11 hỏi về
+thế giới *sau khi ký* nhưng bắt máy trả lời *trước khi ký*. Khác hai lần trước ở chỗ
+nó fail **closed**, nên không có gì không an toàn lọt qua — cái mất là eval không
+bao giờ xanh được.
+
+**Sửa:** tách đôi. Nửa máy chứng minh được → [`check-gate-residual.sh`](../../scripts/acceptance/check-gate-residual.sh)
+(`civ_gate_residual`): mọi feature khác phải sạch, chỉ tha đúng cái chờ-người của
+slug đang bay. Không yếu đi ở chỗ quan trọng — feature nào còn stale/đỏ/thiếu chữ ký
+vẫn hiện violation và guard từ chối (đã kiểm: bỏ chữ ký của `task-metering` →
+guard đỏ và nêu tên nó; khôi phục → xanh). Nửa sau (`clean` sau chữ ký) chuyển thành
+mục kiểm tay ở checklist Cổng 2.
+
+**Ghi ra ngoài feature này:** mọi contract sau có AC dạng "pre-merge-check clean"
+đều đâm vào đúng bức tường này. Thuộc về hàng đợi như một hạng mục riêng — giống
+cách 0.6 ra đời từ Cổng 2 của 0.5.
+
+### Đính chính báo giá Cổng 1 (phát hiện ở vòng 2)
+
+Mục "Chi phí ký lại" trên nói *"diff dự kiến chạm đúng 3 file"*. Sai: diff chạm
+**10 file** ngoài `_acceptance/` — 3 file đó cộng 7 guard script mới/sửa
+(`check-vitest-job.sh`, `check-overlay-pin-derived.sh`, `check-manifest-doc-synced.sh`,
+`check-eval-keys-intact.sh`, `check-gate-residual.sh`, `sdk-version.sh`,
+`check-action-pins.sh`). Không file nào thuộc `t3_paths` nên **tier T2 vẫn đúng**,
+và bảng 2/7/6 vẫn đúng từng tên; chỉ con số file là sai. Ghi lại thay vì lặng lẽ sửa.
 
 ## Coverage
 
