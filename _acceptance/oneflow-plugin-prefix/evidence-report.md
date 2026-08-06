@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent (round 3); round 4 re-verify 2026-07-29
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 9fcfc338c67b6921b5295a3dd26bc22b0d04187e
+verified_commit: c38b939d98426310a91c039882bdd2e9391d76ac
 human_signoff: Manh 2026-07-29
 ---
 
@@ -69,12 +69,12 @@ table has one live assertion per manifest entry.
 ## Evidence
 
 - eval: E1
-  run_id: oneflow-plugin-prefix-E1-20260806014019
+  run_id: oneflow-plugin-prefix-E1-20260806T021151
   exit_code: 0
   baseline: red — mutation M1 (regex reverted to the tongflow-only form) kills
     exactly this block's 7 tests; see "Failure-branch drive"
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-08-06T01:40:19Z
+  verified_at: 2026-08-06T02:11:51Z
   output: |
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — oneflow convention (AC-1) > accepts oneflow-modal-foo 1ms
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — oneflow convention (AC-1) > accepts oneflow-api-foo 0ms
@@ -85,12 +85,12 @@ table has one live assertion per manifest entry.
     ... (7 test(s) in this block, all passed)
 
 - eval: E2
-  run_id: oneflow-plugin-prefix-E2-20260806014019
+  run_id: oneflow-plugin-prefix-E2-20260806T021151
   exit_code: 0
   baseline: red — mutation M2 (regex tightened to the oneflow-only form) kills
     exactly the 38 per-plugin cases and nothing else
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-08-06T01:40:19Z
+  verified_at: 2026-08-06T02:11:51Z
   output: |
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — tongflow stays installable (AC-2) > the manifest still points at the upstream org we do not control 0ms
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — tongflow stays installable (AC-2) > has a non-trivial number of official plugins 0ms
@@ -101,12 +101,12 @@ table has one live assertion per manifest entry.
     ... (41 test(s) in this block, all passed)
 
 - eval: E3
-  run_id: oneflow-plugin-prefix-E3-20260806014019
+  run_id: oneflow-plugin-prefix-E3-20260806T021151
   exit_code: 0
   baseline: red — M3 (runner segment widened) kills the three runner cases and
     M4 (anchors dropped) kills the five shape cases; neither touches the other's
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-08-06T01:40:19Z
+  verified_at: 2026-08-06T02:11:51Z
   output: |
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — everything else is still rejected (AC-3) > rejects foo-modal-bar (unrelated prefix) 0ms
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — everything else is still rejected (AC-3) > rejects flow-modal-bar (prefix substring only) 0ms
@@ -118,12 +118,12 @@ table has one live assertion per manifest entry.
 evil"` case rather than relying on it.
 
 - eval: E4
-  run_id: oneflow-plugin-prefix-E4-20260806014019
+  run_id: oneflow-plugin-prefix-E4-20260806T021151
   exit_code: 0
   baseline: red — three separate message mutations (drop "legacy", name tongflow
     first, drop the `oneflow-api-*` token) each kill their own assertion
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-08-06T01:40:19Z
+  verified_at: 2026-08-06T02:11:51Z
   output: |
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — the error teaches the current convention (AC-4) > quotes the offending name 0ms
     ✓ src/lib/plugins/plugin-id.test.ts > plugin id — the error teaches the current convention (AC-4) > names oneflow before tongflow 0ms
@@ -132,12 +132,12 @@ evil"` case rather than relying on it.
     (4 test(s) in this block, all passed)
 
 - eval: E5
-  run_id: oneflow-plugin-prefix-E5-20260806013921
+  run_id: oneflow-plugin-prefix-E5-20260806T021105
   exit_code: 0
   baseline: red — nine branches driven this round, seven rule deletions plus the
     cannot-look path plus the round-2 bypass replay; see "Failure-branch drive"
   verifier: config:executors.script.docs_plugin_prefix
-  verified_at: 2026-08-06T01:39:21Z
+  verified_at: 2026-08-06T02:11:05Z
   output: |
     ok  record that the legacy tongflow form is still accepted
     ok  give the reason — the upstream repos are not ours
@@ -147,29 +147,29 @@ evil"` case rather than relying on it.
     docs/plugins.md: documents the oneflow convention and the legacy exception, with its reason
 
 - eval: E6
-  run_id: oneflow-plugin-prefix-E6-20260806013921
+  run_id: oneflow-plugin-prefix-E6-20260806T021105
   exit_code: 0
   baseline: red — eleven branches driven, including all five cannot-look paths
   verifier: config:executors.script.prefix_no_config_drift
-  verified_at: 2026-08-06T01:39:21Z
+  verified_at: 2026-08-06T02:11:05Z
   output: |
     no drift vs the range oneflow-plugin-prefix owns (8477f8a08f26b792b313ff4461a978591024c33e..dd39da82b8aaedb17729c0022aa2b146a8219c12): config src/lib/plugins/plugins-registry-schema.ts src/lib/plugins/plugins-registry.server.ts src/db untouched
     manifest intact: 39 plugins, org still https://github.com/tong-io
 
 - eval: E7
-  run_id: oneflow-plugin-prefix-E7-20260806014049
+  run_id: oneflow-plugin-prefix-E7-20260806T021200
   exit_code: 0
   baseline: n/a — a compile gate; it is red by construction on a type error
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-08-06T01:40:49Z
+  verified_at: 2026-08-06T02:12:00Z
 
 - eval: E8
-  run_id: oneflow-plugin-prefix-E8-20260806014109
+  run_id: oneflow-plugin-prefix-E8-20260806T021158
   exit_code: 0
   baseline: red — every regex mutation below is caught by this suite as well as
     by the targeted file
   verifier: config:executors.test.unit
-  verified_at: 2026-08-06T01:41:09Z
+  verified_at: 2026-08-06T02:11:58Z
   output: |
     > vitest run
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
@@ -179,34 +179,34 @@ evil"` case rather than relying on it.
        Duration  1.34s (transform 1.66s, setup 0ms, import 3.40s, tests 1.25s, environment 542ms)
 
 - eval: E9
-  run_id: oneflow-plugin-prefix-E9-20260806014109
+  run_id: oneflow-plugin-prefix-E9-20260806T021200
   exit_code: 0
   baseline: n/a — a lint gate, red by construction on a violation
   verifier: config:executors.test.lint
-  verified_at: 2026-08-06T01:41:09Z
+  verified_at: 2026-08-06T02:12:00Z
   output: |
     > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
     > pnpm exec biome check --error-on-warnings .
     Checked 425 files in 78ms. No fixes applied.
 
 - eval: E10
-  run_id: oneflow-plugin-prefix-E10-20260806014005
+  run_id: oneflow-plugin-prefix-E10-20260806T021144
   exit_code: 0
   baseline: red — six mutations of the scanner's prefix logic were driven and
     all six are caught, including the one that survived round 2
   verifier: config:executors.test.sdk_pytest_scan_prefix
-  verified_at: 2026-08-06T01:40:05Z
+  verified_at: 2026-08-06T02:11:44Z
   output: |
     .......................                                                  [100%]
     23 passed in 0.04s
 
 - eval: E11
-  run_id: oneflow-plugin-prefix-E11-20260806013954
+  run_id: oneflow-plugin-prefix-E11-20260806T021134
   exit_code: 0
   baseline: red — the scan.py revert leaves the rest of the SDK suite green and
     kills only the prefix tests, so widening the gate broke nothing
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-08-06T01:39:54Z
+  verified_at: 2026-08-06T02:11:34Z
   output: |
     ........................................................................ [ 37%]
     ........................................................................ [ 74%]
@@ -856,10 +856,10 @@ Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên go
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
 
-## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — ba lượt, ghim ở `9fcfc33`
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — bốn lượt, ghim ở `c38b939`
 
 Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
-đợt, thay vì ba mục gần trùng nhau.
+đợt, thay vì bốn mục gần trùng nhau.
 
 **Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
 thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
@@ -869,12 +869,13 @@ qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci
 Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
 này cũ.
 
-**Vì sao phải tới ba lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
+**Vì sao phải tới bốn lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
 gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
 `scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
 guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
-`9fcfc33` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
-`_acceptance/**`, nên lần ghim này giữ được.
+`c38b939` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
+`_acceptance/**`, nên lần ghim này giữ được. (`9fcfc33`, mốc của lượt 3, bị chính
+`c38b939` làm cũ vì commit đó sửa `scripts/acceptance/check-stale-golden.sh`.)
 
 **Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này có
 `landed_merge: dd39da8`, nên tập file sở hữu là
@@ -897,7 +898,9 @@ nhánh hiện tại — đã đọc lại dòng kết quả của lượt này �
 - **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
   `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
   **11/11 eval xanh**.
-- **Lượt 3 @ `9fcfc33` (lượt này)** — **11/11 eval xanh**, tất cả thoát 0.
+- **Lượt 3 @ `9fcfc33`** — **11/11 eval xanh**, tất cả thoát 0.
+- **Lượt 4 @ `c38b939` (lượt này)** — **11/11 eval xanh**, tất cả thoát 0,
+  không lệch so với lượt 3.
 
 **Ghi chú số liệu đã trôi (không phải lỗi của nhánh này).** E1–E4 dùng chung một
 lệnh nên vẫn được ghi công theo **khối test riêng** của từng eval: 7 / 41 / 22 / 4
@@ -912,5 +915,15 @@ trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho
 nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
 trùng nhau vì chúng ghi lại cùng một lần chạy.
 
-`verified_commit` chuyển sang `9fcfc338c67b`. Dòng chữ ký người trong frontmatter
+`verified_commit` chuyển sang `c38b939d9842`. Dòng chữ ký người trong frontmatter
 không bị đụng tới.
+
+**Phát hiện của lượt này, ảnh hưởng cả đợt.** `check-stale-golden.sh` — eval E3 của
+`stale-scope-by-paths` — đóng băng output của gate cho **bảy hồ sơ không khai `paths`**
+ở đúng trạng thái ĐANG CŨ (`VIOLATION ... evidence is stale`). Chính việc ghim lại của
+đợt này làm bảy dòng ấy lật sang `OK ... PASS, signed off by`, nên E3 chuyển đỏ ngay
+sau khi ghim. Đây là đo trực tiếp, không suy luận: chạy trước khi ghim thoát 0, chạy lại
+sau khi ghim thoát 1, cả hai đều có dòng trong `run-log.jsonl` của hồ sơ đó.
+Bảy hồ sơ đó **gồm hồ sơ này**. Vì lý do này `stale-scope-by-paths` **không** được ghim ở lượt này và giữ
+verdict REJECT; chi tiết trong hồ sơ riêng của nó. Cơ chế staleness-scoping mà AC-3 nói
+tới không đổi — thứ lật là trạng thái ghim, không phải hành vi scoping.

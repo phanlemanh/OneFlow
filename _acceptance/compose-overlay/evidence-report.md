@@ -7,7 +7,7 @@ reason: ""
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 9fcfc338c67b6921b5295a3dd26bc22b0d04187e
+verified_commit: c38b939d98426310a91c039882bdd2e9391d76ac
 human_signoff: Manh 2026-08-03
 ---
 
@@ -46,11 +46,11 @@ human_signoff: Manh 2026-08-03
 ## Evidence
 
 - eval: E1a
-  run_id: compose-overlay-E1a-20260806013919
+  run_id: compose-overlay-E1a-20260806T021111
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.gen_abi_clean
-  verified_at: 2026-08-06T01:39:19Z
+  verified_at: 2026-08-06T02:11:11Z
   output: |
     > oneflow@0.2.1 gen:abi /Users/manhphan/dev/oneflow
     > tsx scripts/gen-abi-types.ts
@@ -59,22 +59,22 @@ human_signoff: Manh 2026-08-03
     (git diff --exit-code sạch — không drift)
 
 - eval: E1b
-  run_id: compose-overlay-E1b-20260806013920
+  run_id: compose-overlay-E1b-20260806T021112
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.abi_python_gen_clean
-  verified_at: 2026-08-06T01:39:20Z
+  verified_at: 2026-08-06T02:11:12Z
   output: |
     (guard im lặng khi xanh — không stdout; chạy lại gen_models.py + gen_node_slots.py
     rồi git diff --exit-code sdk/tongflow/models sdk/tongflow/node_slots.py sạch,
     không file untracked)
 
 - eval: E2
-  run_id: compose-overlay-E2-20260806013753
+  run_id: compose-overlay-E2-20260806T021001
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_diacritics
-  verified_at: 2026-08-06T01:37:53Z
+  verified_at: 2026-08-06T02:10:01Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -83,11 +83,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.75s
 
 - eval: E3
-  run_id: compose-overlay-E3-20260806013756
+  run_id: compose-overlay-E3-20260806T021003
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_multiline
-  verified_at: 2026-08-06T01:37:56Z
+  verified_at: 2026-08-06T02:10:03Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -96,11 +96,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.10s
 
 - eval: E4
-  run_id: compose-overlay-E4-20260806013757
+  run_id: compose-overlay-E4-20260806T021004
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_price_tag
-  verified_at: 2026-08-06T01:37:57Z
+  verified_at: 2026-08-06T02:10:04Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -109,11 +109,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.06s
 
 - eval: E5a
-  run_id: compose-overlay-E5a-20260806013758
+  run_id: compose-overlay-E5a-20260806T021006
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_logo
-  verified_at: 2026-08-06T01:37:58Z
+  verified_at: 2026-08-06T02:10:06Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -122,11 +122,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.06s
 
 - eval: E5b
-  run_id: compose-overlay-E5b-20260806013759
+  run_id: compose-overlay-E5b-20260806T021007
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_logo_missing
-  verified_at: 2026-08-06T01:37:59Z
+  verified_at: 2026-08-06T02:10:07Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -135,11 +135,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.05s
 
 - eval: E6
-  run_id: compose-overlay-E6-20260806013800
+  run_id: compose-overlay-E6-20260806T021008
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_safe_zone
-  verified_at: 2026-08-06T01:38:00Z
+  verified_at: 2026-08-06T02:10:08Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -148,11 +148,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.05s
 
 - eval: E7a
-  run_id: compose-overlay-E7a-20260806013802
+  run_id: compose-overlay-E7a-20260806T021010
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_placeholder
-  verified_at: 2026-08-06T01:38:02Z
+  verified_at: 2026-08-06T02:10:10Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -161,11 +161,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.06s
 
 - eval: E7b
-  run_id: compose-overlay-E7b-20260806013803
+  run_id: compose-overlay-E7b-20260806T021011
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_placeholder_missing
-  verified_at: 2026-08-06T01:38:03Z
+  verified_at: 2026-08-06T02:10:11Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -174,11 +174,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.05s
 
 - eval: E8a
-  run_id: compose-overlay-E8a-20260806013804
+  run_id: compose-overlay-E8a-20260806T021012
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_time_window
-  verified_at: 2026-08-06T01:38:04Z
+  verified_at: 2026-08-06T02:10:12Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -187,11 +187,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.20s
 
 - eval: E8b
-  run_id: compose-overlay-E8b-20260806013806
+  run_id: compose-overlay-E8b-20260806T021014
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_time_window_image
-  verified_at: 2026-08-06T01:38:06Z
+  verified_at: 2026-08-06T02:10:14Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -200,11 +200,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.07s
 
 - eval: E9a
-  run_id: compose-overlay-E9a-20260806013807
+  run_id: compose-overlay-E9a-20260806T021015
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_modality_image
-  verified_at: 2026-08-06T01:38:07Z
+  verified_at: 2026-08-06T02:10:15Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -213,11 +213,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.06s
 
 - eval: E9b
-  run_id: compose-overlay-E9b-20260806013808
+  run_id: compose-overlay-E9b-20260806T021016
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_modality_video
-  verified_at: 2026-08-06T01:38:08Z
+  verified_at: 2026-08-06T02:10:16Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -226,11 +226,11 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.26s
 
 - eval: E10
-  run_id: compose-overlay-E10-20260806013810
+  run_id: compose-overlay-E10-20260806T021018
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_determinism
-  verified_at: 2026-08-06T01:38:10Z
+  verified_at: 2026-08-06T02:10:18Z
   plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
@@ -239,51 +239,51 @@ human_signoff: Manh 2026-08-03
     1 passed in 0.18s
 
 - eval: E14
-  run_id: compose-overlay-E14-20260806014006
+  run_id: compose-overlay-E14-20260806T021146
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_tier_a_hit
-  verified_at: 2026-08-06T01:40:06Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     .                                                                        [100%]
     1 passed in 0.03s
 
 - eval: E15
-  run_id: compose-overlay-E15-20260806014007
+  run_id: compose-overlay-E15-20260806T021146
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_partial_rerun
-  verified_at: 2026-08-06T01:40:07Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     .                                                                        [100%]
     1 passed in 0.03s
 
 - eval: E16
-  run_id: compose-overlay-E16-20260806014007
+  run_id: compose-overlay-E16-20260806T021146
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l3_allowlists_disjoint
-  verified_at: 2026-08-06T01:40:07Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E17
-  run_id: compose-overlay-E17-20260806014007
+  run_id: compose-overlay-E17-20260806T021146
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_l4_abi_guard_bidirectional
-  verified_at: 2026-08-06T01:40:07Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E12a
-  run_id: compose-overlay-E12a-20260806014021
+  run_id: compose-overlay-E12a-20260806T021155
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_overlay_node
-  verified_at: 2026-08-06T01:40:21Z
+  verified_at: 2026-08-06T02:11:55Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -292,11 +292,11 @@ human_signoff: Manh 2026-08-03
        Duration  1.21s (transform 191ms, setup 0ms, import 462ms, tests 301ms, environment 383ms)
 
 - eval: E12b
-  run_id: compose-overlay-E12b-20260806014023
+  run_id: compose-overlay-E12b-20260806T021156
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_overlay_exporter
-  verified_at: 2026-08-06T01:40:23Z
+  verified_at: 2026-08-06T02:11:56Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -305,21 +305,21 @@ human_signoff: Manh 2026-08-03
        Duration  191ms (transform 96ms, setup 0ms, import 129ms, tests 4ms, environment 0ms)
 
 - eval: E18
-  run_id: compose-overlay-E18-20260806014007
+  run_id: compose-overlay-E18-20260806T021146
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_overlay_conformance
-  verified_at: 2026-08-06T01:40:07Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     .                                                                        [100%]
     1 passed, 6 deselected in 0.04s
 
 - eval: E19
-  run_id: compose-overlay-E19-20260806014020
+  run_id: compose-overlay-E19-20260806T021153
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-06T01:40:20Z
+  verified_at: 2026-08-06T02:11:53Z
   output: |
      RUN  v4.1.10 /Users/manhphan/dev/oneflow
      Test Files  1 passed (1)
@@ -328,20 +328,20 @@ human_signoff: Manh 2026-08-03
        Duration  132ms (transform 56ms, setup 0ms, import 71ms, tests 3ms, environment 0ms)
 
 - eval: E20
-  run_id: compose-overlay-E20-20260806013917
+  run_id: compose-overlay-E20-20260806T021019
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_registration_synced
-  verified_at: 2026-08-06T01:39:17Z
+  verified_at: 2026-08-06T02:10:19Z
   output: |
     OK: compose-overlay registered (origin entry), docs matrix rows + i18n coherent
 
 - eval: E21
-  run_id: compose-overlay-E21-20260806013917
+  run_id: compose-overlay-E21-20260806T021019
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.overlay_sdk_train
-  verified_at: 2026-08-06T01:39:17Z
+  verified_at: 2026-08-06T02:10:19Z
   output: |
     HEAD is now at eabe8fd feat: compose-overlay render engine + golden suite
     published wheel carries compose-overlay types
@@ -431,10 +431,10 @@ Riêng **E22** (design gate, cần app chạy) lại carry-forward: `git diff` t
 cũ cho thấy **không một file `src/**` nào đổi** — toàn bộ delta nằm ở
 `scripts/**` và `_acceptance/**`.
 
-## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — ba lượt, ghim ở `9fcfc33`
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — bốn lượt, ghim ở `c38b939`
 
 Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
-đợt, thay vì ba mục gần trùng nhau.
+đợt, thay vì bốn mục gần trùng nhau.
 
 **Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
 thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
@@ -444,12 +444,13 @@ qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci
 Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
 này cũ.
 
-**Vì sao phải tới ba lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
+**Vì sao phải tới bốn lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
 gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
 `scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
 guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
-`9fcfc33` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
-`_acceptance/**`, nên lần ghim này giữ được.
+`c38b939` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
+`_acceptance/**`, nên lần ghim này giữ được. (`9fcfc33`, mốc của lượt 3, bị chính
+`c38b939` làm cũ vì commit đó sửa `scripts/acceptance/check-stale-golden.sh`.)
 
 **Quyền sở hữu.** Nhánh sửa đúng một file mà hồ sơ này **sở hữu** theo luật
 per-file: `scripts/plugins/run-overlay-plugin-tests.sh`. Bằng chứng đã ký thành cũ,
@@ -463,20 +464,35 @@ nên hồ sơ phải **re-verify** chứ không được carry-forward re-pin.
 - **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
   `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
   **25/25 eval chạy máy xanh**, gồm trọn 13 eval render; đã probe độc lập (`OVERLAY_SDK_SPEC`/`SDK_VERSION_ROOT` không được set; phép thử nhiễu `9.9.9` trên đường chạy thật báo unsatisfiable; đối chứng bản `a1bc936` vẫn chết) để chắc xanh này là sửa thật.
-- **Lượt 3 @ `9fcfc33` (lượt này)** — **25/25 eval chạy máy xanh**, tất cả thoát 0. `--print-spec` → `oneflow-sdk==0.2.18`. Repo plugin không drift: `plugin_commit_sha` của cả 13 lần chạy đều là `eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5`, trùng sha đã ghi ở các vòng trước.
+- **Lượt 3 @ `9fcfc33`** — **25/25 eval chạy máy xanh**, tất cả thoát 0. `--print-spec` → `oneflow-sdk==0.2.18`. Repo plugin không drift: `plugin_commit_sha` của cả 13 lần chạy đều là `eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5`, trùng sha đã ghi ở các vòng trước.
+- **Lượt 4 @ `c38b939` (lượt này)** — **25/25 eval chạy máy xanh**, tất cả thoát 0,
+  không lệch so với lượt 3. `--print-spec` vẫn → `oneflow-sdk==0.2.18`; 13 lần chạy
+  render vẫn cùng một `plugin_commit_sha: eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5`
+  (đọc lại từ log của chính lượt này, không chép sang).
 
-**E22 (ui-check) và E23 (judgment) KHÔNG được chạy ở lượt này** — carry-forward,
-nói thẳng ra như vậy. Căn cứ được dựng lại tại chỗ ở lượt này chứ không chép lại:
-`git diff --name-only f39723a228be HEAD -- 'src/**'` trả về **rỗng (0 file)**, tức
-không một file `src/**` nào đổi kể từ vòng E22/E23 thật sự chạy; toàn bộ diff
-`28c1a7d..9fcfc33` chỉ gồm `_acceptance/**` và
-`scripts/acceptance/check-gate-residual.sh`. Input của E23 (6 capture +
-design-of-record) vì thế không đổi.
+**E22 (ui-check) và E23 (judgment) KHÔNG được chạy ở lượt này** — nói thẳng ra như
+vậy, đây là carry-forward chứ không phải kết quả đo mới. Căn cứ được dựng lại tại
+chỗ ở lượt này chứ không chép lại: `git diff --name-only f39723a228be HEAD -- 'src/**'`
+trả về **rỗng (0 file)**, tức không một file `src/**` nào đổi kể từ vòng E22/E23
+thật sự chạy. Toàn bộ diff `f39723a228be..c38b939` ngoài `_acceptance/**` chỉ gồm
+`.github/workflows/ci.yml`, `CLAUDE.md`, `STATUS.md`, `docs/roadmap.md` và tám file
+dưới `scripts/**` — không file nào thuộc bề mặt UI mà E22/E23 chấm. Input của E23
+(6 capture + design-of-record) vì thế không đổi.
 
 **Cách chạy.** Mỗi `cmd` được giải lại từng dòng theo `_acceptance/config.yaml`
 trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho mọi eval ràng buộc
 nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
 trùng nhau vì chúng ghi lại cùng một lần chạy.
 
-`verified_commit` chuyển sang `9fcfc338c67b`. Dòng chữ ký người trong frontmatter
+`verified_commit` chuyển sang `c38b939d9842`. Dòng chữ ký người trong frontmatter
 không bị đụng tới.
+
+**Phát hiện của lượt này, ảnh hưởng cả đợt.** `check-stale-golden.sh` — eval E3 của
+`stale-scope-by-paths` — đóng băng output của gate cho **bảy hồ sơ không khai `paths`**
+ở đúng trạng thái ĐANG CŨ (`VIOLATION ... evidence is stale`). Chính việc ghim lại của
+đợt này làm bảy dòng ấy lật sang `OK ... PASS, signed off by`, nên E3 chuyển đỏ ngay
+sau khi ghim. Đây là đo trực tiếp, không suy luận: chạy trước khi ghim thoát 0, chạy lại
+sau khi ghim thoát 1, cả hai đều có dòng trong `run-log.jsonl` của hồ sơ đó.
+Hồ sơ này **không** nằm trong bảy hồ sơ đó, nên kết quả eval của nó không đổi. Vì lý do này `stale-scope-by-paths` **không** được ghim ở lượt này và giữ
+verdict REJECT; chi tiết trong hồ sơ riêng của nó. Cơ chế staleness-scoping mà AC-3 nói
+tới không đổi — thứ lật là trạng thái ghim, không phải hành vi scoping.

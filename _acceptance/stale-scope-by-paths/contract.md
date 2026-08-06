@@ -80,6 +80,40 @@ repo the two ranges coincide. AC-12 exists to make that reading red.
 - AC-13: Given `scripts/pre-merge-check.sh` as shipped at HEAD, When it is scanned for the guard's perturbation knobs by name, Then none is present. *"In-process mutation" implemented as an env var in the shipped gate is a production kill switch: set it and every declared feature gets a match-nothing scope and the gate exits clean. AC-9 would require that switch to exist; this forbids it existing anywhere but the guard's temp copy.*
 - AC-14: Given a feature granted narrow scope, When the check runs, Then it prints one line naming that feature and the globs that scoped it; and when the narrow scope suppressed a staleness that whole-tree would have reported, Then the line says so explicitly; and given an undeclared feature, Then no such line is printed. *A successful narrow scope is the only path that weakens the gate, and it was the only path with no mandated output — leaving "F is genuinely unaffected" and "F's declaration has drifted" indistinguishable to a reviewer. The third clause keeps AC-3's silence intact.*
 
+## Amendment (2026-08-05 — duyệt tại chỗ bởi Manh, phát hiện từ wave của `ci-vitest-sdk-pin`)
+
+**E3 (`stale_scoping_golden`) bị descope.** Golden của nó đóng băng **phán quyết
+staleness** của 7 feature khai 0 `paths`, chứ không phải **hành vi scoping** mà AC-3
+nói tới. Hệ quả: nó không có trạng thái ổn định nào.
+
+- Để nguyên → đỏ sau **mọi** wave re-pin thành công, vì ghim 7 feature đó xong thì
+  gate in `OK [slug]` thay cho `VIOLATION [slug]` — 7 dòng lật cùng lúc.
+- Regen về 7 dòng `OK` → đỏ ở nhánh sau, khi 7 feature đó stale trở lại.
+
+Đo được chứ không phải lập luận: trên cùng một cây, `exit 0` trước khi wave ghim và
+`exit 1` sau khi ghim; cả hai lần đều có dòng trong `run-log.jsonl`. 15 guard anh em
+vẫn xanh ở cả hai trạng thái — chỉ E3 nhạy với trạng thái pin.
+
+Đây là tầng thứ hai của đúng lỗi mà `ci-vitest-sdk-pin` vừa sửa ở tầng trên (golden
+nuốt dòng NOTE gap-probe phụ thuộc diff). Cùng một hình dạng: **cổng đóng băng một
+thứ phụ thuộc hoàn cảnh và gọi nó là bất biến.**
+
+**Khoảng hở phải nói thẳng:** AC-3 mất eval máy trực tiếp duy nhất. Cơ chế nó nói tới
+(khai 0 `paths` → whole-tree) vẫn được E4 (khai một phần → coi như không khai →
+whole-tree) và E1/E2 (ngữ nghĩa scope) chạm tới **gián tiếp**, nhưng không eval nào
+còn khẳng định thẳng ca "khai 0 `paths`". Không nên đọc descope này là "AC-3 vẫn được
+phủ" — nó không được phủ trực tiếp nữa.
+
+**Việc kế tiếp (hàng đợi, không thuộc contract này):** thêm case fixture `undeclared`
+vào [`check-stale-scoping.sh`](../../scripts/acceptance/check-stale-scoping.sh), dựng
+trên git fixture như 14 case anh em, nên miễn nhiễm trạng thái pin của repo thật —
+đó là khác biệt khiến nó ổn định còn golden thì không.
+
+[`check-stale-golden.sh`](../../scripts/acceptance/check-stale-golden.sh) và fixture
+của nó **giữ nguyên trên cây**: xoá là chạm `scripts/**`, kích lại treadmill staleness
+cho toàn bộ pin vừa ghim. Chúng là code chết cho tới khi contract kế dọn — ghi ở đây
+để người sau không tưởng đó là guard đang có hiệu lực.
+
 ## Coverage
 
 Scanned with `morphological-scan` (test-matrix preset, axes rebuilt from first

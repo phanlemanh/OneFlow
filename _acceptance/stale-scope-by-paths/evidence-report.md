@@ -4,14 +4,17 @@ feature_slug: stale-scope-by-paths
 verdict: REJECT
 failed_evals: [E3]
 reason: >-
-  Chạy lại ở 9fcfc33 (nhánh feat/ci-vitest-sdk-pin): 15/16 eval xanh, riêng E3
-  (check-stale-golden.sh) đỏ — output của gate cho 7 hồ sơ không khai `paths`
-  có thêm 6 dòng NOTE gap-probe so với golden 7 dòng. Nguyên nhân: chính commit
-  556c799 của nhánh này (đợt re-pin bằng chứng của 9 hồ sơ) đưa
-  `_acceptance/<slug>/` của 6 hồ sơ đó vào diff của PR, mà NOTE gap-probe chỉ
-  bắn khi hồ sơ nằm trong diff. Cơ chế staleness-scoping (thứ AC-3 nói tới)
-  không đổi. Không ghim `verified_commit`.
-verified_by: fresh-context verification subagent
+  Chạy lại ở c38b939 (nhánh feat/ci-vitest-sdk-pin, round 6). Commit c38b939 đã
+  đóng nguyên nhân đỏ của lượt trước (6 dòng NOTE gap-probe thừa) và E3 thoát 0
+  khi chạy trên cây như đã commit — 16/16 eval xanh ở thời điểm chạy. NHƯNG
+  golden của E3 đóng băng 7 hồ sơ không khai `paths` ở trạng thái ĐANG CŨ, nên
+  chính hành động ghim lại của đợt này làm 7 dòng đó lật từ
+  'VIOLATION ... evidence is stale' sang 'OK ... PASS, signed off by' và E3 đỏ
+  trở lại (đã đo: chạy sau khi ghim thoát 1, có dòng trong run-log). Trạng thái
+  sẽ được merge là trạng thái E3 đỏ, nên không ghim `verified_commit`. AC-3 về
+  bản chất vẫn đúng: 7 hồ sơ được un-stale bởi pin hiện hành, không bởi
+  narrow-scoping. Cần sửa E3 trước khi hồ sơ này ghim được.
+verified_by: fresh-context verification subagent (round 6)
 enforcement_mode: strict
 bypass_used: false
 verified_commit: f39723a228be90031eb1e3e423664c84829851db
@@ -42,154 +45,173 @@ human_signoff: Manh 2026-07-29
 ## Evidence
 
 - eval: E1
-  run_id: stale-scope-by-paths-E1-20260806014056
+  run_id: stale-scope-by-paths-E1-20260806T021140
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_in_scope
-  verified_at: 2026-08-06T01:40:56Z
+  verified_at: 2026-08-06T02:11:40Z
   output: |
     CASE in-scope: PASS
 
 - eval: E2
-  run_id: stale-scope-by-paths-E2-20260806014057
+  run_id: stale-scope-by-paths-E2-20260806T021141
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_out_of_scope
-  verified_at: 2026-08-06T01:40:57Z
+  verified_at: 2026-08-06T02:11:41Z
   output: |
     CASE out-of-scope: PASS
 
 - eval: E3
-  run_id: stale-scope-by-paths-E3-20260806014107
+  run_id: stale-scope-by-paths-E3-20260806T021607-postpin
   exit_code: 1
   baseline: red
   verifier: config:executors.script.stale_scoping_golden
-  verified_at: 2026-08-06T01:41:07Z
+  verified_at: 2026-08-06T02:16:07Z
+  note: |
+    Chạy HAI lần trong round 6, cả hai đều có dòng trong run-log.jsonl:
+      (1) run_id stale-scope-by-paths-E3-20260806T021149 @ 02:11:49Z — trên cây
+          như đã commit ở c38b939, TRƯỚC khi đợt này ghim lại: thoát 0,
+          "OK: undeclared features keep byte-identical gate output".
+      (2) run_id ...-postpin @ 02:16:07Z — SAU khi bảy hồ sơ không khai `paths`
+          được ghim về c38b939: thoát 1. Đây là trạng thái sẽ được merge, nên
+          đây là kết quả tính cho eval này.
+    Bảy dòng lật vì pin đã hiện hành nên hồ sơ hết cũ — không phải vì
+    narrow-scoping, thứ mà AC-3 thật sự nói tới.
   output: |
-    FAIL: line count differs from golden (13 actual vs 7 golden)
-    0a1,6
-    > NOTE [ci-actions-bump]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    > NOTE [dependency-refresh-2026-07]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    > NOTE [measure-harness]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    > NOTE [oneflow-plugin-prefix]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    > NOTE [sdk-distribution-rename]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    > NOTE [task-metering]: chưa qua phản biện context sạch (gap-probe) — advisory, không chặn merge. …
-    (7 dòng VIOLATION của golden khớp nguyên vẹn; 6 dòng NOTE ở trên là phần THỪA)
+    FAIL: gate output changed for features that declare no paths
+    1,7c1,7
+    < VIOLATION [ci-actions-bump]: evidence is stale — code changed after verify (verified_commit <SHA>); re-run verify before merge. Changed:
+    < VIOLATION [dependency-refresh-2026-07]: evidence is stale — …
+    < VIOLATION [measure-harness]: evidence is stale — …
+    < VIOLATION [oneflow-plugin-prefix]: evidence is stale — …
+    < VIOLATION [per-plugin-origin]: evidence is stale — …
+    < VIOLATION [sdk-distribution-rename]: evidence is stale — …
+    < VIOLATION [task-metering]: evidence is stale — …
+    ---
+    > OK [ci-actions-bump]: PASS, signed off by Manh 2026-07-26
+    > OK [dependency-refresh-2026-07]: PASS, signed off by Manh 2026-07-26
+    > OK [measure-harness]: PASS, signed off by Manh 2026-08-04
+    > OK [oneflow-plugin-prefix]: PASS, signed off by Manh 2026-07-29
+    > OK [per-plugin-origin]: PASS, signed off by Manh 2026-08-03
+    > OK [sdk-distribution-rename]: PASS, signed off by Manh 2026-08-04
+    > OK [task-metering]: PASS, signed off by Manh 2026-08-04
+    (6 dòng NOTE gap-probe của lượt trước đã hết — c38b939 xử lý đúng phần đó)
 
 - eval: E4
-  run_id: stale-scope-by-paths-E4-20260806014058
+  run_id: stale-scope-by-paths-E4-20260806T021142
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_partial
-  verified_at: 2026-08-06T01:40:58Z
+  verified_at: 2026-08-06T02:11:42Z
   output: |
     CASE partial: PASS
 
 - eval: E5
-  run_id: stale-scope-by-paths-E5-20260806014059
+  run_id: stale-scope-by-paths-E5-20260806T021142
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_under_declared
-  verified_at: 2026-08-06T01:40:59Z
+  verified_at: 2026-08-06T02:11:42Z
   output: |
     CASE under-declared: PASS
 
 - eval: E6
-  run_id: stale-scope-by-paths-E6-20260806014100
+  run_id: stale-scope-by-paths-E6-20260806T021143
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_malformed
-  verified_at: 2026-08-06T01:41:00Z
+  verified_at: 2026-08-06T02:11:43Z
   output: |
     CASE malformed: PASS
 
 - eval: E7
-  run_id: stale-scope-by-paths-E7-20260806014100
+  run_id: stale-scope-by-paths-E7-20260806T021144
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_merged_halves
-  verified_at: 2026-08-06T01:41:00Z
+  verified_at: 2026-08-06T02:11:44Z
   output: |
     CASE merged-halves: PASS
 
 - eval: E8
-  run_id: stale-scope-by-paths-E8-20260806014103
+  run_id: stale-scope-by-paths-E8-20260806T021146
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_suppression
-  verified_at: 2026-08-06T01:41:03Z
+  verified_at: 2026-08-06T02:11:46Z
   output: |
     CASE suppression: PASS
 
 - eval: E9
-  run_id: stale-scope-by-paths-E9-20260806014105
+  run_id: stale-scope-by-paths-E9-20260806T021148
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_mutation
-  verified_at: 2026-08-06T01:41:05Z
+  verified_at: 2026-08-06T02:11:48Z
   output: |
     CASE mutation: PASS
 
 - eval: E10
-  run_id: stale-scope-by-paths-E10-20260806014106
+  run_id: stale-scope-by-paths-E10-20260806T021149
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_case_completeness
-  verified_at: 2026-08-06T01:41:06Z
+  verified_at: 2026-08-06T02:11:49Z
   output: |
     CASE case-completeness: PASS
 
 - eval: E11
-  run_id: stale-scope-by-paths-E11-20260806014107
+  run_id: stale-scope-by-paths-E11-20260806T021149
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_guard_not_exempt
-  verified_at: 2026-08-06T01:41:07Z
+  verified_at: 2026-08-06T02:11:49Z
   output: |
     CASE guard-not-exempt: PASS
 
 - eval: E12
-  run_id: stale-scope-by-paths-E12-20260806014104
+  run_id: stale-scope-by-paths-E12-20260806T021147
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_two_bases
-  verified_at: 2026-08-06T01:41:04Z
+  verified_at: 2026-08-06T02:11:47Z
   output: |
     CASE two-bases: PASS
 
 - eval: E13
-  run_id: stale-scope-by-paths-E13-20260806014107
+  run_id: stale-scope-by-paths-E13-20260806T021149
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_no_kill_switch
-  verified_at: 2026-08-06T01:41:07Z
+  verified_at: 2026-08-06T02:11:49Z
   output: |
     CASE no-kill-switch: PASS
 
 - eval: E14
-  run_id: stale-scope-by-paths-E14-20260806014110
+  run_id: stale-scope-by-paths-E14-20260806T021152
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_real_repo
-  verified_at: 2026-08-06T01:41:10Z
+  verified_at: 2026-08-06T02:11:52Z
   output: |
     OK: conformance-l0 refused narrow scope for exactly the six declared-but-missing files
 
 - eval: E15
-  run_id: stale-scope-by-paths-E15-20260806014104
+  run_id: stale-scope-by-paths-E15-20260806T021147
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_announce
-  verified_at: 2026-08-06T01:41:04Z
+  verified_at: 2026-08-06T02:11:47Z
   output: |
     CASE announce: PASS
 
 - eval: E16
-  run_id: stale-scope-by-paths-E16-20260806014100
+  run_id: stale-scope-by-paths-E16-20260806T021143
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_indent_drift
-  verified_at: 2026-08-06T01:41:00Z
+  verified_at: 2026-08-06T02:11:43Z
   output: |
     CASE indent-drift: PASS
 
@@ -306,41 +328,86 @@ Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên go
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
 
-## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) @ `9fcfc33` — REJECT vì E3
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — hai lượt, vẫn REJECT vì E3
+
+Mục này thay cho mục rời của lượt trước trên cùng nhánh: một mục cho cả đợt.
 
 **Vì sao hồ sơ này vào đợt.** Phạm vi eval khai của nó phủ `scripts/acceptance/**`,
-mà nhánh CI-a thêm `scripts/acceptance/check-gate-residual.sh` vào đúng thư mục đó.
-Đây là lần đầu hồ sơ này bị kéo vào đợt CI-a (hai lượt trước ở `a1bc936` và
-`28c1a7d` không chạm `scripts/acceptance/`).
+mà nhánh CI-a thêm `scripts/acceptance/check-gate-residual.sh` rồi sửa
+`scripts/acceptance/check-stale-golden.sh` — đúng thư mục đó. Đây là **re-verify
+thật**, không phải carry-forward: hồ sơ này SỞ HỮU file mà `c38b939` vừa sửa.
 
-**Kết quả: 15/16 eval xanh, riêng E3 (`check-stale-golden.sh`) đỏ, mã thoát 1.**
+### Lượt 5 @ `9fcfc33` — 15/16, E3 đỏ vì NOTE gap-probe
 
 Guard so output của `pre-merge-check.sh . --base main` cho bảy hồ sơ **không khai
-`paths`** với golden 7 dòng. Lượt này nó thấy **13 dòng**: đủ 7 dòng `VIOLATION`
-khớp golden nguyên vẹn, cộng **6 dòng `NOTE` gap-probe thừa** cho
-`ci-actions-bump`, `dependency-refresh-2026-07`, `measure-harness`,
-`oneflow-plugin-prefix`, `sdk-distribution-rename`, `task-metering`.
+`paths`** với golden 7 dòng, và thấy **13 dòng**: đủ 7 dòng `VIOLATION` khớp golden
+nguyên vẹn, cộng **6 dòng `NOTE` gap-probe thừa**. NOTE gap-probe chỉ bắn khi
+`_acceptance/<slug>/` của hồ sơ đó nằm trong diff PR, mà re-pin bằng chứng — đúng
+việc một đợt verify làm — đưa các thư mục ấy vào diff.
 
-**Nguyên nhân, đã truy tới tận gốc chứ không đoán.** NOTE gap-probe chỉ bắn khi
-`_acceptance/<slug>/` của hồ sơ đó nằm trong diff của PR — đúng điều commit
-`f39723a` từng ghi lại khi hoàn nguyên một lần regen golden trước đó ("regenerating
-from the compose-overlay branch baked a transient, PR-specific state into a baseline
-meant to capture stable behaviour"). Trên nhánh này, commit `556c799` (đợt re-pin
-bằng chứng của 9 hồ sơ, do chính các lượt verify trước của đợt CI-a sinh ra) đã đưa
-`_acceptance/` của sáu hồ sơ ấy vào diff `main...HEAD`. Chạy lại cùng phép so với
-base loại trừ `556c799` (`--base 01ee88c`) cho **đúng 7 dòng, khớp golden từng
-byte** — tức cơ chế staleness-scoping mà AC-3 nói tới **không đổi**; cái đổi là
-trạng thái nhánh.
+### Lượt 6 @ `c38b939` (lượt này) — 16/16 xanh lúc chạy, rồi E3 đỏ lại sau khi ghim
 
-**Phát hiện đáng ghi.** `grep` của guard bắt tiền tố `^(VIOLATION|OK|NOTE) \[<hồ
-sơ>\]`, nên nó nuốt cả NOTE gap-probe — một dòng advisory phụ thuộc **trạng thái
-diff của nhánh**, không phải hành vi của cơ chế scoping. Hệ quả: E3 sẽ đỏ trên bất
-kỳ nhánh nào re-pin bằng chứng của sáu hồ sơ đó, mà đó chính xác là việc một đợt
-acceptance verify làm. Đây là mắc kẹt tự quy chiếu, không phải hồi quy sản phẩm —
-nhưng eval đỏ thật, và hồ sơ này không được ghim.
+`c38b939` bỏ dòng NOTE gap-probe khỏi phép so (`grep -v '(gap-probe)'`) và **chỉ
+dòng đó**. Đã kiểm chứng độ hẹp của bộ lọc chứ không tin lời commit message: trên
+cây này bộ lọc gỡ **đúng 6 dòng, cả 6 đều là NOTE gap-probe**, giữ lại đúng 7 dòng
+`VIOLATION` (13 → 7). NOTE `narrow staleness scope applied` không bị đụng tới.
 
-**Không ghim.** `verified_commit` giữ nguyên `f39723a228be`; `verdict` là REJECT
-với `failed_evals: [E3]`. Dòng chữ ký người trong frontmatter không bị đụng tới.
+**E3 vẫn còn răng — đã thử làm hỏng golden ba kiểu, cả ba đều đỏ:**
 
-15 eval còn lại (E1, E2, E4–E16) đều thoát 0 với đúng token `CASE <tên>: PASS` mà
-`expected` đòi; `stale_scope_real_repo` (E14) vẫn báo đúng sáu file thiếu.
+| Nhiễu vào `fixtures/baseline-gate-output.txt` | Kết quả |
+|---|---|
+| Đổi tên một hồ sơ (`[ci-actions-bump]` → `[ci-actions-bumpX]`) | đỏ, byte-compare chỉ ra đúng dòng lệch |
+| Xoá một dòng (`task-metering`) | đỏ, chốt đếm dòng báo `7 actual vs 6 golden` |
+| Đổi chữ trong thông điệp (`re-run verify before merge` → `re-run verify`) | đỏ, byte-compare chỉ ra cả 7 dòng |
+
+Sau cả ba, golden được khôi phục và đối chiếu bằng `shasum -a 256`
+(`718408e065805385301b795cf4c2e7e34723d206dfaa4cc9b8187d4aecaf9299`, y hệt trước
+khi thử), `check-stale-golden.sh` trở lại xanh, `git status` sạch. Bộ lọc
+`(gap-probe)` **không** làm eval rỗng nghĩa.
+
+**16/16 eval thoát 0 khi chạy trên cây như đã commit ở `c38b939`.** Mười lăm eval
+kia đều thoát 0 với đúng token `CASE <tên>: PASS` mà `expected` đòi;
+`stale_scope_real_repo` (E14) vẫn báo đúng sáu file thiếu.
+
+### Vì sao vẫn KHÔNG ghim: golden đóng băng một trạng thái mà chính đợt này xoá
+
+Đây là phát hiện mới của lượt 6, không phải tồn đọng của lượt 5, và nó **không**
+được `c38b939` xử lý.
+
+Golden 7 dòng ghi bảy hồ sơ ở đúng trạng thái `VIOLATION ... evidence is stale`.
+Nhưng bảy hồ sơ đó **chính là bảy trong mười hồ sơ đợt này phải ghim lại**. Ngay
+khi ghim `verified_commit` của chúng về `c38b939` = HEAD, `stale_files()` không còn
+file nào để báo (chỉ còn thay đổi dưới `_acceptance/**`, vốn thuộc `t1_skip_globs`),
+nên gate in `OK [<slug>]: PASS, signed off by ...` thay cho `VIOLATION`. Bảy dòng
+lật cùng lúc, byte-compare đỏ.
+
+Đã **đo trực tiếp hai lần**, không suy luận:
+
+1. Trước khi ghim (cây như commit): `check-stale-golden.sh` → thoát **0**.
+2. Sau khi ghim bảy hồ sơ về `c38b939`: cùng lệnh → thoát **1**, diff đúng bảy dòng
+   `VIOLATION` → `OK ... PASS, signed off by`.
+
+Cả hai lần chạy đều có dòng riêng trong `run-log.jsonl` (round 6, `run_id` kết thúc
+`-postpin` là lần thứ hai). Mười lăm eval anh em chạy lại sau khi ghim vẫn xanh cả
+mười lăm, nên chỉ mình E3 nhạy với trạng thái ghim.
+
+**Vì sao điều đó chặn việc ghim.** Trạng thái sẽ được merge là trạng thái *sau* khi
+ghim, và ở đó E3 đỏ. Ghim `verified_commit: c38b939` cho hồ sơ này tức là chứng
+nhận một trạng thái mà chạy lại eval sẽ ra đỏ — chứng nhận sai, bất kể lý do. Nên:
+`verified_commit` giữ nguyên `f39723a228be`, `verdict` REJECT, `failed_evals: [E3]`.
+
+**Nhưng AC-3 về bản chất vẫn đúng, và đây là điểm cần người quyết.** AC-3 nói: hồ sơ
+không khai `paths` phải nhận staleness toàn cây, **không** được "un-stale trong im
+lặng bởi một cơ chế nó chưa từng chọn". Bảy hồ sơ ở đây được un-stale bởi **pin hiện
+hành của chính chúng** — lý do hợp lệ và hoàn toàn nằm ngoài cơ chế narrow-scoping mà
+AC-3 nhắm tới. E3 là proxy quá chặt: nó đóng băng cả *phán quyết staleness* chứ không
+chỉ *hành vi scoping*. Đây đúng là hình dạng mà `c38b939` đã sửa cho NOTE gap-probe,
+chỉ là còn sót một tầng nữa.
+
+Hệ quả thực tế cần biết: golden này **không có trạng thái ổn định**. Giữ nguyên thì
+đỏ sau mỗi đợt re-pin thành công; regen về 7 dòng `OK` thì đỏ ở nhánh kế tiếp khi
+bảy hồ sơ cũ trở lại. `check-stale-golden.sh` **không** được gọi trong
+`.github/workflows/**` (đã grep), nên E3 đỏ không chặn CI — nó chỉ chặn việc ghim hồ
+sơ này. Đề xuất cho người ký: chuẩn hoá trục `VIOLATION`-stale / `OK`-PASS trước khi
+so, hoặc thu hẹp E3 về đúng phần AC-3 nói (không có dòng narrow-scope nào cho bảy hồ
+sơ đó), rồi mới ghim. Người quyết, không phải verifier.

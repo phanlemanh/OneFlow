@@ -73,3 +73,14 @@
 {"ts": "2026-08-06T01:41:09Z", "round": 7, "evalId": "E9", "run_id": "oneflow-plugin-prefix-E9-20260806014109", "exit_code": 0, "cmd": "pnpm lint:check"}
 {"ts": "2026-08-06T01:40:05Z", "round": 7, "evalId": "E10", "run_id": "oneflow-plugin-prefix-E10-20260806014005", "exit_code": 0, "cmd": "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_prefix.py"}
 {"ts": "2026-08-06T01:39:54Z", "round": 7, "evalId": "E11", "run_id": "oneflow-plugin-prefix-E11-20260806013954", "exit_code": 0, "cmd": "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}
+{"ts":"2026-08-06T02:11:51Z","round":8,"evalId":"E1","run_id":"oneflow-plugin-prefix-E1-20260806T021151","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-06T02:11:51Z","round":8,"evalId":"E2","run_id":"oneflow-plugin-prefix-E2-20260806T021151","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-06T02:11:51Z","round":8,"evalId":"E3","run_id":"oneflow-plugin-prefix-E3-20260806T021151","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-06T02:11:51Z","round":8,"evalId":"E4","run_id":"oneflow-plugin-prefix-E4-20260806T021151","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-06T02:11:05Z","round":8,"evalId":"E5","run_id":"oneflow-plugin-prefix-E5-20260806T021105","exit_code":0,"cmd":"bash scripts/plugins/check-prefix-docs.sh"}
+{"ts":"2026-08-06T02:11:05Z","round":8,"evalId":"E6","run_id":"oneflow-plugin-prefix-E6-20260806T021105","exit_code":0,"cmd":"ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh origin/main"}
+{"ts":"2026-08-06T02:12:00Z","round":8,"evalId":"E7","run_id":"oneflow-plugin-prefix-E7-20260806T021200","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-08-06T02:11:58Z","round":8,"evalId":"E8","run_id":"oneflow-plugin-prefix-E8-20260806T021158","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-06T02:12:00Z","round":8,"evalId":"E9","run_id":"oneflow-plugin-prefix-E9-20260806T021200","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-06T02:11:44Z","round":8,"evalId":"E10","run_id":"oneflow-plugin-prefix-E10-20260806T021144","exit_code":0,"cmd":"cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_prefix.py"}
+{"ts":"2026-08-06T02:11:34Z","round":8,"evalId":"E11","run_id":"oneflow-plugin-prefix-E11-20260806T021134","exit_code":0,"cmd":"cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}

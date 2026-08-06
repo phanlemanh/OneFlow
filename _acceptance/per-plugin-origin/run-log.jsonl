@@ -162,3 +162,15 @@
 {"ts": "2026-08-06T01:40:49Z", "round": 13, "evalId": "E10", "run_id": "per-plugin-origin-E10-20260806014049", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
 {"ts": "2026-08-06T01:41:09Z", "round": 13, "evalId": "E11", "run_id": "per-plugin-origin-E11-20260806014109", "exit_code": 0, "cmd": "pnpm lint:check"}
 {"ts": "2026-08-06T01:39:20Z", "round": 13, "evalId": "E12", "run_id": "per-plugin-origin-E12-20260806013920", "exit_code": 0, "cmd": "pnpm verify:plugins"}
+{"ts":"2026-08-06T02:11:52Z","round":14,"evalId":"E1","run_id":"per-plugin-origin-E1-20260806T021152","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-06T02:11:52Z","round":14,"evalId":"E2","run_id":"per-plugin-origin-E2-20260806T021152","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-06T02:11:52Z","round":14,"evalId":"E3","run_id":"per-plugin-origin-E3-20260806T021152","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-06T02:11:52Z","round":14,"evalId":"E4","run_id":"per-plugin-origin-E4-20260806T021152","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-06T02:11:05Z","round":14,"evalId":"E5","run_id":"per-plugin-origin-E5-20260806T021105","exit_code":0,"cmd":"bash scripts/plugins/check-single-url-rule.sh"}
+{"ts":"2026-08-06T02:11:05Z","round":14,"evalId":"E6","run_id":"per-plugin-origin-E6-20260806T021105","exit_code":0,"cmd":"pnpm tsx scripts/plugins/check-installer-parity.ts"}
+{"ts":"2026-08-06T02:11:07Z","round":14,"evalId":"E7","run_id":"per-plugin-origin-E7-20260806T021107","exit_code":0,"cmd":"bash scripts/plugins/check-manifest-unmoved.sh"}
+{"ts":"2026-08-06T02:11:51Z","round":14,"evalId":"E8","run_id":"per-plugin-origin-E8-20260806T021151","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-06T02:11:58Z","round":14,"evalId":"E9","run_id":"per-plugin-origin-E9-20260806T021158","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-06T02:12:00Z","round":14,"evalId":"E10","run_id":"per-plugin-origin-E10-20260806T021200","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-08-06T02:12:00Z","round":14,"evalId":"E11","run_id":"per-plugin-origin-E11-20260806T021200","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-06T02:11:10Z","round":14,"evalId":"E12","run_id":"per-plugin-origin-E12-20260806T021110","exit_code":0,"cmd":"pnpm verify:plugins"}
