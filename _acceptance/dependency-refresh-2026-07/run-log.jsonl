@@ -86,3 +86,35 @@
 {"ts":"2026-07-27T10:50:26Z","round":11,"evalId":"E6","run_id":"dependency-refresh-2026-07-r11-E6-20260727105026","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
 {"ts":"2026-07-27T10:50:26Z","round":11,"evalId":"E7","run_id":"dependency-refresh-2026-07-r11-E7-20260727105026","exit_code":0,"cmd":"pnpm tsx scripts/measure/selftest-cogs.ts"}
 {"ts":"2026-07-27T10:50:26Z","round":11,"evalId":"E8","run_id":"dependency-refresh-2026-07-r11-E8-20260727105026","exit_code":0,"cmd":"bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E1", "run_id": "dependency-refresh-2026-07-E1-20260805103318", "exit_code": 0, "cmd": "bash scripts/deps/check-manifest.sh"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E2", "run_id": "dependency-refresh-2026-07-E2-20260805103318", "exit_code": 0, "cmd": "pnpm install --frozen-lockfile"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E3", "run_id": "dependency-refresh-2026-07-E3-20260805103318", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E4", "run_id": "dependency-refresh-2026-07-E4-20260805103318", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E5", "run_id": "dependency-refresh-2026-07-E5-20260805103318", "exit_code": 0, "cmd": "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E6", "run_id": "dependency-refresh-2026-07-E6-20260805103318", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E7", "run_id": "dependency-refresh-2026-07-E7-20260805103318", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-08-05T10:33:18Z", "round": 12, "evalId": "E8", "run_id": "dependency-refresh-2026-07-E8-20260805103318", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts":"2026-08-05T12:40:10Z","round":13,"evalId":"E1","run_id":"dependency-refresh-2026-07-E1-20260805124010","exit_code":0,"cmd":"bash scripts/deps/check-manifest.sh"}
+{"ts":"2026-08-05T12:39:08Z","round":13,"evalId":"E2","run_id":"dependency-refresh-2026-07-E2-20260805123908","exit_code":0,"cmd":"pnpm install --frozen-lockfile"}
+{"ts":"2026-08-05T12:40:35Z","round":13,"evalId":"E3","run_id":"dependency-refresh-2026-07-E3-20260805124035","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-05T12:40:36Z","round":13,"evalId":"E4","run_id":"dependency-refresh-2026-07-E4-20260805124036","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-05T12:40:29Z","round":13,"evalId":"E5","run_id":"dependency-refresh-2026-07-E5-20260805124029","exit_code":0,"cmd":"cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}
+{"ts":"2026-08-05T12:40:38Z","round":13,"evalId":"E6","run_id":"dependency-refresh-2026-07-E6-20260805124038","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-08-05T12:40:17Z","round":13,"evalId":"E7","run_id":"dependency-refresh-2026-07-E7-20260805124017","exit_code":0,"cmd":"pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts":"2026-08-05T12:40:10Z","round":13,"evalId":"E8","run_id":"dependency-refresh-2026-07-E8-20260805124010","exit_code":0,"cmd":"ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts": "2026-08-06T01:39:21Z", "round": 14, "evalId": "E1", "run_id": "dependency-refresh-2026-07-E1-20260806013921", "exit_code": 0, "cmd": "bash scripts/deps/check-manifest.sh"}
+{"ts": "2026-08-06T01:41:11Z", "round": 14, "evalId": "E2", "run_id": "dependency-refresh-2026-07-E2-20260806014111", "exit_code": 0, "cmd": "pnpm install --frozen-lockfile"}
+{"ts": "2026-08-06T01:41:09Z", "round": 14, "evalId": "E3", "run_id": "dependency-refresh-2026-07-E3-20260806014109", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-08-06T01:41:09Z", "round": 14, "evalId": "E4", "run_id": "dependency-refresh-2026-07-E4-20260806014109", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-08-06T01:39:54Z", "round": 14, "evalId": "E5", "run_id": "dependency-refresh-2026-07-E5-20260806013954", "exit_code": 0, "cmd": "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}
+{"ts": "2026-08-06T01:40:49Z", "round": 14, "evalId": "E6", "run_id": "dependency-refresh-2026-07-E6-20260806014049", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-08-06T01:40:24Z", "round": 14, "evalId": "E7", "run_id": "dependency-refresh-2026-07-E7-20260806014024", "exit_code": 0, "cmd": "pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts": "2026-08-06T01:39:21Z", "round": 14, "evalId": "E8", "run_id": "dependency-refresh-2026-07-E8-20260806013921", "exit_code": 0, "cmd": "ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"}
+{"ts":"2026-08-06T02:11:05Z","round":15,"evalId":"E1","run_id":"dependency-refresh-2026-07-E1-20260806T021105","exit_code":0,"cmd":"bash scripts/deps/check-manifest.sh"}
+{"ts":"2026-08-06T02:11:05Z","round":15,"evalId":"E2","run_id":"dependency-refresh-2026-07-E2-20260806T021105","exit_code":0,"cmd":"pnpm install --frozen-lockfile"}
+{"ts":"2026-08-06T02:12:00Z","round":15,"evalId":"E3","run_id":"dependency-refresh-2026-07-E3-20260806T021200","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-06T02:11:58Z","round":15,"evalId":"E4","run_id":"dependency-refresh-2026-07-E4-20260806T021158","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-06T02:11:34Z","round":15,"evalId":"E5","run_id":"dependency-refresh-2026-07-E5-20260806T021134","exit_code":0,"cmd":"cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"}
+{"ts":"2026-08-06T02:12:00Z","round":15,"evalId":"E6","run_id":"dependency-refresh-2026-07-E6-20260806T021200","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-08-06T02:11:57Z","round":15,"evalId":"E7","run_id":"dependency-refresh-2026-07-E7-20260806T021157","exit_code":0,"cmd":"pnpm tsx scripts/measure/selftest-cogs.ts"}
+{"ts":"2026-08-06T02:11:05Z","round":15,"evalId":"E8","run_id":"dependency-refresh-2026-07-E8-20260806T021105","exit_code":0,"cmd":"ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"}

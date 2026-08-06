@@ -3,7 +3,9 @@
 # plugin pin match + published wheel carries the compose-overlay types.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-V_TOML=$(grep -E '^version = ' sdk/pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+# One parsing law, one file — shared with run-overlay-plugin-tests.sh (CI-a AC-8).
+. scripts/lib/sdk-version.sh
+V_TOML=$(sdk_version)
 V_INIT=$(grep -E '^__version__' sdk/tongflow/__init__.py | sed 's/.*"\(.*\)".*/\1/')
 [ "$V_TOML" = "$V_INIT" ] || { echo "FAIL: version drift pyproject=$V_TOML __init__=$V_INIT"; exit 1; }
 

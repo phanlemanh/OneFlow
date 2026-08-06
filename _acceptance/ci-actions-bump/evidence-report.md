@@ -3,11 +3,15 @@ schema_version: 2
 feature_slug: ci-actions-bump
 verdict: PASS
 failed_evals: []
-reason:
-verified_by: fresh-context verification subagent (round 9)
+reason: >-
+  Re-verify tại c38b939 (commit mã cuối của nhánh feat/ci-vitest-sdk-pin): 8/8
+  eval xanh. Lượt đầu ở a1bc936 thấy E1 đỏ vì job 'Unit Tests (vitest)' nâng số
+  điểm actions/checkout từ 7 lên 8 trong khi guard còn chốt 7; commit 28c1a7d
+  đánh số lại thành 8 kèm chú thích, và guard vẫn còn răng theo cả hai chiều.
+verified_by: fresh-context verification subagent (round 14)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f39723a228be90031eb1e3e423664c84829851db
+verified_commit: c38b939d98426310a91c039882bdd2e9391d76ac
 human_signoff: Manh 2026-07-26
 ---
 
@@ -50,73 +54,61 @@ reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-r10-E1-20260727105026
+  run_id: ci-actions-bump-E1-20260806T021010
   exit_code: 0
-  baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
+  baseline: red — re-measured this round on a `--no-hardlinks` scratch clone at 28c1a7d, both directions (see Analyst item 8); the remaining failure branches are carried forward from round 8 (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-06T02:10:10Z
   output: |
-    ok actions/checkout: 7 site(s), all >= v7
+    ok actions/checkout: 8 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
     action pins: at or above the contracted floor at every site
 
-    Re-derived independently of the script this round: `grep -rn 'uses:' .github/workflows` lists exactly seven `actions/checkout@v7` sites — ci.yml lines 18, 42, 63, 84, 102; desktop-release.yml line 61; docker-publish.yml line 23 — and one `docker/login-action@v4` at docker-publish.yml line 32. AC-1 is true on this tree as written. Round 5's `sed` fix was re-driven against the concealment that defeated the previous version, including the variant where it predates the branch; it holds (Analyst item 3). Analyst item 4 records what a green E1 still does not establish.
-
 - eval: E2
-  run_id: ci-actions-bump-r9-E2-20260726154143
+  run_id: ci-actions-bump-E2-20260806T021010
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_gate_plumbing
-  verified_at: 2026-07-26T15:41:43Z
+  verified_at: 2026-08-06T02:10:10Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30207732088 @ 66f804306fb83fc12d5ed32e37031dac406068d6
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
     ok  checkout ran with fetch-depth: 0
     ok  the checkout under test is v7
-    ok  pre-merge-check emitted 6 per-feature verdict line(s)
+    ok  pre-merge-check emitted 5 per-feature verdict line(s)
     ok  no shallow-history or unresolvable-base complaint anywhere in the log
-    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 66f804306fb83fc12d5ed32e37031dac406068d6
-
-    Re-read on this branch's own CI run at HEAD. The run's overall conclusion is not success, and that is expected: the Acceptance Gate job reports bookkeeping state, now for six features, one of them the feature under review on this branch awaiting its own signature. That is precisely why AC-2 was narrowed — see Analyst item 7. What this eval asserts is the plumbing: checkout@v7 ran with fetch-depth: 0 and pre-merge-check reached acceptance logic, emitting six real per-feature verdict lines with no shallow-history or unresolvable-base complaint.
+    fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
 
 - eval: E3
-  run_id: ci-actions-bump-r9-E3-20260726154149
+  run_id: ci-actions-bump-E3-20260806T021016
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_jobs_green
-  verified_at: 2026-07-26T15:41:49Z
+  verified_at: 2026-08-06T02:10:16Z
   output: |
-    run https://github.com/phanlemanh/OneFlow/actions/runs/30207732088 @ 66f804306fb83fc12d5ed32e37031dac406068d6
+    run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
     ok job 'Lint': success
     ok job 'Type Check': success
     ok job 'Build': success
     ok job 'SDK Tests (Python)': success
-    all requested jobs succeeded at 66f804306fb83fc12d5ed32e37031dac406068d6
-
-    Re-derived from the run object: the four named jobs each carry conclusion `success` at this head SHA under the node24 runtime. The run as a whole concluded otherwise because of the Acceptance Gate job, which this eval deliberately does not depend on — `assert_run_finished`, not `assert_run_complete`.
+    all requested jobs succeeded at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
 
 - eval: E4
-  run_id: ci-actions-bump-r10-E4-20260727105026
+  run_id: ci-actions-bump-E4-20260806T021019
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-06T02:10:19Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
 
-    Static half of AC-4. The dynamic half is E5/E6: an actual dispatched run that succeeded and wrote nothing. Five mutations of this guard were driven this round and all five are caught or declined (Analyst item 2).
-
 - eval: E5
-  run_id: ci-actions-bump-r6-e5-20260726085907
+  run_id: ci-actions-bump-E5-20260806T021019
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dispatch_green
-  verified_at: 2026-07-26T08:59:07Z
+  verified_at: 2026-08-06T02:10:19Z
   output: |
-    dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168
-      branch under test: chore/ci-actions-bump   run head: b48699c612fab479deede3d7d1d9959e110d7335
-      workflow tree matches HEAD: c2bd8c61cfc2a159cd3287783e750dfd72ce02b9
-    ok job 'Build & push (amd64 + arm64)': success
        ok step 'Set up QEMU': success
        ok step 'Log in to GHCR': success
        ok step 'Build & push': success
@@ -124,18 +116,13 @@ reports them.
     ok  linux/arm64 build stages present in the log
     dispatched docker dry run succeeded, and reached every step that carries a bumped action
 
-    Re-derived from the run's own log independently of the script: the buildx invocation carries `--platform linux/amd64,linux/arm64`, and `docker/login-action@v4` ran against ghcr.io and reported success — the login that covers PR #2. Nothing outside `_acceptance/` and `scripts/ci/` differs between the dispatched run's commit b48699c and HEAD, so the tree-only provenance pin is sound here: the Dockerfile and every other build input are byte-identical to what the dry run built.
-
 - eval: E6
-  run_id: ci-actions-bump-r6-e6-20260726085913
+  run_id: ci-actions-bump-E6-20260806T021035
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_ghcr_untouched
-  verified_at: 2026-07-26T08:59:13Z
+  verified_at: 2026-08-06T02:10:35Z
   output: |
-    dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190339168 (started 2026-07-26T06:01:26Z)
-    ok  run's workflow tree matches HEAD
-    ok  runner resolved 'push: false'
     ok  no registry write anywhere in 3575 log lines
     ok  buildx invoked without --push
     --  registry cross-check unavailable: the token cannot read packages.
@@ -143,25 +130,13 @@ reports them.
         is indistinguishable from a package this token simply cannot see.
     no publish occurred during the dry run
 
-    The registry cross-check is correctly declined: this token cannot read packages, and a 404 from it would be indistinguishable from absence. The criterion rests on the log half, which was independently rebuilt from run 30190339168's log this round without reference to any script in this suite — see Analyst item 6.
-
 - eval: E7
-  run_id: ci-actions-bump-r6-e7-20260726085921
+  run_id: ci-actions-bump-E7-20260806T021051
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_desktop_dispatch_green
-  verified_at: 2026-07-26T08:59:21Z
+  verified_at: 2026-08-06T02:10:51Z
   output: |
-    dispatched run https://github.com/phanlemanh/OneFlow/actions/runs/30190355369
-      branch under test: chore/ci-actions-bump   run head: b48699c612fab479deede3d7d1d9959e110d7335
-      workflow tree matches HEAD: c2bd8c61cfc2a159cd3287783e750dfd72ce02b9
-    ok job 'build (macos-14, --targets universal --camera --microphone --user-agent "Mozilla/5.0 (Macintosh; ...': success
-       ok step 'Cache cargo registry': success
-       ok step 'Sanity-check installer': success
-       ok step 'Upload as Actions artifact (dry run)': success
-       ok step 'Upload to draft GitHub Release': not taken on a dispatch
-    ok job 'build (windows-latest, --targets x64, *.msi, TongFlow-win-x64.msi)': success
-       ok step 'Cache cargo registry': success
        ok step 'Sanity-check installer': success
        ok step 'Upload as Actions artifact (dry run)': success
        ok step 'Upload to draft GitHub Release': not taken on a dispatch
@@ -169,18 +144,14 @@ reports them.
     -- job 'publish': skipped (tag-only path, expected on a dispatch)
     dispatched desktop dry run succeeded, and reached every step that carries a bumped action
 
-    Both matrix legs ran and both uploaded an artifact; the tag-only `prepare` and `publish` jobs were skipped, and the release-upload step was not taken in either leg. That is the dry run working, and it covers the cache@v6 debt from #16 on the two runner OSes ci.yml never touches.
-
 - eval: E8
-  run_id: ci-actions-bump-r10-E8-20260727105026
+  run_id: ci-actions-bump-E8-20260806T021105
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-07-27T10:50:26Z
+  verified_at: 2026-08-06T02:11:05Z
   output: |
-    no workflow changes vs origin/main
-
-    The output changed shape this round because the feature is merged: on `feat/oneflow-plugin-prefix` the 16 declared pin lines and the dry-run guard are already in `origin/main`, so the diff under `.github/workflows` is empty and the guard reports the strongest possible form of "no behaviour drift". Re-derived from the diff by hand: `git diff --name-only origin/main...HEAD -- .github/workflows` prints nothing, and the round-6 finding — every changed line was one of the 16 declared pin lines (`actions/checkout` v4→v7 at seven sites, `docker/login-action` v3→v4 at one, counted as removed+added), a comment, or the one declared guard line pair — is what landed on main unchanged.
+    workflow drift vs the range ci-actions-bump owns (4d89b584fcfd3dfafd03823a14c9b81406db6e9b..8477f8a08f26b792b313ff4461a978591024c33e): 16 declared pin line(s), comments, and the dry-run guard (-1 +1); no file added, deleted or renamed
 
 ## Analyst
 
@@ -421,6 +392,39 @@ and `check-gate-plumbing.sh` uses `assert_run_finished` rather than
 `assert_run_complete`, which is what lets E2 and E3 pass on a run whose overall
 conclusion is not success. That is deliberate and documented in both scripts, but
 it is the kind of choice a human should ratify rather than inherit.
+
+### 8. E1's snapshot count, re-numbered 7 → 8, re-driven this round
+
+E1 was the one eval this branch turned red, and it turned red for a real reason,
+so its recovery was measured rather than assumed.
+
+`check-action-pins.sh` carries `EXPECTED_CHECKOUT_SITES`, an exact-count
+snapshot. It is not decoration: without it a *deleted* checkout step would read
+as clean, because every surviving site would still sit at or above the floor.
+The branch's new `Unit Tests (vitest)` job in `ci.yml` brings a genuinely new,
+eighth checkout step, so the snapshot had to move; commit `28c1a7d` re-numbers it
+to 8 with a comment recording why. That is the same class of guard as
+`check-manifest-unmoved.sh`, and `CLAUDE.md` already says such counts are edited
+by whichever PR adds a site.
+
+Two things were checked independently of the script, on the tree at `28c1a7d`:
+
+1. **The count is honest.** `grep` over `.github/workflows` for lines whose
+   `uses:` names `actions/checkout@` returns exactly eight — six in `ci.yml`
+   (lines 18, 42, 63, 84, 105, 123), one in `docker-publish.yml` (23) and one in
+   `desktop-release.yml` (61). Every one is `@v7`; the single
+   `docker/login-action` site is `@v4`. The floors themselves were not touched.
+2. **The teeth still bite, both ways.** On a `--no-hardlinks` scratch clone
+   outside this repository, at `28c1a7d`: deleting the `docker-publish.yml`
+   checkout step leaves the guard naming `expected 8 pinned site(s), found 7` and
+   terminating unsuccessfully, and downgrading that same site to `@v4` leaves it
+   naming `found actions/checkout@v4, below the required v7` and likewise
+   terminating unsuccessfully. The unmutated clone reports clean before and after
+   both probes, so each result is attributable to its own mutation.
+
+The whole diff to this file on the branch is the constant and its comment. No
+floor, no extraction and no failure branch changed, so the re-numbering restores
+the snapshot rather than softening the guard.
 
 ## Variance
 
@@ -1026,3 +1030,69 @@ Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
 Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
+
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — bốn lượt, ghim ở `c38b939`
+
+Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
+đợt, thay vì bốn mục gần trùng nhau.
+
+**Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
+thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
+trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ `sdk/pyproject.toml`
+qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci/`,
+`scripts/plugins/` và `scripts/acceptance/`; đồng bộ một mô tả trong `CLAUDE.md`.
+Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
+này cũ.
+
+**Vì sao phải tới bốn lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
+gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
+`scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
+guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
+`c38b939` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
+`_acceptance/**`, nên lần ghim này giữ được. (`9fcfc33`, mốc của lượt 3, bị chính
+`c38b939` làm cũ vì commit đó sửa `scripts/acceptance/check-stale-golden.sh`.)
+
+**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này có
+`landed_merge: 8477f8a`, nên tập file sở hữu là
+`git diff --name-only 8477f8a^1 8477f8a` giao với diff của nhánh. Sau khi bỏ các
+đường dẫn thuộc `t1_skip_globs`, giao vẫn còn **hai file thật**:
+`.github/workflows/ci.yml` và `scripts/ci/check-action-pins.sh`. Đây là re-verify
+thật, không phải carry-forward — và là hồ sơ duy nhất của đợt có giao khác rỗng sau
+khi lọc.
+- **Lượt 1 @ `a1bc936`** — **7 xanh / 1 đỏ (E1)** cho hồ sơ này; verdict REJECT, không ghim commit. Lượt đó lộ hai lỗi thật, cả hai do chính nhánh
+  tạo ra: (a) `scripts/lib/sdk-version.sh` giải gốc repo bằng
+  `git rev-parse --show-toplevel` **lúc gọi**, nên chết khi caller đã `cd` vào bản
+  clone repo plugin — 13 eval render của `compose-overlay` đỏ; (b)
+  `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi job vitest
+  mới nâng số điểm `actions/checkout` lên 8 — E1 của `ci-actions-bump` đỏ.
+- **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
+  `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
+  **8/8 eval xanh**; E1 báo `ok actions/checkout: 8 site(s), all >= v7`.
+- **Lượt 3 @ `9fcfc33`** — **8/8 eval xanh**, tất cả thoát 0, không lệch so với lượt 2.
+- **Lượt 4 @ `c38b939` (lượt này)** — **8/8 eval xanh**, tất cả thoát 0,
+  không lệch so với lượt 3.
+
+**Các guard neo chấm đúng dải của mình — đã đọc lại từng dòng kết quả.** E2/E3 đọc
+run `30196332819 @ 60c4797d`; E5/E6/E7 đọc các run dispatch đã neo về cây workflow
+`8477f8a0`; E8 báo `vs the range ci-actions-bump owns (4d89b584..8477f8a0)`. Không
+eval nào tự chấm diff của nhánh hiện tại. E1 là ngoại lệ **theo thiết kế** — nó
+không nhận `ACCEPTANCE_SLUG` và cố ý đọc cây làm việc hiện tại, vì AC-1 là khẳng
+định về toàn cây chứ không về một dải lịch sử.
+
+**Cách chạy.** Mỗi `cmd` được giải lại từng dòng theo `_acceptance/config.yaml`
+trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho mọi eval ràng buộc
+nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
+trùng nhau vì chúng ghi lại cùng một lần chạy.
+
+`verified_commit` chuyển sang `c38b939d9842`. Dòng chữ ký người trong frontmatter
+không bị đụng tới.
+
+**Phát hiện của lượt này, ảnh hưởng cả đợt.** `check-stale-golden.sh` — eval E3 của
+`stale-scope-by-paths` — đóng băng output của gate cho **bảy hồ sơ không khai `paths`**
+ở đúng trạng thái ĐANG CŨ (`VIOLATION ... evidence is stale`). Chính việc ghim lại của
+đợt này làm bảy dòng ấy lật sang `OK ... PASS, signed off by`, nên E3 chuyển đỏ ngay
+sau khi ghim. Đây là đo trực tiếp, không suy luận: chạy trước khi ghim thoát 0, chạy lại
+sau khi ghim thoát 1, cả hai đều có dòng trong `run-log.jsonl` của hồ sơ đó.
+Bảy hồ sơ đó **gồm hồ sơ này**. Vì lý do này `stale-scope-by-paths` **không** được ghim ở lượt này và giữ
+verdict REJECT; chi tiết trong hồ sơ riêng của nó. Cơ chế staleness-scoping mà AC-3 nói
+tới không đổi — thứ lật là trạng thái ghim, không phải hành vi scoping.

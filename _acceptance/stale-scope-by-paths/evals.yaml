@@ -26,13 +26,16 @@ evals:
     expected: "exit 0; output contains `CASE out-of-scope: PASS`. The same fixture feature is NOT reported stale when every file in its staleness set falls outside its union, and the run attributes no violation to it"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
-  - id: E3
-    criterion: AC-3
-    executor: script
-    cmd: config:executors.script.stale_scoping_golden
-    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
-    expected: "exit 0; the gate's output for the seven features that declare NO paths is byte-identical to the baseline captured BEFORE pre-merge-check.sh was touched, and that baseline's capture commit predates the change in git history. Comparing violation COUNT alone does not satisfy this eval — a new output line or a reworded message is a behaviour change for anyone reading the gate"
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+  # E3 DESCOPED 2026-08-05 (Gate 2, Manh) — see decisions.jsonl
+  # d-20260805T190000Z-31447 and the contract's Amendment. Its golden froze the
+  # staleness VERDICT of the seven paths-less features rather than the scoping
+  # BEHAVIOUR, so it had no stable state: red after every successful re-pin wave,
+  # and red on the next branch if regenerated. Measured, not argued — exit 0
+  # before the pins and exit 1 after, on one tree.
+  # AC-3 is left without a direct machine eval. The gap is recorded in Known
+  # limits and queued: it wants an `undeclared` fixture case in
+  # check-stale-scoping.sh, immune to the real repo's pin state the way its
+  # fourteen sibling cases already are.
 
   - id: E4
     criterion: AC-4

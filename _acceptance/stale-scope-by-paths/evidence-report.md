@@ -3,11 +3,19 @@ schema_version: 2
 feature_slug: stale-scope-by-paths
 verdict: PASS
 failed_evals: []
-reason:
-verified_by: fresh-context verification subagent
+reason: >-
+  Chạy lại ở 1b37024 (nhánh feat/ci-vitest-sdk-pin, round 7) sau khi chủ sở hữu
+  descope E3 tại Cổng 2 (d-20260805T190000Z-31447 + mục Amendment của contract).
+  Bộ eval còn 15; cả 15 thoát 0 với đúng token `expected` đòi. Nguyên nhân đỏ của
+  hai lượt trước là chính E3 — golden của nó đóng băng PHÁN QUYẾT staleness của 7
+  hồ sơ khai 0 `paths`, một thứ phụ thuộc trạng thái ghim, chứ không phải HÀNH VI
+  scoping mà AC-3 nói tới. Lượt này kiểm lại chẩn đoán đó bằng đo trực tiếp trên
+  cây (xem mục CI-a) và xác nhận đúng. Kèm theo: AC-3 nay không còn eval máy
+  khẳng định trọn vẹn — khoảng hở ghi rõ bên dưới cho người ký.
+verified_by: fresh-context verification subagent (round 7)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f39723a228be90031eb1e3e423664c84829851db
+verified_commit: 1b37024c643f5ad845eac61b22c92f1cf4012aae
 human_signoff: Manh 2026-07-29
 ---
 
@@ -17,7 +25,6 @@ human_signoff: Manh 2026-07-29
 |---|---|---|---|
 | E1 | AC-1 | script | PASS |
 | E2 | AC-2 | script | PASS |
-| E3 | AC-3 | script | PASS |
 | E4 | AC-4 | script | PASS |
 | E5 | AC-5 | script | PASS |
 | E6 | AC-6 | script | PASS |
@@ -32,153 +39,153 @@ human_signoff: Manh 2026-07-29
 | E15 | AC-14 | script | PASS |
 | E16 | AC-6 | script | PASS |
 
+E3 (AC-3) đã bị gỡ khỏi `evals.yaml` ngày 2026-08-05 theo quyết định Cổng 2
+`d-20260805T190000Z-31447`. AC-3 vì thế không còn dòng nào trong bảng — đó là
+khoảng hở, không phải sơ suất trình bày; xem "Khoảng hở AC-3" bên dưới.
+
 ## Evidence
 
 - eval: E1
-  run_id: minted-stale-scope-by-paths-E1-r4
+  run_id: stale-scope-by-paths-E1-20260806T023856
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_in_scope
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:38:56Z
   output: |
     CASE in-scope: PASS
 
 - eval: E2
-  run_id: minted-stale-scope-by-paths-E2-r4
+  run_id: stale-scope-by-paths-E2-20260806T023857
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_out_of_scope
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:38:57Z
   output: |
     CASE out-of-scope: PASS
 
-- eval: E3
-  run_id: minted-stale-scope-by-paths-E3-r4
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.stale_scoping_golden
-  verified_at: 2026-07-29T16:50:00Z
-  output: |
-    OK: undeclared features keep byte-identical gate output
-
 - eval: E4
-  run_id: minted-stale-scope-by-paths-E4-r4
+  run_id: stale-scope-by-paths-E4-20260806T023858
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_partial
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:38:58Z
   output: |
     CASE partial: PASS
 
 - eval: E5
-  run_id: minted-stale-scope-by-paths-E5-r4
+  run_id: stale-scope-by-paths-E5-20260806T023859
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_under_declared
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:38:59Z
   output: |
     CASE under-declared: PASS
 
 - eval: E6
-  run_id: minted-stale-scope-by-paths-E6-r4
+  run_id: stale-scope-by-paths-E6-20260806T023859
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_malformed
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:38:59Z
   output: |
     CASE malformed: PASS
 
 - eval: E7
-  run_id: minted-stale-scope-by-paths-E7-r4
+  run_id: stale-scope-by-paths-E7-20260806T023900
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_merged_halves
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:00Z
   output: |
     CASE merged-halves: PASS
 
 - eval: E8
-  run_id: minted-stale-scope-by-paths-E8-r4
+  run_id: stale-scope-by-paths-E8-20260806T023902
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_suppression
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:02Z
   output: |
     CASE suppression: PASS
 
 - eval: E9
-  run_id: minted-stale-scope-by-paths-E9-r4
+  run_id: stale-scope-by-paths-E9-20260806T023903
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_mutation
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:03Z
   output: |
     CASE mutation: PASS
 
 - eval: E10
-  run_id: minted-stale-scope-by-paths-E10-r4
+  run_id: stale-scope-by-paths-E10-20260806T023905
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_case_completeness
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:05Z
   output: |
     CASE case-completeness: PASS
 
 - eval: E11
-  run_id: minted-stale-scope-by-paths-E11-r4
+  run_id: stale-scope-by-paths-E11-20260806T023905
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_guard_not_exempt
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:05Z
   output: |
     CASE guard-not-exempt: PASS
 
 - eval: E12
-  run_id: minted-stale-scope-by-paths-E12-r4
+  run_id: stale-scope-by-paths-E12-20260806T023905
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_two_bases
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:05Z
   output: |
     CASE two-bases: PASS
 
 - eval: E13
-  run_id: minted-stale-scope-by-paths-E13-r4
+  run_id: stale-scope-by-paths-E13-20260806T023905
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_no_kill_switch
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:05Z
   output: |
     CASE no-kill-switch: PASS
 
 - eval: E14
-  run_id: minted-stale-scope-by-paths-E14-r4
+  run_id: stale-scope-by-paths-E14-20260806T023905
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_real_repo
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:05Z
   output: |
     OK: conformance-l0 refused narrow scope for exactly the six declared-but-missing files
 
 - eval: E15
-  run_id: minted-stale-scope-by-paths-E15-r4
+  run_id: stale-scope-by-paths-E15-20260806T023907
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_announce
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:07Z
   output: |
     CASE announce: PASS
 
 - eval: E16
-  run_id: minted-stale-scope-by-paths-E16-r4
+  run_id: stale-scope-by-paths-E16-20260806T023908
   exit_code: 0
   baseline: red
   verifier: config:executors.script.stale_scope_indent_drift
-  verified_at: 2026-07-29T16:50:00Z
+  verified_at: 2026-08-06T02:39:08Z
   output: |
     CASE indent-drift: PASS
 
 ### Supporting checks (whole-repo, not tied to a single eval id)
+
+Đo ở `c38b939` (lượt 6 của cùng đợt CI-a) và **vẫn mô tả đúng cây ở HEAD
+`1b37024`**: `git diff --name-only c38b939..1b37024` chỉ trả về file dưới
+`_acceptance/**` — không một file gated nào — nên không có mã sản phẩm nào đổi
+giữa hai điểm đó. Đã kiểm bằng lệnh, không suy đoán.
 
 - `pnpm build && pnpm typecheck` — exit 0. Tail: `$ tsc --noEmit` (clean, plus the pnpm.onlyBuiltDependencies settings-migration warning, unrelated to this change).
 - `pnpm lint:check` — exit 0. Tail: `Checked 402 files in 177ms. No fixes applied.`
@@ -203,7 +210,7 @@ Round 2: All 16 script evals (E1-E16) exit 0 again — E1 was strengthened to co
 
 Round 3: All 16 script evals (E1-E16) exit 0 again — slug_acceptance_touched() now accepts both the top-level and nested `*/_acceptance/<slug>/` spelling (closing round 2's AC-5 blind spot), and feature_scope()'s completeness check moved from bare total-count comparison to a per-eval, line-number-anchored accounting via "nearest `- id:` above" (closing round 2's total-count AC-4 gap) — and the supporting suite passes clean again. Adversarial code review then found a NEW in-contract AC-4 variant that no round-3 fixture caught: the "nearest `- id:` above" heuristic attributes a `paths:` line to an eval without checking the line is still inside that eval's block, so an unrelated `paths:` key sitting at the eval-key column below the evals list (e.g. under a sibling `misc:`/`sub:` mapping) gets folded into the last eval's ownership, balancing the total and reading a partially-declared file as complete — the exact dangerous-direction failure (narrower-than-truth scope) AC-4 exists to refuse. Given the finding was in-contract and failed in the dangerous direction, the human explicitly approved exceeding the normal 3-round escalation cap to fix it rather than merging on known-bad completeness logic. Overall gate verdict REJECT. Returned to implementation.
 
-Round 4 (this round): feature_scope()'s completeness check now walks the evals list as an explicit open/close block per eval item via a single awk pass (paths_re passed through ENVIRON rather than `-v`, so escape sequences like `\[`/`\]` are not eaten and the glob grammar is not silently widened), rejecting any `paths:` line that lands outside every open block — closing round 3's "nearest `- id:` above" gap. E4 was strengthened with three halves: the obvious partial-declaration case, the same lie hidden behind balanced totals (two `paths:` lines on one eval, none on the sibling), and the sibling-mapping variant that triggered round 3's finding, each isolated from the AC-7 cross-check so they exercise completeness alone. All 16 script evals (E1-E16) exit 0 against the fixture suite, and the supporting `pnpm build`/`typecheck`, `lint:check`, `test`, SDK `pytest`, `verify:plugins`, and `gen:abi` diff-check all pass clean. Adversarial code review found no further in-contract findings this round — 7 out-of-contract findings remain (2 HIGH: the t1-exempt-only fail-open scope, and the Vietnamese-language vendor text; plus 5 MEDIUM/LOW), all already routed to Gate 2 per the S1/gate2 decision log (d-20260729T095807Z-19845, d-20260729T095807Z-29062) as deferred to a separate contract rather than fixed here. Overall gate verdict PASS.
+Round 4: feature_scope()'s completeness check now walks the evals list as an explicit open/close block per eval item via a single awk pass (paths_re passed through ENVIRON rather than `-v`, so escape sequences like `\[`/`\]` are not eaten and the glob grammar is not silently widened), rejecting any `paths:` line that lands outside every open block — closing round 3's "nearest `- id:` above" gap. E4 was strengthened with three halves: the obvious partial-declaration case, the same lie hidden behind balanced totals (two `paths:` lines on one eval, none on the sibling), and the sibling-mapping variant that triggered round 3's finding, each isolated from the AC-7 cross-check so they exercise completeness alone. All 16 script evals (E1-E16) exit 0 against the fixture suite, and the supporting `pnpm build`/`typecheck`, `lint:check`, `test`, SDK `pytest`, `verify:plugins`, and `gen:abi` diff-check all pass clean. Adversarial code review found no further in-contract findings this round — 7 out-of-contract findings remain (2 HIGH: the t1-exempt-only fail-open scope, and the Vietnamese-language vendor text; plus 5 MEDIUM/LOW), all already routed to Gate 2 per the S1/gate2 decision log (d-20260729T095807Z-19845, d-20260729T095807Z-29062) as deferred to a separate contract rather than fixed here. Overall gate verdict PASS.
 
 ## Gate 2 checklist (human)
 
@@ -215,6 +222,9 @@ Round 4 (this round): feature_scope()'s completeness check now walks the evals l
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+- [ ] **Đọc mục "Khoảng hở AC-3" bên dưới trước khi ký.** Hồ sơ này ký PASS với
+      một tiêu chí (AC-3) không còn eval máy khẳng định trọn vẹn, và với hai file
+      guard chết nằm lại trên cây.
 
 
 ---
@@ -290,3 +300,124 @@ Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
 Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
+
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — ba lượt, kết ở việc descope E3
+
+Một mục duy nhất cho cả đợt CI-a, thay cho các mục rời của từng lượt.
+
+**Vì sao hồ sơ này vào đợt.** Phạm vi eval khai của nó phủ `scripts/acceptance/**`,
+mà nhánh CI-a thêm `scripts/acceptance/check-gate-residual.sh` rồi sửa
+`scripts/acceptance/check-stale-golden.sh` — đúng thư mục đó. Đây là **re-verify
+thật**, không phải carry-forward: hồ sơ này SỞ HỮU file mà nhánh vừa sửa.
+
+### Lượt 5 @ `9fcfc33` — 15/16, E3 đỏ vì NOTE gap-probe
+
+Guard so output của `pre-merge-check.sh . --base main` cho bảy hồ sơ **không khai
+`paths`** với golden 7 dòng, và thấy **13 dòng**: đủ 7 dòng `VIOLATION` khớp golden
+nguyên vẹn, cộng **6 dòng `NOTE` gap-probe thừa**. NOTE gap-probe chỉ bắn khi
+`_acceptance/<slug>/` của hồ sơ đó nằm trong diff PR, mà re-pin bằng chứng — đúng
+việc một đợt verify làm — đưa các thư mục ấy vào diff.
+
+### Lượt 6 @ `c38b939` — 16/16 xanh lúc chạy, rồi E3 đỏ lại sau khi ghim
+
+`c38b939` bỏ dòng NOTE gap-probe khỏi phép so (`grep -v '(gap-probe)'`) và **chỉ
+dòng đó** — độ hẹp của bộ lọc đã được kiểm chứng chứ không tin lời commit message
+(gỡ đúng 6 dòng NOTE, giữ đủ 7 dòng `VIOLATION`; 13 → 7). E3 cũng được thử làm
+hỏng golden ba kiểu (đổi tên hồ sơ, xoá một dòng, đổi chữ trong thông điệp) và cả
+ba đều bị bắt, nên bộ lọc `(gap-probe)` không làm eval rỗng nghĩa.
+
+Nhưng lượt 6 phát hiện một tầng nữa: sau khi bảy hồ sơ kia được ghim lại về HEAD,
+`stale_files()` không còn file gated nào để báo, nên gate in `OK [<slug>]: PASS,
+signed off by ...` thay cho `VIOLATION ... evidence is stale`. Bảy dòng lật cùng
+lúc và byte-compare của golden đỏ. Đo trực tiếp hai lần trên cùng một cây (thoát 0
+trước khi ghim, thoát khác 0 sau khi ghim), cả hai lần đều có dòng riêng trong
+`run-log.jsonl` round 6. Mười lăm eval anh em xanh ở cả hai trạng thái — chỉ E3
+nhạy với trạng thái ghim. Lượt 6 vì thế giữ REJECT và không ghim `verified_commit`.
+
+### Quyết ở Cổng 2 (2026-08-05): descope E3
+
+Chủ sở hữu quyết gỡ E3 khỏi bộ eval — `d-20260805T190000Z-31447`, kèm mục
+**Amendment** trong contract. `evals.yaml` còn 15 eval; chỗ của E3 là một khối
+comment giải thích lý do gỡ. `scripts/acceptance/check-stale-golden.sh` và fixture
+của nó **cố ý giữ lại trên cây**: xoá là chạm `scripts/**`, kích lại treadmill
+staleness cho toàn bộ pin vừa ghim.
+
+### Lượt 7 @ `1b37024` (lượt này) — 15/15 xanh, và kiểm lại chính chẩn đoán trên
+
+Lượt này không nhận chẩn đoán của lượt 6 làm dữ kiện mà **đo lại độc lập trên cây
+hiện tại**:
+
+1. `cat scripts/acceptance/fixtures/baseline-gate-output.txt` → đúng 7 dòng, cả 7
+   đều dạng `VIOLATION [<slug>]: evidence is stale …`.
+2. Chạy lại đúng pipeline mà guard dùng (`pre-merge-check.sh . --base main`, cùng
+   `grep`/`sed`/`sort`) → cả 7 hồ sơ nay in `OK [<slug>]: PASS, signed off by …`.
+   Tức byte-compare của E3 hôm nay chắc chắn lệch — golden ghim một phán quyết đã
+   đổi, không phải một hành vi đã đổi.
+3. **Vì sao đổi, và đổi có phải do narrow-scoping không:** không. Cả bảy hồ sơ đều
+   khai **0 dòng `paths`** (đã đếm trên `evals.yaml` của từng hồ sơ), nên không hồ
+   sơ nào đủ điều kiện nhận scope hẹp. Và pipeline của guard có bắt cả dòng `NOTE
+   [<slug>]` — không dòng `narrow staleness scope applied` nào xuất hiện cho bất kỳ
+   hồ sơ nào trong bảy. Chúng hết cũ chỉ vì `verified_commit` của chúng
+   (`c38b939`) nay đã hiện hành: `git diff --name-only c38b939..1b37024` chỉ trả về
+   file dưới `_acceptance/**` — không một file gated nào.
+
+**Kết luận về chẩn đoán:** đúng. E3 đóng băng *phán quyết* staleness, một hàm của
+trạng thái ghim, chứ không phải *hành vi* scoping mà AC-3 khẳng định. Nó không có
+trạng thái ổn định (giữ nguyên → đỏ sau mọi wave re-pin; regen về 7 dòng `OK` → đỏ
+ở nhánh sau khi bảy hồ sơ stale trở lại), nên descope là quyết định đúng, không
+phải né tránh một eval đang bắt được lỗi thật.
+
+**Và hành vi AC-3 thật sự vẫn đúng trên cây này** — điều đó được kiểm riêng, không
+suy ra từ việc E3 bị gỡ: dựng lại đúng fixture `none` (0 `paths`) mà harness đã có
+rồi cho một file gated đổi, gate in `VIOLATION [fx]: evidence is stale …` và
+**không** in dòng narrow-scope nào. Đủ ba vế của AC-3. Chỉ là không eval nào khẳng
+định vế đầu.
+
+15 eval còn lại đều thoát 0 với đúng token `expected` đòi; `stale_scope_real_repo`
+(E14) vẫn báo đúng sáu file thiếu của `conformance-l0`. Vì vậy lượt này ghim
+`verified_commit: 1b37024`.
+
+### Khoảng hở AC-3 — người ký cần biết
+
+AC-3 gồm ba vế: hồ sơ khai 0 `paths` (a) vẫn nhận staleness **toàn cây**, (b)
+không sinh dòng output mới, (c) không được cấp scope hẹp.
+
+Bản Amendment nói AC-3 "mất eval máy trực tiếp duy nhất" và chỉ còn E4 cùng E1/E2
+chạm tới **gián tiếp**. Kiểm lại harness thì mô tả đó **hơi quá tay theo hướng bi
+quan**, và nên đính chính cho đúng:
+
+- **E15 (`announce`, AC-14) có dựng fixture khai 0 `paths` thật**
+  (`mk_committed_report_fixture "$d2" fx none`), cho một file gated đổi
+  (`src/uncovered/new.txt`), rồi khẳng định **trực tiếp** rằng gate **không** in
+  dòng `narrow staleness scope applied` cho nó. Đó chính là vế (b) và (c) của AC-3,
+  khẳng định thẳng trên ca 0-`paths` chứ không phải gián tiếp.
+- **E8 (`suppression`, AC-8) cũng chạy fixture mode `none`** — nhưng chỉ ở chiều
+  phủ định (đổi `docs/**` + `_acceptance/**` thì **không** stale), nên nó không nói
+  gì về vế (a).
+
+**Phần thật sự hở là vế (a):** không eval nào trong 15 khẳng định rằng một hồ sơ
+khai **0** `paths` vẫn bị báo `VIOLATION … evidence is stale` khi có file gated
+đổi. E4 khẳng định vế đó cho khai **một phần**, E6 cho `paths: []` — cả hai đều là
+"coi như không khai", nhưng không phải là ca không-khai theo nghĩa đen mà AC-3 mô
+tả. Đó là một vế, không phải cả tiêu chí.
+
+Chi phí vá rất nhỏ và nên nói rõ để khỏi bị đánh giá to hơn thực tế: fixture cần
+thiết **đã tồn tại** — chính `$d2` của `case_announce` — nên thêm một dòng
+`grep -q 'VIOLATION \[fx\]: evidence is stale'` vào đó là đóng được vế (a). Việc
+đã nằm trong hàng đợi của Amendment dưới dạng case `undeclared` riêng trong
+`check-stale-scoping.sh`; dựng trên fixture git nên miễn nhiễm trạng thái ghim của
+repo thật — đúng điểm khác biệt khiến nó ổn định còn golden thì không.
+
+### Code chết còn lại trên cây (cố ý)
+
+Sau descope, ba thứ của E3 vẫn nằm trên cây và **không** còn eval nào gọi:
+
+- `scripts/acceptance/check-stale-golden.sh`
+- `scripts/acceptance/fixtures/baseline-gate-output.txt`
+- khoá executor `stale_scoping_golden` trong `_acceptance/config.yaml` (dòng 230)
+  — không `evals.yaml` nào của repo còn trỏ tới nó.
+
+Giữ lại là cố ý (xoá = chạm `scripts/**` = stale lại toàn bộ pin vừa ghim), nhưng
+hệ quả cần nói thẳng: guard này **vẫn chạy được bằng tay và hôm nay sẽ đỏ**. Ai
+gặp nó mà không đọc mục này dễ tưởng có một cổng đang hỏng. Đã kiểm: nó **không**
+được gọi trong `.github/workflows/**`, nên không chặn CI. Dọn thuộc contract kế.

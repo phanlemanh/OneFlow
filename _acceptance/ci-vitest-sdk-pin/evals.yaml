@@ -1,0 +1,115 @@
+# 13 eval / 12 tiêu chí — AC-4 là eval duy nhất phụ thuộc mạng (gh), AC-11 là eval
+# tích hợp cuối. Mọi eval khác offline thuần.
+#
+# `paths` khai cho eval offline (cơ chế 0.5 — carry-forward giữa các vòng verify).
+# CHỦ Ý không khai cho E4 (civ_run_jobs_green): sự thật của nó nằm ở một CI run trên
+# GitHub, không ở file nào trong cây — thiếu paths = luôn chạy lại (mặc định an toàn),
+# đúng tiền lệ guard clone-and-pytest của compose-overlay.
+#
+# E11 (civ_gate_residual) cũng không khai paths: nó hỏi về TOÀN BỘ cây so với base,
+# nên bất kỳ scope hẹp nào cũng là câu trả lời sai không gian (đúng họ lỗi mà
+# gate-scope-anchors vừa đóng). Lời của E11 sửa 05/08 — xem Amendment trong contract.
+schema_version: 1
+feature_slug: ci-vitest-sdk-pin
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.civ_job_shape
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-vitest-job.sh"]
+    expected: "exit 0; đúng MỘT job chạy `pnpm test`; trigger pull_request→main + push→main; pattern setup khớp 4 job cũ (pnpm/action-setup + setup-node 24 + pnpm install). Hai job hoặc không job đều ĐỎ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.civ_job_no_softening
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-vitest-job.sh"]
+    expected: "exit 0; trong job vitest KHÔNG có continue-on-error, `|| true`, `if:` bỏ qua trên pull_request, hay `set +e`. Chèn bất kỳ dạng nào → ĐỎ (should-NOT-fire)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.civ_job_teeth
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-vitest-job.sh"]
+    expected: "exit 0; harness chèn một test cố tình hỏng (perturbation in-process, KHÔNG commit), chạy đúng lệnh job CI chạy → exit != 0; gỡ perturbation → exit 0. Guard tự chứng minh nó ĐỎ khi lỗi quay lại"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.civ_run_jobs_green
+    expected: "exit 0; một CI run THẬT của nhánh này có đủ 6 job — Lint · Type Check · Build · SDK Tests (Python) · Acceptance Gate · Unit Tests (vitest) — tất cả success. Thiếu job mới → ĐỎ; mất/đỏ một job cũ → ĐỎ (nửa should-NOT-break)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.civ_pin_derived
+    paths: ["scripts/plugins/run-overlay-plugin-tests.sh", "scripts/plugins/check-overlay-pin-derived.sh", "sdk/pyproject.toml"]
+    expected: "exit 0; trong run-overlay-plugin-tests.sh KHÔNG còn literal phiên bản nào (`0.2.18`, `oneflow-sdk==<số>`); spec giải ra bằng đúng version trong sdk/pyproject.toml"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.civ_pin_teeth
+    paths: ["scripts/plugins/run-overlay-plugin-tests.sh", "scripts/plugins/check-overlay-pin-derived.sh", "sdk/pyproject.toml"]
+    expected: "exit 0; perturbation trên BẢN SAO của pyproject (version != hiện hành) → spec giải ra bám theo bản mới; trả nguyên trạng → spec về đúng bản hiện hành. Chạy harness này trên code TRƯỚC khi sửa phải ĐỎ — đó là fail-open cần đóng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.civ_pin_override
+    paths: ["scripts/plugins/run-overlay-plugin-tests.sh", "scripts/plugins/check-overlay-pin-derived.sh"]
+    expected: "exit 0; OVERLAY_SDK_SPEC=<giá trị> → spec dùng nguyên văn giá trị đó, ưu tiên hơn bản derive (should-NOT-break: đường trỏ wheel local trước khi bản PyPI hạ cánh)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.civ_pin_single_impl
+    paths: ["scripts/plugins/run-overlay-plugin-tests.sh", "scripts/abi/check-overlay-sdk-train.sh", "scripts/plugins/check-overlay-pin-derived.sh"]
+    expected: "exit 0; luật đọc phiên bản từ pyproject được định nghĩa ĐÚNG MỘT chỗ (dùng chung hoặc một script gọi chỗ kia); xuất hiện bản sao thứ hai → ĐỎ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.civ_docs_guard_synced
+    paths: ["CLAUDE.md", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-manifest-doc-synced.sh"]
+    expected: "exit 0; CLAUDE.md §Registering an official plugin mô tả ngữ nghĩa hiện hành (38 chuỗi trơn + đúng 1 entry origin) và KHÔNG còn khẳng định expected_count = 38 plain string entries"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.b1_anchored_green
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-workflow-drift.sh", "scripts/plugins/check-no-config-drift.sh", "scripts/deps/check-no-t3-drift.sh", "scripts/acceptance/own-range.sh"]
+    expected: "exit 0; ba guard đã neo của feature khác vẫn XANH trên nhánh này dù ci.yml đổi — chúng chấm range của chính chủ. ĐỎ ở đây = phát hiện về gate-scope-anchors, không phải về gói này"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.civ_gate_residual
+    expected: "exit 0; violation duy nhất còn lại (nếu có) là chữ ký Cổng 2 đang chờ của CHÍNH feature này — mọi feature khác sạch, tức wave đã khớp báo giá Cổng 1 (2 re-verify + 7 carry-forward + 6 không đụng): nếu còn feature nào stale/đỏ/thiếu chữ ký thì violation của nó xuất hiện và guard TỪ CHỐI. Nửa sau của AC-11 (`clean` sau khi ký) là mục kiểm tay ở Cổng 2"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.civ_eval_keys_intact
+    paths: ["_acceptance/config.yaml", "scripts/ci/check-eval-keys-intact.sh"]
+    expected: "exit 0; so với origin/main KHÔNG có key overlay_* nào bị đổi/gỡ và feature_loop.suite_keys giữ nguyên; thêm key mới của gói này được phép. Sửa một overlay_* → ĐỎ (should-NOT-fire)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.verify_plugins
+    paths: ["_acceptance/config.yaml", "config/official-plugins.json"]
+    expected: "exit 0; scanner vẫn nhận diện đủ plugin sau khi config.yaml thêm key — chứng minh gói này không chạm tập guard/plugin, chỉ chạm cách guard tự chạy"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

@@ -17,8 +17,28 @@ UNDECLARED='ci-actions-bump|dependency-refresh-2026-07|measure-harness|oneflow-p
 # would compare `[ "" = "" ]` and print OK, proving nothing.
 [ -s "$GOLDEN" ] || { echo "FAIL: golden baseline is empty (0 bytes) — a byte-compare against an empty file would pass vacuously"; exit 1; }
 
+# The gap-probe advisory NOTE is dropped before the comparison, and only that
+# one. It fires for a feature when that feature's own `_acceptance/<slug>/` is
+# inside the PR diff — a property of WHICH DIRECTORIES A BRANCH TOUCHES, not of
+# the staleness-scoping behaviour this golden exists to freeze. Any branch that
+# re-pins evidence for these seven puts their directories in the diff, so the
+# NOTEs appear; and re-pinning evidence is exactly what an acceptance verify wave
+# does. Left in, this eval goes red on every future wave and says nothing about
+# AC-3 (observed 2026-08-05: 13 actual vs 7 golden, the seven VIOLATION lines
+# byte-identical, the six extra lines all gap-probe NOTEs; the same run against a
+# base excluding the re-pin commit returned exactly the seven).
+#
+# Regenerating the golden instead would bake that transient PR state into a
+# baseline meant to capture stable behaviour — precisely what commit f39723a
+# reverted once already. The fix belongs in what the comparison reads.
+#
+# Narrow on purpose: the `narrow staleness scope applied` NOTE is real
+# scoping behaviour and stays in the comparison. Anchored on the `(gap-probe)`
+# marker rather than the message prose, which is vendored kit text and is
+# already queued for translation (item 0.7).
 actual="$(bash "$ROOT/scripts/pre-merge-check.sh" "$ROOT" --base main 2>&1 \
   | grep -E "^(VIOLATION|OK|NOTE) \[($UNDECLARED)\]" \
+  | grep -v '(gap-probe)' \
   | sed -E 's/verified_commit [0-9a-f]{40}/verified_commit <SHA>/' \
   | sort)"
 

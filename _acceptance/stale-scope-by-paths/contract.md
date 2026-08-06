@@ -80,6 +80,62 @@ repo the two ranges coincide. AC-12 exists to make that reading red.
 - AC-13: Given `scripts/pre-merge-check.sh` as shipped at HEAD, When it is scanned for the guard's perturbation knobs by name, Then none is present. *"In-process mutation" implemented as an env var in the shipped gate is a production kill switch: set it and every declared feature gets a match-nothing scope and the gate exits clean. AC-9 would require that switch to exist; this forbids it existing anywhere but the guard's temp copy.*
 - AC-14: Given a feature granted narrow scope, When the check runs, Then it prints one line naming that feature and the globs that scoped it; and when the narrow scope suppressed a staleness that whole-tree would have reported, Then the line says so explicitly; and given an undeclared feature, Then no such line is printed. *A successful narrow scope is the only path that weakens the gate, and it was the only path with no mandated output — leaving "F is genuinely unaffected" and "F's declaration has drifted" indistinguishable to a reviewer. The third clause keeps AC-3's silence intact.*
 
+## Amendment (2026-08-05 — duyệt tại chỗ bởi Manh, phát hiện từ wave của `ci-vitest-sdk-pin`)
+
+**E3 (`stale_scoping_golden`) bị descope.** Golden của nó đóng băng **phán quyết
+staleness** của 7 feature khai 0 `paths`, chứ không phải **hành vi scoping** mà AC-3
+nói tới. Hệ quả: nó không có trạng thái ổn định nào.
+
+- Để nguyên → đỏ sau **mọi** wave re-pin thành công, vì ghim 7 feature đó xong thì
+  gate in `OK [slug]` thay cho `VIOLATION [slug]` — 7 dòng lật cùng lúc.
+- Regen về 7 dòng `OK` → đỏ ở nhánh sau, khi 7 feature đó stale trở lại.
+
+Đo được chứ không phải lập luận: trên cùng một cây, `exit 0` trước khi wave ghim và
+`exit 1` sau khi ghim; cả hai lần đều có dòng trong `run-log.jsonl`. 15 guard anh em
+vẫn xanh ở cả hai trạng thái — chỉ E3 nhạy với trạng thái pin.
+
+Đây là tầng thứ hai của đúng lỗi mà `ci-vitest-sdk-pin` vừa sửa ở tầng trên (golden
+nuốt dòng NOTE gap-probe phụ thuộc diff). Cùng một hình dạng: **cổng đóng băng một
+thứ phụ thuộc hoàn cảnh và gọi nó là bất biến.**
+
+**Khoảng hở, đo lại chính xác sau vòng verify.** Bản đầu của Amendment này viết
+"không eval nào còn khẳng định thẳng ca khai 0 `paths`" — **nói quá**. Vòng verify
+context sạch đọc lại harness và chỉ ra **E15 (`announce`, AC-14) dựng fixture
+zero-`paths` thật** (`mk_committed_report_fixture "$d2" fx none`, mode `none` = không
+eval nào khai `paths`), làm bẩn một file gated, rồi khẳng định trực tiếp rằng gate
+**không** in dòng `narrow staleness scope applied` cho nó. E8 (`suppression`) cũng
+chạy fixture mode `none`, nhưng chỉ ở chiều phủ định.
+
+AC-3 có ba mệnh đề. Sau descope:
+
+| Mệnh đề | Trạng thái |
+|---|---|
+| (b) không thêm dòng output mới | ✅ E15 khẳng định thẳng trên fixture zero-`paths` |
+| (c) không được cấp narrow scope | ✅ E15, cùng chỗ |
+| (a) vẫn bị báo `VIOLATION … evidence is stale` khi có thay đổi gated | ❌ **không eval nào khẳng định** |
+
+E4 khẳng định (a) cho ca *khai một phần*, E6 cho `paths: []` — cả hai là "coi như
+không khai", không phải ca khai-0-dòng theo nghĩa đen.
+
+Vòng verify cũng kiểm hành vi thật vẫn nguyên: dựng lại fixture `none` của E15 kèm một
+thay đổi gated → gate in `VIOLATION [fx]: evidence is stale …` và không có dòng
+narrow-scope. Cả ba mệnh đề đúng, chỉ (a) là **không được khẳng định**, không phải bị hỏng.
+
+**Vá rẻ hơn nhiều so với ước tính ban đầu:** một dòng `grep -q 'VIOLATION \[fx\]:
+evidence is stale'` thêm vào `$d2` sẵn có trong `case_announce` — fixture đã nằm đó
+rồi, không cần dựng case `undeclared` mới. Vẫn để cho contract kế (chạm `scripts/**`
+là kích lại treadmill staleness), nhưng giá thật là một dòng.
+
+**Việc kế tiếp (hàng đợi, không thuộc contract này):** thêm case fixture `undeclared`
+vào [`check-stale-scoping.sh`](../../scripts/acceptance/check-stale-scoping.sh), dựng
+trên git fixture như 14 case anh em, nên miễn nhiễm trạng thái pin của repo thật —
+đó là khác biệt khiến nó ổn định còn golden thì không.
+
+[`check-stale-golden.sh`](../../scripts/acceptance/check-stale-golden.sh) và fixture
+của nó **giữ nguyên trên cây**: xoá là chạm `scripts/**`, kích lại treadmill staleness
+cho toàn bộ pin vừa ghim. Chúng là code chết cho tới khi contract kế dọn — ghi ở đây
+để người sau không tưởng đó là guard đang có hiệu lực.
+
 ## Coverage
 
 Scanned with `morphological-scan` (test-matrix preset, axes rebuilt from first

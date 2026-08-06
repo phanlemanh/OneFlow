@@ -9,7 +9,14 @@
 set -euo pipefail
 
 WF_DIR=".github/workflows"
-EXPECTED_CHECKOUT_SITES=7
+# Snapshot count, not a standing invariant — same class as
+# check-manifest-unmoved.sh (see CLAUDE.md). It exists so that DELETING a
+# checkout step cannot masquerade as bumping one, which means whichever PR adds
+# or removes a site must re-number it here.
+# 7 → 8 on 2026-08-05: ci-vitest-sdk-pin added the `Unit Tests (vitest)` job to
+# ci.yml, whose checkout is the sixth in that file (5 ci.yml + 1 desktop-release
+# + 1 docker-publish → 6 + 1 + 1).
+EXPECTED_CHECKOUT_SITES=8
 EXPECTED_LOGIN_SITES=1
 
 if [ ! -d "$WF_DIR" ]; then
