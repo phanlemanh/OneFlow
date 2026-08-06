@@ -57,7 +57,21 @@ evals:
     expected: "exit 0; the serialization chain is keyed per plugin id — two different ids are NOT serialized against each other, while calls sharing one id are"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
-  # ---------- B. oneflow-local-ffmpeg ----------
+  - id: E22
+    criterion: AC-18
+    executor: test
+    cmd: config:executors.test.unit_venv_fail_loudly
+    expected: "exit 0 — the test breaks provisioning and asserts ensurePluginPython THROWS for a plugin declaring requirements.txt, naming the plugin and the fix. It must NOT hand back a plain interpreter missing every dependency"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E23
+    criterion: AC-18
+    executor: test
+    cmd: config:executors.test.unit_venv_lite_fallback_kept
+    expected: "exit 0 — the suppression half: with the SAME broken provisioning, a plugin declaring NO requirements.txt still gets the lightweight fallback rather than an error. Failing loudly must not become failing indiscriminately"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- B. oneflow-api-ffmpeg ----------
   - id: E8
     criterion: AC-6
     executor: script
@@ -93,7 +107,7 @@ evals:
     expected: "exit 0 — the test asserts that with a bogus FFMPEG_BIN, an emptied PATH and no wheel the slot goes RED with an error naming the install fix. It must NOT find another ffmpeg and pass by accident"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
-  # ---------- C. oneflow-local-pyscenedetect ----------
+  # ---------- C. oneflow-api-pyscenedetect ----------
   - id: E13
     criterion: AC-11
     executor: script
@@ -105,7 +119,7 @@ evals:
     criterion: AC-12
     executor: script
     cmd: config:executors.script.lcp_split_ffprobe_required
-    expected: "exit 0 — the test asserts that when ffprobe cannot be resolved the plugin fails loudly NAMING ffprobe. It must NOT silently skip keyframe alignment or emit unaligned cuts; the imageio-ffmpeg wheel ships no ffprobe, so this path is reachable on a clean machine"
+    expected: "exit 0 — the test asserts that when ffprobe cannot be resolved, a caller that requires it fails loudly NAMING ffprobe and explaining that the wheel cannot supply it, never a silent substitution. AMENDED 2026-08-07: AC-12's premise that the splitter needs ffprobe 'for keyframe alignment' is false — upstream's two ffprobe helpers are dead code, so ffmpeg alone is required and a wheel-only machine still works. What is pinned is the resolver's teeth; see the test docstring and contract Notes item 5"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- D. Modal is actually gone ----------

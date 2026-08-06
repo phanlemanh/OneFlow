@@ -272,19 +272,28 @@ set of working examples; pick one close to what you're building, `git clone` it 
 
 ### `requirements.txt` — local deps, auto-installed
 
-The platform runs your entry in a shared, managed Python venv (3.10+, created automatically).
-If your plugin directory contains a `requirements.txt`, the platform installs it into that venv
-on first run, cached by content hash. The tongflow SDK (and its dependencies) are always
-present, so:
+The platform runs your entry in **its own** managed Python venv (3.10+, created automatically)
+under `<dataDir>/.tongflow/plugin-venv/<pluginId>`. If your plugin directory contains a
+`requirements.txt`, the platform installs it into that venv on first run, cached by content
+hash. The tongflow SDK (and its dependencies) are always present, so:
 
 - A **Modal-backed** plugin's `requirements.txt` declares **`modal`** (the SDK is backend-neutral
   and no longer pulls it in) — that's what its `entry.py` bridge imports locally. Its heavy ML
   deps live in the Modal image, not here.
 - A **self-contained** plugin lists whatever its `entry.py` imports (an API client, etc.).
+- A **local** plugin lists the libraries that do the actual work (`moviepy`, `scenedetect`, …).
+  There is no remote image to hide them in — that is the point.
 
-Keep local requirements **thin**. The venv is shared across plugins, so a conflicting version
-pin can collide with another plugin — the platform runs `pip check` and logs any conflict. Pin
-heavy/exact versions in your remote image, not the local entry.
+One venv per plugin, since 2026-08-07 ([ADR-0011](adr/0011-local-first-execution.md)). Before
+that they shared one, on the assumption that every entry was a thin adapter whose real compute
+ran in a remote image. Once the user's machine is the substrate that assumption is gone, and a
+shared venv turns a conflicting pin into wrong behaviour at run time — `pip check` only *warns*,
+so the losing version is silently overwritten. Your pins are now yours alone.
+
+If provisioning fails and your plugin declares a `requirements.txt`, the platform **raises**
+rather than falling back to a plain interpreter: running without your dependencies would only
+produce an `ImportError` seconds later that never mentions pip. A plugin with no
+`requirements.txt` still falls back, because there a plain interpreter is equivalent.
 
 ### `progress()` — stream status to the node
 

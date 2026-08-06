@@ -12,6 +12,7 @@
  * shipped manifest).
  */
 
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -41,9 +42,28 @@ describe("listOfficialPlugins — browsable repo URL", () => {
     });
 
     it("keeps every plain entry on the default org", () => {
+        // Derived from the manifest, not a hardcoded sample id. This assertion
+        // named one plugin (`tongflow-modal-ffmpeg`) until 2026-08-07, when
+        // ADR-0011 moved that very entry to its own origin and the test failed
+        // for a reason it was never about. "Every plain entry" is what the name
+        // promised; now it is what it checks.
+        const manifest = JSON.parse(
+            readFileSync("config/official-plugins.json", "utf8"),
+        ) as { plugins: (string | { id: string })[] };
+        const plainIds = manifest.plugins.filter(
+            (e): e is string => typeof e === "string",
+        );
+        expect(plainIds.length).toBeGreaterThan(0);
+
         const { plugins } = listOfficialPlugins();
-        const plain = plugins.find((p) => p.id === "tongflow-modal-ffmpeg");
-        expect(plain?.repoUrl).toBe(`${DEFAULT_ORG}/tongflow-modal-ffmpeg`);
+        for (const id of plainIds) {
+            const entry = plugins.find((p) => p.id === id);
+            expect(
+                entry,
+                `${id} missing from listOfficialPlugins()`,
+            ).toBeDefined();
+            expect(entry?.repoUrl).toBe(`${DEFAULT_ORG}/${id}`);
+        }
     });
 
     it("never emits a .git suffix — these are browsable pages, not clone URLs", () => {

@@ -2,7 +2,10 @@
  * `plugin-python-env.server.ts` imports `"server-only"`, which throws outside a
  * Next.js server bundle — mocked away exactly as engine-delegate.test.ts does.
  */
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
@@ -11,20 +14,25 @@ let serializeVenvMutation: <T>(
     pluginId: string,
     fn: () => Promise<T>,
 ) => Promise<T>;
+let ensurePluginPython: (
+    pluginId: string,
+    pluginDir: string,
+) => Promise<string>;
 
 beforeAll(async () => {
     const mod = await import("./plugin-python-env.server");
     venvDirFor = mod.venvDirFor;
     serializeVenvMutation = mod.serializeVenvMutation;
+    ensurePluginPython = mod.ensurePluginPython;
 });
 
 describe("venvDirFor", () => {
     it("gives each plugin its own directory", () => {
-        const a = venvDirFor("oneflow-local-ffmpeg");
-        const b = venvDirFor("oneflow-local-pyscenedetect");
+        const a = venvDirFor("oneflow-api-ffmpeg");
+        const b = venvDirFor("oneflow-api-pyscenedetect");
         expect(a).not.toBe(b);
-        expect(a.endsWith("oneflow-local-ffmpeg")).toBe(true);
-        expect(b.endsWith("oneflow-local-pyscenedetect")).toBe(true);
+        expect(a.endsWith("oneflow-api-ffmpeg")).toBe(true);
+        expect(b.endsWith("oneflow-api-pyscenedetect")).toBe(true);
     });
 
     it("keeps every venv under one parent so eviction can find them", () => {
@@ -83,5 +91,50 @@ describe("serializeVenvMutation", () => {
         await expect(
             serializeVenvMutation("gamma", async () => "ok"),
         ).resolves.toBe("ok");
+    });
+});
+
+describe("ensurePluginPython — provisioning failure (fail loudly)", () => {
+    const originalDataDir = process.env.TONGFLOW_DATA_DIR;
+
+    afterEach(() => {
+        if (originalDataDir === undefined) delete process.env.TONGFLOW_DATA_DIR;
+        else process.env.TONGFLOW_DATA_DIR = originalDataDir;
+    });
+
+    /** A data dir under a regular file: every mkdir below it fails with ENOTDIR. */
+    function breakProvisioning(): void {
+        const box = mkdtempSync(join(tmpdir(), "venv-fail-"));
+        const wall = join(box, "not-a-directory");
+        writeFileSync(wall, "");
+        process.env.TONGFLOW_DATA_DIR = join(wall, "data");
+    }
+
+    function pluginDir(withRequirements: boolean): string {
+        const dir = join(mkdtempSync(join(tmpdir(), "venv-plugin-")), "plugin");
+        mkdirSync(dir, { recursive: true });
+        if (withRequirements) {
+            writeFileSync(join(dir, "requirements.txt"), "moviepy\n");
+        }
+        return dir;
+    }
+
+    it("throws, naming the plugin and the fix, when it declares requirements", async () => {
+        breakProvisioning();
+        await expect(
+            ensurePluginPython("needs-deps", pluginDir(true)),
+        ).rejects.toThrow(
+            /could not provision a Python environment for needs-deps/,
+        );
+        await expect(
+            ensurePluginPython("needs-deps-2", pluginDir(true)),
+        ).rejects.toThrow(/venv and pip/);
+    });
+
+    it("still falls back to plain python when the plugin declares no requirements", async () => {
+        breakProvisioning();
+        const py = await ensurePluginPython("no-deps", pluginDir(false));
+        expect(py).toBeTruthy();
+        expect(py).not.toContain("plugin-venv");
     });
 });

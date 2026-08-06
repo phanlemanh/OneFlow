@@ -50,8 +50,17 @@ Source input: [spec](../../docs/superpowers/specs/2026-08-05-local-cpu-plugins-d
 - AC-5: Given two different plugins provisioning at the same moment, When both
   call `ensurePluginPython`, Then pip runs serialized **within** each venv and
   the two plugins are not serialized against each other.
+- AC-18: Given provisioning fails for a plugin that **declares a
+  `requirements.txt`**, When `ensurePluginPython` is called, Then it throws an
+  error naming the plugin and the fix — it must **not** return a plain
+  interpreter that lacks every dependency the plugin is about to import. Given
+  the same failure for a plugin declaring **no** requirements, Then the
+  lightweight fallback is still used, because a plain interpreter is genuinely
+  equivalent there.
+  *(Added 2026-08-07 at the Gate-1 amendment: this was Notes item 3 until
+  implementation proved the path reachable — see Notes.)*
 
-### B. `oneflow-local-ffmpeg` (six slots)
+### B. `oneflow-api-ffmpeg` (six slots)
 
 - AC-6: Given a 1-second fixture video, When each of `concat-videos`,
   `extract-audio`, `merge-video-audio`, `remove-video-audio`, `get-first-frame`,
@@ -71,7 +80,7 @@ Source input: [spec](../../docs/superpowers/specs/2026-08-05-local-cpu-plugins-d
   cleared, wheel absent), When a slot runs, Then it goes red with an error naming
   the install fix — it must **not** find some other ffmpeg and pass by accident.
 
-### C. `oneflow-local-pyscenedetect` (one slot)
+### C. `oneflow-api-pyscenedetect` (one slot)
 
 - AC-11: Given a fixture with a hard red→blue cut, When `split-video` runs, Then
   `success: true` and the output field **`video_parts`** holds ≥ 2 assets, each
@@ -115,7 +124,7 @@ explicit out-of-scope bullet.
 - **Trục A — đơn vị thay đổi:** venv layer | ffmpeg plugin | pyscenedetect plugin
   | manifest + guard | docs. [thước CE: File Structure của plan, 5 nhóm — khớp 1-1]
 - **Trục B — hướng chứng minh:** *wire* (chạy đúng: AC-1, 6, 11, 14, 16) ↔ *teeth*
-  (hỏng thì phải đỏ: AC-2, 3, 7, 8, 10, 12, 15). [thước CE: trục "wire ↔ teeth"
+  (hỏng thì phải đỏ: AC-2, 3, 7, 8, 10, 12, 15, 18). [thước CE: trục "wire ↔ teeth"
   của `ci-vitest-sdk-pin`, đã ký 2026-08-05]
 - **Trục C — biên đầu vào:** thiếu asset (AC-7) | thiếu binary (AC-10, 12) | pin
   xung đột (AC-3) | id độc hại (AC-2) | media thiếu audio track (AC-8).
@@ -156,10 +165,34 @@ trúc `Map` chứ không đo được wall-clock ổn định trên CI.
   2. Spec nói wheel `imageio-ffmpeg` là "lưới an toàn", nhưng
      `tongflow-modal-pyscenedetect/deploy.py:50-70` cần **cả `ffprobe`**, mà
      wheel đó **không** ship ffprobe. → AC-12.
-  3. `ensurePluginPython` vẫn `catch → resolvePythonLite()`. Với plugin local cần
-     `moviepy`/`scenedetect`, fallback này biến lỗi thành `ImportError` khó hiểu
-     thay vì thông báo "cài X" mà spec §Error handling yêu cầu. → cân nhắc khi
-     làm Task 1; chưa nâng thành AC vì là hành vi có sẵn.
+  3. `ensurePluginPython` vẫn `catch → resolvePythonLite()`. → **đã nâng thành
+     AC-18 ngày 2026-08-07** sau khi implement chứng minh đường này *có thật*:
+     `pip install ./sdk` hỏng trên máy dev (`[Errno 2]` lúc build wheel, vì
+     `sdk/.venv` 18M nằm trong `sdk/` và bị copy theo), và hàm lặng lẽ trả về
+     `python3` trần. `check-venv-isolation.ts` bắt được vì nó assert interpreter
+     phải nằm trong venv — không có assert đó thì eval đã xanh giả.
+  4. `scenedetect[opencv]` (spec §88) **không tồn tại** ở scenedetect 0.7.1:
+     extras chỉ có `pyav` và `moviepy`; `opencv-python` là dependency trực tiếp.
+     `requirements.txt` dùng `scenedetect` trơn.
+  5. AC-12 nói ffprobe được dùng "for keyframe alignment" — **tiền đề sai**.
+     `_get_keyframes_seconds` / `_snap_to_prev_kf` được định nghĩa nhưng không
+     bao giờ được gọi; chỉ `_ensure_ff_tools()` (deploy.py:277) đòi ffprobe cho
+     một đường code đã chết. Bắt buộc ffprobe sẽ khiến plugin **từ chối chạy**
+     trên đúng cái máy trắng mà local-first sinh ra để phục vụ. Nên cái được
+     chốt là **răng của resolver**: ai cần ffprobe thì nhận lỗi gọi đúng tên
+     ffprobe, không bao giờ bị thay thầm. Ghi rõ trong docstring của test.
+
+- **Đổi tên plugin, 2026-08-07 (quyết định của Manh).** Ids dự kiến
+  `oneflow-local-*` bị quy tắc prefix từ chối:
+  `^(one|tong)flow-(modal|api)-...`, ép ở **ba** chỗ —
+  [`plugin-id.ts`](../../src/lib/plugins/plugin-id.ts),
+  [`official-manifest.ts:187`](../../src/lib/plugins/official-manifest.ts) và
+  `sdk/tongflow/scan.py` `_detect_runner`. Chỗ thứ ba nằm trong `sdk/**`, tức
+  t3 — thêm kind `local` sẽ đẩy cả gói lên T3 kèm một chuyến release SDK. Đã
+  chọn đổi tên thành **`oneflow-api-ffmpeg`** / **`oneflow-api-pyscenedetect`**
+  để giữ T2. Chi phí đã chấp nhận: nhãn "api" trong picker cho plugin không gọi
+  API nào — tài liệu của `plugin-id.ts` nói rõ prefix chỉ là nhãn, không chọn
+  backend. Một kind `local` đúng nghĩa là việc của gói sau.
 - **Không có eval design-quality:** feature này không render surface web UI nào
   (`surfaces: [plugins, cli]`), nên bỏ theo đúng luật mục 2b của kit.
 - **`per-plugin-origin` sẽ phải re-verify** — `check-manifest-unmoved.sh` chính là

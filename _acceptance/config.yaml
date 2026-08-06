@@ -152,6 +152,10 @@ executors:
     unit_venv_common_parent: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'one parent'"
     unit_venv_unsafe_id: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'escape'"
     unit_venv_chain_per_id: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'per plugin id'"
+    # AC-18, added at the Gate-1 amendment of 2026-08-07 (Manh): implementation
+    # proved the blanket fallback reachable, so it became a criterion.
+    unit_venv_fail_loudly: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'declares requirements'"
+    unit_venv_lite_fallback_kept: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'no requirements'"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -280,13 +284,13 @@ executors:
     # via the same clone-and-pytest wrapper compose-overlay established — one key
     # per criterion, each a distinct pytest node-id. Network-dependent by design.
     # Arg 1 is the plugin repo name so ONE wrapper serves both plugins.
-    lcp_ffmpeg_slots: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-ffmpeg tests/test_slots.py::test_all_six_slots_return_assets"
-    lcp_ffmpeg_missing_input: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-ffmpeg tests/test_slots.py::test_missing_asset_fails_cleanly_without_emitting_a_file"
-    lcp_ffmpeg_no_audio_track: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-ffmpeg tests/test_slots.py::test_extract_audio_on_silent_video_errors_not_zero_bytes"
-    lcp_ffmpeg_resolver_order: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-ffmpeg tests/test_resolver.py::test_resolution_order_env_then_path_then_wheel"
-    lcp_ffmpeg_resolver_teeth: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-ffmpeg tests/test_resolver.py::test_no_route_resolves_fails_loudly_naming_the_fix"
-    lcp_split_video_parts: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-pyscenedetect tests/test_split.py::test_split_returns_video_parts_for_both_scenes"
-    lcp_split_ffprobe_required: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-local-pyscenedetect tests/test_split.py::test_missing_ffprobe_fails_loudly_naming_ffprobe"
+    lcp_ffmpeg_slots: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_all_six_slots_return_assets"
+    lcp_ffmpeg_missing_input: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_missing_asset_fails_cleanly_without_emitting_a_file"
+    lcp_ffmpeg_no_audio_track: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_extract_audio_on_silent_video_errors_not_zero_bytes"
+    lcp_ffmpeg_resolver_order: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_resolution_order_env_then_path_then_wheel"
+    lcp_ffmpeg_resolver_teeth: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_no_route_resolves_fails_loudly_naming_the_fix"
+    lcp_split_video_parts: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_split_returns_video_parts_for_both_scenes"
+    lcp_split_ffprobe_required: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_missing_ffprobe_fails_loudly_naming_ffprobe"
     # Static scans + guards, run in THIS tree against the two plugin clones.
     lcp_no_modal: "bash scripts/plugins/check-local-plugins-no-modal.sh"
     lcp_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh local-cpu-plugins origin/main"

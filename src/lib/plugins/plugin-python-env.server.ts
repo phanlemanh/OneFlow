@@ -261,8 +261,14 @@ async function ensurePluginRequirements(
  * The signature is deliberately unchanged: `runners/generic.ts` is the only
  * caller and lives under a t3 path this change must not touch.
  *
- * On any provisioning failure, falls back to the lightweight resolver so an
- * environment without venv/pip still runs plugins that need no extra deps.
+ * A provisioning failure is only survivable for a plugin that declares no
+ * `requirements.txt`: it needs nothing from the venv beyond the SDK, which the
+ * runner puts on PYTHONPATH anyway, so a plain interpreter is genuinely
+ * equivalent. For a plugin that DOES declare requirements, the old blanket
+ * fallback handed back an interpreter missing every dependency the plugin was
+ * about to import — turning an install error with a fixable cause into an
+ * ImportError several seconds later, in a subprocess, with no mention of pip.
+ * ADR-0011 makes this machine the substrate; failing loudly is the whole point.
  */
 export async function ensurePluginPython(
     pluginId: string,
@@ -276,9 +282,19 @@ export async function ensurePluginPython(
         });
     } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        logger.warn(
-            `[plugin-env] provisioning failed (${msg}); falling back to plain python`,
+        if (!existsSync(join(pluginDir, "requirements.txt"))) {
+            logger.warn(
+                `[plugin-env] provisioning failed for ${pluginId} (${msg}); it ` +
+                    `declares no requirements.txt, so falling back to plain python`,
+            );
+            return resolvePythonLite();
+        }
+        throw new Error(
+            `could not provision a Python environment for ${pluginId}: ${msg}\n` +
+                `${pluginId} declares a requirements.txt, so running it on a plain ` +
+                `interpreter would fail later with an ImportError that never mentions ` +
+                `pip. Fix the environment — a Python >= 3.10 with working venv and ` +
+                `pip — and run the plugin again.`,
         );
-        return resolvePythonLite();
     }
 }

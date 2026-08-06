@@ -168,7 +168,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 
 ## Official plugins
 
-> The official GPU/CPU plugins currently run on [Modal](https://modal.com) — up to **$30/month** of free GPU compute (H100/A100, etc.). See [Self-host setup](#self-host-setup-plugins--credentials) for the `MODAL_TOKEN_*` setup. Any other platform can publish its own plugins the same way.
+> The official GPU/CPU plugins currently run on [Modal](https://modal.com) — up to **$30/month** of free GPU compute (H100/A100, etc.). See [Self-host setup](#self-host-setup-plugins--credentials) for the `MODAL_TOKEN_*` setup. Any other platform can publish its own plugins the same way. The **local** plugins below need none of that.
 
 ### API plugins
 
@@ -180,10 +180,15 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 - [tongflow-api-apimart](https://github.com/tong-io/tongflow-api-apimart) — APIMart gateway with a per-node **model picker**: image gen/edit (Z-Image, Seedream, Nano Banana, GPT-Image), text/image → video (Kling, VEO3, Sora2, Seedance), `gen_text` (GPT-5, Claude, Gemini), Whisper transcription and TTS
 - [tongflow-api-agnes](https://github.com/tong-io/tongflow-api-agnes) — Agnes AI gateway: `gen_text` / text tools / image understanding (`agnes-2.0-flash`), image generation / editing / fusion (`agnes-image-2.x-flash`), and text / image / first-last-frame → video (`agnes-video-v2.0`)
 
+### Local plugins
+
+> These run **on your own machine** — no cloud account, no GPU, no round-trip. See [ADR-0011](docs/adr/0011-local-first-execution.md).
+
+- [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — transcoding, muxing, media pipelines
+- [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — shot-boundary detection for splitting clips
+
 ### GPU/CPU plugins
 
-- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — transcoding, muxing, media pipelines
-- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — shot-boundary detection for splitting clips
 - [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image text-to-image
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image text-to-image (alternative)
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B multi-reference fusion / image editing
@@ -247,7 +252,7 @@ To build the image yourself instead of pulling: `docker build -t tongflow .`
 
 **Data & credentials.** Everything writable lives in the `/data` volume (SQLite db, uploads, settings). API keys are optional — set them in the in-app **Settings** dialog, or pass them at launch (`-e OPENROUTER_API_KEY=…`); supported keys: `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`, `ANTHROPIC_API_KEY` (powers the Director agent — see below).
 
-**Plugins.** The image ships no plugins — install them from the in-app plugin manager (first install needs network access to GitHub). On first run, a plugin provisions a shared Python venv under `/data/.tongflow/plugin-venv` (installs the SDK + the plugin's `requirements.txt` from PyPI), so the first run is slower and needs network. Modal-backed plugins additionally need a Modal token.
+**Plugins.** The image ships no plugins — install them from the in-app plugin manager (first install needs network access to GitHub). On first run, a plugin provisions **its own** Python venv under `/data/.tongflow/plugin-venv/<pluginId>` (installs the SDK + the plugin's `requirements.txt` from PyPI), so the first run is slower and needs network. One venv per plugin means two plugins can pin conflicting versions of the same package without one silently overwriting the other. Modal-backed plugins additionally need a Modal token; the local plugins need none.
 
 ## Self-host setup (plugins & credentials)
 

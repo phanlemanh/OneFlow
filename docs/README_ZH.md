@@ -161,7 +161,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 
 ## 官方插件
 
-> 官方 GPU/CPU 插件目前运行在 [Modal](https://modal.com) 上——每月最多 **$30** 免费 GPU 算力（H100/A100 等）。`MODAL_TOKEN_*` 的配置见[自托管配置](#自托管配置插件与凭据)。任何其他平台都可以用同样方式发布自己的插件。
+> 官方 GPU/CPU 插件目前运行在 [Modal](https://modal.com) 上——每月最多 **$30** 免费 GPU 算力（H100/A100 等）。`MODAL_TOKEN_*` 的配置见[自托管配置](#自托管配置插件与凭据)。任何其他平台都可以用同样方式发布自己的插件。下面的**本地插件**这些都不需要。
 
 ### API 插件
 
@@ -173,10 +173,15 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 - [tongflow-api-apimart](https://github.com/tong-io/tongflow-api-apimart) — APIMart 聚合网关，支持节点上**按模型选择**：图像生成 / 编辑（Z-Image、Seedream、Nano Banana、GPT-Image）、文 / 图 → 视频（可灵、VEO3、Sora2、Seedance）、`gen_text`（GPT-5、Claude、Gemini）、Whisper 转录与 TTS
 - [tongflow-api-agnes](https://github.com/tong-io/tongflow-api-agnes) — Agnes AI 网关：`gen_text` / 文本工具 / 图像理解（`agnes-2.0-flash`）、图像生成 / 编辑 / 融合（`agnes-image-2.x-flash`）、文 / 图 / 首尾帧 → 视频（`agnes-video-v2.0`）
 
+### 本地插件
+
+> 这些插件运行在**你自己的机器**上——不需要云账号、不需要 GPU、没有网络往返。见 [ADR-0011](adr/0011-local-first-execution.md)。
+
+- [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — 转码、混流、媒体处理管线
+- [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — 镜头边界检测，用于分割片段
+
 ### GPU/CPU 插件
 
-- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — 转码、混流、媒体处理管线
-- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — 镜头边界检测，用于分割片段
 - [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image 文本生图
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image 文本生图（备选）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B 多参考融合与图像编辑
@@ -240,7 +245,7 @@ docker compose up -d
 
 **数据与凭据。** 所有可写内容都存放在 `/data` 卷（SQLite 数据库、上传文件、设置）。API key 是可选的——在 app 内的**设置**对话框里填写，或在启动时传入（`-e OPENROUTER_API_KEY=…`）；支持的 key：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`、`ANTHROPIC_API_KEY`（为 Director agent 提供支持——见下文）。
 
-**插件。** 镜像不自带任何插件——请从 app 内的插件管理器安装（首次安装需要访问 GitHub 的网络）。首次运行时，插件会在 `/data/.tongflow/plugin-venv` 下创建一个共享的 Python venv（从 PyPI 安装 SDK 以及该插件的 `requirements.txt`），因此首次运行较慢且需要网络。基于 Modal 的插件还需要一个 Modal token。
+**插件。** 镜像不自带任何插件——请从 app 内的插件管理器安装（首次安装需要访问 GitHub 的网络）。首次运行时，插件会在 `/data/.tongflow/plugin-venv/<pluginId>` 下创建**自己专属的** Python venv（从 PyPI 安装 SDK 以及该插件的 `requirements.txt`），因此首次运行较慢且需要网络。每个插件一个 venv，意味着两个插件可以固定同一个包的不同版本，而不会互相静默覆盖。基于 Modal 的插件还需要一个 Modal token；本地插件则不需要。
 
 ## 自托管配置（插件与凭据）
 
