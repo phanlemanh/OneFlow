@@ -4,14 +4,14 @@ feature_slug: ci-actions-bump
 verdict: PASS
 failed_evals: []
 reason: >-
-  Re-verify tại 28c1a7d (nhánh feat/ci-vitest-sdk-pin): 8/8 eval xanh. Lần chạy
-  trước ở a1bc936 thấy E1 đỏ vì job 'Unit Tests (vitest)' nâng số điểm
-  actions/checkout từ 7 lên 8 trong khi guard còn chốt 7; commit 28c1a7d đánh số
-  lại thành 8 kèm chú thích, và guard vẫn còn răng theo cả hai chiều.
-verified_by: fresh-context verification subagent (round 12)
+  Re-verify tại 9fcfc33 (commit mã cuối của nhánh feat/ci-vitest-sdk-pin): 8/8
+  eval xanh. Lượt đầu ở a1bc936 thấy E1 đỏ vì job 'Unit Tests (vitest)' nâng số
+  điểm actions/checkout từ 7 lên 8 trong khi guard còn chốt 7; commit 28c1a7d
+  đánh số lại thành 8 kèm chú thích, và guard vẫn còn răng theo cả hai chiều.
+verified_by: fresh-context verification subagent (round 13)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 28c1a7d6202ce2a8cd40eeae7eb55a8145264891
+verified_commit: 9fcfc338c67b6921b5295a3dd26bc22b0d04187e
 human_signoff: Manh 2026-07-26
 ---
 
@@ -54,22 +54,22 @@ reports them.
 ## Evidence
 
 - eval: E1
-  run_id: ci-actions-bump-E1-20260805123909
+  run_id: ci-actions-bump-E1-20260806013802
   exit_code: 0
   baseline: red — re-measured this round on a `--no-hardlinks` scratch clone at 28c1a7d, both directions (see Analyst item 8); the remaining failure branches are carried forward from round 8 (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_actions_pinned
-  verified_at: 2026-08-05T12:39:09Z
+  verified_at: 2026-08-06T01:38:02Z
   output: |
     ok actions/checkout: 8 site(s), all >= v7
     ok docker/login-action: 1 site(s), all >= v4
     action pins: at or above the contracted floor at every site
 
 - eval: E2
-  run_id: ci-actions-bump-E2-20260805123909
+  run_id: ci-actions-bump-E2-20260806013802
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_gate_plumbing
-  verified_at: 2026-08-05T12:39:09Z
+  verified_at: 2026-08-06T01:38:02Z
   output: |
     run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
     ok  checkout ran with fetch-depth: 0
@@ -79,11 +79,11 @@ reports them.
     fetch-depth: 0 under checkout@v7 gave pre-merge-check.sh a usable base at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
 
 - eval: E3
-  run_id: ci-actions-bump-E3-20260805123915
+  run_id: ci-actions-bump-E3-20260806013808
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_jobs_green
-  verified_at: 2026-08-05T12:39:15Z
+  verified_at: 2026-08-06T01:38:08Z
   output: |
     run https://github.com/phanlemanh/OneFlow/actions/runs/30196332819 @ 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
     ok job 'Lint': success
@@ -93,21 +93,21 @@ reports them.
     all requested jobs succeeded at 60c4797d3c0ff9aaa3335690ddecdb9bbc9eace7
 
 - eval: E4
-  run_id: ci-actions-bump-E4-20260805123919
+  run_id: ci-actions-bump-E4-20260806013812
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dryrun_guard
-  verified_at: 2026-08-05T12:39:19Z
+  verified_at: 2026-08-06T01:38:12Z
   output: |
     dry-run guard present:          push: ${{ github.ref_type == 'tag' }}
     a workflow_dispatch run builds both platforms and publishes nothing
 
 - eval: E5
-  run_id: ci-actions-bump-E5-20260805123919
+  run_id: ci-actions-bump-E5-20260806013812
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_docker_dispatch_green
-  verified_at: 2026-08-05T12:39:19Z
+  verified_at: 2026-08-06T01:38:12Z
   output: |
        ok step 'Set up QEMU': success
        ok step 'Log in to GHCR': success
@@ -117,11 +117,11 @@ reports them.
     dispatched docker dry run succeeded, and reached every step that carries a bumped action
 
 - eval: E6
-  run_id: ci-actions-bump-E6-20260805123936
+  run_id: ci-actions-bump-E6-20260806013827
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_ghcr_untouched
-  verified_at: 2026-08-05T12:39:36Z
+  verified_at: 2026-08-06T01:38:27Z
   output: |
     ok  no registry write anywhere in 3575 log lines
     ok  buildx invoked without --push
@@ -131,11 +131,11 @@ reports them.
     no publish occurred during the dry run
 
 - eval: E7
-  run_id: ci-actions-bump-E7-20260805123954
+  run_id: ci-actions-bump-E7-20260806013844
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_desktop_dispatch_green
-  verified_at: 2026-08-05T12:39:54Z
+  verified_at: 2026-08-06T01:38:44Z
   output: |
        ok step 'Sanity-check installer': success
        ok step 'Upload as Actions artifact (dry run)': success
@@ -145,11 +145,11 @@ reports them.
     dispatched desktop dry run succeeded, and reached every step that carries a bumped action
 
 - eval: E8
-  run_id: ci-actions-bump-E8-20260805124010
+  run_id: ci-actions-bump-E8-20260806013858
   exit_code: 0
   baseline: red — failure branches driven on `--no-hardlinks` scratch clones and through a `gh` double at round 8; carried forward, NOT re-measured this round (see Analyst item 2 and `## Iterations`)
   verifier: config:executors.script.ci_no_behaviour_drift
-  verified_at: 2026-08-05T12:40:10Z
+  verified_at: 2026-08-06T01:38:58Z
   output: |
     workflow drift vs the range ci-actions-bump owns (4d89b584fcfd3dfafd03823a14c9b81406db6e9b..8477f8a08f26b792b313ff4461a978591024c33e): 16 declared pin line(s), comments, and the dry-run guard (-1 +1); no file added, deleted or renamed
 
@@ -1031,45 +1031,55 @@ Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên go
 bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
 bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
 
-## Ghim lại 2026-08-05 (nhánh `feat/ci-vitest-sdk-pin`, CI-a)
+## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — ba lượt, ghim ở `9fcfc33`
 
-Nhánh CI-a làm ba việc cho hạ tầng verify: thêm job `Unit Tests (vitest)` vào
-`.github/workflows/ci.yml`, gỡ pin SDK ghi cứng trong
-`scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ `sdk/pyproject.toml`
-qua `scripts/lib/sdk-version.sh`), và thêm các guard đi kèm.
+Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
+đợt, thay vì ba mục gần trùng nhau.
+
+**Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
+thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
+trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ `sdk/pyproject.toml`
+qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci/`,
+`scripts/plugins/` và `scripts/acceptance/`; đồng bộ một mô tả trong `CLAUDE.md`.
+Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
+này cũ.
+
+**Vì sao phải tới ba lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
+gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
+`scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
+guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
+`9fcfc33` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
+`_acceptance/**`, nên lần ghim này giữ được.
 
 **Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này có
 `landed_merge: 8477f8a`, nên tập file sở hữu là
 `git diff --name-only 8477f8a^1 8477f8a` giao với diff của nhánh. Sau khi bỏ các
-đường dẫn thuộc `t1_skip_globs` (`_acceptance/**`, `**/*.md`), giao vẫn còn
-**hai file thật**: `.github/workflows/ci.yml` và `scripts/ci/check-action-pins.sh`.
-Đây là re-verify thật, không phải carry-forward — và là hồ sơ duy nhất trong tám
-hồ sơ của đợt này có giao khác rỗng sau khi lọc.
+đường dẫn thuộc `t1_skip_globs`, giao vẫn còn **hai file thật**:
+`.github/workflows/ci.yml` và `scripts/ci/check-action-pins.sh`. Đây là re-verify
+thật, không phải carry-forward — và là hồ sơ duy nhất của đợt có giao khác rỗng sau
+khi lọc.
+- **Lượt 1 @ `a1bc936`** — **7 xanh / 1 đỏ (E1)** cho hồ sơ này; verdict REJECT, không ghim commit. Lượt đó lộ hai lỗi thật, cả hai do chính nhánh
+  tạo ra: (a) `scripts/lib/sdk-version.sh` giải gốc repo bằng
+  `git rev-parse --show-toplevel` **lúc gọi**, nên chết khi caller đã `cd` vào bản
+  clone repo plugin — 13 eval render của `compose-overlay` đỏ; (b)
+  `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi job vitest
+  mới nâng số điểm `actions/checkout` lên 8 — E1 của `ci-actions-bump` đỏ.
+- **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
+  `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
+  **8/8 eval xanh**; E1 báo `ok actions/checkout: 8 site(s), all >= v7`.
+- **Lượt 3 @ `9fcfc33` (lượt này)** — **8/8 eval xanh**, tất cả thoát 0, không lệch so với lượt 2.
 
-**Lượt chạy thứ nhất, ở `a1bc936`: 7 xanh / 1 đỏ (E1).** Job `Unit Tests
-(vitest)` mang theo một bước `actions/checkout@v7` thứ **tám**, trong khi
-`check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7`, nên guard báo
-`expected 7 pinned site(s), found 8` và từ chối. Bản pin vẫn `@v7` ở cả tám điểm;
-sai là **con số ảnh chụp**, không phải phiên bản action — cùng lớp với
-`scripts/plugins/check-manifest-unmoved.sh` (xem `CLAUDE.md`). Lượt đó đúng khi
-**không** ghim `verified_commit`.
+**Các guard neo chấm đúng dải của mình — đã đọc lại từng dòng kết quả.** E2/E3 đọc
+run `30196332819 @ 60c4797d`; E5/E6/E7 đọc các run dispatch đã neo về cây workflow
+`8477f8a0`; E8 báo `vs the range ci-actions-bump owns (4d89b584..8477f8a0)`. Không
+eval nào tự chấm diff của nhánh hiện tại. E1 là ngoại lệ **theo thiết kế** — nó
+không nhận `ACCEPTANCE_SLUG` và cố ý đọc cây làm việc hiện tại, vì AC-1 là khẳng
+định về toàn cây chứ không về một dải lịch sử.
 
-**Lượt chạy này, ở `28c1a7d`: 8/8 eval xanh.** Commit `28c1a7d` đánh số lại
-thành 8 kèm chú thích ghi rõ lý do (và, độc lập với hồ sơ này, neo gốc repo của
-`scripts/lib/sdk-version.sh` vào vị trí file thư viện). E1 nay báo
-`ok actions/checkout: 8 site(s), all >= v7`. Con số đã được dựng lại bằng tay từ
-`.github/workflows` — đúng tám bước, mọi bước `@v7` — và răng của guard đã được
-thử lại theo cả hai chiều trên bản clone nháp ngoài repo: xoá một bước → từ chối,
-hạ một bước xuống `@v4` → từ chối. Chi tiết ở `## Analyst` mục 8. Diff của file
-guard trên nhánh này chỉ gồm hằng số và chú thích, không đụng vào sàn phiên bản
-hay nhánh thất bại nào.
+**Cách chạy.** Mỗi `cmd` được giải lại từng dòng theo `_acceptance/config.yaml`
+trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho mọi eval ràng buộc
+nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
+trùng nhau vì chúng ghi lại cùng một lần chạy.
 
-**Các guard neo chấm đúng dải của mình.** E2/E3 đọc run `30196332819 @ 60c4797d`;
-E5/E6/E7 đọc các run dispatch đã neo về cây workflow `8477f8a0`; E8 báo
-`vs the range ci-actions-bump owns (4d89b584..8477f8a0)`. Không eval nào tự chấm
-diff của nhánh hiện tại. E1 là ngoại lệ **theo thiết kế** — nó không nhận
-`ACCEPTANCE_SLUG` và cố ý đọc cây làm việc hiện tại, vì AC-1 là khẳng định về
-toàn cây chứ không về một dải lịch sử.
-
-`verified_commit` chuyển sang `28c1a7d6202c`; `verdict` trở lại PASS. Dòng chữ ký
-người trong frontmatter không bị đụng tới.
+`verified_commit` chuyển sang `9fcfc338c67b`. Dòng chữ ký người trong frontmatter
+không bị đụng tới.
