@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-PLUGINS=(oneflow-local-ffmpeg oneflow-local-pyscenedetect)
+PLUGINS=(oneflow-api-ffmpeg oneflow-api-pyscenedetect)
 ORIGIN="${LOCAL_PLUGIN_ORIGIN:-https://github.com/phanlemanh}"
 
 fail() { echo "FAIL: $1"; exit 1; }
@@ -22,7 +22,7 @@ for name in "${PLUGINS[@]}"; do
     if [ -d "$dir" ]; then
         source_kind="worktree"
     else
-        dir="${TMPDIR:-/tmp}/oneflow-local-plugin-scan/$name"
+        dir="${TMPDIR:-/tmp}/oneflow-api-plugin-scan/$name"
         source_kind="clone"
         if [ ! -d "$dir/.git" ]; then
             mkdir -p "$(dirname "$dir")"

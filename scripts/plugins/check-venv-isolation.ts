@@ -13,7 +13,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, sep } from "node:path";
 
@@ -55,7 +55,9 @@ async function main(): Promise<void> {
     const dirA = makePlugin(idA, PIN_A);
     const dirB = makePlugin(idB, PIN_B);
 
-    console.log(`provisioning ${idA} (${PACKAGE}==${PIN_A}) and ${idB} (${PACKAGE}==${PIN_B}) concurrently`);
+    console.log(
+        `provisioning ${idA} (${PACKAGE}==${PIN_A}) and ${idB} (${PACKAGE}==${PIN_B}) concurrently`,
+    );
     const [pyA, pyB] = await Promise.all([
         ensurePluginPython(idA, dirA),
         ensurePluginPython(idB, dirB),
@@ -85,12 +87,15 @@ async function main(): Promise<void> {
     console.log(`  ${idA} -> ${PACKAGE} ${versionA}`);
     console.log(`  ${idB} -> ${PACKAGE} ${versionB}`);
 
-    if (versionA !== PIN_A) fail(`${idA} resolved ${PACKAGE} ${versionA}, expected ${PIN_A}`);
-    if (versionB !== PIN_B) fail(`${idB} resolved ${PACKAGE} ${versionB}, expected ${PIN_B}`);
+    if (versionA !== PIN_A)
+        fail(`${idA} resolved ${PACKAGE} ${versionA}, expected ${PIN_A}`);
+    if (versionB !== PIN_B)
+        fail(`${idB} resolved ${PACKAGE} ${versionB}, expected ${PIN_B}`);
 
     // ---- Counterfactual: one shared venv loses a pin, silently. ----
     const base = resolveBasePython();
-    if (!base) fail("no base python available for the shared-venv counterfactual");
+    if (!base)
+        fail("no base python available for the shared-venv counterfactual");
     const shared = join(work, "shared-venv");
     execFileSync(base, ["-m", "venv", shared], { stdio: "ignore" });
     const sharedPy =
@@ -98,12 +103,18 @@ async function main(): Promise<void> {
             ? join(shared, "Scripts", "python.exe")
             : join(shared, "bin", "python");
     for (const pin of [PIN_A, PIN_B]) {
-        execFileSync(sharedPy, ["-m", "pip", "install", "-q", `${PACKAGE}==${pin}`], {
-            stdio: "ignore",
-        });
+        execFileSync(
+            sharedPy,
+            ["-m", "pip", "install", "-q", `${PACKAGE}==${pin}`],
+            {
+                stdio: "ignore",
+            },
+        );
     }
     const sharedVersion = installedVersion(sharedPy);
-    console.log(`  shared venv after both installs -> ${PACKAGE} ${sharedVersion}`);
+    console.log(
+        `  shared venv after both installs -> ${PACKAGE} ${sharedVersion}`,
+    );
     if (sharedVersion === PIN_A) {
         fail(
             "the shared-venv counterfactual kept both pins, so this eval proves nothing " +

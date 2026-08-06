@@ -35,8 +35,8 @@ SDK_SPEC="$(sdk_spec)"
 # requirements.txt because that file pins the PUBLISHED SDK, while the eval lane
 # installs whichever SDK sdk/pyproject.toml currently declares.
 case "$NAME" in
-    oneflow-local-ffmpeg)       EXTRA_DEPS=(--with moviepy) ;;
-    oneflow-local-pyscenedetect) EXTRA_DEPS=(--with scenedetect --with imageio-ffmpeg) ;;
+    oneflow-api-ffmpeg)       EXTRA_DEPS=(--with moviepy) ;;
+    oneflow-api-pyscenedetect) EXTRA_DEPS=(--with scenedetect --with imageio-ffmpeg) ;;
     *) echo "unknown plugin: $NAME" >&2; exit 2 ;;
 esac
 
@@ -48,7 +48,7 @@ if [ -d "$WORKTREE" ]; then
         echo "plugin_commit_sha: $(git -C "$DIR" rev-parse HEAD)"
     fi
 else
-    DIR="${TMPDIR:-/tmp}/oneflow-local-plugin-ci/$NAME"
+    DIR="${TMPDIR:-/tmp}/oneflow-api-plugin-ci/$NAME"
     if [ ! -d "$DIR/.git" ]; then
         mkdir -p "$(dirname "$DIR")"
         git clone --depth 1 "$ORIGIN/$NAME.git" "$DIR"

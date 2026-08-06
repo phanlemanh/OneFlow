@@ -8,8 +8,14 @@
         "tongflow-api-bytedance",
         "tongflow-api-apimart",
         "tongflow-api-agnes",
-        "tongflow-modal-ffmpeg",
-        "tongflow-modal-pyscenedetect",
+        {
+            "id": "oneflow-api-ffmpeg",
+            "origin": "https://github.com/phanlemanh"
+        },
+        {
+            "id": "oneflow-api-pyscenedetect",
+            "origin": "https://github.com/phanlemanh"
+        },
         "tongflow-modal-z-image",
         "tongflow-modal-ernie-image",
         "tongflow-modal-flux2-klein9b",

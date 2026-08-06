@@ -52,7 +52,7 @@ fi
 echo "  ok — guard is green on the real manifest"
 
 # 2. A fourth origin entry.
-stage "m.plugins.push({ id: 'oneflow-local-something', origin: 'https://github.com/phanlemanh' });"
+stage "m.plugins.push({ id: 'oneflow-api-something', origin: 'https://github.com/phanlemanh' });"
 expect_red "a fourth origin entry was added"
 
 # 3. One origin URL altered.
