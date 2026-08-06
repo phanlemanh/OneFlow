@@ -5,10 +5,10 @@ slug: ci-vitest-sdk-pin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, scripts, docs]
-status: implemented
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-05
-time_human_minutes: {gate1: 10, gate2: 0}
+time_human_minutes: {gate1: 10, gate2: 15}
 ---
 
 # Acceptance Contract: ci-vitest-sdk-pin
