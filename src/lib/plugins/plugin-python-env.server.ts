@@ -9,25 +9,48 @@ import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
 import { dataDir, resourcesDir } from "@/lib/runtime/paths.server";
 
 /**
- * Shared Python environment for local plugin entries.
+ * Per-plugin Python environment for local plugin entries.
  *
  * In the unified plugin model the platform spawns every plugin's local entry as
- * a subprocess. Those entries are thin adapters (the heavy compute runs in the
- * backend / Modal image), so they share one managed venv: it holds the tongflow
- * SDK (+ its deps: pydantic, modal) and, layered on top, each plugin's optional
- * `requirements.txt`.
+ * a subprocess. Each plugin gets its own managed venv holding the tongflow SDK
+ * (+ its deps) and, layered on top, that plugin's optional `requirements.txt`.
  *
- * Installs are cumulative and cached by content hash. Because a shared venv can
- * in principle host conflicting version pins, every install runs `pip check` and
- * surfaces conflicts as warnings (keep local requirements thin; heavy/pinned
- * deps belong in the remote image).
+ * These entries used to share ONE venv, on the assumption — documented in this
+ * header until 2026-08-06 — that they are thin adapters whose heavy compute runs
+ * in a remote Modal image. ADR-0011 makes the user's machine the default
+ * execution substrate, so the heavy dependencies land here instead, where a
+ * shared venv is a place for version conflicts that `pip check` only *warns*
+ * about: the loser is silently overwritten and the conflict surfaces at run time
+ * as wrong behaviour rather than at install time as an error. Isolation is the
+ * fix. Cost accepted: one SDK copy per venv and a slower first run.
+ *
+ * Installs are cumulative and cached by content hash.
  */
 
-const VENV_DIR = () => join(dataDir(), ".tongflow", "plugin-venv");
-const MARKERS_DIR = () => join(VENV_DIR(), ".markers");
+const VENV_ROOT = () => join(dataDir(), ".tongflow", "plugin-venv");
 
-function venvPython(): string {
-    const dir = VENV_DIR();
+/**
+ * The venv directory for one plugin id.
+ *
+ * The id reaches this function from a directory name on disk and is
+ * concatenated into a filesystem path, so it is validated rather than trusted:
+ * anything with a separator, a leading dot, or no characters at all would let a
+ * venv be created outside the root that eviction scans.
+ */
+export function venvDirFor(pluginId: string): string {
+    if (!/^[a-zA-Z0-9._-]+$/.test(pluginId) || pluginId.startsWith(".")) {
+        throw new Error(`unsafe plugin id for a venv path: ${pluginId}`);
+    }
+    return join(VENV_ROOT(), pluginId);
+}
+
+// Markers live inside the venv they describe, so they need no plugin id in the
+// filename — and they are discarded with the venv when it is evicted.
+const MARKERS_DIR = (pluginId: string) =>
+    join(venvDirFor(pluginId), ".markers");
+
+function venvPython(pluginId: string): string {
+    const dir = venvDirFor(pluginId);
     return process.platform === "win32"
         ? join(dir, "Scripts", "python.exe")
         : join(dir, "bin", "python");
@@ -97,51 +120,69 @@ function hashFile(path: string): string | null {
     }
 }
 
-function readMarker(name: string): string | null {
+function readMarker(pluginId: string, name: string): string | null {
     try {
-        return readFileSync(join(MARKERS_DIR(), name), "utf8").trim();
+        return readFileSync(join(MARKERS_DIR(pluginId), name), "utf8").trim();
     } catch {
         return null;
     }
 }
 
-function writeMarker(name: string, value: string): void {
-    mkdirSync(MARKERS_DIR(), { recursive: true });
-    writeFileSync(join(MARKERS_DIR(), name), value);
+function writeMarker(pluginId: string, name: string, value: string): void {
+    mkdirSync(MARKERS_DIR(pluginId), { recursive: true });
+    writeFileSync(join(MARKERS_DIR(pluginId), name), value);
 }
 
-// Serialize all venv mutations: pip is not safe to run concurrently against the
-// same environment, and parallel tasks share this one venv.
-let venvChain: Promise<void> = Promise.resolve();
-function serialize<T>(fn: () => Promise<T>): Promise<T> {
-    const next = venvChain.then(fn, fn);
-    venvChain = next.then(
-        () => undefined,
-        () => undefined,
+/**
+ * Serialize venv mutations for ONE plugin.
+ *
+ * pip is not safe to run concurrently against the same environment. Separate
+ * venvs have no such constraint, so the chain is keyed per plugin id rather than
+ * global: two plugins now provision at the same time instead of queueing behind
+ * each other. Exported for the test that pins that behaviour.
+ */
+const venvChains = new Map<string, Promise<void>>();
+
+export function serializeVenvMutation<T>(
+    pluginId: string,
+    fn: () => Promise<T>,
+): Promise<T> {
+    const prev = venvChains.get(pluginId) ?? Promise.resolve();
+    const next = prev.then(fn, fn);
+    venvChains.set(
+        pluginId,
+        next.then(
+            () => undefined,
+            () => undefined,
+        ),
     );
     return next;
 }
 
-async function pipCheck(py: string): Promise<void> {
-    const { code, out } = await runCmd(py, ["-m", "pip", "check"], VENV_DIR());
+async function pipCheck(pluginId: string, py: string): Promise<void> {
+    const { code, out } = await runCmd(
+        py,
+        ["-m", "pip", "check"],
+        venvDirFor(pluginId),
+    );
     if (code !== 0) {
         logger.warn(
-            `[plugin-env] pip dependency conflicts in the shared plugin venv ` +
-                `(keep local requirements thin; pin heavy deps in the remote ` +
-                `image instead):\n${out.trim()}`,
+            `[plugin-env] pip dependency conflicts inside ${pluginId}'s venv ` +
+                `— this venv is private to that plugin, so the conflict is ` +
+                `between its own requirements.txt and the SDK:\n${out.trim()}`,
         );
     }
 }
 
-async function ensureSharedVenv(): Promise<string> {
-    const py = venvPython();
+async function ensureVenv(pluginId: string): Promise<string> {
+    const py = venvPython(pluginId);
     const sdkDir = join(resourcesDir(), "sdk");
     const sdkPyproject = join(sdkDir, "pyproject.toml");
     const sdkHash = hashFile(sdkPyproject) ?? "none";
 
     // Venv + SDK install are cached against the SDK's pyproject (its declared
     // deps). Live SDK *code* still comes via PYTHONPATH in the runner.
-    if (existsSync(py) && readMarker("sdk.hash") === sdkHash) {
+    if (existsSync(py) && readMarker(pluginId, "sdk.hash") === sdkHash) {
         return py;
     }
 
@@ -154,26 +195,35 @@ async function ensureSharedVenv(): Promise<string> {
     }
 
     if (!existsSync(py)) {
-        logger.info(`[plugin-env] creating shared plugin venv with ${base}`);
-        const mk = await runCmd(base, ["-m", "venv", VENV_DIR()], dataDir());
+        logger.info(`[plugin-env] creating venv for ${pluginId} with ${base}`);
+        // The root must exist before it can be a cwd; `python -m venv` creates
+        // the leaf itself.
+        mkdirSync(VENV_ROOT(), { recursive: true });
+        const mk = await runCmd(
+            base,
+            ["-m", "venv", venvDirFor(pluginId)],
+            VENV_ROOT(),
+        );
         if (mk.code !== 0) {
-            throw new Error(`failed to create plugin venv: ${mk.out.trim()}`);
+            throw new Error(
+                `failed to create plugin venv for ${pluginId}: ${mk.out.trim()}`,
+            );
         }
     }
 
-    logger.info("[plugin-env] installing tongflow SDK into the plugin venv");
+    logger.info(`[plugin-env] installing tongflow SDK into ${pluginId}'s venv`);
     const ins = await runCmd(
         py,
         ["-m", "pip", "install", "--upgrade", sdkDir],
-        VENV_DIR(),
+        venvDirFor(pluginId),
     );
     if (ins.code !== 0) {
         throw new Error(
-            `failed to install SDK into plugin venv: ${ins.out.trim()}`,
+            `failed to install SDK into ${pluginId}'s venv: ${ins.out.trim()}`,
         );
     }
 
-    writeMarker("sdk.hash", sdkHash);
+    writeMarker(pluginId, "sdk.hash", sdkHash);
     return py;
 }
 
@@ -186,8 +236,8 @@ async function ensurePluginRequirements(
     if (!existsSync(reqPath)) return;
 
     const hash = hashFile(reqPath) ?? "none";
-    const markerName = `req-${pluginId}.hash`;
-    if (readMarker(markerName) === hash) return;
+    const markerName = "requirements.hash";
+    if (readMarker(pluginId, markerName) === hash) return;
 
     logger.info(`[plugin-env] installing requirements.txt for ${pluginId}`);
     const ins = await runCmd(
@@ -200,13 +250,16 @@ async function ensurePluginRequirements(
             `failed to install requirements for ${pluginId}: ${ins.out.trim()}`,
         );
     }
-    await pipCheck(py);
-    writeMarker(markerName, hash);
+    await pipCheck(pluginId, py);
+    writeMarker(pluginId, markerName, hash);
 }
 
 /**
- * Ensure the shared plugin venv exists with the SDK + this plugin's
- * requirements installed, and return the interpreter to run the entry with.
+ * Ensure this plugin's own venv exists with the SDK + its requirements
+ * installed, and return the interpreter to run the entry with.
+ *
+ * The signature is deliberately unchanged: `runners/generic.ts` is the only
+ * caller and lives under a t3 path this change must not touch.
  *
  * On any provisioning failure, falls back to the lightweight resolver so an
  * environment without venv/pip still runs plugins that need no extra deps.
@@ -216,8 +269,8 @@ export async function ensurePluginPython(
     pluginDir: string,
 ): Promise<string> {
     try {
-        return await serialize(async () => {
-            const py = await ensureSharedVenv();
+        return await serializeVenvMutation(pluginId, async () => {
+            const py = await ensureVenv(pluginId);
             await ensurePluginRequirements(pluginId, pluginDir, py);
             return py;
         });
