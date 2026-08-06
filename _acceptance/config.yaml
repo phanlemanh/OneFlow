@@ -156,6 +156,9 @@ executors:
     # proved the blanket fallback reachable, so it became a criterion.
     unit_venv_fail_loudly: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'declares requirements'"
     unit_venv_lite_fallback_kept: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'no requirements'"
+    # The pre-2026-08-07 shared venv lived AT the path that is now the root of
+    # per-plugin venvs, so its corpse would be enumerated as if it were a plugin.
+    unit_venv_legacy_migration: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'legacy'"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").

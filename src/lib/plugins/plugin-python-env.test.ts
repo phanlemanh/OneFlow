@@ -2,7 +2,7 @@
  * `plugin-python-env.server.ts` imports `"server-only"`, which throws outside a
  * Next.js server bundle — mocked away exactly as engine-delegate.test.ts does.
  */
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -18,12 +18,14 @@ let ensurePluginPython: (
     pluginId: string,
     pluginDir: string,
 ) => Promise<string>;
+let removeLegacySharedVenv: () => void;
 
 beforeAll(async () => {
     const mod = await import("./plugin-python-env.server");
     venvDirFor = mod.venvDirFor;
     serializeVenvMutation = mod.serializeVenvMutation;
     ensurePluginPython = mod.ensurePluginPython;
+    removeLegacySharedVenv = mod.removeLegacySharedVenv;
 });
 
 describe("venvDirFor", () => {
@@ -136,5 +138,46 @@ describe("ensurePluginPython — provisioning failure (fail loudly)", () => {
         const py = await ensurePluginPython("no-deps", pluginDir(false));
         expect(py).toBeTruthy();
         expect(py).not.toContain("plugin-venv");
+    });
+});
+
+describe("legacy shared venv migration", () => {
+    const originalDataDir = process.env.TONGFLOW_DATA_DIR;
+
+    afterEach(() => {
+        if (originalDataDir === undefined) delete process.env.TONGFLOW_DATA_DIR;
+        else process.env.TONGFLOW_DATA_DIR = originalDataDir;
+    });
+
+    it("clears the old shared venv sitting at the new root (legacy)", () => {
+        const data = mkdtempSync(join(tmpdir(), "venv-legacy-"));
+        process.env.TONGFLOW_DATA_DIR = data;
+
+        // Reproduce the pre-2026-08-07 layout: the root IS a venv.
+        const root = join(data, ".tongflow", "plugin-venv");
+        mkdirSync(join(root, "bin"), { recursive: true });
+        writeFileSync(join(root, "pyvenv.cfg"), "home = /usr/bin\n");
+        writeFileSync(join(root, "bin", "python"), "");
+
+        removeLegacySharedVenv();
+
+        // The corpse is gone: nothing enumerating plugin-venv/* can mistake
+        // `bin` for a plugin's environment.
+        expect(existsSync(root)).toBe(false);
+    });
+
+    it("leaves a root that already holds per-plugin venvs alone (legacy)", () => {
+        const data = mkdtempSync(join(tmpdir(), "venv-modern-"));
+        process.env.TONGFLOW_DATA_DIR = data;
+
+        // The new layout has no pyvenv.cfg at the root — only inside each child.
+        const root = join(data, ".tongflow", "plugin-venv");
+        const child = join(root, "some-plugin");
+        mkdirSync(child, { recursive: true });
+        writeFileSync(join(child, "pyvenv.cfg"), "home = /usr/bin\n");
+
+        removeLegacySharedVenv();
+
+        expect(existsSync(child)).toBe(true);
     });
 });

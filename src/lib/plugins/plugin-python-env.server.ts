@@ -2,7 +2,13 @@ import "server-only";
 
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+    existsSync,
+    mkdirSync,
+    readFileSync,
+    rmSync,
+    writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { logger } from "@/lib/logger";
 import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
@@ -28,6 +34,27 @@ import { dataDir, resourcesDir } from "@/lib/runtime/paths.server";
  */
 
 const VENV_ROOT = () => join(dataDir(), ".tongflow", "plugin-venv");
+
+/**
+ * Remove the pre-2026-08-07 shared venv, which lived AT the path that is now
+ * the root holding one venv per plugin.
+ *
+ * Without this its corpse — `bin/`, `lib/`, `include/`, `pyvenv.cfg` — sits
+ * inside the root forever, and anything enumerating `plugin-venv/*` to evict
+ * stale environments reads those directories as if they were plugins. Detected
+ * by the `pyvenv.cfg` that only a venv root has; a directory of venvs has none.
+ *
+ * Exported for the test that pins the migration: driving it through
+ * `ensurePluginPython` would mean provisioning a real venv first.
+ */
+export function removeLegacySharedVenv(): void {
+    const root = VENV_ROOT();
+    if (!existsSync(join(root, "pyvenv.cfg"))) return;
+    logger.info(
+        "[plugin-env] removing the legacy shared venv; each plugin now gets its own",
+    );
+    rmSync(root, { recursive: true, force: true });
+}
 
 /**
  * The venv directory for one plugin id.
@@ -195,6 +222,7 @@ async function ensureVenv(pluginId: string): Promise<string> {
     }
 
     if (!existsSync(py)) {
+        removeLegacySharedVenv();
         logger.info(`[plugin-env] creating venv for ${pluginId} with ${base}`);
         // The root must exist before it can be a cwd; `python -m venv` creates
         // the leaf itself.

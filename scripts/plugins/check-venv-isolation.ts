@@ -13,7 +13,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, sep } from "node:path";
 
@@ -23,6 +23,31 @@ const PIN_B = "1.17.0";
 
 const work = mkdtempSync(join(tmpdir(), "oneflow-venv-isolation-"));
 process.env.TONGFLOW_DATA_DIR = join(work, "data");
+
+/**
+ * Stage a clean copy of `sdk/` as the resources root.
+ *
+ * `ensureVenv` installs the SDK with `pip install <sdkDir>`, and pip copies the
+ * whole source tree to build it. A developer machine keeps an 18 MB `.venv`
+ * INSIDE `sdk/` (uv puts it there), which makes that copy slow and, on this
+ * machine, fatal — setuptools dies with ENOENT partway through. That is
+ * developer detritus, not the behaviour under test: this eval is about whether
+ * two plugins get isolated environments. Removing `.venv` from the packaged
+ * `sdk/` is a `sdk/**` change, i.e. t3 and out of this package's tier, so the
+ * eval sidesteps it here rather than escalating.
+ */
+function stageCleanResources(): void {
+    const resources = join(work, "resources");
+    mkdirSync(resources, { recursive: true });
+    cpSync(join(process.cwd(), "sdk"), join(resources, "sdk"), {
+        recursive: true,
+        filter: (src) =>
+            !src.includes(`${sep}.venv`) &&
+            !src.includes(`${sep}__pycache__`) &&
+            !src.includes(`${sep}.git${sep}`),
+    });
+    process.env.TONGFLOW_RESOURCES_DIR = resources;
+}
 
 function fail(message: string): never {
     console.error(`FAIL: ${message}`);
@@ -46,6 +71,8 @@ function installedVersion(python: string): string {
 }
 
 async function main(): Promise<void> {
+    stageCleanResources();
+
     const { ensurePluginPython, venvDirFor, resolveBasePython } = await import(
         "../../src/lib/plugins/plugin-python-env.server"
     );

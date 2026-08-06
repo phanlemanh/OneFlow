@@ -22,6 +22,13 @@ evals:
     expected: "exit 0; both venv paths share one parent prefix, so eviction can still enumerate them"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
+  - id: E24
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_venv_legacy_migration
+    expected: "exit 0; the pre-2026-08-07 shared venv, which sat AT the path that is now the per-plugin root, is removed on first provision — otherwise its bin/lib/include would be enumerated as if they were plugins. Suppression half: a root that already holds per-plugin venvs is left untouched"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
   - id: E3
     criterion: AC-2
     executor: test
