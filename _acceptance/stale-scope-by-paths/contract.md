@@ -98,11 +98,33 @@ vẫn xanh ở cả hai trạng thái — chỉ E3 nhạy với trạng thái pi
 nuốt dòng NOTE gap-probe phụ thuộc diff). Cùng một hình dạng: **cổng đóng băng một
 thứ phụ thuộc hoàn cảnh và gọi nó là bất biến.**
 
-**Khoảng hở phải nói thẳng:** AC-3 mất eval máy trực tiếp duy nhất. Cơ chế nó nói tới
-(khai 0 `paths` → whole-tree) vẫn được E4 (khai một phần → coi như không khai →
-whole-tree) và E1/E2 (ngữ nghĩa scope) chạm tới **gián tiếp**, nhưng không eval nào
-còn khẳng định thẳng ca "khai 0 `paths`". Không nên đọc descope này là "AC-3 vẫn được
-phủ" — nó không được phủ trực tiếp nữa.
+**Khoảng hở, đo lại chính xác sau vòng verify.** Bản đầu của Amendment này viết
+"không eval nào còn khẳng định thẳng ca khai 0 `paths`" — **nói quá**. Vòng verify
+context sạch đọc lại harness và chỉ ra **E15 (`announce`, AC-14) dựng fixture
+zero-`paths` thật** (`mk_committed_report_fixture "$d2" fx none`, mode `none` = không
+eval nào khai `paths`), làm bẩn một file gated, rồi khẳng định trực tiếp rằng gate
+**không** in dòng `narrow staleness scope applied` cho nó. E8 (`suppression`) cũng
+chạy fixture mode `none`, nhưng chỉ ở chiều phủ định.
+
+AC-3 có ba mệnh đề. Sau descope:
+
+| Mệnh đề | Trạng thái |
+|---|---|
+| (b) không thêm dòng output mới | ✅ E15 khẳng định thẳng trên fixture zero-`paths` |
+| (c) không được cấp narrow scope | ✅ E15, cùng chỗ |
+| (a) vẫn bị báo `VIOLATION … evidence is stale` khi có thay đổi gated | ❌ **không eval nào khẳng định** |
+
+E4 khẳng định (a) cho ca *khai một phần*, E6 cho `paths: []` — cả hai là "coi như
+không khai", không phải ca khai-0-dòng theo nghĩa đen.
+
+Vòng verify cũng kiểm hành vi thật vẫn nguyên: dựng lại fixture `none` của E15 kèm một
+thay đổi gated → gate in `VIOLATION [fx]: evidence is stale …` và không có dòng
+narrow-scope. Cả ba mệnh đề đúng, chỉ (a) là **không được khẳng định**, không phải bị hỏng.
+
+**Vá rẻ hơn nhiều so với ước tính ban đầu:** một dòng `grep -q 'VIOLATION \[fx\]:
+evidence is stale'` thêm vào `$d2` sẵn có trong `case_announce` — fixture đã nằm đó
+rồi, không cần dựng case `undeclared` mới. Vẫn để cho contract kế (chạm `scripts/**`
+là kích lại treadmill staleness), nhưng giá thật là một dòng.
 
 **Việc kế tiếp (hàng đợi, không thuộc contract này):** thêm case fixture `undeclared`
 vào [`check-stale-scoping.sh`](../../scripts/acceptance/check-stale-scoping.sh), dựng
