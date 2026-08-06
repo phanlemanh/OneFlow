@@ -173,12 +173,45 @@ cách 0.6 ra đời từ Cổng 2 của 0.5.
 
 ### Đính chính báo giá Cổng 1 (phát hiện ở vòng 2)
 
-Mục "Chi phí ký lại" trên nói *"diff dự kiến chạm đúng 3 file"*. Sai: diff chạm
-**10 file** ngoài `_acceptance/` — 3 file đó cộng 7 guard script mới/sửa
-(`check-vitest-job.sh`, `check-overlay-pin-derived.sh`, `check-manifest-doc-synced.sh`,
+Mục "Chi phí ký lại" trên nói *"diff dự kiến chạm đúng 3 file"*. Sai. Bản sửa đầu
+tiên của đính chính này nói 10 — **cũng sai**. Con số thật ở `01ee88c` là **13 file**
+ngoài `_acceptance/`: 3 file gốc + 7 guard script mới/sửa (`check-vitest-job.sh`,
+`check-overlay-pin-derived.sh`, `check-manifest-doc-synced.sh`,
 `check-eval-keys-intact.sh`, `check-gate-residual.sh`, `sdk-version.sh`,
-`check-action-pins.sh`). Không file nào thuộc `t3_paths` nên **tier T2 vẫn đúng**,
-và bảng 2/7/6 vẫn đúng từng tên; chỉ con số file là sai. Ghi lại thay vì lặng lẽ sửa.
+`check-action-pins.sh`) + `STATUS.md`, `docs/roadmap.md` (t1-exempt) + chính
+`check-gate-residual.sh` được đếm trong nhóm guard. Không file nào thuộc `t3_paths`
+nên **tier T2 vẫn đúng**, và bảng 2/7/6 vẫn đúng từng tên. Sửa một con số sai bằng
+một con số sai khác là đúng thứ đáng ghi lại, nên giữ cả hai lần trong văn bản.
+
+### Known limits (trình Cổng 2)
+
+- **Guard tha ba lớp, không phải một.** `check-gate-residual.sh` bỏ qua violation
+  của chính slug đang bay khi nó thuộc `no evidence-report.md`, `verdict=REJECT`,
+  hoặc `human_signoff is empty`. Cần cả ba vì E11 chạy **trước** khi report của vòng
+  được ghi. Vòng 3 bắt được việc thông điệp chỉ nói "pending Gate-2 signature" trong
+  cả ba ca — đã sửa để in đúng lớp nào được tha.
+- **Điểm mù kế thừa từ `pre-merge-check`:** nó short-circuit theo từng feature, nên
+  khi report của slug đang bay là PASS + chưa ký, nó chỉ báo đúng cái đó — kể cả khi
+  `verified_commit` của chính report ấy đã cũ. Trong một vòng verify, staleness của
+  chính feature này **vô hình** với E11. Hết vô hình ngay khi người ký.
+- **Treadmill `t1_skip_globs` × gate tooling** (phát hiện vòng 3, thuộc hàng đợi chứ
+  không thuộc gói này): `t1_skip_globs` miễn 4 đường gate-tooling **theo tên chính
+  xác**, nên mọi feature acceptance hạ cánh guard thứ 5 trở đi dưới `scripts/` đều
+  làm cũ lại toàn bộ pin trước đó. Chính commit amendment `01ee88c` đã tự chứng minh:
+  thêm `check-gate-residual.sh` → 10 feature stale, và guard viết ra để khẳng định
+  "mọi feature khác đều sạch" là file làm chúng không sạch. Cùng gốc với bẫy AC-11.
+- **`sdk-version.sh` neo bằng `BASH_SOURCE`** → chỉ đúng khi source từ bash; dưới zsh
+  fail **closed** và ồn ào (exit 2), không âm thầm dùng sai phiên bản. Mọi consumer
+  trong repo là script `#!/usr/bin/env bash`.
+- **AC-4 phủ 5/6 job.** Tiêu chí kể 6 job (gồm Acceptance Gate), lệnh eval liệt 5.
+  Job Acceptance Gate đỏ trong lúc feature chưa ký là đúng thiết kế; nửa "gate job
+  xanh" cần spot-check tay ở Cổng 2 sau chữ ký.
+- **`compose-overlay` và `gate-scope-anchors` cùng `landed_merge: 7976bd8`** → luật
+  "tập file sở hữu = diff của merge commit" không phân biệt được hai feature này.
+- **Chỉ 5/15 contract có `landed_merge`** → với 10 contract còn lại không tính được
+  tập file sở hữu, nên wave phải xử lý bảo thủ là re-verify. `own-range.sh` fallback
+  về `merge-base(HEAD, origin/main)..HEAD`, nên nếu một trong số đó về sau có guard
+  neo, nó sẽ chấm diff của nhánh khác.
 
 ## Coverage
 

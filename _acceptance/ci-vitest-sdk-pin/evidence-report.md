@@ -3,11 +3,11 @@ schema_version: 2
 feature_slug: ci-vitest-sdk-pin
 verdict: REJECT
 failed_evals: [E11]
-reason: "E11 (bash scripts/pre-merge-check.sh . --base origin/main) does not print `clean` and exits 1, both before and after this report reached its verdict. AC-11 requires `clean`. The pre-report run tripped this feature's own round-1 REJECT; the post-report run trips `verdict PASS but human_signoff is empty (Gate 2 pending)`. The second is not a defect in the three code changes — it is a structural property of the eval, which cannot be satisfied by any S4 verify round of a signoff-required feature (see the E11 block and Findings). Reported, not worked around."
+reason: "E11 (bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main) exits 1 at 01ee88c, naming TEN other features as stale. The amendment's new guard is sound and discriminating — it is refusing for a true reason. The reason is that commit 01ee88c, the amendment commit itself, added scripts/acceptance/check-gate-residual.sh: a file outside _acceptance/ and outside t1_skip_globs, which re-staled the nine features re-pinned at 28c1a7d plus stale-scope-by-paths (whose declared scope covers scripts/acceptance/**). The re-sign wave the guard exists to assert is therefore incomplete again at HEAD. Twelve evals pass. Fixing this is a fresh re-pin wave at 01ee88c, or a config decision about gate tooling under scripts/acceptance/ — neither is a verifier's call."
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 556c79956035c14337c98bfa04606b938dbe237e
+verified_commit: 01ee88c75ed52b63dc982443e7f471ac870d943c
 human_signoff:
 ---
 
@@ -32,25 +32,25 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: ci-vitest-sdk-pin-e1-1785934930
+  run_id: ci-vitest-sdk-pin-e1-1785938498
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_job_shape
-  verified_at: 2026-08-05T13:02:10Z
+  verified_at: 2026-08-05T14:01:38Z
   output: |
     $ bash scripts/ci/check-vitest-job.sh shape
     OK: one 'Unit Tests (vitest)' job runs pnpm test with the shared setup; both triggers intact
-    -- baseline (same guard copied into a detached worktree at origin/main, re-derived
-       independently this round, not carried over from round 1) --
+    -- baseline (current guard copied into a fresh detached worktree at origin/main = 65b5529,
+       re-derived independently this round, not carried over) --
     FAIL: expected exactly 1 step running 'pnpm test', found 0
     -> baseline exit_code: 1
 
 - eval: E2
-  run_id: ci-vitest-sdk-pin-e2-1785934930
+  run_id: ci-vitest-sdk-pin-e2-1785938508
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_job_no_softening
-  verified_at: 2026-08-05T13:02:10Z
+  verified_at: 2026-08-05T14:01:48Z
   output: |
     $ bash scripts/ci/check-vitest-job.sh no-softening
     OK: no continue-on-error / || true / set +e / if: inside the unit-tests job
@@ -59,11 +59,11 @@ human_signoff:
     -> baseline exit_code: 1
 
 - eval: E3
-  run_id: ci-vitest-sdk-pin-e3-1785934959
+  run_id: ci-vitest-sdk-pin-e3-1785938516
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_job_teeth
-  verified_at: 2026-08-05T13:02:39Z
+  verified_at: 2026-08-05T14:02:00Z
   output: |
     $ bash scripts/ci/check-vitest-job.sh teeth
     job command under test (read from .github/workflows/ci.yml): pnpm test
@@ -72,91 +72,83 @@ human_signoff:
     -- post-run tree check (the probe must not survive) --
     $ git status --porcelain
      M _acceptance/ci-vitest-sdk-pin/run-log.jsonl
-    $ ls src/__civ_teeth_probe.test.ts
-    ls: src/__civ_teeth_probe.test.ts: No such file or directory
-    $ find . -name '*__civ_teeth_probe*' -not -path './node_modules/*'   # (no matches)
+    $ find . -name '*__civ_teeth_probe*' -not -path './node_modules/*'
+    (no matches)
     No probe file survived. The only dirty path is this round's run-log, written by the
     verifier itself.
-    -- baseline: DISCRIMINATION RE-CHECK of the round-1 finding --
-    Round 1 found this eval non-discriminating: teeth ran `pnpm test` directly and so
-    stayed green on a tree with no CI job at all. Commit a1bc936 changed teeth to read
-    the command out of the `unit-tests` job in ci.yml. That claim was re-tested here
-    rather than taken on trust: the CURRENT guard was copied into a detached worktree at
-    origin/main (a tree whose ci.yml has no `unit-tests:` job — grep confirmed) and run:
+    -- baseline (current guard, origin/main worktree; that tree has no 'unit-tests:' job —
+       grep -c 'unit-tests:' returned 0) --
     FAIL: no 'unit-tests:' job in .github/workflows/ci.yml — nothing to prove teeth about
     -> baseline exit_code: 1
-    The claim HOLDS. E3 now fails when the job is absent, so it is discriminating and no
-    longer belongs in Analyst.
+    The round-1 non-discrimination finding stays closed: re-derived from scratch a second
+    time here, the teeth mode still refuses on a tree with no job.
 
 - eval: E4
-  run_id: ci-vitest-sdk-pin-e4-1785935025
+  run_id: ci-vitest-sdk-pin-e4-1785938533
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.civ_run_jobs_green
-  verified_at: 2026-08-05T13:03:45Z
+  verified_at: 2026-08-05T14:02:17Z
   output: |
     $ ACCEPTANCE_SLUG=ci-vitest-sdk-pin bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' 'Unit Tests (vitest)'
-    run https://github.com/phanlemanh/OneFlow/actions/runs/31007360274 @ 556c79956035c14337c98bfa04606b938dbe237e
+    run https://github.com/phanlemanh/OneFlow/actions/runs/31012949660 @ 01ee88c75ed52b63dc982443e7f471ac870d943c
     ok job 'Lint': success
     ok job 'Type Check': success
     ok job 'Build': success
     ok job 'SDK Tests (Python)': success
     ok job 'Unit Tests (vitest)': success
-    all requested jobs succeeded at 556c79956035c14337c98bfa04606b938dbe237e
-    The round-1 blocker is gone: the branch is pushed and a real run exists, pinned to
-    the exact commit under verification.
+    all requested jobs succeeded at 01ee88c75ed52b63dc982443e7f471ac870d943c
     baseline rationale: the guard is scoped to this slug's own pull request, which does
     not exist on origin/main, so there is no honest red/green to record on the other side.
-    -- DISCLOSURE: AC-4 is only PARTLY covered by this eval --
-    AC-4's text names six jobs: the vitest job plus five older ones, INCLUDING
-    "Acceptance Gate". The resolved command lists only five (it omits Acceptance Gate),
-    following the narrowing config.yaml already documents for ci-actions-bump's
-    ci_jobs_green: "the gate job's colour is dominated by acceptance bookkeeping, so it
-    cannot serve as evidence about a checkout bump". Independently queried, that run's
-    full job list is:
-    $ gh run view 31007360274 --json jobs
-    Acceptance Gate       completed   failure
-    Lint                  completed   success
-    Type Check            completed   success
-    Unit Tests (vitest)   completed   success
-    SDK Tests (Python)    completed   success
+    -- DISCLOSURE, CARRIED FORWARD AND RE-MEASURED: AC-4 is only PARTLY covered --
+    AC-4's text names SIX jobs including "Acceptance Gate"; the resolved command lists
+    FIVE, following the narrowing config.yaml already documents for ci-actions-bump's
+    ci_jobs_green ("the gate job's colour is dominated by acceptance bookkeeping").
+    Independently queried this round:
+    $ gh run view 31012949660 --json jobs
     Build                 completed   success
-    All six jobs are PRESENT. Five are green. The Acceptance Gate job is not, and its
-    only logged cause is this feature's own acceptance bookkeeping:
+    SDK Tests (Python)    completed   success
+    Unit Tests (vitest)   completed   success
+    Type Check            completed   success
+    Lint                  completed   success
+    Acceptance Gate       completed   failure
+    All six jobs are PRESENT; five are green; Acceptance Gate is red. Its logged cause at
+    this commit is NOT only this feature's pending signature — it is eleven violations,
+    ten of them the same staleness E11 reports (see the E11 block):
+      VIOLATION [ci-actions-bump]: evidence is stale ... (verified_commit 28c1a7d...)
       VIOLATION [ci-vitest-sdk-pin]: verdict=REJECT (must be PASS to merge)
-      pre-merge-check: 1 violation(s) — merge blocked
-    That is the same self-reference as E11, and it inherits E11's structural problem too:
-    the gate job runs pre-merge-check, which cannot go green for an in-flight
-    signoff-required feature before Gate 2. The "Acceptance Gate is green on a real
-    runner" half of AC-4 is therefore NOT proven at 556c799, and cannot be proven by any
-    verify round. It must be spot-checked at Gate 2, on the first run after the human
-    signature lands.
+      ... eight more staleness violations ...
+      pre-merge-check: 11 violation(s) - merge blocked
+    Round 2 recorded this job as red for the single self-reference reason. At 01ee88c that
+    is no longer the whole story, and the difference is the finding of this round.
 
 - eval: E5
-  run_id: ci-vitest-sdk-pin-e5-1785935038
+  run_id: ci-vitest-sdk-pin-e5-1785938617
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_pin_derived
-  verified_at: 2026-08-05T13:03:58Z
+  verified_at: 2026-08-05T14:03:37Z
   output: |
     $ bash scripts/plugins/check-overlay-pin-derived.sh shape
     OK: no literal pin; resolves oneflow-sdk==0.2.18 before the cd (line 22 < 32) and
     from inside a foreign git repo
-    -- baseline, evidence/baseline-prefix-pin-guards.txt captured on 65b5529 --
+    -- baseline A, the committed pre-fix capture evidence/baseline-prefix-pin-guards.txt
+       (taken on 65b5529 before any production edit) --
     18:SDK_SPEC="${OVERLAY_SDK_SPEC:-oneflow-sdk==0.2.18}"
     FAIL: scripts/plugins/run-overlay-plugin-tests.sh still carries a hardcoded version specifier
     -> baseline exit_code: 1
-    The guard grew two assertions since round 1 (resolution happens BEFORE the cd into
-    the plugin clone, and survives being run from inside a foreign git repo) — those are
-    the two halves of the defect the compose-overlay re-verification found and 28c1a7d
-    fixed.
+    -- baseline B, re-derived this round: the CURRENT guard copied into an origin/main
+       worktree aborts before it can assert anything --
+    scripts/plugins/check-overlay-pin-derived.sh: line 14: scripts/lib/sdk-version.sh: No such file or directory
+    -> baseline exit_code: 1
+    Baseline A is the load-bearing one: it shows the literal pin the feature removed.
 
 - eval: E6
-  run_id: ci-vitest-sdk-pin-e6-1785935038
+  run_id: ci-vitest-sdk-pin-e6-1785938617
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_pin_teeth
-  verified_at: 2026-08-05T13:03:58Z
+  verified_at: 2026-08-05T14:03:37Z
   output: |
     $ bash scripts/plugins/check-overlay-pin-derived.sh teeth
     OK: perturbed pyproject (9.9.9) moved the spec; real tree still resolves 0.2.18
@@ -167,18 +159,18 @@ human_signoff:
     sdk/pyproject.toml did not move the spec.
 
 - eval: E7
-  run_id: ci-vitest-sdk-pin-e7-1785935038
+  run_id: ci-vitest-sdk-pin-e7-1785938617
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_pin_override
-  verified_at: 2026-08-05T13:03:58Z
+  verified_at: 2026-08-05T14:03:37Z
   output: |
     $ bash scripts/plugins/check-overlay-pin-derived.sh override
     OK: OVERLAY_SDK_SPEC takes precedence over the derived pin
-    -- baseline (same guard copied into an origin/main worktree, re-derived this round) --
+    -- baseline (current guard copied into an origin/main worktree, re-derived this round) --
     scripts/plugins/check-overlay-pin-derived.sh: line 14: scripts/lib/sdk-version.sh: No such file or directory
     -> baseline exit_code: 1
-    HONEST CAVEAT, CARRIED FORWARD FROM ROUND 1 AND RE-CONFIRMED, NOT UPGRADED: this
+    HONEST CAVEAT, CARRIED FORWARD FROM ROUNDS 1 AND 2, RE-CONFIRMED, NOT UPGRADED: this
     baseline red is "the shared library does not exist yet", i.e. the guard aborts on a
     missing file — it is NOT a demonstration that origin/main lost the override. On
     origin/main the `${OVERLAY_SDK_SPEC:-...}` default already honoured the variable, so
@@ -186,11 +178,11 @@ human_signoff:
     and it holds on the branch; that is the whole of what it establishes.
 
 - eval: E8
-  run_id: ci-vitest-sdk-pin-e8-1785935038
+  run_id: ci-vitest-sdk-pin-e8-1785938617
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_pin_single_impl
-  verified_at: 2026-08-05T13:03:58Z
+  verified_at: 2026-08-05T14:03:37Z
   output: |
     $ bash scripts/plugins/check-overlay-pin-derived.sh single-impl
     OK: one parsing law in scripts/lib/sdk-version.sh; both
@@ -205,25 +197,26 @@ human_signoff:
     is outside risk_tiers.t3_paths, so the tier stays T2 (see Boundary below).
 
 - eval: E9
-  run_id: ci-vitest-sdk-pin-e9-1785935059
+  run_id: ci-vitest-sdk-pin-e9-1785938628
   exit_code: 0
   baseline: red
   verifier: config:executors.script.civ_docs_guard_synced
-  verified_at: 2026-08-05T13:04:19Z
+  verified_at: 2026-08-05T14:03:48Z
   output: |
     $ bash scripts/plugins/check-manifest-doc-synced.sh
     OK: CLAUDE.md describes scripts/plugins/check-manifest-unmoved.sh as it behaves — 38 plain strings + 1 origin entry
-    -- baseline, evidence/baseline-prefix-pin-guards.txt on 65b5529 --
+    -- baseline, both the committed capture on 65b5529 and a fresh origin/main worktree
+       run this round agree --
     FAIL: CLAUDE.md still tells the reader to bump `expected_count`, a knob
     scripts/plugins/check-manifest-unmoved.sh no longer has
     -> baseline exit_code: 1
 
 - eval: E10
-  run_id: ci-vitest-sdk-pin-e10-1785935059
+  run_id: ci-vitest-sdk-pin-e10-1785938628
   exit_code: 0
   baseline: green
   verifier: config:executors.script.b1_anchored_green
-  verified_at: 2026-08-05T13:04:19Z
+  verified_at: 2026-08-05T14:03:49Z
   output: |
     $ ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh \
       && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh \
@@ -241,97 +234,107 @@ human_signoff:
     shape of a should-NOT-fire eval — see Analyst.
 
 - eval: E11
-  run_id: ci-vitest-sdk-pin-e11-1785935474
+  run_id: ci-vitest-sdk-pin-e11-1785938577
   exit_code: 1
   baseline: green
-  verifier: config:executors.script.civ_gate_clean
-  verified_at: 2026-08-05T13:11:14Z
+  verifier: config:executors.script.civ_gate_residual
+  verified_at: 2026-08-05T14:03:01Z
   output: |
-    THIS BLOCK RECORDS TWO RUNS OF THE SAME COMMAND, BECAUSE THE CHECK INCLUDES THIS
-    FEATURE'S OWN VERDICT. scripts/pre-merge-check.sh inspects every
-    _acceptance/<slug>/evidence-report.md, including this one, so its result depends on
-    what this very file says. Both runs are in run-log.jsonl as separate lines with their
-    real exit codes; neither is hidden.
-
-    RUN 1 — before this report was written.
-    run_id: ci-vitest-sdk-pin-e11-1785934911   verified_at: 2026-08-05T13:01:51Z
-    $ bash scripts/pre-merge-check.sh . --base origin/main
-    VIOLATION [ci-vitest-sdk-pin]: verdict=REJECT (must be PASS to merge)
-    pre-merge-check: rules ran=3 declared-off=0 expected=3
-    pre-merge-check: 1 violation(s) — merge blocked
+    $ bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main
+    VIOLATION [ci-actions-bump]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [compose-overlay]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [conformance-l0]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [dependency-refresh-2026-07]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [measure-harness]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [oneflow-plugin-prefix]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [per-plugin-origin]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [sdk-distribution-rename]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    VIOLATION [stale-scope-by-paths]: evidence is stale — code changed after verify (verified_commit f39723a...); re-run verify before merge. Changed:
+    VIOLATION [task-metering]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+    FAIL: violations outside 'ci-vitest-sdk-pin' (above) — the re-sign wave has not cleared
     -> exit_code: 1
-    Exactly one violation, and it was this feature's own round-1 verdict. Every other
-    feature printed OK. The nine round-1 staleness violations are gone: 28c1a7d fixed two
-    real defects and 556c799 re-pinned nine features' evidence, so the re-sign wave is
-    complete and the only thing left standing was this report's own verdict.
 
-    RUN 2 — re-run AFTER this report reached its verdict, because the check includes this
-    feature's own verdict and could not clear until the round-2 result was written. The
-    intermediate state was a fully-written PASS report; the re-run below was made against
-    it, and its result is what turned this report into a REJECT.
-    run_id: ci-vitest-sdk-pin-e11-1785935474   verified_at: 2026-08-05T13:11:14Z
-    $ bash scripts/pre-merge-check.sh . --base origin/main
-    VIOLATION [ci-vitest-sdk-pin]: verdict PASS but human_signoff is empty (Gate 2 pending)
-    pre-merge-check: rules ran=3 declared-off=0 expected=3
-    pre-merge-check: 1 violation(s) — merge blocked
-    -> exit_code: 1
-    Still not `clean`. AC-11 demands the word `clean`; the guard prints "merge blocked".
-    The criterion is not met at this commit, so E11 FAILS and the verdict is REJECT.
+    ROOT CAUSE, established rather than inferred. Every one of the ten violations names the
+    SAME single changed file:
+    $ bash scripts/pre-merge-check.sh . --base origin/main | grep -A1 'VIOLATION \[task-metering\]'
+    VIOLATION [task-metering]: evidence is stale — code changed after verify (verified_commit 28c1a7d...); re-run verify before merge. Changed:
+        scripts/acceptance/check-gate-residual.sh
+    $ git diff --name-only 28c1a7d HEAD | grep -v '^_acceptance/'
+    scripts/acceptance/check-gate-residual.sh
+    Commit 01ee88c — the amendment commit — created that guard. It lives outside
+    _acceptance/ and is not one of the four exact paths t1_skip_globs exempts for gate
+    tooling (scripts/pre-merge-check.sh, scripts/recheck-evidence.js, lib/evidence-core.js,
+    lib/gap-probe.js), so it stales every feature whose evidence was pinned at 28c1a7d by
+    556c799 — the nine of the re-sign wave — plus stale-scope-by-paths, whose narrow
+    declared scope includes scripts/acceptance/**. The guard written to assert "every other
+    feature is clean" is itself the file that made every other feature unclean.
 
-    WHY IT FAILED IS NOT WHAT ROUND 1 EXPECTED, and this is the important part.
-    scripts/pre-merge-check.sh:1005-1036 gates every feature whose contract status is
-    `implemented` through three consecutive checks, in this order:
-      1. no evidence-report.md            -> VIOLATION
-      2. verdict != PASS                  -> VIOLATION
-      3. verdict == PASS, signoff empty   -> VIOLATION  (signoff.required_for: [T2, T3])
-    A feature being verified is, by definition, in exactly one of those three states. The
-    first is where it starts, the second is a REJECT round, the third is every PASS round
-    before Gate 2 — and the verifier is forbidden to fill human_signoff, which is a
-    human-owned field that must land in its own commit
-    (signoff.require_human_commit: true). E11 therefore cannot print `clean` in ANY S4
-    verify round of a signoff-required feature. It is not measuring this branch; it is
-    measuring whether Gate 2 has already happened. See Findings.
+    The criterion is NOT met at 01ee88c and E11 correctly says so. This is not the round-2
+    failure returning: round 2's E11 was unsatisfiable in principle; this one is satisfiable
+    and simply unsatisfied — a fresh re-pin wave at 01ee88c would clear it, as would a
+    decision to exempt scripts/acceptance/ gate tooling in t1_skip_globs. Both are owner
+    calls; neither is a verifier's, and no file was changed to chase it.
 
-    -- WAVE COMPOSITION (AC-11's other half), verified independently of the guard --
-    $ git diff --stat origin/main...HEAD -- _acceptance/   (+ per-feature verified_commit)
-    9 features carry evidence re-pinned at 28c1a7d; 6 are untouched at older commits:
-      re-verify + re-sign (2): ci-actions-bump, compose-overlay
-      carry-forward re-pin (7): conformance-l0, dependency-refresh-2026-07,
-        measure-harness, oneflow-plugin-prefix, per-plugin-origin,
-        sdk-distribution-rename, task-metering
-      not touched (6): cache-l1-fingerprint, cache-l2-store, cache-l3-tier-b,
-        cache-l4-eviction, gate-scope-anchors, stale-scope-by-paths
-    2 + 7 + 6 = 15, feature for feature identical to the Gate-1 quote in contract.md. No
-    scope was silently widened; no feature outside the quote moved. This half of AC-11 is
-    MET. The `clean` half is not.
+    -- IS THE NEW GUARD DISCRIMINATING, OR DOES IT RUBBER-STAMP? Probed, not assumed. --
+    Probes ran in a throwaway detached worktree at 556c799 (the last commit where the wave
+    WAS clean) with the current guard copied in as an untracked file; the real tree was
+    never touched. Restoration was verified with git status after each probe.
+    A. Unperturbed there: "OK: the only violation(s) are ci-vitest-sdk-pin's own pending
+       Gate-2 signature (1); every other feature is clean" -> exit 0.
+    B. Blanked task-metering's human_signoff:
+       VIOLATION [task-metering]: verdict PASS but human_signoff is empty (Gate 2 pending)
+       FAIL: violations outside 'ci-vitest-sdk-pin' (above) — the re-sign wave has not cleared
+       -> exit 1. Restored -> back to exit 0.
+    C. Repointed compose-overlay's verified_commit at 65b5529:
+       VIOLATION [compose-overlay]: evidence is stale — code changed after verify (verified_commit 65b5529)
+       FAIL: violations outside 'ci-vitest-sdk-pin' (above) — the re-sign wave has not cleared
+       -> exit 1. Restored -> back to exit 0.
+    D. Gave the IN-FLIGHT slug a violation outside the forgiven set (own report set to
+       verdict PASS with a signature never committed by a human):
+       VIOLATION [ci-vitest-sdk-pin]: human_signoff present but not found in any commit ...
+       FAIL: 'ci-vitest-sdk-pin' violation is not the pending-signature class (above)
+       -> exit 1.
+    The foreign half REFUSES when it should, names the feature, and recovers on restore.
+    The own half does not blanket-forgive. Two caveats on the own half are recorded in
+    Findings 2 and 3 — it forgives one class more than the amendment's wording promises,
+    and it inherits a blind spot from pre-merge-check's per-feature short-circuit.
 
-    -- baseline (origin/main worktree, re-derived this round) --
-    pre-merge-check: clean
+    -- baseline (current guard copied into an origin/main worktree, re-derived this round) --
+    OK: gate clean — no violation at all, including ci-vitest-sdk-pin
     -> baseline exit_code: 0
-    The baseline is green only because origin/main carries no in-flight feature. It is
-    not evidence that this branch could ever reach `clean` before Gate 2.
+    The baseline is green only because origin/main carries no in-flight feature and no
+    unpinned wave. It is not evidence about this branch either way.
+
+    Re-run AFTER this report was written, because the check reads every evidence-report.md
+    including this one — same result, no dependence on what this file says:
+    run_id: ci-vitest-sdk-pin-e11-1785939018   verified_at: 2026-08-05T14:10:22Z
+    FAIL: violations outside 'ci-vitest-sdk-pin' (above) — the re-sign wave has not cleared
+    -> exit_code: 1
+    Both runs are separate lines in run-log.jsonl with their real exit codes.
 
 - eval: E12
-  run_id: ci-vitest-sdk-pin-e12-1785935072
+  run_id: ci-vitest-sdk-pin-e12-1785938638
   exit_code: 0
   baseline: green
   verifier: config:executors.script.civ_eval_keys_intact
-  verified_at: 2026-08-05T13:04:32Z
+  verified_at: 2026-08-05T14:03:58Z
   output: |
     $ bash scripts/ci/check-eval-keys-intact.sh origin/main
     OK: 15 overlay_* keys and feature_loop.suite_keys byte-identical to origin/main
     (13 overlay_* render keys + overlay_registration_synced + overlay_sdk_train = 15,
     matching what config.yaml declares.)
-    -- baseline note --
-    Run against origin/main the comparison is main-vs-main and passes trivially, so this
-    eval is green on both sides. See Analyst.
+    -- baseline note (re-derived this round in the origin/main worktree) --
+    OK: 15 overlay_* keys and feature_loop.suite_keys byte-identical to origin/main
+    -> baseline exit_code: 0
+    On the baseline the comparison is main-vs-main and passes trivially, so this eval is
+    green on both sides. See Analyst.
 
 - eval: E13
-  run_id: ci-vitest-sdk-pin-e13-1785935072
+  run_id: ci-vitest-sdk-pin-e13-1785938638
   exit_code: 0
   baseline: green
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-08-05T13:04:32Z
+  verified_at: 2026-08-05T14:04:00Z
   output: |
     $ pnpm verify:plugins
     > oneflow@0.2.1 verify:plugins /Users/manhphan/dev/oneflow
@@ -342,30 +345,60 @@ human_signoff:
 
 ## Findings
 
-1. **E11 / AC-11 is unsatisfiable by any verify round** (the reason for this REJECT).
-   `scripts/pre-merge-check.sh` violates on an in-flight signoff-required feature in all
-   three states it can occupy during S4: no report, verdict != PASS, or verdict == PASS
-   with an empty `human_signoff`. The third is the state this report is in, and the
-   verifier must not leave it — `human_signoff` is human-owned and, under
-   `signoff.require_human_commit: true`, must arrive in its own commit signed by a human.
-   AC-11's premise ("given this branch in a merge-ready state") is only true AFTER Gate 2,
-   but the eval runs BEFORE it. Round 1 read the failure as "the re-sign wave has not run
-   yet", which was true then and hid this; the wave has since run, and the residue is the
-   structural half. Two honest resolutions exist, both outside a verifier's authority:
-   re-scope the eval to the OTHER features (e.g. assert no violation for any slug except
-   this one), or move it to a Gate-2 post-signature check. Reported, not fixed — the
-   instructions for this round forbid touching evals.yaml, contract.md, or guard scripts,
-   and rightly so.
-2. **AC-4's "Acceptance Gate job is green" half has the same shape.** The eval's command
-   omits that job on purpose, and the job itself runs pre-merge-check, so it inherits
-   finding 1. Recorded in the E4 block; it needs a Gate-2 spot-check, not another verify
-   round.
-3. **The Gate-1 file-count quote is off.** contract.md quotes "diff dự kiến chạm đúng 3
-   file"; the branch touches 10 outside `_acceptance/`. The extra seven are guard scripts
-   created or adjusted to make the criteria checkable (plus `check-action-pins.sh`, whose
-   checkout-site snapshot the new job forced from 7 to 8). All are inside `scripts/` and
-   `.github/`, none is under `risk_tiers.t3_paths`, and the re-sign wave is unchanged —
-   so this is a disclosure, not a tier escalation.
+1. **The amendment commit re-staled the re-sign wave, and E11 caught it** (the reason for
+   this REJECT). `01ee88c` added `scripts/acceptance/check-gate-residual.sh`, a file
+   outside `_acceptance/` and outside the four exact gate-tooling paths `t1_skip_globs`
+   exempts. That one file stales all nine features whose evidence `556c799` pinned at
+   `28c1a7d`, plus `stale-scope-by-paths` (declared scope covers `scripts/acceptance/**`).
+   The same eleven violations are what turns the Acceptance Gate job red on the real CI
+   run at this commit (see E4). Two honest exits, both owner decisions: re-pin the wave at
+   `01ee88c` (mechanical, the tenth feature's own scope makes it cheap), or add
+   `scripts/acceptance/**` — or at least this guard — to `t1_skip_globs` on the same
+   "measuring stick, not product code" reasoning the four existing entries already carry,
+   and accept that gate tooling then stops staling evidence. Not fixed here: the round's
+   instructions forbid touching guard scripts, contracts, `evals.yaml`, and config, and
+   the second option is a policy change that belongs to a contract of its own.
+   *Structural note for the queue: this is a treadmill, not a one-off. Every future
+   acceptance-gate feature that lands a new guard under `scripts/` re-stales every feature
+   pinned before it, so the wave must be re-run once per fix commit. `stale-scope-by-paths`
+   named this family; the exemption list is where it was meant to be answered.*
+2. **`check-gate-residual.sh` forgives one class more than the amendment promises.**
+   The amendment says it tolerates only "the in-flight slug's pending Gate-2 signature";
+   the code's own comment says "a red eval or stale evidence belonging to this slug is a
+   real failure and must not hide behind its own name". But the `case` at lines 56-61
+   forgives three strings: `human_signoff is empty`, **`verdict=REJECT`**, and
+   **`no evidence-report.md`**. Probe A demonstrates the gap concretely: at `556c799` the
+   only violation was `VIOLATION [ci-vitest-sdk-pin]: verdict=REJECT`, and the guard
+   printed *"the only violation(s) are ci-vitest-sdk-pin's own pending Gate-2 signature"*
+   — a green verdict, with a message that misdescribes what it forgave. There IS a defensible
+   reason for the wider set (E11 runs before the round's report is written, so the report on
+   disk is the previous round's), but the effect is that E11 is structurally incapable of
+   going red on account of this feature's own verdict. That is acceptable only because the
+   verdict is read from the report directly by `pre-merge-check`, not through E11 — nothing
+   false-greens the gate. Recorded for Gate 2 as a wording-vs-behaviour mismatch to settle
+   in one direction or the other; the message string is wrong either way.
+3. **A blind spot inherited from `pre-merge-check`'s per-feature short-circuit.**
+   Probe D2: with the in-flight report set to `verdict: PASS`, empty `human_signoff`, AND a
+   deliberately stale `verified_commit`, `pre-merge-check` emitted only the empty-signoff
+   violation — the staleness of the in-flight feature's own evidence was never printed, so
+   `check-gate-residual.sh` returned exit 0. While the signature is pending (i.e. during
+   every verify round), the in-flight slug's own staleness is invisible to this guard. It
+   is not a hole the guard opened; it is the shape of the source it reads. Whether that
+   matters is a Gate-2 judgement — the same run has already proved the tree fresh through
+   E1..E10/E12/E13 — but it should be known rather than assumed away.
+4. **AC-4 six-vs-five, re-measured.** The criterion names six jobs; the resolved command
+   checks five. All six exist on run 31012949660; the five checked are green; Acceptance
+   Gate is `failure`. At `556c799` its only cause was this feature's own verdict; at
+   `01ee88c` its causes are the eleven violations of Finding 1, i.e. mostly OTHER features.
+   The "Acceptance Gate is green on a real runner" half of AC-4 remains unproven, and after
+   Finding 1 is fixed it will still need a post-signature spot-check.
+5. **The Gate-1 file-count correction in the contract is itself now short by one.**
+   The Amendment's "Đính chính" lists 10 files outside `_acceptance/`, naming seven guard
+   scripts. `git diff --name-only origin/main...HEAD` outside `_acceptance/` at 01ee88c
+   returns 13 paths — the 10 plus `STATUS.md` and `docs/roadmap.md` (both t1-exempt docs)
+   and `scripts/acceptance/check-gate-residual.sh` (the eighth guard, added by the
+   amendment itself). Still nothing under `risk_tiers.t3_paths`, so **T2 still holds**.
+   Disclosure, not escalation.
 
 ## Analyst
 
@@ -376,21 +409,21 @@ harness, not the feature.
   carries no positive evidence about this feature — only the absence of collateral damage
   to gate-scope-anchors' anchoring.
 - E12 (eval keys intact): compares config.yaml against origin/main; on the baseline that
-  is a self-comparison and passes vacuously.
+  is a self-comparison and passes vacuously. Re-derived this round rather than assumed.
 - E13 (verify:plugins): the plugin scanner does not read `_acceptance/config.yaml`, so no
   change in this feature could have moved it either way.
-- E11 is green on the baseline and red here, but that is not discrimination in the useful
-  direction: the baseline is green because origin/main has no in-flight feature at all.
-  See Findings 1.
-
-E3 has MOVED OUT of this section since round 1. Round 1 filed it as non-discriminating;
-a1bc936 rewired teeth to read the job command out of ci.yml, and the claim was re-tested
-from scratch this round (current guard, origin/main tree, no unit-tests job) — it goes
-red. The A/B is now real.
+- E11 is green on the origin/main baseline and red here. Unlike round 2, that IS
+  discrimination in the useful direction this round: the branch genuinely carries an
+  uncleared wave and the guard says so. The baseline green remains uninformative (no
+  in-flight feature there), so it is the probe suite in the E11 block — not the baseline —
+  that establishes the guard has teeth.
+- E3 stays OUT of this section, as in round 2: re-derived from scratch again this round
+  (current guard, origin/main tree, no unit-tests job) it goes red. The A/B is real.
 
 Boundary check performed independently of the evals:
-`git diff --name-only origin/main...HEAD` outside `_acceptance/` touches exactly
-.github/workflows/ci.yml, CLAUDE.md, scripts/abi/check-overlay-sdk-train.sh,
+`git diff --name-only origin/main...HEAD` outside `_acceptance/` touches
+.github/workflows/ci.yml, CLAUDE.md, STATUS.md, docs/roadmap.md,
+scripts/abi/check-overlay-sdk-train.sh, scripts/acceptance/check-gate-residual.sh,
 scripts/ci/check-action-pins.sh, scripts/ci/check-eval-keys-intact.sh,
 scripts/ci/check-vitest-job.sh, scripts/lib/sdk-version.sh,
 scripts/plugins/check-manifest-doc-synced.sh,
@@ -402,17 +435,25 @@ declared in the contract still holds and no escalation is required.
 ## Known limits
 
 - `scripts/lib/sdk-version.sh` anchors its default root with `BASH_SOURCE[0]`, so it is
-  only correct when sourced FROM BASH. Verified this round rather than assumed: sourcing
-  it under zsh from /tmp resolves the root to `/` and then reports
+  only correct when sourced FROM BASH. Verified in round 2 rather than assumed: sourced
+  under zsh from /tmp it resolves the root to `/` and reports
   `sdk-version: no such file: //sdk/pyproject.toml` (exit 2), whereas the same source
   under bash resolves the repo root and yields `oneflow-sdk==0.2.18`. It fails CLOSED and
   loudly, not silently to a wrong version. Every consumer in the repo is a
   `#!/usr/bin/env bash` script, so this is not a defect today; it is a trap for the first
-  consumer written for a different shell. Recorded, not fixed — no production file was
-  touched in this round.
+  consumer written for a different shell. Carried forward unchanged.
+- **The AC-11 unsatisfiability is a general trap, and it now has a sibling.** Any future
+  contract with a "pre-merge-check clean" criterion hits the same wall round 2 documented.
+  Round 3 adds the second half: any feature that lands a new guard file under `scripts/`
+  re-stales every already-pinned feature, so "the re-sign wave is clean" is a moving target
+  that must be re-hit after every fix commit. Both belong in the repo's queue as one item
+  about how gate tooling is scoped (`t1_skip_globs`), not as per-feature patches.
 - The wave-ownership rule ("owned file set = the merge commit's diff") still cannot
   separate `compose-overlay` from `gate-scope-anchors`, which share `landed_merge`
   7976bd8. Already disclosed in contract.md Context; unchanged by this round.
+- `check-gate-residual.sh`'s forgiveness set and its success message disagree with each
+  other and with the Amendment's wording (Finding 2); and it cannot see the in-flight
+  slug's own staleness while the signature is pending (Finding 3).
 
 ## Variance
 
@@ -429,42 +470,67 @@ Round 1 (commit b2462f4) returned REJECT on [E4, E11].
 - Round 1 also filed E3 as non-discriminating and disclosed that E7's baseline red is
   weaker than it appears.
 
-Between rounds (not this verifier's work, recorded from the log): a1bc936 rewired the E3
-teeth mode to read the job command out of ci.yml; the branch was pushed and CI ran;
+Between rounds 1 and 2 (not this verifier's work, recorded from the log): a1bc936 rewired
+the E3 teeth mode to read the job command out of ci.yml; the branch was pushed and CI ran;
 28c1a7d fixed two real defects found by a separate re-verification wave (the SDK-version
 root was being resolved at call time, which killed all 13 compose-overlay render evals
 once the runner cd'd into the plugin clone; and check-action-pins.sh needed its
 checkout-site snapshot re-numbered 7 -> 8 because the new vitest job adds a site);
 556c799 re-pinned nine features' evidence at 28c1a7d.
 
-Round 2 (commit 556c799, enforcement strict, no bypass): all 13 evals executed. 12
-passed; E11 failed. Order was fixed in advance for the self-referential eval — E11 was
-run FIRST, as-is, before anything was written; then every other eval was run; then the
-report was written (as PASS, since at that moment E11's only known violation was the
-self-reference that the write clears); then E11 was re-run, came back with a DIFFERENT
-violation that no write of this report can clear, and the verdict was changed to REJECT
-to match the run. Both E11 runs are in run-log.jsonl as separate lines with their real
-exit codes.
+Round 2 (commit 556c799, enforcement strict, no bypass) returned REJECT on [E11] alone.
+12 of 13 evals passed. The finding was not "the wave has not run" — the wave HAD run — but
+that AC-11 as originally written was **unsatisfiable**: `pre-merge-check.sh` violates on the
+in-flight feature in all three states it can occupy during S4 (no report; verdict not PASS;
+verdict PASS with an empty `human_signoff` the verifier is forbidden to fill), so no verify
+round of a signoff-required feature could ever reach the word `clean`. E11 was run before
+the report was written and again after; both runs are in run-log.jsonl.
 
-Round-1 findings re-checked rather than inherited:
-- E3's discrimination claim HOLDS (see the E3 block). E3 leaves Analyst.
-- E4 now passes on a real runner, with the Acceptance-Gate caveat disclosed in its block.
-- E7's weak baseline SURVIVES as a disclosure, not upgraded (see the E7 block).
+Between rounds 2 and 3: 01ee88c amended AC-11 in the contract (approved in place by the
+owner), re-pointed E11 at the new `scripts/acceptance/check-gate-residual.sh`, and moved
+the post-signature `clean` to the Gate-2 checklist.
+
+Round 3 (commit 01ee88c, enforcement strict, no bypass): all 13 evals executed. 12 passed;
+E11 failed — for a NEW and satisfiable reason. The amendment is sound and its guard is
+discriminating (four probes in a throwaway worktree, recorded in the E11 block), but the
+amendment commit itself created a guard file outside the gate-tooling exemption list,
+re-staling the nine re-pinned features plus stale-scope-by-paths. The gate is red because
+the wave is uncleared again, not because a criterion is unanswerable. This is round 3 —
+the last the kit allows — so the escalation goes to the human at Gate 2.
+
+Round-1 and round-2 findings re-checked rather than inherited:
+- E3's discrimination claim HOLDS, re-derived a second time from scratch.
+- E7's weak baseline SURVIVES as a disclosure, not upgraded.
+- E4's six-vs-five gap re-measured on the run at this commit; the Acceptance Gate job's
+  cause has CHANGED since round 2 and is recorded honestly (Finding 4).
 - E3's perturbation cleanup was audited again: after the run, `git status --porcelain`
-  showed only the verifier's own run-log.jsonl, and a repo-wide find for the probe name
-  returned nothing. No probe file survived.
+  showed only the verifier's own run-log.jsonl, and a repo-wide find for
+  `__civ_teeth_probe` returned nothing. No probe file survived.
 
-No production file, guard script, contract, or evals.yaml was modified during this round.
-One throwaway detached worktree at origin/main was created to re-derive real baselines
-for E1, E2, E3, E7, E8, E10, E11; it was removed and `git worktree prune` run, leaving
-HEAD at 556c799 with only run-log.jsonl and this report modified.
+No production file, guard script, contract, config.yaml, or evals.yaml was modified during
+this round. Two throwaway detached worktrees were created under the session scratchpad —
+one at 556c799 to probe the new guard, one at origin/main to re-derive baselines — with the
+current guards copied in as untracked files; both were removed with `git worktree remove`
+and `git worktree prune`, leaving HEAD at 01ee88c with only run-log.jsonl and this report
+modified.
 
 ## Gate 2 checklist (human)
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
-- [ ] Decide Finding 1: E11/AC-11 as written cannot pass in a verify round. Either
-      re-scope the eval (assert no violation for any slug OTHER than this one), move it
-      to a post-signature Gate-2 check, or accept the criterion as human-judged here.
+- [ ] **Decide Finding 1 — the reason for this REJECT.** Either re-pin the nine features
+      (plus stale-scope-by-paths) at 01ee88c and re-run E11, or exempt
+      `scripts/acceptance/**` gate tooling in `t1_skip_globs` so a new guard stops staling
+      signed evidence. The second is the standing fix; the first is what unblocks today.
+- [ ] Decide Finding 2: `check-gate-residual.sh` forgives `verdict=REJECT` and
+      `no evidence-report.md` in addition to the pending signature, and its OK message
+      calls all three "pending Gate-2 signature". Narrow the set, or widen the wording —
+      but the message string is inaccurate as it stands.
+- [ ] Note Finding 3: while the signature is pending, the in-flight slug's OWN staleness is
+      invisible to the guard (pre-merge-check short-circuits per feature).
 - [ ] Spot-check the FIRST CI run after the signature commit: confirm the Acceptance Gate
-      job is green there (the AC-4 half no verify round can observe — see E4, Finding 2)
+      job is green there (the AC-4 half no verify round can observe — see E4, Finding 4)
+- [ ] **AC-11's other half, still manual:** after signing, run
+      `bash scripts/pre-merge-check.sh . --base origin/main` and confirm it prints `clean`
+- [ ] Queue item (outside this feature): "pre-merge-check clean" as a criterion, and gate
+      tooling staling signed evidence, are one scoping problem — see Known limits
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract

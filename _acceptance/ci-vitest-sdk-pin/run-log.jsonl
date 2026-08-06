@@ -25,3 +25,17 @@
 {"ts":"2026-08-05T13:04:32Z","round":2,"evalId":"E12","run_id":"ci-vitest-sdk-pin-e12-1785935072","exit_code":0,"cmd":"bash scripts/ci/check-eval-keys-intact.sh origin/main"}
 {"ts":"2026-08-05T13:04:32Z","round":2,"evalId":"E13","run_id":"ci-vitest-sdk-pin-e13-1785935072","exit_code":0,"cmd":"pnpm verify:plugins"}
 {"ts":"2026-08-05T13:11:14Z","round":2,"evalId":"E11","run_id":"ci-vitest-sdk-pin-e11-1785935474","exit_code":1,"cmd":"bash scripts/pre-merge-check.sh . --base origin/main"}
+{"ts":"2026-08-05T14:01:38Z","round":3,"evalId":"E1","run_id":"ci-vitest-sdk-pin-e1-1785938498","exit_code":0,"cmd":"bash scripts/ci/check-vitest-job.sh shape"}
+{"ts":"2026-08-05T14:01:48Z","round":3,"evalId":"E2","run_id":"ci-vitest-sdk-pin-e2-1785938508","exit_code":0,"cmd":"bash scripts/ci/check-vitest-job.sh no-softening"}
+{"ts":"2026-08-05T14:02:00Z","round":3,"evalId":"E3","run_id":"ci-vitest-sdk-pin-e3-1785938516","exit_code":0,"cmd":"bash scripts/ci/check-vitest-job.sh teeth"}
+{"ts":"2026-08-05T14:02:17Z","round":3,"evalId":"E4","run_id":"ci-vitest-sdk-pin-e4-1785938533","exit_code":0,"cmd":"ACCEPTANCE_SLUG=ci-vitest-sdk-pin bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' 'Unit Tests (vitest)'"}
+{"ts":"2026-08-05T14:03:01Z","round":3,"evalId":"E11","run_id":"ci-vitest-sdk-pin-e11-1785938577","exit_code":1,"cmd":"bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main"}
+{"ts":"2026-08-05T14:03:37Z","round":3,"evalId":"E5","run_id":"ci-vitest-sdk-pin-e5-1785938617","exit_code":0,"cmd":"bash scripts/plugins/check-overlay-pin-derived.sh shape"}
+{"ts":"2026-08-05T14:03:37Z","round":3,"evalId":"E6","run_id":"ci-vitest-sdk-pin-e6-1785938617","exit_code":0,"cmd":"bash scripts/plugins/check-overlay-pin-derived.sh teeth"}
+{"ts":"2026-08-05T14:03:37Z","round":3,"evalId":"E7","run_id":"ci-vitest-sdk-pin-e7-1785938617","exit_code":0,"cmd":"bash scripts/plugins/check-overlay-pin-derived.sh override"}
+{"ts":"2026-08-05T14:03:37Z","round":3,"evalId":"E8","run_id":"ci-vitest-sdk-pin-e8-1785938617","exit_code":0,"cmd":"bash scripts/plugins/check-overlay-pin-derived.sh single-impl"}
+{"ts":"2026-08-05T14:03:48Z","round":3,"evalId":"E9","run_id":"ci-vitest-sdk-pin-e9-1785938628","exit_code":0,"cmd":"bash scripts/plugins/check-manifest-doc-synced.sh"}
+{"ts":"2026-08-05T14:03:49Z","round":3,"evalId":"E10","run_id":"ci-vitest-sdk-pin-e10-1785938628","exit_code":0,"cmd":"ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh"}
+{"ts":"2026-08-05T14:03:58Z","round":3,"evalId":"E12","run_id":"ci-vitest-sdk-pin-e12-1785938638","exit_code":0,"cmd":"bash scripts/ci/check-eval-keys-intact.sh origin/main"}
+{"ts":"2026-08-05T14:04:00Z","round":3,"evalId":"E13","run_id":"ci-vitest-sdk-pin-e13-1785938638","exit_code":0,"cmd":"pnpm verify:plugins"}
+{"ts":"2026-08-05T14:10:22Z","round":3,"evalId":"E11","run_id":"ci-vitest-sdk-pin-e11-1785939018","exit_code":1,"cmd":"bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main"}

@@ -50,15 +50,35 @@ if [ -n "$foreign" ]; then
     fail "violations outside '$SLUG' (above) — the re-sign wave has not cleared"
 fi
 
-# Own violations are forgiven ONLY while they are the wait for a human. A red
-# eval or stale evidence belonging to this slug is a real failure and must not
-# hide behind its own name.
+# Own violations are forgiven ONLY while they are "this feature has not finished
+# its own Gate 2 yet". THREE strings qualify, and the message below names which
+# one was actually forgiven — an earlier version forgave all three but reported
+# every case as "pending Gate-2 signature", which described the world wrongly in
+# two of them. A guard that misreports what it forgave is a guard you cannot read.
+#
+#   no evidence-report.md  — the round has not written its report yet
+#   verdict=REJECT         — a previous round's verdict, rewritten by this one
+#   human_signoff is empty — PASS, waiting on the human (the true end state)
+#
+# Anything else belonging to this slug — stale evidence, a bypass, an
+# unacknowledged enforcement mode — is a real failure and must not hide behind
+# its own name.
+#
+# KNOWN BLIND SPOT (inherited from pre-merge-check, not opened here):
+# pre-merge-check short-circuits per feature, so when the in-flight slug's report
+# is PASS with an empty signature it reports ONLY that, even if the same report's
+# `verified_commit` is stale. During a verify round this feature's own staleness
+# is therefore invisible to this guard. It becomes visible the moment the human
+# signs and the empty-signoff violation clears.
+forgiven=""
 while IFS= read -r line; do
     case "$line" in
-        *"human_signoff is empty"*|*"verdict=REJECT"*|*"no evidence-report.md"*) ;;
-        *) printf '%s\n' "$line" >&2; fail "'$SLUG' violation is not the pending-signature class (above)" ;;
+        *"human_signoff is empty"*) forgiven="${forgiven}PASS awaiting the human's Gate-2 signature; " ;;
+        *"verdict=REJECT"*)         forgiven="${forgiven}a previous round's REJECT verdict, not yet rewritten; " ;;
+        *"no evidence-report.md"*)  forgiven="${forgiven}no evidence report written yet this round; " ;;
+        *) printf '%s\n' "$line" >&2; fail "'$SLUG' violation is not an unfinished-Gate-2 class (above)" ;;
     esac
 done <<<"$violations"
 
 n=$(printf '%s\n' "$violations" | grep -c .)
-echo "OK: the only violation(s) are $SLUG's own pending Gate-2 signature ($n); every other feature is clean"
+echo "OK: every feature other than $SLUG is clean; forgave $n own violation(s) — ${forgiven%; }"
