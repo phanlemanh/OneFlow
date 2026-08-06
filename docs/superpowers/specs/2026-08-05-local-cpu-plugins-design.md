@@ -76,13 +76,20 @@ The upstream `deploy.py` already separates six pure helpers (`concat_videos_help
 `Path` arguments and shell out to ffmpeg; they do not know Modal exists. Porting is a
 copy, not a rewrite — which is what makes this sub-project cheap.
 
-Python dependencies: **none**.
+Python dependencies: **`moviepy`**. Four of the seven helpers shell out to ffmpeg, but
+`concat_videos_helper` (the fallback path), `get_first_frame_helper` and
+`get_last_frame_helper` use moviepy's `VideoFileClip` / `concatenate_videoclips`. An
+earlier draft of this spec claimed zero dependencies — wrong, corrected here.
+
+A useful side effect: moviepy pulls in `imageio-ffmpeg`, which *is* the resolver's third
+rung, so the safety net arrives with a dependency the plugin needs anyway.
 
 ### `oneflow-local-pyscenedetect` — 1 slot
 
-`SPLIT_VIDEO`, the first step of skill #1. Python dependency: `scenedetect`.
+`SPLIT_VIDEO`, the first step of skill #1. Python dependency: `scenedetect[opencv]`. The
+upstream image also installs `boto3` for the Modal-side S3 upload; the local build drops it.
 
-### `ffmpeg` binary resolution — one rule, one file
+### `ffmpeg` binary resolution — one rule per repo
 
 ```
 FFMPEG_BIN (env)  →  ffmpeg on PATH  →  the imageio-ffmpeg wheel
@@ -90,9 +97,14 @@ FFMPEG_BIN (env)  →  ffmpeg on PATH  →  the imageio-ffmpeg wheel
 
 System ffmpeg first because its codec and filter coverage is wider; the wheel is the
 safety net so a machine with nothing installed still works — the point of local-first.
-The resolver lives in exactly one module shared by both plugins, per the `sdk-version.sh`
-lesson from CI-a: a second copy of a rule is the failure family this repo has already
-paid for twice.
+**Each plugin repo keeps its own copy** (~15 lines), decided with Manh once the plan
+showed the two plugins are separate git repositories with no shared file between them.
+Genuinely sharing it would mean putting `ffmpeg_bin()` in `sdk/tongflow/`, which is a
+t3 path and would escalate this package to T3 plus an SDK release train. The
+`sdk-version.sh` lesson from CI-a still holds *within* a repo; across independent
+artifacts, duplication is the cheaper correct answer — the same reason
+`oneflow-modal-compose-overlay` shares no file with this one. Cost accepted and recorded:
+a later change to the resolution order must be made in two places.
 
 All three missing → `{success: false, error}` naming the install command. Never silent.
 
