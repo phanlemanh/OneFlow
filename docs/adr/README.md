@@ -18,3 +18,4 @@ Nguồn bằng chứng chính: [biên bản hội đồng 07/2026](../strategy/c
 | [0008](0008-naming-and-distribution.md) | Đặt tên & phân phối: tiền tố `oneflow-`, distribution `oneflow-sdk`, import giữ `tongflow` | 2026-07-27 |
 | [0009](0009-tts-vi-eleven-v3.md) | TTS tiếng Việt dùng `eleven_v3`; điều kiện MOS của G0 đóng bằng phán quyết vận hành | 2026-07-27 |
 | [0010](0010-mainstream-infra-and-models.md) | Ưu tiên hạ tầng & model phổ biến; Modal là lựa chọn, không phải nền tảng (sửa đổi ADR-0005) | 2026-07-27 |
+| [0011](0011-local-first-execution.md) | Máy của người dùng là nền thực thi mặc định; managed cloud là tier (**thay thế** nửa managed-mặc-định của ADR-0005) | 2026-08-05 |
