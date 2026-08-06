@@ -6,7 +6,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: c1da607c0432afa8ddf52c2ef56d99db9b8edc0b
-human_signoff:
+human_signoff: Manh Phan 2026-08-05
 ---
 
 # Evidence Report: ci-vitest-sdk-pin
