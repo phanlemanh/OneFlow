@@ -1,0 +1,160 @@
+schema_version: 1
+feature_slug: local-cpu-plugins
+
+# Executor keys resolve against _acceptance/config.yaml (2-space indent required).
+# Slot evals run inside the two plugin repos, which live OUTSIDE this tree, via
+# scripts/plugins/run-local-plugin-tests.sh — the same clone-and-pytest shape
+# compose-overlay established on 2026-08-02.
+
+evals:
+  # ---------- A. Per-plugin virtualenv ----------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_venv_per_plugin
+    expected: "exit 0; two distinct plugin ids derive two different paths, each ending in its own id"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_venv_common_parent
+    expected: "exit 0; both venv paths share one parent prefix, so eviction can still enumerate them"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_venv_unsafe_id
+    expected: "exit 0 — the test asserts venvDirFor('../../etc') and '.ssh' THROW; a path that escapes the venv root must NOT be derived"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.lcp_venv_conflicting_pins
+    expected: "exit 0; two throwaway plugins pinning the SAME package to conflicting versions each resolve their own pin and both entries run. Teeth: the guard re-runs the scenario against a single shared venv and asserts it FAILS there — proving the isolation is what fixes it, not luck"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.lcp_tier_boundary
+    expected: "exit 0; git diff vs origin/main shows ZERO changed files under src/lib/plugin-executor/**, src/lib/abi/**, sdk/**, src/generated/abi/**, config/tongflow.abi.json. Also covers the out-of-scope bullets 'no ABI change' and 'no SDK bump'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; the whole existing vitest suite stays green — the shared-venv → per-venv switch must regress no plugin path"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E7
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_venv_chain_per_id
+    expected: "exit 0; the serialization chain is keyed per plugin id — two different ids are NOT serialized against each other, while calls sharing one id are"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- B. oneflow-local-ffmpeg ----------
+  - id: E8
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.lcp_ffmpeg_slots
+    expected: "exit 0; all six slots (concat-videos, extract-audio, merge-video-audio, remove-video-audio, get-first-frame, get-last-frame) return success:true with a non-empty bytesBase64 over the committed 1s fixture"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.lcp_ffmpeg_missing_input
+    expected: "exit 0 — the test asserts that a prompt missing its asset yields success:false naming the field, a non-zero entry exit, and NO file written; a zero-byte asset must NOT be emitted"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.lcp_ffmpeg_no_audio_track
+    expected: "exit 0 — the test asserts extract-audio on a silent video returns success:false carrying trimmed ffmpeg stderr; it must NOT return success:true with a zero-byte audio asset"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.lcp_ffmpeg_resolver_order
+    expected: "exit 0; with FFMPEG_BIN set that binary wins, unset falls to PATH, and with PATH cleared it falls to the imageio-ffmpeg wheel — in that order"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.lcp_ffmpeg_resolver_teeth
+    expected: "exit 0 — the test asserts that with a bogus FFMPEG_BIN, an emptied PATH and no wheel the slot goes RED with an error naming the install fix. It must NOT find another ffmpeg and pass by accident"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. oneflow-local-pyscenedetect ----------
+  - id: E13
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.lcp_split_video_parts
+    expected: "exit 0; split-video on the red→blue fixture returns success:true and video_parts (NOT 'videos') holding >= 2 assets, each with non-empty bytesBase64"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.lcp_split_ffprobe_required
+    expected: "exit 0 — the test asserts that when ffprobe cannot be resolved the plugin fails loudly NAMING ffprobe. It must NOT silently skip keyframe alignment or emit unaligned cuts; the imageio-ffmpeg wheel ships no ffprobe, so this path is reachable on a clean machine"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Modal is actually gone ----------
+  - id: E15
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.lcp_no_modal
+    expected: "exit 0; static scan of both plugin clones finds NO 'import modal', NO deploy.py, NO download.py, NO MODAL_TOKEN_ID/MODAL_TOKEN_SECRET in either tongflow.plugin.json, no boto3/S3 path, and FFMPEG_BIN declared WITHOUT required:true"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- E. Manifest, guard, docs ----------
+  - id: E16
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.lcp_manifest_counts
+    expected: "exit 0; manifest holds exactly 36 plain strings under the upstream org + 3 origin entries = 39, all three origins https://github.com/phanlemanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.verify_plugins
+    expected: "exit 0; the scanner registers both local plugins and reports NO default-slot clash for the seven slots"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-15
+    executor: script
+    cmd: config:executors.script.lcp_manifest_guard_teeth
+    expected: "exit 0 — the guard-of-the-guard mutates a COPY of the manifest (adds a 4th origin entry; then alters one origin URL) and asserts check-manifest-unmoved.sh goes RED for each. The counts must NOT have been loosened into a check that passes on anything"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E19
+    criterion: AC-16
+    executor: script
+    cmd: config:executors.script.lcp_docs_synced
+    expected: "exit 0; check-manifest-doc-synced.sh and check-prefix-docs.sh both green across README.md, docs/README_ZH.md, docs/README_JA.md — and the capability matrix still shows the seven slots available"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E20
+    criterion: AC-17
+    executor: script
+    cmd: config:executors.script.lcp_resign_wave
+    expected: "exit 0; the residual check computes the re-signature wave by machine for this slug against origin/main — the machine half of AC-17"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E21
+    criterion: AC-17
+    executor: judgment
+    question: "This package edits scripts/plugins/check-manifest-unmoved.sh, which IS acceptance criterion AC-6 of the already-signed per-plugin-origin feature. Given the computed re-signature wave, has per-plugin-origin actually been re-verified against the NEW guard (third edition, 36/3), or was its earlier signature merely assumed still valid? Answer UNCERTAIN unless you can point at a re-run."
+    inputs: [contract.md, evidence-report.md, ../per-plugin-origin/contract.md, ../per-plugin-origin/evidence-report.md]
+    evidence_required: [judged_by, verdict, rationale]
