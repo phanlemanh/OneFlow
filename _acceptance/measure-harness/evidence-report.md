@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
-human_signoff:
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: measure-harness

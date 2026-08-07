@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: a4c6eca33542e78037b05273a280237194415004
-human_signoff:
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: local-cpu-plugins

@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: f7306bfa6c17c4e2ff656b66036b0d369c60648d
-human_signoff:
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: per-plugin-origin

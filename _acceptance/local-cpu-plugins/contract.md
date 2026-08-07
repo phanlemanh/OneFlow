@@ -5,7 +5,7 @@ slug: local-cpu-plugins
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins, cli]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-06
 time_human_minutes: {gate1: 0, gate2: 0}
