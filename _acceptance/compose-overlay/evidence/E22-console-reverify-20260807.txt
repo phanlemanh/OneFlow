@@ -1,0 +1,26 @@
+=== Re-verification round, 2026-08-07 — fresh-context verify subagent ===
+Repo: /Users/manh-macmini/dev/oneflow, branch feat/local-first-adr-and-s2-plan,
+HEAD a788985b3b30c7072dcfd95bc65db1f83b940984.
+
+Dev server started from .claude/launch.json entry "oneflow-dev" (pnpm dev, port 3000);
+fresh tab navigated to http://localhost:3000/workspace.
+
+read_console_messages(onlyErrors: true) returned five entries, all of the same shape:
+
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+  [error] Failed to load resource: the server responded with a status of 404 (Not Found)
+
+These are the browser's own resource-load notices for the five /api/uploads/... media URLs
+listed in E22-network-reverify-20260807.txt — the local sqlite workspace's stub media rows
+whose bytes are not on this machine. They are not thrown application errors: there is no
+stack trace, no hydration mismatch, and no React or Next.js runtime error in the log.
+
+No JavaScript exception, no hydration warning, no unhandled rejection was observed.
+
+SCOPE NOTE: the locally persisted workspace no longer contains the e22-fixture workflow with
+compose-overlay node instances, so this console check covers the workspace shell rather than a
+live compose-overlay node. The compose-overlay component sources are unchanged at this HEAD
+relative to the tree that produced the reused state captures.

@@ -5,7 +5,7 @@ slug: measure-harness
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [cli]
-status: signed-off
+status: verified
 approved_by: Manh
 approved_at: 2026-07-26
 time_human_minutes: {gate1: 0, gate2: 0}
