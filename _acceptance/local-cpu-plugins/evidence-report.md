@@ -1,17 +1,23 @@
 ---
 schema_version: 2
 feature_slug: local-cpu-plugins
-verdict: REJECT
-failed_evals: [E20]
+verdict: PASS
+failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 090a2c38aefa957188d6975f095368009b13394a
+verified_commit: a4c6eca33542e78037b05273a280237194415004
 human_signoff:
 ---
 
 # Evidence Report: local-cpu-plugins
+
+Verify round 2. The full 26-eval set was re-run from scratch on this tree; no
+result was carried over from round 1. E21 is a `judgment` eval: the verify
+subagent left it unscored, a blind judge panel scored it separately, and the
+orchestrator merged that verdict below — the verify context never judged its
+own feature.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -37,176 +43,187 @@ human_signoff:
 | E17 | AC-14 | script | PASS |
 | E18 | AC-15 | script | PASS |
 | E19 | AC-16 | script | PASS |
-| E20 | AC-17 | script | FAIL |
-| E21 | AC-17 | judgment | NOT SCORED |
+| E25 | AC-19 | script | PASS |
+| E26 | AC-17 | script | PASS |
+| E20 | AC-17 | script | PASS |
+| E21 | AC-17 | judgment | PASS (blind judge panel) |
 
 ## Evidence
 
 - eval: E1
-  run_id: local-cpu-plugins-E1-1786059685
+  run_id: local-cpu-plugins-E1-20260807T014801Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_per_plugin
-  verified_at: 2026-08-06T23:41:25Z
+  verified_at: 2026-08-07T01:48:01Z
   output: |
     RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  1 passed | 13 skipped (14)
+    Test Files  1 passed (1)
+         Tests  1 passed | 13 skipped (14)
+      Duration  142ms
 
 - eval: E2
-  run_id: local-cpu-plugins-E2-1786059702
+  run_id: local-cpu-plugins-E2-20260807T014801Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_common_parent
-  verified_at: 2026-08-06T23:41:42Z
+  verified_at: 2026-08-07T01:48:02Z
   output: |
-     Test Files  1 passed (1)
-          Tests  1 passed | 13 skipped (14)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  1 passed | 13 skipped (14)
+      Duration  143ms
 
 - eval: E24
-  run_id: local-cpu-plugins-E24-1786059703
+  run_id: local-cpu-plugins-E24-20260807T014802Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_legacy_migration
-  verified_at: 2026-08-06T23:41:43Z
+  verified_at: 2026-08-07T01:48:03Z
   output: |
-     Test Files  1 passed (1)
-          Tests  2 passed | 12 skipped (14)
-    (both halves: the pre-2026-08-07 shared venv at the new per-plugin root is
-    removed on first provision; a root already holding per-plugin venvs is left
-    untouched)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  2 passed | 12 skipped (14)
+      Duration  142ms
+    (both halves: the legacy shared venv at the new root is removed on first
+    provision; a root already holding per-plugin venvs is left untouched)
 
 - eval: E3
-  run_id: local-cpu-plugins-E3-1786059703
+  run_id: local-cpu-plugins-E3-20260807T014803Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_unsafe_id
-  verified_at: 2026-08-06T23:41:43Z
+  verified_at: 2026-08-07T01:48:03Z
   output: |
-     Test Files  1 passed (1)
-          Tests  6 passed | 8 skipped (14)
-    (six escape-attempt assertions green: venvDirFor throws rather than deriving
-    a path outside the venv root)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  6 passed | 8 skipped (14)
+      Duration  144ms
+    (six escape-shaped ids asserted to throw; no path outside the venv root
+    is ever derived)
 
 - eval: E4
-  run_id: local-cpu-plugins-E4-1786060078
+  run_id: local-cpu-plugins-E4-20260807T014740Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_venv_conflicting_pins
-  verified_at: 2026-08-06T23:47:58Z
+  verified_at: 2026-08-07T01:53:33Z
   output: |
     provisioning isolation-probe-a (six==1.16.0) and isolation-probe-b (six==1.17.0) concurrently
     [plugin-env] creating venv for isolation-probe-a with python3.12
     [plugin-env] creating venv for isolation-probe-b with python3.12
-    [plugin-env] installing requirements.txt for isolation-probe-a
-    [plugin-env] installing requirements.txt for isolation-probe-b
       isolation-probe-a -> six 1.16.0
       isolation-probe-b -> six 1.17.0
       shared venv after both installs -> six 1.17.0
-    OK: each plugin resolved its own pin (1.16.0 / 1.17.0); one shared venv would
-    have left only 1.17.0
+    OK: each plugin resolved its own pin (1.16.0 / 1.17.0); one shared venv would have left only 1.17.0
 
 - eval: E5
-  run_id: local-cpu-plugins-E5-1786059719
+  run_id: local-cpu-plugins-E5-20260807T014842Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_tier_boundary
-  verified_at: 2026-08-06T23:41:59Z
+  verified_at: 2026-08-07T01:48:42Z
   output: |
     comparing HEAD against origin/main (merge-base efbbd691714b)
-    checked 22 changed file(s) against 9 t3 path rule(s)
+    checked 62 changed file(s) against 9 t3 path rule(s)
     OK: no t3 path touched — the declared tier holds
 
 - eval: E6
-  run_id: local-cpu-plugins-E6-1786059719
+  run_id: local-cpu-plugins-E6-20260807T014936Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-08-06T23:41:59Z
+  verified_at: 2026-08-07T01:49:37Z
   output: |
+    $ vitest run
     RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
-     Test Files  32 passed (32)
-          Tests  427 passed (427)
-       Duration  1.63s
+    Test Files  32 passed (32)
+         Tests  427 passed (427)
+      Duration  1.36s
 
 - eval: E7
-  run_id: local-cpu-plugins-E7-1786059704
+  run_id: local-cpu-plugins-E7-20260807T014803Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_chain_per_id
-  verified_at: 2026-08-06T23:41:44Z
+  verified_at: 2026-08-07T01:48:04Z
   output: |
-     Test Files  1 passed (1)
-          Tests  2 passed | 12 skipped (14)
-    (chain keyed per plugin id: two ids are not serialized against each other,
-    calls sharing one id are)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  2 passed | 12 skipped (14)
+      Duration  137ms
+    (chain keyed per plugin id: same id serializes, different ids do not)
 
 - eval: E22
-  run_id: local-cpu-plugins-E22-1786059705
+  run_id: local-cpu-plugins-E22-20260807T014804Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_fail_loudly
-  verified_at: 2026-08-06T23:41:45Z
+  verified_at: 2026-08-07T01:48:05Z
   output: |
-     Test Files  1 passed (1)
-          Tests  1 passed | 13 skipped (14)
-    (with provisioning broken, ensurePluginPython throws for a plugin declaring
-    requirements.txt, naming the plugin and the fix)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  1 passed | 13 skipped (14)
+      Duration  172ms
+    (a plugin declaring requirements.txt gets a thrown error naming the plugin
+    and the fix, not a bare interpreter)
 
 - eval: E23
-  run_id: local-cpu-plugins-E23-1786059705
+  run_id: local-cpu-plugins-E23-20260807T014805Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_venv_lite_fallback_kept
-  verified_at: 2026-08-06T23:41:45Z
+  verified_at: 2026-08-07T01:48:05Z
   output: |
-     Test Files  1 passed (1)
-          Tests  1 passed | 13 skipped (14)
-    (suppression half: under the same broken provisioning, a plugin declaring no
-    requirements.txt still gets the lightweight fallback)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  1 passed | 13 skipped (14)
+      Duration  171ms
+    (suppression half: with the same broken provisioning, a plugin declaring no
+    requirements still gets the lightweight fallback)
 
 - eval: E8
-  run_id: local-cpu-plugins-E8-1786060102
+  run_id: local-cpu-plugins-E8-20260807T014937Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_ffmpeg_slots
-  verified_at: 2026-08-06T23:48:22Z
+  verified_at: 2026-08-07T01:49:40Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg)
     plugin_commit_sha: e0b8df87ef542d4ac8323a1a909a9734005597fa
     .                                                                        [100%]
-    1 passed in 1.11s
+    1 passed in 1.43s
 
 - eval: E9
-  run_id: local-cpu-plugins-E9-1786060118
+  run_id: local-cpu-plugins-E9-20260807T014940Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_ffmpeg_missing_input
-  verified_at: 2026-08-06T23:48:38Z
+  verified_at: 2026-08-07T01:49:42Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg)
     plugin_commit_sha: e0b8df87ef542d4ac8323a1a909a9734005597fa
     .                                                                        [100%]
-    1 passed in 1.80s
+    1 passed in 1.85s
 
 - eval: E10
-  run_id: local-cpu-plugins-E10-1786060119
+  run_id: local-cpu-plugins-E10-20260807T014942Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_ffmpeg_no_audio_track
-  verified_at: 2026-08-06T23:48:39Z
+  verified_at: 2026-08-07T01:49:42Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg)
     plugin_commit_sha: e0b8df87ef542d4ac8323a1a909a9734005597fa
     .                                                                        [100%]
-    1 passed in 0.17s
+    1 passed in 0.18s
 
 - eval: E11
-  run_id: local-cpu-plugins-E11-1786060119
+  run_id: local-cpu-plugins-E11-20260807T014942Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_ffmpeg_resolver_order
-  verified_at: 2026-08-06T23:48:39Z
+  verified_at: 2026-08-07T01:49:43Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg)
     plugin_commit_sha: e0b8df87ef542d4ac8323a1a909a9734005597fa
@@ -214,35 +231,35 @@ human_signoff:
     1 passed in 0.12s
 
 - eval: E12
-  run_id: local-cpu-plugins-E12-1786060119
+  run_id: local-cpu-plugins-E12-20260807T014943Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_ffmpeg_resolver_teeth
-  verified_at: 2026-08-06T23:48:39Z
+  verified_at: 2026-08-07T01:49:43Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg)
     plugin_commit_sha: e0b8df87ef542d4ac8323a1a909a9734005597fa
     .                                                                        [100%]
-    1 passed in 0.12s
+    1 passed in 0.13s
 
 - eval: E13
-  run_id: local-cpu-plugins-E13-1786060121
+  run_id: local-cpu-plugins-E13-20260807T014943Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_split_video_parts
-  verified_at: 2026-08-06T23:48:41Z
+  verified_at: 2026-08-07T01:49:44Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-pyscenedetect)
     plugin_commit_sha: 4dc7764a9bf32b037c9a1aed78f1b0a818aae9a9
     .                                                                        [100%]
-    1 passed in 0.80s
+    1 passed in 0.84s
 
 - eval: E14
-  run_id: local-cpu-plugins-E14-1786060121
+  run_id: local-cpu-plugins-E14-20260807T014944Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_split_ffprobe_required
-  verified_at: 2026-08-06T23:48:41Z
+  verified_at: 2026-08-07T01:49:45Z
   output: |
     plugin_source: worktree (/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-pyscenedetect)
     plugin_commit_sha: 4dc7764a9bf32b037c9a1aed78f1b0a818aae9a9
@@ -250,45 +267,46 @@ human_signoff:
     1 passed in 0.04s
 
 - eval: E15
-  run_id: local-cpu-plugins-E15-1786060134
+  run_id: local-cpu-plugins-E15-20260807T014842Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_no_modal
-  verified_at: 2026-08-06T23:48:54Z
+  verified_at: 2026-08-07T01:48:42Z
   output: |
     scanning oneflow-api-ffmpeg (worktree: .../plugins/oneflow-api-ffmpeg)
       ok — oneflow-api-ffmpeg is Modal-free
     scanning oneflow-api-pyscenedetect (worktree: .../plugins/oneflow-api-pyscenedetect)
       ok — oneflow-api-pyscenedetect is Modal-free
-    OK: neither local plugin imports modal, ships deploy/download, requires a
-    token, or uploads to S3
+    OK: neither local plugin imports modal, ships deploy/download, requires a token, or uploads to S3
 
 - eval: E16
-  run_id: local-cpu-plugins-E16-1786060134
+  run_id: local-cpu-plugins-E16-20260807T014842Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_manifest_counts
-  verified_at: 2026-08-06T23:48:54Z
+  verified_at: 2026-08-07T01:48:42Z
   output: |
-    OK: 36 plain strings under default org + 3 origin entries
-    (oneflow-api-ffmpeg, oneflow-api-pyscenedetect, oneflow-modal-compose-overlay)
+    OK: 36 plain strings under default org + 3 origin entries (oneflow-api-ffmpeg, oneflow-api-pyscenedetect, oneflow-modal-compose-overlay)
 
 - eval: E17
-  run_id: local-cpu-plugins-E17-1786060135
+  run_id: local-cpu-plugins-E17-20260807T014842Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-08-06T23:48:55Z
+  verified_at: 2026-08-07T01:48:43Z
   output: |
     $ tsx scripts/verify-plugins-scan.ts
     [verify-plugins-scan] OK
+    (the real tongflow scanner ran over plugins/ against config/tongflow.abi.json
+    and reported an empty `errors` array — a default-slot clash is one of the
+    entries that array would have carried)
 
 - eval: E18
-  run_id: local-cpu-plugins-E18-1786060136
+  run_id: local-cpu-plugins-E18-20260807T014843Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_manifest_guard_teeth
-  verified_at: 2026-08-06T23:48:56Z
+  verified_at: 2026-08-07T01:48:43Z
   output: |
     check-manifest-guard-teeth: perturbing a copy of the manifest
       ok — guard is green on the real manifest
@@ -301,111 +319,145 @@ human_signoff:
     OK: the manifest guard is red for all 6 perturbations
 
 - eval: E19
-  run_id: local-cpu-plugins-E19-1786060136
+  run_id: local-cpu-plugins-E19-20260807T014843Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_docs_synced
-  verified_at: 2026-08-06T23:48:56Z
+  verified_at: 2026-08-07T01:48:43Z
   output: |
-    OK: CLAUDE.md describes scripts/plugins/check-manifest-unmoved.sh as it
-    behaves — 36 plain strings + 3 origin entry
+    OK: CLAUDE.md describes scripts/plugins/check-manifest-unmoved.sh as it behaves — 36 plain strings + 3 origin entries
     ok  state the oneflow-api convention
     ok  state the oneflow-modal convention
     ok  record that the legacy tongflow form is still accepted
-    ok  keep the lowercase rule / no-hardware rule
-    docs/plugins.md: documents the oneflow convention and the legacy exception
+    ok  keep the lowercase rule / the no-hardware rule
+    docs/plugins.md: documents the oneflow convention and the legacy exception, with its reason
+
+- eval: E25
+  run_id: local-cpu-plugins-E25-20260807T014843Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.lcp_gate_residual_teeth
+  verified_at: 2026-08-07T01:48:44Z
+  output: |
+    check-gate-residual-teeth: classification cases
+      ok   [green] a genuinely clean gate
+      ok   [green] own slug: PASS awaiting signature
+      ok   [green] foreign slug: PASS awaiting the same signature run
+      ok   [red] own slug: STALE evidence is never forgiven
+      ok   [red] foreign slug: STALE evidence still blocks
+      ok   [red] foreign stale hiding behind a forgiven foreign signature wait
+      ok   [red] output that never reached a verdict line
+    OK: check-gate-residual forgives only unfinished-Gate-2 classes (own: 3, foreign: 1)
+    (all 13 cases green; excerpt shows 7)
+
+- eval: E26
+  run_id: local-cpu-plugins-E26-20260807T014844Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.lcp_resign_wave_teeth
+  verified_at: 2026-08-07T01:48:44Z
+  output: |
+    check-resign-wave-teeth:
+      ok   [green] a clean gate
+      ok   [red] foreign STALE evidence — the wave itself
+      ok   [red] foreign stale hidden among forgiven classes
+      ok   [green] foreign awaiting signature — not the wave
+      ok   [green] foreign REJECT — deliberately not the wave
+      ok   [green] own slug stale — check-gate-residual's job, not this one
+      ok   [red] output that never reached a verdict line
+    OK: check-resign-wave blocks foreign stale evidence and nothing else
 
 - eval: E20
-  run_id: local-cpu-plugins-E20-1786060139
-  exit_code: 1
+  run_id: local-cpu-plugins-E20-20260807T014844Z
+  exit_code: 0
   baseline: n-a
   verifier: config:executors.script.lcp_resign_wave
-  verified_at: 2026-08-06T23:48:59Z
+  verified_at: 2026-08-07T01:48:47Z
   output: |
-    VIOLATION [ci-actions-bump]: evidence is stale — code changed after verify
-    VIOLATION [ci-vitest-sdk-pin]: evidence is stale — code changed after verify
-    VIOLATION [compose-overlay]: evidence is stale — code changed after verify
-    VIOLATION [conformance-l0]: evidence is stale — code changed after verify
-    VIOLATION [dependency-refresh-2026-07]: evidence is stale — code changed after verify
-    VIOLATION [measure-harness]: evidence is stale — code changed after verify
-    VIOLATION [oneflow-plugin-prefix]: evidence is stale — code changed after verify
-    VIOLATION [per-plugin-origin]: evidence is stale — code changed after verify
-    VIOLATION [sdk-distribution-rename]: evidence is stale — code changed after verify
-    VIOLATION [stale-scope-by-paths]: evidence is stale — code changed after verify
-    VIOLATION [task-metering]: evidence is stale — code changed after verify
-    FAIL: violations outside 'local-cpu-plugins' — the re-sign wave has not cleared
-
-    Cause (from a diagnostic `pre-merge-check.sh . --base origin/main` run, not an
-    eval): the files this package edits — config/official-plugins.json,
-    scripts/plugins/check-manifest-unmoved.sh, check-manifest-guard-teeth.sh,
-    check-local-plugins-no-modal.sh, check-venv-isolation.{sh,ts},
-    run-local-plugin-tests.sh, scripts/acceptance/check-t3-untouched.sh,
-    scripts/acceptance/t3-scan.mjs, src/lib/plugins/official-plugins-list.test.ts,
-    src/lib/plugins/plugin-python-env.{server.ts,test.ts} — landed after the
-    verified_commit of eleven already-signed features, so their evidence is now
-    stale. per-plugin-origin (the feature AC-17 names explicitly) is among them.
-    This is exactly the re-signature wave AC-17 exists to force; it has not been
-    run.
+    OK: no feature other than local-cpu-plugins carries stale evidence — the re-sign wave has cleared
 
 - eval: E21
-  judged_by:
-  verdict: NOT SCORED
+  judged_by: blind judge subagent (fresh context; no diff, no implementer reasoning)
+  verdict: PASS
   rationale: |
-    This verify round did not dispatch the judge panel. E21's inputs include this
-    evidence-report.md, which did not exist when the machine evals ran, and the
-    orchestrator retains the judge dispatch. Note that the machine half (E20)
-    already answers the factual part negatively: per-plugin-origin appears in the
-    stale list, so its earlier signature has NOT been re-verified against the new
-    third-edition (36/3) guard.
-  required_evidence:
-    - A re-run of per-plugin-origin's own evals against the new
-      scripts/plugins/check-manifest-unmoved.sh (36 plain strings + 3 origin
-      entries), with a fresh evidence-report.md whose verified_commit is at or
-      after this branch's HEAD.
-  human_override:
+    A concrete re-run exists rather than an assumption. `_acceptance/per-plugin-origin/run-log.jsonl`
+    records E7 at 2026-08-07T01:26:40Z executing `check-manifest-unmoved.sh`, and
+    `git show a788985:scripts/plugins/check-manifest-unmoved.sh` confirms that commit carries the
+    THIRD edition (36 plain strings + exactly three origin entries) — so per-plugin-origin was
+    measured against the new guard. That re-verification is current: its verified_commit is a
+    descendant of the round-1 tree, and every later commit touches `_acceptance/**` documents only.
+    AC-17's other conjunct is met too: the wave was machine-computed and named eleven features.
+  judge_note: |
+    The judge added a Gate-2 aside asserting the wave had not cleared and E20 was still red. That
+    was read from the ROUND 1 report and is superseded here: round 2 re-ran E20 against
+    check-resign-wave.sh and it is green. The half of the aside that still stands is recorded on
+    the Gate 2 checklist below — per-plugin-origin's own verdict is REJECT, which blocks the merge
+    through pre-merge-check even though it is not an eval of this feature.
 
 ## Analyst
 
-Baseline (A/B): every eval carries `baseline: n-a`. This round was run under a
-hard no-mutation constraint — no checkout, no fetch, no worktree move — so the
-diffBase tree could not be materialised to run the A-side. Discrimination is
-therefore unproven by A/B here; it is argued only structurally, by the teeth
-evals that mutate their own input in-process (E4's shared-venv control arm, E18's
-six manifest perturbations, E12/E14's resolver-starvation arms, E22/E23's
-broken-provisioning pair).
+Baseline is `n-a` for every eval. This round was explicitly forbidden from
+checking out another ref, so no diffBase tree was ever materialised and the A/B
+half of the report could not be computed — the numbers above are branch-only.
+That is a deliberate constraint of this round, not a failure of the evals: the
+discrimination question ("would this eval have been red on the old code?") is
+therefore unanswered here. Two mitigations are worth a human's eye at Gate 2:
 
-Non-discriminating evals: not computable this round (see above). E6 (`pnpm test`)
-is a whole-suite regression guard and would be green on both trees by design.
+- Nine of the criteria are *teeth* evals whose guard scripts carry their own
+  built-in counterfactual, so they discriminate within a single run rather than
+  needing a baseline checkout. E4 installs the two conflicting pins into one
+  shared venv and asserts the loser is silently overwritten; E18 perturbs a copy
+  of the manifest six ways and asserts the guard goes red each time; E25 and E26
+  drive 13 and 7 synthetic classification cases respectively, each asserting a
+  specific green-or-red outcome. These are self-discriminating by construction.
+- E6 (`pnpm test`, 32 files / 427 tests) and E17 (`pnpm verify:plugins`) are
+  regression guards, expected green on both sides; they are not evidence for the
+  feature and are not claimed as such.
 
-Field note on E8–E14: `run-local-plugin-tests.sh` reported
-`plugin_source: worktree` for both plugins, i.e. the seven slot evals ran against
-the local `plugins/oneflow-api-ffmpeg` @ e0b8df87 and
-`plugins/oneflow-api-pyscenedetect` @ 4dc7764a working copies, NOT against a
-fetched remote commit. The wrapper prints this on purpose. Gate 2 should confirm
-those two commits are what is actually pushed to
-`https://github.com/phanlemanh/<name>` before the manifest entries point users
-there.
+E17's own stdout is thin (`[verify-plugins-scan] OK`). Its substance is that it
+runs the real bundled tongflow scanner over `plugins/` against
+`config/tongflow.abi.json` and exits non-zero if the registry's `errors` array
+is non-empty — which is where a default-slot clash would surface. The eval's
+stronger phrasing ("registers both local plugins") is satisfied only indirectly:
+the scanner did enumerate both worktrees, but the script prints no per-plugin
+line, so a human wanting that stated explicitly should read the registry output
+directly.
+
+E4's guard stages a `.venv`-free copy of `sdk/` before provisioning, and
+documents why in its header: a developer machine keeps an 18 MB `.venv` inside
+`sdk/`, which pip copies during `pip install <sdkDir>` and which kills the build
+on this machine. That work-around is confined to the eval harness; removing the
+`.venv` from the packaged `sdk/` would be a `sdk/**` change and therefore t3,
+outside this package's declared tier. Worth knowing that the eval is green
+partly because it sidesteps a real local-machine fragility.
 
 ## Variance
 
-none — every eval is deterministic and ran once (no `runs: N` declared).
+none — no eval declares `runs > 1`; every eval ran once and deterministically.
 
 ## Iterations
 
-Round 1: E20 failed — the re-signature wave has not cleared. Eleven previously
-signed features (including per-plugin-origin, the one AC-17 names) now carry
+Round 1: E20 failed — the re-signature wave had not cleared; eleven previously
+signed features (including `per-plugin-origin`, the one AC-17 names) carried
 stale evidence because this package edited files inside their staleness scope.
-Returned to implementation / orchestration: the wave must be re-verified and
-re-signed, then E20 re-run. All 22 other machine evals passed; E21 was not
-scored.
+Returned to implementation / orchestration.
+
+Round 2: all 25 machine evals PASS on commit a4c6eca. Since round 1 the guard
+E20 binds to was replaced (`check-gate-residual.sh` → `check-resign-wave.sh`,
+per the AC-19 amendment) and two new teeth evals were added (E25 for AC-19,
+E26 for AC-17); the FULL set was re-run and nothing was carried over. E21
+remains unscored pending the judge panel, so the verdict is PENDING-JUDGMENT.
 
 ## Gate 2 checklist (human)
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
-- [ ] Personally verify every judgment item marked UNCERTAIN, then fill its
-      `human_override: <name> <date>` line
-- [ ] T3 only: personally verify ALL judgment items and fill `human_override`
-      on each (judge verdicts are advisory; the hook blocks PASS without them)
-- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
-      the hook re-validates evidence + overrides)
+- [ ] Merge the judge panel's E21 verdict into this report; if it is UNCERTAIN,
+      personally verify it and fill `human_override: <name> <date>`
+- [ ] E21 asks specifically whether `per-plugin-origin` was re-verified against
+      the NEW `check-manifest-unmoved.sh` (third edition, 36/3) rather than
+      assumed still valid — point at the re-run, not at the old signature
+- [ ] Note that `baseline:` is `n-a` throughout (no diffBase checkout was
+      permitted this round); accept or ask for an A/B pass
+- [ ] Upgrade the verdict from PENDING-JUDGMENT to PASS (this write is when the
+      hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
