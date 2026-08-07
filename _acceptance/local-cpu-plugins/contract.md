@@ -111,6 +111,16 @@ Source input: [spec](../../docs/superpowers/specs/2026-08-05-local-cpu-plugins-d
   `check-manifest-doc-synced.sh` and `check-prefix-docs.sh` run, Then both exit 0,
   and the capability matrix still shows the seven slots ✅ (they change server,
   not availability).
+- AC-19: Given two features in flight each carry a residual eval asserting "the
+  gate is clear apart from me", When `check-gate-residual.sh` runs, Then a
+  FOREIGN feature that is PASS-but-unsigned is forgiven (both can reach green in
+  one signature run), while a foreign feature that is **stale**, **REJECT**, or
+  has **no evidence report** still blocks — and the three own-slug classes are
+  unchanged.
+  *(Added 2026-08-07: verify round 1 proved the two residual evals deadlocked —
+  each a machine FAIL awaiting the other's signature, which no `human_override`
+  can release. See Notes.)*
+
 - AC-17: Given this package edits `check-manifest-unmoved.sh`, which **is** AC-6
   of the already-signed `per-plugin-origin` feature, When Gate 2 is reached, Then
   the re-signature wave is computed by machine and `per-plugin-origin` is

@@ -301,7 +301,12 @@ executors:
     lcp_manifest_counts: "bash scripts/plugins/check-manifest-unmoved.sh"
     lcp_manifest_guard_teeth: "bash scripts/plugins/check-manifest-guard-teeth.sh"
     lcp_docs_synced: "bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh"
-    lcp_resign_wave: "bash scripts/acceptance/check-gate-residual.sh local-cpu-plugins origin/main"
+    lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
+    # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
+    # stale evidence), which is narrower and answerable; check-gate-residual's
+    # wider "gate clear apart from me" is unreachable with two features in flight.
+    lcp_resign_wave: "bash scripts/acceptance/check-resign-wave.sh local-cpu-plugins origin/main"
+    lcp_resign_wave_teeth: "bash scripts/acceptance/check-resign-wave-teeth.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

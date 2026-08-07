@@ -166,11 +166,25 @@ evals:
     expected: "exit 0; check-manifest-doc-synced.sh and check-prefix-docs.sh both green across README.md, docs/README_ZH.md, docs/README_JA.md — and the capability matrix still shows the seven slots available"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
+  - id: E25
+    criterion: AC-19
+    executor: script
+    cmd: config:executors.script.lcp_gate_residual_teeth
+    expected: "exit 0; 13 synthetic classification cases. Forgiven: the three unfinished-Gate-2 classes for the own slug, and ONLY the awaiting-signature class for a foreign slug. Still red: own-slug stale, own-slug bypass, foreign stale, foreign REJECT, foreign missing report, foreign stale hidden behind a forgiven foreign signature wait, and output that never reached a verdict line"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E26
+    criterion: AC-17
+    executor: script
+    cmd: config:executors.script.lcp_resign_wave_teeth
+    expected: "exit 0; 7 cases. The wave guard goes RED on foreign stale evidence (including stale hidden among forgiven lines) and on output with no verdict line; it deliberately stays green on a foreign pending signature, a foreign REJECT, and the own slug's staleness — those belong to check-gate-residual and the Gate-2 checklist"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
   - id: E20
     criterion: AC-17
     executor: script
     cmd: config:executors.script.lcp_resign_wave
-    expected: "exit 0; the residual check computes the re-signature wave by machine for this slug against origin/main — the machine half of AC-17"
+    expected: "exit 0; no feature OTHER than local-cpu-plugins carries stale evidence — the machine half of AC-17. AMENDED 2026-08-07: bound to check-resign-wave.sh rather than check-gate-residual.sh, because the wider 'gate clear apart from me' question deadlocks when two features are in flight (see AC-19 and the guard's header)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E21
