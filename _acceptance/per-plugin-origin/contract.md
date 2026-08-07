@@ -57,7 +57,7 @@ Source input: prompt (bắt đầu (a) luôn)
 - AC-3: Given the URL rule has three consumers — the in-app manager, the CLI installer, and the update checker, which today calls `checkPluginUpdate(manifest.org, id)` for every installed plugin — When each builds a remote for the same id, Then all three produce the **same URL from the same resolver** — no second copy of the rule survives this change, and a plugin that overrides its origin must not be update-checked against the default one.
 - AC-4: Given a malformed entry (unknown key, missing `id`, non-string `origin`, empty string, duplicate id), When the manifest is loaded, Then loading **fails with a message naming the offending entry** — a typo must not silently clone from the default origin.
 - AC-5: Given an origin that is not an `http(s)` URL (`git@github.com:x`, `../etc`, `javascript:`), When the manifest is loaded, Then it is rejected — an origin is a clone target, and the installer already refuses non-http(s) remotes for custom URLs.
-- AC-6 *(amended 2026-08-03 and again 2026-08-07; see Amendment)*: Given this change is a
+- AC-6: *(amended 2026-08-03 and again 2026-08-07; see Amendment)* Given this change is a
   capability and not a migration, When the shipped manifest is inspected, Then **this feature
   repointed nothing on its own**, and every later move of a plugin out of the default org is
   one an explicitly approved feature performed and recorded. The guard
@@ -150,6 +150,26 @@ change files outside this feature's approved scope.
   plugin, or on the first real fork — both of which are intended future work.
   The coupling is now called out in CLAUDE.md's "Registering an official plugin"
   checklist so that failure arrives with an explanation attached.
+
+## Amendment 3 (2026-08-07 — wording fix so the lint can parse it; NO change of meaning)
+
+AC-6 carried its amendment note as `- AC-6 *(amended 2026-08-03 and again 2026-08-07; see
+Amendment)*: Given …` — the note sits **between** the id and the colon.
+`eval-coverage-lint.js` matches criteria **per physical line** with
+`^\s*[-*]\s*(AC-\d+)\s*[:.]\s*(.+)$`, so that line never matched and AC-6 **fell out of the
+lint's view entirely** — no W1, no W4, and no signal at all that a criterion was being
+skipped. The note now sits **after** the colon; the criterion text is byte-identical
+(diff: 1 line, 1+/1-). Worth recording plainly: the habit that hid AC-6 was created by
+this contract's own two previous wording amendments — a fix for one drift introduced
+another, silently, because the parser has no failure mode for a malformed criterion.
+
+**Re-measured after the fix (2026-08-07):** AC-6 carries no `(cross-layer)` tag, so W4 does
+not apply, and making it visible produced **no new W1 warning** — the lint's output across
+all of `_acceptance/` is identical before and after (7 W1 warnings, all on other criteria).
+Nothing further to fix; the Gate 2 signature does **not** need to be re-cut. Amended in the
+same pass as `compose-overlay` and `ci-vitest-sdk-pin` (same annotation shape) and
+`cache-l2-store` / `cache-l3-tier-b` (the `(cross-layer)` tag shape, where W4 had in fact
+never fired).
 
 ## Amendment 2 (2026-08-07 — two plugins left the default org, ADR-0011)
 

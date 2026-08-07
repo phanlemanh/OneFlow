@@ -54,7 +54,7 @@ trường: Modal image / venv khoá phiên bản Pillow-freetype-ffmpeg); "verba
 từng ký tự — node không bao giờ format lại số/chuỗi (format là việc của
 `normalize-text-vi` thượng nguồn).
 
-- AC-1 *(sửa lời 03/08 — xem Amendment 2)*: Given ABI có slot `compose-overlay` đúng thiết kế
+- AC-1: *(sửa lời 03/08 — xem Amendment 2)* Given ABI có slot `compose-overlay` đúng thiết kế
   (media + ops[] **4 loại phân biệt bằng trường `type` (enum)** + text+logo;
   outputs image/video; **không** seed/temperature/top_p), When chạy trọn codegen train
   (`pnpm gen:abi` → `gen_models.py` → `gen_node_slots.py`), Then không drift: generated TS,
@@ -115,7 +115,7 @@ từng ký tự — node không bao giờ format lại số/chuỗi (format là 
   runtime không lệch (cùng số call, cùng shape input tới plugin — media single, không
   batch fan-out). *Slot mới đầu tiên sinh sau conformance suite: phải vào suite ngay,
   không nợ như batchField.*
-- AC-14 *(sửa 03/08 — Gate-1 re-approve, xem Amendment)*: Given plugin đã đăng ký
+- AC-14: *(sửa 03/08 — Gate-1 re-approve, xem Amendment)* Given plugin đã đăng ký
   official, When kiểm đồng bộ, Then `official-plugins.json` có entry thứ 39 dạng
   `{"id": "oneflow-modal-compose-overlay", "origin": "https://github.com/phanlemanh"}` —
   **entry origin đầu tiên**, đúng cơ chế per-plugin-origin; `check-manifest-unmoved.sh`
@@ -173,6 +173,29 @@ Bảy vòng verify; ba vòng cuối do lỗi phát sinh sau chữ ký lần đ�
   `top-left`, `tiktok-portrait`… bằng tiếng Anh).
 - Vài trường hợp hiếm: workflow nhập từ ngoài / sửa tay có thể còn dây video ở ô `logo`,
   hoặc dropdown hiện giá trị không có trong danh sách.
+
+## Amendment 3 (2026-08-07 — sửa lời để lint đọc được, KHÔNG đổi ngữ nghĩa)
+
+AC-1 và AC-14 mang chú thích sửa-lời dạng `- AC-1 *(sửa lời 03/08 — xem Amendment 2)*:
+Given …`, tức chú thích nằm **giữa** id và dấu hai chấm. `eval-coverage-lint.js` khớp tiêu
+chí theo **từng dòng vật lý** bằng `^\s*[-*]\s*(AC-\d+)\s*[:.]\s*(.+)$`, nên hai dòng này
+không khớp và AC-1 / AC-14 **rơi khỏi tầm nhìn của lint hoàn toàn** — không W1, không W4,
+và không một tiếng động nào báo là có tiêu chí bị bỏ qua. Đáng ghi thẳng: chính hai
+amendment sửa-lời ở trên (03/08) đẻ ra thói quen làm hai tiêu chí này vô hình. Chú thích
+nay chuyển ra **sau** dấu hai chấm; chữ nghĩa tiêu chí giữ nguyên từng byte
+(diff: 2 dòng, 2+/2-).
+
+**Ghi chú vị thế:** hợp đồng này vẫn được lấy làm **dạng mẫu** cho nhãn `(cross-layer)` —
+AC-11 và AC-13 viết `- AC-11: (cross-layer) Given …`, đúng dạng, và W4 đọc được cả hai từ
+đầu. Nhưng nó chỉ đúng mẫu ở *nhãn cross-layer*: ở *chú thích amendment* thì chính nó cũng
+mắc, và mất hai tiêu chí khác. Hai thói quen viết khác nhau, cùng một cách vỡ.
+
+**Đo lại sau khi sửa (07/08):** AC-1 và AC-14 không gắn `(cross-layer)` nên W4 không áp
+dụng, và việc chúng hiện ra **không** sinh cảnh báo W1 mới — output của lint trên toàn
+`_acceptance/` giống hệt trước và sau. Không có gì phải sửa thêm; chữ ký Cổng 2 **không**
+cần cắt lại. Cùng đợt sửa với `ci-vitest-sdk-pin`, `per-plugin-origin` (cùng dạng chú
+thích) và `cache-l2-store` / `cache-l3-tier-b` (dạng nhãn `(cross-layer)`, nơi W4 thật sự
+đã ngủ suốt).
 
 ## Coverage
 
