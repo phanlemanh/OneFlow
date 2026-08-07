@@ -158,6 +158,15 @@ executors:
     unit_venv_lite_fallback_kept: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'no requirements'"
     # The pre-2026-08-07 shared venv lived AT the path that is now the root of
     # per-plugin venvs, so its corpse would be enumerated as if it were a plugin.
+    # byo-key-onboarding Gate 1 (2026-08-07): every file below lands during
+    # implementation. One key per criterion — criteria sharing one exit code make a
+    # never-implemented case look identical to a passing one (standing rule).
+    unit_first_run_readiness: "pnpm vitest run src/hooks/use-first-run-readiness.test.ts"
+    unit_example_requirements: "pnpm vitest run src/lib/onboarding/example-requirements.test.ts"
+    unit_failure_actions: "pnpm vitest run src/lib/onboarding/failure-actions.test.ts"
+    unit_provisioning_events: "pnpm vitest run src/lib/plugin-executor/provisioning-events.test.ts"
+    unit_example_run_produces_new_asset: "pnpm vitest run src/lib/onboarding/example-run.test.ts"
+    unit_key_verified_on_save: "pnpm vitest run src/lib/onboarding/key-verify.test.ts"
     unit_venv_legacy_migration: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'legacy'"
     sdk_pytest_scope_with_deploy: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_deploy_with_image_imports_registers_slot
     sdk_pytest_scope_with_scan: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_scan_with_image_imports_registers_and_is_quiet
@@ -313,6 +322,12 @@ executors:
     lcp_manifest_counts: "bash scripts/plugins/check-manifest-unmoved.sh"
     lcp_manifest_guard_teeth: "bash scripts/plugins/check-manifest-guard-teeth.sh"
     lcp_docs_synced: "bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh"
+    # byo-key-onboarding Gate 1 (2026-08-07): guard scripts land during implementation.
+    bko_example_needs_no_keys: "bash scripts/onboarding/check-example-needs-no-keys.sh"
+    bko_one_action_installs_all: "bash scripts/onboarding/check-one-action-installs-all.sh"
+    bko_no_restart_after_install: "bash scripts/onboarding/check-no-restart-after-install.sh"
+    bko_no_telemetry_sinks: "bash scripts/onboarding/check-no-telemetry-sinks.sh"
+    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow src/lib/plugin-executor/**"
     lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
     # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
     # stale evidence), which is narrower and answerable; check-gate-residual's
@@ -348,6 +363,7 @@ executors:
     gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1)"
     # ui_check is a browser-injected asset (runner loads it INTO the page) — PATH only, no `node` prefix.
     ui_check: "$(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-scan.js | sort -V | tail -1)"
+    a11y: node scripts/a11y-scan.mjs
 
 risk_tiers:
   # Docs/branding/config-only changes — acceptance gate skipped entirely.
@@ -439,3 +455,6 @@ dev_server:
 #     ui: "node scripts/ui-capture.mjs"
 capture:
   ui: pnpm ui:capture
+design_pass:
+  proto_route: http://localhost:3000/proto/{slug}
+  dev_cmd: pnpm dev

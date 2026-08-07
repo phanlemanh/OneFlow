@@ -1,0 +1,49 @@
+{
+  "feature_plain": "Người mới cài OneFlow chạm được một kết quả thật do máy mình vừa tạo, trước khi bị hỏi bất kỳ khoá trả phí nào.",
+
+  "will_do": [
+    { "id": "AC-1", "p": "Sẽ mở sẵn một ví dụ chạy được ngay trên máy người dùng, không đòi khoá và không đòi tài khoản của bên thứ ba nào." },
+    { "id": "AC-2", "p": "Sẽ cho ra một kết quả do lần chạy này tạo ra, khác hẳn file mẫu đóng gói sẵn — chạy hỏng mà vẫn còn file mẫu trên màn hình thì tính là hỏng." },
+    { "id": "AC-3", "p": "Sẽ im lặng sau khi người dùng chạy xong ví dụ một lần: mở lại workspace không thấy dải hướng dẫn nữa." },
+    { "id": "AC-13", "p": "Sẽ để người dùng phớt lờ dải hướng dẫn mà canvas vẫn dùng bình thường — không hộp thoại chặn, không nút bị khoá." },
+    { "id": "AC-4", "p": "Sẽ gọi tên những công cụ còn thiếu ngay lúc ví dụ vừa mở, trước khi người dùng kịp bấm chạy rồi mới biết." },
+    { "id": "AC-5", "p": "Sẽ cài trọn bộ công cụ còn thiếu chỉ với một lần bấm, không bắt bấm lại từng cái." },
+    { "id": "AC-6", "p": "Sẽ dùng được công cụ vừa cài ngay lập tức, không bắt người dùng khởi động lại ứng dụng." },
+    { "id": "AC-7", "p": "Sẽ hiện đúng ba bước chuẩn bị mà máy đang thực sự làm, mỗi bước chỉ sáng lên khi việc đó đã xong thật." },
+    { "id": "AC-8", "p": "Sẽ luôn cho người dùng phân biệt được máy còn đang chạy hay đã treo, kể cả khi chuẩn bị mất vài phút." },
+    { "id": "AC-9", "p": "Sẽ cho nhập khoá ngay tại chỗ vừa báo lỗi, không bắt người dùng đi tìm màn hình cài đặt." },
+    { "id": "AC-10", "p": "Sẽ thử khoá với chính nhà cung cấp lúc bấm lưu, nên \"lưu được\" đồng nghĩa với \"dùng được\" — khoá đúng định dạng nhưng bị từ chối vẫn phải báo là không dùng được." },
+    { "id": "AC-11", "p": "Sẽ đưa đúng lối thoát cho đúng nguyên nhân hỏng: thiếu công cụ thì mở ngay chỗ cài nó, thiếu khoá thì mở ô nhập khoá, còn lại thì giữ nguyên thông báo cũ chứ không bịa ra một nút vô nghĩa." },
+    { "id": "AC-12", "p": "Sẽ không để bất kỳ dấu vết sử dụng nào rời khỏi máy người dùng — không bước phễu, không thời lượng, không hành vi." },
+    { "id": "AC-14", "p": "Sẽ chỉ chạm đúng một vùng nhạy cảm đã khai trước, còn bản hợp đồng dữ liệu, bộ thư viện Python và cấu trúc cơ sở dữ liệu giữ nguyên không đổi một dòng." }
+  ],
+
+  "wont_do": [],
+
+  "scope_plain": "Bỏ ra ngoài: mọi hình thức thu thập số liệu, gói trả tiền và màn hình thanh toán, wizard bắt làm tuần tự, bản chạy máy để bàn, thêm ngôn ngữ mới, và màn hình điện thoại.",
+
+  "coverage_plain": [
+    { "i": 0, "p": "Đủ năm chỗ người mới có thể tắc trong phễu: tìm công cụ, cài công cụ, chờ máy chuẩn bị, nhập khoá, chạy xong. Bằng chứng đủ = mỗi chỗ có một AC nói người dùng thấy gì tại đó." },
+    { "i": 1, "p": "Đủ năm kết cục của một bước: xong, đang chờ, hỏng nhưng tự sửa được, hỏng phải nhờ người, và bỏ giữa chừng. Bằng chứng đủ = AC-11 (đúng lối thoát cho đúng nguyên nhân) phân biệt được cả năm." },
+    { "i": 2, "p": "Đủ bốn thời điểm phát hiện thiếu công cụ: lúc mở, trước khi chạy, lúc chạy, và không bao giờ. Bằng chứng đủ = AC-4 (báo thiếu ngay lúc mở) chốt vào thời điểm sớm nhất." },
+    { "i": 3, "p": "Đủ năm chỗ có thể mang tin cho người dùng: dải hướng dẫn, node, thông báo nổi, cài đặt, hộp thoại công cụ. Bằng chứng đủ = AC-9 (nhập khoá tại node) chọn chỗ gần lỗi nhất thay vì đẩy sang cài đặt." }
+  ],
+
+  "gap_probe_plain": [
+    { "i": 0, "p": "Lời hứa \"thử khoá lúc lưu\" chưa có chỗ nào trong bản thiết kế làm việc đó, và cũng chưa có phép đo nào bắt nó gọi thật ra nhà cung cấp thay vì chỉ ngó qua hình dạng khoá. Đã sửa: thiết kế chỉ rõ chỗ đặt việc thử khoá, tiêu chí ghim \"thử là hỏi thứ mà khoá mở\", và phép đo đòi một khoá đúng định dạng nhưng bị từ chối phải báo hỏng." },
+    { "i": 1, "p": "Lời hứa \"một lần bấm cài hết\" chưa có phép đo nào chạm vào cái nút — chỉ chạm hàm bên dưới, nên nút quên nối vào hàm vẫn xanh; và tập công cụ mà ví dụ cần có thể rỗng, khiến lời khẳng định luôn đúng một cách vô nghĩa. Đã sửa: tiêu chí viết lại thành quan hệ một-lần-bấm-tới-cả-tập, phép đo đòi danh sách ít nhất hai công cụ, và thêm một phép đo bấm nút thật rồi kiểm cả tập." },
+    { "i": 2, "p": "Lời hứa \"kết quả thật\" chỉ có bằng chứng ở lớp giao diện, trong khi nó băng qua cả phần chạy nền — đúng điều bộ phép đo tự cấm. Đã sửa: gắn nhãn liên-tầng, đòi kết quả phải khác file mẫu, và thêm một phép đo ở lớp chạy nền kiểm tác vụ hoàn tất và nội dung khác mọi file đóng gói sẵn." },
+    { "i": 3, "p": "Phép đo duy nhất canh phạm vi T3 khai sai vùng canh và không nói đang so giữa hai mốc nào, nên có thể xanh nhờ không có gì để so. Đã sửa: đổi sang canh đúng bốn vùng cấm, nêu rõ cửa sổ so sánh, và bắt kiểm cửa sổ không rỗng trước khi mọi khẳng định \"không đổi gì\" có nghĩa." },
+    { "i": 4, "p": "Hai phép đo của lời hứa \"không gửi dữ liệu đi\" đều chỉ khẳng định sự vắng mặt, mà không chứng minh mình còn nhìn thấy được cái gì — một máy đo hỏng cũng cho ra kết quả y hệt. Đã sửa: bắt đếm được số lần gọi hợp lệ khác 0 trước khi kết luận vắng mặt, mở rộng sang các đường gửi lén, và thêm một hồ sơ có gửi lén để phép đo phải đỏ." }
+  ],
+
+  "decisions_plain": [
+    { "id": "d-20260807T051228Z-342", "p": "Ôm cả phễu (cài công cụ → nhập khoá → chạy) thay vì chỉ bước nhập khoá — làm rộng hơn, đổi lại người rớt ở bước cài công cụ không còn vô hình trong số liệu về bước khoá." },
+    { "id": "d-20260807T051228Z-20093", "p": "KHÔNG làm bất kỳ hình thức thu thập số liệu nào, kể cả cục bộ — tiết kiệm cả một mảng lưu trữ và màn hình xuất, đổi lại chỉ đo được trong phiên ngồi xem tận mắt, không đo tiếp sau khi phát hành." },
+    { "id": "d-20260807T051228Z-1560", "p": "Đổi ví dụ chào mừng sang đường chạy tại máy không cần khoá — mất ấn tượng đầu mạnh của ảnh và video AI, đổi lại người dùng chạm kết quả thật trước khi bị đòi trả bất cứ thứ gì." },
+    { "id": "d-20260807T051228Z-4616", "p": "Hiện tiến độ chuẩn bị lấy từ việc đang chạy thật thay vì báo trước \"lần đầu mất vài phút\" — cố ý nhận mức rủi ro cao nhất, thêm một cổng duyệt kế hoạch và một đợt ký lại 11 hồ sơ, đổi lại thanh tiến độ là sự thật chứ không phải lời hứa." },
+    { "id": "d-20260807T051228Z-2488", "p": "KHÔNG làm wizard bắt đi tuần tự từng bước — mất cách đo từng bước dễ nhất, đổi lại không bắt người dùng trả giá trước khi nhận được giá trị." },
+    { "id": "d-20260807T051228Z-7719", "p": "KHÔNG viết kịch bản máy giả làm người mới — mất một lớp tự động, đổi lại tránh một màu xanh trả lời sai câu hỏi thật, câu đó để phiên ngồi xem tận mắt trả lời." },
+    { "id": "d-20260807T051409Z-12400", "p": "Duyệt giao diện trên bản bấm được trước cổng thay vì duyệt bằng chữ — tốn công dựng bản mẫu, đổi lại câu hỏi \"người quan sát có chỉ ra được người dùng đang ở đâu không\" được phán trên pixel thật." }
+  ]
+}
