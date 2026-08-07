@@ -8,7 +8,7 @@ surfaces: [plugins, cli]
 status: signed-off
 approved_by: Manh
 approved_at: 2026-08-06
-time_human_minutes: {gate1: 0, gate2: 0}
+time_human_minutes: {gate1: 5, gate2: 10}
 ---
 
 # Acceptance Contract: local-cpu-plugins
