@@ -5,7 +5,7 @@ slug: per-plugin-origin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [plugins]
-status: implemented
+status: verified
 approved_by: Manh
 approved_at: 2026-07-27
 time_human_minutes: {gate1: 0, gate2: 0}

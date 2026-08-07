@@ -1,12 +1,12 @@
-{"ts":"2026-08-07T01:26:28Z","round":1,"evalId":"E1","run_id":"per-plugin-origin-E1-20260807T012628Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
-{"ts":"2026-08-07T01:26:28Z","round":1,"evalId":"E2","run_id":"per-plugin-origin-E2-20260807T012628Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
-{"ts":"2026-08-07T01:26:28Z","round":1,"evalId":"E3","run_id":"per-plugin-origin-E3-20260807T012628Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
-{"ts":"2026-08-07T01:26:28Z","round":1,"evalId":"E4","run_id":"per-plugin-origin-E4-20260807T012628Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
-{"ts":"2026-08-07T01:26:36Z","round":1,"evalId":"E5","run_id":"per-plugin-origin-E5-20260807T012636Z","exit_code":0,"cmd":"bash scripts/plugins/check-single-url-rule.sh"}
-{"ts":"2026-08-07T01:26:38Z","round":1,"evalId":"E6","run_id":"per-plugin-origin-E6-20260807T012638Z","exit_code":0,"cmd":"pnpm tsx scripts/plugins/check-installer-parity.ts"}
-{"ts":"2026-08-07T01:26:40Z","round":1,"evalId":"E7","run_id":"per-plugin-origin-E7-20260807T012640Z","exit_code":0,"cmd":"bash scripts/plugins/check-manifest-unmoved.sh"}
-{"ts":"2026-08-07T01:26:41Z","round":1,"evalId":"E8","run_id":"per-plugin-origin-E8-20260807T012641Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
-{"ts":"2026-08-07T01:27:44Z","round":1,"evalId":"E9","run_id":"per-plugin-origin-E9-20260807T012744Z","exit_code":0,"cmd":"pnpm test"}
-{"ts":"2026-08-07T01:28:30Z","round":1,"evalId":"E10","run_id":"per-plugin-origin-E10-20260807T012830Z","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
-{"ts":"2026-08-07T01:27:46Z","round":1,"evalId":"E11","run_id":"per-plugin-origin-E11-20260807T012746Z","exit_code":0,"cmd":"pnpm lint:check"}
-{"ts":"2026-08-07T01:27:48Z","round":1,"evalId":"E12","run_id":"per-plugin-origin-E12-20260807T012748Z","exit_code":0,"cmd":"pnpm verify:plugins"}
+{"ts":"2026-08-07T02:03:30Z","round":2,"evalId":"E1","run_id":"per-plugin-origin-E1-20260807T020330Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-07T02:03:31Z","round":2,"evalId":"E2","run_id":"per-plugin-origin-E2-20260807T020331Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-07T02:03:40Z","round":2,"evalId":"E3","run_id":"per-plugin-origin-E3-20260807T020340Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-07T02:03:41Z","round":2,"evalId":"E4","run_id":"per-plugin-origin-E4-20260807T020341Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/official-manifest.test.ts"}
+{"ts":"2026-08-07T02:03:42Z","round":2,"evalId":"E5","run_id":"per-plugin-origin-E5-20260807T020342Z","exit_code":0,"cmd":"bash scripts/plugins/check-single-url-rule.sh"}
+{"ts":"2026-08-07T02:03:42Z","round":2,"evalId":"E6","run_id":"per-plugin-origin-E6-20260807T020342Z","exit_code":0,"cmd":"pnpm tsx scripts/plugins/check-installer-parity.ts"}
+{"ts":"2026-08-07T02:03:43Z","round":2,"evalId":"E7","run_id":"per-plugin-origin-E7-20260807T020343Z","exit_code":0,"cmd":"bash scripts/plugins/check-manifest-unmoved.sh"}
+{"ts":"2026-08-07T02:03:43Z","round":2,"evalId":"E8","run_id":"per-plugin-origin-E8-20260807T020343Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-id.test.ts"}
+{"ts":"2026-08-07T02:03:54Z","round":2,"evalId":"E9","run_id":"per-plugin-origin-E9-20260807T020354Z","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-08-07T02:03:56Z","round":2,"evalId":"E11","run_id":"per-plugin-origin-E11-20260807T020356Z","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-08-07T02:03:56Z","round":2,"evalId":"E12","run_id":"per-plugin-origin-E12-20260807T020356Z","exit_code":0,"cmd":"pnpm verify:plugins"}
+{"ts":"2026-08-07T02:04:05Z","round":2,"evalId":"E10","run_id":"per-plugin-origin-E10-20260807T020405Z","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
