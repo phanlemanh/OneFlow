@@ -7,11 +7,15 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c38b939d98426310a91c039882bdd2e9391d76ac
-human_signoff: Manh 2026-08-03
+verified_commit: f7306bfa6c17c4e2ff656b66036b0d369c60648d
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: per-plugin-origin
+
+Round 2, verified against the contract as amended on 2026-08-07 (Amendment 2 —
+third-edition census: 36 plain strings under the default org plus exactly three
+origin entries under `phanlemanh`).
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -28,242 +32,244 @@ human_signoff: Manh 2026-08-03
 | E11 | AC-3 | test | PASS |
 | E12 | AC-3 | script | PASS |
 
+No judgment-executor evals exist in this feature's `evals.yaml`; nothing is
+UNSCORED and nothing awaits a human verdict.
+
 ## Evidence
 
 - eval: E1
-  run_id: per-plugin-origin-E1-20260806T021152
+  run_id: per-plugin-origin-E1-20260807T020330Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T02:03:30Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  59 passed (59)
-       Start at  08:40:20
-       Duration  91ms (transform 18ms, setup 0ms, import 26ms, tests 6ms, environment 0ms)
+    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+    Test Files  1 passed (1)
+         Tests  59 passed (59)
+      Start at  09:03:31
+      Duration  130ms (transform 20ms, setup 0ms, import 27ms, tests 6ms)
+    (block "string entries — today's manifest (AC-1)": every string entry
+     resolves to the top-level org; the id list matches the raw file element
+     for element, in order)
 
 - eval: E2
-  run_id: per-plugin-origin-E2-20260806T021152
+  run_id: per-plugin-origin-E2-20260807T020331Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T02:03:31Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  59 passed (59)
-       Start at  08:40:20
-       Duration  91ms (transform 18ms, setup 0ms, import 26ms, tests 6ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  59 passed (59)
+    (block "override entries (AC-2)": appends id and .git to the entry's own
+     origin; leaves every sibling on the default origin; accepts an object
+     entry with no origin and falls back to the default; keeps order across
+     mixed string and object entries)
 
 - eval: E3
-  run_id: per-plugin-origin-E3-20260806T021152
+  run_id: per-plugin-origin-E3-20260807T020340Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T02:03:40Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  59 passed (59)
-       Start at  08:40:20
-       Duration  91ms (transform 18ms, setup 0ms, import 26ms, tests 6ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  59 passed (59)
+    (SUPPRESSION half — blocks "malformed entries are rejected by name (AC-4)"
+     and "plugin ids are validated at load, not just origins (AC-4)": unknown
+     key, missing id, non-string origin, empty string, duplicate id across both
+     entry forms, traversing id — each rejected with the offending entry named)
 
 - eval: E4
-  run_id: per-plugin-origin-E4-20260806T021152
+  run_id: per-plugin-origin-E4-20260807T020341Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_official_manifest
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T02:03:41Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  59 passed (59)
-       Start at  08:40:20
-       Duration  91ms (transform 18ms, setup 0ms, import 26ms, tests 6ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  59 passed (59)
+    (SUPPRESSION half — block "non-http(s) origins are rejected (AC-5)":
+     scp-style git@, relative path, javascript:, whitespace in the org; plain
+     http accepted; trailing slash stripped rather than doubled)
 
 - eval: E5
-  run_id: per-plugin-origin-E5-20260806T021105
+  run_id: per-plugin-origin-E5-20260807T020342Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_single_impl
-  verified_at: 2026-08-06T02:11:05Z
+  verified_at: 2026-08-07T02:03:42Z
   output: |
-    OK: one URL rule across src/ and scripts/, in src/lib/plugins/official-manifest.ts; the CLI installer imports it (the SDK engine's Python copy is out of this scan's scope — see the contract's known limits)
+    OK: one URL rule across src/ and scripts/, in
+    src/lib/plugins/official-manifest.ts; the CLI installer imports it
+    (the SDK engine's Python copy is out of this scan's scope — see the
+    contract's known limits)
 
 - eval: E6
-  run_id: per-plugin-origin-E6-20260806T021105
+  run_id: per-plugin-origin-E6-20260807T020342Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_installer_parity
-  verified_at: 2026-08-06T02:11:05Z
+  verified_at: 2026-08-07T02:03:42Z
   output: |
-    OK: the CLI installer, the in-app install path and the update checker agree; both pull paths use the resolved origin and refuse a non-fast-forward
+    OK: the CLI installer, the in-app install path and the update checker
+    agree; both pull paths use the resolved origin and refuse a
+    non-fast-forward
 
 - eval: E7
-  run_id: per-plugin-origin-E7-20260806T021107
+  run_id: per-plugin-origin-E7-20260807T020343Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.origin_manifest_unmoved
-  verified_at: 2026-08-06T02:11:07Z
+  verified_at: 2026-08-07T02:03:43Z
   output: |
-    OK: 38 plain strings under default org + 1 origin entry (compose-overlay)
+    OK: 36 plain strings under default org + 3 origin entries
+    (oneflow-api-ffmpeg, oneflow-api-pyscenedetect,
+     oneflow-modal-compose-overlay)
 
 - eval: E8
-  run_id: per-plugin-origin-E8-20260806T021151
+  run_id: per-plugin-origin-E8-20260807T020343Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_id
-  verified_at: 2026-08-06T02:11:51Z
+  verified_at: 2026-08-07T02:03:43Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  76 passed (76)
-       Start at  08:40:19
-       Duration  87ms (transform 17ms, setup 0ms, import 24ms, tests 3ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  76 passed (76)
+    (oneflow-plugin-prefix's own suite, including its assertion that the
+     manifest's default org is still the upstream one)
 
 - eval: E9
-  run_id: per-plugin-origin-E9-20260806T021158
+  run_id: per-plugin-origin-E9-20260807T020354Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-08-06T02:11:58Z
+  verified_at: 2026-08-07T02:03:54Z
   output: |
-    > vitest run
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  31 passed (31)
-          Tests  413 passed (413)
-       Start at  08:41:10
-       Duration  1.34s (transform 1.66s, setup 0ms, import 3.40s, tests 1.25s, environment 542ms)
+    $ vitest run
+    Test Files  32 passed (32)
+         Tests  427 passed (427)
+      Duration  1.37s
 
 - eval: E10
-  run_id: per-plugin-origin-E10-20260806T021200
+  run_id: per-plugin-origin-E10-20260807T020405Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-08-06T02:12:00Z
+  verified_at: 2026-08-07T02:04:05Z
   output: |
-      ├ chunks/620846f1-92c416bf2f09796f.js  54.2 kB
-      ├ chunks/8336-0e84acaf04d00d35.js      46.2 kB
-      └ other shared chunks (total)          2.19 kB
-    ƒ  (Dynamic)  server-rendered on demand
-    > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
-    > tsc --noEmit
+    + First Load JS shared by all             103 kB
+      chunks/620846f1-92c416bf2f09796f.js  54.2 kB
+      chunks/8336-0e84acaf04d00d35.js      46.2 kB
+    (Dynamic)  server-rendered on demand
+    $ tsc --noEmit
+    (next build then tsc --noEmit, sequential per the config comment)
 
 - eval: E11
-  run_id: per-plugin-origin-E11-20260806T021200
+  run_id: per-plugin-origin-E11-20260807T020356Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-08-06T02:12:00Z
+  verified_at: 2026-08-07T02:03:56Z
   output: |
-    > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
-    > pnpm exec biome check --error-on-warnings .
-    Checked 425 files in 78ms. No fixes applied.
+    $ pnpm exec biome check --error-on-warnings .
+    Checked 429 files in 83ms. No fixes applied.
 
 - eval: E12
-  run_id: per-plugin-origin-E12-20260806T021110
+  run_id: per-plugin-origin-E12-20260807T020356Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.verify_plugins
-  verified_at: 2026-08-06T02:11:10Z
+  verified_at: 2026-08-07T02:03:56Z
   output: |
-    > oneflow@0.2.1 verify:plugins /Users/manhphan/dev/oneflow
-    > tsx scripts/verify-plugins-scan.ts
+    $ tsx scripts/verify-plugins-scan.ts
     [verify-plugins-scan] OK
 
 ## Analyst
 
-carried tu round truoc — baseline khong do lai round nay
-none — baseline not re-measured this round (see prior round's evidence report for the baseline classification)
+Non-discriminating evals: not determined this round — `baseline: n-a` on every
+eval. Establishing a diffBase status requires checking out or worktree-ing the
+pre-feature tree, and this verify round is constrained to zero git operations,
+so no baseline could be run. Round 1 recorded the same `n-a` for the same
+reason. The absence is a gap in A/B signal, not a failure signal.
+
+Verdict shape: all twelve evals are machine (test/script); none is a
+`judgment` executor, so there is nothing UNSCORED and no `human_override` line
+is required. Working tree was clean before and after the round; nothing was
+staged, committed, or fetched, and no source file, script, contract criterion
+or eval was edited.
+
+**Does the amended AC-6/E7 still have teeth? Yes — I checked rather than
+assumed.** The amendment rewrites the *census*, not the shape of the claim.
+`scripts/plugins/check-manifest-unmoved.sh` still pins four independent things:
+the default org string, the count of plain strings (36), the count of origin
+entries (exactly 3), and the exact id set and origin URL of those three. I ran
+`scripts/plugins/check-manifest-guard-teeth.sh` as corroboration (not one of
+this feature's eval keys, so it is not in the run-log): it stages six perturbed
+copies of the manifest and asserts the guard goes red on each — a fourth origin
+entry, a changed origin URL, a renamed origin entry, a 37th plain string, an
+origin entry demoted back to a plain string, and a changed default org. All six
+went red, and the untouched manifest went green, so the baseline case is not
+vacuous. That is exactly the falsifiability the amendment is required to
+preserve, and it convinced me: the criterion cannot be satisfied by a manifest
+that has drifted.
+
+Two honest qualifications a human should carry into Gate 2:
+
+1. **What the guard measures narrowed.** The original AC-6 was self-verifying:
+   "nothing moved" was a property of the file alone. The amended AC-6 asserts a
+   census *plus* a provenance claim — that each of the three moves "is one an
+   explicitly approved feature performed and recorded". The census half is
+   machine-enforced; the provenance half rests on human bookkeeping (ADR-0011,
+   compose-overlay's Gate 1 on 2026-08-03, local-cpu-plugins' Gate 1 on
+   2026-08-06). No eval can go red if that bookkeeping is wrong. The criterion
+   is still falsifiable, but it is now falsifiable about *the manifest's current
+   state*, not about *who moved what*.
+
+2. **The re-cut hazard the amendment names is not itself guarded.**
+   `check-manifest-guard-teeth.sh` defends against the guard being loosened into
+   something that accepts anything; it does not defend against the guard being
+   re-cut to a new, internally consistent census in the same commit that moves a
+   plugin — which is precisely how the round-1 finding arose. The only control
+   against that remains the doer≠grader split (a fresh-context re-verify), which
+   is what caught it. Recording that plainly here rather than treating it as
+   closed.
+
+I do not think the amendment has hollowed the criterion out. AC-6's stated
+intent — *this capability is not a migration; adding per-entry `origin` did not
+by itself move any plugin* — is unchanged, and the manifest confirms it
+directly: all three origin entries belong to features that were approved after
+this one and are named in the contract. The criterion has been correctly
+demoted from "the manifest is frozen" (a claim it could never keep, and which
+CLAUDE.md always described as a snapshot) to "the manifest matches this
+recorded census", which is a claim the guard actually enforces.
 
 ## Variance
 
-none — no stochastic evals this round (no eval carries runs > 1)
+none — no eval declares `runs > 1`; every eval is deterministic and uniform
+across this round.
 
 ## Iterations
 
-Round 10: all 12 machine evals (E1-E12) passed on first run, zero failures, zero judgment items pending; baseline not re-measured this round (carried from prior round per P2).
+Round 1 (2026-08-07, commit a788985): E7 rejected — the third-edition manifest
+guard had been re-cut to record two plugins moved to `phanlemanh` by
+`local-cpu-plugins` (ADR-0011), while AC-6 still asserted all 38 original
+entries were plain strings; eleven other evals clean. Returned for amendment.
+
+Round 2 (2026-08-07, commit f7306bf): re-verified against the human-approved
+Amendment 2 (census rewritten to 36 plain strings + exactly three origin
+entries). All twelve evals clean, including E7. The amended E7's teeth
+independently corroborated with `check-manifest-guard-teeth.sh` (six
+perturbations, all red). Verdict PASS.
 
 ## Gate 2 checklist (human)
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
-- [ ] Personally verify every judgment item marked UNCERTAIN, then fill its
-      `human_override: <name> <date>` line
-- [ ] T3 only: personally verify ALL judgment items and fill `human_override`
-      on each (judge verdicts are advisory; the hook blocks PASS without them)
-- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
-      the hook re-validates evidence + overrides)
-- [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
-
-## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
-
-Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
-thành cũ theo cơ chế staleness. Đã chạy lại: **12/12 eval xanh** ở
-`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
-sơ bị ảnh hưởng — không hồ sơ nào đỏ.
-
-Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
-
-## Ghim lại 2026-08-05 (nhánh `chore/landed-merge-anchors`)
-
-Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
-bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
-bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
-
-## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — bốn lượt, ghim ở `c38b939`
-
-Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
-đợt, thay vì bốn mục gần trùng nhau.
-
-**Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
-thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
-trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ `sdk/pyproject.toml`
-qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci/`,
-`scripts/plugins/` và `scripts/acceptance/`; đồng bộ một mô tả trong `CLAUDE.md`.
-Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
-này cũ.
-
-**Vì sao phải tới bốn lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
-gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
-`scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
-guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
-`c38b939` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
-`_acceptance/**`, nên lần ghim này giữ được. (`9fcfc33`, mốc của lượt 3, bị chính
-`c38b939` làm cũ vì commit đó sửa `scripts/acceptance/check-stale-golden.sh`.)
-
-**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này **không có**
-`landed_merge:` trong frontmatter, nên không dựng được tập file sở hữu; không dựng
-được tập đó thì cũng không chứng minh được carry-forward là hợp lệ. Theo nguyên tắc
-thận trọng, hồ sơ đi đường re-verify ở cả ba lượt: chạy lại toàn bộ eval, không ghi
-công thừa kế cho eval nào.
-- **Lượt 1 @ `a1bc936`** — **12/12 eval xanh** cho hồ sơ này. Lượt đó lộ hai lỗi thật, cả hai do chính nhánh
-  tạo ra: (a) `scripts/lib/sdk-version.sh` giải gốc repo bằng
-  `git rev-parse --show-toplevel` **lúc gọi**, nên chết khi caller đã `cd` vào bản
-  clone repo plugin — 13 eval render của `compose-overlay` đỏ; (b)
-  `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi job vitest
-  mới nâng số điểm `actions/checkout` lên 8 — E1 của `ci-actions-bump` đỏ.
-- **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
-  `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
-  **12/12 eval xanh**.
-- **Lượt 3 @ `9fcfc33`** — **12/12 eval xanh**, tất cả thoát 0. `origin_manifest_unmoved` vẫn báo `38 plain strings under default org + 1 origin entry (compose-overlay)`.
-- **Lượt 4 @ `c38b939` (lượt này)** — **12/12 eval xanh**, tất cả thoát 0,
-  không lệch so với lượt 3.
-
-**Cách chạy.** Mỗi `cmd` được giải lại từng dòng theo `_acceptance/config.yaml`
-trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho mọi eval ràng buộc
-nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
-trùng nhau vì chúng ghi lại cùng một lần chạy.
-
-`verified_commit` chuyển sang `c38b939d9842`. Dòng chữ ký người trong frontmatter
-không bị đụng tới.
-
-**Phát hiện của lượt này, ảnh hưởng cả đợt.** `check-stale-golden.sh` — eval E3 của
-`stale-scope-by-paths` — đóng băng output của gate cho **bảy hồ sơ không khai `paths`**
-ở đúng trạng thái ĐANG CŨ (`VIOLATION ... evidence is stale`). Chính việc ghim lại của
-đợt này làm bảy dòng ấy lật sang `OK ... PASS, signed off by`, nên E3 chuyển đỏ ngay
-sau khi ghim. Đây là đo trực tiếp, không suy luận: chạy trước khi ghim thoát 0, chạy lại
-sau khi ghim thoát 1, cả hai đều có dòng trong `run-log.jsonl` của hồ sơ đó.
-Bảy hồ sơ đó **gồm hồ sơ này**. Vì lý do này `stale-scope-by-paths` **không** được ghim ở lượt này và giữ
-verdict REJECT; chi tiết trong hồ sơ riêng của nó. Cơ chế staleness-scoping mà AC-3 nói
-tới không đổi — thứ lật là trạng thái ghim, không phải hành vi scoping.
+- [ ] Read `## Analyst` — in particular the two qualifications about what the
+      amended AC-6 does and does not machine-enforce, and decide whether the
+      provenance half needs its own guard in a future contract
+- [ ] No judgment items exist on this contract; no `human_override` lines are
+      required
+- [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in
+      contract

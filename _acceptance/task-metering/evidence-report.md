@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c38b939d98426310a91c039882bdd2e9391d76ac
-human_signoff: Manh 2026-08-04
+verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: task-metering
@@ -31,254 +31,184 @@ human_signoff: Manh 2026-08-04
 ## Evidence
 
 - eval: E1
-  run_id: task-metering-E1-20260806T021152
+  run_id: task-metering-E1-20260807T013628Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T01:36:28Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  7 passed (7)
-       Start at  08:40:18
-       Duration  306ms (transform 15ms, setup 0ms, import 200ms, tests 49ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  7 passed (7)
+    criterion tests: "metering migration shape (AC-1) > introduces the three columns
+    in exactly one migration", "is purely additive — three ADDs, no DROP, no RENAME"
 
 - eval: E2
-  run_id: task-metering-E2-20260806T021152
+  run_id: task-metering-E2-20260807T013629Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T01:36:29Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  7 passed (7)
-       Start at  08:40:18
-       Duration  306ms (transform 15ms, setup 0ms, import 200ms, tests 49ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  7 passed (7)
+    criterion test: "upgrading an existing database (AC-2) > adds the columns without
+    disturbing pre-existing rows"
 
 - eval: E3
-  run_id: task-metering-E3-20260806T021152
+  run_id: task-metering-E3-20260807T013630Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_schema
-  verified_at: 2026-08-06T02:11:52Z
+  verified_at: 2026-08-07T01:36:30Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  7 passed (7)
-       Start at  08:40:18
-       Duration  306ms (transform 15ms, setup 0ms, import 200ms, tests 49ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  7 passed (7)
+    criterion test: "fresh database (AC-3) > declares all three columns nullable with
+    the intended types"
 
 - eval: E4
-  run_id: task-metering-E4-20260806T021153
+  run_id: task-metering-E4-20260807T013631Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:31Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1)
+         Tests  6 passed (6)
+    criterion test: "successful invocation (AC-4) > records the elapsed plugin time
+    next to status completed"
 
 - eval: E5
-  run_id: task-metering-E5-20260806T021153
+  run_id: task-metering-E5-20260807T013632Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:32Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  6 passed (6)
+    criterion test: "plugin reports failure (AC-5) > still records the time — a failed
+    generation burns GPU too"
 
 - eval: E6
-  run_id: task-metering-E6-20260806T021153
+  run_id: task-metering-E6-20260807T013633Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:33Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  6 passed (6)
+    criterion test: "plugin throws (AC-6) > records the time from the catch branch"
 
 - eval: E7
-  run_id: task-metering-E7-20260806T021153
+  run_id: task-metering-E7-20260807T013634Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:34Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  6 passed (6)
+    criterion test: "measurement boundary (AC-7) > excludes asset preparation from the
+    billable number" (142ms — the test really does spend the padded asset time)
 
 - eval: E8
-  run_id: task-metering-E8-20260806T021153
+  run_id: task-metering-E8-20260807T013635Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:35Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  6 passed (6)
+    criterion test: "aborted run (AC-8) — suppression half > writes no duration for a
+    cancelled task"
 
 - eval: E9
-  run_id: task-metering-E9-20260806T021153
+  run_id: task-metering-E9-20260807T013636Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_metering_runner
-  verified_at: 2026-08-06T02:11:53Z
+  verified_at: 2026-08-07T01:36:36Z
   output: |
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  1 passed (1)
-          Tests  6 passed (6)
-       Start at  08:40:19
-       Duration  487ms (transform 53ms, setup 0ms, import 204ms, tests 225ms, environment 0ms)
+    Test Files  1 passed (1) / Tests  6 passed (6)
+    criterion test: "cost and gpu stay unmeasured (AC-9) — suppression half > never
+    writes cost_usd or gpu_type on any exit"
 
 - eval: E10
-  run_id: task-metering-E10-20260806T021158
+  run_id: task-metering-E10-20260807T013638Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit
-  verified_at: 2026-08-06T02:11:58Z
+  verified_at: 2026-08-07T01:36:38Z
   output: |
-    > vitest run
-     RUN  v4.1.10 /Users/manhphan/dev/oneflow
-     Test Files  31 passed (31)
-          Tests  413 passed (413)
-       Start at  08:41:10
-       Duration  1.34s (transform 1.66s, setup 0ms, import 3.40s, tests 1.25s, environment 542ms)
+    $ vitest run
+    Test Files  32 passed (32)
+         Tests  427 passed (427)
+      Duration  1.58s
 
 - eval: E11
-  run_id: task-metering-E11-20260806T021200
+  run_id: task-metering-E11-20260807T013711Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.build_typecheck
-  verified_at: 2026-08-06T02:12:00Z
+  verified_at: 2026-08-07T01:37:11Z
   output: |
-      ├ chunks/620846f1-92c416bf2f09796f.js  54.2 kB
-      ├ chunks/8336-0e84acaf04d00d35.js      46.2 kB
-      └ other shared chunks (total)          2.19 kB
-    ƒ  (Dynamic)  server-rendered on demand
-    > oneflow@0.2.1 typecheck /Users/manhphan/dev/oneflow
-    > tsc --noEmit
+    (Dynamic)  server-rendered on demand
+    $ tsc --noEmit
 
 - eval: E12
-  run_id: task-metering-E12-20260806T021200
+  run_id: task-metering-E12-20260807T013639Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.lint
-  verified_at: 2026-08-06T02:12:00Z
+  verified_at: 2026-08-07T01:36:39Z
   output: |
-    > oneflow@0.2.1 lint:check /Users/manhphan/dev/oneflow
-    > pnpm exec biome check --error-on-warnings .
-    Checked 425 files in 78ms. No fixes applied.
+    $ pnpm exec biome check --error-on-warnings .
+    Checked 429 files in 81ms. No fixes applied.
 
 ## Analyst
 
-carried tu round truoc — baseline khong do lai round nay
+Baseline is `n-a` on every eval: establishing an A/B baseline would require moving
+the working tree to the diffBase, which this re-verification round is forbidden to
+do (no git operations at all). Discrimination cannot be re-established this round;
+the earlier signed rounds carry that judgment.
 
-none — baseline không đo lại round này (mọi block ghi baseline: n-a) nên không có eval nào được xác nhận non-discriminating round này.
+Nine evals share two commands — E1-E3 on `src/db/metering-schema.test.ts` and E4-E9
+on `src/lib/task/metering.test.ts`. Each eval was executed as its own run with its
+own logged run_id, and both files were additionally enumerated once with
+`--reporter=verbose` so each evidence block can name the test carrying its criterion.
+Every criterion AC-1 through AC-9 has at least one test whose name states it, and the
+two suppression-half criteria (AC-8, AC-9) each carry a test explicitly labelled
+"suppression half". Nothing in the AC-1…AC-9 range is riding a shared exit code
+without an implementation behind it.
+
+Two things the Gate-2 reviewer should know:
+
+- `src/db/metering-schema.test.ts` has grown since this feature was signed: it now
+  holds seven tests, three of which belong to the later cache-l4-eviction work
+  ("cache counters ..."). E1-E3 therefore pass a file whose green includes assertions
+  outside this contract. That is why each block above names the specific
+  metering test rather than resting on the file's exit status. The precise fix, if
+  the human wants these keys tightened, is the `-t` scoping already used elsewhere in
+  `_acceptance/config.yaml` (see `unit_l4_schema_columns`, which scopes the same file
+  to `-t 'cache counters'`).
+- E10's `expected` still describes "152 assertions plus the 10 new metering tests";
+  the suite is now 427 tests across 32 files. AC-10 asks only that the lifecycle
+  behaviour be unchanged and the suite green, and it is — the number in the eval
+  text is stale prose, not a failed condition.
 
 ## Variance
 
-none — every multi-run eval is uniform (không eval nào của round này có runs > 1).
+none — every multi-run eval is uniform (all evals here are deterministic, runs: 1)
 
 ## Iterations
 
-Round 16: E1-E12 all green on first pass this round; no fixes returned to implementation.
+Round 1 (re-verification after upstream code change)
 
 ## Gate 2 checklist (human)
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
 - [ ] Personally verify every judgment item marked UNCERTAIN, then fill its
-      `human_override: <name> <date>` line
+      `human_override: <name> <date>` line (none in this report — no judgment evals)
 - [ ] T3 only: personally verify ALL judgment items and fill `human_override`
-      on each (judge verdicts are advisory; the hook blocks PASS without them)
-- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
-      the hook re-validates evidence + overrides)
+      on each (this contract is T3 but declares no judgment evals — nothing to fill)
+- [ ] Decide whether E1-E3 should be re-scoped with `-t` now that the schema test
+      file also carries later cache-counter assertions (see Analyst)
+- [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (n/a — verdict is PASS)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
-
-## Vòng kiểm lại 2026-08-04 (sau hạng mục 0.6 `gate-scope-anchors`)
-
-Hợp đồng `gate-scope-anchors` chạm `scripts/**`, nên bằng chứng của hồ sơ này
-thành cũ theo cơ chế staleness. Đã chạy lại: **12/12 eval xanh** ở
-`5acc982e7690`, trong một đợt chạy chung 194 eval / 131 lệnh duy nhất của cả 13 hồ
-sơ bị ảnh hưởng — không hồ sơ nào đỏ.
-
-Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
-
-## Ghim lại 2026-08-05 (nhánh `chore/landed-merge-anchors`)
-
-Nhánh điền `landed_merge` chạm `scripts/**` (sửa test + hoàn nguyên golden), nên
-bằng chứng lại thành cũ. Đã chạy lại đợt chung 139 eval / 85 lệnh của 10 hồ sơ
-bị ảnh hưởng ở `f39723a228be` — **0 hồ sơ đỏ**.
-
-## Kiểm lại trên nhánh `feat/ci-vitest-sdk-pin` (CI-a) — bốn lượt, ghim ở `c38b939`
-
-Mục này thay cho các mục rời của những lượt trước trên cùng nhánh: một mục cho cả
-đợt, thay vì bốn mục gần trùng nhau.
-
-**Nhánh làm gì.** CI-a chỉ động vào hạ tầng verify, không thêm tính năng sản phẩm:
-thêm job `Unit Tests (vitest)` vào `.github/workflows/ci.yml`; gỡ pin SDK ghi cứng
-trong `scripts/plugins/run-overlay-plugin-tests.sh` (nay rút từ `sdk/pyproject.toml`
-qua `scripts/lib/sdk-version.sh`); thêm các guard đi kèm dưới `scripts/ci/`,
-`scripts/plugins/` và `scripts/acceptance/`; đồng bộ một mô tả trong `CLAUDE.md`.
-Vì nó chạm `.github/workflows/**` và `scripts/**`, `pre-merge-check.sh` báo hồ sơ
-này cũ.
-
-**Vì sao phải tới bốn lượt.** `risk_tiers.t1_skip_globs` chỉ miễn bốn đường dẫn
-gate-tooling theo TÊN CHÍNH XÁC (`scripts/pre-merge-check.sh`,
-`scripts/recheck-evidence.js`, `lib/evidence-core.js`, `lib/gap-probe.js`), nên mỗi
-guard script mới dưới `scripts/` lại làm cũ đúng những hồ sơ vừa ghim ở lượt trước.
-`c38b939` là commit mã cuối cùng của nhánh — sau nó chỉ còn thay đổi dưới
-`_acceptance/**`, nên lần ghim này giữ được. (`9fcfc33`, mốc của lượt 3, bị chính
-`c38b939` làm cũ vì commit đó sửa `scripts/acceptance/check-stale-golden.sh`.)
-
-**Quyền sở hữu, tự tính lại chứ không thừa kế.** Contract này **không có**
-`landed_merge:` trong frontmatter, nên không dựng được tập file sở hữu; không dựng
-được tập đó thì cũng không chứng minh được carry-forward là hợp lệ. Theo nguyên tắc
-thận trọng, hồ sơ đi đường re-verify ở cả ba lượt: chạy lại toàn bộ eval, không ghi
-công thừa kế cho eval nào.
-- **Lượt 1 @ `a1bc936`** — **12/12 eval xanh** cho hồ sơ này. Lượt đó lộ hai lỗi thật, cả hai do chính nhánh
-  tạo ra: (a) `scripts/lib/sdk-version.sh` giải gốc repo bằng
-  `git rev-parse --show-toplevel` **lúc gọi**, nên chết khi caller đã `cd` vào bản
-  clone repo plugin — 13 eval render của `compose-overlay` đỏ; (b)
-  `check-action-pins.sh` còn chốt `EXPECTED_CHECKOUT_SITES=7` trong khi job vitest
-  mới nâng số điểm `actions/checkout` lên 8 — E1 của `ci-actions-bump` đỏ.
-- **Lượt 2 @ `28c1a7d`** — commit sửa cả hai lỗi trên (neo gốc repo của
-  `sdk-version.sh` vào vị trí file thư viện; đánh số lại thành 8 kèm chú thích).
-  **12/12 eval xanh**.
-- **Lượt 3 @ `9fcfc33`** — **12/12 eval xanh**, tất cả thoát 0.
-- **Lượt 4 @ `c38b939` (lượt này)** — **12/12 eval xanh**, tất cả thoát 0,
-  không lệch so với lượt 3.
-
-**Cách chạy.** Mỗi `cmd` được giải lại từng dòng theo `_acceptance/config.yaml`
-trước khi chạy; lệnh dùng chung chạy **một lần** và ghi công cho mọi eval ràng buộc
-nó, mỗi eval một `run_id` riêng, còn `verified_at` của các eval chung lệnh cố ý
-trùng nhau vì chúng ghi lại cùng một lần chạy.
-
-`verified_commit` chuyển sang `c38b939d9842`. Dòng chữ ký người trong frontmatter
-không bị đụng tới.
-
-**Phát hiện của lượt này, ảnh hưởng cả đợt.** `check-stale-golden.sh` — eval E3 của
-`stale-scope-by-paths` — đóng băng output của gate cho **bảy hồ sơ không khai `paths`**
-ở đúng trạng thái ĐANG CŨ (`VIOLATION ... evidence is stale`). Chính việc ghim lại của
-đợt này làm bảy dòng ấy lật sang `OK ... PASS, signed off by`, nên E3 chuyển đỏ ngay
-sau khi ghim. Đây là đo trực tiếp, không suy luận: chạy trước khi ghim thoát 0, chạy lại
-sau khi ghim thoát 1, cả hai đều có dòng trong `run-log.jsonl` của hồ sơ đó.
-Bảy hồ sơ đó **gồm hồ sơ này**. Vì lý do này `stale-scope-by-paths` **không** được ghim ở lượt này và giữ
-verdict REJECT; chi tiết trong hồ sơ riêng của nó. Cơ chế staleness-scoping mà AC-3 nói
-tới không đổi — thứ lật là trạng thái ghim, không phải hành vi scoping.

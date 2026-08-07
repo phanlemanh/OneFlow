@@ -30,7 +30,17 @@ BASE="${2:-origin/main}"
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
 # pre-merge-check exits non-zero when it blocks; that is data here, not an error.
-out=$(bash scripts/pre-merge-check.sh . --base "$BASE" 2>&1) || true
+#
+# GATE_RESIDUAL_INPUT substitutes a captured/synthetic pre-merge-check output for
+# a live run. It exists so check-gate-residual-teeth.sh can prove this guard goes
+# red on the violation classes it must never forgive, without having to
+# manufacture eleven real stale features to do it. Same seam as
+# SDK_VERSION_ROOT in scripts/lib/sdk-version.sh.
+if [ -n "${GATE_RESIDUAL_INPUT:-}" ]; then
+    out=$(cat "$GATE_RESIDUAL_INPUT")
+else
+    out=$(bash scripts/pre-merge-check.sh . --base "$BASE" 2>&1) || true
+fi
 
 # A run that never reached its own summary line crashed; refuse to read silence
 # as cleanliness (the failure mode check-no-t3-drift.sh names).
@@ -44,15 +54,9 @@ if [ -z "$violations" ]; then
     exit 0
 fi
 
-foreign=$(printf '%s\n' "$violations" | grep -v "^VIOLATION \[$SLUG\]:" || true)
-if [ -n "$foreign" ]; then
-    printf '%s\n' "$foreign" >&2
-    fail "violations outside '$SLUG' (above) — the re-sign wave has not cleared"
-fi
-
-# Own violations are forgiven ONLY while they are "this feature has not finished
-# its own Gate 2 yet". THREE strings qualify, and the message below names which
-# one was actually forgiven — an earlier version forgave all three but reported
+# Own violations are forgiven while they are "this feature has not finished its
+# own Gate 2 yet". THREE strings qualify, and the message below names which one
+# was actually forgiven — an earlier version forgave all three but reported
 # every case as "pending Gate-2 signature", which described the world wrongly in
 # two of them. A guard that misreports what it forgave is a guard you cannot read.
 #
@@ -64,21 +68,53 @@ fi
 # unacknowledged enforcement mode — is a real failure and must not hide behind
 # its own name.
 #
+# A FOREIGN slug is forgiven for exactly ONE of those three: "human_signoff is
+# empty". Generalised 2026-08-07 (local-cpu-plugins), and it is a fix to the
+# same family as ci-vitest-sdk-pin's AC-11 amendment rather than a new
+# indulgence. That amendment made the guard reachable for the ONE feature in
+# flight; it silently assumed there is only ever one. Two features carrying
+# residual evals — `civ_gate_residual` and `lcp_resign_wave` — each demanded the
+# other be signed first, so neither could ever go green: a machine FAIL, which
+# no human_override can release. Signing them on a separate branch does not
+# help either, because staleness is measured from the commit that carries the
+# code, so both must be in flight at once.
+#
+# The other two classes stay FAIL when they are foreign, and the distinction is
+# the whole point: a foreign feature that has PASSED its evals and merely awaits
+# the same reviewer's signature is not evidence of anything wrong, while a
+# foreign feature that is STALE, RED, or has no evidence at all is exactly what
+# this guard exists to catch. check-gate-residual-teeth.sh pins all six cases.
+foreign=$(printf '%s\n' "$violations" | grep -v "^VIOLATION \[$SLUG\]:" || true)
+if [ -n "$foreign" ]; then
+    unforgivable=$(printf '%s\n' "$foreign" | grep -v "human_signoff is empty" || true)
+    if [ -n "$unforgivable" ]; then
+        printf '%s\n' "$unforgivable" >&2
+        fail "violations outside '$SLUG' that are not merely awaiting a signature (above) — the re-sign wave has not cleared"
+    fi
+fi
+#
 # KNOWN BLIND SPOT (inherited from pre-merge-check, not opened here):
 # pre-merge-check short-circuits per feature, so when the in-flight slug's report
 # is PASS with an empty signature it reports ONLY that, even if the same report's
 # `verified_commit` is stale. During a verify round this feature's own staleness
 # is therefore invisible to this guard. It becomes visible the moment the human
 # signs and the empty-signoff violation clears.
+own=$(printf '%s\n' "$violations" | grep "^VIOLATION \[$SLUG\]:" || true)
 forgiven=""
-while IFS= read -r line; do
-    case "$line" in
-        *"human_signoff is empty"*) forgiven="${forgiven}PASS awaiting the human's Gate-2 signature; " ;;
-        *"verdict=REJECT"*)         forgiven="${forgiven}a previous round's REJECT verdict, not yet rewritten; " ;;
-        *"no evidence-report.md"*)  forgiven="${forgiven}no evidence report written yet this round; " ;;
-        *) printf '%s\n' "$line" >&2; fail "'$SLUG' violation is not an unfinished-Gate-2 class (above)" ;;
-    esac
-done <<<"$violations"
+if [ -n "$own" ]; then
+    while IFS= read -r line; do
+        case "$line" in
+            *"human_signoff is empty"*) forgiven="${forgiven}PASS awaiting the human's Gate-2 signature; " ;;
+            *"verdict=REJECT"*)         forgiven="${forgiven}a previous round's REJECT verdict, not yet rewritten; " ;;
+            *"no evidence-report.md"*)  forgiven="${forgiven}no evidence report written yet this round; " ;;
+            *) printf '%s\n' "$line" >&2; fail "'$SLUG' violation is not an unfinished-Gate-2 class (above)" ;;
+        esac
+    done <<<"$own"
+fi
 
-n=$(printf '%s\n' "$violations" | grep -c .)
-echo "OK: every feature other than $SLUG is clean; forgave $n own violation(s) — ${forgiven%; }"
+n_own=$(printf '%s\n' "$own" | grep -c . || true)
+n_foreign=$(printf '%s\n' "$foreign" | grep -c . || true)
+# Name the two counts separately. Collapsing them would hide the fact that other
+# features are waiting on the same signature run — the thing a reader most needs
+# to know when deciding what to sign next.
+echo "OK: no blocking residual for $SLUG; forgave ${n_own} own violation(s)${forgiven:+ — ${forgiven%; }}, and ${n_foreign} other in-flight feature(s) awaiting the same Gate-2 signature run"

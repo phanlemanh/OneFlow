@@ -161,7 +161,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 
 ## 公式プラグイン
 
-> 公式のGPU/CPUプラグインは現在 [Modal](https://modal.com) 上で動作しています——毎月最大 **$30** 分の無料GPU演算（H100/A100など）。`MODAL_TOKEN_*` の設定は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)を参照してください。他のどのプラットフォームでも同じ方法で自分のプラグインを公開できます。
+> 公式のGPU/CPUプラグインは現在 [Modal](https://modal.com) 上で動作しています——毎月最大 **$30** 分の無料GPU演算（H100/A100など）。`MODAL_TOKEN_*` の設定は[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)を参照してください。他のどのプラットフォームでも同じ方法で自分のプラグインを公開できます。以下の**ローカルプラグイン**にはこれらは一切不要です。
 
 ### API プラグイン
 
@@ -173,10 +173,15 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 - [tongflow-api-apimart](https://github.com/tong-io/tongflow-api-apimart) — APIMart ゲートウェイ。ノード上で**モデルを選択**可能：画像生成 / 編集（Z-Image、Seedream、Nano Banana、GPT-Image）、テキスト / 画像 → 動画（Kling、VEO3、Sora2、Seedance）、`gen_text`（GPT-5、Claude、Gemini）、Whisper 文字起こしと TTS
 - [tongflow-api-agnes](https://github.com/tong-io/tongflow-api-agnes) — Agnes AI ゲートウェイ：`gen_text` / テキストツール / 画像理解（`agnes-2.0-flash`）、画像生成 / 編集 / 融合（`agnes-image-2.x-flash`）、テキスト / 画像 / 最初・最後フレーム → 動画（`agnes-video-v2.0`）
 
+### ローカルプラグイン
+
+> これらは**あなた自身のマシン**で動作します——クラウドアカウント不要、GPU 不要、ラウンドトリップなし。[ADR-0011](adr/0011-local-first-execution.md) を参照。
+
+- [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — トランスコード、ミキシング、メディア処理パイプライン
+- [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — ショット境界の検出、クリップ分割用
+
 ### GPU/CPU プラグイン
 
-- [tongflow-modal-ffmpeg](https://github.com/tong-io/tongflow-modal-ffmpeg) — トランスコード、ミキシング、メディア処理パイプライン
-- [tongflow-modal-pyscenedetect](https://github.com/tong-io/tongflow-modal-pyscenedetect) — ショット境界の検出、クリップ分割用
 - [tongflow-modal-z-image](https://github.com/tong-io/tongflow-modal-z-image) — Z-Image テキストから画像生成
 - [tongflow-modal-ernie-image](https://github.com/tong-io/tongflow-modal-ernie-image) — ERNIE Image テキストから画像生成（代替）
 - [tongflow-modal-flux2-klein9b](https://github.com/tong-io/tongflow-modal-flux2-klein9b) — FLUX.2 Klein 9B マルチ参照融合と画像編集
@@ -240,7 +245,7 @@ docker compose up -d
 
 **データと認証情報。** 書き込み可能なものはすべて `/data` ボリュームに保存されます（SQLite DB、アップロード、設定）。API キーは任意です——アプリ内の**設定**ダイアログで設定するか、起動時に渡します（`-e OPENROUTER_API_KEY=…`）。対応キー：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`、`ANTHROPIC_API_KEY`（Director agent の利用に必要——詳細は後述）。
 
-**プラグイン。** イメージにはプラグインが含まれていません——アプリ内のプラグインマネージャーからインストールしてください（初回インストールには GitHub へのネットワークアクセスが必要）。初回実行時、プラグインは `/data/.tongflow/plugin-venv` の下に共有 Python venv を作成します（PyPI から SDK とそのプラグインの `requirements.txt` をインストール）。そのため初回実行は遅く、ネットワークが必要です。Modal ベースのプラグインにはさらに Modal トークンが必要です。
+**プラグイン。** イメージにはプラグインが含まれていません——アプリ内のプラグインマネージャーからインストールしてください（初回インストールには GitHub へのネットワークアクセスが必要）。初回実行時、プラグインは `/data/.tongflow/plugin-venv/<pluginId>` の下に**専用の** Python venv を作成します（PyPI から SDK とそのプラグインの `requirements.txt` をインストール）。そのため初回実行は遅く、ネットワークが必要です。プラグインごとに venv を分けることで、2 つのプラグインが同じパッケージの競合するバージョンを固定しても、一方が黙って上書きされることはありません。Modal ベースのプラグインにはさらに Modal トークンが必要です。ローカルプラグインには不要です。
 
 ## セルフホストのセットアップ（プラグインと認証情報）
 

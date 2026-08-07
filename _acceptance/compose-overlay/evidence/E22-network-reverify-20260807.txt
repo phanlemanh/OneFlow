@@ -1,0 +1,40 @@
+=== Re-verification round, 2026-08-07 — fresh-context verify subagent ===
+Repo: /Users/manh-macmini/dev/oneflow, branch feat/local-first-adr-and-s2-plan,
+HEAD a788985b3b30c7072dcfd95bc65db1f83b940984.
+
+Scoping: dev_server.url = http://localhost:3000 (config.yaml). No dev_server.api_base declared.
+FAIL-eligible set = fetch/XHR to http://localhost:3000. Static assets (image/video/font/.map/
+favicon) served at the app origin are note-only per the scoping rule used by every prior round.
+
+Dev server: started via the repo's own .claude/launch.json entry "oneflow-dev" (pnpm dev,
+port 3000). Navigated a fresh tab to http://localhost:3000/workspace (two loads observed).
+
+FAIL-eligible XHR set, all 200 OK:
+  GET /api/feature/list        -> 200 OK
+  GET /api/plugins/registry    -> 200 OK
+  GET /api/task/pending        -> 200 OK
+  GET /workspace  (document)   -> 200 OK  (x2)
+  GET /example.json            -> 200 OK
+All /_next/static/** chunks, CSS and woff2 fonts -> 200 OK.
+
+Note-only (static-asset media endpoint /api/uploads/[...path], same class documented in every
+prior round's network evidence — raw stored media bytes, not a business XHR):
+  GET /api/uploads/tasks/82xfBRQHs2mC-WJjPgpEM/CKtGcdc8YMrouNZtpjbzN.png  -> 404 Not Found
+  GET /api/uploads/tasks/YNiEkIqDHWzCdKu3EGMtT/etz5lwKJ1aXJKm4Y5kVHA.png  -> 404 Not Found
+  GET /api/uploads/tasks/iokJb-SC1DeiM0S_PQv0r/pU8sgnY8F8-hKd5L-OPBl.png  -> 404 Not Found
+  GET /api/uploads/tasks/02dBZ5ZhgPJLEbyLaOkRZ/thatFeeVupFMbRpFH8_eg.mp4  -> 404 Not Found (x2)
+These are the local sqlite workspace's stub media rows, unrelated to compose-overlay.
+
+No 5xx, no connection errors, no timeouts anywhere in the FAIL-eligible set.
+
+IMPORTANT SCOPE NOTE FOR THIS ROUND: the locally persisted workspace no longer contains the
+e22-fixture workflow that earlier rounds used to drive the six compose-overlay states — the
+canvas now renders an unrelated example workflow (Text to Image / Image Fusion / Image to
+Video nodes). The live drive therefore exercised the workspace page but NOT a live
+compose-overlay node instance. The six state captures under evidence/design/captures/ were
+reused rather than re-driven; see the evidence report's E22 block for why that is sound at
+this HEAD (no file under src/components/workspace/nodes/transfer/ changed between the
+previously verified commit c38b939 and a788985).
+
+networkObserved = clean (app-scope traffic observed; every FAIL-eligible request is 200 OK
+once the static-asset media 404s are excluded per the scoping rule).

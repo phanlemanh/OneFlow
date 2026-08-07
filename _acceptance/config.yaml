@@ -144,6 +144,21 @@ executors:
     unit_conformance: pnpm vitest run src/lib/abi/conformance.test.ts
     unit_plugin_rev: pnpm vitest run src/lib/plugins/plugin-rev.test.ts
     unit_node_cached: pnpm vitest run src/lib/task/node-cached.test.ts
+    # local-cpu-plugins Gate 1 (2026-08-06): plugin-python-env.test.ts lands during
+    # implementation. One key per criterion, addressed by `-t` — four assertions
+    # behind one exit code would make a never-implemented case look like a passing
+    # one (standing rule since cache-l1-fingerprint review round 1).
+    unit_venv_per_plugin: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'own directory'"
+    unit_venv_common_parent: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'one parent'"
+    unit_venv_unsafe_id: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'escape'"
+    unit_venv_chain_per_id: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'per plugin id'"
+    # AC-18, added at the Gate-1 amendment of 2026-08-07 (Manh): implementation
+    # proved the blanket fallback reachable, so it became a criterion.
+    unit_venv_fail_loudly: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'declares requirements'"
+    unit_venv_lite_fallback_kept: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'no requirements'"
+    # The pre-2026-08-07 shared venv lived AT the path that is now the root of
+    # per-plugin venvs, so its corpse would be enumerated as if it were a plugin.
+    unit_venv_legacy_migration: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'legacy'"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -266,7 +281,34 @@ executors:
     # in-flight feature in all three states it can occupy, including a PASS whose
     # human_signoff the verifier is forbidden to fill. civ_gate_residual asserts
     # the reachable half; the post-signature half moved to the Gate-2 checklist.
-    civ_gate_residual: bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main
+    # Rebound 2026-08-07 (AC-11 Amendment 2): the wider "gate clear apart from me"
+    # question deadlocks once two features carry residual evals; the wave is staleness.
+    civ_gate_residual: bash scripts/acceptance/check-resign-wave.sh ci-vitest-sdk-pin origin/main
+    # local-cpu-plugins Gate 1 (2026-08-06): every script below lands during
+    # implementation. Slot evals run in the two PLUGIN repos (outside this tree)
+    # via the same clone-and-pytest wrapper compose-overlay established — one key
+    # per criterion, each a distinct pytest node-id. Network-dependent by design.
+    # Arg 1 is the plugin repo name so ONE wrapper serves both plugins.
+    lcp_ffmpeg_slots: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_all_six_slots_return_assets"
+    lcp_ffmpeg_missing_input: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_missing_asset_fails_cleanly_without_emitting_a_file"
+    lcp_ffmpeg_no_audio_track: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_extract_audio_on_silent_video_errors_not_zero_bytes"
+    lcp_ffmpeg_resolver_order: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_resolution_order_env_then_path_then_wheel"
+    lcp_ffmpeg_resolver_teeth: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_no_route_resolves_fails_loudly_naming_the_fix"
+    lcp_split_video_parts: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_split_returns_video_parts_for_both_scenes"
+    lcp_split_ffprobe_required: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_missing_ffprobe_fails_loudly_naming_ffprobe"
+    # Static scans + guards, run in THIS tree against the two plugin clones.
+    lcp_no_modal: "bash scripts/plugins/check-local-plugins-no-modal.sh"
+    lcp_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh local-cpu-plugins origin/main"
+    lcp_venv_conflicting_pins: "bash scripts/plugins/check-venv-isolation.sh"
+    lcp_manifest_counts: "bash scripts/plugins/check-manifest-unmoved.sh"
+    lcp_manifest_guard_teeth: "bash scripts/plugins/check-manifest-guard-teeth.sh"
+    lcp_docs_synced: "bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh"
+    lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
+    # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
+    # stale evidence), which is narrower and answerable; check-gate-residual's
+    # wider "gate clear apart from me" is unreachable with two features in flight.
+    lcp_resign_wave: "bash scripts/acceptance/check-resign-wave.sh local-cpu-plugins origin/main"
+    lcp_resign_wave_teeth: "bash scripts/acceptance/check-resign-wave-teeth.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

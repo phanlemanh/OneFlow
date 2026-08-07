@@ -47,7 +47,7 @@ evals:
     criterion: AC-6
     executor: script
     cmd: config:executors.script.origin_manifest_unmoved
-    expected: "exit 0; SUPPRESSION half — no pre-existing plugin was repointed: the 38 original entries are still plain strings under the same default org (second-edition guard also pins the single origin entry that compose-overlay landed)"
+    expected: "exit 0; SUPPRESSION half — this capability repoints nothing by itself. Third-edition guard (amended 2026-08-07): exactly 36 plain strings under the default org + exactly three origin entries, all under phanlemanh — compose-overlay, oneflow-api-ffmpeg, oneflow-api-pyscenedetect. A fourth origin entry, an altered origin URL, or a demoted entry must turn it red"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8

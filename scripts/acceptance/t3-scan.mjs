@@ -1,0 +1,83 @@
+/**
+ * Reads risk_tiers.t3_paths out of _acceptance/config.yaml and reports any
+ * changed file that matches one. Called by check-t3-untouched.sh.
+ *
+ * A real file rather than `node -e`: Node 24 runs -e input through its
+ * TypeScript stripper, which mis-parses the character class in the glob
+ * escaper below.
+ *
+ * Usage: node t3-scan.mjs <changed-files-list> <config.yaml>
+ */
+
+import { readFileSync } from "node:fs";
+
+const [listPath, configPath] = process.argv.slice(2);
+const changed = readFileSync(listPath, "utf8").split("\n").filter(Boolean);
+
+// Minimal reader for the one block we need. The kit requires 2-space
+// indentation in this file, so the shape is fixed.
+function readT3Paths(path) {
+    const patterns = [];
+    let inTiers = false;
+    let inT3 = false;
+    for (const line of readFileSync(path, "utf8").split("\n")) {
+        if (/^risk_tiers:/.test(line)) {
+            inTiers = true;
+            continue;
+        }
+        if (inTiers && /^\S/.test(line)) break;
+        if (!inTiers) continue;
+        if (/^\s{2}t3_paths:\s*$/.test(line)) {
+            inT3 = true;
+            continue;
+        }
+        if (inT3 && /^\s{2}\S/.test(line)) {
+            inT3 = false;
+            continue;
+        }
+        if (!inT3) continue;
+        const m = line.match(/^\s*-\s*"?([^"#]+?)"?\s*$/);
+        if (m) patterns.push(m[1]);
+    }
+    return patterns;
+}
+
+const patterns = readT3Paths(configPath);
+if (patterns.length === 0) {
+    console.error(
+        "FAIL: parsed no t3_paths out of the config — refusing to pass vacuously",
+    );
+    process.exit(1);
+}
+
+// `a/**` must match `a/b/c`, and `a/*` only one segment deep.
+function toRegExp(glob) {
+    const escaped = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+    // One pass, so `**` and `*` can never be mistaken for each other and no
+    // sentinel character is needed to keep them apart.
+    const body = escaped.replace(/\*\*\/?|\*/g, (token) =>
+        token.startsWith("**") ? ".*" : "[^/]*",
+    );
+    return new RegExp(`^${body}$`);
+}
+
+const rules = patterns.map((glob) => ({ glob, re: toRegExp(glob) }));
+const hits = [];
+for (const file of changed) {
+    for (const rule of rules) {
+        if (rule.re.test(file)) hits.push(`${file}  ->  ${rule.glob}`);
+    }
+}
+
+console.log(
+    `checked ${changed.length} changed file(s) against ${rules.length} t3 path rule(s)`,
+);
+if (hits.length > 0) {
+    console.error("FAIL: this feature is declared T2 but touches t3 path(s):");
+    for (const hit of hits) console.error(`  ${hit}`);
+    console.error(
+        "Escalate the contract to T3 (the re-signature wave grows) or revert the edit.",
+    );
+    process.exit(1);
+}
+console.log("OK: no t3 path touched — the declared tier holds");
