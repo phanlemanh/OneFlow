@@ -57,13 +57,14 @@ Source input: prompt (bắt đầu (a) luôn)
 - AC-3: Given the URL rule has three consumers — the in-app manager, the CLI installer, and the update checker, which today calls `checkPluginUpdate(manifest.org, id)` for every installed plugin — When each builds a remote for the same id, Then all three produce the **same URL from the same resolver** — no second copy of the rule survives this change, and a plugin that overrides its origin must not be update-checked against the default one.
 - AC-4: Given a malformed entry (unknown key, missing `id`, non-string `origin`, empty string, duplicate id), When the manifest is loaded, Then loading **fails with a message naming the offending entry** — a typo must not silently clone from the default origin.
 - AC-5: Given an origin that is not an `http(s)` URL (`git@github.com:x`, `../etc`, `javascript:`), When the manifest is loaded, Then it is rejected — an origin is a clone target, and the installer already refuses non-http(s) remotes for custom URLs.
-- AC-6 *(amended 2026-08-03 — first fork landed; see Amendment)*: Given this change is a
-  capability and not a migration, When the shipped manifest is inspected, Then **no plugin
-  that existed at sign-off has been repointed**: all 38 original entries are still plain
-  strings under the same default org. The guard `check-manifest-unmoved.sh` enforces exactly
-  that, now in its second edition — it additionally requires the one origin entry the
-  capability was built for (`oneflow-modal-compose-overlay` → `https://github.com/phanlemanh`,
-  landed by the compose-overlay feature). The two guards from `oneflow-plugin-prefix` stay green.
+- AC-6 *(amended 2026-08-03 and again 2026-08-07; see Amendment)*: Given this change is a
+  capability and not a migration, When the shipped manifest is inspected, Then **this feature
+  repointed nothing on its own**, and every later move of a plugin out of the default org is
+  one an explicitly approved feature performed and recorded. The guard
+  `check-manifest-unmoved.sh` enforces the current census, now in its third edition: **36 plain
+  strings under the default org + exactly three origin entries** — `oneflow-modal-compose-overlay`
+  (compose-overlay, 2026-08-03) and `oneflow-api-ffmpeg` / `oneflow-api-pyscenedetect`
+  (local-cpu-plugins, 2026-08-07, ADR-0011). The two guards from `oneflow-plugin-prefix` stay green.
 
 ## Coverage
 
@@ -149,6 +150,24 @@ change files outside this feature's approved scope.
   plugin, or on the first real fork — both of which are intended future work.
   The coupling is now called out in CLAUDE.md's "Registering an official plugin"
   checklist so that failure arrives with an explanation attached.
+
+## Amendment 2 (2026-08-07 — two plugins left the default org, ADR-0011)
+
+`local-cpu-plugins` replaced `tongflow-modal-ffmpeg` and `tongflow-modal-pyscenedetect` with
+local plugins under `phanlemanh`. Two of the 38 entries that existed at this feature's sign-off
+are therefore gone, and AC-6's previous wording — *"all 38 original entries are still plain
+strings"* — became measurably false. A fresh-context re-verification caught it (E7, 2026-08-07);
+no eval written by the implementing session could have, because the guard that enforces AC-6 was
+re-cut in the **same commit** that broke the claim. Recorded plainly: changing a rule and its
+only measuring stick together is how a regression hides, and the doer≠grader split is what
+found it.
+
+What is amended is the **census**, not the intent. AC-6 exists to say *this capability is not a
+migration* — adding per-entry `origin` did not, by itself, move any plugin. That remains true and
+remains enforced. What the criterion can no longer claim is that the manifest is frozen: it is a
+snapshot, exactly as CLAUDE.md always described the guard, and each move must be a decision some
+feature took at its own Gate 1. The replace-not-coexist decision here was approved by Manh at
+local-cpu-plugins' Gate 1 on 2026-08-06 (spec Decision 2).
 
 ## Amendment (2026-08-03 — first fork landed, prescribed by CLAUDE.md)
 

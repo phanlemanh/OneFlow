@@ -281,7 +281,9 @@ executors:
     # in-flight feature in all three states it can occupy, including a PASS whose
     # human_signoff the verifier is forbidden to fill. civ_gate_residual asserts
     # the reachable half; the post-signature half moved to the Gate-2 checklist.
-    civ_gate_residual: bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin origin/main
+    # Rebound 2026-08-07 (AC-11 Amendment 2): the wider "gate clear apart from me"
+    # question deadlocks once two features carry residual evals; the wave is staleness.
+    civ_gate_residual: bash scripts/acceptance/check-resign-wave.sh ci-vitest-sdk-pin origin/main
     # local-cpu-plugins Gate 1 (2026-08-06): every script below lands during
     # implementation. Slot evals run in the two PLUGIN repos (outside this tree)
     # via the same clone-and-pytest wrapper compose-overlay established — one key

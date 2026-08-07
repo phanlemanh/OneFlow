@@ -125,18 +125,39 @@ hạng mục dưới đây vì thế có một tiêu chí "răng" đi kèm tiêu
   *Should-NOT-fire: thêm một job vào `ci.yml` là đúng hình dạng thay đổi mà
   `check-workflow-drift.sh` từ chối; nếu nó đỏ ở đây thì neo `landed_merge` của
   `gate-scope-anchors` chưa thật sự hoạt động, và ta cần biết điều đó ngay.*
-- AC-11 *(sửa lời 05/08 — xem Amendment)*: Given nhánh này sau khi wave ký lại đã
-  chạy, When chạy `bash scripts/acceptance/check-gate-residual.sh ci-vitest-sdk-pin`,
-  Then exit 0: violation duy nhất còn lại (nếu có) là **chữ ký Cổng 2 đang chờ của
-  chính feature này**, mọi feature khác sạch. Đó tương đương khẳng định wave khớp
-  báo giá Cổng 1 (**2 re-verify** `ci-actions-bump` + `compose-overlay`, **7
-  carry-forward re-pin**, **6 không đụng**) — vì bất kỳ feature nào còn stale, đỏ,
-  hay thiếu chữ ký đều hiện thành violation và guard từ chối. Lệch khỏi bảng →
-  disclose ở Cổng 2, không âm thầm mở rộng. **Nửa sau — `pre-merge-check: clean`
-  sau khi ký — là mục kiểm tay trong checklist Cổng 2, không phải eval máy.**
+- AC-11 *(sửa lời 05/08, sửa lần hai 07/08 — xem Amendment)*: Given nhánh này sau
+  khi wave ký lại đã chạy, When chạy
+  `bash scripts/acceptance/check-resign-wave.sh ci-vitest-sdk-pin`, Then exit 0:
+  **không feature nào khác còn evidence stale**. Đó là nửa đo được của "wave đã
+  khớp báo giá Cổng 1" — sóng ký lại *chính là* chuyện staleness. Chữ ký đang chờ
+  của feature khác, hay verdict đang bay của feature khác, **không** thuộc câu hỏi
+  này: chúng chỉ nói rằng cùng một người còn nhiều thứ phải ký. Lệch khỏi bảng báo
+  giá → disclose ở Cổng 2, không âm thầm mở rộng. **Nửa sau — `pre-merge-check:
+  clean` sau khi ký — là mục kiểm tay trong checklist Cổng 2, không phải eval máy.**
+
 - AC-12: Given `_acceptance/config.yaml`, When kiểm sau thay đổi, Then **không có
   executor key `overlay_*` nào bị đổi hoặc gỡ**, và `feature_loop.suite_keys`
   giữ nguyên. *Boundary: gói này sửa cách guard tự chạy, không sửa tập guard.*
+
+## Amendment 2 (2026-08-07 — nhiều feature cùng bay)
+
+Bản sửa 05/08 làm AC-11 *đạt tới được* bằng cách tha cho chữ ký đang chờ của
+**chính feature này**. Nó ngầm giả định tại một thời điểm chỉ có **một** feature
+đang bay. Ngày 07/08 giả định đó vỡ: `local-cpu-plugins` mang một eval residual
+cùng dạng, và hai eval khoá nhau — mỗi cái đòi cái kia phải ký xong trước. Cả hai
+là eval `script`, nên `human_override` không giải phóng được; verify trên nhánh
+riêng cũng không thoát, vì staleness đo từ commit **mang code**, nên cả hai buộc
+phải cùng bay.
+
+Sửa ở hai tầng. `check-gate-residual.sh` nay tha cho feature *khác* đang ở trạng
+thái PASS-chờ-ký (vẫn chặn foreign stale / REJECT / thiếu report). Và AC-11 rebind
+sang `check-resign-wave.sh`, guard mới hỏi đúng câu hẹp hơn mà tiêu chí này thật
+sự cần: *còn feature nào mang evidence stale không*. Mỗi guard có bộ răng riêng
+(13 và 7 case) chứng minh nó vẫn đỏ với đúng những gì không được tha.
+
+Cái bị bỏ đi so với lời cũ: AC-11 không còn khẳng định mọi feature khác đã **ký
+xong**. Đó không phải mất mát — nó là điều một vòng verify không bao giờ quan sát
+được, và `pre-merge-check` sau chữ ký mới là chỗ khẳng định nó.
 
 ## Amendment (2026-08-05 — duyệt tại chỗ bởi Manh, sau vòng verify 2)
 
