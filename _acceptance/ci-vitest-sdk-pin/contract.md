@@ -125,7 +125,7 @@ hạng mục dưới đây vì thế có một tiêu chí "răng" đi kèm tiêu
   *Should-NOT-fire: thêm một job vào `ci.yml` là đúng hình dạng thay đổi mà
   `check-workflow-drift.sh` từ chối; nếu nó đỏ ở đây thì neo `landed_merge` của
   `gate-scope-anchors` chưa thật sự hoạt động, và ta cần biết điều đó ngay.*
-- AC-11 *(sửa lời 05/08, sửa lần hai 07/08 — xem Amendment)*: Given nhánh này sau
+- AC-11: *(sửa lời 05/08, sửa lần hai 07/08 — xem Amendment)* Given nhánh này sau
   khi wave ký lại đã chạy, When chạy
   `bash scripts/acceptance/check-resign-wave.sh ci-vitest-sdk-pin`, Then exit 0:
   **không feature nào khác còn evidence stale**. Đó là nửa đo được của "wave đã
@@ -138,6 +138,23 @@ hạng mục dưới đây vì thế có một tiêu chí "răng" đi kèm tiêu
 - AC-12: Given `_acceptance/config.yaml`, When kiểm sau thay đổi, Then **không có
   executor key `overlay_*` nào bị đổi hoặc gỡ**, và `feature_loop.suite_keys`
   giữ nguyên. *Boundary: gói này sửa cách guard tự chạy, không sửa tập guard.*
+
+## Amendment 3 (2026-08-07 — sửa lời để lint đọc được, KHÔNG đổi ngữ nghĩa)
+
+AC-11 mang chú thích sửa-lời dạng `- AC-11 *(sửa lời 05/08, …)*: Given …`, tức chú thích
+nằm **giữa** id và dấu hai chấm. `eval-coverage-lint.js` khớp tiêu chí theo **từng dòng
+vật lý** bằng `^\s*[-*]\s*(AC-\d+)\s*[:.]\s*(.+)$`, nên dòng này không khớp và AC-11 **rơi
+khỏi tầm nhìn của lint hoàn toàn** — không W1, không W4, không một tiếng động nào báo là
+nó bị bỏ qua. Trớ trêu: chính thói quen ghi chú amendment (do hai lần sửa lời trước đó
+sinh ra) là thứ làm tiêu chí vô hình. Chú thích nay chuyển ra **sau** dấu hai chấm; chữ
+nghĩa tiêu chí giữ nguyên từng byte (diff: 1 dòng, 1+/1-).
+
+**Đo lại sau khi sửa (07/08):** AC-11 không gắn `(cross-layer)` nên W4 không áp dụng, và
+việc nó hiện ra **không** sinh cảnh báo W1 mới — output của lint trên toàn `_acceptance/`
+giống hệt trước và sau (7 cảnh báo W1, đều thuộc AC khác). Không có gì phải sửa thêm;
+chữ ký Cổng 2 **không** cần cắt lại. Cùng đợt sửa với `compose-overlay`,
+`per-plugin-origin` (cùng dạng chú thích) và `cache-l2-store` / `cache-l3-tier-b`
+(dạng nhãn `(cross-layer)`, nơi W4 thật sự đã ngủ).
 
 ## Amendment 2 (2026-08-07 — nhiều feature cùng bay)
 
