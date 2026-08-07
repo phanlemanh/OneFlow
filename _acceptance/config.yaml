@@ -341,6 +341,11 @@ risk_tiers:
     - "scripts/recheck-evidence.js"
     - "lib/evidence-core.js"
     - "lib/gap-probe.js"
+    # Vendored 1.38.0: pre-merge-check.sh gọi CẢ HAI trong cùng một lệnh node để
+    # chấm răng cross-layer. Thiếu một trong hai thì cổng vẫn chạy nhưng tụt về
+    # awk rộng hơn và in NOTE — cùng lớp measuring-stick.
+    - "lib/ac-line.js"
+    - "lib/md-section.js"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"

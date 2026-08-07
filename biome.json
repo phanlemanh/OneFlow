@@ -30,6 +30,8 @@
             "!scripts/recheck-evidence.js",
             "!lib/evidence-core.js",
             "!lib/gap-probe.js",
+            "!lib/ac-line.js",
+            "!lib/md-section.js",
             "!_acceptance"
         ]
     },

@@ -47,6 +47,11 @@ violations=0
 # Bật khi lưới giữ-chỗ nổ ít nhất một lần; dùng để in ĐÚNG MỘT dòng cảnh báo
 # về phạm vi hẹp của chính lưới đó ở cuối lần chạy.
 NARROW_NET_SEEN=""
+# Bật khi răng cross-layer phải chấm bằng khuôn awk nội bộ vì thiếu node hoặc
+# lib/ac-line.js. Răng VẪN chạy (awk rộng hơn nên không rụng dòng nào), nhưng đó
+# là một định nghĩa "dòng criterion" khác với ba consumer JS — in đúng một dòng ở
+# cuối lần chạy để chỗ lệch có tiếng, thay vì âm thầm như trước.
+AC_LINE_FALLBACK_SEEN=""
 
 # CI evidence re-checker shipped alongside this script (needs ../lib/evidence-core.js).
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -251,12 +256,23 @@ if [ -f "$ACC/config.yaml" ]; then
   fi
   cfg_rc="$(sed -n 's/^[[:space:]]*recheck:[[:space:]]*//p' "$ACC/config.yaml" | head -1 | sed 's/[[:space:]]*#.*$//')"
   case "$cfg_rc" in strict|warn|off) RECHECK_MODE="$cfg_rc" ;; esac
-  T1_GLOBS="$(sed -n '/^  t1_skip_globs:/,/^  [a-zA-Z0-9_-]*:/p' "$ACC/config.yaml" \
-    | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
-    | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//" -e 's/[[:space:]]*$//')"
-  T3_PATHS="$(sed -n '/^  t3_paths:/,/^  [a-zA-Z0-9_-]*:/p' "$ACC/config.yaml" \
-    | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
-    | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//" -e 's/[[:space:]]*$//')"
+  # Đọc danh sách config qua MỘT nguồn luật (lib/workspace-record.js
+  # configList) khi có node — bản sed chỉ còn là fallback cho máy thiếu node.
+  # Hai bản đọc từng lệch ở hình dạng key-line-comment (bug round 16
+  # product-map-uat-session): bản sed đọc được, bản JS trả rỗng — giữ hai bản
+  # ngang hàng là giữ chỗ cho lần lệch kế tiếp (AC-1 workspace-reader-unification;
+  # quan hệ hai-bản-đồng-kết-luận vẫn do case P130 ghim).
+  WSREC_LIB="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)/lib/workspace-record.js"
+  config_list() {
+    if [ -f "$WSREC_LIB" ] && command -v node >/dev/null 2>&1; then
+      _cl_out="$(node -e 'const l=require(process.argv[1]);const fs=require("fs");process.stdout.write(l.configList(fs.readFileSync(process.argv[2],"utf8"),process.argv[3]).join("\n"))' "$WSREC_LIB" "$ACC/config.yaml" "$1" 2>/dev/null)" && { printf '%s\n' "$_cl_out"; return; }
+    fi
+    sed -n "/^  $1:/,/^  [a-zA-Z0-9_-]*:/p" "$ACC/config.yaml" \
+      | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
+      | sed -e 's/[[:space:]]*#.*$//' -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'\$//" -e 's/[[:space:]]*$//'
+  }
+  T1_GLOBS="$(config_list t1_skip_globs)"
+  T3_PATHS="$(config_list t3_paths)"
   REQ_HUMAN_COMMIT="$(sed -n 's/^[[:space:]]*require_human_commit:[[:space:]]*//p' "$ACC/config.yaml" | head -1 | sed 's/[[:space:]]*#.*$//' | tr '[:upper:]' '[:lower:]')"
   AGENT_AUTHORS="$(sed -n '/^  agent_authors:/,/^  [a-zA-Z0-9_-]*:/p' "$ACC/config.yaml" \
     | sed -n 's/^[[:space:]]*-[[:space:]]*//p' \
@@ -922,6 +938,39 @@ for dir in "$ACC"/*/; do
   # content, not a boundary. Exiting on any heading truncated the scan and every
   # AC after the first sub-heading went untagged (teeth silently off).
   xl_acs="$(awk '/^#/ && !/^###/ {insec=0} tolower($0) ~ /^##[[:space:]]+criteria/{insec=1; next} insec && tolower($0) ~ /^[[:space:]]*[-*].*\(cross-layer\)/ { if (match($0, /AC-[0-9]+/)) print substr($0, RSTART, RLENGTH) }' "$contract" | sort -u)"
+  # "Thế nào là một dòng criterion" có MỘT nguồn: lib/ac-line.js — cùng nơi
+  # gate-card.js, eval-coverage-lint.js và evidence-page.js đọc. Khi có node +
+  # lib, kết quả của nó ĐÈ khuôn awk ở trên; khuôn awk ở lại làm đường lùi cho
+  # máy thiếu node (cùng nếp fail-open có tiếng với gap-probe/recheck-evidence).
+  #
+  # Vì sao KHÔNG xoá awk đi cho gọn: nó RỘNG hơn cả ba khuôn JS nên không rụng
+  # dòng nào — bỏ nó là tự tay tắt răng chặn trên máy thiếu node, đúng chiều hỏng
+  # tệ nhất cho một cổng CHẶN. (Luật diff-chỉ-thêm của DV5 cũng cấm sửa dòng cũ.)
+  # Cái awk KHÔNG làm được, và đây là lý do có khối này: nó không phân biệt được
+  # dòng THAM CHIẾU CHÉO (`- **AC-5, AC-9 chưa có gì** (cross-layer)` là văn xuôi
+  # trong Notes) với một tiêu chí thật, nên nó chấm oan và chặn merge nhầm;
+  # parseAC loại đúng dạng đó bằng AC_XREF. Nó cũng đóng section ở h1 trong khi
+  # lib/md-section.js coi h1 là nội dung.
+  AC_LINE_LIB="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)/lib/ac-line.js"
+  if [ -f "$AC_LINE_LIB" ] && command -v node >/dev/null 2>&1; then
+    if xl_from_lib="$(AGK_CONTRACT="$contract" node -e '
+        const { parseAC } = require(process.argv[1]);
+        const { section } = require(process.argv[2]);
+        const t = require("fs").readFileSync(process.env.AGK_CONTRACT, "utf8");
+        const out = new Set();
+        for (const l of section(t, "Criteria")) {
+          const a = parseAC(l);
+          if (a && /\(cross-layer\)/i.test(a.gwt)) out.add(a.id);
+        }
+        process.stdout.write([...out].sort().join("\n"));
+      ' "$AC_LINE_LIB" "$(dirname "$AC_LINE_LIB")/md-section.js" 2>/dev/null)"; then
+      xl_acs="$xl_from_lib"
+    else
+      AC_LINE_FALLBACK_SEEN=1
+    fi
+  else
+    AC_LINE_FALLBACK_SEEN=1
+  fi
   if [ -n "$xl_acs" ]; then
     if [ ! -f "${dir}evals.yaml" ]; then
       echo "NOTE [$slug]: cross-layer criteria declared but no evals.yaml — pairing unverifiable (fail-open)"
@@ -934,9 +983,16 @@ for dir in "$ACC"/*/; do
       # key names here: a block opening on an unlisted key would fail to flush,
       # leaking the previous block's `layer:` onto it — false-green, the exact
       # failure these teeth exist to stop. Open wide, discriminate on syntax.
+      # Thân block scalar (`expected: >` — khuôn mặc định của eval-gen — hay
+      # `cmd: |`) là DATA, phải bị nuốt trọn: một bullet "- baseline: green"
+      # trong thân từng khớp luật flush và reset crit giữa block (false
+      # VIOLATION), còn một dòng prose "layer: backend-effect" trong thân từng
+      # pair hộ eval UI-only (false-green — đúng thứ răng này chặn).
       xl_paired="$(awk '
         function flush() { if (lay=="backend-effect" && crit!="") print crit }
+        { if (inblk) { if ($0 ~ /^[[:space:]]*$/) next; if (match($0, /[^[:space:]]/) - 1 > blkind) next; inblk = 0 } }
         tolower($0) ~ /^[[:space:]]*-[[:space:]]*[a-z_]+:([[:space:]]|$)/ { flush(); crit=""; lay="" }
+        /^[[:space:]]*(-[[:space:]]*)?[A-Za-z_][A-Za-z0-9_-]*:[[:space:]]*[>|][+0-9-]*[[:space:]]*(#.*)?$/ { inblk = 1; blkind = match($0, /[^[:space:]]/) - 1; next }
         tolower($0) ~ /^[[:space:]]*(-[[:space:]]*)?criterion:[[:space:]]*/ {v=$0; sub(/^[^:]*:[[:space:]]*/,"",v); gsub(/["'\'']/,"",v); sub(/[[:space:]]+#.*$/,"",v); sub(/[[:space:]]+$/,"",v); crit=v}
         tolower($0) ~ /^[[:space:]]*(-[[:space:]]*)?layer:[[:space:]]*/ {v=tolower($0); sub(/^[^:]*:[[:space:]]*/,"",v); gsub(/["'\'']/,"",v); sub(/[[:space:]]+#.*$/,"",v); sub(/[[:space:]]+$/,"",v); lay=v}
         END { flush() }
@@ -1231,6 +1287,51 @@ GLOBS2
   if [ ! -f "$dir/run-log.jsonl" ]; then
     echo "NOTE [$slug]: no run-log.jsonl (older verify flow) — run_id provenance is not machine-logged; report run_ids are unreconciled. Re-verify to generate the log."
   fi
+  # Re-pin provenance (delta-verify-repin, additive): new-form "### Re-pin"
+  # sections cite run_id on its own line — the lane must be logged per-slug
+  # ({"kind":"repin"} line), its sha must equal verified_commit, and every
+  # suites_exit element must be 0 (a red lane cannot back a signature).
+  # Old-form sections (no "run_id:" line) are grandfathered — no rule applies.
+  # Ngữ pháp ranh giới section THỐNG NHẤT với recheck-evidence.js (fix S4-r2):
+  # section chỉ kết thúc ở heading cấp 1-3 (# / ## / ### + khoảng trắng) —
+  # #### sub-heading là NỘI DUNG của section; run_id bắt không phân biệt hoa
+  # thường (recheck dùng flag i). Hai reader lệch ngữ pháp = một bên fail-open.
+  repin_ids="$(awk '/^### Re-pin/{s=1;next} /^(#|##|###)[[:space:]]/{s=0} s { low=tolower($0); if (match(low, /^[[:space:]]*run_id[:=][[:space:]]*/)) { t=substr($0, RSTART+RLENGTH); sub(/[ \t·,].*$/,"",t); if(t!="")print t } }' "$report")"
+  if [ -n "$repin_ids" ]; then
+    if [ ! -f "$dir/run-log.jsonl" ]; then
+      echo "VIOLATION [$slug]: re-pin run_id cited in ### Re-pin but _acceptance/$slug/run-log.jsonl does not exist — no lane was ever logged for this workspace"
+      violations=$((violations+1)); continue
+    fi
+    repin_bad=""
+    repin_current=""
+    while IFS= read -r rid; do
+      [ -n "$rid" ] || continue
+      rline="$(grep -F "\"run_id\":\"$rid\"" "$dir/run-log.jsonl" | grep -F '"kind":"repin"' | tail -1)"
+      if [ -z "$rline" ]; then
+        echo "VIOLATION [$slug]: re-pin run_id \"$rid\" cited in ### Re-pin but no {\"kind\":\"repin\"} line with that run_id in run-log.jsonl — the lane never logged this re-pin; re-run the lane, do not hand-mint run_ids"
+        repin_bad=1; continue
+      fi
+      rsha="$(printf '%s' "$rline" | sed -n 's/.*"sha":"\([0-9a-fA-F]\{7,40\}\)".*/\1/p')"
+      # Hotfix sự-kiện-thứ-hai: sha-khớp chuyển thành quan hệ tổng hợp bên dưới
+      # (ít nhất MỘT citation khớp vc) — section cũ có sha lịch sử là hợp lệ.
+      if [ -n "$vc" ] && [ "$rsha" = "$vc" ]; then repin_current=1; fi
+      if ! printf '%s' "$rline" | grep -Eq '"suites_exit":[[:space:]]*\[[0-9][0-9, ]*\]'; then
+        echo "VIOLATION [$slug]: re-pin line for run_id \"$rid\" has no well-formed suites_exit array — a lane that never recorded its suite results cannot back a signature; re-run the lane"
+        repin_bad=1; continue
+      fi
+      if printf '%s' "$rline" | grep -Eq '"suites_exit":[[:space:]]*\[[0-9, ]*[1-9]'; then
+        echo "VIOLATION [$slug]: re-pin line for run_id \"$rid\" has nonzero suites_exit — a red lane cannot back a signature; fix the suites and run a NEW lane"
+        repin_bad=1; continue
+      fi
+    done <<REPINIDS
+$repin_ids
+REPINIDS
+    if [ -n "$vc" ] && [ -z "$repin_current" ]; then
+      echo "VIOLATION [$slug]: none of the cited re-pin lane(s) matches verified_commit $vc — the current pin has no backing lane; re-pin against the verified commit, do not hand-edit the pin"
+      repin_bad=1
+    fi
+    if [ -n "$repin_bad" ]; then violations=$((violations+1)); continue; fi
+  fi
   # observed (schema v2): older reports with screenshot evidence never faced the
   # inspected-frames bar — tolerated, but must be visible.
   sv="$(front_field "$report" schema_version)"
@@ -1375,6 +1476,10 @@ if [ "$LEDGER_ENABLED" -eq 1 ]; then
     echo "NOTE: VIOLATION [ledger] là lỗi NỘI TẠI của cổng pre-merge (một khối luật bị trượt qua hoặc sổ lệch) — KHÔNG phải lỗi trong thay đổi của bạn. Bước kế tiếp: báo maintainer của kit kèm TOÀN BỘ output lần chạy này; đừng sửa feature của bạn để né nó."
     exit 2
   fi
+fi
+
+if [ -n "$AC_LINE_FALLBACK_SEEN" ]; then
+  echo "NOTE: cross-layer teeth graded with the built-in awk pattern, not lib/ac-line.js (node or the lib was unavailable). The teeth still fire — the awk form is WIDER than the shared parser, so it drops no criterion — but it does not reject cross-reference bullets and it closes the Criteria section at an H1, so a blocking finding reported above may be spurious. Install node / vendor lib/ac-line.js to grade on the same definition the rest of the kit uses."
 fi
 
 if [ -n "$NARROW_NET_SEEN" ]; then
