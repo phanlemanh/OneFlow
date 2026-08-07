@@ -1,7 +1,7 @@
 ---
 schema_version: 2
 feature_slug: compose-overlay
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 reason: >-
   Re-verification round at HEAD a788985 (branch feat/local-first-adr-and-s2-plan).
@@ -15,7 +15,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
-human_signoff:
+human_signoff: Manh 2026-08-07
 ---
 
 # Evidence Report: compose-overlay
@@ -415,7 +415,7 @@ line, and two new `evidence/E22-*-reverify-20260807.txt` observation files.
       _acceptance/compose-overlay/evidence/design/captures/state-*.png against the
       design-of-record manifest at evidence/design/reference/source/manifest.json,
       and recording the outcome here.
-  human_override:
+  human_override: Manh 2026-08-07 — reviewed all six frames directly; verdict PASS (T3: human verdict, no judge panel convened)
 
 ## Analyst
 
