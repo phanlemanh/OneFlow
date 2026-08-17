@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneFlow — bản đồ năng lực</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #f7f7f8;
+      --color-ink: #1a0033;
+      --color-muted: #4f4a63;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Lora', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1360px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 0.5rem;
+    }
+    .sub { color: var(--color-muted); font-size: 0.9rem; margin-bottom: 1.5rem; max-width: 68ch; line-height: 1.5; }
+    .wrap { overflow-x: auto; }
+    svg { width: 100%; min-width: 1080px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Bản đồ năng lực · OneFlow</p>
+    <h1>OneFlow làm được gì cho người dùng</h1>
+    <p class="sub">Sáu nhóm năng lực, đọc từ chính mã nguồn ngày 17/08/2026 — 62 việc trong hợp đồng năng lực, 55 việc người dùng bấm chạy được hôm nay.</p>
+    <div class="wrap">
+    <svg viewBox="0 0 1320 600" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+      <text x="24" y="20" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.16em">NĂNG LỰC SÁNG TÁC — NGƯỜI DÙNG CHẠM TRỰC TIẾP</text>
+      <rect x="24" y="28" width="300" height="276" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="36" y="48" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">ẢNH &amp; 3D</text>
+      <rect x="36" y="60" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="84" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tạo và sửa ảnh bằng câu lệnh</text>
+      <rect x="36" y="108" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="132" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tách nền, cắt chủ thể ra PNG</text>
+      <rect x="36" y="156" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Phóng to ảnh cho nét hơn</text>
+      <rect x="36" y="204" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="228" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đọc tư thế và phân vùng cơ thể</text>
+      <rect x="36" y="252" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="276" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Dựng mô hình 3D từ một tấm ảnh</text>
+      <rect x="348" y="28" width="300" height="276" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="360" y="48" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">VIDEO</text>
+      <rect x="360" y="60" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="372" y="84" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tạo video từ chữ hoặc từ ảnh</text>
+      <rect x="360" y="108" width="276" height="40" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="372" y="125" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cắt cảnh, nối, ghép tiếng</text>
+      <text x="372" y="141" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">chạy thẳng trên máy người dùng</text>
+      <rect x="588" y="120" width="40" height="16" rx="2" fill="none" stroke="rgba(225,0,225,0.50)" stroke-width="0.8"/>
+      <text x="608" y="132" fill="#9a0091" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MỚI</text>
+      <rect x="360" y="156" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="372" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Lồng tiếng khớp khẩu hình</text>
+      <rect x="360" y="204" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="372" y="228" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Xoá watermark và phụ đề cháy</text>
+      <rect x="360" y="252" width="276" height="40" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="372" y="269" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Dán chữ, giá, logo lên hình</text>
+      <text x="372" y="285" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">kẹp vùng an toàn TikTok</text>
+      <rect x="588" y="264" width="40" height="16" rx="2" fill="none" stroke="rgba(225,0,225,0.50)" stroke-width="0.8"/>
+      <text x="608" y="276" fill="#9a0091" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">MỚI</text>
+      <rect x="672" y="28" width="300" height="276" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="684" y="48" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">TIẾNG NÓI &amp; NHẠC</text>
+      <rect x="684" y="60" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="84" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Chép lời thoại trong video ra chữ</text>
+      <rect x="684" y="108" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="132" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đọc văn bản thành giọng nói</text>
+      <rect x="684" y="156" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tách nhạc, tách bè, khử tạp âm</text>
+      <rect x="684" y="204" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="228" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Sáng tác và phối lại nhạc</text>
+      <rect x="684" y="252" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="696" y="276" fill="#66607a" font-size="12" font-weight="400" font-family="'Geist', sans-serif">Giọng đọc tiếng Việt</text>
+      <rect x="888" y="264" width="64" height="16" rx="2" fill="none" stroke="rgba(102,96,122,0.50)" stroke-width="0.8"/>
+      <text x="920" y="276" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SẮP CÓ</text>
+      <rect x="996" y="28" width="300" height="276" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="1008" y="48" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHỮ · TÀI LIỆU · WEB</text>
+      <rect x="1008" y="60" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1020" y="84" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Viết và viết lại nội dung</text>
+      <rect x="1008" y="108" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1020" y="132" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cắt, gộp, xếp lô nội dung</text>
+      <rect x="1008" y="156" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1020" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Bóc chữ khỏi PDF và ảnh scan</text>
+      <rect x="1008" y="204" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1020" y="228" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Kéo nội dung trang web về</text>
+      <rect x="1008" y="252" width="276" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="1020" y="276" fill="#66607a" font-size="12" font-weight="400" font-family="'Geist', sans-serif">Đọc số và giá thành chữ Việt</text>
+      <rect x="1212" y="264" width="64" height="16" rx="2" fill="none" stroke="rgba(102,96,122,0.50)" stroke-width="0.8"/>
+      <text x="1244" y="276" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SẮP CÓ</text>
+      <text x="24" y="336" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.16em">BÀN LÀM VIỆC & NỀN CHẠY — THỨ ĐỠ MỌI NĂNG LỰC BÊN TRÊN</text>
+      <rect x="24" y="344" width="624" height="180" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="36" y="364" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">BÀN LÀM VIỆC</text>
+      <rect x="36" y="376" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Dựng sơ đồ, chạy, xem tiến độ</text>
+      <rect x="340" y="376" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="352" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Kho tác phẩm và tải tư liệu lên</text>
+      <rect x="36" y="424" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="448" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Xuất và nhập bản vẽ</text>
+      <rect x="340" y="424" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="352" y="448" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cài plugin ngay trong app</text>
+      <rect x="36" y="472" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="48" y="496" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tả bằng lời, máy dựng sơ đồ</text>
+      <rect x="260" y="484" width="64" height="16" rx="2" fill="none" stroke="rgba(79,74,99,0.45)" stroke-width="0.8"/>
+      <text x="292" y="496" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÒN HỞ</text>
+      <rect x="340" y="472" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="352" y="496" fill="#66607a" font-size="12" font-weight="400" font-family="'Geist', sans-serif">Chia sẻ và làm chung</text>
+      <rect x="564" y="484" width="64" height="16" rx="2" fill="none" stroke="rgba(102,96,122,0.50)" stroke-width="0.8"/>
+      <text x="596" y="496" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SẮP CÓ</text>
+      <rect x="672" y="344" width="624" height="180" rx="8" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="684" y="364" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">NỀN CHẠY</text>
+      <rect x="684" y="376" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Chạy ngay trên máy người dùng</text>
+      <rect x="988" y="376" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1000" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Thiếu plugin thì tự cài lúc chạy</text>
+      <rect x="684" y="424" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="448" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Sửa một chỗ, chạy lại chỗ đó</text>
+      <rect x="908" y="436" width="64" height="16" rx="2" fill="none" stroke="rgba(79,74,99,0.45)" stroke-width="0.8"/>
+      <text x="940" y="448" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÒN HỞ</text>
+      <rect x="988" y="424" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="1000" y="448" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tự nhập khoá nhà cung cấp</text>
+      <rect x="1212" y="436" width="64" height="16" rx="2" fill="none" stroke="rgba(79,74,99,0.45)" stroke-width="0.8"/>
+      <text x="1244" y="448" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÒN HỞ</text>
+      <rect x="684" y="472" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="696" y="496" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Mỗi plugin một môi trường riêng</text>
+      <rect x="908" y="484" width="64" height="16" rx="2" fill="none" stroke="rgba(79,74,99,0.45)" stroke-width="0.8"/>
+      <text x="940" y="496" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÒN HỞ</text>
+      <rect x="988" y="472" width="296" height="40" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="1000" y="496" fill="#66607a" font-size="12" font-weight="400" font-family="'Geist', sans-serif">App cài trên máy tính</text>
+      <rect x="1212" y="484" width="64" height="16" rx="2" fill="none" stroke="rgba(102,96,122,0.50)" stroke-width="0.8"/>
+      <text x="1244" y="496" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SẮP CÓ</text>
+      <line x1="24" y1="556" x2="1296" y2="556" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="24" y="572" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+      <rect x="112" y="564" width="20" height="12" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="1"/>
+      <text x="140" y="573" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">Đang dùng được</text>
+      <rect x="312" y="564" width="20" height="12" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="340" y="573" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">Vừa mở, là mũi nhọn</text>
+      <rect x="552" y="564" width="20" height="12" rx="2" fill="#ffffff" stroke="rgba(79,74,99,0.45)" stroke-width="1"/>
+      <text x="580" y="573" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">Dùng được nhưng còn hở</text>
+      <rect x="816" y="564" width="20" height="12" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="844" y="573" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">Chưa dùng được</text>
+      <rect x="1024" y="564" width="20" height="12" rx="2" fill="#ececed" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="1052" y="573" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">Nhóm năng lực</text>
+    </svg>
+    </div>
+  </div>
+</body>
+</html>
