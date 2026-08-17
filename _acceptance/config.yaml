@@ -338,14 +338,27 @@ risk_tiers:
     # Vendored gate tooling = measuring stick, not product code; upgrading it must
     # not stale-invalidate signed feature evidence (exact paths, not globs).
     - "scripts/pre-merge-check.sh"
+    # CẢ HAI bộ tên phải nằm đây cho tới khi commit đổi tên rời khỏi MỌI cửa sổ
+    # diff. Kit 1.40.0 đổi `.js` -> `.cjs`; git ghi đổi tên vào diff PR như
+    # «xoá đường cũ + thêm đường mới», nên nếu chỉ khai `.cjs` thì phía XOÁ nằm
+    # ngoài miễn trừ và mọi slug có hồ sơ trong cùng diff hoá stale cùng lúc
+    # (đo thật ở artifact-platform: 137 hồ sơ, thủ phạm là đúng một dòng).
+    - "scripts/recheck-evidence.cjs"
     - "scripts/recheck-evidence.js"
+    - "lib/evidence-core.cjs"
     - "lib/evidence-core.js"
+    - "lib/gap-probe.cjs"
     - "lib/gap-probe.js"
-    # Vendored 1.38.0: pre-merge-check.sh gọi CẢ HAI trong cùng một lệnh node để
-    # chấm răng cross-layer. Thiếu một trong hai thì cổng vẫn chạy nhưng tụt về
-    # awk rộng hơn và in NOTE — cùng lớp measuring-stick.
+    # pre-merge-check.sh gọi ac-line + md-section trong CÙNG một lệnh node để chấm
+    # răng cross-layer. Thiếu một trong hai thì cổng vẫn chạy nhưng tụt về awk
+    # rộng hơn và in NOTE — cùng lớp measuring-stick.
+    - "lib/ac-line.cjs"
     - "lib/ac-line.js"
+    - "lib/md-section.cjs"
     - "lib/md-section.js"
+    # workspace-record: vendor LẦN ĐẦU ở lượt này. Trước đây oneflow thiếu hẳn
+    # file này nên nhánh đọc workspace của cổng chưa từng chạy.
+    - "lib/workspace-record.cjs"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
@@ -364,7 +377,12 @@ risk_tiers:
 signoff:
   required_for: [T2, T3]     # tiers that pre-merge-check requires signoff for
   approvers: ["Manh"]        # informational in v1 (not yet machine-enforced)
-  require_human_commit: true # Gate-2 signature lands in its own human-fields-only commit.
+  # require_human_commit ĐÃ GỠ 2026-08-17: kit 2.1 cho khoá này (và agent_authors)
+  # hết hiệu lực — ADR 0012. Provenance chữ ký nay lấy từ forge (ai approve / ai bấm
+  # merge PR), và gate in một dòng NOTE «chữ ký mới trong diff» khi chữ ký xuất hiện
+  # lần đầu trong diff. Đo trên chính kho này: lớp mất đi là «chữ ký không nằm trong
+  # commit nào của báo cáo» — gate 1.38.0 chặn (exit 1), gate 2.1.0 cho qua (exit 0).
+  # Giữ khoá lại chỉ khiến config KHAI một sự cưỡng chế không còn xảy ra.
 
 # Suite verify chạy mỗi round S4 của plugin feature-loop (dotted keys trỏ vào executors.* ở trên).
 # Per-feature evals nằm trong evals.yaml của từng feature, KHÔNG khai ở đây.
