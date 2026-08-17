@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * recheck-evidence.js — CI re-verification of a COMMITTED evidence-report.md.
+ * recheck-evidence.cjs — CI re-verification of a COMMITTED evidence-report.md.
  *
  * The write-time hook only sees agent edits; a report hand-edited afterwards (or
  * written under ACCEPTANCE_GATE_BYPASS) never faced the gate. This re-applies the
- * EXACT evidence bar (lib/evidence-core.js — same code the hook runs) to the
+ * EXACT evidence bar (lib/evidence-core.cjs — same code the hook runs) to the
  * committed file, at strict, regardless of the repo's enforcement mode. So a
  * committed PASS that lacks real evidence, carries a nonzero exit, a manual
  * verifier, or an unresolved UNCERTAIN cannot reach merge.
  *
- * Usage: recheck-evidence.js <evidence-report.md>
+ * Usage: recheck-evidence.cjs <evidence-report.md>
  *   exit 0 — not a PASS-family report (nothing to re-verify) OR evidence holds
  *   exit 1 — committed PASS report fails the evidence bar (failures on stderr)
  *   exit 2 — usage / unreadable file
@@ -20,15 +20,15 @@ const fs = require('fs');
 const path = require('path');
 let core;
 try {
-  core = require(path.join(__dirname, '..', 'lib', 'evidence-core.js'));
+  core = require(path.join(__dirname, '..', 'lib', 'evidence-core.cjs'));
 } catch (e) {
-  process.stderr.write(`recheck-evidence: cannot load lib/evidence-core.js (${e.message}) — vendor lib/ next to scripts/\n`);
+  process.stderr.write(`recheck-evidence: cannot load lib/evidence-core.cjs (${e.message}) — vendor lib/ next to scripts/\n`);
   process.exit(2);
 }
 
 const reportPath = process.argv[2];
 if (!reportPath) {
-  process.stderr.write('recheck-evidence: usage: recheck-evidence.js <evidence-report.md>\n');
+  process.stderr.write('recheck-evidence: usage: recheck-evidence.cjs <evidence-report.md>\n');
   process.exit(2);
 }
 
@@ -74,7 +74,7 @@ if (!core.determineEnforce(payload)) process.exit(0);
     } else {
       const repins = new Map();
       for (const l of fs.readFileSync(logPath, 'utf8').split('\n')) {
-        try { const e = JSON.parse(l); if (e && e.kind === 'repin' && typeof e.run_id === 'string') repins.set(e.run_id, e); } catch (_) {}
+        try { const e = JSON.parse(l); if (e && e.kind === 'repin' && typeof e.run_id === 'string') repins.set(e.run_id, e); } catch { /* skip malformed line */ }
       }
       // Hotfix sự-kiện-thứ-hai (dogfood #2, 2026-08-05): sha-khớp là quan hệ
       // TỔNG HỢP, không per-section — report tích nhiều section Re-pin theo
@@ -101,7 +101,7 @@ const fileDir = path.dirname(path.resolve(reportPath));
 const configPath = core.findAcceptanceConfig(fileDir);
 let configText = null;
 if (configPath) {
-  try { configText = fs.readFileSync(configPath, 'utf8'); } catch (_) {}
+  try { configText = fs.readFileSync(configPath, 'utf8'); } catch { /* config unreadable — evaluate without it */ }
 }
 
 const r = core.evaluateEvidence(payload, { fileDir, configText, configPath });

@@ -27,11 +27,12 @@
             "!.claude",
             "!plugins",
             "!scripts/pre-merge-check.sh",
-            "!scripts/recheck-evidence.js",
-            "!lib/evidence-core.js",
-            "!lib/gap-probe.js",
-            "!lib/ac-line.js",
-            "!lib/md-section.js",
+            "!scripts/recheck-evidence.cjs",
+            "!lib/evidence-core.cjs",
+            "!lib/gap-probe.cjs",
+            "!lib/ac-line.cjs",
+            "!lib/md-section.cjs",
+            "!lib/workspace-record.cjs",
             "!_acceptance"
         ]
     },
