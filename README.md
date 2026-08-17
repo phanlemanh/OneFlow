@@ -76,7 +76,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 
 ## What’s Defined
 
-> ✅ = available out of the box with an official plugin · ⬜ = node exists in the canvas but has no official plugin yet (planned).
+> ✅ = available out of the box with an official plugin · ⬜ = not usable yet — either the canvas node or the official plugin is still missing (planned).
 
 ### Add
 
@@ -135,6 +135,8 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 - ✅ **Noise reduction**: denoise audio.
 - ⬜ **Speaker diarization**: separate audio by speaker.
 - ⬜ **Voice / timbre replacement**: replace or clone a voice with a reference sample.
+- ⬜ **Emotion / style-referenced speech**: text plus a reference clip → speech in that voice and emotion.
+- ⬜ **Timestamped transcription**: transcript with per-sentence time codes — the plugin ships it, the canvas node is still missing.
 - ✅ **Multi-track / vocal-accompaniment separation**: isolate vocals, drums, bass, guitar, and 8 more stems.
 - ✅ **Open-vocabulary sound separation**: describe any sound in words ("dog barking") and split the audio into that sound and everything else.
 
