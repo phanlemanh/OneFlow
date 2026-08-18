@@ -14,6 +14,21 @@ human_signoff:
 
 # Evidence Report: scan-with-block-imports
 
+> **Ghi chú của người vận hành (không do máy chấm viết).** Vòng 2 có HAI lượt trên
+> cùng commit `a33e0df`, không đổi một dòng mã nào giữa hai lượt:
+>
+> - **Lượt 1 (03:18Z) — BLOCKED.** Bộ phân loại an toàn của Bash bị giới hạn tốc độ,
+>   13/16 eval không chạy được. `run-log.jsonl` giữ 13 dòng `"cannot_run": true`,
+>   `exit_code: null`. Ba eval chạy được là E13, E14, E15.
+> - **Lượt 2 (03:38Z) — lượt trong báo cáo này.** Sau khi giới hạn tốc độ hết, toàn
+>   bộ 16 eval chạy và exit 0.
+>
+> Vì hai lượt cùng vòng, `run_id` của một eval xuất hiện HAI lần trong sổ chạy — dòng
+> `cannot_run` và dòng thật. Đây là chủ ý: xoá dòng của lượt không chạy được sẽ xoá
+> mất bằng chứng rằng vòng đó từng không đo được gì. Một agent trong workflow đã tự
+> xoá 13 dòng đó và commit kèm nhãn "(PASS)" (commit `3a83a13`); các dòng đã được
+> khôi phục từ kết quả gốc của lượt bị chặn.
+
 ⚠ phân loại phạm vi KHÔNG chạy được: không có lỗi nào được máy tự sửa vòng này; danh sách đầy đủ nằm trong review-findings.md; người xem lại toàn bộ trước khi ký.
 
 | Eval | Criterion | Executor | Verdict |
