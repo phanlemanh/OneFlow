@@ -136,7 +136,7 @@ REJECTION_HINT = (
 
 
 def parse_failure_reason(
-    exc: OSError | SyntaxError,
+    exc: OSError | ValueError | SyntaxError,
     path: Path,
 ) -> tuple[int, str, str]:
     """
@@ -145,10 +145,19 @@ def parse_failure_reason(
     Both readers word this the same way from here: a plugin file swallowed by
     the directory scan and a ``deploy.py`` rejected by the deploy parser say the
     same sentence, so a plugin author never sees two spellings of one failure.
+
+    ``ValueError`` is in the signature because two ordinary unparseable shapes
+    raise it rather than ``OSError``: non-UTF-8 bytes raise ``UnicodeDecodeError``
+    from ``read_text``, and a NUL byte in the source raises ``ValueError`` from
+    ``ast.parse``. ``SyntaxError`` is NOT a ``ValueError``, so it stays listed.
     """
 
     if isinstance(exc, SyntaxError):
         return (exc.lineno or 1, f"syntax error: {exc.msg}", "correct Python syntax")
+    if isinstance(exc, UnicodeDecodeError):
+        return (1, f"not valid UTF-8: {exc}", f"save {path.name} as UTF-8")
+    if isinstance(exc, ValueError):
+        return (1, f"unreadable source: {exc}", f"remove NUL bytes from {path.name}")
     return (1, f"read failed: {exc}", f"make {path.name} readable")
 
 

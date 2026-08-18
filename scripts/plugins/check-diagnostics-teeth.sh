@@ -102,7 +102,7 @@ PY
 import sys
 p = sys.argv[1]
 s = open(p, encoding="utf-8").read()
-old_except = """    except (OSError, SyntaxError) as exc:
+old_except = """    except (OSError, ValueError, SyntaxError) as exc:
         # A file that will not parse HAS a reason. Returning it in the
         # `rejections` slot both routes it into `errors` and lets the existing
         # `if not rejections:` guard suppress the generic entry.py line.

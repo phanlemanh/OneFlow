@@ -159,12 +159,12 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
     """Return (scan, error). On recoverable issues error is set; scan may still be partial."""
     try:
         src = path.read_text(encoding="utf-8")
-    except OSError as e:
+    except (OSError, ValueError) as e:
         line, reason, hint = parse_failure_reason(e, path)
         return None, f"{path}:{line}: {reason}; fix: {hint}"
     try:
         tree = ast.parse(src, filename=str(path))
-    except SyntaxError as e:
+    except (ValueError, SyntaxError) as e:
         line, reason, hint = parse_failure_reason(e, path)
         return None, f"{path}:{line}: {reason}; fix: {hint}"
 

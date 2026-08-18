@@ -99,7 +99,7 @@ evals:
     criterion: AC-8
     executor: test
     cmd: config:executors.test.sdk_pytest_diag_unreadable
-    expected: "exit 0; a plugin .py made unreadable (chmod 000, skipped with a NAMED skip when running as root, where the mode is unenforceable) yields a problem naming that file and the read failure, and the generic problem is absent. Red direction: unpatched, the OSError is swallowed and the test goes red printing the generic line"
+    expected: "exit 0; THREE read-failure shapes, widened after the round-2 review confirmed IN CONTRACT that two of them crashed the whole scan: (1) chmod 000, skipped with a NAMED skip when running as root, where the mode is unenforceable; (2) non-UTF-8 bytes, which raise UnicodeDecodeError — a ValueError, not an OSError, so it escaped every layer and aborted the scan; (3) a NUL byte, which makes ast.parse raise ValueError. Each must name its own file, AND a healthy plugin sitting beside the broken one must still register: scan() documents that one broken plugin must not cost the registry every other one, and an uncaught decode failure broke exactly that. Red direction: unpatched, the OSError is swallowed and the test goes red printing the generic line"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tests/test_scan_diagnostics.py"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 

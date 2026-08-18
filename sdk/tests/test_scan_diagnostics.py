@@ -547,3 +547,56 @@ def test_syntax_error_names_the_broken_file_not_entry(tmp_path):
         "the syntax error names entry.py, which parses fine - the reader is "
         f"blaming the wrong file; got {syn}"
     )
+
+
+def test_undecodable_file_names_itself_and_spares_other_plugins(tmp_path):
+    """AC-8 - a file that cannot be DECODED is a file that cannot be read.
+
+    Confirmed in-contract by the round-2 review: UnicodeDecodeError is a
+    ValueError, not an OSError, so it escaped every layer and aborted the whole
+    scan. That breaks scan()'s own documented invariant that one broken plugin
+    must not cost the registry every other one, so this asserts BOTH halves:
+    the offender names itself, AND the healthy plugin beside it still registers.
+    """
+    root = tmp_path / "plugins"
+    healthy = root / _PLUGIN_ID
+    healthy.mkdir(parents=True)
+    (healthy / "entry.py").write_text(_entry_src(None, _GOOD_FN), encoding="utf-8")
+
+    broken = root / "oneflow-api-latin1"
+    broken.mkdir(parents=True)
+    (broken / "entry.py").write_bytes(b"# caf\xe9 comment\nx = 1\n")
+
+    payload = scan(root, _write_abi(tmp_path))
+
+    assert _PLUGIN_ID in payload["nodePluginMap"]["compose-overlay"], (
+        "a mis-encoded file in ANOTHER plugin took down registration for the "
+        f"healthy one; nodePluginMap={payload['nodePluginMap']}"
+    )
+    msgs = _problems(payload, "oneflow-api-latin1")
+    assert any("not valid UTF-8" in m and str(broken / "entry.py") in m for m in msgs), (
+        f"the undecodable file did not name itself; got {msgs}"
+    )
+
+
+def test_nul_byte_source_names_itself_and_spares_other_plugins(tmp_path):
+    """AC-8 - the other ValueError shape: ast.parse rejects a NUL byte."""
+    root = tmp_path / "plugins"
+    healthy = root / _PLUGIN_ID
+    healthy.mkdir(parents=True)
+    (healthy / "entry.py").write_text(_entry_src(None, _GOOD_FN), encoding="utf-8")
+
+    broken = root / "oneflow-api-nulbyte"
+    broken.mkdir(parents=True)
+    (broken / "entry.py").write_text("x = 1\n\x00\n", encoding="utf-8")
+
+    payload = scan(root, _write_abi(tmp_path))
+
+    assert _PLUGIN_ID in payload["nodePluginMap"]["compose-overlay"], (
+        "a NUL byte in ANOTHER plugin took down registration for the healthy "
+        f"one; nodePluginMap={payload['nodePluginMap']}"
+    )
+    msgs = _problems(payload, "oneflow-api-nulbyte")
+    assert any(str(broken / "entry.py") in m for m in msgs), (
+        f"the NUL-byte file did not name itself; got {msgs}"
+    )

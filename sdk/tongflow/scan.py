@@ -146,7 +146,7 @@ def _scan_methods_by_slot_in_file(
     try:
         src = path.read_text(encoding="utf-8")
         tree = ast.parse(src, filename=str(path))
-    except (OSError, SyntaxError) as exc:
+    except (OSError, ValueError, SyntaxError) as exc:
         # A file that will not parse HAS a reason. Returning it in the
         # `rejections` slot both routes it into `errors` and lets the existing
         # `if not rejections:` guard suppress the generic entry.py line.
@@ -230,7 +230,7 @@ def _scan_slot_models_in_dir(
     for p in _iter_plugin_py_files(plugin_dir):
         try:
             tree = ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
-        except (OSError, SyntaxError):
+        except (OSError, ValueError, SyntaxError):
             continue
         found, file_problems = extract_slot_models(tree)
         for lineno, reason in file_problems:
@@ -264,7 +264,7 @@ def _scan_default_slots_in_dir(plugin_dir: Path) -> tuple[list[str], list[str]]:
     for p in _iter_plugin_py_files(plugin_dir):
         try:
             tree = ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
-        except (OSError, SyntaxError):
+        except (OSError, ValueError, SyntaxError):
             continue
         found, file_problems = extract_default_slots(tree)
         for lineno, reason in file_problems:
