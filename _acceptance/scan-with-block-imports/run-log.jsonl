@@ -63,3 +63,4 @@
 {"ts":"2026-08-18T05:07:44Z","sha":"6e406f308a7502deeff209ab0b784d9c9bd0d938","round":3,"evalId":"E13","run_id":"minted-scan-with-block-imports-E13-r3","exit_code":null,"cmd":"bash scripts/plugins/check-scan-blast-radius.sh","cannot_run":true}
 {"ts":"2026-08-18T05:07:44Z","sha":"6e406f308a7502deeff209ab0b784d9c9bd0d938","round":3,"evalId":"E14","run_id":"minted-scan-with-block-imports-E14-r3","exit_code":null,"cmd":"bash scripts/plugins/check-scope-walker-teeth.sh","cannot_run":true}
 {"ts":"2026-08-18T05:07:44Z","sha":"6e406f308a7502deeff209ab0b784d9c9bd0d938","round":3,"evalId":"E15","run_id":"minted-scan-with-block-imports-E15-r3","exit_code":0,"cmd":"bash scripts/plugins/check-reason-teeth.sh"}
+{"ts":"2026-08-18T08:54:52Z","kind":"repin","run_id":"repin-scan-with-block-imports-20260818T085452Z","sha":"0928f8a74c2c3f564efccbb06fdf0feae705077a","suites_exit":[0,0,0,0,0,0]}

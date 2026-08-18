@@ -8,7 +8,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a33e0df4db5253e190051a947576c97a6bd564dc
+verified_commit: 0928f8a74c2c3f564efccbb06fdf0feae705077a
 human_signoff: Manh Phan 2026-08-18
 ---
 
@@ -267,3 +267,7 @@ Round 2: this attempt was retried after an earlier same-round pass ended BLOCKED
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter
+
+### Re-pin lần 1 — 2026-08-18, do merge `origin/main` mang vào ba file ngoài gói này (`package.json`, `pnpm-workspace.yaml`, `scripts/pnpm/check-build-approvals.sh`); mã của gói này không đổi một byte so với mốc cũ
+run_id: repin-scan-with-block-imports-20260818T085452Z
+sha: 0928f8a74c2c3f564efccbb06fdf0feae705077a · suites: 6 lệnh exit 0
