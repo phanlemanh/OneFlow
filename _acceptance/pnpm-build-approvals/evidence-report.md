@@ -8,7 +8,7 @@ verified_by: separated grader pass (same session; subagent dispatch disabled by 
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 9e1387715d61a9b855628db8243b862e6d5a17de
-human_signoff:
+human_signoff: Manh 2026-08-18
 ---
 
 # Evidence Report: pnpm-build-approvals

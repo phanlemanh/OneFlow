@@ -5,9 +5,9 @@ slug: pnpm-build-approvals
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, scripts]
-status: verified
-approved_by:
-approved_at:
+status: signed-off
+approved_by: Manh
+approved_at: 2026-08-18
 veto_state: mo
 veto_opened_at: 2026-08-18T08:20:31Z
 ---
