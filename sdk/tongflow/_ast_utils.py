@@ -101,6 +101,50 @@ def looks_like_sdk_model_type(
     return False
 
 
+# The ONLY place these sentences exist. Both readers (repo scan and deploy
+# parse) consume them, so a skipped slot reads the same wherever it is found —
+# two call sites writing their own wording drift apart, a class of defect this
+# repo has already paid for (four copies of a URL rule, two of the SDK pin rule).
+REASON_MISSING_INPUT_PARAM = "@node_slot method has no input parameter"
+REASON_MISSING_ANNOTATION = (
+    "@node_slot method is missing its input or return type annotation"
+)
+REASON_NOT_SDK_MODEL = (
+    "@node_slot method input/return annotation is not a tongflow.models type"
+)
+REJECTION_HINT = (
+    "annotate the input parameter and the return value with tongflow.models "
+    "types imported at module scope"
+)
+
+
+def slot_rejection_reason(
+    fn: ast.FunctionDef | ast.AsyncFunctionDef,
+    module: ast.Module | None,
+    *,
+    input_index: int,
+) -> str | None:
+    """
+    Why this ``@node_slot`` method cannot be registered — ``None`` when it can.
+
+    ``input_index`` is 0 for a module-level function and 1 for a bound method
+    (``self`` comes first). Callers keep their own file/line framing; the
+    sentence itself is produced here and nowhere else.
+    """
+
+    args = fn.args.args
+    if len(args) < input_index + 1:
+        return REASON_MISSING_INPUT_PARAM
+    input_arg = args[input_index]
+    if input_arg.annotation is None or fn.returns is None:
+        return REASON_MISSING_ANNOTATION
+    if not looks_like_sdk_model_type(input_arg.annotation, "Input", module):
+        return REASON_NOT_SDK_MODEL
+    if not looks_like_sdk_model_type(fn.returns, "Output", module):
+        return REASON_NOT_SDK_MODEL
+    return None
+
+
 def decorator_name(expr: ast.expr) -> str | None:
     if isinstance(expr, ast.Name):
         return expr.id

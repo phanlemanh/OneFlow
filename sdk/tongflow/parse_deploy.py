@@ -7,7 +7,7 @@ from pathlib import Path
 from ._ast_utils import (
     extract_node_slot_decorators,
     extract_node_slot_defaults,
-    looks_like_sdk_model_type,
+    slot_rejection_reason,
 )
 
 
@@ -21,6 +21,8 @@ class DeployScan:
     default_slots: frozenset[str] = frozenset()
     # Malformed `default=` declarations, as (lineno, reason).
     default_problems: tuple[tuple[int, str], ...] = ()
+    # Why a @node_slot method was skipped, as (lineno, reason).
+    slot_problems: tuple[tuple[int, str], ...] = ()
 
 
 def _const_str(node: ast.expr | None) -> str | None:
@@ -54,26 +56,25 @@ def _parse_class_methods(cls: ast.ClassDef) -> frozenset[str]:
 
 def _parse_methods_by_slot(
     cls: ast.ClassDef, tree: ast.Module
-) -> tuple[dict[str, str], set[str], list[tuple[int, str]]]:
-    """Returns (methods_by_slot_ident, default_slot_idents, default_problems)."""
+) -> tuple[dict[str, str], set[str], list[tuple[int, str]], list[tuple[int, str]]]:
+    """Returns (methods_by_slot_ident, default_slot_idents, default_problems,
+    slot_problems)."""
     out: dict[str, str] = {}
     defaults: set[str] = set()
     problems: list[tuple[int, str]] = []
+    slot_problems: list[tuple[int, str]] = []
     for stmt in cls.body:
         if not isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
         if stmt.name.startswith("_"):
             continue
-        # Strict typing: task arg + return annotation required
-        if len(stmt.args.args) < 2:
-            continue
-        task_arg = stmt.args.args[1]
-        if task_arg.annotation is None or stmt.returns is None:
-            continue
-        # Strict typing: require using SDK-generated types (models.*Input/Output)
-        if not looks_like_sdk_model_type(task_arg.annotation, "Input", tree):
-            continue
-        if not looks_like_sdk_model_type(stmt.returns, "Output", tree):
+        # Strict typing: task arg + return annotation, both SDK model types.
+        reason = slot_rejection_reason(stmt, tree, input_index=1)
+        if reason is not None:
+            # Only a method that ASKED to serve a slot is worth a diagnostic;
+            # an ordinary helper on the class is not a defect.
+            if extract_node_slot_decorators(stmt):
+                slot_problems.append((stmt.lineno, reason))
             continue
         slots = extract_node_slot_decorators(stmt)
         for s in slots:
@@ -81,7 +82,7 @@ def _parse_methods_by_slot(
         claimed, claim_problems = extract_node_slot_defaults(stmt)
         defaults.update(claimed)
         problems.extend(claim_problems)
-    return out, defaults, problems
+    return out, defaults, problems, slot_problems
 
 
 def _is_deploy_decorator(deco: ast.expr) -> bool:
@@ -106,20 +107,22 @@ def _parse_deploy_classes(
     frozenset[str],
     set[str],
     list[tuple[int, str]],
+    list[tuple[int, str]],
     str | None,
 ]:
     """
     Collect ``@node_slot`` methods from every class decorated with ``@deploy``.
 
     Returns (methods_by_slot, cls_by_slot, public_method_names, default_slots,
-    default_problems, error). Ident keys match :class:`DeployScan.methods_by_slot`
-    (NodeSlots attribute names).
+    default_problems, slot_problems, error). Ident keys match
+    :class:`DeployScan.methods_by_slot` (NodeSlots attribute names).
     """
     merged_mb: dict[str, str] = {}
     merged_cls: dict[str, str] = {}
     all_names: set[str] = set()
     merged_defaults: set[str] = set()
     merged_problems: list[tuple[int, str]] = []
+    merged_slot_problems: list[tuple[int, str]] = []
 
     for node in tree.body:
         if not isinstance(node, ast.ClassDef):
@@ -127,12 +130,13 @@ def _parse_deploy_classes(
         if not any(_is_deploy_decorator(d) for d in node.decorator_list):
             continue
         all_names |= set(_parse_class_methods(node))
-        mb, defaults, problems = _parse_methods_by_slot(node, tree)
+        mb, defaults, problems, slot_problems = _parse_methods_by_slot(node, tree)
         merged_defaults |= defaults
         merged_problems.extend(problems)
+        merged_slot_problems.extend(slot_problems)
         for ident, method in mb.items():
             if ident in merged_mb:
-                return {}, {}, frozenset(), set(), [], (
+                return {}, {}, frozenset(), set(), [], [], (
                     f"Duplicate @node_slot({ident!r}) on multiple @deploy classes "
                     f"({merged_cls.get(ident)!r} vs {node.name!r})"
                 )
@@ -145,6 +149,7 @@ def _parse_deploy_classes(
         frozenset(all_names),
         merged_defaults,
         merged_problems,
+        merged_slot_problems,
         None,
     )
 
@@ -167,6 +172,7 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
     cls_by_slot: dict[str, str] = {}
     default_slots: set[str] = set()
     default_problems: list[tuple[int, str]] = []
+    slot_problems: list[tuple[int, str]] = []
 
     (
         dep_mb,
@@ -174,10 +180,15 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
         dep_mnames,
         dep_defaults,
         dep_problems,
+        dep_slot_problems,
         dep_err,
     ) = _parse_deploy_classes(tree)
     if dep_err:
         return None, f"{path}:1: {dep_err}; fix: keep one @node_slot implementation per slot"
+
+    # A @deploy class that registered nothing still has something to say: the
+    # reason each of its @node_slot methods was skipped.
+    slot_problems = list(dep_slot_problems)
 
     if dep_mb:
         methods_by_slot = dep_mb
@@ -191,9 +202,13 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
             if isinstance(node, ast.ClassDef) and node.name == "Inference":
                 method_names = _parse_class_methods(node)
                 cls_name = "Inference"
-                methods_by_slot, default_slots, default_problems = (
-                    _parse_methods_by_slot(node, tree)
-                )
+                (
+                    methods_by_slot,
+                    default_slots,
+                    default_problems,
+                    legacy_slot_problems,
+                ) = _parse_methods_by_slot(node, tree)
+                slot_problems = legacy_slot_problems
 
     return (
         DeployScan(
@@ -203,6 +218,7 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
             cls_by_slot=cls_by_slot,
             default_slots=frozenset(default_slots),
             default_problems=tuple(default_problems),
+            slot_problems=tuple(slot_problems),
         ),
         None,
     )

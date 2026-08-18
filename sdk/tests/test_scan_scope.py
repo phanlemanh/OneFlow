@@ -13,6 +13,11 @@ import json
 from pathlib import Path
 
 import pytest
+from tongflow._ast_utils import (
+    REASON_MISSING_ANNOTATION,
+    REASON_MISSING_INPUT_PARAM,
+    REASON_NOT_SDK_MODEL,
+)
 from tongflow.parse_deploy import parse_deploy_py
 from tongflow.scan import scan
 
@@ -264,3 +269,91 @@ def test_prior_behaviour_module_level_and_try(tmp_path):
         assert scanned.methods_by_slot == {_SLOT_IDENT: "compose_overlay"}, (
             f"prior behaviour regressed for `{name}`; got {scanned.methods_by_slot}"
         )
+
+
+_BAD_CLASS = (
+    "\n@deploy\n@app.cls(image=image)\nclass Inference:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def compose_overlay(self, input: dict) -> dict:\n"
+    "        ...\n"
+)
+
+
+def _write_plugin_with_class(tmp_path: Path, class_src: str) -> tuple[Path, Path, int]:
+    """Returns (plugins_root, deploy_path, line of the `def`)."""
+    root = tmp_path / "plugins"
+    pdir = root / _PLUGIN_ID
+    pdir.mkdir(parents=True)
+    (pdir / "entry.py").write_text(
+        "import sys, json\n\n\ndef main() -> None:\n    json.dump({}, sys.stdout)\n",
+        encoding="utf-8",
+    )
+    src = _HEAD + f"with image.imports():\n    {_IMPORT}\n" + class_src
+    deploy = pdir / "deploy.py"
+    deploy.write_text(src, encoding="utf-8")
+    line = next(
+        i
+        for i, text in enumerate(src.splitlines(), start=1)
+        if text.strip().startswith("def compose_overlay")
+    )
+    return root, deploy, line
+
+
+def test_reason_names_defining_file_and_line(tmp_path):
+    """AC-7 — the RELATION, not the presence of four substrings: the problem must
+    carry the file that defines the method and the line of its `def`. A problem
+    reading 'entry.py:1: ...' names a file and a line and would still have cost
+    the original debugging session."""
+    root, deploy, line = _write_plugin_with_class(tmp_path, _BAD_CLASS)
+    payload = scan(root, _write_abi(tmp_path))
+    problems = _problems(payload)
+    assert any(m.startswith(f"{deploy}:{line}:") for m in problems), (
+        f"no problem anchored at {deploy}:{line} carrying reason "
+        f"{REASON_NOT_SDK_MODEL!r}; got {problems}"
+    )
+    assert any(REASON_NOT_SDK_MODEL in m for m in problems), (
+        f"no problem naming the reason {REASON_NOT_SDK_MODEL!r}; got {problems}"
+    )
+    assert not any("entry.py" in m for m in problems), (
+        f"the scanner still blames entry.py while the cause is in {deploy.name}; "
+        f"got {problems}"
+    )
+
+
+_MISSING_ANNOTATION_CLASS = (
+    "\n@deploy\n@app.cls(image=image)\nclass Inference:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def compose_overlay(self, input) -> ComposeOverlayOutput:\n"
+    "        ...\n"
+)
+
+_MISSING_PARAM_CLASS = (
+    "\n@deploy\n@app.cls(image=image)\nclass Inference:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def compose_overlay(self) -> ComposeOverlayOutput:\n"
+    "        ...\n"
+)
+
+
+def test_reason_missing_annotation(tmp_path):
+    """AC-8 — a distinct sentence from AC-7's."""
+    root, deploy, line = _write_plugin_with_class(tmp_path, _MISSING_ANNOTATION_CLASS)
+    problems = _problems(scan(root, _write_abi(tmp_path)))
+    assert any(
+        m.startswith(f"{deploy}:{line}:") and REASON_MISSING_ANNOTATION in m
+        for m in problems
+    ), f"expected {REASON_MISSING_ANNOTATION!r} at {deploy}:{line}; got {problems}"
+    assert not any(REASON_NOT_SDK_MODEL in m for m in problems), (
+        "the missing-annotation case must not borrow the wrong-type sentence; "
+        f"got {problems}"
+    )
+
+
+def test_reason_missing_param(tmp_path):
+    """AC-9 — a distinct sentence from AC-7's and AC-8's."""
+    root, deploy, line = _write_plugin_with_class(tmp_path, _MISSING_PARAM_CLASS)
+    problems = _problems(scan(root, _write_abi(tmp_path)))
+    assert any(
+        m.startswith(f"{deploy}:{line}:") and REASON_MISSING_INPUT_PARAM in m
+        for m in problems
+    ), f"expected {REASON_MISSING_INPUT_PARAM!r} at {deploy}:{line}; got {problems}"
