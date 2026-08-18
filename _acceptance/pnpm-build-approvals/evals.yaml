@@ -1,0 +1,121 @@
+schema_version: 1
+feature_slug: pnpm-build-approvals
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.pnpm_no_pnpm_field
+    expected: "exit 0; package.json declares no `pnpm` key and `pnpm --version` prints no 'no longer read' migration warning"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.pnpm_install_clean
+    expected: "exit 0; `pnpm install` exits 0 with no ERR_PNPM_IGNORED_BUILDS and no migration warning"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.pnpm_addon_built
+    expected: "exit 0; better_sqlite3.node exists AND loads — an in-memory table is created, written and read back"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_metering_schema
+    expected: "exit 0; src/db/metering-schema.test.ts fully green — the 4 'Could not locate the bindings file' failures are gone"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit
+    expected: "exit 0; 427/427 tests pass across 32 files, none skipped"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.build_typecheck
+    expected: "exit 0; `pnpm build && pnpm typecheck` run to completion with no --config.verifyDepsBeforeRun=false workaround"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E7
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.lint
+    expected: "exit 0; biome check runs (does not abort on the deps check) with no workaround flag"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E8
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.verify_plugins
+    expected: "exit 0; plugins scan runs with no workaround flag"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.gen_abi_clean
+    expected: "exit 0; gen:abi runs with no workaround flag and leaves no generated-file drift"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.pnpm_teeth_removed
+    expected: "exit 0; TEETH — with the approvals block stripped on a throwaway copy (isolated store), the addon is NOT built and ERR_PNPM_IGNORED_BUILDS is reported; the unmodified control DOES build"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.pnpm_teeth_legacy_key
+    expected: "exit 0; TEETH — rewritten to the legacy `onlyBuiltDependencies` list form, pnpm 11 still skips the build (identical to the no-config control), proving `allowBuilds` is the load-bearing key and the intuitive fix would have been a silent no-op"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.pnpm_ci_pnpm10
+    expected: "exit 0; under the pnpm major read from ci.yml (pnpm/action-setup version: 10) a clean throwaway install builds the addon and reports no ignored builds — one config serves CI and local"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.pnpm_tracked_not_ignored
+    expected: "exit 0; TEETH — pnpm-workspace.yaml is tracked by git AND not matched by git check-ignore, so a clean checkout receives the approvals"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.pnpm_explicit_decisions
+    expected: "exit 0; every allowBuilds key resolves to a package present in pnpm-lock.yaml (no phantom approval such as the dropped cbor-extract), and each denied package is justified — @parcel/watcher's install script guarded by npm_config_build_from_source, @google/genai declaring no real install/postinstall hook"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.pnpm_keys_intact
+    expected: "exit 0; SUPPRESSION half — _acceptance/config.yaml carries additions only (no removed/modified lines), feature_loop.suite_keys untouched, and pnpm-lock.yaml unchanged"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.pnpm_scope_confined
+    expected: "exit 0; SUPPRESSION half — every changed path is package.json, pnpm-workspace.yaml, .gitignore, _acceptance/** or scripts/pnpm/**; nothing under src/**, sdk/** or config/**"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.pnpm_case_completeness
+    expected: "exit 0; every case named in the guard's CASES list has a matching implemented branch — a declared-but-missing case cannot masquerade as a passing one"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

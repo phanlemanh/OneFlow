@@ -1,0 +1,32 @@
+# Build-script approvals for dependencies with install/postinstall hooks.
+#
+# This file — not package.json's "pnpm" field — is the single source of truth.
+# pnpm 11 stopped reading that field entirely, and it reads the approvals under
+# `allowBuilds` (a package -> boolean map). The older `onlyBuiltDependencies`
+# list form is honoured by pnpm 10 but silently IGNORED by pnpm 11, so it is not
+# used here. `allowBuilds` is understood by pnpm >= ~10.28 and by pnpm 11+; CI
+# (.github/workflows/ci.yml) pins pnpm/action-setup at major 10, which resolves
+# to the latest 10.x and is well above that floor. If CI is ever pinned to an
+# exact 10.x below 10.28, these approvals stop applying and native builds are
+# skipped silently.
+#
+# Every dependency pnpm flags must appear here with an explicit true or false;
+# an unlisted one fails the install with ERR_PNPM_IGNORED_BUILDS. `false` is a
+# recorded "deliberately not built", which keeps installs quiet without running
+# the script.
+allowBuilds:
+  # Native addons and platform binaries this repo genuinely needs compiled or
+  # downloaded. better-sqlite3 in particular backs src/db/metering-schema.test.ts.
+  '@swc/core': true
+  better-sqlite3: true
+  esbuild: true
+  protobufjs: true
+  sharp: true
+
+  # Deliberately not built.
+  # @parcel/watcher (via next-intl): its install script no-ops unless
+  #   npm_config_build_from_source=true; the prebuilt @parcel/watcher-<platform>
+  #   packages supply the binary.
+  # @google/genai: its only install-time hook is `preinstall: echo ...`.
+  '@parcel/watcher': false
+  '@google/genai': false
