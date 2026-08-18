@@ -210,7 +210,15 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
                     default_problems,
                     legacy_slot_problems,
                 ) = _parse_methods_by_slot(node, tree)
-                slot_problems = legacy_slot_problems
+                # Extend, do not assign — a @deploy class that registered
+                # nothing still has reasons worth keeping. Dedupe on the
+                # (lineno, reason) tuple because in the ORDINARY shape the
+                # @deploy class IS `Inference`, so both readers parse the same
+                # class and produce identical tuples; a naive extend would
+                # report every reason twice for every deploy-first plugin.
+                for problem in legacy_slot_problems:
+                    if problem not in slot_problems:
+                        slot_problems.append(problem)
 
     return (
         DeployScan(

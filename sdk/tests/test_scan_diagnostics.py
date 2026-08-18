@@ -430,3 +430,64 @@ def test_deploy_parse_error_surfaces_in_scan_errors(tmp_path):
         f"in the scan errors; got {msgs}"
     )
     assert not _generic(msgs), f"the generic line must yield to it; got {msgs}"
+
+
+_HEAD_MIN = (
+    "from tongflow import deploy\n"
+    "from tongflow.slots import node_slot, NodeSlots\n" + _IMPORT + "\n\n"
+)
+
+_RARE_SHAPE = _HEAD_MIN + (
+    "@deploy\n"
+    "class Marked:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def marked_handler(self, input) -> ComposeOverlayOutput:\n"
+    "        ...\n\n"
+    "class Inference:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def legacy_handler(self, input) -> ComposeOverlayOutput:\n"
+    "        ...\n"
+)
+
+_ORDINARY_SHAPE = _HEAD_MIN + (
+    "@deploy\n"
+    "class Inference:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def only_handler(self, input) -> ComposeOverlayOutput:\n"
+    "        ...\n"
+)
+
+
+def test_deploy_and_inference_reasons_both_survive(tmp_path):
+    """AC-11 - the RARE shape: a @deploy class registering nothing beside a
+    separately-named Inference class. Assign-not-extend drops the @deploy half."""
+    from tongflow.parse_deploy import parse_deploy_py
+
+    p = tmp_path / "deploy.py"
+    p.write_text(_RARE_SHAPE, encoding="utf-8")
+    scanned, err = parse_deploy_py(p)
+    assert err is None, err
+    assert scanned is not None
+    named = {reason.split(":")[0] for _line, reason in scanned.slot_problems}
+    assert named == {"marked_handler", "legacy_handler"}, (
+        f"reasons from BOTH classes must survive; got {sorted(named)} from "
+        f"{scanned.slot_problems}"
+    )
+
+
+def test_ordinary_shape_reports_each_reason_once(tmp_path):
+    """AC-12 - the trap in fixing AC-11, not a nicety. Both readers parse the
+    SAME class here and produce identical (line, reason) tuples, so a naive
+    .extend() doubles every reason for every ordinary deploy-first plugin.
+    Overwriting is what hides that today. Asserted by COUNT, not membership."""
+    from tongflow.parse_deploy import parse_deploy_py
+
+    p = tmp_path / "deploy.py"
+    p.write_text(_ORDINARY_SHAPE, encoding="utf-8")
+    scanned, err = parse_deploy_py(p)
+    assert err is None, err
+    assert scanned is not None
+    assert len(scanned.slot_problems) == 1, (
+        f"each reason must appear exactly once; got {len(scanned.slot_problems)} "
+        f"entries: {scanned.slot_problems}"
+    )
