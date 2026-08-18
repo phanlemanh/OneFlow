@@ -3,6 +3,29 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
+
+
+def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
+    """
+    Visit every statement that binds names in the MODULE scope.
+
+    An import binds its name in the enclosing scope, and only ``def``, ``class``
+    and ``lambda`` open a new one — ``with``, ``if``, ``for``, ``while``, ``try``
+    and ``match`` do not. So the rule is a boundary, not a list of block types:
+    recurse into everything except the scope openers. Naming block types is what
+    made ``with image.imports():`` invisible; any such list is one idiom behind.
+    """
+
+    for child in ast.iter_child_nodes(node):
+        if isinstance(
+            child,
+            (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda),
+        ):
+            continue
+        if isinstance(child, ast.stmt):
+            take(child)
+        _walk_module_scope(child, take)
 
 
 def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
@@ -11,8 +34,9 @@ def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
     ``from tongflow.models.gen_text import GenTextInput`` or
     ``import tongflow.models.gen_text as gen_text``.
 
-    Imports inside ``try:`` / ``except:`` blocks are included (common in deploy.py
-    fallbacks when tongflow is optional at ``modal deploy`` parse time).
+    Imports inside any block that does not open a scope are included — ``try:``
+    fallbacks when tongflow is optional at ``modal deploy`` parse time, and
+    ``with image.imports():``, the idiom Modal plugins are written to.
     """
 
     out: set[str] = set()
@@ -34,19 +58,7 @@ def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
                     tail = base.rsplit(".", 1)[-1]
                     out.add(alias.asname or tail)
 
-    def walk_body(body: list[ast.stmt]) -> None:
-        for node in body:
-            take_import_stmt(node)
-            if isinstance(node, ast.Try):
-                walk_body(node.body)
-                for h in node.handlers:
-                    walk_body(h.body)
-                if node.orelse:
-                    walk_body(node.orelse)
-                if node.finalbody:
-                    walk_body(node.finalbody)
-
-    walk_body(tree.body)
+    _walk_module_scope(tree, take_import_stmt)
     return frozenset(out)
 
 
@@ -87,6 +99,54 @@ def looks_like_sdk_model_type(
         return expr.id in roots
 
     return False
+
+
+# The ONLY place these sentences exist. Both readers (repo scan and deploy
+# parse) consume them, so a skipped slot reads the same wherever it is found —
+# two call sites writing their own wording drift apart, a class of defect this
+# repo has already paid for (four copies of a URL rule, two of the SDK pin rule).
+REASON_MISSING_INPUT_PARAM = "@node_slot method has no input parameter"
+REASON_MISSING_ANNOTATION = (
+    "@node_slot method is missing its input or return type annotation"
+)
+REASON_NOT_SDK_MODEL = (
+    "@node_slot method input/return annotation is not a tongflow.models type"
+)
+REJECTION_HINT = (
+    "annotate the input parameter and the return value with tongflow.models "
+    "types imported at module scope"
+)
+
+
+def slot_rejection_reason(
+    fn: ast.FunctionDef | ast.AsyncFunctionDef,
+    module: ast.Module | None,
+    *,
+    input_index: int,
+) -> str | None:
+    """
+    Why this ``@node_slot`` method cannot be registered — ``None`` when it can.
+
+    ``input_index`` is 0 for a module-level function and 1 for a bound method
+    (``self`` comes first). Callers keep their own file/line framing; the
+    sentence itself — method name included — is produced here and nowhere else,
+    so both readers word an identical rejection identically.
+    """
+
+    def named(reason: str) -> str:
+        return f"{fn.name}: {reason}"
+
+    args = fn.args.args
+    if len(args) < input_index + 1:
+        return named(REASON_MISSING_INPUT_PARAM)
+    input_arg = args[input_index]
+    if input_arg.annotation is None or fn.returns is None:
+        return named(REASON_MISSING_ANNOTATION)
+    if not looks_like_sdk_model_type(input_arg.annotation, "Input", module):
+        return named(REASON_NOT_SDK_MODEL)
+    if not looks_like_sdk_model_type(fn.returns, "Output", module):
+        return named(REASON_NOT_SDK_MODEL)
+    return None
 
 
 def decorator_name(expr: ast.expr) -> str | None:

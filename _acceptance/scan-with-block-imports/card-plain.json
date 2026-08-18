@@ -1,0 +1,47 @@
+{
+  "feature_plain": "Kéo node dán chữ/giá/logo ra bàn làm việc rồi bấm chạy thì có plugin phục vụ — và khi một plugin bị bỏ qua, màn hình nói rõ vì sao, ngay tại dòng viết sai.",
+  "scope_plain": "Chưa phát hành bản SDK mới lên kho công khai, chưa sửa plugin nào, và chưa động tới hai bộ đọc hằng số khác.",
+  "analyst_plain": "Mọi phép đo của việc này đều đỏ trên bản chưa vá — không có phép đo nào xanh sẵn bất kể mã đúng hay sai.",
+  "decisions_plain": [
+    {
+      "id": "d-20260817T234540Z-6068",
+      "p": "Đọc câu import theo luật phạm vi của chính Python thay vì nuôi một danh sách loại khối — đóng cả lớp lỗi, đổi lại phải giữ một phép đo chân âm để bản vá không thoái hoá thành nhận-tất."
+    },
+    {
+      "id": "d-20260817T234541Z-16255",
+      "p": "Câu giải thích 'vì sao bị bỏ qua' chỉ viết ở một chỗ, hai đường đọc cùng dùng lại — một cách diễn đạt duy nhất, đổi lại phải đổi hình dạng một hàm dùng chung."
+    },
+    {
+      "id": "d-20260817T234542Z-20936",
+      "p": "KHÔNG làm: phát hành bản SDK mới lên kho công khai kèm gói này — tiết kiệm cả một chuyến phát hành, đổi lại bản đang công khai vẫn mang lỗi cho tới chuyến sau."
+    },
+    {
+      "id": "d-20260817T235217Z-9684",
+      "p": "Đo bằng hành vi thật ở cả mười kiểu viết, bỏ phương án soi hình dạng mã nguồn — đo thứ người dùng cảm được, đổi lại không bắt được người viết mã đúng hình mà sai tinh thần."
+    },
+    {
+      "id": "d-20260818T012857Z-8607",
+      "p": "Câu báo lỗi chung chung nhường chỗ cho lý do cụ thể khi có lý do — người vận hành thôi phải lọc một câu chỉ sai chỗ, đổi lại nếu điều kiện phát lý do bị hụt thì plugin hỏng sẽ im lặng hẳn."
+    },
+    {
+      "id": "d-20260818T012857Z-29432",
+      "p": "Chỉ giải thích cho method đã xin phục vụ một slot, và chỉ ở lớp ngoài cùng của tệp — plugin lành không bị kêu oan, đổi lại method quên hẳn dấu đăng ký vẫn bị bỏ lặng."
+    },
+    {
+      "id": "d-20260818T012857Z-31411",
+      "p": "Tải plugin thật một lần để rút bản mẫu, thay vì viết mẫu theo trí nhớ — bản mẫu không thể mang hình dạng plugin thật chưa từng có, đổi lại một lần chạm mạng lúc dựng."
+    },
+    {
+      "id": "d-20260818T013219Z-6713",
+      "p": "Phép đo ba dạng câu import so trực tiếp kết quả trong khối với kết quả ngoài khối, thay vì nới luật đặt tên sẵn có — giữ đúng bán kính đã khai, đổi lại một dạng đặt tên tắt vẫn bị bỏ lặng ở mọi vị trí."
+    },
+    {
+      "id": "d-20260818T013625Z-20818",
+      "p": "Phép đo 'một nguồn duy nhất' tự khẳng định nó đang đo bản sao chứ không phải mã thật của kho — bắt được lỗi đo-nhầm-vật, đổi lại thêm một lần khởi động cho mỗi lần chạy."
+    },
+    {
+      "id": "d-20260818T013957Z-2578",
+      "p": "Phép đo bán kính nổ nhìn cả những sửa đổi chưa lưu, để hai nửa của nó thôi đo hai cây khác nhau — đổi lại nó đỏ cả khi cây đang bẩn vì việc khác."
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+schema_version: 1
+feature_slug: scan-with-block-imports
+
+# Executor keys resolve against _acceptance/config.yaml (2-space indent required).
+# Every eval below is machine-run: this feature has no UI surface and no
+# business-judgment criterion, so there is no ui-check or judgment executor here.
+#
+# MEASURE-BIRTH: E14/E15 are the red halves. Every assertion added by this
+# package is paired with a perturbation that must turn it RED with a pinned
+# message — a green that has never been red does not distinguish "the code is
+# right" from "the measure never ran".
+
+evals:
+  # ---------- A. Import reader — scope boundary ----------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_with_deploy
+    expected: "exit 0; a deploy.py whose model import sits inside `with image.imports():` yields methods_by_slot == {'COMPOSE_OVERLAY': 'compose_overlay'}. Red direction: today this returns {} — the test fails on unpatched code, naming the missing slot"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_with_scan
+    expected: "exit 0; the same import shape scanned through scan() registers the slot AND produces no 'no @node_slot methods found' problem for that plugin. Red direction: unpatched, the slot is absent and the misleading problem is present"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_nested
+    expected: "exit 0; TEN separate assertions, one per non-scope block keyword (with, if, elif, else, for, while, try, except, finally, match) — number of assertions equals the number of keywords listed in AC-3, each naming its own keyword on failure. Plus the nested case (with inside if inside try). Red direction: an implementation that enumerates only some block types goes red on the keywords it missed and names them; this is the ONLY eval that separates walk-by-scope-boundary from add-a-few-more-types"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_function_local
+    expected: "exit 0 — the NEGATIVE half. A model import inside a `def` (and inside a `class`) must NOT be collected, and a @node_slot method annotated only by it must NOT register. Without this the fix could pass every other eval by accepting everything"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_import_spellings
+    expected: "exit 0; all three spellings (`from X import Y`, `from X import Y as Z`, `import X as m` used as `m.YInput`) are collected from inside a non-scope block, each asserted separately so a partial regression names which spelling broke"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_scope_prior_behaviour
+    expected: "exit 0; module-level and try/except imports collect exactly as before. This is the regression floor — it must stay green on BOTH patched and unpatched code, which is what makes it a floor rather than a restatement of E1"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- B. Diagnostics ----------
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_reason_not_sdk_model
+    expected: "exit 0; on a fixture whose scan starts at entry.py while the offending method is defined in deploy.py, the problem's file equals the DEFINING file (deploy.py) and its line equals the line of that def — asserted as an equality against the fixture's known def line, and additionally asserted NOT to be entry.py. Measures the relation, not the presence of four substrings: a problem reading 'entry.py:1: ...' contains a file and a line and would still have cost the original debugging session"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_reason_missing_annotation
+    expected: "exit 0; a @node_slot method missing its input or return annotation produces a problem naming that reason, distinct in wording from E7's"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.sdk_pytest_reason_missing_param
+    expected: "exit 0; a @node_slot method that takes no input parameter produces a problem naming that reason, distinct from E7 and E8"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.sdk_pytest_reason_single_source
+    expected: "exit 0; MUTATION, not equality. On a copy of the tree, replace the reason text inside _ast_utils.py with a sentinel token, run BOTH consumer paths, and require the sentinel to surface in both outputs. Equality of two strings cannot tell one source from two identical copies; only the mutation can — if either path still emits the old wording, the reason is duplicated at the call site and this eval goes red naming which path"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.check_scan_noise
+    expected: "exit 0; DELTA across two code points, matching AC-11 word for word: run the scanner at the merge base and at HEAD over the SAME plugins/ tree, compare the SET OF PLUGIN IDS that carry problems, and go red if and only if HEAD carries an id the base did not — printing that id. No pinned literal of problem text and no dependence on how many plugins happen to be installed, so a differently-populated machine cannot turn it red for environmental reasons (which would get 'fixed' by editing the pin, costing the eval its teeth)"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "scripts/plugins/check-scan-noise.sh"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- C. Product-level effect ----------
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.check_overlay_discoverable_fixture
+    expected: "exit 0; NEVER skips. Runs the scanner the way the server runs it against a COMMITTED fixture plugin tree whose deploy.py is round-tripped byte-for-byte from the real oneflow-modal-compose-overlay (hash pinned in the fixture, verified before the scan, so the fixture cannot drift into a shape the real plugin never had). Asserts three things: nodePluginMap['compose-overlay'] non-empty; zero errors entries for that plugin id; and tongflow.__file__ resolving under this repo's sdk/ — the last one is what catches the scan silently running against an installed 0.2.18. Root is derived from the script's own location, never from the caller's cwd"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "scripts/plugins/check-overlay-discoverable.sh", "sdk/tests/fixtures/scan_scope"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E14b
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.check_overlay_discoverable_real
+    expected: "exit 0; the same three assertions against the REAL plugins/ tree. When plugins/oneflow-modal-compose-overlay is not installed, prints a NAMED skip that lands in the evidence rather than passing silently. This is the honest half — plugins/ is gitignored and populated at runtime, so it cannot be the only place the product question is asked (that is E12's job)"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "scripts/plugins/check-overlay-discoverable.sh", "config/official-plugins.json"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.check_scan_blast_radius
+    expected: "exit 0; git diff against the merge base shows zero changed files under config/tongflow.abi.json, src/generated/abi/**, src/lib/abi/**, src/db/**, and the version strings in sdk/pyproject.toml and sdk/tongflow/__init__.py are unchanged. No paths key on purpose — this eval is about the whole diff, so it must run every round"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- Teeth: the red halves ----------
+  - id: E14
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.check_scope_walker_teeth
+    expected: "exit 0; on a COPY of the tree, revert the walker to the old name-the-block-types form, re-run E1..E5, and require them to go RED with a message naming the missing slot (COMPOSE_OVERLAY) — not merely a non-zero exit. Green if and only if the perturbation is caught; a suite that stays green under the reverted walker fails this eval"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py", "scripts/plugins/check-scope-walker-teeth.sh"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E15
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.check_reason_teeth
+    expected: "exit 0; on a COPY of the tree, remove the reason emission (restore the silent `continue`), re-run E7..E10, and require them to go RED with a message naming the absent reason text. Proves the diagnostic assertions measure the reason, not just that scanning finished"
+    paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tongflow/parse_deploy.py", "sdk/tests/test_scan_scope.py", "scripts/plugins/check-reason-teeth.sh"]
+    evidence_required: [run_id, exit_code, verifier, verified_at]

@@ -11,12 +11,13 @@ from .abi import load_abi
 from ._subproc import utf8_env
 from ._ast_utils import (
     DEFAULT_SLOTS_CONST,
+    REJECTION_HINT,
     SLOT_MODELS_CONST,
     extract_default_slots,
     extract_node_slot_decorators,
     extract_node_slot_defaults,
     extract_slot_models,
-    looks_like_sdk_model_type,
+    slot_rejection_reason,
 )
 from .parse_deploy import _slot_to_ident, parse_deploy_py
 
@@ -138,17 +139,21 @@ def _scan_error(path: Path, reason: str, hint: str, line: int = 1) -> str:
 
 def _scan_methods_by_slot_in_file(
     path: Path,
-) -> tuple[dict[str, str], set[str], list[str]]:
-    """Returns (methods_by_slot_ident, default_slot_idents, problem messages)."""
+) -> tuple[dict[str, str], set[str], list[str], list[str]]:
+    """Returns (methods_by_slot_ident, default_slot_idents, problems, rejections)."""
     try:
         src = path.read_text(encoding="utf-8")
         tree = ast.parse(src, filename=str(path))
     except (OSError, SyntaxError):
-        return {}, set(), []
+        return {}, set(), [], []
 
     out: dict[str, str] = {}
     defaults: set[str] = set()
     problems: list[str] = []
+    rejections: list[str] = []
+    # Methods on a class are the deploy parser's business; reporting them here
+    # too would make every healthy deploy-first plugin noisy (AC-11).
+    module_level = {id(node) for node in tree.body}
 
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -156,40 +161,42 @@ def _scan_methods_by_slot_in_file(
         if node.name.startswith("_"):
             continue
         # Strict typing: require 1st arg annotation + return annotation (SDK models).
-        if not node.args.args:
-            continue
-        first = node.args.args[0]
-        if first.annotation is None or node.returns is None:
-            continue
-        if not looks_like_sdk_model_type(first.annotation, "Input", tree):
-            continue
-        if not looks_like_sdk_model_type(node.returns, "Output", tree):
+        reason = slot_rejection_reason(node, tree, input_index=0)
+        if reason is not None:
+            if id(node) in module_level and extract_node_slot_decorators(node):
+                rejections.append(
+                    _scan_error(path, reason, REJECTION_HINT, line=node.lineno)
+                )
             continue
         slots = extract_node_slot_decorators(node)
         for s in slots:
             out[s] = node.name
         claimed, claim_problems = extract_node_slot_defaults(node)
         defaults.update(claimed)
-        for lineno, reason in claim_problems:
+        for lineno, claim_reason in claim_problems:
             problems.append(
-                _scan_error(path, reason, "pass a literal True", line=lineno)
+                _scan_error(path, claim_reason, "pass a literal True", line=lineno)
             )
-    return out, defaults, problems
+    return out, defaults, problems, rejections
 
 
 def _scan_methods_by_slot_in_dir(
     plugin_dir: Path,
-) -> tuple[dict[str, str], set[str], list[str]]:
+) -> tuple[dict[str, str], set[str], list[str], list[str]]:
     out: dict[str, str] = {}
     defaults: set[str] = set()
     problems: list[str] = []
+    rejections: list[str] = []
     for p in _iter_plugin_py_files(plugin_dir):
-        methods, file_defaults, file_problems = _scan_methods_by_slot_in_file(p)
+        methods, file_defaults, file_problems, file_rejections = (
+            _scan_methods_by_slot_in_file(p)
+        )
         for slot_ident, method in methods.items():
             out.setdefault(slot_ident, method)
         defaults.update(file_defaults)
         problems.extend(file_problems)
-    return out, defaults, problems
+        rejections.extend(file_rejections)
+    return out, defaults, problems, rejections
 
 
 def _iter_plugin_py_files(plugin_dir: Path) -> list[Path]:
@@ -348,10 +355,12 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         # Every plugin is spawned the same way: the platform runs the plugin's
         # local entry.py and exchanges JSON. Handlers are discovered by scanning
         # every .py file for module-level @node_slot + SDK annotations.
-        methods_by_ident, default_idents, default_problems = (
+        methods_by_ident, default_idents, default_problems, rejections = (
             _scan_methods_by_slot_in_dir(pdir)
         )
         for message in default_problems:
+            errors.append({"pluginId": plugin_id, "message": message})
+        for message in rejections:
             errors.append({"pluginId": plugin_id, "message": message})
         # A deploy-first plugin keeps its handlers as methods on a @deploy-marked
         # class in deploy.py — first arg `self`, so the module-level dir scan
@@ -360,35 +369,46 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         # a plugin must be deployed before it can run, recorded as needsDeploy so
         # the platform routes it through its entry.py deploy-then-invoke bridge.
         needs_deploy = False
-        if not methods_by_ident and (pdir / "deploy.py").is_file():
-            dscan, _derr = parse_deploy_py(pdir / "deploy.py")
-            if dscan and dscan.methods_by_slot:
-                methods_by_ident = dict(dscan.methods_by_slot)
-                default_idents = set(dscan.default_slots)
-                for lineno, reason in dscan.default_problems:
-                    errors.append(
-                        {
-                            "pluginId": plugin_id,
-                            "message": _scan_error(
-                                pdir / "deploy.py",
-                                reason,
-                                "pass a literal True",
-                                line=lineno,
-                            ),
-                        }
+        deploy_py = pdir / "deploy.py"
+        if not methods_by_ident and deploy_py.is_file():
+            dscan, _derr = parse_deploy_py(deploy_py)
+            if dscan:
+                for lineno, reason in dscan.slot_problems:
+                    message = _scan_error(
+                        deploy_py, reason, REJECTION_HINT, line=lineno
                     )
-                needs_deploy = True
+                    rejections.append(message)
+                    errors.append({"pluginId": plugin_id, "message": message})
+                if dscan.methods_by_slot:
+                    methods_by_ident = dict(dscan.methods_by_slot)
+                    default_idents = set(dscan.default_slots)
+                    for lineno, reason in dscan.default_problems:
+                        errors.append(
+                            {
+                                "pluginId": plugin_id,
+                                "message": _scan_error(
+                                    deploy_py,
+                                    reason,
+                                    "pass a literal True",
+                                    line=lineno,
+                                ),
+                            }
+                        )
+                    needs_deploy = True
         if not methods_by_ident:
-            errors.append(
-                {
-                    "pluginId": plugin_id,
-                    "message": _scan_error(
-                        pdir / "entry.py",
-                        "no @node_slot(NodeSlots.XXX) methods found",
-                        "add @node_slot and Input/Output annotations to entry.py",
-                    ),
-                }
-            )
+            # A specific reason at the defining line says strictly more than
+            # "nothing found in entry.py" — the generic line yields to it.
+            if not rejections:
+                errors.append(
+                    {
+                        "pluginId": plugin_id,
+                        "message": _scan_error(
+                            pdir / "entry.py",
+                            "no @node_slot(NodeSlots.XXX) methods found",
+                            "add @node_slot and Input/Output annotations to entry.py",
+                        ),
+                    }
+                )
             continue
 
         ident_to_slot = {_slot_to_ident(s): s for s in valid}
