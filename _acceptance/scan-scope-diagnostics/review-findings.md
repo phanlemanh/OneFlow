@@ -1,73 +1,51 @@
 ## Trong hợp đồng
 
-- **A file that will not decode aborts the whole registry scan instead of naming itself**
-  file: `sdk/tongflow/scan.py:149`
-  severity: medium
-  AC: AC-8
-  The new arm reads `except (OSError, SyntaxError) as exc:` and its comment claims "A file that will not parse HAS a reason." Two common unparseable shapes are not in that tuple: non-UTF-8 bytes raise `UnicodeDecodeError` from `path.read_text(encoding='utf-8')`, and a NUL byte in the source raises `ValueError` from `ast.parse` — both subclasses of `ValueError`, not `OSError`.
-
-  Those escape `_scan_methods_by_slot_in_file`, escape `_scan_methods_by_slot_in_dir`, and escape the per-plugin loop in `scan()`, which has no try/except around it. Reproduced against HEAD with two plugin dirs, one healthy and one holding `entry.py` with a 0xff byte:
-
-      RAISED UnicodeDecodeError 'utf-8' codec can't decode byte 0xff in position 5
-
-  The healthy plugin never registers. This breaks the invariant the file itself documents at scan.py:506-509 — "Every other per-plugin failure in this loop is reported through `errors` and skipped rather than raised, because one broken plugin must not cost the registry every other one" — and which `read_plugin_rev` is explicitly written to honour (scan.py:511-514 catches RuntimeError). The catch set predates this PR, but this PR is the one that reworks the path and asserts completeness over it, and `parse_failure_reason(exc: OSError | SyntaxError, ...)` bakes the narrow set into the shared helper's signature. Widening to `(OSError, ValueError, SyntaxError)` (SyntaxError is not a ValueError, so it must stay listed) makes the claim true.
-
-  Rationale: AC-8 requires that a plugin file which cannot be read produces a named problem for that plugin rather than propagating; an uncaught decode failure means no problem is ever reported and the scan aborts, directly failing AC-8's Then clause.
-
-- **A non-UTF-8 .py file in any plugin crashes the whole scan, producing no registry at all**
-  file: `sdk/tongflow/scan.py:149`
-  severity: medium
-  AC: AC-8
-  `path.read_text(encoding="utf-8")` raises `UnicodeDecodeError`, a subclass of `ValueError`, which is not caught by `except (OSError, SyntaxError) as exc`. The exception escapes `_scan_methods_by_slot_in_file` -> `_scan_methods_by_slot_in_dir` -> `scan()` entirely, so a single mis-encoded file in one third-party plugin takes down discovery for *every* plugin rather than degrading one entry.
-
-  Reproduced: a healthy plugin plus `latin1.py` written as `b"# caf\xe9 comment\nx = 1\n"` gives `CRASH: UnicodeDecodeError 'utf-8' codec can't decode byte 0xe9 in position 5`, with no payload returned.
-
-  The `except` tuple is pre-existing, but this diff rewrote that handler and states its contract as "A file that will not parse HAS a reason." A file that cannot be decoded is precisely that case and is not covered. `_scan_slot_models_in_dir` (line ~233) has the same narrow tuple. Fix: catch `UnicodeDecodeError` (or `ValueError`) alongside `OSError`/`SyntaxError` and route it through `parse_failure_reason`.
-
-  Rationale: Same as the other decode-failure finding on this file/line: AC-8 requires a read failure to be reported as a named problem for the offending plugin, not to crash the entire scan function and take down every other plugin's registration.
+Findings: none — chưa có finding nào map được vào một AC cụ thể trong round này.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **A deploy.py that will not parse is reported twice, byte-identically**
-  Người dùng thấy gì: Khi file deploy.py của một plugin bị lỗi, tác giả có thể thấy đúng một thông báo lỗi bị lặp lại y hệt hai lần trong danh sách lỗi, dễ gây hiểu lầm là có hai vấn đề trong khi chỉ có một.
-  file: `sdk/tongflow/scan.py:387`
+- **An unparseable deploy.py is reported twice — violating the branch's own AC-12 "exactly once" invariant**
+  Người dùng thấy gì: Khi tệp deploy.py của một plugin bị lỗi cú pháp hoặc không đọc được, danh sách lỗi hiển thị cho người dùng lặp lại đúng một thông báo giống hệt nhau hai lần, khiến báo cáo lỗi trông rối và khó tin cậy hơn thực tế.
+  file: `sdk/tongflow/scan.py`
   severity: high
   Đề xuất: known-limits
 
-- **Unrelated sdk/uv.lock regeneration rides along in a scoped PR**
-  Người dùng thấy gì: Bản vá này kèm theo một thay đổi không liên quan trong tệp khoá phụ thuộc của SDK Python, làm phạm vi thay đổi của PR rộng hơn cam kết ban đầu, dù không ảnh hưởng trực tiếp tới người dùng.
-  file: `sdk/uv.lock:18`
+- **Evidence report is pinned to a commit two behind HEAD, with a functional SDK fix landing after verification**
+  Người dùng thấy gì: Báo cáo nghiệm thu hiện đang dựa trên một phiên bản mã cũ hơn commit mới nhất và vẫn ở trạng thái chưa hoàn tất (nhiều phép kiểm tra máy chưa chạy được) — nghĩa là các sửa đổi gần nhất chưa thực sự được xác minh trước khi ai đó dựa vào báo cáo này để quyết định duyệt.
+  file: `_acceptance/scan-scope-diagnostics/evidence-report.md`
   severity: low
   Đề xuất: known-limits
 
-- **An unparseable deploy.py is reported twice with byte-identical messages**
-  Người dùng thấy gì: Khi file deploy.py của một plugin bị lỗi cú pháp, tác giả có thể thấy đúng một thông báo lỗi xuất hiện hai lần y hệt nhau trong danh sách lỗi, khiến việc đọc log gây nhầm lẫn.
-  file: `sdk/tongflow/scan.py:395`
+- **An unparseable deploy.py is reported twice, byte-identically**
+  Người dùng thấy gì: Khi deploy.py của một plugin bị lỗi cú pháp, người dùng nhận được đúng một thông báo lỗi nhưng bị lặp lại hai lần y hệt nhau trong kết quả quét, gây rối mắt và làm báo cáo trông thiếu chỉn chu.
+  file: `sdk/tongflow/scan.py`
   severity: medium
   Đề xuất: known-limits
 
-- **A broken file anywhere in the plugin tree silently swallows the real "no @node_slot found" diagnostic**
-  Người dùng thấy gì: Nếu bất kỳ tệp nào trong plugin — kể cả một tệp không liên quan như file mẫu hay thư viện đi kèm — bị lỗi cú pháp, tác giả plugin có thể không còn thấy được lý do thật khiến plugin của mình chưa đăng ký được, khiến việc tự gỡ lỗi khó hơn.
-  file: `sdk/tongflow/scan.py:422`
+- **A parse error in any stray .py file suppresses the actionable "no @node_slot found" message**
+  Người dùng thấy gì: Nếu thư mục cài đặt của một plugin chứa bất kỳ tệp Python phụ nào có lỗi cú pháp (ví dụ tệp kiểm thử cũ đi kèm), tác giả plugin sẽ không còn thấy thông báo hướng dẫn thật sự cần thiết (thêm @node_slot vào entry.py), mà chỉ thấy lỗi ở một tệp không liên quan — khiến họ mất phương hướng khi tìm cách sửa.
+  file: `sdk/tongflow/scan.py`
+  severity: medium
+  Đề xuất: new-contract
+
+- **Assert "chuỗi có mặt" thay vì quan hệ: test NUL-byte xanh ngay cả khi lỗi parse bị nuốt**
+  Người dùng thấy gì: Bài kiểm thử tự động cho trường hợp tệp plugin chứa ký tự byte-null không thực sự xác nhận rằng lý do lỗi cụ thể được báo đúng, nên nếu về sau có thay đổi vô tình làm mất lý do lỗi chi tiết ở tình huống này, người dùng có thể lại nhận thông báo chung chung, kém hữu ích, mà không ai phát hiện ra trước khi phát hành.
+  file: `sdk/tests/test_scan_diagnostics.py`
+  severity: high
+  Đề xuất: known-limits
+
+- **Teeth scope-gate tuyên quét E1..E3 + E6 nhưng chỉ chạy điểm-case E1/E2; E3 và E6 không thể đỏ**
+  Người dùng thấy gì: Kịch bản kiểm tra tự động tuyên bố đã phủ nhiều tình huống hơn thực tế nó chạy, nên nếu một lỗi hồi quy chỉ lộ ra ở đúng những tình huống bị bỏ sót, nó sẽ không được phát hiện trước khi phát hành.
+  file: `scripts/plugins/check-diagnostics-teeth.sh`
   severity: medium
   Đề xuất: known-limits
 
-- **Tuyên quét LỚP nhưng chỉ chạy điểm-case: teeth mode re-chạy 2/5 test mà eval khai là E7..E10**
-  Người dùng thấy gì: Kịch bản tự kiểm tra dùng để bảo đảm các bài test thật sự phát hiện được lỗi lại tuyên bố chạy nhiều bài test hơn số nó thực sự chạy, nên một số thay đổi làm hỏng chẩn đoán trong tương lai có thể lọt qua mà không bị phát hiện dù script này báo ổn.
-  file: `scripts/plugins/check-diagnostics-teeth.sh:122`
+- **Teeth parse-failure tuyên quét E7..E10 nhưng chỉ chạy 2/7 test — bỏ đúng test duy nhất không đỏ**
+  Người dùng thấy gì: Kịch bản kiểm tra cho nhóm lỗi 'tệp không đọc được' chỉ thực sự chạy một phần nhỏ trong số các tình huống mà nó tuyên bố đã phủ, nên một lỗi hồi quy (kể cả lỗi báo trùng lặp thông báo đã nêu ở trên) có thể lọt qua mà không bị phát hiện trước khi phát hành.
+  file: `scripts/plugins/check-diagnostics-teeth.sh`
   severity: medium
   Đề xuất: known-limits
-
-- **Số assert = 1 cho cả batch: expect_red chỉ đòi MỘT test trong nhóm đỏ và mang needle**
-  Người dùng thấy gì: Kịch bản tự kiểm tra coi cả một nhóm bài test là đã được bảo vệ chỉ cần một bài trong nhóm đó phát hiện được lỗi, nên các bài còn lại trong nhóm có thể âm thầm mất khả năng phát hiện lỗi mà không ai biết cho tới khi sự cố thật xảy ra.
-  file: `scripts/plugins/check-diagnostics-teeth.sh:23`
-  severity: medium
-  Đề xuất: known-limits
-
-## Chưa adversarial-verify (refuter chết)
-
-(rỗng — không có finding nào chưa adversarial-verify)
 
 Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).
