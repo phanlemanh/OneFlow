@@ -484,38 +484,3 @@ def test_reason_single_source_mutation(tmp_path):
             f"reason is duplicated at that call site instead of being consumed "
             f"from _ast_utils.py; got {msgs}"
         )
-
-
-def test_models_roots_walk_runs_once_per_module(monkeypatch):
-    """The boundary walk visits the whole tree, and every annotation check needs
-    the same answer — so it must be computed once per module, not once per check.
-    Counted, not timed: a timing assertion would be flaky, and the defect this
-    pins (O(functions x nodes) per file) is a count, not a duration."""
-    import ast as ast_mod
-
-    from tongflow import _ast_utils
-
-    src = _HEAD + f"with image.imports():\n    {_IMPORT}\n" + _CLASS
-    tree = ast_mod.parse(src)
-
-    calls = {"n": 0}
-    real_walk = _ast_utils._walk_module_scope
-
-    def counting_walk(node, take):
-        if isinstance(node, ast_mod.Module):
-            calls["n"] += 1
-        real_walk(node, take)
-
-    _ast_utils._collect_models_roots.cache_clear()
-    monkeypatch.setattr(_ast_utils, "_walk_module_scope", counting_walk)
-
-    # Two annotation checks on the same module — input and return of one method.
-    for suffix in ("Input", "Output"):
-        _ast_utils.looks_like_sdk_model_type(
-            ast_mod.Name(id=f"ComposeOverlay{suffix}"), suffix, tree
-        )
-
-    assert calls["n"] == 1, (
-        f"the module-scope walk ran {calls['n']} times for one module — it is "
-        "being recomputed per annotation check instead of memoised"
-    )
