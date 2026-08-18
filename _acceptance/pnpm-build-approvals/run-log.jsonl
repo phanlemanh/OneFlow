@@ -1,0 +1,34 @@
+{"ts": "2026-08-18T08:21:46Z", "round": 1, "evalId": "E1", "run_id": "pnpm-build-approvals-e1-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case no-pnpm-field"}
+{"ts": "2026-08-18T08:21:46Z", "round": 1, "evalId": "E2", "run_id": "pnpm-build-approvals-e2-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case install-clean"}
+{"ts": "2026-08-18T08:21:46Z", "round": 1, "evalId": "E3", "run_id": "pnpm-build-approvals-e3-20260818", "exit_code": 1, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case addon-built"}
+{"ts": "2026-08-18T08:21:47Z", "round": 1, "evalId": "E4", "run_id": "pnpm-build-approvals-e4-20260818", "exit_code": 1, "cmd": "pnpm vitest run src/db/metering-schema.test.ts"}
+{"ts": "2026-08-18T08:21:47Z", "round": 1, "evalId": "E5", "run_id": "pnpm-build-approvals-e5-20260818", "exit_code": 1, "cmd": "pnpm test"}
+{"ts": "2026-08-18T08:21:49Z", "round": 1, "evalId": "E6", "run_id": "pnpm-build-approvals-e6-20260818", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-08-18T08:22:07Z", "round": 1, "evalId": "E7", "run_id": "pnpm-build-approvals-e7-20260818", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-08-18T08:22:08Z", "round": 1, "evalId": "E8", "run_id": "pnpm-build-approvals-e8-20260818", "exit_code": 0, "cmd": "pnpm verify:plugins"}
+{"ts": "2026-08-18T08:22:08Z", "round": 1, "evalId": "E9", "run_id": "pnpm-build-approvals-e9-20260818", "exit_code": 0, "cmd": "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"}
+{"ts": "2026-08-18T08:22:08Z", "round": 1, "evalId": "E10", "run_id": "pnpm-build-approvals-e10-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case teeth-removed"}
+{"ts": "2026-08-18T08:22:12Z", "round": 1, "evalId": "E11", "run_id": "pnpm-build-approvals-e11-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case teeth-legacy-key"}
+{"ts": "2026-08-18T08:22:15Z", "round": 1, "evalId": "E12", "run_id": "pnpm-build-approvals-e12-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case ci-pnpm10"}
+{"ts": "2026-08-18T08:22:17Z", "round": 1, "evalId": "E13", "run_id": "pnpm-build-approvals-e13-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case tracked-not-ignored"}
+{"ts": "2026-08-18T08:22:17Z", "round": 1, "evalId": "E14", "run_id": "pnpm-build-approvals-e14-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"}
+{"ts": "2026-08-18T08:22:18Z", "round": 1, "evalId": "E15", "run_id": "pnpm-build-approvals-e15-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"}
+{"ts": "2026-08-18T08:22:18Z", "round": 1, "evalId": "E16", "run_id": "pnpm-build-approvals-e16-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"}
+{"ts": "2026-08-18T08:22:18Z", "round": 1, "evalId": "E17", "run_id": "pnpm-build-approvals-e17-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"}
+{"ts": "2026-08-18T08:23:14Z", "round": 2, "evalId": "E1", "run_id": "pnpm-build-approvals-e1-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case no-pnpm-field"}
+{"ts": "2026-08-18T08:23:14Z", "round": 2, "evalId": "E2", "run_id": "pnpm-build-approvals-e2-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case install-clean"}
+{"ts": "2026-08-18T08:23:14Z", "round": 2, "evalId": "E3", "run_id": "pnpm-build-approvals-e3-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case addon-built"}
+{"ts": "2026-08-18T08:23:15Z", "round": 2, "evalId": "E4", "run_id": "pnpm-build-approvals-e4-20260818", "exit_code": 0, "cmd": "pnpm vitest run src/db/metering-schema.test.ts"}
+{"ts": "2026-08-18T08:23:16Z", "round": 2, "evalId": "E5", "run_id": "pnpm-build-approvals-e5-20260818", "exit_code": 0, "cmd": "pnpm test"}
+{"ts": "2026-08-18T08:23:17Z", "round": 2, "evalId": "E6", "run_id": "pnpm-build-approvals-e6-20260818", "exit_code": 0, "cmd": "pnpm build && pnpm typecheck"}
+{"ts": "2026-08-18T08:23:36Z", "round": 2, "evalId": "E7", "run_id": "pnpm-build-approvals-e7-20260818", "exit_code": 0, "cmd": "pnpm lint:check"}
+{"ts": "2026-08-18T08:23:37Z", "round": 2, "evalId": "E8", "run_id": "pnpm-build-approvals-e8-20260818", "exit_code": 0, "cmd": "pnpm verify:plugins"}
+{"ts": "2026-08-18T08:23:37Z", "round": 2, "evalId": "E9", "run_id": "pnpm-build-approvals-e9-20260818", "exit_code": 0, "cmd": "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"}
+{"ts": "2026-08-18T08:23:38Z", "round": 2, "evalId": "E10", "run_id": "pnpm-build-approvals-e10-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case teeth-removed"}
+{"ts": "2026-08-18T08:23:41Z", "round": 2, "evalId": "E11", "run_id": "pnpm-build-approvals-e11-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case teeth-legacy-key"}
+{"ts": "2026-08-18T08:23:44Z", "round": 2, "evalId": "E12", "run_id": "pnpm-build-approvals-e12-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case ci-pnpm10"}
+{"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E13", "run_id": "pnpm-build-approvals-e13-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case tracked-not-ignored"}
+{"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E14", "run_id": "pnpm-build-approvals-e14-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"}
+{"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E15", "run_id": "pnpm-build-approvals-e15-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"}
+{"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E16", "run_id": "pnpm-build-approvals-e16-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"}
+{"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E17", "run_id": "pnpm-build-approvals-e17-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"}
