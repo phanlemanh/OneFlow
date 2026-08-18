@@ -3,6 +3,29 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Callable
+
+
+def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
+    """
+    Visit every statement that binds names in the MODULE scope.
+
+    An import binds its name in the enclosing scope, and only ``def``, ``class``
+    and ``lambda`` open a new one — ``with``, ``if``, ``for``, ``while``, ``try``
+    and ``match`` do not. So the rule is a boundary, not a list of block types:
+    recurse into everything except the scope openers. Naming block types is what
+    made ``with image.imports():`` invisible; any such list is one idiom behind.
+    """
+
+    for child in ast.iter_child_nodes(node):
+        if isinstance(
+            child,
+            (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda),
+        ):
+            continue
+        if isinstance(child, ast.stmt):
+            take(child)
+        _walk_module_scope(child, take)
 
 
 def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
@@ -11,8 +34,9 @@ def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
     ``from tongflow.models.gen_text import GenTextInput`` or
     ``import tongflow.models.gen_text as gen_text``.
 
-    Imports inside ``try:`` / ``except:`` blocks are included (common in deploy.py
-    fallbacks when tongflow is optional at ``modal deploy`` parse time).
+    Imports inside any block that does not open a scope are included — ``try:``
+    fallbacks when tongflow is optional at ``modal deploy`` parse time, and
+    ``with image.imports():``, the idiom Modal plugins are written to.
     """
 
     out: set[str] = set()
@@ -34,19 +58,7 @@ def _collect_models_roots(tree: ast.Module) -> frozenset[str]:
                     tail = base.rsplit(".", 1)[-1]
                     out.add(alias.asname or tail)
 
-    def walk_body(body: list[ast.stmt]) -> None:
-        for node in body:
-            take_import_stmt(node)
-            if isinstance(node, ast.Try):
-                walk_body(node.body)
-                for h in node.handlers:
-                    walk_body(h.body)
-                if node.orelse:
-                    walk_body(node.orelse)
-                if node.finalbody:
-                    walk_body(node.finalbody)
-
-    walk_body(tree.body)
+    _walk_module_scope(tree, take_import_stmt)
     return frozenset(out)
 
 
