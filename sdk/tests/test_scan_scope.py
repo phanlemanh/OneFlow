@@ -10,9 +10,14 @@ blamed the wrong file.
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+import tongflow
 from tongflow._ast_utils import (
     REASON_MISSING_ANNOTATION,
     REASON_MISSING_INPUT_PARAM,
@@ -357,3 +362,98 @@ def test_reason_missing_param(tmp_path):
         m.startswith(f"{deploy}:{line}:") and REASON_MISSING_INPUT_PARAM in m
         for m in problems
     ), f"expected {REASON_MISSING_INPUT_PARAM!r} at {deploy}:{line}; got {problems}"
+
+
+_ENTRY_BAD = (
+    "from tongflow.slots import node_slot, NodeSlots\n\n\n"
+    "@node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "def compose_overlay(input: dict) -> dict:\n"
+    "    ...\n"
+)
+
+
+def test_reason_single_source_mutation(tmp_path):
+    """AC-10 — MUTATION, not equality. Replace the sentence inside _ast_utils.py
+    with a sentinel on a copy of the tree; if either reader still emits the old
+    wording, the reason is duplicated at that call site. Two equal strings cannot
+    tell one source from two identical copies; only the mutation can."""
+    pkg = Path(tongflow.__file__).resolve().parent
+    copy_root = tmp_path / "sdkcopy"
+    shutil.copytree(
+        pkg, copy_root / "tongflow", ignore=shutil.ignore_patterns("__pycache__")
+    )
+
+    ast_utils = copy_root / "tongflow" / "_ast_utils.py"
+    text = ast_utils.read_text(encoding="utf-8")
+    assert REASON_NOT_SDK_MODEL in text, (
+        "the reason sentence is not a literal in _ast_utils.py — it cannot be "
+        "the single source if it is composed elsewhere"
+    )
+    sentinel = "SENTINEL-REASON-8f21"
+    ast_utils.write_text(text.replace(REASON_NOT_SDK_MODEL, sentinel), encoding="utf-8")
+
+    # Two plugins in one scan: one rejected through the entry-style reader,
+    # one through the @deploy class reader.
+    root = tmp_path / "plugins"
+    entry_plugin = root / "oneflow-api-entrybad"
+    entry_plugin.mkdir(parents=True)
+    (entry_plugin / "entry.py").write_text(_ENTRY_BAD, encoding="utf-8")
+    deploy_plugin = root / _PLUGIN_ID
+    deploy_plugin.mkdir(parents=True)
+    (deploy_plugin / "entry.py").write_text(
+        "def main() -> None:\n    ...\n", encoding="utf-8"
+    )
+    (deploy_plugin / "deploy.py").write_text(
+        _HEAD + f"with image.imports():\n    {_IMPORT}\n" + _BAD_CLASS,
+        encoding="utf-8",
+    )
+
+    # cwd must NOT be the repo's sdk/: `python -m` puts the working directory
+    # first on sys.path, which would shadow the mutated copy with the real
+    # package and quietly measure the wrong tree.
+    env = {**os.environ, "PYTHONPATH": str(copy_root)}
+    probe = subprocess.run(
+        [sys.executable, "-c", "import tongflow; print(tongflow.__file__)"],
+        env=env,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert probe.stdout.strip().startswith(str(copy_root)), (
+        f"the subprocess loaded tongflow from {probe.stdout.strip()!r}, not the "
+        f"mutated copy under {copy_root} — the mutation would not be measured"
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tongflow",
+            "--root",
+            str(root),
+            "--abi",
+            str(_write_abi(tmp_path)),
+        ],
+        env=env,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    payload = json.loads(proc.stdout)
+    by_plugin: dict[str, list[str]] = {}
+    for e in payload["errors"]:
+        by_plugin.setdefault(str(e["pluginId"]), []).append(str(e["message"]))
+
+    for plugin_id, reader in (
+        ("oneflow-api-entrybad", "scan.py"),
+        (_PLUGIN_ID, "parse_deploy.py"),
+    ):
+        msgs = by_plugin.get(plugin_id, [])
+        assert any(sentinel in m for m in msgs), (
+            f"the {reader} reader did not pick up the mutated sentence — the "
+            f"reason is duplicated at that call site instead of being consumed "
+            f"from _ast_utils.py; got {msgs}"
+        )
