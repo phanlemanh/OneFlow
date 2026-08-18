@@ -1,104 +1,79 @@
 ## Trong hợp đồng
 
-### Shape 5 — trục "đường tiêu thụ" tuyên quét cả LỚP nhưng chỉ đo một đường: AC-1 và AC-2 cùng chạy qua parse_deploy_py
-- file: `sdk/tests/test_scan_scope.py:112`
-- severity: medium
-- source: measurement
-- AC: AC-2
-
-contract.md Coverage khai trục **Đường tiêu thụ** gồm hai phần tử — `scan.py` (quét mọi tệp `.py`, đường entry-file) và `parse_deploy.py` (class `@deploy`) — và ghi rõ "Phủ bởi AC-1, AC-2 (mỗi đường một ca)"; AC-2 nói "Given the same import shape in a plugin file scanned by **the entry-file path**".
-
-Nhưng `_write_plugin` (test_scan_scope.py:92-101) ghi `entry.py` chỉ chứa `def main(): json.dump({}, sys.stdout)` — KHÔNG có `@node_slot`, KHÔNG có import model — rồi đặt toàn bộ class + method vào `deploy.py`. Nên trong `test_scan_with_image_imports_registers_and_is_quiet` (:112-121), `scan()` chạy `_scan_methods_by_slot_in_dir` không tìm thấy gì ở mức module (method có `self` → `slot_rejection_reason(..., input_index=0)` loại, và nó không nằm trong `module_level` nên cũng không sinh rejection), rồi rơi xuống nhánh fallback `parse_deploy_py(deploy_py)`. Tức AC-2 đo lại đúng đường mà AC-1 đã đo, chỉ thêm một lớp `scan()` bọc ngoài.
-
-Ô còn lại của trục — hàm mức module mang `@node_slot` trong `entry.py` với import model nằm trong khối không mở phạm vi, đọc bởi `_scan_methods_by_slot_in_file` (scan.py:141-186) — không có assert nào trong gói. `_ENTRY_BAD` (:395-400) là chỗ duy nhất viết `entry.py` có `@node_slot`, nhưng nó chú thích `dict`/`dict` và không hề có câu import `tongflow.models` nào, nên nó đo nhánh reason chứ không đo nhánh đăng-ký-qua-khối.
-
-Ô này có thật và chạy được: probe với `entry.py` = `if True:\n    from tongflow.models.compose_overlay import ...` + hàm `@node_slot` mức module cho `nodePluginMap['compose-overlay'] == ['oneflow-api-probe']`, `errors == []`. Đúng hình dạng lỗi gốc của gói, trên đúng đường mà bảng Coverage khai là đã phủ, mà không phép đo nào chạm tới. Số assert (1 đường) < số phần tử của lớp đã tuyên (2 đường).
-
-Rationale: AC-2 yêu cầu bằng chứng đo đúng "đường tiêu thụ" entry-file (scan() quét entry.py), nhưng fixture đưa toàn bộ hàm vào deploy.py nên phép đo thực chạy qua parse_deploy_py — cùng đường AC-1 đã đo — khiến AC-2 không được xác minh đúng như tiêu chí của chính nó.
-
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Rejection diagnostics are gated on `tree.body` membership, so the exact idiom this change enables stays silent**
-  Người dùng thấy gì: Nếu hàm xử lý slot được đặt bên trong một khối lệnh (if/with/try) thay vì nằm thẳng trong file, hệ thống báo lỗi chung chung "không tìm thấy phương thức nào" thay vì chỉ đúng nguyên nhân thật, khiến người viết plugin mất thời gian tự dò lỗi.
+- **Nhánh chẩn đoán chốt bằng tree.body, mù đúng thành ngữ mà feature này vừa hợp thức hoá**
+  Người dùng thấy gì: Nếu người viết plugin đặt hàm xử lý slot bên trong một khối lệnh (thành ngữ chuẩn mà chính tính năng này vừa cho phép) và viết sai, hệ thống vẫn báo lỗi chung chung trỏ sai vị trí thay vì nêu đúng nguyên nhân, khiến việc tìm lỗi mất nhiều thời gian hơn.
   file: `sdk/tongflow/scan.py`
   severity: high
   Đề xuất: new-contract
 
-- **Legacy `Inference` fallback overwrites `slot_problems`, dropping @deploy-class diagnostics**
-  Người dùng thấy gì: Trong một số cấu trúc file hiếm gặp, lý do lỗi thật của plugin có thể bị một class không liên quan tên là Inference che mất, khiến người viết plugin nhận thông báo sai về nguyên nhân slot của họ bị bỏ qua.
-  file: `sdk/tongflow/parse_deploy.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **New scanner rejection diagnostics are not documented in docs/plugins.md**
-  Người dùng thấy gì: Tài liệu hướng dẫn viết plugin chưa giải thích các loại lỗi mới và quy tắc "import phải ở cấp module", nên người viết plugin mới có thể không hiểu vì sao slot của họ bị từ chối.
-  file: `docs/plugins.md`
-  severity: low
-  Đề xuất: known-limits
-
-- **Rejection reason is dropped for @node_slot functions nested in a module-level block — the exact idiom this change enables**
-  Người dùng thấy gì: Nếu hàm xử lý slot được đặt bên trong một khối lệnh (if/with/try) thay vì nằm thẳng trong file, hệ thống báo lỗi chung chung "không tìm thấy phương thức nào" thay vì chỉ đúng nguyên nhân thật, khiến người viết plugin mất thời gian tự dò lỗi.
-  file: `sdk/tongflow/scan.py`
-  severity: high
-  Đề xuất: new-contract
-
-- **@deploy class slot problems are overwritten by the legacy Inference path**
-  Người dùng thấy gì: Trong một số cấu trúc file hiếm gặp, lý do lỗi thật của plugin có thể bị một class không liên quan tên là Inference che mất, khiến người viết plugin nhận thông báo sai về nguyên nhân slot của họ bị bỏ qua.
-  file: `sdk/tongflow/parse_deploy.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **parse_deploy_py's duplicate-slot error is discarded and replaced by the misleading generic message**
-  Người dùng thấy gì: Khi file cấu hình của plugin khai trùng một slot trên hai class khác nhau, hệ thống chỉ báo chung chung "không tìm thấy phương thức" thay vì nêu rõ đúng nguyên nhân và vị trí lỗi, khiến người viết plugin khó tìm ra nguyên nhân thật.
-  file: `sdk/tongflow/scan.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **~100x scan slowdown: full-AST import walk recomputed per annotation check**
-  Người dùng thấy gì: Với các file plugin lớn, việc quét danh sách plugin có thể chậm đi đáng kể (đo được khoảng 100 lần so với trước), làm tăng thời gian chờ khi cài đặt hoặc làm mới danh sách plugin.
-  file: `sdk/tongflow/_ast_utils.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Shape 4 — nửa chokepoint của check-scan-blast-radius là assertion âm-tính-một-mình, không có đối chứng dương như nửa version**
-  Người dùng thấy gì: Cơ chế tự động kiểm tra "không đụng vào các file nhạy cảm" có thể âm thầm mất tác dụng nếu các thư mục đó bị đổi tên hoặc đường dẫn kiểm tra bị gõ sai sau này, mà không ai phát hiện ra, tạo cảm giác an toàn giả.
+- **Bản sao thứ hai của luật đọc phiên bản SDK, và guard canh nó có lỗ**
+  Người dùng thấy gì: Đoạn kịch bản canh việc không phát hành thay đổi ngoài dự kiến có một lỗ hổng khiến nó có thể báo "an toàn" ngay cả khi có một cách đọc phiên bản thứ hai không nhất quán được thêm vào, nên rủi ro lọt thay đổi ngoài phạm vi tăng lên mà không hiện cảnh báo rõ ràng.
   file: `scripts/plugins/check-scan-blast-radius.sh`
   severity: medium
   Đề xuất: known-limits
 
-- **Shape 1 — hai script "răng" grep chính CHUỖI TRONG THÔNG ĐIỆP ASSERT của test, không phải đầu ra sản phẩm**
-  Người dùng thấy gì: Các kịch bản dùng để đảm bảo bài kiểm thử thật sự phát hiện đúng lỗi có thể báo "ổn" ngay cả khi bài kiểm thử thất bại vì một lý do khác, làm giảm độ tin cậy của bằng chứng kiểm thử.
-  file: `scripts/plugins/check-scope-walker-teeth.sh`
+- **Ba câu chẩn đoán mới không vào docs/plugins.md §9, và finding về docs biến mất khỏi sổ chấp nhận của contract**
+  Người dùng thấy gì: Người viết plugin sẽ gặp các thông báo lỗi mới của tính năng này nhưng tài liệu hướng dẫn chưa được cập nhật để giải thích chúng, nên phải tự đoán cách khắc phục khi gặp thông báo lạ.
+  file: `docs/plugins.md`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Nhánh Inference cũ GHI ĐÈ slot_problems của class @deploy thay vì gộp**
+  Người dùng thấy gì: Trong một trường hợp hiếm gặp, lý do lỗi thật của plugin bị mất và người dùng chỉ thấy một thông báo chung chung không rõ nguyên nhân, kéo dài thời gian tìm lỗi.
+  file: `sdk/tongflow/parse_deploy.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Cache toàn cục theo identity của AST giữ tham chiếu mạnh tới tối đa 16 cây module**
+  Người dùng thấy gì: Một cơ chế lưu tạm dữ liệu phân tích có thể giữ dữ liệu cũ trong bộ nhớ lâu hơn cần thiết ở một số quy trình chạy nền dài, dù chưa quan sát thấy sự cố thực tế nào từ việc này.
+  file: `sdk/tongflow/_ast_utils.py`
   severity: low
   Đề xuất: known-limits
 
-- **Shape 3 — E9 hứa QUAN HỆ "distinct from E7 and E8" nhưng assert chỉ là "chuỗi có mặt"**
-  Người dùng thấy gì: Bài kiểm tra cho một loại thông báo lỗi không thật sự xác nhận thông báo đó khác biệt với hai loại thông báo lỗi còn lại, nên nếu sau này các thông báo bị gộp nhầm với nhau, sẽ không có gì phát hiện ra để cảnh báo.
+- **@node_slot functions nested in a module-level block are silently skipped (the exact `with image.imports():` idiom this change targets)**
+  Người dùng thấy gì: Nếu người viết plugin đặt hàm xử lý slot bên trong một khối lệnh (thành ngữ chuẩn mà chính tính năng này vừa cho phép) và viết sai, hệ thống vẫn báo lỗi chung chung trỏ sai vị trí thay vì nêu đúng nguyên nhân, khiến việc tìm lỗi mất nhiều thời gian hơn.
+  file: `sdk/tongflow/scan.py`
+  severity: high
+  Đề xuất: new-contract
+
+- **parse_deploy_py's error is discarded, replaced by a misleading generic message**
+  Người dùng thấy gì: Khi tệp cấu hình plugin có lỗi cấu trúc thật sự (ví dụ khai trùng một slot ở hai nơi), người dùng chỉ nhận một thông báo chung chung trỏ sai vị trí thay vì nguyên nhân thật, đúng kiểu lỗi mà tính năng này vốn được làm ra để sửa.
+  file: `sdk/tongflow/scan.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **@deploy-class slot rejection reasons are overwritten by the legacy Inference branch**
+  Người dùng thấy gì: Trong một trường hợp hiếm gặp, lý do lỗi thật của plugin bị mất và người dùng chỉ thấy một thông báo chung chung không rõ nguyên nhân, kéo dài thời gian tìm lỗi.
+  file: `sdk/tongflow/parse_deploy.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Assertion âm-tính-một-mình: chân âm AC-4 xanh cả khi việc đăng ký slot hỏng toàn bộ (hình dạng 4)**
+  Người dùng thấy gì: Một trong các bài kiểm tra tự động không đủ chặt để phát hiện nếu việc đăng ký tính năng bị hỏng hoàn toàn ở một dạng hiếm gặp, nên có nguy cơ một lỗi nghiêm trọng trượt qua mà không ai hay biết.
+  file: `sdk/tests/test_scan_scope.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Assert 'chuỗi có mặt' trong khi lời hứa là QUAN HỆ khác-biệt giữa ba câu lý do (hình dạng 3)**
+  Người dùng thấy gì: Bài kiểm tra tự động chỉ xác nhận có thông báo lỗi xuất hiện, không xác nhận các thông báo lỗi khác nhau có thực sự phân biệt được với nhau, nên hai nguyên nhân lỗi khác nhau có thể trộn lẫn thành một câu mà không ai phát hiện.
+  file: `sdk/tests/test_scan_scope.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Ghim fixture là ghim CHÍNH NÓ, không phải round-trip từ plugin thật; entry.py không có ghim nào (hình dạng 2)**
+  Người dùng thấy gì: Tệp mẫu dùng để kiểm thử được đối chiếu với chính nó chứ không phải với plugin thật đang chạy, nên nếu plugin thật đổi hình dạng, bài kiểm thử vẫn có thể báo xanh một cách sai lệch.
+  file: `scripts/plugins/check-overlay-discoverable.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Tuyên biên-giới-phạm-vi cả LỚP nhưng chân âm chỉ có 2/4 điểm-case: thiếu `async def` (hình dạng 5)**
+  Người dùng thấy gì: Một dạng khai báo hàm xử lý slot (dùng async) chưa được kiểm thử đầy đủ như các dạng còn lại, nên nếu logic bị hỏng riêng ở dạng này, không có bài kiểm tra nào phát hiện.
   file: `sdk/tests/test_scan_scope.py`
   severity: low
   Đề xuất: known-limits
 
-- **Shape 2 — fixture chốt bằng hash CỦA CHÍNH NÓ, không phải round-trip đối chiếu bên viết**
-  Người dùng thấy gì: Bản mẫu dùng để kiểm thử tự đối chiếu với chính nó chứ không đối chiếu với plugin thật đang chạy trên máy, nên nếu bản mẫu bị lệch so với plugin thật theo thời gian, sẽ không có gì phát hiện ra.
-  file: `sdk/tests/fixtures/scan_scope/plugins/oneflow-modal-compose-overlay/deploy.py.sha256`
-  severity: low
-  Đề xuất: known-limits
-
-## Chưa phân loại (triage-failed)
-
-phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ.
-
-### `parse_deploy_py`'s error is discarded in `scan()`, so a broken deploy.py is reported as "no @node_slot found in entry.py"
-- file: `sdk/tongflow/scan.py:374`
-- severity: medium
-- source: conventions
-
-Line 374: `dscan, _derr = parse_deploy_py(deploy_py)` — the error string is bound to `_derr` and never used. `parse_deploy_py` returns `(None, err)` for a SyntaxError/OSError in deploy.py and for the duplicate-slot case (`Duplicate @node_slot(...) on multiple @deploy classes ...; fix: keep one @node_slot implementation per slot`), so `dscan` is `None`, `rejections` stays empty, and the block at line 401 (`if not rejections:`) emits the generic entry.py message.
-
-Verified: a plugin whose deploy.py contains `def broken(:` yields only `.../entry.py:1: no @node_slot(NodeSlots.XXX) methods found; ...` — the actual syntax error is never surfaced.
-
-This contradicts the principle this very commit states in the comment at line 399-400 ("A specific reason at the defining line says strictly more than 'nothing found in entry.py' — the generic line yields to it") and the repo/global rule "Never silently swallow errors" (~/.claude/rules/common/coding-style.md). `_derr` should join `rejections`/`errors` the same way `dscan.slot_problems` now does.
-
-⚠ Cụm ngoài vùng phủ: 3/13 lỗi rơi vào file không bộ đo nào phủ (docs/plugins.md, scripts/plugins/check-scan-blast-radius.sh, sdk/tests/fixtures/scan_scope/plugins/oneflow-modal-compose-overlay/deploy.py.sha256) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 2/12 lỗi rơi vào file không bộ đo nào phủ (scripts/plugins/check-scan-blast-radius.sh, docs/plugins.md) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
