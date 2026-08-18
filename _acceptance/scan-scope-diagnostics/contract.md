@@ -5,7 +5,7 @@ slug: scan-scope-diagnostics
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [plugins, sdk]
-status: approved
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-18
 ---
