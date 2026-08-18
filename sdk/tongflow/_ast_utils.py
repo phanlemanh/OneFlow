@@ -9,13 +9,17 @@ from functools import lru_cache
 
 def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
     """
-    Visit every statement that binds names in the MODULE scope.
+    Visit every statement that binds a name in the MODULE scope.
 
     An import binds its name in the enclosing scope, and only ``def``, ``class``
     and ``lambda`` open a new one — ``with``, ``if``, ``for``, ``while``, ``try``
     and ``match`` do not. So the rule is a boundary, not a list of block types:
     recurse into everything except the scope openers. Naming block types is what
     made ``with image.imports():`` invisible; any such list is one idiom behind.
+
+    ``def`` and ``class`` are handed back too: each binds its own name here,
+    even though its body opens a new scope. Import collection is unaffected —
+    its ``take`` acts only on ``Import`` / ``ImportFrom``.
     """
 
     for child in ast.iter_child_nodes(node):
@@ -23,6 +27,11 @@ def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
             child,
             (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda),
         ):
+            # A scope opener binds its OWN name in this scope, so it is a
+            # module-scope statement — but its body is a different scope, so
+            # stop here. `ast.Lambda` is an expr, not a stmt, and falls through.
+            if isinstance(child, ast.stmt):
+                take(child)
             continue
         if isinstance(child, ast.stmt):
             take(child)
