@@ -51,8 +51,14 @@ PY
 
 set +e
 out=$(cd "$work/sdk" && PYTHONPATH=. uv run --no-project --with pytest --with tomli \
-  --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py \
-  -k 'deploy_with_image_imports or scan_with_image_imports or non_scope_block or nested_blocks or function_local or class_body or import_spelling' 2>&1)
+  --with pydantic --with typing_extensions python -m pytest -q \
+  tests/test_scan_scope.py::test_deploy_with_image_imports_registers_slot \
+  tests/test_scan_scope.py::test_scan_with_image_imports_registers_and_is_quiet \
+  tests/test_scan_scope.py::test_non_scope_block_collects_import \
+  tests/test_scan_scope.py::test_nested_blocks_collect_import \
+  tests/test_scan_scope.py::test_function_local_import_is_not_collected \
+  tests/test_scan_scope.py::test_class_body_import_is_not_collected \
+  tests/test_scan_scope.py::test_import_spelling_inside_block 2>&1)
 code=$?
 set -e
 

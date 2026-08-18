@@ -5,7 +5,7 @@ slug: scan-with-block-imports
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [plugins, sdk]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-18
 ---
@@ -169,3 +169,35 @@ Không ô nào mang `[GIẢ ĐỊNH]`; không trục nào `[CE chưa kiểm ch�
 - **Sóng ký lại:** thay đổi trong `sdk/**` sẽ làm hết hiệu lực bằng chứng của các feature
   sở hữu file trong đó. Chi phí thật tính bằng máy ở Cổng 1 — ứng viên chắc chắn là
   `conformance-l0` và `oneflow-plugin-prefix` (cả hai sở hữu file dưới `sdk/`).
+
+### Known limits (Cổng 2, vòng 2 — người ký chấp nhận, ship bản này)
+
+Bảy lỗi do vòng review xác nhận nằm NGOÀI phạm vi đã duyệt ở Cổng 1. Năm mục dưới đây
+được ghi nhận và ship như hiện trạng; hai mục còn lại tách sang hợp đồng riêng (xem
+mục kế).
+
+- **Bản mẫu tự chiếu chính nó.** `deploy.py.sha256` chốt bản mẫu với chính nó, nên nó
+  chỉ bắt được "ai đó sửa bản mẫu mà quên cập nhật hash" — KHÔNG bắt được trôi so với
+  plugin thật, vì `plugins/` là thư mục gitignore và bản thượng nguồn không nằm trong
+  kho. Chữ trong `check-overlay-discoverable.sh` và README của bản mẫu đang hứa nhiều
+  hơn thứ nó chứng minh được. (`deploy.py.sha256:1`, `check-overlay-discoverable.sh:22`)
+- **Nhánh `Inference` cũ ghi đè thay vì gộp lý do.** Với một hình dạng tệp hiếm — class
+  mang `@deploy` không đăng ký được slot nào, đứng cạnh một class tên đúng `Inference` —
+  mọi lý do thu từ class `@deploy` bị thay chứ không gộp, và người viết plugin nhận lại
+  câu chung chung. Vô hại ở hình dạng phổ biến (class `@deploy` chính là `Inference`).
+  (`parse_deploy.py:211`, hai finding cùng gốc)
+- **Lỗi cấu trúc `deploy.py` bị nuốt.** `scan()` bỏ đi chuỗi lỗi mà `parse_deploy_py`
+  trả về — tệp không đọc được, sai cú pháp, hoặc khai trùng một slot trên hai class —
+  rồi thay bằng câu chung chung trỏ `entry.py`. Cùng họ với lỗi gốc của gói này nhưng ở
+  một nhánh khác. (`scan.py:374`)
+
+### Việc tách ra hợp đồng riêng
+
+- **Nửa chẩn đoán vẫn chốt bằng lớp ngoài cùng, không bằng ranh giới phạm vi.**
+  `scan.py:156` dựng `module_level` từ `tree.body`, trong khi nửa đăng ký dùng
+  `ast.walk` duyệt cả cây. Hệ quả: một hàm mang `@node_slot` đặt trong khối `if`/`with`/
+  `try` ở lớp ngoài cùng — đúng thành ngữ mà gói này vừa hợp thức hoá — thì ĐĂNG KÝ
+  được, nhưng khi viết sai lại nhận câu chung chung `entry.py:1` thay vì lý do. Không
+  phép đo nào của gói này phủ hình dạng đó. Nặng, và nằm trong lời hứa của họ tiêu chí
+  B, nhưng ngoài phạm vi Cổng 1 đã duyệt (AC-7 nói về method trên class `@deploy`) →
+  làm thành một feature riêng có AC và eval của nó. (`scan.py:156`, `scan.py:166`)

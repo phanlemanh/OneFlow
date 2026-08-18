@@ -1,121 +1,47 @@
 {
-  "feature_plain": "Plugin cài đúng chuẩn thì hiện ra đúng việc nó làm được — và khi không hiện ra, máy nói thẳng vì sao thay vì chỉ nhầm sang tệp khác.",
-  "will_do": [
-    {
-      "id": "AC-1",
-      "p": "Sẽ nhận ra việc mà plugin khai, kể cả khi plugin viết theo đúng thành ngữ chuẩn của nền chạy đám mây."
-    },
-    {
-      "id": "AC-2",
-      "p": "Sẽ nhận ra việc đó qua cả hai đường máy dùng để đọc plugin, không phải chỉ một."
-    },
-    {
-      "id": "AC-3",
-      "p": "Sẽ đọc đúng ở cả mười kiểu khối lệnh của Python — mỗi kiểu một phép thử riêng, để không ai vá được bằng cách thêm vài kiểu vào danh sách."
-    },
-    {
-      "id": "AC-4",
-      "p": "Sẽ vẫn từ chối những khai báo nằm trong thân hàm hay thân class — nhận tất thì bản vá mất hết ý nghĩa."
-    },
-    {
-      "id": "AC-5",
-      "p": "Sẽ nhận cả ba cách viết câu khai báo mà plugin thường dùng."
-    },
-    {
-      "id": "AC-6",
-      "p": "Sẽ giữ nguyên mọi thứ đang chạy đúng hôm nay — cách viết cũ không được thành nạn nhân của bản vá."
-    },
-    {
-      "id": "AC-7",
-      "p": "Khi bỏ qua một việc, sẽ chỉ đúng tệp và đúng dòng định nghĩa nó — không chỉ sang tệp khác như hôm nay."
-    },
-    {
-      "id": "AC-8",
-      "p": "Sẽ nói rõ khi plugin thiếu khai báo kiểu dữ liệu."
-    },
-    {
-      "id": "AC-9",
-      "p": "Sẽ nói rõ khi plugin thiếu tham số đầu vào."
-    },
-    {
-      "id": "AC-10",
-      "p": "Hai đường đọc sẽ nói CÙNG một câu giải thích — một chỗ giữ lời, không hai bản trôi khỏi nhau."
-    },
-    {
-      "id": "AC-11",
-      "p": "Sẽ không biến plugin đang lành thành plugin có cảnh báo — đo bằng cách so trước và sau, không so với danh sách chép tay."
-    },
-    {
-      "id": "AC-12",
-      "p": "Người dùng cài plugin dán chữ, giá, logo sẽ thấy nó chạy được — đo trên bản mẫu cố định, luôn chạy, không bao giờ được bỏ qua."
-    },
-    {
-      "id": "AC-14",
-      "p": "Đo lại đúng điều đó trên cây plugin thật khi máy có cài; chưa cài thì báo bỏ qua CÓ TÊN, không lặng lẽ tính là đạt."
-    },
-    {
-      "id": "AC-13",
-      "p": "Sẽ không đụng vào các hợp đồng dữ liệu lõi, và không phát hành bản SDK mới."
-    }
-  ],
-  "wont_do": [],
-  "scope_plain": "Không phát hành SDK mới, không sửa plugin nào, không dọn hai thư mục plugin thừa, không đụng vụ hai đường chạy giành nhau thư mục môi trường Python — mỗi thứ là một việc riêng.",
-  "coverage_plain": [
-    {
-      "i": 0,
-      "p": "Đã quét đủ NƠI một câu khai báo có thể đứng: mười kiểu khối, cộng hai chỗ buộc phải từ chối là thân hàm và thân class. Bằng chứng đủ lấy từ luật phạm vi của chính ngôn ngữ Python và cách các bộ soát mã lớn làm."
-    },
-    {
-      "i": 1,
-      "p": "Đã quét đủ hai ĐƯỜNG máy đọc plugin — cả SDK chỉ có đúng hai chỗ gọi, đếm được chứ không phỏng đoán."
-    },
-    {
-      "i": 2,
-      "p": "Đã quét đủ bốn KẾT CỤC của một việc plugin khai: được nhận, hoặc bị loại vì một trong ba lý do — đếm được từ bốn nhánh bỏ qua trong mã."
-    },
-    {
-      "i": 3,
-      "p": "Đã quét đủ ba CÁCH VIẾT câu khai báo mà bộ đọc đang xử lý."
-    }
-  ],
-  "gap_probe_plain": [
-    {
-      "i": 0,
-      "p": "Bộ đo ban đầu không phân biệt được bản vá chữa đúng gốc với bản vá chỉ thêm vài kiểu khối vào danh sách. Đã sửa: mỗi kiểu khối nay có phép thử riêng."
-    },
-    {
-      "i": 1,
-      "p": "Phép đo trả lời câu hỏi sản phẩm lại được phép bỏ qua khi máy chưa cài plugin — mà thư mục plugin thì dựng lúc chạy, nên bản mới tinh có thể xanh mà chưa từng trả lời. Đã sửa: tách làm hai, bản chạy trên mẫu cố định không bao giờ bỏ qua."
-    },
-    {
-      "i": 2,
-      "p": "Câu giải thích chỉ cần nêu ra một tệp nào đó là tính đạt — trong khi đúng cái sai hôm nay là nêu nhầm tệp. Đã sửa: nay đòi đúng tệp định nghĩa và đúng dòng."
-    },
-    {
-      "i": 3,
-      "p": "Phép đo một-chỗ-giữ-lời lại chỉ so hai câu bằng nhau, nên không phân biệt được một nguồn với hai bản sao giống hệt. Đã sửa: đổi sang phá thử rồi xem có đỏ không."
-    },
-    {
-      "i": 4,
-      "p": "Phép đo không-làm-ồn so với một danh sách chép tay từ máy hiện tại, nên máy khác cấu hình sẽ đỏ oan rồi bị chữa bằng cách sửa danh sách. Đã sửa: so trước và sau thay đổi trên cùng một cây."
-    }
-  ],
+  "feature_plain": "Kéo node dán chữ/giá/logo ra bàn làm việc rồi bấm chạy thì có plugin phục vụ — và khi một plugin bị bỏ qua, màn hình nói rõ vì sao, ngay tại dòng viết sai.",
+  "scope_plain": "Chưa phát hành bản SDK mới lên kho công khai, chưa sửa plugin nào, và chưa động tới hai bộ đọc hằng số khác.",
+  "analyst_plain": "Mọi phép đo của việc này đều đỏ trên bản chưa vá — không có phép đo nào xanh sẵn bất kể mã đúng hay sai.",
   "decisions_plain": [
     {
       "id": "d-20260817T234540Z-6068",
-      "p": "Đã chọn đọc theo ranh giới phạm vi thay vì kể tên từng kiểu khối — đổi lại phải thêm một phép thử giữ cho bản vá không trượt sang nhận tất."
+      "p": "Đọc câu import theo luật phạm vi của chính Python thay vì nuôi một danh sách loại khối — đóng cả lớp lỗi, đổi lại phải giữ một phép đo chân âm để bản vá không thoái hoá thành nhận-tất."
     },
     {
       "id": "d-20260817T234541Z-16255",
-      "p": "Đã chọn để câu giải thích sinh ở một chỗ duy nhất — đổi lại phải đổi hình dạng một hàm dùng chung."
+      "p": "Câu giải thích 'vì sao bị bỏ qua' chỉ viết ở một chỗ, hai đường đọc cùng dùng lại — một cách diễn đạt duy nhất, đổi lại phải đổi hình dạng một hàm dùng chung."
     },
     {
       "id": "d-20260817T234542Z-20936",
-      "p": "KHÔNG làm bản phát hành SDK mới — đổi lại bản đã phát hành trên kho công khai vẫn còn lỗi này cho tới chuyến phát hành kế tiếp."
+      "p": "KHÔNG làm: phát hành bản SDK mới lên kho công khai kèm gói này — tiết kiệm cả một chuyến phát hành, đổi lại bản đang công khai vẫn mang lỗi cho tới chuyến sau."
     },
     {
       "id": "d-20260817T235217Z-9684",
-      "p": "Đã chọn đo bằng hành vi ở cả mười kiểu khối và bỏ phương án soi hình dạng mã — đổi lại nếu ai viết một danh sách chứa đủ mười kiểu thì phép đo vẫn xanh."
+      "p": "Đo bằng hành vi thật ở cả mười kiểu viết, bỏ phương án soi hình dạng mã nguồn — đo thứ người dùng cảm được, đổi lại không bắt được người viết mã đúng hình mà sai tinh thần."
+    },
+    {
+      "id": "d-20260818T012857Z-8607",
+      "p": "Câu báo lỗi chung chung nhường chỗ cho lý do cụ thể khi có lý do — người vận hành thôi phải lọc một câu chỉ sai chỗ, đổi lại nếu điều kiện phát lý do bị hụt thì plugin hỏng sẽ im lặng hẳn."
+    },
+    {
+      "id": "d-20260818T012857Z-29432",
+      "p": "Chỉ giải thích cho method đã xin phục vụ một slot, và chỉ ở lớp ngoài cùng của tệp — plugin lành không bị kêu oan, đổi lại method quên hẳn dấu đăng ký vẫn bị bỏ lặng."
+    },
+    {
+      "id": "d-20260818T012857Z-31411",
+      "p": "Tải plugin thật một lần để rút bản mẫu, thay vì viết mẫu theo trí nhớ — bản mẫu không thể mang hình dạng plugin thật chưa từng có, đổi lại một lần chạm mạng lúc dựng."
+    },
+    {
+      "id": "d-20260818T013219Z-6713",
+      "p": "Phép đo ba dạng câu import so trực tiếp kết quả trong khối với kết quả ngoài khối, thay vì nới luật đặt tên sẵn có — giữ đúng bán kính đã khai, đổi lại một dạng đặt tên tắt vẫn bị bỏ lặng ở mọi vị trí."
+    },
+    {
+      "id": "d-20260818T013625Z-20818",
+      "p": "Phép đo 'một nguồn duy nhất' tự khẳng định nó đang đo bản sao chứ không phải mã thật của kho — bắt được lỗi đo-nhầm-vật, đổi lại thêm một lần khởi động cho mỗi lần chạy."
+    },
+    {
+      "id": "d-20260818T013957Z-2578",
+      "p": "Phép đo bán kính nổ nhìn cả những sửa đổi chưa lưu, để hai nửa của nó thôi đo hai cây khác nhau — đổi lại nó đỏ cả khi cây đang bẩn vì việc khác."
     }
   ]
 }

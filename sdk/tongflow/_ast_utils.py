@@ -129,19 +129,23 @@ def slot_rejection_reason(
 
     ``input_index`` is 0 for a module-level function and 1 for a bound method
     (``self`` comes first). Callers keep their own file/line framing; the
-    sentence itself is produced here and nowhere else.
+    sentence itself — method name included — is produced here and nowhere else,
+    so both readers word an identical rejection identically.
     """
+
+    def named(reason: str) -> str:
+        return f"{fn.name}: {reason}"
 
     args = fn.args.args
     if len(args) < input_index + 1:
-        return REASON_MISSING_INPUT_PARAM
+        return named(REASON_MISSING_INPUT_PARAM)
     input_arg = args[input_index]
     if input_arg.annotation is None or fn.returns is None:
-        return REASON_MISSING_ANNOTATION
+        return named(REASON_MISSING_ANNOTATION)
     if not looks_like_sdk_model_type(input_arg.annotation, "Input", module):
-        return REASON_NOT_SDK_MODEL
+        return named(REASON_NOT_SDK_MODEL)
     if not looks_like_sdk_model_type(fn.returns, "Output", module):
-        return REASON_NOT_SDK_MODEL
+        return named(REASON_NOT_SDK_MODEL)
     return None
 
 

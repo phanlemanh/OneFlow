@@ -30,8 +30,27 @@ if [ ! -d "$plugins_root" ] || [ -z "$(ls -A "$plugins_root" 2>/dev/null)" ]; th
   exit 0
 fi
 
+# `python -m` puts the working directory FIRST on sys.path, ahead of PYTHONPATH.
+# Called from a directory that itself contains a `tongflow` package (sdk/, say),
+# both runs would load the SAME tree, `before` would equal `after` by
+# construction, and this delta would be green forever without ever comparing two
+# code points. So assert which tree each run actually loaded, and run from a
+# directory that holds no `tongflow`.
+neutral_cwd=$(mktemp -d)
+
 ids_at() {
-  PYTHONPATH="$1/sdk" "$py" -m tongflow --root "$plugins_root" --abi "$abi" \
+  local tree="$1"
+  local loaded
+  loaded=$(cd "$neutral_cwd" && PYTHONPATH="$tree/sdk" "$py" -c 'import tongflow; print(tongflow.__file__)')
+  case "$loaded" in
+    "$tree/sdk/"*) : ;;
+    *)
+      echo "FAIL: the scan meant to measure $tree/sdk loaded tongflow from" >&2
+      echo "      $loaded instead — this delta would compare a tree against itself." >&2
+      return 1
+      ;;
+  esac
+  (cd "$neutral_cwd" && PYTHONPATH="$tree/sdk" "$py" -m tongflow --root "$plugins_root" --abi "$abi") \
     | "$py" -c '
 import json, sys
 payload = json.load(sys.stdin)
@@ -43,7 +62,7 @@ print("\n".join(ids))
 work=$(mktemp -d)
 cleanup() {
   git -C "$root" worktree remove --force "$work/base" >/dev/null 2>&1 || true
-  rm -rf "$work"
+  rm -rf "$work" "$neutral_cwd"
 }
 trap cleanup EXIT
 

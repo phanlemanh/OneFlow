@@ -136,6 +136,26 @@ _BLOCKS = {
 }
 
 
+def test_block_matrix_covers_the_ten_keywords():
+    """AC-3 pins the SIZE of the matrix, not just its contents: the criterion
+    says ten keywords, one assertion each. Without this, deleting a row shrinks
+    the matrix silently and every remaining row still passes."""
+    assert sorted(_BLOCKS) == sorted(
+        [
+            "with",
+            "if",
+            "elif",
+            "else",
+            "for",
+            "while",
+            "try",
+            "except",
+            "finally",
+            "match",
+        ]
+    ), f"the block matrix no longer matches the ten keywords AC-3 names; got {sorted(_BLOCKS)}"
+
+
 @pytest.mark.parametrize("keyword", sorted(_BLOCKS))
 def test_non_scope_block_collects_import(tmp_path, keyword):
     """AC-3 — ten keywords, one assertion each, so a partial implementation
@@ -312,12 +332,19 @@ def test_reason_names_defining_file_and_line(tmp_path):
     root, deploy, line = _write_plugin_with_class(tmp_path, _BAD_CLASS)
     payload = scan(root, _write_abi(tmp_path))
     problems = _problems(payload)
-    assert any(m.startswith(f"{deploy}:{line}:") for m in problems), (
-        f"no problem anchored at {deploy}:{line} carrying reason "
+    # ONE predicate over ONE problem. Two independent any() calls would accept a
+    # payload where the anchor sits on one message and the reason on another —
+    # that is the presence of two substrings, not the relation the criterion is
+    # about ("the relation is the point", contract.md:72).
+    assert any(
+        m.startswith(f"{deploy}:{line}:")
+        and "compose_overlay" in m
+        and REASON_NOT_SDK_MODEL in m
+        for m in problems
+    ), (
+        f"no SINGLE problem carrying all three things AC-7 asks for — anchored at "
+        f"{deploy}:{line}, naming the method compose_overlay, and carrying reason "
         f"{REASON_NOT_SDK_MODEL!r}; got {problems}"
-    )
-    assert any(REASON_NOT_SDK_MODEL in m for m in problems), (
-        f"no problem naming the reason {REASON_NOT_SDK_MODEL!r}; got {problems}"
     )
     assert not any("entry.py" in m for m in problems), (
         f"the scanner still blames entry.py while the cause is in {deploy.name}; "

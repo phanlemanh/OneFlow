@@ -41,8 +41,11 @@ PY
 
 set +e
 out=$(cd "$work/sdk" && PYTHONPATH=. uv run --no-project --with pytest --with tomli \
-  --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py \
-  -k 'reason_names_defining_file or reason_missing_annotation or reason_missing_param or reason_single_source' 2>&1)
+  --with pydantic --with typing_extensions python -m pytest -q \
+  tests/test_scan_scope.py::test_reason_names_defining_file_and_line \
+  tests/test_scan_scope.py::test_reason_missing_annotation \
+  tests/test_scan_scope.py::test_reason_missing_param \
+  tests/test_scan_scope.py::test_reason_single_source_mutation 2>&1)
 code=$?
 set -e
 

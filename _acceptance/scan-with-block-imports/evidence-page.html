@@ -1,0 +1,131 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · scan-with-block-imports</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Plugin scanner reads imports by scope boundary, and says why a slot was skipped</h1><div class="sub">Trang bằng chứng · <span class="mono">scan-with-block-imports</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E1-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E2-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E3-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E4-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E5-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E6-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E7-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E8-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E9-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E10-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-11</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E11-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-12</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E12-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E14b">E14b</a></td><td>AC-14</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E14b-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-13</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E13-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-1</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E14-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-7</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-scan-with-block-imports-E15-r1</td><td class="mono">2026-08-18T09:00:00Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · test</h3><p class="crit">AC-1: Given a `deploy.py` whose model import sits inside `with image.imports():` and</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E1-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_with_deploy</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · test</h3><p class="crit">AC-2: Given the same import shape in a plugin file scanned by the entry-file path,</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E2-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_with_scan</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">.                                                                        [100%]
+1 passed, 22 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · test</h3><p class="crit">AC-3: Given a model import placed inside each of the ten Python block keywords that</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E3-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_nested</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">...........                                                              [100%]
+11 passed, 12 deselected in 0.03s</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · test</h3><p class="crit">AC-4: Given a model import placed inside a `def` or a `class` body, When the module is</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E4-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_function_local</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">..                                                                       [100%]
+2 passed, 21 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · test</h3><p class="crit">AC-5: Given the three import spellings the collector already supports —</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E5-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_import_spellings</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">...                                                                      [100%]
+3 passed, 20 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · test</h3><p class="crit">AC-6: Given imports at bare module level and inside `try`/`except`, When the module is</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E6-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_scope_prior_behaviour</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · test</h3><p class="crit">AC-7: Given a method decorated with `@node_slot` whose input or return annotation is</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E7-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_reason_not_sdk_model</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.11s</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · test</h3><p class="crit">AC-8: Given a method decorated with `@node_slot` that is missing its input or return</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E8-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_reason_missing_annotation</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.05s</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · test</h3><p class="crit">AC-9: Given a method decorated with `@node_slot` that omits the input parameter</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E9-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_reason_missing_param</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.02s</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · test</h3><p class="crit">AC-10: Given both consumer paths (`scan.py` for entry-style files and</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E10-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.sdk_pytest_reason_single_source</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">1 passed, 22 deselected in 0.19s</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · script</h3><p class="crit">AC-11: Given the plugins currently installed under `plugins/`, When the scanner runs</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E11-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_scan_noise</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">ok: over 5 installed plugins, no plugin became newly problematic at HEAD</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · script</h3><p class="crit">AC-12: Given a committed fixture plugin tree whose `deploy.py` is round-tripped</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E12-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_overlay_discoverable_fixture</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">fixture deploy.py matches its pinned hash (b3ac7ff6ab0f9a556f8a48ff44f51b58f6912037aaec5da752e0abb3eb5c9e6e)
+tongflow loaded from this repo: /Users/manh-macmini/dev/oneflow/sdk/tongflow/__init__.py
+ok [fixture]: compose-overlay served by [&#39;oneflow-modal-compose-overlay&#39;], no problems for oneflow-modal-compose-overlay</pre>
+</div>
+<div class="card eval" id="E14b"><h3><span class="badge pass">PASS</span> &nbsp;E14b · script</h3><p class="crit">AC-14: Given the real `plugins/` tree when the plugin is actually installed there,</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E14b-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_overlay_discoverable_real</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">tongflow loaded from this repo: /Users/manh-macmini/dev/oneflow/sdk/tongflow/__init__.py
+ok [real]: compose-overlay served by [&#39;oneflow-modal-compose-overlay&#39;], no problems for oneflow-modal-compose-overlay</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · script</h3><p class="crit">AC-13: Given this package must not widen its blast radius, When the change lands, Then</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E13-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_scan_blast_radius</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">ok: no contract chokepoint touched, SDK version unchanged since 29d0c3be811408297827f75d7c7931c11e0973ed</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · script</h3><p class="crit">AC-1: Given a `deploy.py` whose model import sits inside `with image.imports():` and</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E14-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_scope_walker_teeth</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">ok: reverting the walker turns E1..E5 red and names the missing slot COMPOSE_OVERLAY</pre>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge pass">PASS</span> &nbsp;E15 · script</h3><p class="crit">AC-7: Given a method decorated with `@node_slot` whose input or return annotation is</p>
+<div class="kv"><span>run_id <b>minted-scan-with-block-imports-E15-r1</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.check_reason_teeth</b></span><span>verified_at <b>2026-08-18T09:00:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">ok: removing the reason emission turns E7..E10 red and names the absent reason</pre>
+</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: tat ca 16 eval PASS ngay lan dau (E1-E10, E11-E15, E14b); khong co that bai, khong quay lai implementation.</li></ul>
+<h2>Checklist Cổng 2 (bạn)</h2><div class="card"><ul class="ck"><li><input type="checkbox" id="ck0"><label for="ck0">Read the table + spot-check 1-2 evidence blocks</label></li><li><input type="checkbox" id="ck1"><label for="ck1">Personally verify every judgment item marked UNCERTAIN, then fill its</label></li><li><input type="checkbox" id="ck2"><label for="ck2">T3 only: personally verify ALL judgment items and fill `human_override`</label></li><li><input type="checkbox" id="ck3"><label for="ck3">If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when</label></li><li><input type="checkbox" id="ck4"><label for="ck4">Fill `human_signoff` in frontmatter</label></li></ul><div class="note">Tick để theo dõi — chỉ lưu trong trình duyệt; quyết định THẬT vào human_signoff / human_override của report.</div></div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>
