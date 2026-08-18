@@ -169,6 +169,29 @@ executors:
     sdk_pytest_reason_missing_annotation: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_reason_missing_annotation
     sdk_pytest_reason_missing_param: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_reason_missing_param
     sdk_pytest_reason_single_source: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_reason_single_source_mutation
+    # scan-scope-diagnostics Gate 1 (2026-08-18): every test below lands during
+    # implementation; keys declared now so eval refs stay portable. One key per
+    # criterion, addressed by pytest node-id — criteria sharing one exit code make a
+    # never-implemented case look identical to a passing one (lesson: cache-l1 round 1).
+    sdk_pytest_diag_block_reason: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_reason_for_malformed_def_in_module_block
+    sdk_pytest_diag_block_matrix: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_rejection_block_matrix_covers_the_ten_keywords tests/test_scan_diagnostics.py::test_rejection_in_non_scope_block tests/test_scan_diagnostics.py::test_rejection_in_nested_blocks
+    sdk_pytest_diag_block_wellformed: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_well_formed_def_in_block_registers_and_is_quiet
+    sdk_pytest_diag_closure_quiet: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_closure_def_is_not_reported
+    sdk_pytest_diag_class_body_quiet: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_class_body_method_is_not_reported_by_dir_scan
+    sdk_pytest_diag_shared_walker: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_module_scope_gate_and_import_collector_share_one_walker
+    sdk_pytest_diag_syntax_error: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_syntax_error_names_its_own_file_and_line
+    sdk_pytest_diag_unreadable: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_unreadable_file_names_the_read_failure
+    sdk_pytest_diag_deploy_error: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_deploy_parse_error_surfaces_in_scan_errors
+    sdk_pytest_diag_parse_wording: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_parse_failure_wording_single_source_mutation
+    sdk_pytest_diag_inference_merge: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_deploy_and_inference_reasons_both_survive
+    sdk_pytest_diag_inference_dedupe: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_ordinary_shape_reports_each_reason_once
+    # Added after the S1 gap-probe (P0-1): the BARE module-level def had no criterion —
+    # every other case is nested, and check-scan-noise only reddens on GAINED noise, so a
+    # lost diagnostic on the commonest shape was invisible to all 17 evals.
+    sdk_pytest_diag_bare_module: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_diagnostics.py::test_bare_module_level_malformed_is_still_named tests/test_scan_diagnostics.py::test_bare_module_level_well_formed_stays_quiet
+    # gap-probe P0-2: AC-6 promises FOUR collection cases unchanged; the negatives alone
+    # are half a floor. All four of the parent's own node-ids, run as one criterion.
+    sdk_pytest_diag_import_floor: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_non_scope_block_collects_import tests/test_scan_scope.py::test_nested_blocks_collect_import tests/test_scan_scope.py::test_prior_behaviour_module_level_and_try tests/test_scan_scope.py::test_function_local_import_is_not_collected tests/test_scan_scope.py::test_class_body_import_is_not_collected
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -325,6 +348,25 @@ executors:
     check_scan_blast_radius: bash scripts/plugins/check-scan-blast-radius.sh
     check_scope_walker_teeth: bash scripts/plugins/check-scope-walker-teeth.sh
     check_reason_teeth: bash scripts/plugins/check-reason-teeth.sh
+    # scan-scope-diagnostics Gate 1 (2026-08-18): scripts land during implementation.
+    # One wrapper, one subcommand per perturbation (the check-vitest-job.sh pattern) —
+    # three teeth evals sharing one exit code would hide which perturbation went
+    # uncaught, which is the one thing a teeth eval exists to tell you.
+    # DIAG_BASE_REF overrides the base: this feature is STACKED on
+    # feat/scan-with-block-imports, so merge-base-with-origin/main would attribute the
+    # parent's diff to this package.
+    diag_blast_radius: bash scripts/plugins/check-diagnostics-blast-radius.sh
+    diag_scope_gate_teeth: bash scripts/plugins/check-diagnostics-teeth.sh scope-gate
+    diag_parse_failure_teeth: bash scripts/plugins/check-diagnostics-teeth.sh parse-failure
+    diag_dedupe_teeth: bash scripts/plugins/check-diagnostics-teeth.sh dedupe
+    # gap-probe P1-1: AC-6 promises a RELATION (both readers routed through ONE function).
+    # A unit test of the walker cannot prove routing; only neutering the one site can.
+    diag_shared_walker_teeth: bash scripts/plugins/check-diagnostics-teeth.sh shared-walker
+    # gap-probe P1-2: plugins/ is gitignored and runtime-populated, so a noise check that
+    # only reads it goes vacuously green on a clean checkout — the parent hit this exact
+    # shape (scan-with-block-imports#F2) and split it. fixture ALWAYS runs; real skips by name.
+    diag_noise_fixture: bash scripts/plugins/check-diagnostics-noise.sh fixture
+    diag_noise_real: bash scripts/plugins/check-diagnostics-noise.sh real
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
