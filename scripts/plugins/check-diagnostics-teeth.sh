@@ -32,10 +32,16 @@ expect_red() {
     printf '  %s\n' "$@"
     exit 1
   fi
-  if ! printf '%s' "$out" | grep -qF "$needle"; then
-    echo "FAIL: the tests went red but never named what went missing."
-    echo "      expected the output to contain: $needle"
-    printf '%s\n' "$out" | tail -30
+  # Match ONLY pytest's rendered assertion lines (`E   AssertionError: ...`).
+  # Grepping the whole output is not a measure: pytest echoes the assert SOURCE
+  # too, and the source contains the same words as the message it builds — so a
+  # plain grep goes green even when the real message never named anything.
+  # Under `^E`, the needle can only come from the interpolated message.
+  if ! printf '%s\n' "$out" | grep -E '^E( |$)' | grep -qF "$needle"; then
+    echo "FAIL: the tests went red but the rendered assertion never named what"
+    echo "      went missing. Expected an 'E ...' line containing: $needle"
+    echo "      (rendered assertion lines seen:)"
+    printf '%s\n' "$out" | grep -E '^E( |$)' | head -10
     exit 1
   fi
   echo "ok: perturbation caught, and the failure names \"$needle\""
@@ -65,7 +71,7 @@ assert old in s, "scope-gate perturbation found nothing to revert"
 s = s.replace(old, "    module_scope = {id(node) for node in tree.body}", 1)
 open(p, "w", encoding="utf-8").write(s)
 PY
-    expect_red "compose_overlay" \
+    expect_red "produced no reason at its own line" \
       "$T::test_reason_for_malformed_def_in_module_block" \
       "$T::test_rejection_in_non_scope_block" \
       "$T::test_rejection_in_nested_blocks"
@@ -84,7 +90,7 @@ s = s.replace(old, "    return\n" + old, 1)
 open(p, "w", encoding="utf-8").write(s)
 PY
     echo "-- consumer 1: the rejection gate in scan.py"
-    expect_red "compose_overlay" "$T::test_reason_for_malformed_def_in_module_block"
+    expect_red "naming compose_overlay" "$T::test_reason_for_malformed_def_in_module_block"
     echo "-- consumer 2: the import collector"
     expect_red "COMPOSE_OVERLAY unregistered" \
       "tests/test_scan_scope.py::test_non_scope_block_collects_import"

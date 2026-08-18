@@ -206,10 +206,25 @@ def test_well_formed_def_in_block_registers_and_is_quiet(tmp_path):
 
 
 def test_closure_def_is_not_reported(tmp_path):
-    """AC-4 - NEGATIVE boundary: a closure is not module scope. Asserts silence
-    only; the closure-registers mirror bug is Out of scope."""
+    """AC-4 - NEGATIVE boundary: a closure is not module scope. Paired with a
+    POSITIVE control on the same harness, because silence on its own cannot tell
+    "correctly not reported" from "the scan never looked at this plugin".
+    Asserts silence only; the closure-registers mirror bug is Out of scope."""
+    _p, control_msgs, control_line = _scan_entry(
+        tmp_path / "control", _entry_src(None, _BAD_FN)
+    )
+    control_entry = tmp_path / "control" / "plugins" / _PLUGIN_ID / "entry.py"
+    assert any(
+        f"{control_entry}:{control_line}:" in m and "compose_overlay" in m
+        for m in control_msgs
+    ), (
+        "positive control failed: this harness does not report a malformed def "
+        "even at module scope, so the negative half below would prove nothing; "
+        f"got {control_msgs}"
+    )
+
     src = _ENTRY_HEAD + "def _setup():\n" + _indent(_BAD_FN, 4)
-    _payload, msgs, _line = _scan_entry(tmp_path, src)
+    _payload, msgs, _line = _scan_entry(tmp_path / "closure", src)
     assert not [m for m in msgs if "compose_overlay" in m], (
         "a @node_slot def inside another def was reported - the fix degraded "
         f"into reporting everything; got {msgs}"
@@ -220,8 +235,21 @@ def test_class_body_method_is_not_reported_by_dir_scan(tmp_path):
     """AC-5 - NEGATIVE boundary and the noise budget in miniature. Methods on a
     class are the deploy parser's business; reporting them here too would make
     every healthy deploy-first plugin noisy."""
+    _p, control_msgs, control_line = _scan_entry(
+        tmp_path / "control", _entry_src(None, _BAD_FN)
+    )
+    control_entry = tmp_path / "control" / "plugins" / _PLUGIN_ID / "entry.py"
+    assert any(
+        f"{control_entry}:{control_line}:" in m and "compose_overlay" in m
+        for m in control_msgs
+    ), (
+        "positive control failed: this harness does not report a malformed def "
+        "even at module scope, so the negative half below would prove nothing; "
+        f"got {control_msgs}"
+    )
+
     src = _ENTRY_HEAD + "class Holder:\n" + _indent(_BAD_METHOD, 4)
-    _payload, msgs, _line = _scan_entry(tmp_path, src)
+    _payload, msgs, _line = _scan_entry(tmp_path / "classbody", src)
     assert not [m for m in msgs if "compose_overlay" in m], (
         "a @node_slot method in a class body was reported by the directory "
         f"scan; got {msgs}"
@@ -490,4 +518,32 @@ def test_ordinary_shape_reports_each_reason_once(tmp_path):
     assert len(scanned.slot_problems) == 1, (
         f"each reason must appear exactly once; got {len(scanned.slot_problems)} "
         f"entries: {scanned.slot_problems}"
+    )
+
+
+def test_syntax_error_names_the_broken_file_not_entry(tmp_path):
+    """AC-7 - the DISCRIMINATING case, added after the round-1 review: the
+    broken file is NOT entry.py. Without it, an implementation that always
+    blames entry.py passes every other AC-7 measure, which is the exact defect
+    the parent package was built to remove."""
+    root = tmp_path / "plugins"
+    pdir = root / _PLUGIN_ID
+    pdir.mkdir(parents=True)
+    (pdir / "entry.py").write_text(_entry_src(None, _GOOD_FN), encoding="utf-8")
+    (pdir / "helper.py").write_text("def oops(:\n    ...\n", encoding="utf-8")
+
+    payload = scan(root, _write_abi(tmp_path))
+    msgs = _problems(payload)
+    helper = pdir / "helper.py"
+    entry = pdir / "entry.py"
+
+    syn = [m for m in msgs if "syntax error" in m]
+    assert syn, f"a syntax error in helper.py produced no problem at all; got {msgs}"
+    assert all(str(helper) in m for m in syn), (
+        "the syntax error must name helper.py, the file that is actually broken, "
+        f"not whichever file the scan happened to start from; got {syn}"
+    )
+    assert not any(str(entry) in m for m in syn), (
+        "the syntax error names entry.py, which parses fine - the reader is "
+        f"blaming the wrong file; got {syn}"
     )

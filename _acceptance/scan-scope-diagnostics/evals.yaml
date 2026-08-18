@@ -42,7 +42,7 @@ evals:
     criterion: AC-4
     executor: test
     cmd: config:executors.test.sdk_pytest_diag_closure_quiet
-    expected: "exit 0 — NEGATIVE boundary. A malformed @node_slot def nested inside another def produces NO problem: a closure is not module scope. Red direction: a fix that walks the whole tree without a boundary reports it and goes red naming the closure. Deliberately asserts silence only, NOT absence of registration — the closure-registers mirror bug is recorded in Out of scope and is not this package's to fix"
+    expected: "exit 0 — NEGATIVE boundary. A malformed @node_slot def nested inside another def produces NO problem: a closure is not module scope. Red direction: a fix that walks the whole tree without a boundary reports it and goes red naming the closure. Paired with a POSITIVE CONTROL on the same harness (the same malformed def at module scope MUST be reported), added after the round-1 review: silence on its own cannot tell 'correctly not reported' from 'the scan never looked at this plugin'. Deliberately asserts silence only, NOT absence of registration — the closure-registers mirror bug is recorded in Out of scope and is not this package's to fix"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tests/test_scan_diagnostics.py"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -50,7 +50,7 @@ evals:
     criterion: AC-5
     executor: test
     cmd: config:executors.test.sdk_pytest_diag_class_body_quiet
-    expected: "exit 0 — NEGATIVE boundary and the noise budget in miniature. A malformed @node_slot method in a class body produces NO problem from the directory scan; those belong to the deploy parser. Red direction: widening the gate to every walked def turns this red naming the method, which is exactly what would make every healthy deploy-first plugin noisy in the field"
+    expected: "exit 0 — NEGATIVE boundary and the noise budget in miniature. A malformed @node_slot method in a class body produces NO problem from the directory scan; those belong to the deploy parser. Red direction: widening the gate to every walked def turns this red naming the method, which is exactly what would make every healthy deploy-first plugin noisy in the field. Paired with the same POSITIVE CONTROL as E4, added after the round-1 review"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tests/test_scan_diagnostics.py"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -66,7 +66,7 @@ evals:
     criterion: AC-6
     executor: test
     cmd: config:executors.test.sdk_pytest_diag_import_floor
-    expected: "exit 0; the REGRESSION FLOOR for the shared predicate — ALL FOUR collection cases AC-6 names, not just the negatives: the ten-keyword in-block matrix, the nested case, bare module level plus try/except, AND the two negatives (import inside a def, inside a class body). Widened after the S1 gap-probe: measuring only the negatives is half a floor, and the edit lands inside _walk_module_scope, the parent package's core function. Must be green on BOTH patched and unpatched code, which is what makes it a floor rather than a restatement of E6. Red direction: handing back scope openers without stopping recursion reddens the negatives naming the leaked local import; short-circuiting recursion into non-scope blocks reddens the positives naming the keyword that stopped collecting"
+    expected: "exit 0; the REGRESSION FLOOR for the shared predicate — ALL FOUR collection cases AC-6 names, not just the negatives: the ten-keyword in-block matrix, the nested case, bare module level plus try/except, AND the two negatives (import inside a def, inside a class body). Widened after the S1 gap-probe: measuring only the negatives is half a floor, and the edit lands inside _walk_module_scope, the parent package's core function. Includes the parent's SIZE-PINNING case, so deleting a row from that ten-keyword matrix goes red here instead of shrinking it silently (added after the round-1 review found this eval claimed ten keywords while omitting the pin). Must be green on BOTH patched and unpatched code, which is what makes it a floor rather than a restatement of E6. Red direction: handing back scope openers without stopping recursion reddens the negatives naming the leaked local import; short-circuiting recursion into non-scope blocks reddens the positives naming the keyword that stopped collecting"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tests/test_scan_scope.py"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -74,7 +74,7 @@ evals:
     criterion: AC-6
     executor: script
     cmd: config:executors.script.diag_shared_walker_teeth
-    expected: "exit 0; MUTATION proving the RELATION, added after the S1 gap-probe. On a COPY of the tree, neuter _walk_module_scope at its one site (make it yield nothing) and require BOTH consumers to change behaviour: the rejection gate in scan.py stops naming reasons AND the import collector stops collecting. Green iff both move. A unit test of the walker cannot prove routing — an implementer can satisfy E1..E6 and every teeth eval by editing the shared walker as designed AND separately writing a private module-scope enumerator inside scan.py, leaving the two halves free to drift apart again, which is the exact defect class this package exists to remove. Red direction: if either consumer keeps working after the neuter, that consumer is not routed through the shared function and the script names it"
+    expected: "exit 0; MUTATION proving the RELATION, added after the S1 gap-probe. Matches only pytest's RENDERED assertion lines, not the echoed assert source, after the round-1 review found a needle that matched the source and would have passed even with an unnamed failure. On a COPY of the tree, neuter _walk_module_scope at its one site (make it yield nothing) and require BOTH consumers to change behaviour: the rejection gate in scan.py stops naming reasons AND the import collector stops collecting. Green iff both move. A unit test of the walker cannot prove routing — an implementer can satisfy E1..E6 and every teeth eval by editing the shared walker as designed AND separately writing a private module-scope enumerator inside scan.py, leaving the two halves free to drift apart again, which is the exact defect class this package exists to remove. Red direction: if either consumer keeps working after the neuter, that consumer is not routed through the shared function and the script names it"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "scripts/plugins/check-diagnostics-teeth.sh"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -91,7 +91,7 @@ evals:
     criterion: AC-7
     executor: test
     cmd: config:executors.test.sdk_pytest_diag_syntax_error
-    expected: "exit 0; a plugin .py holding a syntax error yields a problem naming THAT file (equality against the fixture path, and asserted NOT to be entry.py when the broken file is a different one), the line the parser reported, and the parser's message; and the generic 'no @node_slot ... methods found' problem is absent. Red direction: today the except clause swallows it and the test goes red printing the generic line it got instead"
+    expected: "exit 0; a plugin .py holding a syntax error yields a problem naming THAT file (equality against the fixture path, and asserted NOT to be entry.py when the broken file is a different one), the line the parser reported, and the parser's message; and the generic 'no @node_slot ... methods found' problem is absent. Runs TWO cases: the broken file IS entry.py, and — added after the round-1 review — the broken file is NOT entry.py (a healthy entry.py beside a broken helper.py), where the problem must name helper.py and must NOT name entry.py. Without that second case an implementation that always blames entry.py passes, which is the exact defect the parent package existed to remove. Red direction: today the except clause swallows it and the test goes red printing the generic line it got instead"
     paths: ["sdk/tongflow/_ast_utils.py", "sdk/tongflow/scan.py", "sdk/tests/test_scan_diagnostics.py"]
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
