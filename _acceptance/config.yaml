@@ -159,6 +159,16 @@ executors:
     # The pre-2026-08-07 shared venv lived AT the path that is now the root of
     # per-plugin venvs, so its corpse would be enumerated as if it were a plugin.
     unit_venv_legacy_migration: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'legacy'"
+    sdk_pytest_scope_with_deploy: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k deploy_with_image_imports
+    sdk_pytest_scope_with_scan: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k scan_with_image_imports
+    sdk_pytest_scope_nested: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k 'non_scope_block or nested_blocks'
+    sdk_pytest_scope_function_local: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k 'function_local or class_body'
+    sdk_pytest_scope_import_spellings: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k import_spelling
+    sdk_pytest_scope_prior_behaviour: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k prior_behaviour
+    sdk_pytest_reason_not_sdk_model: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k reason_names_defining_file
+    sdk_pytest_reason_missing_annotation: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k reason_missing_annotation
+    sdk_pytest_reason_missing_param: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k reason_missing_param
+    sdk_pytest_reason_single_source: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py -k reason_single_source
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -309,6 +319,12 @@ executors:
     # wider "gate clear apart from me" is unreachable with two features in flight.
     lcp_resign_wave: "bash scripts/acceptance/check-resign-wave.sh local-cpu-plugins origin/main"
     lcp_resign_wave_teeth: "bash scripts/acceptance/check-resign-wave-teeth.sh"
+    check_scan_noise: bash scripts/plugins/check-scan-noise.sh
+    check_overlay_discoverable_fixture: bash scripts/plugins/check-overlay-discoverable.sh fixture
+    check_overlay_discoverable_real: bash scripts/plugins/check-overlay-discoverable.sh real
+    check_scan_blast_radius: bash scripts/plugins/check-scan-blast-radius.sh
+    check_scope_walker_teeth: bash scripts/plugins/check-scope-walker-teeth.sh
+    check_reason_teeth: bash scripts/plugins/check-reason-teeth.sh
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
