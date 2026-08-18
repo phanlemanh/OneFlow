@@ -1,7 +1,7 @@
 ---
 schema_version: 2
 feature_slug: scan-with-block-imports
-verdict: PENDING-JUDGMENT
+verdict: PASS
 triage_failed: true
 failed_evals: []
 reason:
@@ -9,10 +9,18 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: a33e0df4db5253e190051a947576c97a6bd564dc
-human_signoff:
+human_signoff: Manh Phan 2026-08-18
 ---
 
 # Evidence Report: scan-with-block-imports
+
+> **Nâng PENDING-JUDGMENT lên PASS tại Cổng 2 — Manh Phan, 2026-08-18.** Vòng chấm
+> để verdict ở PENDING-JUDGMENT vì phân loại phạm vi chạy không trọn
+> (`triage_failed: true`), tức máy KHÔNG khai là đã kiểm hết. Việc nâng lên PASS là
+> chữ ký của người đã tự đọc toàn bộ `review-findings.md`, không phải kết luận của
+> máy. Hai điều đã chốt kèm chữ ký: đường `entry.py` không thuộc gói này (AC-2 đã thu
+> phạm vi, hợp đồng kế đóng nó) và năm giới hạn đã biết ghi trong `## Notes` của
+> contract.
 
 > **Ghi chú của người vận hành (không do máy chấm viết).** Vòng 2 có HAI lượt trên
 > cùng commit `a33e0df`, không đổi một dòng mã nào giữa hai lượt:
