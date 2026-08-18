@@ -7,6 +7,7 @@ from pathlib import Path
 from ._ast_utils import (
     extract_node_slot_decorators,
     extract_node_slot_defaults,
+    parse_failure_reason,
     slot_rejection_reason,
 )
 
@@ -159,12 +160,13 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
     try:
         src = path.read_text(encoding="utf-8")
     except OSError as e:
-        return None, f"{path}:1: read failed: {e}; fix: make deploy.py readable"
+        line, reason, hint = parse_failure_reason(e, path)
+        return None, f"{path}:{line}: {reason}; fix: {hint}"
     try:
         tree = ast.parse(src, filename=str(path))
     except SyntaxError as e:
-        line = e.lineno or 1
-        return None, f"{path}:{line}: syntax error: {e.msg}; fix: correct Python syntax"
+        line, reason, hint = parse_failure_reason(e, path)
+        return None, f"{path}:{line}: {reason}; fix: {hint}"
 
     cls_name = "Inference"
     method_names: frozenset[str] = frozenset()

@@ -14,6 +14,7 @@ from ._ast_utils import (
     REJECTION_HINT,
     SLOT_MODELS_CONST,
     _walk_module_scope,
+    parse_failure_reason,
     extract_default_slots,
     extract_node_slot_decorators,
     extract_node_slot_defaults,
@@ -145,8 +146,12 @@ def _scan_methods_by_slot_in_file(
     try:
         src = path.read_text(encoding="utf-8")
         tree = ast.parse(src, filename=str(path))
-    except (OSError, SyntaxError):
-        return {}, set(), [], []
+    except (OSError, SyntaxError) as exc:
+        # A file that will not parse HAS a reason. Returning it in the
+        # `rejections` slot both routes it into `errors` and lets the existing
+        # `if not rejections:` guard suppress the generic entry.py line.
+        line, reason, hint = parse_failure_reason(exc, path)
+        return {}, set(), [], [_scan_error(path, reason, hint, line=line)]
 
     out: dict[str, str] = {}
     defaults: set[str] = set()

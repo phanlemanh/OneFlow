@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 from collections.abc import Callable
 from functools import lru_cache
+from pathlib import Path
 
 
 def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
@@ -132,6 +133,23 @@ REJECTION_HINT = (
     "annotate the input parameter and the return value with tongflow.models "
     "types imported at module scope"
 )
+
+
+def parse_failure_reason(
+    exc: OSError | SyntaxError,
+    path: Path,
+) -> tuple[int, str, str]:
+    """
+    ``(line, reason, hint)`` for a file that could not be read or parsed.
+
+    Both readers word this the same way from here: a plugin file swallowed by
+    the directory scan and a ``deploy.py`` rejected by the deploy parser say the
+    same sentence, so a plugin author never sees two spellings of one failure.
+    """
+
+    if isinstance(exc, SyntaxError):
+        return (exc.lineno or 1, f"syntax error: {exc.msg}", "correct Python syntax")
+    return (1, f"read failed: {exc}", f"make {path.name} readable")
 
 
 def slot_rejection_reason(

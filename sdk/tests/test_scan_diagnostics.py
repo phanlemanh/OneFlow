@@ -9,9 +9,14 @@ Inference branch overwriting reasons, and a swallowed parse failure.
 from __future__ import annotations
 
 import ast
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+import tongflow
 from tongflow._ast_utils import REASON_MISSING_ANNOTATION, _walk_module_scope
 from tongflow.scan import scan
 
@@ -243,3 +248,145 @@ def test_bare_module_level_well_formed_stays_quiet(tmp_path):
         f"a well-formed @node_slot def at column 0 did not register; errors={msgs}"
     )
     assert msgs == [], f"a healthy plugin must produce no problems; got {msgs}"
+
+
+def test_syntax_error_names_its_own_file_and_line(tmp_path):
+    """AC-7 - a typo in a plugin file is the likeliest authoring mistake there
+    is, and it currently produces the generic line pointing at entry.py."""
+    src = _ENTRY_HEAD + "def broken(:\n    ...\n"
+    root = _write_entry_plugin(tmp_path, src)
+    payload = scan(root, _write_abi(tmp_path))
+    msgs = _problems(payload)
+    entry = root / _PLUGIN_ID / "entry.py"
+    assert any(f"{entry}:4:" in m and "syntax error" in m for m in msgs), (
+        f"a syntax error at line 4 of {entry} produced no problem naming that "
+        f"file and line; got {msgs}"
+    )
+    assert not _generic(msgs), (
+        f"the generic line must yield to the syntax error; got {msgs}"
+    )
+
+
+def test_unreadable_file_names_the_read_failure(tmp_path):
+    """AC-8 - same family, other exception."""
+    if os.geteuid() == 0:
+        pytest.skip(
+            "running as root: mode 000 is not enforced, so this cannot be measured"
+        )
+    src = _entry_src(None, _GOOD_FN)
+    root = _write_entry_plugin(tmp_path, src)
+    entry = root / _PLUGIN_ID / "entry.py"
+    entry.chmod(0o000)
+    try:
+        payload = scan(root, _write_abi(tmp_path))
+    finally:
+        entry.chmod(0o644)
+    msgs = _problems(payload)
+    assert any(f"{entry}:1:" in m and "read failed" in m for m in msgs), (
+        f"an unreadable plugin file produced no problem naming it; got {msgs}"
+    )
+    assert not _generic(msgs), (
+        f"the generic line must yield to the read failure; got {msgs}"
+    )
+
+
+def test_parse_failure_wording_single_source_mutation(tmp_path):
+    """AC-10 - MUTATION, not equality. Replace the sentence inside
+    _ast_utils.py with a sentinel on a copy of the tree; if either reader still
+    emits the old wording, it words the failure locally. Two equal strings
+    cannot tell one source from two identical copies; only the mutation can."""
+    pkg = Path(tongflow.__file__).resolve().parent
+    copy_root = tmp_path / "sdkcopy"
+    shutil.copytree(
+        pkg, copy_root / "tongflow", ignore=shutil.ignore_patterns("__pycache__")
+    )
+    ast_utils = copy_root / "tongflow" / "_ast_utils.py"
+    text = ast_utils.read_text(encoding="utf-8")
+    assert "syntax error" in text, (
+        "the parse-failure sentence is not a literal in _ast_utils.py - it "
+        "cannot be the single source if it is composed elsewhere"
+    )
+    sentinel = "SENTINEL-PARSE-4c07"
+    ast_utils.write_text(text.replace("syntax error", sentinel), encoding="utf-8")
+
+    # Two plugins in one scan: one broken through the plugin-file reader, one
+    # through the deploy.py reader.
+    root = tmp_path / "plugins"
+    entry_plugin = root / "oneflow-api-entrybad"
+    entry_plugin.mkdir(parents=True)
+    (entry_plugin / "entry.py").write_text("def broken(:\n    ...\n", encoding="utf-8")
+    deploy_plugin = root / _PLUGIN_ID
+    deploy_plugin.mkdir(parents=True)
+    (deploy_plugin / "entry.py").write_text(
+        "def main() -> None:\n    ...\n", encoding="utf-8"
+    )
+    (deploy_plugin / "deploy.py").write_text(
+        "class Inference(:\n    ...\n", encoding="utf-8"
+    )
+
+    env = {**os.environ, "PYTHONPATH": str(copy_root)}
+    probe = subprocess.run(
+        [sys.executable, "-c", "import tongflow; print(tongflow.__file__)"],
+        env=env,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert probe.stdout.strip().startswith(str(copy_root)), (
+        f"the subprocess loaded tongflow from {probe.stdout.strip()!r}, not the "
+        f"mutated copy under {copy_root} - the mutation would not be measured"
+    )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tongflow",
+            "--root",
+            str(root),
+            "--abi",
+            str(_write_abi(tmp_path)),
+        ],
+        env=env,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    out = proc.stdout
+    assert sentinel in out, (
+        "reader 1 (the plugin-file scan) does not route through the shared "
+        f"helper. Output was:\n{out}"
+    )
+    assert "syntax error" not in out, (
+        "reader 1 still words the failure locally, so the sentence has two "
+        f"sources, not one. Output was:\n{out}"
+    )
+
+    # Reader 2 must be driven DIRECTLY. The directory scan reads every .py in
+    # the plugin folder, deploy.py included, so a sentinel in the scan output
+    # proves only that reader 1 saw it — counting occurrences there would let
+    # one reader stand in for the other and never measure parse_deploy_py.
+    direct = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; from pathlib import Path;"
+            " from tongflow.parse_deploy import parse_deploy_py;"
+            " print(parse_deploy_py(Path(sys.argv[1]))[1])",
+            str(deploy_plugin / "deploy.py"),
+        ],
+        env=env,
+        cwd=str(tmp_path),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert sentinel in direct.stdout, (
+        "reader 2 (parse_deploy_py) does not route through the shared helper - "
+        f"it words the failure locally. Output was:\n{direct.stdout}{direct.stderr}"
+    )
+    assert "syntax error" not in direct.stdout, (
+        "reader 2 still emits the old wording, so the sentence has two sources, "
+        f"not one. Output was:\n{direct.stdout}"
+    )
