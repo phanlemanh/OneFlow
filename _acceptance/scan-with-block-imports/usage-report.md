@@ -48,3 +48,48 @@
 - **claude-sonnet-5**: 16 agent · 175 calls · out 128,906 · in 2,089 · cache_read 12,872,412 · cache_create 1,131,701
 - **claude-haiku-4-5-20251001**: 22 agent · 48 calls · out 15,733 · in 428 · cache_read 1,545,426 · cache_create 610,739
 
+### S4 round 2 — wf_b0bd63db-3b1 (36 agent, 164,522 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:measurement | claude-opus-5 | 11 | 25,269 | 21 | 970,956 | 389 |
+| synthesize:report | claude-sonnet-5 | 6 | 20,905 | 12 | 457,093 | 234 |
+| review:bugs | claude-opus-5 | 13 | 18,959 | 25 | 1,131,284 | 294 |
+| review:conventions | claude-opus-5 | 18 | 15,861 | 2,833 | 1,581,530 | 287 |
+| refute:check-scope-walker-teeth.sh | claude-sonnet-5 | 15 | 15,389 | 30 | 1,097,810 | 245 |
+| refute:scan.py | claude-sonnet-5 | 29 | 12,336 | 58 | 2,405,305 | 236 |
+| refute:parse_deploy.py | claude-sonnet-5 | 13 | 11,262 | 26 | 968,356 | 170 |
+| refute:scan.py | claude-sonnet-5 | 20 | 9,433 | 40 | 1,600,129 | 181 |
+| triage | claude-sonnet-5 | 2 | 4,939 | 4 | 69,736 | 60 |
+| baseline:diffBase | claude-sonnet-5 | 8 | 4,846 | 16 | 524,941 | 76 |
+| refute:check-scan-blast-radius.sh | claude-sonnet-5 | 12 | 4,579 | 24 | 818,116 | 114 |
+| refute:parse_deploy.py | claude-sonnet-5 | 5 | 2,588 | 10 | 314,980 | 51 |
+| refute:README.md | claude-sonnet-5 | 5 | 1,995 | 1,567 | 301,498 | 43 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 1,304 | 18 | 61,728 | 23 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 1,034 | 18 | 61,691 | 18 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 6 | 1,003 | 50 | 249,950 | 31 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 987 | 20 | 61,699 | 42 |
+| capture:provenance | claude-sonnet-5 | 2 | 842 | 4 | 64,024 | 23 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 820 | 18 | 61,799 | 14 |
+| machine:bash scripts/plugins/check-overlay-disco | claude-haiku-4-5-20251001 | 2 | 805 | 18 | 61,703 | 16 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 753 | 18 | 61,758 | 15 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 734 | 18 | 61,687 | 17 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 704 | 18 | 60,700 | 15 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 702 | 18 | 61,754 | 14 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 676 | 18 | 61,735 | 19 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 659 | 18 | 61,762 | 14 |
+| machine:bash scripts/plugins/check-scan-blast-ra | claude-haiku-4-5-20251001 | 2 | 659 | 18 | 61,705 | 14 |
+| machine:bash scripts/plugins/check-scope-walker- | claude-haiku-4-5-20251001 | 2 | 649 | 18 | 61,704 | 14 |
+| machine:bash scripts/plugins/check-scan-noise.sh | claude-haiku-4-5-20251001 | 2 | 614 | 18 | 61,703 | 15 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 590 | 18 | 61,752 | 14 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 582 | 18 | 61,754 | 13 |
+| machine:bash scripts/plugins/check-reason-teeth. | claude-haiku-4-5-20251001 | 2 | 552 | 18 | 61,701 | 12 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 455 | 18 | 61,691 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 385 | 18 | 61,758 | 14 |
+| machine:bash scripts/plugins/check-overlay-disco | claude-haiku-4-5-20251001 | 2 | 341 | 18 | 61,703 | 16 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 311 | 18 | 61,752 | 14 |
+
+- **claude-opus-5**: 3 agent · 42 calls · out 60,089 · in 2,879 · cache_read 3,683,770 · cache_create 289,320
+- **claude-sonnet-5**: 11 agent · 117 calls · out 89,114 · in 1,791 · cache_read 8,621,988 · cache_create 740,136
+- **claude-haiku-4-5-20251001**: 22 agent · 48 calls · out 15,319 · in 430 · cache_read 1,545,189 · cache_create 570,028
+
