@@ -5,7 +5,7 @@ slug: scan-with-block-imports
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [plugins, sdk]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-18
 ---
@@ -38,9 +38,14 @@ Source input: [design](../../docs/superpowers/specs/2026-08-18-scan-with-block-i
   whose `@deploy` class has a `@node_slot` method annotated with those models, When
   `parse_deploy_py` parses it, Then `methods_by_slot` contains that slot mapped to that
   method name.
-- AC-2: Given the same import shape in a plugin file scanned by the entry-file path,
-  When `scan()` runs over the plugin directory, Then the slot appears in the scan result
-  and no "no @node_slot methods found" problem is raised for that plugin.
+- AC-2: (amendment 2026-08-18, Cổng 2 vòng 2 — thu phạm vi) Given the same import shape
+  in a plugin directory whose handler is a method on a `@deploy` class, When `scan()` runs
+  over that directory, Then the slot appears in the scan result and no "no @node_slot
+  methods found" problem is raised for that plugin. *(Narrowed at Gate 2 on evidence: the
+  earlier wording said "the entry-file path", but the fixture's `entry.py` holds no
+  handler, so the eval reaches the `@deploy` fallback — it never measured a module-level
+  `@node_slot` function in `entry.py`. That cell, and the diagnostic hole the review found
+  in it, belong to the follow-up contract; this package does not claim it.)*
 - AC-3: Given a model import placed inside each of the ten Python block keywords that
   do **not** open a scope — `with`, `if`, `elif`, `else`, `for`, `while`, `try`,
   `except`, `finally`, `match` — When the module is parsed, Then the imported names are
@@ -125,8 +130,12 @@ for spaces above ~50 cells.
   khoá) và AC-4 (chân âm `def`/`class`).
 - **Đường tiêu thụ** — `scan.py` (quét mọi tệp `.py`) · `parse_deploy.py` (class
   `@deploy`). Bằng chứng "đủ": chỉ có đúng hai chỗ gọi trong toàn SDK, đọc được ở
-  `scan.py:153` và `parse_deploy.py:55`. Phủ bởi AC-1, AC-2 (mỗi đường một ca) và AC-10
-  (cùng một lý do qua cả hai đường).
+  `scan.py:153` và `parse_deploy.py:55`. **Thu phạm vi 2026-08-18 (Cổng 2 vòng 2):** ô
+  `parse_deploy.py` phủ bởi AC-1 và AC-2; ô `scan.py` chỉ phủ ở nhánh CHẨN ĐOÁN (AC-7 tới
+  AC-9, hàm mức module) và ở AC-10 (cùng một lý do qua cả hai đường) — nhánh ĐĂNG KÝ của
+  ô đó, tức hàm mức module mang `@node_slot` trong `entry.py` với import nằm trong khối
+  không mở phạm vi, KHÔNG được gói này đo và không được gói này hứa. Đó là việc của hợp
+  đồng kế; xem mục "Việc tách ra hợp đồng riêng" trong Notes.
 - **Kết cục của method mang `@node_slot`** — được đăng ký · loại vì chú thích không phải
   model của SDK · loại vì thiếu chú thích · loại vì thiếu tham số. Bằng chứng "đủ": bốn
   nhánh `continue` đọc được tại `scan.py:159-167` và `parse_deploy.py:62-78`. Phủ bởi
