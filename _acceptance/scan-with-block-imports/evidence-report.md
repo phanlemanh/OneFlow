@@ -1,7 +1,8 @@
 ---
 schema_version: 2
 feature_slug: scan-with-block-imports
-verdict: PASS
+verdict: PENDING-JUDGMENT
+triage_failed: true
 failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
@@ -12,6 +13,8 @@ human_signoff:
 ---
 
 # Evidence Report: scan-with-block-imports
+
+⚠ phân loại phạm vi KHÔNG chạy được: không có lỗi nào được máy tự sửa vòng này; danh sách đầy đủ nằm trong review-findings.md; người xem lại toàn bộ trước khi ký.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -37,19 +40,19 @@ human_signoff:
 - eval: E1
   run_id: minted-scan-with-block-imports-E1-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_with_deploy
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     .                                                                        [100%]
-    1 passed in 0.21s
+    1 passed in 0.16s
 
 - eval: E2
   run_id: minted-scan-with-block-imports-E2-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_with_scan
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
@@ -57,38 +60,39 @@ human_signoff:
 - eval: E3
   run_id: minted-scan-with-block-imports-E3-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_nested
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ............                                                             [100%]
-    12 passed in 0.17s
+    12 passed in 0.03s
 
 - eval: E4
   run_id: minted-scan-with-block-imports-E4-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_function_local
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ..                                                                       [100%]
-    2 passed in 0.02s
+    2 passed in 0.03s
 
 - eval: E5
   run_id: minted-scan-with-block-imports-E5-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_import_spellings
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
-    3 passed in 0.12s
+    ...                                                                      [100%]
+    3 passed in 0.04s
 
 - eval: E6
   run_id: minted-scan-with-block-imports-E6-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_scope_prior_behaviour
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
@@ -96,48 +100,48 @@ human_signoff:
 - eval: E7
   run_id: minted-scan-with-block-imports-E7-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_reason_not_sdk_model
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     .                                                                        [100%]
-    1 passed in 0.15s
+    1 passed in 0.03s
 
 - eval: E8
   run_id: minted-scan-with-block-imports-E8-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_reason_missing_annotation
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
-    . [100%]
-    1 passed in 0.04s
+    .                                                                        [100%]
+    1 passed in 0.02s
 
 - eval: E9
   run_id: minted-scan-with-block-imports-E9-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_reason_missing_param
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
-    1 passed in 0.02s
+    1 passed in 0.16s
 
 - eval: E10
   run_id: minted-scan-with-block-imports-E10-r2
   exit_code: 0
-  baseline: n-a
+  baseline: red
   verifier: config:executors.test.sdk_pytest_reason_single_source
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     .                                                                        [100%]
-    1 passed in 0.22s
+    1 passed in 0.26s
 
 - eval: E11
   run_id: minted-scan-with-block-imports-E11-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_scan_noise
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ok: over 5 installed plugins, no plugin became newly problematic at HEAD
 
@@ -146,7 +150,7 @@ human_signoff:
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_overlay_discoverable_fixture
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     fixture deploy.py matches its pinned hash (b3ac7ff6ab0f9a556f8a48ff44f51b58f6912037aaec5da752e0abb3eb5c9e6e)
     tongflow loaded from this repo: /Users/manh-macmini/dev/oneflow/sdk/tongflow/__init__.py
@@ -157,7 +161,7 @@ human_signoff:
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_scan_blast_radius
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ok: no contract chokepoint touched, SDK version unchanged since 29d0c3be811408297827f75d7c7931c11e0973ed
 
@@ -166,7 +170,7 @@ human_signoff:
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_scope_walker_teeth
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ok: reverting the walker turns E1..E5 red and names the missing slot COMPOSE_OVERLAY
 
@@ -175,7 +179,7 @@ human_signoff:
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_overlay_discoverable_real
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     tongflow loaded from this repo: /Users/manh-macmini/dev/oneflow/sdk/tongflow/__init__.py
     ok [real]: compose-overlay served by ['oneflow-modal-compose-overlay'], no problems for oneflow-modal-compose-overlay
@@ -185,9 +189,21 @@ human_signoff:
   exit_code: 0
   baseline: red
   verifier: config:executors.script.check_reason_teeth
-  verified_at: 2026-08-18T03:53:16Z
+  verified_at: 2026-08-18T11:15:00+07:00
   output: |
     ok: removing the reason emission turns E7..E10 red and names the absent reason
+
+### Full regression suites (context, not mapped to a single contract eval)
+
+These ran successfully this round and confirm nothing outside the mapped
+evals is broken:
+
+- `pnpm build && pnpm typecheck` — exit 0. Last line: `$ tsc --noEmit`.
+- `pnpm lint:check` — exit 0. `Checked 431 files in 182ms. No fixes applied.`
+- `pnpm test` — exit 0. `Tests 427 passed (427)`.
+- `cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q` — exit 0. `217 passed in 6.18s`.
+- `pnpm verify:plugins` — exit 0. `[verify-plugins-scan] OK`.
+- `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — exit 0. `Wrote sdk/tongflow/_data/tongflow.abi.json` / `[no diff detected]`.
 
 ## Analyst
 
@@ -199,9 +215,8 @@ none — every multi-run eval is uniform
 
 ## Iterations
 
-Round 1: All 16 evals passed on the first pass; scope-triage surfaced review findings, several classified out-of-contract (proposed as new-contract or known-limits) — signed off PASS.
-Round 2 (attempt 1): BLOCKED — the Bash tool's safety classifier (claude-sonnet-5) was rate-limited for most of the round, so 13 of 16 planned eval commands (E1-E10, E11, E12, E14b) never executed; E13/E14/E15 and the full regression suites did run and passed. Retried once the classifier recovered.
-Round 2 (attempt 2, this report): All 16 evals ran for real and passed; full regression suites (pnpm build/typecheck/lint/test, sdk full pytest suite, verify:plugins, gen:abi diff) also passed clean. Verdict PASS.
+Round 1: PASS — evidence committed for this feature's criteria (see commit `f9368f4 chore(acceptance): S4 round 1 evidence for scan-with-block-imports (PASS)`).
+Round 2: this attempt was retried after an earlier same-round pass ended BLOCKED (Bash tool safety classifier rate-limited on 13 of 16 evals). This retry ran all 16 machine evals (E1-E15/E14b) to completion — all PASS, all baseline: red (discriminating) — but scope-triage could not run, so no finding this round was auto-classified into or out of contract; verdict is PENDING-JUDGMENT with `triage_failed: true`, awaiting full human review of review-findings.md before Gate 2 can sign off.
 
 ## Gate 2 checklist (human)
 
@@ -210,6 +225,10 @@ Round 2 (attempt 2, this report): All 16 evals ran for real and passed; full reg
       `human_override: <name> <date>` line
 - [ ] T3 only: personally verify ALL judgment items and fill `human_override`
       on each (judge verdicts are advisory; the hook blocks PASS without them)
+- [ ] Scope-triage failed this round (`triage_failed: true`) — personally
+      review every finding in review-findings.md (all sections, including
+      `## Chưa phân loại (triage-failed)`) since the machine did not classify
+      or fix any of them
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter

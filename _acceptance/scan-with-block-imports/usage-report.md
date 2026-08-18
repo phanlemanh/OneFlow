@@ -93,3 +93,55 @@
 - **claude-sonnet-5**: 11 agent · 117 calls · out 89,114 · in 1,791 · cache_read 8,621,988 · cache_create 740,136
 - **claude-haiku-4-5-20251001**: 22 agent · 48 calls · out 15,319 · in 430 · cache_read 1,545,189 · cache_create 570,028
 
+### S4 round 2 (rerun after BLOCKED) — wf_2518a970-b41 (43 agent, 216,564 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:measurement | claude-opus-5 | 22 | 20,733 | 42 | 2,015,576 | 440 |
+| refute:check-scope-walker-teeth.sh | claude-sonnet-5 | 11 | 19,820 | 750 | 845,595 | 287 |
+| synthesize:report | claude-sonnet-5 | 4 | 19,681 | 8 | 304,548 | 210 |
+| review:bugs | claude-opus-5 | 19 | 17,574 | 1,806 | 1,689,062 | 305 |
+| review:conventions | claude-opus-5 | 28 | 16,607 | 54 | 2,429,761 | 331 |
+| refute:test_scan_scope.py | claude-sonnet-5 | 12 | 15,714 | 648 | 895,703 | 224 |
+| triage | claude-sonnet-5 | 2 | 13,176 | 4 | 97,674 | 142 |
+| refute:test_scan_scope.py | claude-sonnet-5 | 11 | 10,426 | 4,569 | 851,823 | 162 |
+| refute:deploy.py.sha256 | claude-sonnet-5 | 6 | 8,464 | 1,927 | 379,529 | 121 |
+| refute:check-scan-blast-radius.sh | claude-sonnet-5 | 7 | 7,053 | 14 | 452,703 | 114 |
+| refute:parse_deploy.py | claude-sonnet-5 | 13 | 7,030 | 26 | 971,253 | 124 |
+| refute:scan.py | claude-sonnet-5 | 11 | 6,895 | 276 | 852,436 | 119 |
+| refute:_ast_utils.py | claude-sonnet-5 | 7 | 6,766 | 14 | 490,709 | 99 |
+| refute:scan.py | claude-sonnet-5 | 12 | 6,150 | 1,727 | 907,121 | 149 |
+| baseline:diffBase | claude-sonnet-5 | 9 | 5,922 | 18 | 570,160 | 86 |
+| refute:parse_deploy.py | claude-sonnet-5 | 7 | 5,135 | 14 | 446,745 | 79 |
+| refute:plugins.md | claude-sonnet-5 | 9 | 4,335 | 18 | 610,320 | 77 |
+| refute:scan.py | claude-sonnet-5 | 11 | 3,577 | 131 | 753,408 | 80 |
+| refute:test_scan_scope.py | claude-sonnet-5 | 9 | 3,519 | 4,882 | 612,073 | 83 |
+| refute:scan.py | claude-sonnet-5 | 8 | 2,936 | 16 | 540,059 | 64 |
+| capture:provenance | claude-sonnet-5 | 2 | 1,074 | 4 | 88,784 | 23 |
+| machine:bash scripts/plugins/check-reason-teeth. | claude-haiku-4-5-20251001 | 2 | 961 | 18 | 61,645 | 18 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 858 | 20 | 61,643 | 38 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 800 | 18 | 61,743 | 13 |
+| machine:bash scripts/plugins/check-scan-blast-ra | claude-haiku-4-5-20251001 | 2 | 758 | 18 | 61,649 | 15 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 736 | 18 | 61,702 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 710 | 18 | 61,725 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 691 | 18 | 61,696 | 13 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 690 | 18 | 61,672 | 13 |
+| machine:bash scripts/plugins/check-overlay-disco | claude-haiku-4-5-20251001 | 2 | 681 | 18 | 61,647 | 14 |
+| machine:bash scripts/plugins/check-overlay-disco | claude-haiku-4-5-20251001 | 2 | 670 | 18 | 61,647 | 14 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 660 | 18 | 61,679 | 18 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 642 | 18 | 61,698 | 13 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 615 | 18 | 42,003 | 12 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 596 | 18 | 61,702 | 12 |
+| machine:bash scripts/plugins/check-scan-noise.sh | claude-haiku-4-5-20251001 | 2 | 595 | 18 | 61,647 | 14 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 593 | 18 | 61,631 | 15 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 571 | 18 | 61,696 | 12 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 567 | 18 | 61,698 | 13 |
+| machine:bash scripts/plugins/check-scope-walker- | claude-haiku-4-5-20251001 | 2 | 543 | 18 | 61,648 | 12 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 526 | 18 | 61,635 | 12 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 301 | 18 | 61,635 | 14 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 213 | 18 | 61,702 | 12 |
+
+- **claude-opus-5**: 3 agent · 69 calls · out 54,914 · in 1,902 · cache_read 6,134,399 · cache_create 300,371
+- **claude-sonnet-5**: 18 agent · 151 calls · out 147,673 · in 15,046 · cache_read 10,670,643 · cache_create 1,138,835
+- **claude-haiku-4-5-20251001**: 22 agent · 44 calls · out 13,977 · in 398 · cache_read 1,337,143 · cache_create 585,192
+
