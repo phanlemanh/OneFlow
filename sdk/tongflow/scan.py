@@ -384,7 +384,15 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         needs_deploy = False
         deploy_py = pdir / "deploy.py"
         if not methods_by_ident and deploy_py.is_file():
-            dscan, _derr = parse_deploy_py(deploy_py)
+            dscan, derr = parse_deploy_py(deploy_py)
+            if derr:
+                # Already framed as `path:line: reason; fix: hint`. Appending to
+                # `rejections` is what lets the generic entry.py line yield —
+                # an unreadable deploy.py, a syntax error, or one slot claimed
+                # twice across two @deploy classes each said strictly more than
+                # "no @node_slot methods found in entry.py".
+                rejections.append(derr)
+                errors.append({"pluginId": plugin_id, "message": derr})
             if dscan:
                 for lineno, reason in dscan.slot_problems:
                     message = _scan_error(

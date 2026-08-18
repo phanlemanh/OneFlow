@@ -390,3 +390,43 @@ def test_parse_failure_wording_single_source_mutation(tmp_path):
         "reader 2 still emits the old wording, so the sentence has two sources, "
         f"not one. Output was:\n{direct.stdout}"
     )
+
+
+_DUP_DEPLOY = (
+    "from tongflow import deploy\n"
+    "from tongflow.slots import node_slot, NodeSlots\n" + _IMPORT + "\n\n"
+    "@deploy\n"
+    "class A:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def compose_overlay(self, input: ComposeOverlayInput) -> ComposeOverlayOutput:\n"
+    "        ...\n\n"
+    "@deploy\n"
+    "class B:\n"
+    "    @node_slot(NodeSlots.COMPOSE_OVERLAY)\n"
+    "    def compose_overlay(self, input: ComposeOverlayInput) -> ComposeOverlayOutput:\n"
+    "        ...\n"
+)
+
+
+def test_deploy_parse_error_surfaces_in_scan_errors(tmp_path):
+    """AC-9 - the string parse_deploy_py returns is already correctly worded;
+    the defect is `dscan, _derr = ...` dropping it on the floor. Asserts the
+    RETURNED string surfaces, not merely that some error exists."""
+    from tongflow.parse_deploy import parse_deploy_py
+
+    root = tmp_path / "plugins"
+    pdir = root / _PLUGIN_ID
+    pdir.mkdir(parents=True)
+    (pdir / "entry.py").write_text("def main() -> None:\n    ...\n", encoding="utf-8")
+    (pdir / "deploy.py").write_text(_DUP_DEPLOY, encoding="utf-8")
+
+    _scan, derr = parse_deploy_py(pdir / "deploy.py")
+    assert derr, "the fixture must be a shape parse_deploy_py rejects"
+
+    payload = scan(root, _write_abi(tmp_path))
+    msgs = _problems(payload)
+    assert derr in msgs, (
+        f"the deploy parser's own error string was discarded. Expected {derr!r} "
+        f"in the scan errors; got {msgs}"
+    )
+    assert not _generic(msgs), f"the generic line must yield to it; got {msgs}"
