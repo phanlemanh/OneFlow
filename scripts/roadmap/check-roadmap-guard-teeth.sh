@@ -85,7 +85,9 @@ expect_red "3. sổ cái giữ dòng cho hồ sơ không còn ký"
 
 # 4. An ADR exists that the roadmap never mentions.
 build_fixture
-cp "$tmp/t/docs/adr/0011-local-first-execution.md" "$tmp/t/docs/adr/0012-a-decision-nobody-wrote-down.md"
+# 0099, not "next number": a real ADR taking the fixture's id would make this
+# perturbation silently test nothing (the id would already be mentioned).
+cp "$tmp/t/docs/adr/0011-local-first-execution.md" "$tmp/t/docs/adr/0099-a-decision-nobody-wrote-down.md"
 expect_red "4. có ADR mới mà roadmap chưa nhắc"
 
 # 5. SHARPEST: ADR-0011 still mentioned elsewhere, but stripped from the one
