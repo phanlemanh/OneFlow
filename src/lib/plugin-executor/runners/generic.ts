@@ -12,6 +12,7 @@ import { getScope, scopedDataDirFor } from "@/lib/runtime/scope.server";
 import { withStoredEnv } from "@/lib/settings/env-store.server";
 import { notifyTask } from "@/lib/task/emitter";
 import { parseProgressLine } from "../progress-protocol";
+import { provisioningMessage } from "../provisioning-events";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 function tryParseAbiOutput(stdout: string): Record<string, unknown> | null {
@@ -48,9 +49,21 @@ export async function execPlugin<S extends NodeSlot>(
     // deploy-first plugin (needsDeploy) that entry.py is a thin bridge that
     // deploys once and invokes the remote backend.
     const entryArgs = [cfg.entryFile || "entry.py"];
-    // Provision the shared plugin venv (SDK + this plugin's requirements.txt)
-    // and run the entry with it. Falls back to a bare interpreter on failure.
-    const python = await ensurePluginPython(req.pluginId, pluginDir);
+    // Provision this plugin's own venv (SDK + its requirements.txt) and run the
+    // entry with it. A plugin that declares requirements fails loudly here
+    // rather than falling back to a bare interpreter missing every dependency.
+    // The first run can take minutes, so each real provisioning step is
+    // forwarded to the client as it starts and as it finishes.
+    const python = await ensurePluginPython(
+        req.pluginId,
+        pluginDir,
+        (event) => {
+            notifyTask(req.taskId, TaskStatus.RUNNING, {
+                message: provisioningMessage(event),
+                provisioning: event,
+            });
+        },
+    );
     const tongflowSdkDir = join(resourcesDir(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,
