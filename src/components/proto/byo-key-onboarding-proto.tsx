@@ -37,8 +37,10 @@ const STRIP_LABELS: FirstRunStripLabels = {
         "installing-sdk": "Cài SDK",
         "installing-requirements": "Cài thư viện",
     },
-    elapsed: (sec) =>
-        `Lần đầu mất vài phút — đã ${sec}s. Những lần sau chạy ngay.`,
+    // No duration promise here: ledger d-20260807T051228Z-4616 bought the real
+    // milestone stream at the cost of a T3 escalation precisely so this line
+    // reports elapsed fact instead of pre-announcing "a few minutes".
+    elapsed: (sec) => `Đã ${sec}s. Những lần sau chạy ngay.`,
     ready: "Xong. Bấm Run trên node đầu tiên để chạy thử.",
     blocked: "Chưa chuẩn bị được",
     retry: "Thử lại",
@@ -78,7 +80,7 @@ const STRIP_STATES: Record<string, FirstRunState> = {
     ready: { phase: "ready" },
     blocked: {
         phase: "blocked",
-        reason: "Không kết nối được tới GitHub để tải plugin.",
+        reason: "Không tải được công cụ về máy — kiểm tra kết nối mạng.",
         retryable: true,
     },
 };

@@ -38,6 +38,14 @@ export type FirstRunState =
           elapsedSec: number;
       }
     | { phase: "ready" }
+    /**
+     * `reason` is read aloud to a first-run seller, so it carries the same ban
+     * the rest of this surface carries: no implementation nouns. Not just
+     * plugin ids — "GitHub", "venv", "pip", "registry" and their kin are all
+     * words this audience does not have. Say what failed in product terms
+     * ("không tải được công cụ về máy") and what to check; the retry control
+     * next to it already supplies the next move.
+     */
     | { phase: "blocked"; reason: string; retryable: boolean };
 
 export interface FirstRunStripProps {
