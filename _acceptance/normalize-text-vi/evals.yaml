@@ -195,20 +195,20 @@ evals:
 
   - id: E17a
     criterion: AC-14
-    executor: test
+    executor: script
     layer: backend-effect
-    cmd: config:executors.test.sdk_pytest_normalize_slot_roundtrip
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_slot.py", "sdk/tongflow/slots.py"]
+    cmd: config:executors.script.normalize_plugin_shell
+    paths: ["sdk/tongflow/text/", "sdk/tongflow/slots.py", "scripts/plugins/run-normalize-plugin-tests.sh"]
     expected: "exit 0; gọi slot method THẬT của vỏ plugin qua @node_slot với dict {'text': '<một dòng corpus>'} → success:true và text khớp ĐÚNG dòng corpus đó, so với hằng số corpus DÙNG CHUNG (không viết lại kỳ vọng tại chỗ); spy chứng minh hàm SDK được gọi ĐÚNG MỘT LẦN — chặn kịch bản vỏ tự cài lại logic hoặc vỏ trả thẳng input"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E17b
     criterion: AC-14
-    executor: test
+    executor: script
     layer: backend-effect
-    cmd: config:executors.test.sdk_pytest_normalize_slot_error
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_slot.py"]
-    expected: "exit 0; monkeypatch hàm SDK ném → vỏ trả success:false + error GHIM THÔNG ĐIỆP, không để lộ traceback. Nửa âm của cặp E17a trên cùng vỏ"
+    cmd: config:executors.script.normalize_plugin_shell
+    paths: ["sdk/tongflow/text/", "scripts/plugins/run-normalize-plugin-tests.sh"]
+    expected: "exit 0; CHUNG một lệnh guard với E17a — cả bộ test của vỏ chạy một lượt và guard in plugin_commit_sha để bằng chứng trích được đúng cây đã chạy. Nội dung nửa âm: monkeypatch hàm SDK ném → vỏ trả success:false + error GHIM THÔNG ĐIỆP, không để lộ traceback; và chuỗi đọc-không-hết đi qua vỏ vẫn ra success:false kèm token còn sót"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E15

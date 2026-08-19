@@ -226,14 +226,12 @@ executors:
     sdk_pytest_normalize_edges: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_edge_inputs"
     sdk_pytest_node_cache_normalize: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_node_cache_normalize.py"
     sdk_pytest_tier_a_allowlist: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_node_cache.py::test_tier_a_allowlist_pinned_and_in_abi"
-    sdk_pytest_normalize_conformance: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/conformance/test_conformance.py -k normalize_text_vi"
+    sdk_pytest_normalize_conformance: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/conformance/test_conformance.py -k normalize"
     unit_normalize_node: "pnpm vitest run src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx"
     unit_normalize_export: "pnpm vitest run src/lib/workflow/normalize-text-vi-export.test.ts"
     unit_tts_order_violation: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t violation"
     unit_tts_order_compliant: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t compliant"
     unit_tts_family_matches_abi: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t two-way"
-    sdk_pytest_normalize_slot_roundtrip: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_slot.py::test_slot_roundtrip_calls_sdk_once"
-    sdk_pytest_normalize_slot_error: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_slot.py::test_slot_reports_error_without_traceback"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -450,6 +448,10 @@ executors:
     pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
     # normalize-text-vi Gate 1 (2026-08-19): hai guard moi, file ha canh luc implement.
     normalize_registration_synced: "bash scripts/plugins/check-normalize-registration.sh"
+    # Vỏ plugin sống ở kho riêng (plugins/ bị gitignore), nên phép đo nó phải với
+    # tới cây đó — cùng cơ chế run-overlay-plugin-tests.sh. Lệch này đã trình và
+    # được duyệt ở Cổng 1.5; lời tiêu chí AC-14 không đổi.
+    normalize_plugin_shell: "bash scripts/plugins/run-normalize-plugin-tests.sh"
     # Tách đôi theo phản biện context sạch F4: nhánh ngoại tuyến chạy mọi vòng, nhánh trực
     # tuyến chỉ có nghĩa sau khi owner ký cho phép publish lên PyPI (hành vi không đảo ngược).
     normalize_sdk_train_local: "bash scripts/abi/check-normalize-sdk-train-local.sh"
