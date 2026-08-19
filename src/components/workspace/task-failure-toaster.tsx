@@ -1,13 +1,55 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { ErrorToastAction } from "@/components/ui/error-toast";
 import { showErrorToast } from "@/components/ui/error-toast";
 import { TaskStatus, WorkflowStatus } from "@/constants/task-status";
 import { getClientTranslator } from "@/i18n/client";
+import type { FailureAction } from "@/lib/onboarding/failure-actions";
+import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { SerializedWorkflowFailure } from "@/lib/task/error-envelope";
 import { buildTaskErrorDetail } from "@/lib/task/error-format";
 import { SSE_TASK_MESSAGE_EVENT } from "@/lib/task/sse-events";
 import type { SSEMessage } from "@/types/sse";
+
+/**
+ * Fired when the user takes the recovery exit offered on a failed task. The
+ * surface that owns the destination listens for it: the plugin manager for
+ * `install-plugin`, the node's key prompt for `enter-key`. Never fired for
+ * `kind: "none"` — an unrecognised failure gets no control at all.
+ */
+export const ONBOARDING_RECOVERY_EVENT = "onboarding-recovery-action";
+
+export type OnboardingRecoveryDetail = Exclude<FailureAction, { kind: "none" }>;
+
+function emitRecovery(detail: OnboardingRecoveryDetail) {
+    window.dispatchEvent(
+        new CustomEvent<OnboardingRecoveryDetail>(ONBOARDING_RECOVERY_EVENT, {
+            detail,
+        }),
+    );
+}
+
+/**
+ * The failure's cause decides the control. `none` returns undefined, which
+ * leaves the toast exactly as it is today: the plain message, no button.
+ */
+function recoveryControl(action: FailureAction): ErrorToastAction | undefined {
+    switch (action.kind) {
+        case "install-plugin":
+            return {
+                label: `Cài plugin ${action.pluginId}`,
+                onClick: () => emitRecovery(action),
+            };
+        case "enter-key":
+            return {
+                label: `Nhập khoá ${action.envKey}`,
+                onClick: () => emitRecovery(action),
+            };
+        case "none":
+            return undefined;
+    }
+}
 
 /**
  * Global listener that surfaces every task / workflow failure as a persistent
@@ -57,10 +99,12 @@ export function TaskFailureToaster() {
 
             // With an error message: "Task failed" headline + the message.
             // Without one: just the "Task failed" message, no redundant title.
+            // The message also decides which recovery exit to offer, if any.
             showErrorToast({
                 title: errorText ? t("taskFailed") : undefined,
                 message: errorText || t("taskFailed"),
                 detail,
+                action: recoveryControl(classifyFailure(errorText ?? "")),
                 id: `task-failed:${taskId}`,
             });
         };
