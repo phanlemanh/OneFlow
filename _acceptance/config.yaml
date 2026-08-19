@@ -22,7 +22,12 @@ executors:
     # PYTHONPATH keeps sdk/uv.lock and sdk/.venv untouched, so a verify round
     # never dirties the tree; the SDK's runtime deps are named explicitly
     # because PYTHONPATH imports tongflow from source rather than installing it.
-    sdk_pytest: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q"
+    # `--with vietnormalizer` added 2026-08-19 (normalize-text-vi Gate 1): it becomes a
+    # real runtime dependency of the SDK at 0.2.19, and the WHOLE suite — not just this
+    # feature's keys — imports tongflow.text.normalize_vi once the module lands. Omitting
+    # it here would turn the shared suite red on a collection ImportError that has nothing
+    # to do with whatever feature is being verified.
+    sdk_pytest: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q"
     # task-metering Gate 1 (2026-07-25): the test files land during implementation;
     # keys are declared now so eval refs stay portable (artifact-platform pattern).
     unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"
@@ -208,6 +213,27 @@ executors:
     # gap-probe P0-2: AC-6 promises FOUR collection cases unchanged; the negatives alone
     # are half a floor. All four of the parent's own node-ids, run as one criterion.
     sdk_pytest_diag_import_floor: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_block_matrix_covers_the_ten_keywords tests/test_scan_scope.py::test_non_scope_block_collects_import tests/test_scan_scope.py::test_nested_blocks_collect_import tests/test_scan_scope.py::test_prior_behaviour_module_level_and_try tests/test_scan_scope.py::test_function_local_import_is_not_collected tests/test_scan_scope.py::test_class_body_import_is_not_collected
+    # normalize-text-vi Gate 1 (2026-08-19): corpus vang song trong kho nay (design §3), nen moi
+    # eval doc-thanh-chu la pytest SDK chu khong phai guard clone repo plugin nhu ho overlay_*.
+    # --with vietnormalizer: engine chuan hoa la dep runtime cua SDK tu 0.2.19.
+    sdk_pytest_normalize_money: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_numbers_and_money_golden"
+    sdk_pytest_normalize_datetime: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_datetime_golden"
+    sdk_pytest_normalize_identifiers: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_identifiers_units_abbrev_golden"
+    sdk_pytest_normalize_ambiguous: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_ambiguous_policy_pinned"
+    sdk_pytest_normalize_residual_fail: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_residual_tokens_fail_and_are_listed"
+    sdk_pytest_normalize_residual_pass: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_clean_input_has_no_digits_left"
+    sdk_pytest_normalize_idempotent: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_idempotent_and_byte_identical"
+    sdk_pytest_normalize_edges: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_vi.py::test_edge_inputs"
+    sdk_pytest_node_cache_normalize: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_node_cache_normalize.py"
+    sdk_pytest_tier_a_allowlist: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_node_cache.py::test_tier_a_allowlist_pinned_and_in_abi"
+    sdk_pytest_normalize_conformance: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/conformance/test_conformance.py -k normalize_text_vi"
+    unit_normalize_node: "pnpm vitest run src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx"
+    unit_normalize_export: "pnpm vitest run src/lib/workflow/normalize-text-vi-export.test.ts"
+    unit_tts_order_violation: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t violation"
+    unit_tts_order_compliant: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t compliant"
+    unit_tts_family_matches_abi: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t two-way"
+    sdk_pytest_normalize_slot_roundtrip: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_slot.py::test_slot_roundtrip_calls_sdk_once"
+    sdk_pytest_normalize_slot_error: "cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with vietnormalizer python -m pytest -q tests/test_normalize_slot.py::test_slot_reports_error_without_traceback"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
@@ -422,6 +448,12 @@ executors:
     pnpm_keys_intact: "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
     pnpm_scope_confined: "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
     pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
+    # normalize-text-vi Gate 1 (2026-08-19): hai guard moi, file ha canh luc implement.
+    normalize_registration_synced: "bash scripts/plugins/check-normalize-registration.sh"
+    # Tách đôi theo phản biện context sạch F4: nhánh ngoại tuyến chạy mọi vòng, nhánh trực
+    # tuyến chỉ có nghĩa sau khi owner ký cho phép publish lên PyPI (hành vi không đảo ngược).
+    normalize_sdk_train_local: "bash scripts/abi/check-normalize-sdk-train-local.sh"
+    normalize_sdk_published: "bash scripts/abi/check-normalize-sdk-published.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

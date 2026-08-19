@@ -1,0 +1,228 @@
+# 26 eval / 15 tiêu chí — AC-1, AC-6, AC-9, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15 có nhiều eval.
+# Bốn tiêu chí cross-layer NGUYÊN TỬ (mọi eval của chúng phải chạy CÙNG một round — cấm ghép
+# bằng chứng backend round cũ với bằng chứng lớp trên round mới):
+#   AC-10 = E10a + E10b + E10c · AC-11 = E11a + E11b · AC-12 = E12a + E12b · AC-14 = E17a + E17b.
+# Sửa sau phản biện context sạch 19/08: E2/E3/E4 đổi sang ma trận toàn phần (F2) · thêm E10c
+# đối chiếu ABI hai chiều (F3) · E14 tách thành E14a ngoại tuyến + E14b trực tuyến (F4) ·
+# E8 thêm hai assert quan hệ về dạng Unicode (F5) · thêm E17a/E17b đo vỏ plugin thật (F1).
+# Corpus vàng nằm TRONG kho này (sdk/tests/test_normalize_vi.py) chứ không ở repo plugin —
+# quyết định §3 của design doc. Hệ quả: mọi eval đọc-thành-chữ đều khai `paths` và đều
+# hưởng carry-forward round delta, không cần guard clone-and-pytest như họ overlay_*.
+# Cặp hai chiều bắt buộc (MEASURE-BIRTH-CLAUSE) khai thẳng trong `expected`: chiều đỏ phải
+# ghim THÔNG ĐIỆP, không chỉ exit code.
+evals:
+  - id: E1a
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.gen_abi_clean
+    paths: ["config/tongflow.abi.json", "src/generated/abi/index.ts", "sdk/tongflow/_data/tongflow.abi.json", "scripts/gen-abi-types.ts"]
+    expected: "exit 0; generated TS + bản copy _data khớp ABI đã commit (git diff --exit-code). Chiều đỏ: xoá slot khỏi index.ts đã commit → diff đỏ, nêu đúng đường dẫn file lệch"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E1b
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.abi_python_gen_clean
+    paths: ["config/tongflow.abi.json", "sdk/tongflow/models/normalize_text_vi.py", "sdk/tongflow/node_slots.py", "sdk/tongflow/gen_models.py", "sdk/tongflow/gen_node_slots.py", "scripts/abi/check-python-gen-clean.sh"]
+    expected: "exit 0; chạy lại gen_models.py + gen_node_slots.py rồi git diff --exit-code sdk/tongflow/models sdk/tongflow/node_slots.py — có NormalizeTextViInput/Output + NORMALIZE_TEXT_VI, và file untracked cũng bị bắt"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_money
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py", "sdk/pyproject.toml"]
+    expected: "exit 0; MA TRẬN TOÀN PHẦN khai trước trong file test — trục biến thể {linh, lẻ, mốt, lăm, mươi-vs-mười} × trục vị trí {chục sau 20..90, trăm, nghìn, triệu, tỷ}, mỗi ô ≥1 ca (41 → bốn mươi MỐT, 125.000 → một trăm hai mươi LĂM nghìn, 105 → một trăm LINH năm); assert len(CORPUS_MONEY) == literal; expected là literal viết tay trong file test, KHÔNG dán từ output thư viện. Chiều đỏ: xoá một ô ma trận → assert đỏ nêu ĐÚNG TÊN Ô thiếu, không chỉ exit code"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_datetime
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; ma trận toàn phần {ngày, tháng, năm, giờ, phút, khoảng} × {có số 0 đứng đầu, không có, hai chữ số, bốn chữ số} khai trước trong file test, mỗi ô ≥1 ca — 19/8/2026, 19-08-2026, 14:30, 25-26/12; trật tự đọc ngày-tháng-năm; assert len(CORPUS_TIME) == literal. Chiều đỏ như E2 (ô trống → đỏ kèm tên ô)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_identifiers
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; ma trận toàn phần {điện thoại, đơn vị đo, viết tắt hành chính} × {đứng đầu câu, giữa câu, cuối câu} khai trước, mỗi ô ≥1 ca; 0901234567 đọc TỪNG CHỮ SỐ (không thành số lượng); m², km/h, kg bung đúng; TP.HCM → 'thành phố hồ chí minh', Q.7 → 'quận bảy', P.Bến Nghé → 'phường bến nghé' theo từ điển ngành trong kho, và KHÔNG còn dấu chấm viết tắt nào sót trong đầu ra; assert len(CORPUS_ID) == literal. Chiều đỏ: bỏ một mục từ điển → assert đỏ nêu đúng viết tắt không bung"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_ambiguous
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; 5/3 → 'năm tháng ba', 1.500 → 'một nghìn năm trăm', 10-15 → 'mười ĐẾN mười lăm' (không còn dấu gạch), đúng chốt hợp đồng và KHÔNG phụ thuộc ngữ cảnh câu (cùng chuỗi trong 3 câu khác nhau ra cùng kết quả). Chiều đỏ: đổi chốt trong code → assert đỏ nêu đúng ca mơ hồ nào lệch chốt"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6a
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_residual_fail
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; chuỗi có token không đọc được → success:false và error LIỆT KÊ ĐÚNG các token còn sót (so danh sách, không so chuỗi con). Đây là nửa ÂM của cặp hai chiều — nửa dương là E6b trên cùng fixture"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6b
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_residual_pass
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; cùng fixture ở dạng lành → success:true, đầu ra KHÔNG chứa ký tự 0-9 / ₫ / % / dấu gạch giữa hai số; VÀ luật QUAN HỆ: mọi ca corpus có dấu hiệu tiền ở đầu vào (₫, đ, VNĐ, VND) phải có từ chỉ tiền ở đầu ra — assert quan hệ vào↔ra trên từng ca, không phải assert vắng-mặt trên đầu ra. Chiều đỏ ghim: bỏ bước đổi ₫→đ ở tiền xử lý thì 1.999.000₫ ra 'một triệu chín trăm chín mươi chín nghìn' — không còn chữ số nên luật vắng-mặt vẫn xanh, chỉ luật quan hệ mới đỏ, và thông điệp phải nêu đúng ca đó"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_idempotent
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; chạy 2 lần byte-identical; normalize(normalize(x)) == normalize(x) trên TOÀN corpus (không chỉ vài mẫu). Chiều đỏ: chèn một quy tắc phụ thuộc trạng thái → assert đỏ nêu chuỗi nào không idempotent"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_edges
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    expected: "exit 0; rỗng/chỉ khoảng trắng → success:false + error rõ (thư viện tự nó trả chuỗi rỗng không báo lỗi — đây là việc của vỏ ta, phải có ca chứng minh); văn bản thuần chữ ra y nguyên TRỪ dạng chữ (so byte với bản lower() của đầu vào, không so 'gần giống'); chuỗi ≥10.000 ký tự và emoji/URL/email không crash; HAI ASSERT QUAN HỆ bắt buộc: unicodedata.is_normalized('NFC', out) đúng trên TOÀN corpus, và normalize(NFD(x)) == normalize(NFC(x)) byte-identical với mọi ca corpus có dấu. Chiều đỏ: gỡ bước chuẩn hoá dạng ở tiền xử lý → assert đỏ nêu đúng chuỗi nào lệch dạng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9a
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_normalize_node
+    paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx", "src/lib/abi/node-feature-registry.ts", "src/components/workspace/types.tsx"]
+    expected: "exit 0; node mount, handles đúng ABI (in:text, out:text); sourceSpec là textBatch() nên fan-out một-lời-gọi-mỗi-chuỗi GIỐNG node TTS (so trực tiếp với spec của textGenSpeechPresetNode, không hardcode kỳ vọng)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9b
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_normalize_export
+    paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/normalize-text-vi-export.test.ts", "src/lib/abi/node-feature-registry.ts"]
+    expected: "exit 0; exporter phát ExecutableNode có pluginId top-level + prompt chỉ chứa text — không bindings/paramMappings viết tay"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10a
+    criterion: AC-10
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.unit_tts_order_violation
+    paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts"]
+    expected: "exit 0; workflow có node TTS mà thượng nguồn KHÔNG có normalize-text-vi → export ném lỗi, thông điệp NÊU ĐÚNG id node vi phạm và việc phải làm; kiểm cho cả 4 slot TTS (text-gen-speech-preset/clone/instruct, text-audio-gen-speech), không chỉ một"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10b
+    criterion: AC-10
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.unit_tts_order_compliant
+    paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts"]
+    expected: "exit 0; workflow có normalize-text-vi trên đường phụ thuộc thượng nguồn của TTS (kể cả cách 2 node) → export ra bình thường, KHÔNG lỗi, KHÔNG cảnh báo; VÀ đối chứng âm: workflow nhạc (gen-music, music-repaint, music-cover, music-lego, music-complete, separate-sound) không có normalize thượng nguồn cũng export sạch — trường text của chúng là lời mô tả cho model. Nửa dương của cặp E10a — thiếu nó thì một guard luôn-ném cũng xanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10c
+    criterion: AC-10
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.unit_tts_family_matches_abi
+    paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts", "config/tongflow.abi.json"]
+    expected: "exit 0; đối chiếu HAI CHIỀU danh sách trắng họ TTS ghim trong guard với tập derive từ config/tongflow.abi.json theo tiêu chí khai ở design §5 — không slot nào trong ABI thoả tiêu chí mà vắng khỏi guard, và không tên nào trong guard vắng khỏi ABI. Chiều đỏ: thêm một slot TTS giả vào bản ABI fixture → đỏ, thông điệp nêu ĐÚNG TÊN slot chưa khai. Cùng khuôn hai chiều mà E11b dùng cho TIER_A_SLOTS — hạng mục 1.4 sắp thêm slot TTS ElevenLabs"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11a
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_node_cache_normalize
+    paths: ["sdk/tongflow/engine/", "sdk/tests/test_node_cache_normalize.py", "sdk/tests/test_node_cache.py"]
+    expected: "exit 0; workflow 2-node qua engine: chạy lần 2 không đổi gì → full hit, 0 lời gọi plugin; đổi chuỗi text vào → node tầng B KHÔNG chạy lại, normalize-text-vi chạy lại"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11b
+    criterion: AC-11
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_tier_a_allowlist
+    paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py", "config/tongflow.abi.json"]
+    expected: "exit 0; guard allowlist hai chiều vẫn xanh sau khi thêm slot — danh sách ghim khớp TIER_A_SLOTS và mọi slot trong đó tồn tại trong ABI"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12a
+    criterion: AC-12
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_normalize_conformance
+    paths: ["sdk/tests/conformance/", "config/tongflow.abi.json", "sdk/tongflow/engine/"]
+    expected: "exit 0; fixture normalize-text-vi chạy qua đường engine-Python khớp đường canvas-TS: cùng số lời gọi, mỗi lời gọi nhận text scalar (không batch fan-out nhầm tầng)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12b
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_conformance
+    paths: ["src/lib/abi/conformance.test.ts", "src/lib/abi/conformance.ts", "config/tongflow.abi.json"]
+    expected: "exit 0; nửa TS của conformance suite xanh với fixture normalize-text-vi mới"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.normalize_registration_synced
+    paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-manifest-guard-teeth.sh", "scripts/plugins/check-normalize-registration.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md", "src/i18n/messages/"]
+    expected: "exit 0; manifest có entry origin THỨ TƯ oneflow-api-normalize-text-vi dưới phanlemanh; check-manifest-unmoved.sh đã cập nhật (36 chuỗi + 4 origin, id set có tên mới) và check-manifest-guard-teeth.sh vẫn đỏ trên cả 6 phép nhiễu KHÔNG cần sửa file đó; cả 3 README có plugin trong danh sách + một DÒNG MỚI dưới Transform → Text của ma trận năng lực (không phải lật ⬜→✅ hàng có sẵn — hôm nay mục đó chỉ có một hàng); i18n đủ 5 locale dưới normalizeTextVi.*"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14a
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.normalize_sdk_train_local
+    paths: ["sdk/pyproject.toml", "sdk/tongflow/__init__.py", "scripts/abi/check-normalize-sdk-train-local.sh"]
+    expected: "exit 0; NGOẠI TUYẾN, chạy mọi vòng: hai file version khớp nhau (0.2.19) — số DERIVE từ pyproject.toml chứ không ghi cứng trong script; vietnormalizer==0.2.3 pin chính xác trong dependencies; ROOT suy từ vị trí script (BASH_SOURCE) chứ không từ cwd. Chiều đỏ: lệch một trong hai version → đỏ nêu đúng hai số"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14b
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.normalize_sdk_published
+    paths: ["sdk/pyproject.toml", "scripts/abi/check-normalize-sdk-published.sh"]
+    expected: "exit 0; TRỰC TUYẾN, chỉ có nghĩa SAU khi owner ký cho phép publish (tiền đề khai ở Context): PyPI có bản 0.2.19; bản publish chứa NormalizeTextViInput/Output + NORMALIZE_TEXT_VI; repo plugin pin oneflow-sdk==0.2.19. Khai hạn giờ tường minh; đỏ trước mốc publish là đỏ HẠ TẦNG, không phải trượt nghiệm thu — trình ở Cổng 2 chứ không đốt round"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17a
+    criterion: AC-14
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_normalize_slot_roundtrip
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_slot.py", "sdk/tongflow/slots.py"]
+    expected: "exit 0; gọi slot method THẬT của vỏ plugin qua @node_slot với dict {'text': '<một dòng corpus>'} → success:true và text khớp ĐÚNG dòng corpus đó, so với hằng số corpus DÙNG CHUNG (không viết lại kỳ vọng tại chỗ); spy chứng minh hàm SDK được gọi ĐÚNG MỘT LẦN — chặn kịch bản vỏ tự cài lại logic hoặc vỏ trả thẳng input"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17b
+    criterion: AC-14
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.sdk_pytest_normalize_slot_error
+    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_slot.py"]
+    expected: "exit 0; monkeypatch hàm SDK ném → vỏ trả success:false + error GHIM THÔNG ĐIỆP, không để lộ traceback. Nửa âm của cặp E17a trên cùng vỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-15
+    executor: ui-check
+    cmd: config:executors.design.gate
+    paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/"]
+    expected: "exit 0; sàn P0 design gate trên trang workspace có node normalize-text-vi (console sạch, a11y cơ bản); capture HTML + screenshot cho đủ 4 state (rỗng-chưa-nối / đã-nối / đang-chạy / lỗi-còn-sót-token) lưu evidence/design/captures/ cho E16"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-15
+    executor: judgment
+    question: "So 4 capture với các node transfer sẵn có của workspace (denoise-audio, remove-subtitle — cùng khuôn AbiNodeShell): node normalize-text-vi có nhìn như người nhà không (shell, spacing, icon, trạng thái)? Riêng state lỗi: thông điệp 'chưa đọc được: …' có đọc được bằng tiếng người với một người bán hàng không rành kỹ thuật, hay là dump kỹ thuật? Có gì phá ngôn ngữ thiết kế workspace?"
+    inputs: ["evidence/design/captures/state-1-idle.png", "evidence/design/captures/state-2-wired.png", "evidence/design/captures/state-3-running.png", "evidence/design/captures/state-4-residual-error.png"]
+    expected: "Panel đồng thuận node đạt ngôn ngữ thiết kế workspace và thông điệp lỗi đọc được bằng tiếng người; UNCERTAIN → human quyết ở Cổng 2"
+    evidence_required: [run_id, verifier, verified_at, output]
