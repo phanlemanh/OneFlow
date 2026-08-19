@@ -126,10 +126,13 @@ hợp đồng thật của media-library (`packages/contracts/src/`, đã đọc
 - AC-14: Given lời hứa của roadmap "add node không ABI-driven nên không đụng
   ABI/SDK", When xem toàn bộ diff của nhánh, Then **không** file nào dưới
   `config/tongflow.abi.json`, `src/generated/abi/**`, `sdk/**`, `src/db/**` bị chạm.
-- AC-15: Given các trạng thái của node (thiếu cấu hình · đang tìm · kệ mỏng · kết
-  quả không xếp hạng · đang nạp · xong · lỗi có tên), When từng trạng thái hiện ra ở
-  cả nền sáng lẫn nền tối, Then mỗi trạng thái có hình hài rõ ràng và đạt sàn tiếp
-  cận (axe-core: **0 lỗi mức critical/serious**, gồm cả tương phản).
+- AC-15: Given **tám** trạng thái của node — thiếu cấu hình · rỗng chờ gõ · đang tìm
+  · có kết quả · kệ mỏng · kết quả không xếp hạng · đang nạp · lỗi có tên — When từng
+  trạng thái hiện ra ở cả nền sáng lẫn nền tối, Then mỗi trạng thái có hình hài rõ
+  ràng và đạt sàn tiếp cận (axe-core: **0 lỗi mức critical/serious**, gồm cả tương
+  phản). ("Xong" **không** nằm trong danh sách vì nó không phải trạng thái của node
+  này: nạp xong thì kết quả là một node video MỚI trên canvas, đúng khuôn mọi add
+  node sẵn có — AC-12 đo điều đó.)
 
 ## Coverage
 

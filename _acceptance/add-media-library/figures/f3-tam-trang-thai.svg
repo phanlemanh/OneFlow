@@ -13,6 +13,7 @@
       <text x="304" y="127" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
       <rect x="52" y="146" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.15)"/>
       <rect x="240" y="146" width="64" height="20" rx="4" fill="rgba(26,0,51,0.18)"/>
+      <text x="272" y="160" fill="#66607a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Tìm</text>
       <rect x="52" y="178" width="252" height="52" rx="4" fill="rgba(26,0,51,0.05)" stroke="rgba(26,0,51,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
       <text x="64" y="200" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">MEDIA_LIBRARY_API_KEY</text>
       <text x="64" y="218" fill="#66607a" font-size="9" font-family="'Geist', sans-serif">chưa có trong kho khoá BYO</text>

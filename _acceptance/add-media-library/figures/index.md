@@ -13,10 +13,16 @@ hoặc **≥2 chỗ rẽ nhánh**.
 | QĐ-5 · bỏ design-pass (owner vắng) | dưới ngưỡng: 1 | — |
 | QĐ-6 · descope ảnh/audio/floorplan | dưới ngưỡng: 1 | — |
 
-Thêm **F3** ngoài diện quyết định: ma trận **bảy trạng thái** của node. Không phải
+Thêm **F3** ngoài diện quyết định: ma trận **tám trạng thái** của node. Không phải
 hình của một quyết định, mà là thứ bù cho việc bỏ design-pass — Cổng 1 vốn phải
 duyệt UI trên bản bấm được; ở đây người ký ít nhất được nhìn hình hài từng trạng
 thái thay vì đọc chữ.
+
+**Đính chính 19/08 (do lượt vẽ tìm ra):** đề bài ban đầu viết "bảy ô" rồi liệt kê
+tám, và AC-15 của contract kê "xong" như một trạng thái. Sai: nạp xong thì node
+này không đổi hình hài — kết quả là một **node video mới** trên canvas (AC-12 đo
+điều đó). Danh sách đúng là **tám** trạng thái, không có "xong"; contract, eval
+E24 (16 trang thay vì 14) và tên file đã sửa theo.
 
 ## Đề bài từng hình
 
@@ -41,9 +47,9 @@ thái thay vì đọc chữ.
 - Nhãn: bên C ghi «lát cắt, mở lại khi skill #2 cần ảnh»; bên E ghi «vẫn còn đó».
 - AC liên quan: AC-12; ledger QĐ-2 + QĐ-6.
 
-**F3 — bảy trạng thái của node**
+**F3 — tám trạng thái của node**
 - Loại: ma trận trạng thái (lưới), mỗi ô một khung hình hài đơn giản.
-- Bảy ô: thiếu-cấu-hình (nêu tên biến) · rỗng/chờ gõ · đang tìm · có kết quả (thẻ
+- Tám ô: thiếu-cấu-hình (nêu tên biến) · rỗng/chờ gõ · đang tìm · có kết quả (thẻ
   kèm nhãn quyền) · kệ mỏng · kết quả không xếp hạng (có dải cảnh báo) · đang nạp ·
   lỗi có tên (401 / 403 thiếu scope / lệch phiên bản).
 - Nhãn: mỗi ô ghi câu người dùng đọc được, để Cổng 1 duyệt được lời văn.

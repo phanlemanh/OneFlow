@@ -13,7 +13,7 @@
     { "id": "AC-9", "p": "Sẽ đưa clip về kho file của studio, nguyên vẹn từng byte, và mở lại được từ đó." },
     { "id": "AC-12", "p": "Sẽ tự đặt clip vừa lấy thành một khối video nối sẵn trên canvas, dùng tiếp được ngay." },
     { "id": "AC-13", "p": "Sẽ dừng lại và nói rõ khi kho chung đổi sang một phiên bản giao kèo khác — thà không chạy còn hơn đọc nhầm dữ liệu." },
-    { "id": "AC-15", "p": "Sẽ đọc được ở cả nền sáng lẫn nền tối, và đạt sàn tiếp cận cho cả bảy trạng thái của khối này." }
+    { "id": "AC-15", "p": "Sẽ đọc được ở cả nền sáng lẫn nền tối, và đạt sàn tiếp cận cho cả tám trạng thái của khối này." }
   ],
 
   "wont_do": [

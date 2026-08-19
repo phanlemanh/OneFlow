@@ -248,7 +248,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_a11y_proto
     paths: ["src/components/workspace/nodes/add/add-media-library-node.tsx", "src/components/workspace/nodes/add/media-card-list.tsx", "src/components/proto/**", "src/app/globals.css"]
-    expected: "exit 0 trên bảy trạng thái x nền sáng/tối; guard assert SỐ CẶP (trạng thái, nền) chạm được ĐÚNG BẰNG 14 trước khi kết luận sạch — tới được 4/14 mà vẫn exit 0 là đúng lỗ hổng bị bịt. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
+    expected: "exit 0 trên TÁM trạng thái x nền sáng/tối; guard assert SỐ CẶP (trạng thái, nền) chạm được ĐÚNG BẰNG 16 trước khi kết luận sạch — tới được 4/16 mà vẫn exit 0 là đúng lỗ hổng bị bịt. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- Sinh sau lượt phản biện context sạch (gap-probe P0 + 3 P1) ----------
