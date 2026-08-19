@@ -53,6 +53,16 @@ ghi điều kiện đảo chiều: *≥1/3 người dùng đại diện không t
 quay lại làm mặc định*. Điều kiện đó **chưa đo được ngày nào** vì cần S4 trước — nên tới khi S4
 ký, ADR-0011 nằm ở trạng thái đảo-chiều-không-bằng-chứng, và Phase 2 phải đọc kèm cảnh báo này.
 
+## Nền kho + tri thức — media-library ([ADR-0012](adr/0012-media-library-boundary.md))
+
+Từ 19/08, kho footage + đồ thị thực thể + provenance/nhãn AI của hệ sống ở **media-library**
+(service headless độc lập, repo riêng, đa lĩnh vực theo quy hoạch — BĐS trước, tài chính/bảo
+hiểm sau). OneFlow là **khách qua hợp đồng REST + API key** với tám bảo đảm ranh giới ghi
+trong ADR — không nhúng code, không phụ thuộc cứng (local-first giữ nguyên), không nguồn sự
+thật thứ hai, lĩnh vực là dữ liệu chứ không phải code. Hệ quả lên lộ trình: 1.7 đổi cách
+hiện thực (uỷ quyền), và node nạp-từ-kho là hạng mục làm được trước G0. Sơ đồ ranh giới:
+[oneflow-media-library-boundary.html](assets/oneflow-media-library-boundary.html).
+
 ## Phase 0 — Nền độc lập & số liệu gốc (T1–T4)
 
 | # | Hạng mục | DoD | Trạng thái |
@@ -87,7 +97,7 @@ nhắc ship nó. Kết quả trả lời luôn câu "giữ hay bỏ Modal khỏi
 4. **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
 5. **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch".
 6. **Skill #1 "Footage → kho clip"**: split-video → transcribe-timestamp → drop-video → tách/thay hoặc denoise audio → overlay phụ đề + khung giá → xuất 9:16. (Livestream hay tour nhà là tham số.)
-7. **KG v0 + provenance wire shape** ([ADR-0004](adr/0004-universe-kg-three-entities.md)): bảng entities 3 loại + anchor; `FieldBinding kind:"entity"` phát hành đồng bộ TS + `bindings.py`; `tasks.entity_refs`.
+7. **KG v0 + provenance wire shape** ([ADR-0004](adr/0004-universe-kg-three-entities.md), hiện thực theo [ADR-0012](adr/0012-media-library-boundary.md)): **uỷ quyền media-library** — `tasks.entity_refs` trỏ `entity_id` của library, `FieldBinding kind:"entity"` resolve qua API; giới hạn 3 loại thực thể giữ nguyên như bộ lọc tiêu thụ, không xây bảng entities riêng.
 
 > **Làn local-first xen kẽ ở đây, không nối đuôi.** S3 (transcribe không-Modal) và S4 (UX BYO
 > key) đều có lý do chen lên trước mục 4: S3 vì nó nằm trên đường đo WER của G0, S4 vì không có
