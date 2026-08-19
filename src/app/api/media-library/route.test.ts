@@ -132,6 +132,13 @@ describe("POST /api/media-library/search — no config, no traffic (AC-1)", () =
         expect(spy).toHaveBeenCalledTimes(0);
         const body = await response.json();
         expect(body.code).toBe("MISSING_CONFIG");
+        // The names travel as DATA, so the form can render one field per name
+        // without parsing them back out of a sentence.
+        expect(body.missing).toEqual([
+            "MEDIA_LIBRARY_URL",
+            "MEDIA_LIBRARY_API_KEY",
+        ]);
+        // ...and the sentence still names them, because that is what a person reads.
         expect(String(body.message)).toContain("MEDIA_LIBRARY_URL");
         expect(String(body.message)).toContain("MEDIA_LIBRARY_API_KEY");
     });

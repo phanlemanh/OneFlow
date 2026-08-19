@@ -22,7 +22,11 @@ async function call<T>(
     if (!cfg.ok) {
         return {
             ok: false,
-            failure: { code: "MISSING_CONFIG", message: cfg.message },
+            failure: {
+                code: "MISSING_CONFIG",
+                message: cfg.message,
+                missing: cfg.missing,
+            },
         };
     }
 

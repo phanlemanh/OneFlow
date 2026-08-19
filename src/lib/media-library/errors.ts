@@ -24,6 +24,12 @@ export type MediaLibraryErrorCode =
 export interface MediaLibraryFailure {
     code: MediaLibraryErrorCode;
     message: string;
+    /**
+     * Present only on MISSING_CONFIG: the variable names that are absent, so the
+     * caller can render one field per name instead of parsing them back out of
+     * the sentence. The sentence is for people; this list is for the form.
+     */
+    missing?: string[];
 }
 
 export function classify(

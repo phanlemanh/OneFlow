@@ -1055,7 +1055,7 @@
                 "search": "Search",
                 "searching": "Searching…",
                 "importing": "Pulling the clip into your file store… it will appear as a video node on the canvas.",
-                "results": "clips match your description. Pick one to pull into the workspace.",
+                "results": "{count} clips match your description. Pick one to pull into the workspace.",
                 "thinShelf": "No clip could be shown for this description ({candidates} clips passed the filters). Try another wording or loosen the request.",
                 "unranked": "Results are not ranked by meaning: the library is missing embeddings. The list still matches the filters, but the order does not reflect fit.",
                 "error": "The library call did not go through.",

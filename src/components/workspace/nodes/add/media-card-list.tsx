@@ -33,9 +33,15 @@ export function MediaCardList({
                         disabled={busyId === card.id}
                         className="w-full text-left rounded-lg border border-border overflow-hidden bg-card hover:border-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60"
                     >
+                        {/*
+                         * Decorative: the caption sits right below and is the
+                         * button's accessible name, so repeating it in `alt`
+                         * makes a screen reader say the same sentence twice
+                         * (axe: image-redundant-alt, measured on all six cards).
+                         */}
                         <img
                             src={card.renditions.thumb_url}
-                            alt={card.caption}
+                            alt=""
                             width={160}
                             height={90}
                             loading="lazy"

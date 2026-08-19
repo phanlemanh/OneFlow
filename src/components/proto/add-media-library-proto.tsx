@@ -73,9 +73,15 @@ function Frame({ children }: { children: React.ReactNode }) {
             <div className="mx-auto w-[460px] rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                     <Library className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm font-medium text-foreground">
+                    {/*
+                     * A heading, not a span: this page IS the node, so the node
+                     * title is its level-one heading. In the shipped canvas the
+                     * surrounding page owns the h1; the harness has to supply
+                     * its own or every scanned page reports a missing one.
+                     */}
+                    <h1 className="text-sm font-medium text-foreground">
                         {COPY.title}
-                    </span>
+                    </h1>
                     <span className="ml-auto font-mono text-xs text-muted-foreground">
                         add/media-library
                     </span>
@@ -131,6 +137,10 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             return (
                 <Frame>
                     <SearchRow />
+                    <p className="text-sm text-muted-foreground">
+                        {CARDS.length} clip khớp mô tả. Chọn một clip để nạp về
+                        workspace.
+                    </p>
                     <MediaCardList cards={CARDS} onPick={() => {}} />
                 </Frame>
             );

@@ -52,9 +52,10 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                     body.code === "MISSING_CONFIG"
                         ? {
                               kind: "missing-config",
-                              // The server names the variables; the node shows
-                              // exactly what it was told, never a generic line.
-                              missing: missingFromMessage(String(body.message)),
+                              // The server sends the names as DATA; the node
+                              // renders one field per name and never parses
+                              // them back out of the sentence.
+                              missing: (body.missing ?? []) as string[],
                               message: String(body.message),
                           }
                         : {
@@ -183,10 +184,15 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 ) : null}
 
                 {outcome.kind === "results" && outcome.cards.length > 0 ? (
-                    <MediaCardList
-                        cards={outcome.cards}
-                        onPick={(card) => void pick(card)}
-                    />
+                    <>
+                        <p className="text-sm text-muted-foreground">
+                            {t("results", { count: outcome.cards.length })}
+                        </p>
+                        <MediaCardList
+                            cards={outcome.cards}
+                            onPick={(card) => void pick(card)}
+                        />
+                    </>
                 ) : null}
 
                 {outcome.kind === "importing" ? (
@@ -215,17 +221,6 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
         </BaseNodeShell>
     );
 };
-
-/**
- * The server sentence lists the missing variable names; this reads them back so
- * the form can show one field per missing name. Matching on the NAMES (which
- * are ours) rather than on the sentence shape keeps the copy free to change.
- */
-function missingFromMessage(message: string): string[] {
-    return ["MEDIA_LIBRARY_URL", "MEDIA_LIBRARY_API_KEY"].filter((name) =>
-        message.includes(name),
-    );
-}
 
 AddMediaLibraryNode.displayName = "AddMediaLibraryNode";
 
