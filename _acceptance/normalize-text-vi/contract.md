@@ -5,9 +5,9 @@ slug: normalize-text-vi
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: draft
-approved_by:
-approved_at:
+status: approved
+approved_by: Manh
+approved_at: 2026-08-19
 ---
 
 # Acceptance Contract: normalize-text-vi
