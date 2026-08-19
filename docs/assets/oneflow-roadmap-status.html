@@ -246,7 +246,7 @@
       gate đo được; trượt gate là dừng sửa, không lao tiếp.
     </p>
     <p class="stamp">
-      Trạng thái đọc ngày <b>19/08/2026</b> · nguồn <b>docs/roadmap.md</b> @ <b>chore/roadmap-activate</b>
+      Trạng thái đọc ngày <b>19/08/2026</b> (sau PR #68 — S4 ship) · nguồn <b>docs/roadmap.md</b> @ <b>main</b>
       · đối chiếu máy bằng <b>pnpm roadmap:check</b>
     </p>
   </header>
@@ -254,12 +254,12 @@
   <section aria-label="Tổng quan">
     <div class="tiles">
       <div class="tile is-accent">
-        <div class="n">20</div>
+        <div class="n">21</div>
         <div class="k">hạng mục đã ký</div>
-        <div class="d">12 năng lực sản phẩm · 8 hạ tầng quy trình</div>
+        <div class="d">13 năng lực sản phẩm · 8 hạ tầng quy trình</div>
       </div>
       <div class="tile">
-        <div class="n">2/7</div>
+        <div class="n">2/9</div>
         <div class="k">Phase 1 đã đóng</div>
         <div class="d">Trục cache 1.1 và overlay 1.2 — hai hạng mục "không được cắt"</div>
       </div>
@@ -269,9 +269,9 @@
         <div class="d">Cả bốn cần người vận hành, máy không tự làm được</div>
       </div>
       <div class="tile">
-        <div class="n">11</div>
+        <div class="n">12</div>
         <div class="k">ADR bất biến</div>
-        <div class="d">ADR-0011 đảo chiều nền thực thi ngày 05/08</div>
+        <div class="d">ADR-0011 local-first · ADR-0012 ranh giới media-library</div>
       </div>
     </div>
   </section>
@@ -298,7 +298,7 @@
             <li><span class="ref">0.4</span><span class="what">Spec cache content-addressed + partial re-render<em>Spec xong, ba câu hỏi mở đã chốt 29/07</em></span><span class="pill s-live">một phần</span></li>
           </ul>
           <div class="gate">
-            <b>Gate G0 — chưa qua</b>
+            <b>Gate G0 — chưa qua · hạn danh nghĩa dời T5, chặn bởi người vận hành</b>
             <span class="cond">Bốn điều kiện, cả bốn cần người vận hành:</span>
             ⓪ ký ngưỡng số <em>trước</em> khi thấy dữ liệu (chốt vạch sau là mất tính khách quan) ·
             ① clip thực địa + bản chép tay cho WER ·
@@ -312,16 +312,18 @@
         <div class="phase-id">
           <div class="num">Phase 1</div>
           <div class="weeks">T5–T10 · năng lực P0</div>
-          <div class="bar"><span class="fill" style="width:29%"></span></div>
+          <div class="bar"><span class="fill" style="width:22%"></span></div>
         </div>
         <div>
           <ul class="items">
             <li><span class="ref">1.1</span><span class="what">Cache + partial re-render trong engine<em>L0 conformance → L1 → L2 → L3 → L4, đóng trọn 01/08</em></span><span class="pill s-done">xong</span></li>
             <li><span class="ref">1.2</span><span class="what">Slot compose-overlay — text, khung giá, logo, safe-zone<em>Ký 03/08, merge 05/08 · 16 AC / 27 eval, 12 vòng verify</em></span><span class="pill s-done">xong</span></li>
             <li><span class="ref">1.3</span><span class="what">Slot normalize-text-vi tất định — số, giá, ngày → chữ<em>Bắt buộc đứng trước TTS trong mọi template</em></span><span class="pill s-live">kế tiếp</span></li>
+            <li><span class="ref">1.3b</span><span class="what">Node nạp-từ-kho — ADR-0012 giai đoạn A<em>Không ABI, key qua kho khoá BYO; mở khoá input skill #1</em></span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">S3</span><span class="what">Transcribe không-Modal — chen trước 1.4, chốt 19/08<em>Trên hai đường tới hạn: skill #1 và phép đo WER của G0</em></span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">1.4</span><span class="what">Plugin TTS ElevenLabs tiếng Việt</span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">1.5</span><span class="what">Skill system v1 — template + orchestrator TS<em>Phần scaffold không phụ thuộc quyết định ngách</em></span><span class="pill s-queued">hàng đợi</span></li>
-            <li><span class="ref">1.6</span><span class="what">Skill #1 "Footage → kho clip"</span><span class="pill s-queued">chờ ngách</span></li>
+            <li><span class="ref">1.6</span><span class="what">Skill #1 "Footage → kho clip"<em>Viết lại theo ADR-0012: nạp từ kho → render → ingest ngược có chữ ký + telemetry</em></span><span class="pill s-queued">chờ ngách</span></li>
             <li><span class="ref">1.7</span><span class="what">KG v0 + provenance wire shape</span><span class="pill s-queued">chờ ngách</span></li>
           </ul>
           <div class="gate">
@@ -364,7 +366,7 @@
         </div>
         <div>
           <ul class="items">
-            <li><span class="ref">3.1</span><span class="what">Skill #2 "Nguồn → ma trận" — fan-out biến thể ở orchestrator</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">3.1</span><span class="what">Skill #2 "Kho → ma trận" — fan-out tiêu thụ search/coverage của library<em>Đổi tên 19/08: nạp nguồn về kho là việc phía library (ADR-0012)</em></span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">3.2</span><span class="what">Slot media-judge + 200 mẫu gắn nhãn đo FPR</span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">3.3</span><span class="what">Batch semantics thống nhất về orchestrator</span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">3.4</span><span class="what">OF-CB-1 — benchmark consistency 5 arm<em>Chạy nền T17–T21, cho verdict go/no-go chặng 2</em></span><span class="pill s-queued">hàng đợi</span></li>
@@ -408,13 +410,13 @@
         </div>
         <div class="stop">
           <div class="sid">S3</div>
-          <span class="pill s-blocked">chưa bắt đầu</span>
-          <div class="txt">Đường transcribe không-Modal — trên hai đường tới hạn cùng lúc</div>
+          <span class="pill s-queued">chen trước 1.4</span>
+          <div class="txt">Đường transcribe không-Modal — trên hai đường tới hạn; chốt thứ tự 19/08</div>
         </div>
         <div class="stop">
           <div class="sid">S4</div>
-          <span class="pill s-live">đang chạy</span>
-          <div class="txt">UX BYO key cho người dùng đầu tiên không phải tác giả</div>
+          <span class="pill s-done">ký 19/08</span>
+          <div class="txt">UX BYO key — ship PR #68; điều kiện đảo chiều ADR-0011 từ nay đo được</div>
         </div>
         <div class="stop">
           <div class="sid">S5</div>
@@ -429,10 +431,10 @@
       </div>
 
       <div class="warn">
-        <b>Rủi ro đã ghi, chưa đo được.</b> ADR-0011 đảo một rủi ro critical của hội đồng
-        <em>mà chưa có bằng chứng thị trường mới</em>. Nó tự đặt điều kiện đảo chiều: ≥1/3 người
-        dùng đại diện không tự nhập được key ở onboarding → managed quay lại làm mặc định.
-        Điều kiện đó chưa đo được ngày nào, vì cần S4 xong trước.
+        <b>Đo được rồi — nhưng chưa đo.</b> Điều kiện đảo chiều của ADR-0011 (≥1/3 người dùng
+        đại diện không tự nhập được key → managed quay lại làm mặc định) được S4 gỡ chốt chặn
+        ngày 19/08. Phiên nghiệm thu với người dùng đại diện là việc của làn A (người vận hành);
+        tới khi có số, ADR-0011 vẫn ở trạng thái đảo-chiều-chưa-có-bằng-chứng.
       </div>
     </div>
   </section>
@@ -462,6 +464,7 @@
           <tr><td class="slug">cache-l4-eviction</td><td>T3</td><td class="when">31/07</td><td class="where"><b>1.1</b> — lát L4, LRU + purge · trục đóng</td></tr>
           <tr><td class="slug">compose-overlay</td><td>T3</td><td class="when">02/08</td><td class="where"><b>1.2</b> — slot overlay</td></tr>
           <tr><td class="slug">local-cpu-plugins</td><td>T2</td><td class="when">06/08</td><td class="where"><b>S2</b> — làn local-first</td></tr>
+          <tr><td class="slug">byo-key-onboarding</td><td>T3</td><td class="when">19/08</td><td class="where"><b>S4</b> — UX BYO key lượt chạy đầu</td></tr>
           <tr><td class="slug">dependency-refresh-2026-07</td><td>T2</td><td class="when">26/07</td><td class="where off">ngoài lộ trình — bảo trì phụ thuộc</td></tr>
           <tr><td class="slug">ci-actions-bump</td><td>T2</td><td class="when">26/07</td><td class="where off">ngoài lộ trình — hạ tầng CI</td></tr>
           <tr><td class="slug">stale-scope-by-paths</td><td>T2</td><td class="when">28/07</td><td class="where off">ngoài lộ trình — hạ tầng cổng</td></tr>
@@ -477,7 +480,7 @@
     <div class="split">
       <div class="half">
         <div class="k">năng lực sản phẩm</div>
-        <div class="n">12</div>
+        <div class="n">13</div>
         <p>Nằm trên một ô cụ thể của lộ trình.</p>
       </div>
       <div class="half">
@@ -511,8 +514,8 @@
     vì miễn trừ T1 của gate tooling khai theo đường chính xác: gate áp lên chính nó.
     <br><br>
     Lưu ý một điểm lệch đã biết: <code>STATUS.md</code> còn ghi <b>17</b> hạng mục đã ký
-    (chốt 17/08), trong khi <code>main</code> đã có <b>20</b> — ba hồ sơ ký ngày 18/08 chưa
-    được cộng vào.
+    (chốt 17/08), trong khi <code>main</code> đã có <b>21</b> — ba hồ sơ 18/08 và
+    <code>byo-key-onboarding</code> 19/08 chưa được cộng vào.
   </footer>
 
 </div>
