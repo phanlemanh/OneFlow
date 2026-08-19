@@ -14,9 +14,11 @@ import type { Edge, Node } from "@xyflow/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ABI_NODES } from "@/generated/abi";
-import { NODE_TYPE_TO_ABI_FEATURE } from "@/lib/abi/node-feature-registry";
+import {
+    NODE_TYPE_SOURCE_SPEC,
+    NODE_TYPE_TO_ABI_FEATURE,
+} from "@/lib/abi/node-feature-registry";
 import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
-import { textBatch } from "@/lib/abi/sources";
 
 import {
     exportWorkflow,
@@ -56,7 +58,9 @@ function buildChain(specs: Spec[]): { nodes: Node[]; edges: Edge[] } {
         registerAbiNode({
             nodeId: spec.id,
             feature: spec.feature as never,
-            sourceSpec: { text: textBatch() },
+            // Every feature under test takes a scalar `text`; reuse the spec
+            // the registry already declares instead of rebuilding one here.
+            sourceSpec: NODE_TYPE_SOURCE_SPEC.genTextNode,
         });
         registered.push(spec.id);
 

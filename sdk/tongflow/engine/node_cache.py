@@ -60,6 +60,10 @@ TIER_A_SLOTS = frozenset({
     # no seed to pin); byte-identity evidence lives in the plugin repo's
     # golden suite (AC-10).
     "compose-overlay",
+    # normalize-text-vi: a pure function over a string — no model call, no
+    # seed, no I/O. Byte-identity and idempotence evidence lives in
+    # tests/test_normalize_vi.py (AC-7).
+    "normalize-text-vi",
     "concat-videos",
     "extract-audio",
     "remove-video-audio",

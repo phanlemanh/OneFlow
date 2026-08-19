@@ -96,8 +96,10 @@ def test_allowlist_holds_exactly_the_twelve_mechanical_slots():
     # 1.1-L1b lands, and a new slot must not be added silently.
     # compose-overlay joined 2026-08-02: deterministic CPU overlay
     # compositing, byte-identity evidence in the plugin repo's golden suite.
+    # normalize-text-vi joined 2026-08-20: pure string function, evidence in
+    # tests/test_normalize_vi.py.
     assert TIER_A_SLOTS == frozenset({
-        "compose-overlay",
+        "compose-overlay", "normalize-text-vi",
         "concat-videos", "extract-audio", "remove-video-audio",
         "merge-video-audio", "get-first-frame", "get-last-frame",
         "split-video", "drop-video", "split-text", "combine-text",
