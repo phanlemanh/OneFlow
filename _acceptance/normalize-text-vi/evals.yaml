@@ -224,5 +224,5 @@ evals:
     executor: judgment
     question: "So 2 capture với các node transfer sẵn có của workspace (denoise-audio, remove-subtitle — cùng khuôn AbiNodeShell): node normalize-text-vi có nhìn như người nhà không (shell, spacing, icon, nhãn nút)? Có gì phá ngôn ngữ thiết kế workspace? Riêng CHỮ của thông điệp lỗi không hỏi ở đây — nó do E6a đo tất định, không chấm bằng ảnh."
     inputs: ["evidence/design/captures/state-1-idle.png", "evidence/design/captures/state-2-wired.png"]
-    expected: "Panel đồng thuận node đạt ngôn ngữ thiết kế workspace và thông điệp lỗi đọc được bằng tiếng người; UNCERTAIN → human quyết ở Cổng 2"
+    expected: "Panel đồng thuận node đạt ngôn ngữ thiết kế workspace trên hai state chụp được; UNCERTAIN → human quyết ở Cổng 2"
     evidence_required: [run_id, verifier, verified_at, output]
