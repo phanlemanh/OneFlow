@@ -1,0 +1,286 @@
+<title>Ranh giới OneFlow ↔ media-library</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  /* Tokens: docs/reference/diagram-skin.md (OneFlow) — skin: custom */
+  :root {
+    --paper: #f7f7f8;
+    --card: #ffffff;
+    --ink: #1a0033;
+    --muted: #4f4a63;
+    --soft: #66607a;
+    --rule: rgba(26, 0, 51, 0.12);
+    --stroke: rgba(26, 0, 51, 0.28);
+    --zone-fill: rgba(26, 0, 51, 0.02);
+    --zone-stroke: rgba(26, 0, 51, 0.10);
+    --accent: #e100e1;
+    --accent-tint: rgba(225, 0, 225, 0.05);
+    --link: #0068cc;
+    --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --serif: 'Instrument Serif', 'Lora', Georgia, serif;
+    --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1a0033;
+      --card: #241041;
+      --ink: #f7f7f8;
+      --muted: #c0bacf;
+      --soft: #a49cb8;
+      --rule: rgba(247, 247, 248, 0.12);
+      --stroke: rgba(247, 247, 248, 0.30);
+      --zone-fill: rgba(247, 247, 248, 0.03);
+      --zone-stroke: rgba(247, 247, 248, 0.10);
+      --accent: #ff5cff;
+      --accent-tint: rgba(255, 92, 255, 0.08);
+      --link: #5aa9ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1a0033;
+    --card: #241041;
+    --ink: #f7f7f8;
+    --muted: #c0bacf;
+    --soft: #a49cb8;
+    --rule: rgba(247, 247, 248, 0.12);
+    --stroke: rgba(247, 247, 248, 0.30);
+    --zone-fill: rgba(247, 247, 248, 0.03);
+    --zone-stroke: rgba(247, 247, 248, 0.10);
+    --accent: #ff5cff;
+    --accent-tint: rgba(255, 92, 255, 0.08);
+    --link: #5aa9ff;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+  .frame { max-width: 1120px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.68rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--soft);
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 2.25rem);
+    letter-spacing: -0.02em; line-height: 1.1; margin: 0 0 0.5rem;
+    text-wrap: balance;
+  }
+  .sub { color: var(--muted); font-size: 0.92rem; max-width: 76ch; margin: 0 0 1.75rem; }
+
+  .wrap { overflow-x: auto; }
+  svg { width: 100%; min-width: 960px; display: block; }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr 1.1fr; gap: 1rem; margin-top: 2rem; }
+  @media (max-width: 780px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1.25rem;
+  }
+  .card .eyebrow { margin-bottom: 0.6rem; }
+  .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+  .card-dot.coral { background: var(--accent); }
+  .card-dot.link { background: var(--link); }
+  .card h3 { font-size: 0.95rem; font-weight: 600; margin: 0; }
+  .card p { font-size: 0.85rem; color: var(--muted); margin: 0; }
+  .card code { font-family: var(--mono); font-size: 0.78rem; color: var(--ink); }
+
+  footer {
+    margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 0.7rem; color: var(--soft);
+    letter-spacing: 0.04em;
+  }
+</style>
+
+<div class="frame">
+  <p class="eyebrow">OneFlow × media-library · phân tích tích hợp 19/08/2026</p>
+  <h1>Ranh giới hai hệ</h1>
+  <p class="sub">
+    Media-library không render video — OneFlow là máy render nó từ chối xây. OneFlow cần kho
+    footage — media-library là kho đó, đã chạy, quy hoạch đa lĩnh vực (BĐS → tài chính, bảo
+    hiểm…). Mọi điểm nối đi qua REST + API key với tám bảo đảm ranh giới của ADR-0012; không
+    bên nào đổi kiến trúc. Nét đứt magenta đã được ADR-0012 chốt cơ chế — chưa thi công;
+    thứ còn mở ở Gate G0 chỉ là chọn gói lĩnh vực.
+  </p>
+
+  <div class="wrap">
+  <svg viewBox="0 0 1040 552" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Sơ đồ ranh giới OneFlow và media-library: 5 điểm nối qua REST và API key">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--muted)"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/>
+      </marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--link)"/>
+      </marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="var(--paper)"/>
+
+    <!-- ===== zones (bg → zones → arrows → nodes) ===== -->
+    <rect x="32" y="80" width="448" height="392" rx="8" fill="var(--zone-fill)" stroke="var(--zone-stroke)" stroke-width="0.8"/>
+    <rect x="120" y="84" width="272" height="12" rx="2" fill="var(--paper)"/>
+    <text x="256" y="93" fill="var(--soft)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">ONEFLOW — STUDIO LOCAL-FIRST (ADR-0011)</text>
+
+    <rect x="576" y="80" width="416" height="392" rx="8" fill="var(--zone-fill)" stroke="var(--zone-stroke)" stroke-width="0.8"/>
+    <rect x="656" y="84" width="264" height="12" rx="2" fill="var(--paper)"/>
+    <text x="788" y="93" fill="var(--soft)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">MEDIA-LIBRARY — HEADLESS BĐS · MULTI-TENANT</text>
+
+    <!-- ===== arrows (before boxes) ===== -->
+
+    <!-- 1. env-store -> adapter : API key (config, dashed muted) -->
+    <line x1="192" y1="148" x2="256" y2="148" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <rect x="210" y="128" width="28" height="12" rx="2" fill="var(--paper)"/>
+    <text x="224" y="137" fill="var(--soft)" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">KEY</text>
+
+    <!-- 2. adapter -> REST : search + get asset (link) -->
+    <line x1="464" y1="140" x2="592" y2="140" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="488" y="120" width="80" height="12" rx="2" fill="var(--paper)"/>
+    <text x="528" y="129" fill="var(--link)" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SEARCH · GET</text>
+
+    <!-- 3. skill/tasks -> REST : ingest + telemetry write-back (link, elbow up) -->
+    <path d="M 464,276 H 512 Q 520,276 520,268 V 180 Q 520,172 528,172 H 592"
+          fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="530" y="210" width="60" height="26" rx="2" fill="var(--paper)"/>
+    <text x="534" y="220" fill="var(--link)" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">INGEST +</text>
+    <text x="534" y="231" fill="var(--link)" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">TELEMETRY</text>
+
+    <!-- 4. tasks.entity_refs -> entity graph : undecided KG delegation (dashed accent) -->
+    <line x1="464" y1="312" x2="592" y2="312" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+    <rect x="488" y="292" width="80" height="12" rx="2" fill="var(--paper)"/>
+    <text x="528" y="301" fill="var(--accent)" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ENTITY_REFS</text>
+
+    <!-- 5. storage -> file store : bytes over signed URL (link, leftward) -->
+    <line x1="592" y1="416" x2="464" y2="416" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="490" y="396" width="76" height="12" rx="2" fill="var(--paper)"/>
+    <text x="528" y="405" fill="var(--link)" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">BYTES · 15′</text>
+
+    <!-- ===== nodes ===== -->
+
+    <!-- env-store -->
+    <rect x="48" y="112" width="144" height="72" rx="6" fill="var(--paper)"/>
+    <rect x="48" y="112" width="144" height="72" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="56" y="118" width="28" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="70" y="127" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KEY</text>
+    <text x="120" y="152" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Kho khoá BYO</text>
+    <text x="120" y="168" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">env-store.server.ts</text>
+
+    <!-- adapter node (FOCAL) -->
+    <rect x="256" y="112" width="208" height="72" rx="6" fill="var(--paper)"/>
+    <rect x="256" y="112" width="208" height="72" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.2"/>
+    <rect x="264" y="118" width="32" height="12" rx="2" fill="transparent" stroke="var(--accent)" stroke-width="0.8" opacity="0.6"/>
+    <text x="280" y="127" fill="var(--accent)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">NODE</text>
+    <text x="360" y="150" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Node nạp từ kho — MỚI</text>
+    <text x="360" y="166" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">add/media-library · không ABI</text>
+
+    <!-- skill #1 + tasks -->
+    <rect x="256" y="248" width="208" height="88" rx="6" fill="var(--paper)"/>
+    <rect x="256" y="248" width="208" height="88" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="264" y="254" width="32" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="280" y="263" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TASK</text>
+    <text x="360" y="288" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Skill #1 + bảng tasks</text>
+    <text x="360" y="304" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">entity_refs · chữ ký</text>
+    <text x="360" y="317" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">provider:oneflow</text>
+
+    <!-- file store -->
+    <rect x="256" y="384" width="208" height="64" rx="6" fill="var(--paper)"/>
+    <rect x="256" y="384" width="208" height="64" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="264" y="390" width="36" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="282" y="399" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STORE</text>
+    <text x="360" y="416" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Kho file</text>
+    <text x="360" y="432" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">file_key · sha256</text>
+
+    <!-- REST API -->
+    <rect x="592" y="112" width="384" height="72" rx="6" fill="var(--paper)"/>
+    <rect x="592" y="112" width="384" height="72" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="600" y="118" width="28" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="614" y="127" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+    <text x="784" y="150" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">REST API v1 — key theo scope</text>
+    <text x="784" y="166" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/search · /assets/:id · /ingest · /telemetry</text>
+
+    <!-- entity graph -->
+    <rect x="592" y="248" width="176" height="88" rx="6" fill="var(--paper)"/>
+    <rect x="592" y="248" width="176" height="88" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="600" y="254" width="24" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="612" y="263" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KG</text>
+    <text x="680" y="288" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Đồ thị thực thể</text>
+    <text x="680" y="304" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">dự án · phân khu · căn</text>
+    <text x="680" y="317" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">cây + trục + alias</text>
+
+    <!-- media card / contracts -->
+    <rect x="800" y="248" width="176" height="88" rx="6" fill="var(--paper)"/>
+    <rect x="800" y="248" width="176" height="88" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="808" y="254" width="32" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="824" y="263" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">DATA</text>
+    <text x="888" y="288" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Media Card</text>
+    <text x="888" y="304" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">contracts 0.2.0</text>
+    <text x="888" y="317" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">8 luật lọc cứng</text>
+
+    <!-- storage -->
+    <rect x="592" y="384" width="384" height="64" rx="6" fill="var(--paper)"/>
+    <rect x="592" y="384" width="384" height="64" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+    <rect x="600" y="390" width="32" height="12" rx="2" fill="transparent" stroke="var(--stroke)" stroke-width="0.8"/>
+    <text x="616" y="399" fill="var(--muted)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">BLOB</text>
+    <text x="784" y="416" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Storage</text>
+    <text x="784" y="432" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">URL ký 15 phút · qua cùng 5 luật thấy-được</text>
+
+    <!-- ===== legend ===== -->
+    <line x1="32" y1="496" x2="1008" y2="496" stroke="var(--rule)" stroke-width="0.8"/>
+    <text x="32" y="516" fill="var(--muted)" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+    <rect x="128" y="508" width="10" height="10" rx="2" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1"/>
+    <text x="148" y="516" fill="var(--muted)" font-size="8" font-family="'Geist Mono', monospace">điểm phải xây</text>
+
+    <line x1="296" y1="512" x2="328" y2="512" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <text x="340" y="516" fill="var(--muted)" font-size="8" font-family="'Geist Mono', monospace">gọi REST + API key</text>
+
+    <line x1="512" y1="512" x2="544" y2="512" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <text x="556" y="516" fill="var(--muted)" font-size="8" font-family="'Geist Mono', monospace">cấu hình lúc chạy</text>
+
+    <line x1="720" y1="512" x2="752" y2="512" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-accent)"/>
+    <text x="764" y="516" fill="var(--muted)" font-size="8" font-family="'Geist Mono', monospace">đã quyết (ADR-0012) — chưa thi công</text>
+  </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <p class="eyebrow">Giai đoạn A · đọc</p>
+      <div class="card-header"><span class="card-dot link"></span><h3>Node nạp từ kho</h3></div>
+      <p>Search → chọn thẻ → URL ký → bytes về kho file thành <code>file_key</code>. Add node
+        không ABI-driven nên <strong>không đụng ABI, không kéo SDK release train</strong>.
+        Làm được trước G0; key nằm trong kho khoá BYO sẵn có.</p>
+    </div>
+    <div class="card">
+      <p class="eyebrow">Giai đoạn B · ghi ngược</p>
+      <div class="card-header"><span class="card-dot link"></span><h3>Render xong, trả về kho</h3></div>
+      <p>Output của Skill #1 ingest với <code>provenance: generated</code> + nhãn AI (NĐ142 —
+        ADR-0006 "chuẩn bị, không xây" được library xây hộ), chữ ký
+        <code>provider:oneflow</code>. Lượt dùng báo về <code>/v1/telemetry</code> — khớp
+        vòng metrics Phase 2.5–2.6.</p>
+    </div>
+    <div class="card">
+      <p class="eyebrow">Giai đoạn C · tri thức — ADR-0012</p>
+      <div class="card-header"><span class="card-dot coral"></span><h3>Uỷ quyền KG — đã chốt</h3></div>
+      <p><code>tasks.entity_refs</code> trỏ <code>entity_id</code> của library thay vì xây bảng
+        entities riêng (Phase 1.7) — không nguồn sự thật thứ hai. Lĩnh vực là <strong>dữ
+        liệu</strong>, không phải code: library mở sang tài chính/bảo hiểm thì OneFlow thừa
+        hưởng bằng 0 dòng code. Điều kiện thoát ghi trong ADR: G0 chốt ngách mà library chưa
+        có gói lĩnh vực đó → kho tối thiểu cục bộ (file_key + tag phẳng, không KG).</p>
+    </div>
+  </div>
+
+  <footer>
+    NGUỒN · media-library: CLAUDE.md · packages/contracts/src/search.ts (zSearchRequest, SIGNED_URL_TTL_S=900) · contracts 0.2.0
+    — oneflow: env-store.server.ts · nodes/add/* · ADR-0004 / 0006 / 0011 / 0012 · vẽ 19/08/2026
+  </footer>
+</div>
