@@ -18,6 +18,12 @@ export interface StubOptions {
     searchResponse?: unknown;
     searchStatus?: number;
     assetResponse?: unknown;
+    /**
+     * Serve a full AssetDetail whose `urls.original` points back at THIS stub's
+     * own byte route. Needed because the signed URL can only be spelled once
+     * the server has a port, and a caller cannot know the port before start.
+     */
+    assetOriginalPath?: string;
     assetStatus?: number;
     contractsVersion?: string;
     bytes?: Buffer;
@@ -48,6 +54,8 @@ async function readBody(req: IncomingMessage): Promise<unknown> {
 export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
     const version = opts.contractsVersion ?? "0.2.0";
     const requests: RecordedRequest[] = [];
+    /** Filled in once the port is known; read by the /v1/assets/ handler. */
+    let selfUrl = "";
 
     const server: Server = createServer((req, res) => {
         void (async () => {
@@ -100,6 +108,19 @@ export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
                 return;
             }
             if (path.startsWith("/v1/assets/")) {
+                if (opts.assetOriginalPath) {
+                    send(opts.assetStatus ?? 200, {
+                        card: { id: "stub" },
+                        urls: {
+                            original: `${selfUrl}${opts.assetOriginalPath}`,
+                            proxy: null,
+                            thumb: null,
+                        },
+                        expires_in_s: 900,
+                        contracts_version: version,
+                    });
+                    return;
+                }
                 send(
                     opts.assetStatus ?? 200,
                     opts.assetResponse ?? { contracts_version: version },
@@ -115,9 +136,10 @@ export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
     });
     const address = server.address();
     const port = typeof address === "object" && address ? address.port : 0;
+    selfUrl = `http://127.0.0.1:${port}`;
 
     return {
-        url: `http://127.0.0.1:${port}`,
+        url: selfUrl,
         requests,
         close: () =>
             new Promise<void>((resolve) => {
