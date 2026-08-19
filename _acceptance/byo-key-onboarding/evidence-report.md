@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: d08be1c8cb0eb2ad283cdc61e756fbab66be268c
-human_signoff:
+human_signoff: Phan Le Manh 2026-08-19
 ---
 
 # Evidence Report: byo-key-onboarding
@@ -114,7 +114,7 @@ sai; chúng là phép đo không dựng lại được trên bàn thí nghiệm 
     - spec-alignment: PASS — Each of the five walls shows a distinct, plain-English on-screen label with no console needed: wall 1 (no plugin) = the top strip "Need 2 tools to run this example / Tách cảnh video · Cắt ghép video" + "Get the tools" (E2-step1/E6-step1); wall 2 (install) = "Downloading tools... (0/2)" with a spinner (E2-step2); wall 3 (provisioning wait) = strip "Setting up environment / Installing SDK / Installing libraries / 0s elapsed. Later runs start instantly." plus a node badge with its own elapsed counter (E10-step2); wall 4 (first result) = "Done. Press Run..." then a green "Task completed" toast with real thumbnails/clips populating downstream nodes (E2-step3/E2-step4); wall 5 (key) = a red "Task failed / Missing required env var ..." toast with an inline node field to paste the key (E12-step2/E12-step3), and a rejected-key case showing the inline error "Khoá chưa dùng được — Nhà cung cấp từ chối khoá này (HTTP 401)" directly under the field (E14-step1). No wall's evidence leaves the observer guessing between moving and stuck.
   required_evidence:
     - A second screenshot captured a few seconds after E2-step2/E6-step1's 'Downloading tools... (0/2)' state, showing the counter having advanced (e.g. '(1/2)') or an elapsed-time label appearing next to it — proving the install wall's state changes over time rather than being a static frozen banner indistinguishable from a hang.
-  human_override:
+  human_override: Phan Le Manh 2026-08-19 — thông qua theo đề xuất của hội đồng. Chặng 'đang tải công cụ' đúng là còn yếu; nó được tách thành việc riêng thay vì chặn phát hành.
 <!-- JUDGMENT-BLOCK-TEMPLATE>>> -->
 
 ## Analyst

@@ -5,7 +5,7 @@ slug: byo-key-onboarding
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [ui, api]
-status: verified
+status: signed-off
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-07T09:22:27Z
 time_human_minutes: {gate1: 0, gate2: 0}
@@ -169,3 +169,39 @@ chúng đi tới Cổng Bằng chứng kèm đúng bằng chứng đang có:
   mã (E17, có nửa phá-thử) xanh ở cả hai vòng.
 
 Cả hai được đo lại trên máy sạch ở phiên nghiệm thu người thật.
+
+## Người ký quyết gì với 17 lỗi ngoài hợp đồng (Cổng Bằng chứng, 2026-08-19)
+
+Đây là lỗi THẬT do lớp soát xét tìm ra, nhưng nằm ngoài bộ tiêu chí đã duyệt ở
+Cổng Phạm vi. Người ký chọn: **hai mục tách thành việc riêng, mười lăm mục ghi
+thành giới hạn đã biết và phát hành bản này.**
+
+### Tách thành việc riêng — làm ngay sau, có tiêu chí nghiệm thu của nó
+
+1. **Chữ tiếng Việt viết cứng trong mã.** Kho có năm ngôn ngữ và mặc định là
+   tiếng Trung, nhưng nhãn ô nhập khoá, nhãn nút gỡ lỗi, tên khả năng còn thiếu,
+   chữ mốc tiến độ và câu trả lời của nhà cung cấp đều là tiếng Việt viết thẳng
+   vào mã. Người dùng không phải người Việt sẽ thấy giao diện lẫn lộn — ngay
+   trên chính luồng mà việc này sinh ra để làm cho dễ tiếp cận. (Chính bản thay
+   đổi này đã làm đúng cách cho dải hướng dẫn: năm tệp ngôn ngữ đều có, nên nửa
+   còn lại chỉ là làm nốt.)
+2. **Bộ đếm tải công cụ đứng yên ở 0.** Suốt vài phút tải, màn hình luôn hiện
+   "0 trên N" rồi biến mất đột ngột — đúng cảm giác treo máy mà phần chuẩn bị
+   môi trường đã phải dựng cả một luồng mốc tiến độ để tránh. Đây cũng chính là
+   chặng mà hội đồng còn lăn tăn khi phán mục cần người.
+
+### Ghi thành giới hạn đã biết — chấp nhận và phát hành
+
+Mười lăm mục còn lại, đáng chú ý nhất:
+
+- Dòng trạng thái trên node vẫn hiện câu chung chung trong khi thông báo bật lên
+  cạnh đó đã nói đúng nguyên nhân — hai lời giải thích khác nhau cho cùng một lỗi.
+- Hai chỗ lưu khoá cùng lúc (form tại node và hộp thoại cài đặt) có thể ghi đè
+  của nhau, vì cả hai đều ghi lại trọn bộ danh sách khoá.
+- Lệnh hỏi nhà cung cấp không có hạn giờ, nên một nhà cung cấp treo có thể làm
+  ô nhập khoá kẹt ở trạng thái "đang kiểm tra".
+- Vài chỗ xử lý lỗi chưa chặt: đọc ví dụ chào mừng hỏng thì lỗi rơi ra console
+  thay vì được xử lý; chép phim mẫu gặp lỗi quyền có thể làm hỏng cả trang.
+
+Tất cả đều đảo ngược được và không chặn đường người dùng mới tới kết quả đầu
+tiên — lý do người ký chấp nhận chúng ở bản này.
