@@ -140,10 +140,11 @@ evals:
     criterion: AC-9
     executor: ui-check
     steps:
-      - "With the example working, add a node whose plugin declares a required key → capture evidence/E12-step1.png"
+      - "With the example working, add or switch a node to a plugin whose manifest declares a required env key that is blank in the env store → capture evidence/E12-step1.png"
       - "Press Run so it fails for a missing key → capture evidence/E12-step2.png (node shows the needs-key state)"
       - "Enter the key from the node itself → capture evidence/E12-step3.png"
       - "Assert the settings dialog was never opened during this sequence"
+      - "Each of the three frames MUST be a real PNG of the live screen, captured with the browser's own screenshot, and step2 and step3 must differ visibly. `pnpm ui:capture` re-navigates and therefore cannot photograph an interactive moment; a DOM dump is not a frame. E20's panel judges the key wall from these two images alone, so identical or missing PNGs make that judgment unanswerable regardless of whether the product works (S4 round 3: E12 passed on HTML dumps while E20 failed on round-2 leftovers)"
     expected: "the key is entered at the node; frames show failure → needs-key state → inline form, with no settings dialog"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
