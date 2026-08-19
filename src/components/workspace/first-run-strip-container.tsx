@@ -12,6 +12,7 @@ import {
     EXAMPLE_COMPLETED_KEY,
     useFirstRunReadiness,
 } from "@/hooks/use-first-run-readiness";
+import { refreshPluginsRegistry } from "@/hooks/use-plugins-registry";
 import { useTaskStore } from "@/hooks/use-task";
 import type {
     ProvisioningEvent,
@@ -118,10 +119,37 @@ export function FirstRunStripContainer() {
         setDismissed(true);
     }, [workflowStatus, dismissed, readiness]);
 
-    const handlePrepare = useCallback(() => {
-        // Wired in the install task: one press hands the WHOLE missing set to
-        // the server in a single call.
-    }, []);
+    // ONE press, the WHOLE set: the server derives the full missing list from
+    // the shipped example itself — the view never loops over plugins (AC-5).
+    const handlePrepare = useCallback(async () => {
+        setOverride((current) => {
+            if (current?.phase === "installing") return current;
+            return {
+                phase: "installing",
+                capabilities:
+                    readiness?.phase === "missing-plugins"
+                        ? readiness.capabilities
+                        : [],
+                installed: 0,
+            };
+        });
+        try {
+            const res = await fetch("/api/plugins/install-missing", {
+                method: "POST",
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            // No restart, no reload: re-pull the SAME registry store the node
+            // pickers read, so the fresh install is visible everywhere (AC-6).
+            await refreshPluginsRegistry();
+            setOverride(null);
+        } catch {
+            setOverride({
+                phase: "blocked",
+                reason: t("blockedReasonDownload"),
+                retryable: true,
+            });
+        }
+    }, [readiness, t]);
 
     const labels = useMemo<FirstRunStripLabels>(
         () => ({
