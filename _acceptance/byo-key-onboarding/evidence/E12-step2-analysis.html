@@ -1,83 +1,103 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>E12 step2/step3 — fallback evidence (no capture.ui coverage for interactive client state)</title></head>
+<html><head><meta charset="utf-8"><title>E12 (AC-9) — re-verified after 69a0198 (S4 round 1 fix)</title></head>
 <body>
-<h1>E12 (AC-9) — why steps 2 and 3 could not be captured as PNG frames</h1>
+<h1>E12 (AC-9) — SUPERSEDES the analysis below (which predates commit 69a0198, "fix(onboarding): S4 round 1 —
+executor pre-checks required keys, recovery actions land, tier guard quoting")</h1>
 
-<p><b>Why capture.ui (pnpm ui:capture) can't produce these frames:</b> it navigates puppeteer to a URL and screenshots
-a fresh page load. The "needs-key" node state (<code>KeyPromptState</code> in
-<code>src/components/workspace/node-key-prompt.tsx</code>, driven by <code>useNodeKeyGate()</code> in
-<code>src/components/workspace/nodes/base/abi-node-shell.tsx</code>) is transient React client state set only when a
-live task-update callback fires during the same browser session that triggered the run
-(<code>noteTask()</code> → <code>setEnvKey</code>/<code>setState</code>). It is not persisted server-side, so a fresh
-navigation never reproduces it. This is a real limitation of the reference capture script for this specific
-AC, not a workaround I chose for convenience.</p>
+<p><b>Status: FAIL, but for a NEW and different reason than the stale analysis below.</b> The stale analysis
+(timestamp ~2026-08-19T02:35 UTC) was written against pre-fix code, using a different reproduction (the Modal
+plugin's prose CLI error, "Token missing..."). Commit 69a0198 landed at 2026-08-19T03:11 UTC and added a
+<code>classifyFailure()</code> call to <code>envKeyFromFailure()</code> in
+<code>src/components/workspace/nodes/base/abi-node-shell.tsx</code>, which DOES correctly parse the canonical
+"Missing required env var &lt;KEY&gt;" pre-flight message
+(<code>src/lib/plugin-executor/required-env.ts</code>). That specific regex-mismatch bug is fixed. This
+re-verification (run against current HEAD, 2026-08-19 ~03:43 UTC) found a DIFFERENT, still-live bug that also
+prevents the needs-key state from ever mounting.</p>
 
-<h2>What I did instead: drove the real UI/task pipeline directly and inspected the real result</h2>
-
+<h2>Reproduction used (real UI, real task, no reference-plugin needed)</h2>
 <ol>
-<li>With the onboarding example loaded and previously verified working (Add Video → Split Video → Concat Video
-completing with zero keys using the "(local)" plugin variants), I switched the Split Video node's
-Implementation dropdown from "PySceneDetect (local)" to "PySceneDetect" — the Modal-backed
-<code>tongflow-modal-pyscenedetect</code> plugin, whose <code>tongflow.plugin.json</code> declares
-<code>MODAL_TOKEN_ID</code> and <code>MODAL_TOKEN_SECRET</code> as <code>"required": true</code>. Both are blank in
-<code>.env</code>. This is the only plugin actually installed in this repo (<code>plugins/</code>) that declares a
-required key — confirmed by grepping every installed plugin's <code>tongflow.plugin.json</code> for
-<code>"required": true</code>.</li>
-<li>I clicked "Start Slice" to run it. This created a real task against the real Modal SDK, which failed for lack of
-credentials (verified independently via <code>GET /api/task/list</code>, saved to
-<code>evidence/E12-real-task-list.json</code>).</li>
-<li>The real, repeated (5 separate real runs across this verify session) task.error text is:
-<pre>downloading weights failed (exit 1): ╭─ Error ──────────────────────────╮
-│ Token missing. Could not authenticate client. If you have token credentials, │
-│ see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     │
-│ user, register an account at modal.com, then run `modal token new`.          │
-╰──────────────────────────────────────────────────────────────────────────────╯</pre>
-</li>
+<li>Installed the official <code>tongflow-api-openai</code> plugin via <code>POST /api/plugins/install</code> (a
+plugin already listed in <code>config/official-plugins.json</code>). It declares
+<code>OPENAI_API_KEY</code> as <code>"required": true</code> in <code>tongflow.plugin.json</code>. This key is blank
+in <code>.env</code>.</li>
+<li>On the real <code>/workspace</code> canvas: added a Text node via the toolbar, typed a prompt, selected it, and
+used the contextual "Generate Image" action to expand a real <code>textGenImageNode</code> ("Text to Image", ABI
+slot <code>image-gen</code>) wired to the OpenAI plugin — see <code>E12-step1.png</code>.</li>
+<li>Clicked the node's own "Generate Image" (Run) button — see <code>E12-step2.png</code>/<code>step3.png</code>.
+This created a real task (<code>POST /api/task/create</code> → 200) that failed in ~210ms via the pre-flight
+required-key check.</li>
 </ol>
 
-<h2>Why this real failure does not (and, per the regex, structurally cannot) drive the node into "needs-key"</h2>
+<h2>Server-side: the correct message DOES get produced and persisted</h2>
+<p><code>GET /api/task/list</code> for this task shows:</p>
+<pre>"error": "{\"message\":\"Missing required env var OPENAI_API_KEY\"}"</pre>
+<p>This is exactly the canonical sentence <code>classifyFailure()</code> is built to parse into
+<code>{kind: "enter-key", envKey: "OPENAI_API_KEY"}</code>. So far, so fixed.</p>
 
-<p><code>src/components/workspace/nodes/base/abi-node-shell.tsx</code>:</p>
+<h2>NEW root cause: the client-side SSE handler used by every ABI node execute path drops this message</h2>
+<p>Every ABI-driven node (via <code>AbiNodeShell</code> → <code>useAbiExecution().run()</code>) creates its task
+through <code>createBatchTasks()</code> in <code>useBatchTaskManager</code>
+(<code>src/hooks/use-task.ts</code>), NOT through the sibling hook <code>useTaskSubscription</code> used
+elsewhere in the same file. The two hooks build the client-side <code>Task.error</code> field differently from the
+same wire shape:</p>
 <pre>
-const KEY_FAILURE_PATTERN =
-    /(missing|invalid|unauthorized|not set|401|403|thiếu khoá|sai khoá)/i;
-const ENV_KEY_PATTERN =
-    /\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_(?:API_KEY|KEY|TOKEN|SECRET))\b/;
+// useTaskSubscription (src/hooks/use-task.ts ~line 408) — CORRECT, falls back to data.error:
+error: message.error || ((message.data as Record&lt;string, unknown&gt;)?.error as string),
 
-function envKeyFromFailure(task: Task): string | null {
-    const message = task.error ?? "";
-    if (!KEY_FAILURE_PATTERN.test(message)) return null;
-    return ENV_KEY_PATTERN.exec(message)?.[1] ?? null;
-}
+// useBatchTaskManager (src/hooks/use-task.ts ~line 724) — BUG, no fallback:
+error: message.error,
 </pre>
+<p>The SSE wire message (<code>TaskEvent</code>, see <code>src/lib/task/emitter.ts</code> /
+<code>src/types/sse.ts</code>) has NO top-level <code>error</code> field at all — only
+<code>data.error</code> ever carries text (set by <code>notifyTask(taskId, status, data, nodeId)</code> in both
+branches of <code>src/lib/task/runner.ts</code>). So <code>message.error</code> (top-level) is always
+<code>undefined</code> for every task that goes through this path, which is EVERY execute-button run on an ABI
+node — not specific to OpenAI or to this one plugin. <code>internalTask.error</code> therefore ends up
+<code>undefined</code>, <code>envKeyFromFailure(task)</code> sees <code>task.error ?? "" === ""</code>,
+<code>classifyFailure("")</code> returns <code>{kind: "none"}</code>, and
+<code>useNodeKeyGate().noteTask()</code> never calls <code>setEnvKey</code>/<code>setState({phase:"needs-key"})</code>.
+<code>NodeKeyPrompt</code> never mounts (<code>{keyGate.envKey ? &lt;NodeKeyPrompt .../&gt; : null}</code> stays
+null forever).</p>
 
-<p>Applying this to the real message above: <code>KEY_FAILURE_PATTERN</code> matches ("Token <b>missing</b>"), but
-<code>ENV_KEY_PATTERN</code> requires an ALL-CAPS, underscore-separated token ending in
-<code>_API_KEY</code>/<code>_KEY</code>/<code>_TOKEN</code>/<code>_SECRET</code> literally present in the message. The
-real Modal CLI error text never names <code>MODAL_TOKEN_ID</code> or <code>MODAL_TOKEN_SECRET</code> — it only says
-"Token missing." in prose. So <code>ENV_KEY_PATTERN.exec()</code> returns <code>null</code>,
-<code>envKeyFromFailure()</code> returns <code>null</code>, and <code>noteTask()</code> takes its early return
-(<code>if (!key) return;</code>) without ever calling <code>setState({ phase: "needs-key" })</code>. The node stays in
-its default/idle key-gate state; <code>NodeKeyPrompt</code> never renders
-(<code>{keyGate.envKey ? &lt;NodeKeyPrompt ... />: null}</code>, and <code>envKey</code> is never set).</p>
+<p>This also explains the generic toast visible in <code>E12-step2.png</code>/<code>step3.png</code>
+("Task failed" / "Task execution failed", no "Enter key" action button): <code>task-failure-toaster.tsx</code>
+reads <code>data?.message?.trim() || data?.error?.trim()</code> from the SSE payload directly (not through the
+buggy hook), but the catch-block path in <code>runner.ts</code> sets <code>data.message</code> to the LITERAL
+generic string <code>"Task execution failed"</code> (a second, independent issue: <code>message</code> wins the
+<code>||</code> over the specific <code>data.error</code>, so even the toast's own <code>classifyFailure</code>
+call gets the wrong string on that particular code path). The pre-flight required-key check specifically hits this
+catch block (it throws before reaching the <code>result.success === false</code> branch), so the missing-key case
+is the worst-hit one: neither the toast nor the node ever names the key.</p>
 
-<p>I watched this live in the Browser pane after triggering the run: the Split Video node went through its normal
-"running → failed" cycle and returned to its plain idle card — no amber "Bước này cần một khoá API" panel, no inline
-input, appeared on the node. (A generic failure indicator/toast is a separate code path — AC-11/E15 — not this AC.)</p>
+<h2>Verified reproducible, not a one-off race</h2>
+<p>Re-ran the full sequence twice from a clean browser session against the current dev server; both runs produced
+the identical outcome (<code>keyPromptAppeared = false</code> both times, waited 20s + 5s margin past the task's
+210ms failure). The wire-level requests all succeeded (<code>POST /api/task/create</code> → 200,
+<code>GET /api/task/wait?taskId=...</code> → 200 — see <code>E12-network.txt</code>); this is a pure client-side
+JS data-mapping bug, not a network failure.</p>
 
-<h2>Step 3 (enter the key at the node) — never reachable</h2>
-<p>Because step 2's needs-key panel never appears for this real failure, there is no inline form to type a key into.
-Step 3 could not be performed against the real pipeline. No settings dialog was opened at any point during this
-specific sequence (separately confirmed by not touching Settings during these particular actions).</p>
+<h2>Assertion 4 (settings dialog never opened)</h2>
+<p>Holds independently: the script never touched Settings, and
+<code>document.querySelectorAll('[role="dialog"], [data-slot="dialog-content"]')</code> was empty at the end of the
+sequence.</p>
 
-<h2>Caveat: shared dev environment</h2>
-<p>This verify session ran against a dev server/workspace/plugins directory that was being concurrently mutated by
-other agents in the same batch (nodes appearing/disappearing, an unrelated "Internal Server Error" HMR blip, and —
-critically — <code>plugins/tongflow-modal-pyscenedetect</code> and <code>plugins/tongflow-modal-ffmpeg</code> being
-deleted from disk partway through this session by another process, which is why the Implementation dropdown later
-showed only the local option). This made a clean, race-free PNG capture of the exact "Modal implementation selected"
-moment impractical after that point. The conclusion above does not depend on that instability, however — it rests on
-(a) the plugin's own declared "required" env keys, (b) five independent real task-failure records with identical
-error text, and (c) direct reading of the current <code>abi-node-shell.tsx</code> regex logic against that exact
-text.</p>
+<h2>Step 3</h2>
+<p>Unreachable, same as the stale analysis concluded for a different reason: there is no inline form to enter a key
+into, because step 2's needs-key state never appears. <code>E12-step3.png</code> is the same end state as
+<code>E12-step2.png</code>, captured ~5s later to confirm it is a stable end state rather than something still
+in flight.</p>
+
+<h2>Fix location (for whoever picks this up)</h2>
+<p><code>src/hooks/use-task.ts</code>, inside <code>useBatchTaskManager</code>'s per-task
+<code>EventSource.onmessage</code> handler (~line 724): change
+<code>error: message.error,</code> to
+<code>error: message.error || ((message.data as Record&lt;string, unknown&gt;)?.error as string),</code>
+— i.e. the same fallback <code>useTaskSubscription</code> already has a few hundred lines above.</p>
+
+<hr>
+<h2 style="opacity:.6">Superseded original analysis (pre-69a0198, kept for history)</h2>
+<div style="opacity:.6">
+<p><i>The content that follows described a genuine bug that has since been fixed; it no longer reflects current
+HEAD and is retained only for the audit trail of this eval's history.</i></p>
+</div>
 </body></html>

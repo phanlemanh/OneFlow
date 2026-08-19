@@ -1,135 +1,38 @@
 {
-  "assertions": [
-    {
-      "name": "no visible modal/dialog overlay",
-      "pass": true
-    },
-    {
-      "name": "canvas pane not pointer-events:none (not disabled)",
-      "pass": true
-    },
-    {
-      "name": "body not pointer-events:none (no page-level block)",
-      "pass": true
-    },
-    {
-      "name": "active element still inside document body (no external focus trap)",
-      "pass": true
-    },
-    {
-      "name": "strip still present after interaction",
-      "pass": true
-    },
-    {
-      "name": "node count increased (a node was added)",
-      "pass": true
-    },
-    {
-      "name": "dragged node changed position",
-      "pass": true
-    },
-    {
-      "name": "Tab key still moves focus within the document (no trap)",
-      "pass": true
-    }
-  ],
-  "step1_strip_present": true,
-  "nodeBoxes": [
-    {
-      "id": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
-      "x": 58,
-      "y": 319.1824951171875,
-      "w": 218.548828125,
-      "h": 144.78857421875
-    },
-    {
-      "id": "97ebbb1d-8681-4e39-9bc8-31306e37ca30",
-      "x": 393.791015625,
-      "y": 385.6578369140625,
-      "w": 54.63671875,
-      "h": 52.986572265625
-    },
-    {
-      "id": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
-      "x": 498.9677734375,
-      "y": 366.5347900390625,
-      "w": 126.7041015625,
-      "h": 91.06201171875
-    },
-    {
-      "id": "4acb468a-4144-43fc-b197-6fb380f7ad91",
-      "x": 681.0908203125,
-      "y": 393.8533935546875,
-      "w": 116.5595703125,
-      "h": 36.4248046875
-    },
-    {
-      "id": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
-      "x": 831.34375,
-      "y": 343.3138427734375,
-      "w": 218.548828125,
-      "h": 137.503662109375
-    },
-    {
-      "id": "e37eeba2-9e54-4f4a-812d-07548d9cfdb4",
-      "x": 1105.4404296875,
-      "y": 393.8533935546875,
-      "w": 116.5595703125,
-      "h": 36.4248046875
-    }
-  ],
-  "nodeBoxesAfterDrag": [
-    {
-      "id": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
-      "x": 58,
-      "y": 319.1824951171875
-    },
-    {
-      "id": "97ebbb1d-8681-4e39-9bc8-31306e37ca30",
-      "x": 392.7900390625,
-      "y": 514.6575927734375
-    },
-    {
-      "id": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
-      "x": 498.9677734375,
-      "y": 366.5347900390625
-    },
-    {
-      "id": "4acb468a-4144-43fc-b197-6fb380f7ad91",
-      "x": 681.0908203125,
-      "y": 393.8533935546875
-    },
-    {
-      "id": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
-      "x": 831.34375,
-      "y": 343.3138427734375
-    },
-    {
-      "id": "e37eeba2-9e54-4f4a-812d-07548d9cfdb4",
-      "x": 1105.4404296875,
-      "y": 393.8533935546875
-    }
-  ],
-  "toolbarBtn": {
-    "x": 640,
-    "y": 756,
-    "count": 7
+  "eval": "E4",
+  "criterion": "AC-13",
+  "run_url": "http://localhost:3201/workspace",
+  "note_on_url": "config dev_server.url (http://localhost:3000) had a pre-existing process already listening (PID 895, started before this verify run) that returned HTTP 500 for every route including / and /workspace. That process was not started by this verifier, so it was left running untouched. A fresh `pnpm dev --port 3201` in the same checkout served /workspace with HTTP 200, confirming the code itself is not the cause of the 500s. All E4 steps were run against that own, disposable dev server, which was shut down at the end of this run.",
+  "step1": {
+    "description": "Fresh browser profile (no localStorage), oneflow.firstRun.exampleCompleted cleared, reload, screenshot saved to E4-step1.png",
+    "stripText": "Done. Press Run on the first node to try it.",
+    "nodeCountOnCanvas": 6
   },
-  "addedViaTextarea": true,
-  "nodeCountBefore": 6,
-  "nodeCountAfter": 7,
-  "assertionData": {
-    "visibleDialogCount": 0,
-    "visibleDialogInfo": [],
-    "panePointerEvents": "auto",
-    "bodyPointerEvents": "auto",
-    "activeElementTag": "DIV",
-    "activeElementInBody": true,
-    "stripStillPresent": true
+  "step2": {
+    "description": "Without touching the strip: dragged the 'Add Video' node (id 418a1943-6d00-490d-9cf2-b9a5bb2b9ab6) via real trusted mouse events (page.mouse down/move/up), then clicked the bottom toolbar's Video icon (the node-picker row rendered by smart-island.tsx) to add a new addVideoNode. Screenshot saved to E4-step2.png",
+    "dragNodeId": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
+    "dragStyleBefore": "z-index: 0; transform: translate(27001.1px, 4673.4px); pointer-events: all; visibility: visible;",
+    "dragStyleAfter": "z-index: 0; transform: translate(27001.1px, 4921.58px); pointer-events: all; visibility: visible;",
+    "dragMovedNode": true,
+    "nodeCountBefore": 6,
+    "nodeCountAfter": 7,
+    "nodeAdded": true,
+    "stripStillPresentAfter": true,
+    "stripText2": "Done. Press Run on the first node to try it."
   },
-  "afterTabPress": {
-    "tag": "TEXTAREA",
-    "inBody": true
+  "domAssertions": {
+    "dialogsOpen": 0,
+    "ariaModalCount": 0,
+    "canvasExists": true,
+    "canvasPointerEvents": "auto",
+    "stripWrapperClass": "pointer-events-none absolute left-1/2 top-16 z-10 flex w-full max-w-3xl -translate-x-1/2 justify-center px-4",
+    "stripWrapperIsPointerEventsNone": true
   },
-  "allPass": true
+  "focusTrapCheck": {
+    "description": "12 sequential Tab presses after load; document.activeElement inspected each time",
+    "result": "focus moved through canvas elements (DIV/BUTTON/VIDEO nodes inside .react-flow) on every press; never landed on document.body; never stayed inside the strip's <output> wrapper",
+    "trappedInStrip": false
+  },
+  "verdict": "PASS — canvas stayed fully interactive (node drag succeeded, node-picker add succeeded) with the first-run strip visible throughout; no modal, no disabled canvas, no focus trap observed.",
+  "verified_at": "2026-08-19T03:35:00Z"
 }

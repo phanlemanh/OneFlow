@@ -1,135 +1,41 @@
-[response] 200 GET http://localhost:3000/workspace
-[response] 200 GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2
-[response] 200 GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106207218
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106207218
-[response] 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787106207218
-[response] 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
-[response] 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
-[response] 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787106207218
-[response] 200 GET http://localhost:3000/_next/static/chunks/app/workspace/page.js
-[response] 200 GET http://localhost:3000/apple-touch-icon.png
-[response] 200 GET http://localhost:3000/example.json
-[response] 304 GET http://localhost:3000/apple-touch-icon.png
-[response] 304 GET http://localhost:3000/example.json
-[response] 200 GET http://localhost:3000/api/plugins/registry
-[response] 200 GET http://localhost:3000/api/feature/list
-[response] 200 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
-[response] 206 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
-[response] 200 GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg
-[response] 200 GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg
-[response] 404 GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg
-[response] 404 GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg
-[response] 200 GET http://localhost:3000/api/task/pending
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106209320
-[response] 200 GET http://localhost:3000/_next/static/webpack/9123952deb999b8b.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.9123952deb999b8b.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.9123952deb999b8b.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 POST http://localhost:3000/api/task/create
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106211794
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106211794
-[response] 200 GET http://localhost:3000/api/task/wait?taskId=JZYM1CEjaDGSUt71WXcnP
-[response] 200 GET http://localhost:3000/_next/static/webpack/d45885f18db4db56.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.d45885f18db4db56.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.d45885f18db4db56.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106213823
-[requestfailed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106213823
-[response] 200 GET http://localhost:3000/_next/static/webpack/e3cdce6e416386c1.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.e3cdce6e416386c1.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.e3cdce6e416386c1.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106215322
-[requestfailed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106215322
-[response] 200 GET http://localhost:3000/_next/static/webpack/aa2099e8bd7cff96.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.aa2099e8bd7cff96.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.aa2099e8bd7cff96.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106216254
-[requestfailed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106216254
-[response] 200 GET http://localhost:3000/_next/static/webpack/3fce6b469ec4968d.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.3fce6b469ec4968d.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.3fce6b469ec4968d.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106217333
-[requestfailed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106217333
-[response] 200 GET http://localhost:3000/_next/static/webpack/643c29e7d4645221.webpack.hot-update.json
-[response] 200 GET http://localhost:3000/_next/static/webpack/app/layout.643c29e7d4645221.hot-update.js
-[response] 200 GET http://localhost:3000/_next/static/webpack/webpack.643c29e7d4645221.hot-update.js
-[response] 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-[response] 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787106218282
-[requestfailed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
-[response] 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787106218282
+=== responses (app origin) ===
+RESPONSE 200 GET http://localhost:3000/workspace
+RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110826182
+RESPONSE 200 GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
+RESPONSE 200 GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2
+RESPONSE 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110826182
+RESPONSE 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787110826182
+RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
+RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
+RESPONSE 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787110826182
+RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app/workspace/page.js
+RESPONSE 200 GET http://localhost:3000/apple-touch-icon.png
+RESPONSE 304 GET http://localhost:3000/apple-touch-icon.png
+RESPONSE 200 GET http://localhost:3000/example.json
+RESPONSE 304 GET http://localhost:3000/example.json
+RESPONSE 200 GET http://localhost:3000/api/plugins/registry
+RESPONSE 200 GET http://localhost:3000/api/feature/list
+RESPONSE 200 GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg
+RESPONSE 200 GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg
+RESPONSE 200 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
+RESPONSE 206 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
+RESPONSE 200 GET http://localhost:3000/_next/static/webpack/08d96f7ab9d9d2cd.webpack.hot-update.json
+RESPONSE 200 GET http://localhost:3000/_next/static/webpack/app/layout.08d96f7ab9d9d2cd.hot-update.js
+RESPONSE 200 GET http://localhost:3000/_next/static/webpack/webpack.08d96f7ab9d9d2cd.hot-update.js
+RESPONSE 404 GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg
+RESPONSE 404 GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg
+RESPONSE 200 GET http://localhost:3000/api/task/pending
+RESPONSE 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
+RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110828048
+RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110828200
+REQUEST-FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt :: net::ERR_ABORTED
+RESPONSE 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110828200
+RESPONSE 200 POST http://localhost:3000/api/task/create
+RESPONSE 200 GET http://localhost:3000/api/task/wait?taskId=1Hra1wC3gtkP1G0zPSrpk
 
---- console ---
-[console:info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [useNodeTaskUpdate] Registering task update handler for node: 2a0ab3e5-147a-49a3-a692-b89fb9f6e879
-[console:log] [Task Store] Registered handler for node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, total handlers: 1
-[console:log] [useNodeTaskUpdate] Registering task update handler for node: 3674f5c0-818d-460f-825a-3d2ca7e7a4a2
-[console:log] [Task Store] Registered handler for node 3674f5c0-818d-460f-825a-3d2ca7e7a4a2, total handlers: 1
-[console:log] [useNodeTaskUpdate] Unregistering task update handler for node: 2a0ab3e5-147a-49a3-a692-b89fb9f6e879
-[console:log] [Task Store] Unregistered handler for node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, remaining handlers: 0
-[console:log] [useNodeTaskUpdate] Registering task update handler for node: 2a0ab3e5-147a-49a3-a692-b89fb9f6e879
-[console:log] [Task Store] Registered handler for node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, total handlers: 1
-[console:log] [useNodeTaskUpdate] Unregistering task update handler for node: 3674f5c0-818d-460f-825a-3d2ca7e7a4a2
-[console:log] [Task Store] Unregistered handler for node 3674f5c0-818d-460f-825a-3d2ca7e7a4a2, remaining handlers: 0
-[console:log] [useNodeTaskUpdate] Registering task update handler for node: 3674f5c0-818d-460f-825a-3d2ca7e7a4a2
-[console:log] [Task Store] Registered handler for node 3674f5c0-818d-460f-825a-3d2ca7e7a4a2, total handlers: 1
-[console:log] [WorkflowRecovery] Checking for pending workflow tasks...
-[console:error] Failed to load resource: the server responded with a status of 404 (Not Found)
-[console:error] Failed to load resource: the server responded with a status of 404 (Not Found)
-[console:log] [WorkflowRecovery] No pending workflow task found
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 259ms
-[console:log] [Task Store] Task JZYM1CEjaDGSUt71WXcnP tracked to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [SSE Batch] Connected for task JZYM1CEjaDGSUt71WXcnP
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 214ms
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 172ms
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 190ms
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 157ms
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [Fast Refresh] rebuilding
-[console:log] [Fast Refresh] done in 143ms
-[console:log] AddVideoNode data: [object Object]
-[console:log] AddVideoNode data: [object Object]
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
-[console:log] [SSE Batch] Message for task JZYM1CEjaDGSUt71WXcnP: [object Object]
-[console:log] [emitSSETaskMessage] Emitting: [object Object]
-[console:log] [Task Router] Routing task JZYM1CEjaDGSUt71WXcnP (status: PROCESSING) to node 2a0ab3e5-147a-49a3-a692-b89fb9f6e879, handlers: 1
+=== requestfailed ===
+REQUEST-FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt :: net::ERR_ABORTED
+
+=== console.error ===
+Failed to load resource: the server responded with a status of 404 (Not Found)
+Failed to load resource: the server responded with a status of 404 (Not Found)

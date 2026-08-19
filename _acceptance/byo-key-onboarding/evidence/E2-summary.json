@@ -1,0 +1,19 @@
+{
+  "clickedInstall": true,
+  "ready": true,
+  "sawProvisioningFrameInInstall": false,
+  "sawProvisioningFrameInRun": true,
+  "clickedRun": true,
+  "outputSeen": true,
+  "step1Text": "Add Video\nUpload\nRecord Video\nLibrary\n\nDrag files here or click to upload\n\nSupports MP4, MOV, WEBM\n\nBrowse Files\nVideo\n480 × 270\nSplit Video\nImplementation\n\nNo plugin implementations were scanned for this capability. Add Modal or API plugins under the repo's plugins/ directory (see README), then reload this page.\n\nStart Slice\nVideos (0)\nConcat Video\nImplementation\n\nNo plugin implementations were s",
+  "step2Text": "Add Video\nUpload\nRecord Video\nLibrary\n\nDrag files here or click to upload\n\nSupports MP4, MOV, WEBM\n\nBrowse Files\nVideo\n480 × 270\nSplit Video\nImplementation\n\nNo plugin implementations were scanned for this capability. Add Modal or API plugins under the repo's plugins/ directory (see README), then reload this page.\n\nStart Slice\nVideos (0)\nConcat Video\nImplementation\n\nNo plugin implementations were s",
+  "finalText": "Add Video\nUpload\nRecord Video\nLibrary\n\nDrag files here or click to upload\n\nSupports MP4, MOV, WEBM\n\nBrowse Files\nVideo\n480 × 270\nSplit Video\nImplementation\nP\nPySceneDetect (local)\nStart Slice\n2\nVideos (2)\nConcat Video\nImplementation\nF\nFFmpeg (local)\nVideo Files (2)\nVideo 1\nVideo 2\nConcat Video\nVideos (0)\nNew Idea\n\nDone. Press Run on the first node to try it.\n\nDirector\nTask completed",
+  "videoSrcs": [
+    "http://localhost:3101/api/uploads/example-assets/two-scenes.mp4",
+    "http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4",
+    "http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4",
+    "http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4",
+    "http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4"
+  ],
+  "dialogSightings": []
+}

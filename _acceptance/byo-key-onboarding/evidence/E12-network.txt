@@ -1,29 +1,44 @@
-E12 network truth — captured via mcp Claude_Browser read_network_requests / read_console_messages
-Scope: dev_server.url = http://localhost:3000 (from _acceptance/config.yaml)
-
-FAIL-eligible app-origin fetch/XHR observed during this session (last ~150 entries):
-- POST /api/task/create -> 200 OK (x2 seen)
-- GET  /api/task/wait?taskId=... -> 200 OK
-- POST /api/task/update-status -> 200 OK (x2)
-- GET  /api/uploads/tasks/.../*.mp4 -> 200 / 206 Partial Content (many)
-- GET  /api/plugins/registry -> 200 OK
-- GET  /api/feature/list -> 200 OK
-- GET  /api/task/pending -> 200 OK
-All FAIL-eligible (fetch/XHR to app origin) requests observed returned 2xx.
-
-Note-only (not FAIL-eligible per scoping rules):
-- GET /plugins/oneflow-local-pyscenedetect.svg -> 404 Not Found (static icon asset, repeated)
-- GET /plugins/oneflow-local-ffmpeg.svg -> 404 Not Found (static icon asset)
-- GET /workspace?_rsc=... -> [FAILED: net::ERR_ABORTED] (Next.js RSC prefetch aborted by rapid
-  subsequent navigation during this heavily-concurrent session; client-side abort, not a server
-  error/connection failure)
-
-Console (onlyErrors=true) additionally showed three "Failed to load resource: 500 Internal Server
-Error" entries and one transient full-page "Internal Server Error" render, coincident with a Next.js
-dev-server HMR recompile triggered by another process editing files concurrently during this verify
-session (confirmed recovered immediately on re-navigate; curl -D- to /workspace returned clean 200
-OK before and after). These did not appear as distinct entries in the last 150 read_network_requests
-rows (older than the capture window) and were not reproducible on re-check, so they are treated as a
-transient dev-only HMR artifact rather than a steady-state app failure.
-
-networkObserved = clean (app-scope traffic present; every FAIL-eligible request resolved 2xx).
+GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200
+GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200
+GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110976440 -> 200
+GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110976440 -> 200
+GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787110976440 -> 200
+GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200
+GET http://localhost:3000/workspace -> 200
+GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200
+GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787110976440 -> 200
+GET http://localhost:3000/_next/static/chunks/app/workspace/page.js -> 200
+GET http://localhost:3000/apple-touch-icon.png -> 200
+GET http://localhost:3000/apple-touch-icon.png -> 304
+GET http://localhost:3000/example.json -> 200
+GET http://localhost:3000/example.json -> 304
+GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo= -> 200
+GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg== -> 200
+GET data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K -> 200
+GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K -> 200
+GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K -> 200
+GET data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo= -> 200
+GET http://localhost:3000/api/plugins/registry -> 200
+GET http://localhost:3000/api/feature/list -> 200
+GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg -> 200
+GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg -> 200
+GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 200
+GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 206
+GET http://localhost:3000/_next/static/webpack/1ad65be27991a204.webpack.hot-update.json -> 200
+GET http://localhost:3000/_next/static/webpack/webpack.1ad65be27991a204.hot-update.js -> 200
+GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg -> 404
+GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg -> 404
+GET http://localhost:3000/api/task/pending -> 200
+GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110978589 -> 200
+GET http://localhost:3000/plugins/tongflow-api-openai.svg -> 200
+POST http://localhost:3000/api/task/create -> 200
+GET http://localhost:3000/api/task/wait?taskId=DLmxFc7KP5ZlbwUAK5eoh -> 200
+POST http://localhost:3000/__nextjs_original-stack-frames -> 200
+GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200
+GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110986758 -> 200
+FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110986758 -> 200
+POST http://localhost:3000/api/task/update-status -> 200
+GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110987162 -> 200
+FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110987162 -> 200

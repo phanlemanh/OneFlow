@@ -1,96 +1,198 @@
-[
-  {
-    "t": 1787106213191,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "SSE_CONNECTED",
-      "nodeId": null
+{
+  "uploadFile": "/tmp/e10-input-1787110656.mp4",
+  "allDomSnapshots": [
+    {
+      "phase": "split",
+      "frame": 1,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step1.png",
+      "sinceClickMs": 178,
+      "stripText": "Done. Press Run on the first node to try it."
+    },
+    {
+      "phase": "split",
+      "frame": 2,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step2.png",
+      "sinceClickMs": 255,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries0s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 3,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step3.png",
+      "sinceClickMs": 1255,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries1s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 4,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step4.png",
+      "sinceClickMs": 2234,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries2s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 5,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step5.png",
+      "sinceClickMs": 3233,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries3s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 6,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step6.png",
+      "sinceClickMs": 4230,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries4s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 7,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step7.png",
+      "sinceClickMs": 5254,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries5s elapsed. Later runs start instantly."
+    },
+    {
+      "phase": "split",
+      "frame": 8,
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step8.png",
+      "sinceClickMs": 6232,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries6s elapsed. Later runs start instantly."
     }
-  },
-  {
-    "t": 1787106213192,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
-      "data": {
-        "message": "Task started"
+  ],
+  "clientEvents": [
+    {
+      "t": 1787110710280,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "SSE_CONNECTED",
+        "nodeId": null
       }
-    }
-  },
-  {
-    "t": 1787106213400,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": null,
-      "data": {
-        "message": "Đang tạo môi trường Python",
-        "provisioning": {
-          "step": "create-venv",
-          "phase": "started"
+    },
+    {
+      "t": 1787110710280,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+        "data": {
+          "message": "Task started"
+        }
+      }
+    },
+    {
+      "t": 1787110710312,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110ang t\u1ea1o m\u00f4i tr\u01b0\u1eddng Python",
+          "provisioning": {
+            "step": "create-venv",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787110711298,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110\u00e3 t\u1ea1o xong m\u00f4i tr\u01b0\u1eddng Python",
+          "provisioning": {
+            "step": "create-venv",
+            "phase": "completed"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787110711325,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110ang c\u00e0i b\u1ed9 th\u01b0 vi\u1ec7n l\u00f5i",
+          "provisioning": {
+            "step": "install-sdk",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787110713267,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110\u00e3 c\u00e0i xong b\u1ed9 th\u01b0 vi\u1ec7n l\u00f5i",
+          "provisioning": {
+            "step": "install-sdk",
+            "phase": "completed"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787110713292,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110ang c\u00e0i th\u01b0 vi\u1ec7n c\u1ee7a c\u00f4ng c\u1ee5",
+          "provisioning": {
+            "step": "install-requirements",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787110715353,
+      "detail": {
+        "id": "w_kTUuT3zlzzmfxoAy6H8",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "\u0110\u00e3 c\u00e0i xong th\u01b0 vi\u1ec7n c\u1ee7a c\u00f4ng c\u1ee5",
+          "provisioning": {
+            "step": "install-requirements",
+            "phase": "completed"
+          }
         }
       }
     }
-  },
-  {
-    "t": 1787106215831,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": null,
-      "data": {
-        "message": "Đã tạo xong môi trường Python",
-        "provisioning": {
-          "step": "create-venv",
-          "phase": "completed"
-        }
-      }
+  ],
+  "taskCreateRequests": [
+    {
+      "t": 1787110710244,
+      "url": "http://localhost:3000/api/task/create",
+      "status": 200
     }
-  },
-  {
-    "t": 1787106215859,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": null,
-      "data": {
-        "message": "Đang cài bộ thư viện lõi",
-        "provisioning": {
-          "step": "install-sdk",
-          "phase": "started"
-        }
-      }
-    }
-  },
-  {
-    "t": 1787106218597,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": null,
-      "data": {
-        "message": "Đã cài xong bộ thư viện lõi",
-        "provisioning": {
-          "step": "install-sdk",
-          "phase": "completed"
-        }
-      }
-    }
-  },
-  {
-    "t": 1787106218623,
-    "data": {
-      "id": "JZYM1CEjaDGSUt71WXcnP",
-      "status": "RUNNING",
-      "nodeId": null,
-      "data": {
-        "message": "Đang cài thư viện của công cụ",
-        "provisioning": {
-          "step": "install-requirements",
-          "phase": "started"
-        }
-      }
-    }
+  ],
+  "officialFrameMapping": {
+    "note": "The screen-poll loop caught 8 distinct DOM text states (the strip's elapsed-seconds counter ticks every second, so most of the 8 frames differ only by that counter). E10-step1/2/3.png were curated from this set to show the three DISTINCT milestones as bold/current on screen, each cross-checked against the raw SSE events below.",
+    "E10-step1.png": {
+      "source_frame": "domSnapshot #2 (sinceClickMs=255)",
+      "on_screen_current_milestone": "Setting up environment (creating-venv)",
+      "matches_server_event": "provisioning.step=create-venv phase=started (t=1787110710312) / node card shows literal server text \"Dang tao moi truong Python\""
+    },
+    "E10-step2.png": {
+      "source_frame": "domSnapshot #4 (sinceClickMs=2234)",
+      "on_screen_current_milestone": "Installing SDK (install-sdk), creating-venv shown checked/completed",
+      "matches_server_event": "provisioning.step=install-sdk phase=started (t=1787110711325..713267 window) / node card shows literal server text for install-sdk"
+    },
+    "E10-step3.png": {
+      "source_frame": "domSnapshot #6 (sinceClickMs=4230)",
+      "on_screen_current_milestone": "Installing libraries (install-requirements), prior two shown checked/completed",
+      "matches_server_event": "provisioning.step=install-requirements phase=started (t=1787110713292..715353 window) / node card shows literal server text \"Dang cai thu vien cua cong cu\""
+    },
+    "how_forced_real_provisioning": "Deleted data/.tongflow/plugin-venv/oneflow-api-pyscenedetect and oneflow-api-ffmpeg, then uploaded a byte-distinct copy of the example video (ffmpeg -metadata comment=<fresh-timestamp>) via the Add Video node's file input before pressing Run, guaranteeing a fresh business-input fingerprint so no node-result cache could short-circuit the run. Two earlier attempts on the unmodified example asset completed in <1s with zero milestone events -- this shared dev environment has many concurrent sibling sessions re-running the identical bundled example, which warms both the venv and the node-result cache; the fresh upload was needed to get an honest, uncached execution."
   }
-]
+}

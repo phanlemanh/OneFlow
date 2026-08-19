@@ -1,0 +1,38 @@
+E14 network/console dump
+=========================
+App origin under test: http://localhost:3001 (port 3000 was occupied by another
+concurrent session's dev server; my own instance auto-shifted to 3001. Config's
+dev_server.url=http://localhost:3000 — differs only by port, same app/codebase,
+same working tree /Users/manh-macmini/dev/oneflow).
+
+Key console line (confirms the bug at the network/data layer):
+[error] [useAbiExecution] Task failed for node 260ffa96-b630-41b2-af2b-65d07f793ca9:
+  {id: wCk-nubcXAsJUyliagTOd, status: FAILED, progress: 0, data: Object, error: undefined, ...}
+  -> task.error is undefined despite the task genuinely failing for a missing-key
+     reason. Root cause traced in source: src/lib/task/runner.ts's catch block wraps
+     the thrown Error as SSE data {message:"Task execution failed", error: errorMsg},
+     but src/hooks/use-task.ts's BATCH SSE handler (~line 719) does
+     `error: message.error` only, with NO fallback to `message.data?.error` (the
+     single-task SSE handler at ~line 408 DOES have that fallback). Batch SSE is the
+     path AbiNodeShell/useAbiExecution uses for node-level Execute, so this is the
+     path actually exercised by the workspace canvas node.
+
+Other console errors observed: repeated "Failed to load resource: 404" for Next.js
+dev-server internals (.next/server/app/_not-found/page.js ENOENT) and static chunk
+404s — these are webpack cache races from MULTIPLE concurrent `next dev` processes
+in this shared repo/working tree writing to the same .next directory (verified in
+dev.log: "[webpack.cache.PackFileCacheStrategy] Caching failed... ENOENT ... rename").
+Infra noise from other concurrent sessions sharing this machine/repo, not app XHR
+4xx/5xx from a business endpoint, and not third-party. Not counted as app-fail.
+
+Network requests observed (read_network_requests, last ~60): all same-origin
+(http://localhost:3001), all Next.js static/HMR asset fetches (webpack hot-update
+chunks, page CSS with cache-busting query strings) plus a few
+"GET /workspace?_rsc=... [FAILED: net::ERR_ABORTED]" entries — normal RSC prefetch
+aborts caused by rapid navigation/HMR, not failed business requests. No 4xx/5xx
+observed on any /api/* endpoint in this window. DB inspection (sqlite3 direct query,
+not network-visible) confirms the task row itself has the CORRECT specific error:
+  id=wCk-nubcXAsJUyliagTOd  feature=gen-text  plugin=tongflow-api-openai
+  status=failed  error={"message":"Missing required env var OPENAI_API_KEY"}
+So the backend did the right thing; the bug is client-side, in how the batch SSE
+message is mapped onto the Task object consumed by the node's key-gate logic.
