@@ -17,7 +17,15 @@ LOCAL="$ROOT/plugins/$PLUGIN_ID"
 
 if [ -d "$LOCAL" ]; then
     tree="$LOCAL"
-    sha="$(git -C "$tree" rev-parse HEAD 2>/dev/null || echo "uncommitted-local-tree")"
+    # `git -C` walks UP to the host repo when the plugin tree is not its own
+    # repository, which would print the OneFlow sha under a "plugin_commit_sha"
+    # label — a provenance claim about the wrong tree. Only trust the sha when
+    # the tree actually owns a .git.
+    if [ -e "$tree/.git" ]; then
+        sha="$(git -C "$tree" rev-parse HEAD)"
+    else
+        sha="local-tree-not-a-repo"
+    fi
     echo "plugin tree: installed at plugins/$PLUGIN_ID"
 else
     tmp="$(mktemp -d)"
