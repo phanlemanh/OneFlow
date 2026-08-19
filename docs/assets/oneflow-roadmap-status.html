@@ -1,0 +1,518 @@
+<title>Lộ trình OneFlow 24 tuần</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  /* Tokens: docs/reference/diagram-skin.md — brand deep purple as ink,
+     magenta as the single editorial accent, logo blue as link. State colors
+     are deliberately separate from the accent. */
+  :root {
+    --paper: #f7f7f8;
+    --paper-2: #ececed;
+    --paper-3: #e2e2e4;
+    --ink: #1a0033;
+    --muted: #4f4a63;
+    --soft: #66607a;
+    --rule: rgba(26, 0, 51, 0.12);
+    --rule-strong: rgba(26, 0, 51, 0.26);
+    --accent: #e100e1;
+    --link: #0068cc;
+
+    --done: #176b45;
+    --done-bg: rgba(23, 107, 69, 0.10);
+    --live: #8a5600;
+    --live-bg: rgba(138, 86, 0, 0.11);
+    --blocked: #a32b2b;
+    --blocked-bg: rgba(163, 43, 43, 0.09);
+    --queued: #66607a;
+    --queued-bg: rgba(102, 96, 122, 0.09);
+
+    --sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --serif: 'Instrument Serif', 'Lora', Georgia, serif;
+    --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --step: clamp(1.5rem, 1rem + 1.6vw, 2.5rem);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1a0033;
+      --paper-2: #241041;
+      --paper-3: #2e1852;
+      --ink: #f7f7f8;
+      --muted: #c0bacf;
+      --soft: #a49cb8;
+      --rule: rgba(247, 247, 248, 0.12);
+      --rule-strong: rgba(247, 247, 248, 0.28);
+      --accent: #ff5cff;
+      --link: #5aa9ff;
+
+      --done: #57d494;
+      --done-bg: rgba(87, 212, 148, 0.13);
+      --live: #e8ab3c;
+      --live-bg: rgba(232, 171, 60, 0.14);
+      --blocked: #ff8171;
+      --blocked-bg: rgba(255, 129, 113, 0.13);
+      --queued: #a49cb8;
+      --queued-bg: rgba(164, 156, 184, 0.12);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1a0033;
+    --paper-2: #241041;
+    --paper-3: #2e1852;
+    --ink: #f7f7f8;
+    --muted: #c0bacf;
+    --soft: #a49cb8;
+    --rule: rgba(247, 247, 248, 0.12);
+    --rule-strong: rgba(247, 247, 248, 0.28);
+    --accent: #ff5cff;
+    --link: #5aa9ff;
+
+    --done: #57d494;
+    --done-bg: rgba(87, 212, 148, 0.13);
+    --live: #e8ab3c;
+    --live-bg: rgba(232, 171, 60, 0.14);
+    --blocked: #ff8171;
+    --blocked-bg: rgba(255, 129, 113, 0.13);
+    --queued: #a49cb8;
+    --queued-bg: rgba(164, 156, 184, 0.12);
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(2rem, 1rem + 4vw, 4.5rem) clamp(1rem, 0.5rem + 3vw, 3rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--step);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0.35rem 0 0;
+  }
+
+  .lede {
+    color: var(--muted);
+    max-width: 64ch;
+    margin: 0.85rem 0 0;
+    font-size: 1.02rem;
+  }
+
+  .stamp {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    color: var(--soft);
+    margin-top: 0.9rem;
+  }
+  .stamp b { color: var(--ink); font-weight: 500; }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.35rem, 1rem + 1.2vw, 1.85rem);
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .section-head { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1.1rem; }
+  .section-head p { margin: 0; color: var(--muted); max-width: 68ch; font-size: 0.94rem; }
+
+  /* ---- summary tiles ---- */
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .tile { background: var(--paper); padding: 1.15rem 1.2rem; display: flex; flex-direction: column; gap: 0.3rem; }
+  .tile .n { font-family: var(--serif); font-size: 2.3rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .tile .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--soft); }
+  .tile .d { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+  .tile.is-accent .n { color: var(--accent); }
+
+  /* ---- state pills ---- */
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.36rem;
+    font-family: var(--mono); font-size: 0.66rem; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 0.16rem 0.46rem; border-radius: 2px; white-space: nowrap;
+  }
+  .pill::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .s-done { color: var(--done); background: var(--done-bg); }
+  .s-live { color: var(--live); background: var(--live-bg); }
+  .s-blocked { color: var(--blocked); background: var(--blocked-bg); }
+  .s-queued { color: var(--queued); background: var(--queued-bg); }
+
+  /* ---- phase spine ---- */
+  .phases { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .phase { background: var(--paper); padding: 1.35rem 1.4rem; display: grid; grid-template-columns: 190px 1fr; gap: 1.4rem; }
+  @media (max-width: 720px) { .phase { grid-template-columns: 1fr; gap: 0.9rem; } }
+
+  .phase-id { display: flex; flex-direction: column; gap: 0.4rem; }
+  .phase-id .num { font-family: var(--serif); font-size: 1.5rem; line-height: 1.1; }
+  .phase-id .weeks { font-family: var(--mono); font-size: 0.7rem; color: var(--soft); letter-spacing: 0.08em; }
+  .phase-id .bar { height: 3px; background: var(--paper-3); position: relative; overflow: hidden; }
+  .phase-id .bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+
+  .items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+  .items li { display: grid; grid-template-columns: 3.1rem 1fr auto; gap: 0.7rem; align-items: baseline; font-size: 0.92rem; }
+  @media (max-width: 560px) { .items li { grid-template-columns: 2.8rem 1fr; } .items li .pill { grid-column: 2; justify-self: start; } }
+  .items .ref { font-family: var(--mono); font-size: 0.74rem; color: var(--soft); font-variant-numeric: tabular-nums; }
+  .items .what { color: var(--ink); }
+  .items .what em { color: var(--muted); font-style: normal; font-size: 0.86rem; display: block; margin-top: 0.1rem; }
+  .items .what .it { font-style: italic; }
+
+  .gate {
+    margin-top: 1.05rem; padding: 0.85rem 1rem;
+    border-left: 2px solid var(--accent);
+    background: var(--paper-2);
+    font-size: 0.88rem; color: var(--muted);
+  }
+  .gate b { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 0.25rem; }
+  .gate .cond { color: var(--ink); }
+
+  /* ---- local-first band ---- */
+  .band { border: 1px solid var(--rule-strong); background: var(--paper-2); padding: 1.4rem; }
+  .band-note { font-size: 0.9rem; color: var(--muted); margin: 0 0 1.1rem; max-width: 72ch; }
+  .lane { display: grid; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+  .stop { background: var(--paper); padding: 0.85rem 0.9rem; display: flex; flex-direction: column; gap: 0.45rem; }
+  .stop .sid { font-family: var(--mono); font-size: 0.78rem; font-weight: 500; letter-spacing: 0.08em; }
+  .stop .txt { font-size: 0.82rem; color: var(--muted); line-height: 1.4; }
+
+  .warn { margin-top: 1.2rem; padding: 0.9rem 1rem; border: 1px dashed var(--blocked); color: var(--ink); font-size: 0.88rem; background: var(--blocked-bg); }
+  .warn b { color: var(--blocked); }
+
+  /* ---- ledger ---- */
+  .scroll { overflow-x: auto; border: 1px solid var(--rule); }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.88rem; }
+  th, td { text-align: left; padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+  thead th { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--soft); font-weight: 500; background: var(--paper-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.slug { font-family: var(--mono); font-size: 0.78rem; white-space: nowrap; }
+  td.when { font-family: var(--mono); font-size: 0.76rem; color: var(--soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.where { color: var(--muted); }
+  td.where b { color: var(--ink); font-weight: 500; }
+  .off { color: var(--soft); font-style: italic; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 1.1rem; }
+  @media (max-width: 620px) { .split { grid-template-columns: 1fr; } }
+  .half { background: var(--paper); padding: 1rem 1.1rem; }
+  .half .n { font-family: var(--serif); font-size: 1.9rem; line-height: 1; }
+  .half .k { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--soft); margin-bottom: 0.3rem; }
+  .half p { margin: 0.4rem 0 0; font-size: 0.85rem; color: var(--muted); }
+
+  /* ---- calendar strip ---- */
+  .cal { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .cal span { font-family: var(--mono); font-size: 0.74rem; padding: 0.28rem 0.55rem; border: 1px solid var(--rule); color: var(--muted); }
+  .cal span b { color: var(--ink); font-weight: 500; }
+
+  footer { border-top: 1px solid var(--rule); padding-top: 1.2rem; font-size: 0.82rem; color: var(--soft); }
+  footer code { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+  a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, .tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="page">
+
+  <header>
+    <div class="eyebrow">OneFlow · lộ trình sản phẩm</div>
+    <h1>24 tuần, bốn cổng bằng số</h1>
+    <p class="lede">
+      Studio AIGC đa phương thức, một người làm. Lộ trình 08/2026 → 01/2027 chỉ tính
+      <b>phát triển sản phẩm</b> — GTM, growth, vận hành nằm ngoài. Mỗi phase đóng bằng một
+      gate đo được; trượt gate là dừng sửa, không lao tiếp.
+    </p>
+    <p class="stamp">
+      Trạng thái đọc ngày <b>19/08/2026</b> · nguồn <b>docs/roadmap.md</b> @ <b>chore/roadmap-activate</b>
+      · đối chiếu máy bằng <b>pnpm roadmap:check</b>
+    </p>
+  </header>
+
+  <section aria-label="Tổng quan">
+    <div class="tiles">
+      <div class="tile is-accent">
+        <div class="n">20</div>
+        <div class="k">hạng mục đã ký</div>
+        <div class="d">12 năng lực sản phẩm · 8 hạ tầng quy trình</div>
+      </div>
+      <div class="tile">
+        <div class="n">2/7</div>
+        <div class="k">Phase 1 đã đóng</div>
+        <div class="d">Trục cache 1.1 và overlay 1.2 — hai hạng mục "không được cắt"</div>
+      </div>
+      <div class="tile">
+        <div class="n">4</div>
+        <div class="k">điều kiện chặn G0</div>
+        <div class="d">Cả bốn cần người vận hành, máy không tự làm được</div>
+      </div>
+      <div class="tile">
+        <div class="n">11</div>
+        <div class="k">ADR bất biến</div>
+        <div class="d">ADR-0011 đảo chiều nền thực thi ngày 05/08</div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ph">
+    <div class="section-head">
+      <h2 id="ph">Bốn phase, bốn gate</h2>
+      <p>Thứ tự trong mỗi phase là thứ tự thực thi — nguồn lực một người, tuần tự tàn nhẫn.</p>
+    </div>
+
+    <div class="phases">
+
+      <article class="phase">
+        <div class="phase-id">
+          <div class="num">Phase 0</div>
+          <div class="weeks">T1–T4 · nền &amp; số liệu gốc</div>
+          <div class="bar"><span class="fill" style="width:25%"></span></div>
+        </div>
+        <div>
+          <ul class="items">
+            <li><span class="ref">0.1</span><span class="what">Độc lập upstream — SDK riêng, fork plugin tuần tự<em>SDK 0.2.18 đã publish, 3 fork đã hạ cánh · desktop chưa tách khỏi app.tongflow.com</em></span><span class="pill s-live">một phần</span></li>
+            <li><span class="ref">0.2</span><span class="what">Metering + móng provenance vào bảng tasks</span><span class="pill s-done">xong</span></li>
+            <li><span class="ref">0.3</span><span class="what">Bộ đo chuẩn tái chạy được — WER, COGS<em>Script đã ký 26/07, chưa chạy lần nào · MOS đóng bằng ADR-0009</em></span><span class="pill s-live">một phần</span></li>
+            <li><span class="ref">0.4</span><span class="what">Spec cache content-addressed + partial re-render<em>Spec xong, ba câu hỏi mở đã chốt 29/07</em></span><span class="pill s-live">một phần</span></li>
+          </ul>
+          <div class="gate">
+            <b>Gate G0 — chưa qua</b>
+            <span class="cond">Bốn điều kiện, cả bốn cần người vận hành:</span>
+            ⓪ ký ngưỡng số <em>trước</em> khi thấy dữ liệu (chốt vạch sau là mất tính khách quan) ·
+            ① clip thực địa + bản chép tay cho WER ·
+            ② task chạy thật + hoá đơn cho COGS ·
+            ③ chốt ngách seller e-commerce ↔ môi giới BĐS.
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-id">
+          <div class="num">Phase 1</div>
+          <div class="weeks">T5–T10 · năng lực P0</div>
+          <div class="bar"><span class="fill" style="width:29%"></span></div>
+        </div>
+        <div>
+          <ul class="items">
+            <li><span class="ref">1.1</span><span class="what">Cache + partial re-render trong engine<em>L0 conformance → L1 → L2 → L3 → L4, đóng trọn 01/08</em></span><span class="pill s-done">xong</span></li>
+            <li><span class="ref">1.2</span><span class="what">Slot compose-overlay — text, khung giá, logo, safe-zone<em>Ký 03/08, merge 05/08 · 16 AC / 27 eval, 12 vòng verify</em></span><span class="pill s-done">xong</span></li>
+            <li><span class="ref">1.3</span><span class="what">Slot normalize-text-vi tất định — số, giá, ngày → chữ<em>Bắt buộc đứng trước TTS trong mọi template</em></span><span class="pill s-live">kế tiếp</span></li>
+            <li><span class="ref">1.4</span><span class="what">Plugin TTS ElevenLabs tiếng Việt</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">1.5</span><span class="what">Skill system v1 — template + orchestrator TS<em>Phần scaffold không phụ thuộc quyết định ngách</em></span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">1.6</span><span class="what">Skill #1 "Footage → kho clip"</span><span class="pill s-queued">chờ ngách</span></li>
+            <li><span class="ref">1.7</span><span class="what">KG v0 + provenance wire shape</span><span class="pill s-queued">chờ ngách</span></li>
+          </ul>
+          <div class="gate">
+            <b>Gate G1 — cơ chế đủ, thiếu phần đo</b>
+            <span class="cond">50 clip liên tiếp không lỗi dấu, không sai số giá trên overlay ·
+            demo "đổi giá → chỉ re-run overlay + merge" chứng minh bằng telemetry ·
+            skill #1 chạy headless cho kết quả giống canvas.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-id">
+          <div class="num">Phase 2</div>
+          <div class="weeks">T11–T16 · cloud &amp; vòng dữ liệu</div>
+          <div class="bar"><span class="fill" style="width:0%"></span></div>
+        </div>
+        <div>
+          <ul class="items">
+            <li><span class="ref">2.1</span><span class="what">Managed shared mode — nay là <i class="it">tier</i>, không phải mặc định<em>Cơ chế giữ nguyên, vai trò đổi theo ADR-0011</em></span><span class="pill s-queued">viết lại</span></li>
+            <li><span class="ref">2.2</span><span class="what">Metadata sang Postgres + schema org/membership/workspace</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">2.3</span><span class="what">Độ bền thực thi — retry, timeout, resume, sống sót restart</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">2.4</span><span class="what">Metering → gating theo workspace</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">2.5</span><span class="what">Telemetry opt-in — 2 chỉ số lõi</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">2.6</span><span class="what">Metrics loop v1 — CSV quảng cáo join provenance</span><span class="pill s-queued">hàng đợi</span></li>
+          </ul>
+          <div class="gate">
+            <b>Gate G2</b>
+            <span class="cond">Run 100 node sống sót restart · ≥25% render trong dogfood là partial ·
+            COGS đo qua metering khớp dự toán G0 ±20% · CSV map đúng ≥95% biến thể.</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="phase">
+        <div class="phase-id">
+          <div class="num">Phase 3</div>
+          <div class="weeks">T17–T24 · ma trận &amp; judge</div>
+          <div class="bar"><span class="fill" style="width:0%"></span></div>
+        </div>
+        <div>
+          <ul class="items">
+            <li><span class="ref">3.1</span><span class="what">Skill #2 "Nguồn → ma trận" — fan-out biến thể ở orchestrator</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">3.2</span><span class="what">Slot media-judge + 200 mẫu gắn nhãn đo FPR</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">3.3</span><span class="what">Batch semantics thống nhất về orchestrator</span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">3.4</span><span class="what">OF-CB-1 — benchmark consistency 5 arm<em>Chạy nền T17–T21, cho verdict go/no-go chặng 2</em></span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">3.5</span><span class="what">Kiểm tra thiết kế "sẵn sàng pháp lý" — 2 bài kiểm tra, không phải tính năng</span><span class="pill s-queued">hàng đợi</span></li>
+          </ul>
+          <div class="gate">
+            <b>Gate G3</b>
+            <span class="cond">Ma trận 20 biến thể end-to-end &lt; 60 phút với COGS trong khung ·
+            judge FPR &lt; 15% ở vai ranker · OF-CB-1 có verdict.</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section aria-labelledby="lf">
+    <div class="section-head">
+      <h2 id="lf">Làn local-first cắt ngang, không nối đuôi</h2>
+      <p>ADR-0011 (05/08) đặt máy của người dùng làm nền thực thi mặc định — thay thế nửa
+        "managed là mặc định" của ADR-0005. Kiến trúc và thứ tự phase không đổi; cái đổi là <em>ai chạy</em>.</p>
+    </div>
+
+    <div class="band">
+      <p class="band-note">
+        Làn này xen kẽ giữa các hạng mục P0 chứ không xếp sau chúng: S3 nằm trên đường đo WER
+        của G0, còn S4 là tiền đề để đo được điều kiện đảo chiều mà chính ADR-0011 tự đặt ra.
+        Thứ tự cuối cùng giữa 1.4 / S3 / S4 chưa quyết.
+      </p>
+
+      <div class="lane">
+        <div class="stop">
+          <div class="sid">S1</div>
+          <span class="pill s-done">05/08</span>
+          <div class="txt">ADR-0011 — quyết định của founder sau khảo sát 38 plugin</div>
+        </div>
+        <div class="stop">
+          <div class="sid">S2</div>
+          <span class="pill s-done">07/08</span>
+          <div class="txt">7 slot rời Modal về máy: ffmpeg + pyscenedetect, venv riêng mỗi plugin</div>
+        </div>
+        <div class="stop">
+          <div class="sid">S3</div>
+          <span class="pill s-blocked">chưa bắt đầu</span>
+          <div class="txt">Đường transcribe không-Modal — trên hai đường tới hạn cùng lúc</div>
+        </div>
+        <div class="stop">
+          <div class="sid">S4</div>
+          <span class="pill s-live">đang chạy</span>
+          <div class="txt">UX BYO key cho người dùng đầu tiên không phải tác giả</div>
+        </div>
+        <div class="stop">
+          <div class="sid">S5</div>
+          <span class="pill s-blocked">chưa bắt đầu</span>
+          <div class="txt">Desktop thành app local thật — hôm nay là vỏ Pake trỏ cloud</div>
+        </div>
+        <div class="stop">
+          <div class="sid">S6</div>
+          <span class="pill s-blocked">chưa bắt đầu</span>
+          <div class="txt">docling / crawl4ai / scrapling + 26 plugin GPU sang đường API</div>
+        </div>
+      </div>
+
+      <div class="warn">
+        <b>Rủi ro đã ghi, chưa đo được.</b> ADR-0011 đảo một rủi ro critical của hội đồng
+        <em>mà chưa có bằng chứng thị trường mới</em>. Nó tự đặt điều kiện đảo chiều: ≥1/3 người
+        dùng đại diện không tự nhập được key ở onboarding → managed quay lại làm mặc định.
+        Điều kiện đó chưa đo được ngày nào, vì cần S4 xong trước.
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="lg">
+    <div class="section-head">
+      <h2 id="lg">Sổ cái hạng mục đã ký</h2>
+      <p>Mỗi hồ sơ <code>status: signed-off</code> phải được phân loại đúng một lần — nếu không,
+        "không có trên lộ trình vì thuộc loại khác" và "không có vì quên" trông giống hệt nhau.</p>
+    </div>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th scope="col">Hạng mục</th><th scope="col">Tier</th><th scope="col">Ký</th><th scope="col">Vị trí trên lộ trình</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="slug">task-metering</td><td>T3</td><td class="when">25/07</td><td class="where"><b>0.2</b> — metering + móng provenance</td></tr>
+          <tr><td class="slug">measure-harness</td><td>T2</td><td class="when">26/07</td><td class="where"><b>0.3</b> — bộ đo WER / MOS / COGS</td></tr>
+          <tr><td class="slug">sdk-distribution-rename</td><td>T3</td><td class="when">26/07</td><td class="where"><b>0.1</b> — độc lập upstream</td></tr>
+          <tr><td class="slug">oneflow-plugin-prefix</td><td>T3</td><td class="when">26/07</td><td class="where"><b>0.1</b> — độc lập upstream</td></tr>
+          <tr><td class="slug">per-plugin-origin</td><td>T2</td><td class="when">27/07</td><td class="where"><b>0.1</b> — độc lập upstream</td></tr>
+          <tr><td class="slug">conformance-l0</td><td>T3</td><td class="when">28/07</td><td class="where"><b>1.1</b> — lát L0, conformance TS↔Python</td></tr>
+          <tr><td class="slug">cache-l1-fingerprint</td><td>T3</td><td class="when">29/07</td><td class="where"><b>1.1</b> — lát L1, khoá content-addressed</td></tr>
+          <tr><td class="slug">cache-l2-store</td><td>T3</td><td class="when">30/07</td><td class="where"><b>1.1</b> — lát L2, store trên đĩa</td></tr>
+          <tr><td class="slug">cache-l3-tier-b</td><td>T3</td><td class="when">30/07</td><td class="where"><b>1.1</b> — lát L3, tầng B</td></tr>
+          <tr><td class="slug">cache-l4-eviction</td><td>T3</td><td class="when">31/07</td><td class="where"><b>1.1</b> — lát L4, LRU + purge · trục đóng</td></tr>
+          <tr><td class="slug">compose-overlay</td><td>T3</td><td class="when">02/08</td><td class="where"><b>1.2</b> — slot overlay</td></tr>
+          <tr><td class="slug">local-cpu-plugins</td><td>T2</td><td class="when">06/08</td><td class="where"><b>S2</b> — làn local-first</td></tr>
+          <tr><td class="slug">dependency-refresh-2026-07</td><td>T2</td><td class="when">26/07</td><td class="where off">ngoài lộ trình — bảo trì phụ thuộc</td></tr>
+          <tr><td class="slug">ci-actions-bump</td><td>T2</td><td class="when">26/07</td><td class="where off">ngoài lộ trình — hạ tầng CI</td></tr>
+          <tr><td class="slug">stale-scope-by-paths</td><td>T2</td><td class="when">28/07</td><td class="where off">ngoài lộ trình — hạ tầng cổng</td></tr>
+          <tr><td class="slug">gate-scope-anchors</td><td>T2</td><td class="when">04/08</td><td class="where off">ngoài lộ trình — hạ tầng cổng</td></tr>
+          <tr><td class="slug">ci-vitest-sdk-pin</td><td>T2</td><td class="when">05/08</td><td class="where off">ngoài lộ trình — hạ tầng CI</td></tr>
+          <tr><td class="slug">pnpm-build-approvals</td><td>T2</td><td class="when">18/08</td><td class="where off">ngoài lộ trình — chuỗi công cụ verify</td></tr>
+          <tr><td class="slug">scan-with-block-imports</td><td>T3</td><td class="when">18/08</td><td class="where off">ngoài lộ trình — chẩn đoán scanner</td></tr>
+          <tr><td class="slug">scan-scope-diagnostics</td><td>T3</td><td class="when">18/08</td><td class="where off">ngoài lộ trình — chẩn đoán scanner</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="split">
+      <div class="half">
+        <div class="k">năng lực sản phẩm</div>
+        <div class="n">12</div>
+        <p>Nằm trên một ô cụ thể của lộ trình.</p>
+      </div>
+      <div class="half">
+        <div class="k">hạ tầng quy trình &amp; CI</div>
+        <div class="n">8</div>
+        <p>Không lãng phí — đây là giá của luật "mỗi phase một gate bằng số". Nhưng lộ trình
+          24 tuần không tính khoản chi này vào bất kỳ ô nào.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cl">
+    <div class="section-head">
+      <h2 id="cl">Bối cảnh lịch</h2>
+      <p>Tham chiếu, không phải hạng mục — năng lực nên chín trước các mốc này để còn tuỳ chọn khai thác.</p>
+    </div>
+    <div class="cal">
+      <span><b>T6</b> · sale 9.9</span>
+      <span><b>T15</b> · sale 11.11</span>
+      <span><b>T20</b> · sale 12.12</span>
+      <span><b>ngay sau T24</b> · Tết 06/02/2027</span>
+    </div>
+  </section>
+
+  <footer>
+    Phân vai ba tài liệu: <code>docs/roadmap.md</code> = sẽ đi đâu ·
+    <code>STATUS.md</code> = đang ở đâu · <code>docs/feature-index.md</code> = làm được gì.
+    Trang này vẽ lại tài liệu thứ nhất và không thay nó.
+    Luật "cập nhật mỗi lần qua gate" được canh bằng guard <code>scripts/roadmap/</code>
+    (<code>pnpm roadmap:check</code> / <code>roadmap:teeth</code>) — đi PR riêng qua acceptance gate,
+    vì miễn trừ T1 của gate tooling khai theo đường chính xác: gate áp lên chính nó.
+    <br><br>
+    Lưu ý một điểm lệch đã biết: <code>STATUS.md</code> còn ghi <b>17</b> hạng mục đã ký
+    (chốt 17/08), trong khi <code>main</code> đã có <b>20</b> — ba hồ sơ ký ngày 18/08 chưa
+    được cộng vào.
+  </footer>
+
+</div>
