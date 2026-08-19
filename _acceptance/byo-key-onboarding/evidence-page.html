@@ -1,0 +1,159 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · byo-key-onboarding</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>BYO-key onboarding — first run reaches a real result before asking for a key</h1><div class="sub">Trang bằng chứng · <span class="mono">byo-key-onboarding</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge rej">REJECT</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>ví dụ mở sẵn không đòi khoá của ai</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>thấy kết quả thật trước khi bị hỏi khoá</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E22">E22</a></td><td>AC-2</td><td>kết quả đó là thứ máy vừa tạo, không phải mẫu có sẵn</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">minted-byo-key-onboarding-E22-r4</td><td class="mono">2026-08-19T16:46:34+07:00</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>chạy xong một lần thì dải hướng dẫn thôi hiện</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-13</td><td>bỏ qua dải hướng dẫn vẫn dùng canvas bình thường</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-4</td><td>máy biết đúng ví dụ cần công cụ nào</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-4</td><td>khung hình đầu tiên đã gọi tên thứ còn thiếu</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-5</td><td>một lệnh cài đủ bộ, không tải lại thứ đã có</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E21">E21</a></td><td>AC-5</td><td>bấm nút đúng một lần là đủ cả bộ</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-6</td><td>cài xong dùng được ngay, không khởi động lại</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-7</td><td>mốc tiến độ chỉ báo việc đã thật sự xong</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-7</td><td>chữ trên màn hình là mốc máy chủ phát ra</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-8</td><td>chờ lâu vẫn biết đang tới đâu</td><td><span class="badge neutral">**GIỚI HẠN ĐÃ BIẾT**</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-9</td><td>nhập khoá ngay tại node, không phải mò vào cài đặt</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-10</td><td>khoá lưu xong được thử thật với nhà cung cấp</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">minted-byo-key-onboarding-E13-r4</td><td class="mono">2026-08-19T16:46:31+07:00</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-10</td><td>khoá sai bị báo ngay, theo lời nhà cung cấp</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-11</td><td>mỗi loại lỗi đưa đúng lối thoát</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-12</td><td>không gửi dữ liệu hành vi đi đâu</td><td><span class="badge neutral">**GIỚI HẠN ĐÃ BIẾT**</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-12</td><td>quét mã: không có đường truyền dữ liệu nào</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">minted-byo-key-onboarding-E17-r4</td><td class="mono">2026-08-19T16:46:32+07:00</td></tr>
+<tr><td><a href="#E18">E18</a></td><td>AC-14</td><td>bán kính nổ đúng như đã khai</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">minted-byo-key-onboarding-E18-r4</td><td class="mono">2026-08-19T16:46:33+07:00</td></tr>
+<tr><td><a href="#E19">E19</a></td><td>AC-13</td><td>20 trang giao diện sạch lỗi tiếp cận</td><td><span class="badge neutral">ĐẠT</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E20">E20</a></td><td>AC-15</td><td>người ngoài nhìn màn hình biết người dùng đang ở đâu</td><td><span class="badge neutral">HỘI ĐỒNG ĐỀ XUẤT **THÔNG QUA**</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-byo-key-onboarding-E13-r4</td><td class="mono">2026-08-19T16:46:31+07:00</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-12</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-byo-key-onboarding-E17-r4</td><td class="mono">2026-08-19T16:46:32+07:00</td></tr>
+<tr><td><a href="#E18">E18</a></td><td>AC-14</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-byo-key-onboarding-E18-r4</td><td class="mono">2026-08-19T16:46:33+07:00</td></tr>
+<tr><td><a href="#E22">E22</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-byo-key-onboarding-E22-r4</td><td class="mono">2026-08-19T16:46:34+07:00</td></tr>
+<tr><td><a href="#E20">E20</a></td><td>AC-15</td><td>judgment</td><td><span class="badge pend">UNCERTAIN</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E1 · ví dụ mở sẵn không đòi khoá của ai</h3><p class="crit">AC-1: Given a machine that has never run OneFlow, When the workspace opens, Then the bundled</p>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E2 · thấy kết quả thật trước khi bị hỏi khoá</h3><p class="crit">AC-2: (cross-layer)** Given that example, When the user completes the guided path, Then a real output</p>
+</div>
+<div class="card eval" id="E22"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E22 · kết quả đó là thứ máy vừa tạo, không phải mẫu có sẵn</h3><p class="crit">AC-2: (cross-layer)** Given that example, When the user completes the guided path, Then a real output</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E22-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_example_run_produces_new_asset</b></span><span>verified_at <b>2026-08-19T16:46:34+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  2 passed (2)
+Start at  16:46:34
+Duration  36.94s (transform 259ms, setup 0ms, import 85ms, tests 36.55s, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E3 · chạy xong một lần thì dải hướng dẫn thôi hiện</h3><p class="crit">AC-3: Given the workspace has already run the example once, When it is reopened, Then the first-run</p>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E4 · bỏ qua dải hướng dẫn vẫn dùng canvas bình thường</h3><p class="crit">AC-13: Given a user who ignores the strip entirely, When they use the canvas, Then nothing is</p>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E5 · máy biết đúng ví dụ cần công cụ nào</h3><p class="crit">AC-4: Given the example needs plugins that are not installed, When the workflow **loads**, Then the</p>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E6 · khung hình đầu tiên đã gọi tên thứ còn thiếu</h3><p class="crit">AC-4: Given the example needs plugins that are not installed, When the workflow **loads**, Then the</p>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E7 · một lệnh cài đủ bộ, không tải lại thứ đã có</h3><p class="crit">AC-5: Given the example needs **two or more** plugins and none are installed, When the user presses the</p>
+</div>
+<div class="card eval" id="E21"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E21 · bấm nút đúng một lần là đủ cả bộ</h3><p class="crit">AC-5: Given the example needs **two or more** plugins and none are installed, When the user presses the</p>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E8 · cài xong dùng được ngay, không khởi động lại</h3><p class="crit">AC-6: Given a plugin has just been installed, When the registry is queried, Then the new plugin is</p>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E9 · mốc tiến độ chỉ báo việc đã thật sự xong</h3><p class="crit">AC-7: (cross-layer)** Given a plugin&#39;s Python environment is being provisioned, When it runs, Then the client</p>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E10 · chữ trên màn hình là mốc máy chủ phát ra</h3><p class="crit">AC-7: (cross-layer)** Given a plugin&#39;s Python environment is being provisioned, When it runs, Then the client</p>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge neutral">**GIỚI HẠN ĐÃ BIẾT**</span> &nbsp;E11 · chờ lâu vẫn biết đang tới đâu</h3><p class="crit">AC-8: Given provisioning takes minutes, When the user watches, Then elapsed state is continuously</p>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E12 · nhập khoá ngay tại node, không phải mò vào cài đặt</h3><p class="crit">AC-9: Given a node fails because a required env key is missing, When the failure surfaces, Then the</p>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E13 · khoá lưu xong được thử thật với nhà cung cấp</h3><p class="crit">AC-10: (cross-layer)** Given a key is entered and saved, When the save completes, Then it is **verified against the</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E13-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_key_verified_on_save</b></span><span>verified_at <b>2026-08-19T16:46:31+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  5 passed (5)
+Start at  16:46:31
+Duration  150ms (transform 15ms, setup 0ms, import 20ms, tests 25ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E14 · khoá sai bị báo ngay, theo lời nhà cung cấp</h3><p class="crit">AC-10: (cross-layer)** Given a key is entered and saved, When the save completes, Then it is **verified against the</p>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E15 · mỗi loại lỗi đưa đúng lối thoát</h3><p class="crit">AC-11: Given a task fails, When the failure is classified, Then the offered action matches the</p>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge neutral">**GIỚI HẠN ĐÃ BIẾT**</span> &nbsp;E16 · không gửi dữ liệu hành vi đi đâu</h3><p class="crit">AC-12: Given the whole feature, When the client is exercised end to end, Then **no** request carries</p>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E17 · quét mã: không có đường truyền dữ liệu nào</h3><p class="crit">AC-12: Given the whole feature, When the client is exercised end to end, Then **no** request carries</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E17-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.bko_no_telemetry_sinks</b></span><span>verified_at <b>2026-08-19T16:46:32+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">ok — no telemetry transport shape in src</pre>
+</div>
+<div class="card eval" id="E18"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E18 · bán kính nổ đúng như đã khai</h3><p class="crit">AC-14: Given this feature is declared T3 because it touches `src/lib/plugin-executor/**`, When the</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E18-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.bko_tier_boundary</b></span><span>verified_at <b>2026-08-19T16:46:33+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">checking 148 changed file(s) against 9 t3 path rule(s), 3 allowed, 1 required
+OK: only declared t3 paths touched — the declared surface holds</pre>
+</div>
+<div class="card eval" id="E19"><h3><span class="badge neutral">ĐẠT</span> &nbsp;E19 · 20 trang giao diện sạch lỗi tiếp cận</h3><p class="crit">AC-13: Given a user who ignores the strip entirely, When they use the canvas, Then nothing is</p>
+</div>
+<div class="card eval" id="E20"><h3><span class="badge neutral">HỘI ĐỒNG ĐỀ XUẤT **THÔNG QUA**</span> &nbsp;E20 · người ngoài nhìn màn hình biết người dùng đang ở đâu</h3><p class="crit">AC-15: ** Given a representative user session, When the funnel is walked, Then each of the five walls</p>
+<div class="kv"><span>judged_by <b>panel (domain-correctness, operational-feasibility, spec-alignment)</b></span></div>
+<p class="note"><b>Phán đoán:</b> Bốn trên năm &quot;bức tường&quot; onboarding có bằng chứng screen-visible mạnh (no-plugin, provisioning-wait, first-result, key wall), nhưng lens domain-correctness không xác nhận được bức tường &quot;cài plugin&quot; (install wall): E2-step2/E6-step1 chỉ có MỘT khung tĩnh &quot;Downloading tools... (0/2)&quot; với spinner chung chung, không có khung thứ hai cho thấy bộ đếm tăng lên (vd. &quot;(1/2)&quot;) hoặc nhãn thời gian trôi qua — nên không đủ căn cứ phân biệt &quot;đang chạy&quot; với &quot;bị treo&quot;, khác hẳn bức tường provisioning-wait vốn được dựng có chủ đích để phân biệt điều này.</p>
+<div class="ov">human_override: CHƯA điền (việc của bạn ở Gate 2)</div>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · test</h3><p class="crit">AC-10: (cross-layer)** Given a key is entered and saved, When the save completes, Then it is **verified against the</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E13-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_key_verified_on_save</b></span><span>verified_at <b>2026-08-19T16:46:31+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  5 passed (5)
+Start at  16:46:31
+Duration  150ms (transform 15ms, setup 0ms, import 20ms, tests 25ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge pass">PASS</span> &nbsp;E17 · script</h3><p class="crit">AC-12: Given the whole feature, When the client is exercised end to end, Then **no** request carries</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E17-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.bko_no_telemetry_sinks</b></span><span>verified_at <b>2026-08-19T16:46:32+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">ok — no telemetry transport shape in src</pre>
+</div>
+<div class="card eval" id="E18"><h3><span class="badge pass">PASS</span> &nbsp;E18 · script</h3><p class="crit">AC-14: Given this feature is declared T3 because it touches `src/lib/plugin-executor/**`, When the</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E18-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.bko_tier_boundary</b></span><span>verified_at <b>2026-08-19T16:46:33+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">checking 148 changed file(s) against 9 t3 path rule(s), 3 allowed, 1 required
+OK: only declared t3 paths touched — the declared surface holds</pre>
+</div>
+<div class="card eval" id="E22"><h3><span class="badge pass">PASS</span> &nbsp;E22 · test</h3><p class="crit">AC-2: (cross-layer)** Given that example, When the user completes the guided path, Then a real output</p>
+<div class="kv"><span>run_id <b>minted-byo-key-onboarding-E22-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.unit_example_run_produces_new_asset</b></span><span>verified_at <b>2026-08-19T16:46:34+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  2 passed (2)
+Start at  16:46:34
+Duration  36.94s (transform 259ms, setup 0ms, import 85ms, tests 36.55s, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E20"><h3><span class="badge pend">UNCERTAIN</span> &nbsp;E20 · judgment</h3><p class="crit">AC-15: ** Given a representative user session, When the funnel is walked, Then each of the five walls</p>
+<div class="kv"><span>judged_by <b>panel (domain-correctness, operational-feasibility, spec-alignment)</b></span></div>
+<p class="note"><b>Phán đoán:</b> Bốn trên năm &quot;bức tường&quot; onboarding có bằng chứng screen-visible mạnh (no-plugin, provisioning-wait, first-result, key wall), nhưng lens domain-correctness không xác nhận được bức tường &quot;cài plugin&quot; (install wall): E2-step2/E6-step1 chỉ có MỘT khung tĩnh &quot;Downloading tools... (0/2)&quot; với spinner chung chung, không có khung thứ hai cho thấy bộ đếm tăng lên (vd. &quot;(1/2)&quot;) hoặc nhãn thời gian trôi qua — nên không đủ căn cứ phân biệt &quot;đang chạy&quot; với &quot;bị treo&quot;, khác hẳn bức tường provisioning-wait vốn được dựng có chủ đích để phân biệt điều này.</p>
+<div class="ov">human_override: CHƯA điền (việc của bạn ở Gate 2)</div>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">carried tu round 1 — baseline khong do lai round nay
+none — danh sách non-discriminating trống (baseline không đo lại vòng này; xem round 1 để biết eval nào discriminate)</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 4: E13, E17, E18, E22 đều exit 0 (pass), nhưng verdict tổng là REJECT vì review-findings phát hiện các khoảng trống trong-hợp-đồng chưa được đóng: E13/AC-10 chỉ hand-feed probe mock, không round-trip qua writer thật (PUT /api/settings/env → verifyChangedKeys); E17/AC-12 nửa phá-thử (teeth) không được nối vào lệnh eval nào; E18/AC-14 ổn về boundary nhưng đi kèm bug installMissingForExample báo &quot;đã cài&quot; cho plugin registry không nhận ra (AC-6); và E1/AC-1 nửa RED không có fixture nào để re-run. Các lệnh xanh không chứng minh đủ các AC liên quan — trở lại implementation để đóng các khoảng trống đo lường trước khi verify lại.</li></ul>
+<h2>Checklist Cổng 2 (bạn)</h2><div class="card"><ul class="ck"><li><input type="checkbox" id="ck0"><label for="ck0">Read the table + spot-check 1-2 evidence blocks</label></li><li><input type="checkbox" id="ck1"><label for="ck1">Personally verify every judgment item marked UNCERTAIN, then fill its</label></li><li><input type="checkbox" id="ck2"><label for="ck2">T3 only: personally verify ALL judgment items and fill `human_override`</label></li><li><input type="checkbox" id="ck3"><label for="ck3">If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when</label></li><li><input type="checkbox" id="ck4"><label for="ck4">Fill `human_signoff` in frontmatter</label></li></ul><div class="note">Tick để theo dõi — chỉ lưu trong trình duyệt; quyết định THẬT vào human_signoff / human_override của report.</div></div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>
