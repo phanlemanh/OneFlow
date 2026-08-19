@@ -290,3 +290,51 @@
 - **claude-sonnet-5**: 30 agent · 277 calls · out 190,861 · in 554 · cache_read 20,963,259 · cache_create 1,953,371
 - **claude-haiku-4-5-20251001**: 10 agent · 23 calls · out 7,283 · in 204 · cache_read 775,224 · cache_create 296,081
 
+### S4 round 5 — wf_32a55964-1a9 (39 agent, 235,559 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| review:bugs | claude-opus-5 | 53 | 24,446 | 106 | 6,942,691 | 538 |
+| ui:E21 | claude-sonnet-5 | 70 | 24,305 | 140 | 7,482,519 | 671 |
+| synthesize:report | claude-sonnet-5 | 4 | 20,403 | 8 | 283,890 | 220 |
+| review:conventions | claude-opus-5 | 35 | 18,768 | 70 | 4,807,869 | 427 |
+| triage | claude-sonnet-5 | 2 | 18,127 | 4 | 76,066 | 192 |
+| refute:sse-error.ts | claude-sonnet-5 | 44 | 14,527 | 88 | 4,036,254 | 315 |
+| review:measurement | claude-opus-5 | 17 | 11,149 | 34 | 1,742,526 | 321 |
+| refute:example-needs-no-keys.mjs | claude-sonnet-5 | 17 | 10,747 | 34 | 1,356,125 | 172 |
+| refute:provisioning-events.ts | claude-sonnet-5 | 15 | 7,543 | 30 | 1,287,534 | 137 |
+| refute:check-no-telemetry-sinks.sh | claude-sonnet-5 | 9 | 7,215 | 18 | 662,233 | 108 |
+| refute:example-requirements.test.ts | claude-sonnet-5 | 12 | 7,195 | 24 | 881,510 | 118 |
+| refute:sse-error.ts | claude-sonnet-5 | 25 | 7,158 | 50 | 1,966,570 | 168 |
+| refute:generic.ts | claude-sonnet-5 | 23 | 5,760 | 46 | 2,126,180 | 145 |
+| refute:first-run-strip-container.tsx | claude-sonnet-5 | 16 | 5,643 | 32 | 1,268,616 | 117 |
+| refute:key-verify.ts | claude-sonnet-5 | 7 | 5,487 | 14 | 478,188 | 84 |
+| refute:check-t3-untouched.sh | claude-sonnet-5 | 14 | 5,487 | 28 | 1,000,466 | 139 |
+| refute:task-failure-toaster.tsx | claude-sonnet-5 | 7 | 4,472 | 14 | 505,172 | 69 |
+| refute:use-first-run-readiness.ts | claude-sonnet-5 | 7 | 4,206 | 14 | 490,248 | 65 |
+| refute:check-example-needs-no-keys.sh | claude-sonnet-5 | 8 | 4,203 | 16 | 513,555 | 78 |
+| refute:route.ts | claude-sonnet-5 | 14 | 3,893 | 28 | 1,043,796 | 89 |
+| refute:use-first-run-readiness.test.ts | claude-sonnet-5 | 5 | 3,690 | 10 | 327,051 | 60 |
+| refute:seed-example-asset.server.ts | claude-sonnet-5 | 4 | 3,016 | 8 | 247,084 | 47 |
+| refute:check-a11y-proto.sh | claude-sonnet-5 | 6 | 2,966 | 12 | 404,891 | 83 |
+| refute:abi-node-shell.tsx | claude-sonnet-5 | 5 | 2,613 | 10 | 332,563 | 43 |
+| refute:first-run-strip-container.tsx | claude-sonnet-5 | 6 | 2,331 | 12 | 412,864 | 45 |
+| machine:bash scripts/onboarding/check-one-action | claude-haiku-4-5-20251001 | 2 | 1,291 | 18 | 65,225 | 46 |
+| machine:bash scripts/onboarding/check-no-telemet | claude-haiku-4-5-20251001 | 2 | 1,143 | 18 | 65,226 | 21 |
+| machine:bash scripts/acceptance/check-t3-untouch | claude-haiku-4-5-20251001 | 2 | 920 | 18 | 65,291 | 18 |
+| machine:BKO_E22=1 pnpm vitest run src/lib/onboar | claude-haiku-4-5-20251001 | 2 | 907 | 18 | 65,246 | 42 |
+| machine:bash scripts/onboarding/check-example-ne | claude-haiku-4-5-20251001 | 2 | 853 | 18 | 44,568 | 31 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 749 | 18 | 65,243 | 22 |
+| machine:pnpm vitest run src/hooks/use-first-run- | claude-haiku-4-5-20251001 | 2 | 709 | 18 | 65,232 | 25 |
+| machine:pnpm vitest run src/lib/onboarding/key-v | claude-haiku-4-5-20251001 | 2 | 671 | 18 | 65,247 | 24 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 2 | 628 | 18 | 65,250 | 54 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 611 | 18 | 65,206 | 23 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 571 | 18 | 65,214 | 93 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 483 | 18 | 65,206 | 23 |
+| capture:provenance | claude-sonnet-5 | 2 | 396 | 4 | 67,014 | 19 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 277 | 18 | 65,202 | 66 |
+
+- **claude-opus-5**: 3 agent · 105 calls · out 54,363 · in 210 · cache_read 13,493,086 · cache_create 446,248
+- **claude-sonnet-5**: 23 agent · 322 calls · out 171,383 · in 644 · cache_read 27,250,389 · cache_create 1,644,458
+- **claude-haiku-4-5-20251001**: 13 agent · 26 calls · out 9,813 · in 234 · cache_read 827,356 · cache_create 379,854
+

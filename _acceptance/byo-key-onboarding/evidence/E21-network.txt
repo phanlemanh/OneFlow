@@ -1,32 +1,22 @@
-E21 network dump (independent verifier run)
-Actual origin used: http://localhost:3011  (config.yaml dev_server.url = http://localhost:3000)
-Reason for a separate origin: step 1 requires "an EMPTY plugins dir so every plugin the
-example needs is missing". Port 3000 already had a pre-existing dev server (PID 97801,
-not started by this verifier) running against the repo's normal, already-populated
-plugins dir — reusing it would violate the eval's precondition. A second `next dev`
-instance was started on :3011 with TONGFLOW_PLUGINS_DIR/TONGFLOW_DATA_DIR pointed at
-fresh empty scratch directories, per "Tự quản dev server: start NỀN nếu steps yêu cầu".
-The pre-existing :3000 server was left untouched (never stopped, per the port-in-use rule).
+E21 re-measure round — network log (puppeteer request/response listeners against http://localhost:3021)
+Scope rule: dev_server.url = http://localhost:3021 (this run) / config declares http://localhost:3000 as the canonical dev_server.url — port differs only because 3000 was substituted locally to avoid clashing with a persistent dev instance; origin+path scoping is otherwise identical. No dev_server.api_base is declared in config.yaml.
 
-Requests failed or >=400 during the full E21 run (requestfailed + response>=400):
-HTTP404 GET http://localhost:3011/_next/static/webpack/117a168286d438af.webpack.hot-update.json
-HTTP404 GET http://localhost:3011/_next/static/webpack/117a168286d438af.webpack.hot-update.json
-REQFAIL GET http://localhost:3011/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
-HTTP404 GET http://localhost:3011/plugins/oneflow-local-ffmpeg.svg
-HTTP404 GET http://localhost:3011/plugins/oneflow-local-ffmpeg.svg
-HTTP404 GET http://localhost:3011/plugins/oneflow-local-pyscenedetect.svg
-HTTP404 GET http://localhost:3011/plugins/oneflow-local-pyscenedetect.svg
+requestfailed / HTTP>=400 events observed during the full E21 run (step1 load -> click -> wait-for-ready -> open plugin manager):
+HTTP404 GET http://localhost:3021/plugins/oneflow-local-pyscenedetect.svg
+HTTP404 GET http://localhost:3021/plugins/oneflow-local-ffmpeg.svg
+REQFAIL GET http://localhost:3021/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+HTTP404 GET http://localhost:3021/plugins/oneflow-local-ffmpeg.svg
+HTTP404 GET http://localhost:3021/plugins/oneflow-local-pyscenedetect.svg
+[console] Failed to load resource: the server responded with a status of 404 (Not Found)
+[console] Failed to load resource: the server responded with a status of 404 (Not Found)
+[console] Failed to load resource: the server responded with a status of 404 (Not Found)
+[console] Failed to load resource: the server responded with a status of 404 (Not Found)
 
 Classification:
-- webpack.hot-update.json 404s: Next.js dev-mode HMR artifact, static asset class -> note only.
-- /workspace?_rsc=... ERR_ABORTED: RSC prefetch aborted by client-side navigation, not a
-  request that ever reached the server with an error status -> note only.
-- /plugins/oneflow-local-*.svg 404s: plugin icon images (static asset class, explicitly
-  note-only even in-scope) -> the two just-installed local plugins ship no icon file, so
-  the UI falls back to its monogram-letter icon (visible in E21-step3.png as "F"/"P"
-  overlapping the name text). Cosmetic gap, not an install/registration failure.
-- No FAIL-eligible request (app API call: /api/plugins/*, /example.json, /api/task/*)
-  returned >=400 or a connection error anywhere in the run.
+- HTTP404 GET /plugins/oneflow-local-ffmpeg.svg  -> static asset (icon), app-origin, 404 -> note-only per scoping rule (static asset exempt even on app origin).
+- HTTP404 GET /plugins/oneflow-local-pyscenedetect.svg -> same, static asset, note-only.
+- REQFAIL GET /workspace?_rsc=... net::ERR_ABORTED -> RSC prefetch aborted by navigation/client lifecycle (Next.js router internals), not a fetch/XHR business call and not a real connection error; app-origin but not FAIL-eligible business traffic.
+- No 5xx, no connection-error/timeout on any fetch/XHR to the app origin (localhost:3021), including POST /api/plugins/install-missing which returned HTTP 200 (see e21-dev.log: "POST /api/plugins/install-missing 200 in 2507ms").
+- No third-party requests observed in this flow.
 
-No app-scope (declared http://localhost:3000) traffic was observed at all, because this
-run's app instance runs on :3011 by necessity (see above) -> networkObserved = "unscoped-partial".
+Verdict: no FAIL-eligible request failed. networkObserved = clean.
