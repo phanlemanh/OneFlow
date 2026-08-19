@@ -13,6 +13,44 @@ human_signoff:
 
 # Evidence Report: byo-key-onboarding
 
+> **Đọc bảng nào?** Bảng ngay dưới đây là bảng TỔNG HỢP cho người ký: kết quả
+> mới nhất của cả 22 phép đo, gộp từ bốn vòng, dựng từ `run-log.jsonl`. Bảng
+> thứ hai (ngay sau nó) là bảng do máy sinh cho RIÊNG lượt chạy cuối, nên chỉ
+> có 5 dòng — nó không phải bức tranh đầy đủ.
+
+## Tổng hợp bốn vòng — 20/22 đạt
+
+| Phép đo | Tiêu chí | Người dùng được gì | Kết quả | Đo ở vòng |
+|---|---|---|---|---|
+| E1 | AC-1 | Ví dụ mở sẵn không đòi khoá của ai | ĐẠT | 3 |
+| E2 | AC-2 | Thấy kết quả thật trước khi bị hỏi khoá | ĐẠT | 3 |
+| E22 | AC-2 | Kết quả đó là thứ máy vừa tạo, không phải mẫu có sẵn | ĐẠT | 4 |
+| E3 | AC-3 | Chạy xong một lần thì dải hướng dẫn thôi hiện | ĐẠT | 3 |
+| E4 | AC-13 | Bỏ qua dải hướng dẫn vẫn dùng canvas bình thường | ĐẠT | 3 |
+| E5 | AC-4 | Máy biết đúng ví dụ cần công cụ nào | ĐẠT | 3 |
+| E6 | AC-4 | Khung hình đầu tiên đã gọi tên thứ còn thiếu | ĐẠT | 3 |
+| E7 | AC-5 | Một lệnh cài đủ bộ, không tải lại thứ đã có | ĐẠT | 3 |
+| E21 | AC-5 | Bấm nút ĐÚNG MỘT LẦN là đủ cả bộ | ĐẠT | 3 |
+| E8 | AC-6 | Cài xong dùng được ngay, không khởi động lại | ĐẠT | 3 |
+| E9 | AC-7 | Mốc tiến độ chỉ báo việc đã thật sự xong | ĐẠT | 4 |
+| E10 | AC-7 | Chữ trên màn hình là mốc máy chủ phát ra | ĐẠT | 3 |
+| E11 | AC-8 | Chờ lâu vẫn biết đang tới đâu | **giới hạn đã biết** | 1 (đạt), 2 (không lặp được) |
+| E12 | AC-9 | Nhập khoá ngay tại node, không phải mò vào cài đặt | ĐẠT | 4 |
+| E13 | AC-10 | Khoá lưu xong được thử thật với nhà cung cấp | ĐẠT | 4 |
+| E14 | AC-10 | Khoá sai bị báo ngay, theo lời nhà cung cấp | ĐẠT | 4 |
+| E15 | AC-11 | Mỗi loại lỗi đưa đúng lối thoát | ĐẠT | 3 |
+| E16 | AC-12 | Không gửi dữ liệu hành vi đi đâu | **giới hạn đã biết** | 1, 2 (nội dung đạt, cổng mạng trượt) |
+| E17 | AC-12 | Quét mã: không có đường truyền dữ liệu nào | ĐẠT | 4 |
+| E18 | AC-14 | Bán kính nổ đúng như đã khai | ĐẠT | 4 |
+| E19 | AC-13 | 20 trang giao diện sạch lỗi tiếp cận | ĐẠT | 4 |
+| E20 | AC-15 | Người ngoài nhìn màn hình biết người dùng đang ở đâu | hội đồng đề xuất **THÔNG QUA** | 4 |
+
+Hai dòng **giới hạn đã biết** là phần owner đã chọn thu phạm vi — xem khối
+"Known limits" trong `contract.md`. Chúng KHÔNG phải phép đo trượt vì sản phẩm
+sai; chúng là phép đo không dựng lại được trên bàn thí nghiệm dùng chung.
+
+## Bảng của riêng lượt chạy cuối (máy sinh)
+
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
 | E13 | AC-10 | test | PASS |
@@ -103,3 +141,23 @@ Round 4: E13, E17, E18, E22 đều exit 0 (pass), nhưng verdict tổng là REJE
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter
+
+## Sau vòng 4 — bốn sửa và bằng chứng của chúng (main loop bổ sung)
+
+**Đọc phần này với con mắt khác phần trên.** Mọi thứ phía trên do agent
+ngữ-cảnh-tươi chạy: người viết mã không chấm bài của chính mình. Bốn mục dưới
+đây thì KHÔNG — chúng được sửa sau lượt chạy cuối, và bằng chứng kèm theo là do
+chính main loop (người viết mã) chạy. Owner chọn đường này ở điểm quyết định
+sau vòng 4, đổi một hồ sơ sạch tuyệt đối lấy việc ra cổng sớm hơn. Đây là chỗ
+yếu nhất của toàn bộ hồ sơ và nó được ghi ra để người ký cân, không để lấp.
+
+| Sửa gì | Vì sao | Bằng chứng (main loop chạy) |
+|---|---|---|
+| Công cụ tải về nhưng máy quét không nhận nay bị tính là HỎNG, kèm lý do và ghi nhật ký | Trước đó dải hướng dẫn báo "xong" rồi lượt chạy vẫn đỏ vì không có công cụ | `pnpm test` 466 phép thử xanh; đường mã đọc lại tay |
+| Phép đo khoá đi TRỌN đường lưu thật qua chính route, chỉ giả lập mạng | Bản cũ bơm đầu dò vào hàm, nên route ngừng gọi việc kiểm khoá cũng không phép đo nào đỏ | 4 phép thử mới xanh; **nửa phá-thử: gỡ việc kiểm khoá khỏi route → 3 phép đo đỏ ngay, lắp lại → xanh** |
+| Phép đo telemetry tự chạy CẢ nửa đỏ trong cùng một lệnh | Nửa đỏ trước đây nằm trong trí nhớ người, không trong lệnh | chạy tay: cây thật sạch, hồ sơ bẫy bị bắt đúng 3 chỗ, thoát 0 |
+| Phép đo ví-dụ-không-cần-khoá tự chạy CẢ nửa đỏ (ví dụ Modal cũ lấy từ lịch sử git) | như trên | chạy tay: ví dụ mới sạch, ví dụ Modal cũ bị bắt, thoát 0 |
+
+Nếu owner muốn bốn dòng này có cùng hạng bằng chứng như phần trên, cách duy
+nhất là cấp một vòng đo lại bằng agent tươi — rẻ, vì chỉ còn vài phép đo liên
+quan.
