@@ -214,10 +214,17 @@ evals:
   - id: E15
     criterion: AC-15
     executor: ui-check
-    cmd: config:executors.design.gate
     paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/"]
-    expected: "exit 0; sàn P0 design gate trên trang workspace có node normalize-text-vi (console sạch, a11y cơ bản); capture HTML + screenshot cho HAI state chụp được thật — rỗng-chưa-nối và đã-nối — lưu evidence/design/captures/ cho E16. THU HẸP so với bản Cổng 1 (4 state): hai state 'đang-chạy' và 'lỗi-còn-sót-token' do exec.loading và trạng thái task lái, không đặt được từ ngoài mà không giả lập store hoặc sửa shell dùng chung; lời hứa về CHỮ của thông điệp lỗi chuyển sang phép đo tất định E6a (error liệt kê đúng token còn sót) thay vì chấm bằng ảnh. Trình ở Cổng 2."
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+    steps:
+      - "Kiểm cổng 3000 TRƯỚC: nếu đã có tiến trình lạ nghe ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"
+      - "Khởi động dev server theo config dev_server.start (pnpm dev)"
+      - "KIỂM XUẤT XỨ, bắt buộc trước mọi lượt chụp: curl -s {url}/workspace phải chứa chuỗi 'normalizeTextVi' hoặc 'Đọc số thành chữ'. Không thấy → DỪNG và báo là chụp nhầm cây, KHÔNG ghi là đỏ tiêu chí"
+      - "Mở {url}/workspace, thêm node 'Đọc số thành chữ' từ bộ chọn node, chưa nối dây gì → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png"
+      - "Thêm một node văn bản, gõ 'Giá 1.999.000₫ ngày 19/8/2026', nối vào handle in:text của node → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-2-wired.png"
+      - "Chạy sàn P0 design gate trên chính trang đó bằng lệnh config:executors.design.gate và đính kết quả vào output"
+      - "Assert: console không có lỗi; node hiện đúng hai handle in:text / out:text; nhãn nút đọc được bằng tiếng Việt, không phải khoá i18n thô"
+    expected: "hai ảnh tồn tại và là ảnh của CÂY NÀY (đã kiểm xuất xứ); sàn P0 design gate xanh; console sạch. THU HẸP so với bản Cổng 1 (4 state): 'đang-chạy' và 'lỗi-còn-sót-token' do exec.loading và trạng thái task lái nên không đặt được từ ngoài mà không giả lập store hoặc sửa shell dùng chung — lời hứa về CHỮ của thông điệp lỗi chuyển sang phép đo tất định E6a. Trình ở Cổng 2."
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   - id: E16
     criterion: AC-15
