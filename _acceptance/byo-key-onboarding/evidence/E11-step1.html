@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>E11 step1 - provisioning strip at t0</title></head>
+<body>
+<!--
+E11 evidence, step 1 (t0 = 1787110827037 epoch ms).
+
+Captured via javascript_tool reading document.querySelector('output[aria-live="polite"]').outerHTML
+on http://localhost:3000/workspace, ~6s after clicking "Start Slice" on the Split Video node
+(oneflow-api-pyscenedetect), with that plugin's venv freshly deleted immediately beforehand
+(rm -rf data/.tongflow/plugin-venv/oneflow-api-pyscenedetect) so this is a REAL provisioning run,
+not a cached no-op. Confirmed via disk: the venv directory did not exist at click time and was
+recreated by the run. A 25-minute synthetic test video (public/verifier-scratch-long.mp4, ffmpeg
+testsrc2 320x180@30fps, 45000 frames) was substituted for the node's input via DataTransfer file
+injection (fetch + File + input.files + change event) so the underlying scene-detection task would
+run long enough to observe the strip continuously over a real >=60s window, independent of how
+fast pip/venv provisioning itself completes on this network.
+
+Fallback note (screenshot tooling): capture.ui (pnpm ui:capture / scripts/ui-capture.mjs) launches
+a FRESH puppeteer browser page; it cannot reproduce this state because the "provisioning" override
+in first-run-strip-container.tsx is populated purely from a client-side window CustomEvent fed by
+this tab's own long-poll task-event stream (src/lib/task/sse-events.ts) -- there is no server-side
+replay endpoint a new page load could read to reconstruct current milestone/elapsed. The
+Claude_Browser `computer` screenshot action also failed on every attempt in this session
+("the Browser pane is not displayed, so the page is not compositing frames" -- this session's
+Browser pane is shared with several other concurrent verifier subagents against the same dev
+server, and only one tab can be frontmost at a time). This asserted-DOM HTML snapshot is the
+sanctioned fallback.
+
+Icon <svg> markup collapsed to [icon] for readability; classes/text preserved verbatim.
+-->
+<pre id="captured-time">t=1787110827037 (epoch ms)</pre>
+<output aria-live="polite" class="pointer-events-auto flex w-full max-w-3xl gap-3 flex-col items-stretch sm:flex-row sm:items-center rounded-lg border bg-card text-card-foreground px-4 py-3 shadow-sm">[icon]<div class="min-w-0 flex-1"><ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm"><li class="flex items-center gap-1 text-foreground">[icon]Setting up environment</li><li class="flex items-center gap-1 text-foreground">[icon]Installing SDK</li><li class="flex items-center gap-1 font-medium text-foreground" aria-current="step">Installing libraries</li></ol><p class="text-xs text-muted-foreground">6s elapsed. Later runs start instantly.</p></div></output>
+</body>
+</html>

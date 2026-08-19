@@ -1,0 +1,57 @@
+E6 network truth — captured via mcp__Claude_Browser (tab-1), navigation to
+http://localhost:3000/workspace while plugins/ was empty (registry confirmed
+0 installed plugins at the time of this navigation).
+
+Scope: dev_server.url = http://localhost:3000 (config.yaml). No api_base
+declared beyond that.
+
+--- Network requests (app-origin, FAIL-eligible set) ---
+GET /api/plugins/registry            -> 200 OK
+GET /example.json                    -> 200 OK
+GET /api/feature/list                -> 200 OK
+GET /api/uploads/example-assets/two-scenes.mp4                              -> 206 Partial Content
+GET /api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/dtJVbDh73XkJpe3x2yZ7H.mp4       -> 206 Partial Content
+GET /api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/HzshEdIoqdzVLtKEF6zp9.mp4       -> 206 Partial Content
+GET /api/uploads/tasks/tRbvn9T5bZkVs9CyQ0nW1/Xn_3kPPwh7lOsQIdYFJfV.mp4       -> 200 OK
+GET /api/task/pending                -> 200 OK
+GET /workspace?_rsc=...              -> 200 OK (tag "FAILED: net::ERR_ABORTED" is a
+                                        superseded RSC prefetch aborted by the next
+                                        navigation frame, not a real failure — status
+                                        line itself reads 200 OK)
+
+--- Static assets (app-origin, note-only per scoping rule) ---
+GET /plugins/oneflow-local-pyscenedetect.svg -> 404 Not Found  (icon lookup; not FAIL-eligible)
+GET /plugins/oneflow-local-ffmpeg.svg        -> 404 Not Found  (icon lookup; not FAIL-eligible)
+GET /_next/static/** (js/css/fonts)          -> 200 OK (build assets)
+
+--- Console (same navigation) ---
+[warn] React Flow: parent container needs width/height (cosmetic, not app-scope network)
+[log] Fast Refresh rebuilding / done (HMR noise from shared dev server)
+[error] Failed to load resource: 500 (Internal Server Error) x2 — these correspond
+        to the same shared dev server's transient recompile flakiness observed via
+        curl polling BEFORE this navigation stabilized (dev server was mid-recompile
+        for an unrelated concurrent reason; see outputTail). Not reproduced in the
+        network list captured for THIS navigation (all entries above are 2xx/206).
+[info] React DevTools download hint (noise)
+[log] AddVideoNode / task-store registration logs (app logs, informational)
+[log] WorkflowRecovery: no pending workflow task found
+
+Verdict: no FAIL-eligible (app-origin API/XHR) request returned >=500 or a
+connection error during the load that produced the E6-step1 evidence. The two
+404s are static plugin-icon assets (app-origin but asset class) — note-only,
+not eval-failing per scoping rule.
+
+networkObserved = clean
+
+Note on environment: this repo's plugins/ directory and the shared
+localhost:3000 dev server are being modified concurrently by another
+session during this verify round (confirmed: while this eval's plugins/
+directory was emptied for the AC-4 test, a second process re-installed
+oneflow-api-ffmpeg, oneflow-api-pyscenedetect, and a new tongflow-api-openai
+plugin mid-run). This explains the intermittent 500/404 responses seen while
+polling server readiness before capture, and the [error] 500 lines in the
+console log (which predate/overlap this navigation in a shared browser tab
+with prior history). The evidence frame itself (E6-step1.png/html) and the
+DOM read (get_page_text) were captured while the registry was independently
+confirmed empty via a direct curl check, so the causal claim (first frame
+names the missing plugins) is not affected by the race.

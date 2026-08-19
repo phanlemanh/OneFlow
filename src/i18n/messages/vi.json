@@ -1048,6 +1048,20 @@
                 "editOp": "Sửa op",
                 "removeOp": "Xoá op"
             }
+        },
+        "firstRun": {
+            "missingTitle": "Cần tải {count} công cụ để chạy ví dụ này",
+            "missingTitleWithSize": "Cần tải {count} công cụ (~{mb} MB) để chạy ví dụ này",
+            "prepare": "Tải công cụ",
+            "installing": "Đang tải công cụ… ({done}/{total})",
+            "milestoneCreatingVenv": "Tạo môi trường",
+            "milestoneInstallingSdk": "Cài SDK",
+            "milestoneInstallingRequirements": "Cài thư viện",
+            "elapsed": "Đã {sec}s. Những lần sau chạy ngay.",
+            "ready": "Xong. Bấm Run trên node đầu tiên để chạy thử.",
+            "blocked": "Chưa chuẩn bị được",
+            "blockedReasonDownload": "Không tải được công cụ về máy — kiểm tra kết nối mạng.",
+            "retry": "Thử lại"
         }
     },
     "Upload": {

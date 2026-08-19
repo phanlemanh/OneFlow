@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dòng sự kiện dựng môi trường — hai pha hay chỉ báo khi xong</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f7f7f8;
+      --color-ink:     #1a0033;
+      --color-muted:   #4f4a63;
+      --color-soft:    #66607a;
+      --color-accent:  #e100e1;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Lora', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+    }
+    .sub {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--color-muted);
+      max-width: 62ch;
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">So sánh dòng thời gian · Cổng 1.5</p>
+    <h1>Dựng môi trường Python: phát hai pha, hay chỉ báo khi xong?</h1>
+    <p class="sub">Cùng một chuỗi ba bước, hai cách phát sự kiện. Điểm phải nhìn thấy ngay: cột phải để màn hình câm suốt bước dài nhất.</p>
+
+    <svg viewBox="0 0 1000 844" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0068cc"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ============ TRỤC THỜI GIAN + ĐƯỜNG MỐC ============ -->
+      <text x="120" y="124" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.14em">THỜI GIAN ↓</text>
+      <line x1="132" y1="136" x2="132" y2="644" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+      <line x1="132" y1="140" x2="964" y2="140" stroke="rgba(26,0,51,0.12)" stroke-width="0.8" stroke-dasharray="4,4"/>
+      <line x1="132" y1="340" x2="964" y2="340" stroke="rgba(26,0,51,0.12)" stroke-width="0.8" stroke-dasharray="4,4"/>
+      <line x1="132" y1="460" x2="964" y2="460" stroke="rgba(26,0,51,0.12)" stroke-width="0.8" stroke-dasharray="4,4"/>
+      <line x1="132" y1="620" x2="964" y2="620" stroke="rgba(26,0,51,0.12)" stroke-width="0.8" stroke-dasharray="4,4"/>
+
+      <text x="120" y="144" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">giây 0</text>
+      <text x="120" y="344" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">xong bước 1</text>
+      <text x="120" y="464" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">xong bước 2</text>
+      <text x="120" y="624" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">xong bước 3</text>
+
+      <!-- ============ VÁCH NGĂN HAI PHƯƠNG ÁN ============ -->
+      <line x1="560" y1="48" x2="560" y2="644" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+
+      <!-- ============ ĐẦU CỘT ============ -->
+      <text x="152" y="64" fill="#1a0033" font-size="16" font-weight="600" font-family="'Geist', sans-serif">Phương án A — hai pha</text>
+      <text x="152" y="84" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">mỗi bước phát «bắt đầu» rồi «xong»</text>
+      <text x="152" y="124" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CÁC BƯỚC</text>
+      <text x="376" y="124" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MÀN HÌNH NÓI GÌ</text>
+
+      <text x="584" y="64" fill="#1a0033" font-size="16" font-weight="600" font-family="'Geist', sans-serif">Phương án B — chỉ báo khi xong</text>
+      <text x="584" y="84" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">chỉ phát ở cuối mỗi bước</text>
+      <text x="584" y="124" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CÁC BƯỚC</text>
+      <text x="808" y="124" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MÀN HÌNH NÓI GÌ</text>
+
+      <!-- ============ CỘT TRÁI — KHỐI BƯỚC ============ -->
+      <rect x="152" y="140" width="200" height="196" rx="6" fill="#f7f7f8"/>
+      <rect x="152" y="140" width="200" height="196" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <circle cx="168" cy="164" r="3.5" fill="#1a0033"/>
+      <text x="180" y="168" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «BẮT ĐẦU»</text>
+      <text x="168" y="236" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tạo môi trường ảo</text>
+      <text x="168" y="252" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">create-venv</text>
+      <circle cx="168" cy="312" r="3.5" fill="#1a0033"/>
+      <text x="180" y="316" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <rect x="152" y="344" width="200" height="112" rx="6" fill="#f7f7f8"/>
+      <rect x="152" y="344" width="200" height="112" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <circle cx="168" cy="368" r="3.5" fill="#1a0033"/>
+      <text x="180" y="372" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «BẮT ĐẦU»</text>
+      <text x="168" y="396" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cài SDK</text>
+      <text x="168" y="412" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">install-sdk</text>
+      <circle cx="168" cy="436" r="3.5" fill="#1a0033"/>
+      <text x="180" y="440" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <rect x="152" y="464" width="200" height="156" rx="6" fill="#f7f7f8"/>
+      <rect x="152" y="464" width="200" height="156" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <circle cx="168" cy="488" r="3.5" fill="#1a0033"/>
+      <text x="180" y="492" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «BẮT ĐẦU»</text>
+      <text x="168" y="540" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cài thư viện plugin</text>
+      <text x="168" y="556" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">install-requirements</text>
+      <circle cx="168" cy="596" r="3.5" fill="#1a0033"/>
+      <text x="180" y="600" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <!-- ============ CỘT TRÁI — BĂNG MÀN HÌNH ============ -->
+      <rect x="376" y="140" width="156" height="196" rx="6" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.25)" stroke-width="1"/>
+      <text x="392" y="168" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CÓ CHỮ TỪ GIÂY ĐẦU</text>
+      <text x="392" y="228" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đang tạo</text>
+      <text x="392" y="246" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">môi trường ảo…</text>
+
+      <rect x="376" y="344" width="156" height="112" rx="6" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.25)" stroke-width="1"/>
+      <text x="392" y="404" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đang cài SDK…</text>
+
+      <rect x="376" y="464" width="156" height="156" rx="6" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.25)" stroke-width="1"/>
+      <text x="392" y="532" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đang cài</text>
+      <text x="392" y="550" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">thư viện plugin…</text>
+
+      <!-- ============ CỘT PHẢI — KHỐI BƯỚC ============ -->
+      <rect x="584" y="140" width="200" height="196" rx="6" fill="#f7f7f8"/>
+      <rect x="584" y="140" width="200" height="196" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="600" y="236" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tạo môi trường ảo</text>
+      <text x="600" y="252" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">create-venv</text>
+      <circle cx="600" cy="312" r="3.5" fill="#1a0033"/>
+      <text x="612" y="316" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <rect x="584" y="344" width="200" height="112" rx="6" fill="#f7f7f8"/>
+      <rect x="584" y="344" width="200" height="112" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="600" y="396" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cài SDK</text>
+      <text x="600" y="412" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">install-sdk</text>
+      <circle cx="600" cy="436" r="3.5" fill="#1a0033"/>
+      <text x="612" y="440" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <rect x="584" y="464" width="200" height="156" rx="6" fill="#f7f7f8"/>
+      <rect x="584" y="464" width="200" height="156" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="600" y="540" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Cài thư viện plugin</text>
+      <text x="600" y="556" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">install-requirements</text>
+      <circle cx="600" cy="596" r="3.5" fill="#1a0033"/>
+      <text x="612" y="600" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">PHÁT «XONG»</text>
+
+      <!-- ============ CỘT PHẢI — BĂNG MÀN HÌNH (KHOẢNG TRỐNG) ============ -->
+      <!-- ngoặc đo khoảng trống -->
+      <line x1="800" y1="140" x2="800" y2="336" stroke="#e100e1" stroke-width="1.4"/>
+      <line x1="794" y1="140" x2="806" y2="140" stroke="#e100e1" stroke-width="1.4"/>
+      <line x1="794" y1="336" x2="806" y2="336" stroke="#e100e1" stroke-width="1.4"/>
+
+      <rect x="808" y="140" width="156" height="196" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4" stroke-dasharray="6,4"/>
+      <text x="824" y="168" fill="#b300b3" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">GIÂY 0 → BƯỚC 1 XONG</text>
+      <text x="824" y="224" fill="#b300b3" font-size="20" font-weight="600" font-family="'Geist', sans-serif">TRỐNG</text>
+      <text x="824" y="252" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Không chữ nào</text>
+      <text x="824" y="270" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">trên màn hình</text>
+
+      <rect x="808" y="344" width="156" height="112" rx="6" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.25)" stroke-width="1"/>
+      <text x="824" y="372" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MỐC CUỐI ĐÃ ĐẠT</text>
+      <text x="824" y="404" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đã tạo xong</text>
+      <text x="824" y="422" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">môi trường ảo</text>
+
+      <rect x="808" y="464" width="156" height="156" rx="6" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.25)" stroke-width="1"/>
+      <text x="824" y="492" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">MỐC CUỐI ĐÃ ĐẠT</text>
+      <text x="824" y="532" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Đã cài xong SDK</text>
+
+      <!-- ============ CHÚ THÍCH BIÊN TẬP ============ -->
+      <text x="560" y="668" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">Suốt khoảng trống ấy, người dùng không phân biệt được «đang chạy» với</text>
+      <text x="560" y="692" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">«đã treo» — đúng thứ AC-8 cấm.</text>
+
+      <!-- ============ CHÚ GIẢI ============ -->
+      <line x1="32" y1="720" x2="964" y2="720" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="32" y="740" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+      <rect x="140" y="732" width="12" height="10" rx="2" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="160" y="740" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Khối = một bước, độ dài tương đối</text>
+
+      <circle cx="464" cy="737" r="3.5" fill="#1a0033"/>
+      <text x="476" y="740" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Chấm = một sự kiện được phát</text>
+
+      <rect x="744" y="732" width="12" height="10" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.2" stroke-dasharray="3,2"/>
+      <text x="764" y="740" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Khoảng trống = không có gì để nói</text>
+
+      <!-- ============ CHÂN HÌNH ============ -->
+      <text x="32" y="776" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">Bước bị bỏ qua thì không phát gì cả — ở cả hai phương án.</text>
+      <text x="32" y="796" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">AC-7: không sự kiện nào khai việc chưa xong · AC-8: khi chờ, màn hình luôn có thứ đúng-sự-thật để nói.</text>
+      <text x="32" y="816" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">Độ dài khối là tương đối (bước đầu dài nhất) — kế hoạch không nêu thời lượng thật, hình không bịa số.</text>
+      <text x="32" y="836" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">Mã pha trong kế hoạch: «bắt đầu» = started · «xong» = completed.</text>
+    </svg>
+  </div>
+</body>
+</html>

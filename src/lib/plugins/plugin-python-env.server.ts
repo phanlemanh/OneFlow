@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { logger } from "@/lib/logger";
+import type { OnMilestone } from "@/lib/plugin-executor/provisioning-events";
 import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
 import { dataDir, resourcesDir } from "@/lib/runtime/paths.server";
 
@@ -201,7 +202,10 @@ async function pipCheck(pluginId: string, py: string): Promise<void> {
     }
 }
 
-async function ensureVenv(pluginId: string): Promise<string> {
+async function ensureVenv(
+    pluginId: string,
+    onMilestone?: OnMilestone,
+): Promise<string> {
     const py = venvPython(pluginId);
     const sdkDir = join(resourcesDir(), "sdk");
     const sdkPyproject = join(sdkDir, "pyproject.toml");
@@ -227,6 +231,9 @@ async function ensureVenv(pluginId: string): Promise<string> {
         // The root must exist before it can be a cwd; `python -m venv` creates
         // the leaf itself.
         mkdirSync(VENV_ROOT(), { recursive: true });
+        // Emitted inside this branch, so a venv that already exists reports
+        // neither a start nor a completion for work nobody did.
+        onMilestone?.({ step: "create-venv", phase: "started" });
         const mk = await runCmd(
             base,
             ["-m", "venv", venvDirFor(pluginId)],
@@ -237,9 +244,13 @@ async function ensureVenv(pluginId: string): Promise<string> {
                 `failed to create plugin venv for ${pluginId}: ${mk.out.trim()}`,
             );
         }
+        onMilestone?.({ step: "create-venv", phase: "completed" });
     }
 
     logger.info(`[plugin-env] installing tongflow SDK into ${pluginId}'s venv`);
+    // Reached only past the cache check above, so a venv whose SDK is already
+    // current emits nothing here either.
+    onMilestone?.({ step: "install-sdk", phase: "started" });
     const ins = await runCmd(
         py,
         ["-m", "pip", "install", "--upgrade", sdkDir],
@@ -250,6 +261,7 @@ async function ensureVenv(pluginId: string): Promise<string> {
             `failed to install SDK into ${pluginId}'s venv: ${ins.out.trim()}`,
         );
     }
+    onMilestone?.({ step: "install-sdk", phase: "completed" });
 
     writeMarker(pluginId, "sdk.hash", sdkHash);
     return py;
@@ -259,6 +271,7 @@ async function ensurePluginRequirements(
     pluginId: string,
     pluginDir: string,
     py: string,
+    onMilestone?: OnMilestone,
 ): Promise<void> {
     const reqPath = join(pluginDir, "requirements.txt");
     if (!existsSync(reqPath)) return;
@@ -268,6 +281,9 @@ async function ensurePluginRequirements(
     if (readMarker(pluginId, markerName) === hash) return;
 
     logger.info(`[plugin-env] installing requirements.txt for ${pluginId}`);
+    // Past both early returns: an absent or unchanged requirements.txt says
+    // nothing rather than announcing an install that never runs.
+    onMilestone?.({ step: "install-requirements", phase: "started" });
     const ins = await runCmd(
         py,
         ["-m", "pip", "install", "-r", reqPath],
@@ -280,14 +296,20 @@ async function ensurePluginRequirements(
     }
     await pipCheck(pluginId, py);
     writeMarker(pluginId, markerName, hash);
+    onMilestone?.({ step: "install-requirements", phase: "completed" });
 }
 
 /**
  * Ensure this plugin's own venv exists with the SDK + its requirements
  * installed, and return the interpreter to run the entry with.
  *
- * The signature is deliberately unchanged: `runners/generic.ts` is the only
- * caller and lives under a t3 path this change must not touch.
+ * `onMilestone` is optional and third, so callers that only want the
+ * interpreter keep working unchanged. When it is passed, each real step
+ * announces itself twice — once when the work begins, once when it exits
+ * cleanly — and a step that is skipped (cached venv, current SDK, absent or
+ * unchanged requirements.txt) announces nothing at all. That silence is the
+ * point: a milestone fired on a code path that did no work would be a
+ * simulated progress bar wearing the clothes of a fact.
  *
  * A provisioning failure is only survivable for a plugin that declares no
  * `requirements.txt`: it needs nothing from the venv beyond the SDK, which the
@@ -301,11 +323,17 @@ async function ensurePluginRequirements(
 export async function ensurePluginPython(
     pluginId: string,
     pluginDir: string,
+    onMilestone?: OnMilestone,
 ): Promise<string> {
     try {
         return await serializeVenvMutation(pluginId, async () => {
-            const py = await ensureVenv(pluginId);
-            await ensurePluginRequirements(pluginId, pluginDir, py);
+            const py = await ensureVenv(pluginId, onMilestone);
+            await ensurePluginRequirements(
+                pluginId,
+                pluginDir,
+                py,
+                onMilestone,
+            );
             return py;
         });
     } catch (e) {

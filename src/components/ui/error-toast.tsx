@@ -5,6 +5,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { getClientTranslator } from "@/i18n/client";
 
+/**
+ * One recovery control, offered only when the caller knows what would actually
+ * help. Omit it rather than inventing a plausible-looking button.
+ */
+export interface ErrorToastAction {
+    label: string;
+    onClick: () => void;
+}
+
 export interface ShowErrorToastOptions {
     /** Optional bold headline shown above the message. */
     title?: string;
@@ -12,6 +21,8 @@ export interface ShowErrorToastOptions {
     message: string;
     /** Full detail (stack / per-node failures) revealed under "Details". */
     detail?: string;
+    /** Optional single recovery control. Omitted → today's plain toast. */
+    action?: ErrorToastAction;
     /**
      * Stable id so repeated errors from the same source replace rather than
      * stack (e.g. one per task id). Omit for an auto-generated id.
@@ -24,11 +35,13 @@ function ErrorToastCard({
     title,
     message,
     detail,
+    action,
 }: {
     toastId: string;
     title?: string;
     message: string;
     detail?: string;
+    action?: ErrorToastAction;
 }) {
     const t = getClientTranslator("Errors");
     const [expanded, setExpanded] = useState(false);
@@ -55,6 +68,18 @@ function ErrorToastCard({
                     <p className="break-words text-sm text-neutral-700 dark:text-neutral-200">
                         {message}
                     </p>
+                    {action && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                action.onClick();
+                                toast.dismiss(toastId);
+                            }}
+                            className="mt-2.5 rounded-md bg-red-600 px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 dark:bg-red-500 dark:hover:bg-red-400"
+                        >
+                            {action.label}
+                        </button>
+                    )}
                     <div className="mt-1.5 flex items-center gap-3 text-xs">
                         {detail && (
                             <button
@@ -101,6 +126,7 @@ export function showErrorToast({
     title,
     message,
     detail,
+    action,
     id,
 }: ShowErrorToastOptions): string {
     return toast.custom(
@@ -110,6 +136,7 @@ export function showErrorToast({
                 title={title}
                 message={message}
                 detail={detail}
+                action={action}
             />
         ),
         { duration: Number.POSITIVE_INFINITY, id },

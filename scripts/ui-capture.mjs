@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 /* ui-capture.reference.mjs — REFERENCE implementation of `config:capture.ui`.
  *
@@ -30,7 +30,7 @@ const flag = (n, d) => {
     const i = args.indexOf(n);
     return i >= 0 ? args[i + 1] : d;
 };
-const VAL_FLAGS = ["--wait", "--w", "--h"];
+const VAL_FLAGS = ["--wait", "--w", "--h", "--html"];
 const pos = [];
 for (let i = 0; i < args.length; i++) {
     if (VAL_FLAGS.includes(args[i])) {
@@ -43,7 +43,7 @@ for (let i = 0; i < args.length; i++) {
 const [url, out] = pos;
 if (!url || !out) {
     console.error(
-        "usage: ui-capture <url> <out.png> [--wait ms] [--full] [--w px] [--h px]",
+        "usage: ui-capture <url> <out.png> [--wait ms] [--full] [--w px] [--h px] [--html out.html]",
     );
     process.exit(2);
 }
@@ -87,6 +87,45 @@ try {
     await new Promise((r) => setTimeout(r, waitMs));
     await page.screenshot({ path: out, fullPage });
     console.log(`saved ${out}`);
+
+    // --html <path>: also dump the rendered DOM with every same-origin
+    // stylesheet inlined.
+    //
+    // The design gate reads HTML and computes contrast through jsdom. A bare
+    // outerHTML dump is not enough: jsdom does not fetch external stylesheets,
+    // so every colour would resolve to a default and the gate would report a
+    // clean sheet it never actually measured — the exact shape of a green that
+    // means nothing. Inlining the CSS text is what makes the measurement real.
+    const htmlOut = flag("--html", null);
+    if (htmlOut) {
+        const html = await page.evaluate(() => {
+            const css = Array.from(document.styleSheets)
+                .map((sheet) => {
+                    try {
+                        return Array.from(sheet.cssRules)
+                            .map((r) => r.cssText)
+                            .join("\n");
+                    } catch {
+                        // Cross-origin sheet: rules are not readable. Skipped
+                        // knowingly rather than silently pretending it applied.
+                        return "";
+                    }
+                })
+                .filter(Boolean)
+                .join("\n");
+            const doc = document.documentElement.cloneNode(true);
+            doc.querySelectorAll("link[rel=stylesheet], script").forEach((n) =>
+                n.remove(),
+            );
+            const style = document.createElement("style");
+            style.textContent = css;
+            doc.querySelector("head")?.appendChild(style);
+            return `<!doctype html>\n${doc.outerHTML}`;
+        });
+        mkdirSync(dirname(htmlOut), { recursive: true });
+        writeFileSync(htmlOut, html, "utf8");
+        console.log(`saved ${htmlOut}`);
+    }
 } finally {
     await browser.close();
 }

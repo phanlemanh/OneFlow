@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { delimiter, join } from "node:path";
 import { TaskStatus } from "@/constants/task-status";
 import type { NodeSlot } from "@/generated/abi";
+import { loadPluginEnvDecls } from "@/lib/plugins/plugin-env-manifests.server";
 import { ensurePluginPython } from "@/lib/plugins/plugin-python-env.server";
 import { getPluginConfig } from "@/lib/plugins/plugins-registry.server";
 import { PYTHON_UTF8_ENV } from "@/lib/plugins/python-lite";
@@ -12,6 +13,11 @@ import { getScope, scopedDataDirFor } from "@/lib/runtime/scope.server";
 import { withStoredEnv } from "@/lib/settings/env-store.server";
 import { notifyTask } from "@/lib/task/emitter";
 import { parseProgressLine } from "../progress-protocol";
+import { provisioningMessage } from "../provisioning-events";
+import {
+    missingRequiredEnvKeys,
+    missingRequiredEnvMessage,
+} from "../required-env";
 import type { PluginExecRequest, PluginExecResult } from "../types";
 
 function tryParseAbiOutput(stdout: string): Record<string, unknown> | null {
@@ -48,9 +54,38 @@ export async function execPlugin<S extends NodeSlot>(
     // deploy-first plugin (needsDeploy) that entry.py is a thin bridge that
     // deploys once and invokes the remote backend.
     const entryArgs = [cfg.entryFile || "entry.py"];
-    // Provision the shared plugin venv (SDK + this plugin's requirements.txt)
-    // and run the entry with it. Falls back to a bare interpreter on failure.
-    const python = await ensurePluginPython(req.pluginId, pluginDir);
+
+    // Pre-flight BEFORE provisioning: a required env key that is absent or
+    // blank fails the run here, in the canonical sentence classifyFailure()
+    // routes to the key form — not minutes later inside the provider's SDK
+    // with words no classifier recognises. See required-env.ts.
+    const storedEnv = await withStoredEnv();
+    const declared =
+        loadPluginEnvDecls().find((d) => d.pluginId === req.pluginId)?.env ??
+        [];
+    const missingKeys = missingRequiredEnvKeys(
+        declared,
+        storedEnv as Record<string, string | undefined>,
+    );
+    if (missingKeys.length > 0) {
+        throw new Error(missingRequiredEnvMessage(missingKeys));
+    }
+
+    // Provision this plugin's own venv (SDK + its requirements.txt) and run the
+    // entry with it. A plugin that declares requirements fails loudly here
+    // rather than falling back to a bare interpreter missing every dependency.
+    // The first run can take minutes, so each real provisioning step is
+    // forwarded to the client as it starts and as it finishes.
+    const python = await ensurePluginPython(
+        req.pluginId,
+        pluginDir,
+        (event) => {
+            notifyTask(req.taskId, TaskStatus.RUNNING, {
+                message: provisioningMessage(event),
+                provisioning: event,
+            });
+        },
+    );
     const tongflowSdkDir = join(resourcesDir(), "sdk");
     const pythonPathParts = [
         tongflowSdkDir,

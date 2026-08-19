@@ -1048,6 +1048,20 @@
                 "editOp": "编辑操作",
                 "removeOp": "删除操作"
             }
+        },
+        "firstRun": {
+            "missingTitle": "需要下载 {count} 个工具才能运行此示例",
+            "missingTitleWithSize": "需要下载 {count} 个工具（约 {mb} MB）才能运行此示例",
+            "prepare": "下载工具",
+            "installing": "正在下载工具…（{done}/{total}）",
+            "milestoneCreatingVenv": "创建环境",
+            "milestoneInstallingSdk": "安装 SDK",
+            "milestoneInstallingRequirements": "安装依赖库",
+            "elapsed": "已用 {sec} 秒。之后的运行将立即开始。",
+            "ready": "完成。点击第一个节点上的 Run 试试。",
+            "blocked": "准备失败",
+            "blockedReasonDownload": "无法下载工具——请检查网络连接。",
+            "retry": "重试"
         }
     },
     "Upload": {

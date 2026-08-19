@@ -19,8 +19,11 @@
 # "no ABI change" and "no SDK bump" are both t3 paths.
 set -euo pipefail
 
-SLUG="${1:?usage: check-t3-untouched.sh <slug> [base-ref]}"
+SLUG="${1:?usage: check-t3-untouched.sh <slug> [base-ref] [--allow <glob>]... [--require <glob>]...}"
 BASE_REF="${2:-origin/main}"
+shift 2 2>/dev/null || shift $#
+# Everything left over is passed straight through to the scanner.
+SCAN_ARGS=("$@")
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
@@ -46,4 +49,14 @@ trap 'rm -f "$CHANGED"' EXIT
     git ls-files --others --exclude-standard
 } | sort -u > "$CHANGED"
 
-node "$ROOT/scripts/acceptance/t3-scan.mjs" "$CHANGED" "$CONFIG"
+# An empty window makes every absence claim below vacuous: "touches no t3
+# path" is trivially true of a diff that touches nothing, and that is what a
+# wrong base ref or a dropped rebase looks like. Fail before the scanner can
+# report a clean pass over nothing.
+if [ ! -s "$CHANGED" ]; then
+    echo "FAIL: nothing changed against $BASE_REF — an empty diff window cannot"
+    echo "      support any claim about which paths this feature touches."
+    exit 1
+fi
+
+node "$ROOT/scripts/acceptance/t3-scan.mjs" "$CHANGED" "$CONFIG" "${SCAN_ARGS[@]}"

@@ -44,6 +44,7 @@ import { logger } from "@/lib/logger";
 import { isValidFlowConnection } from "@/lib/workflow/connection-rules";
 import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
 import DirectorPrompt from "./director-prompt";
+import { FirstRunStripContainer } from "./first-run-strip-container";
 import { ModeSwitch } from "./mode-switch";
 import SmartIsland from "./smart-island";
 import { EDGE_TYPES, NODE_TYPES } from "./types";
@@ -399,6 +400,13 @@ function WorkspaceInner({
             <div className="absolute left-5 top-5 z-10 flex items-center gap-3">
                 <WorkflowTitleMenu />
                 <WorkspaceLeftNav />
+            </div>
+
+            {/* Guidance, never a gate (AC-13): the wrapper ignores the mouse
+                so the canvas behind it keeps dragging; the strip itself opts
+                back in via pointer-events-auto. */}
+            <div className="pointer-events-none absolute left-1/2 top-16 z-10 flex w-full max-w-3xl -translate-x-1/2 justify-center px-4">
+                <FirstRunStripContainer />
             </div>
 
             <DirectorPrompt />

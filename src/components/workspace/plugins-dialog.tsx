@@ -38,9 +38,14 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    ONBOARDING_RECOVERY_EVENT,
+    type OnboardingRecoveryDetail,
+} from "@/components/workspace/task-failure-toaster";
 import { refreshPluginsRegistry } from "@/hooks/use-plugins-registry";
 import { apiGet, apiPost } from "@/lib/api/client";
 import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 
 const navBtnClass =
     "h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700 transition-all duration-200";
@@ -127,6 +132,26 @@ export function PluginsDialog() {
 
     const [gitUrl, setGitUrl] = useState("");
     const [cloning, setCloning] = useState(false);
+    // Plugin the failure toast's recovery action pointed at: dialog opens with
+    // this one pinned to the top and highlighted (AC-11: "missing plugin →
+    // plugin manager filtered to that plugin"). Cleared when the dialog closes.
+    const [spotlightId, setSpotlightId] = useState<string | null>(null);
+
+    // The failure toast dispatches this when the user takes the
+    // "install plugin" exit — before this listener existed, that press
+    // dispatched into silence and only dismissed the toast (S4 round 1).
+    useEffect(() => {
+        const onRecovery = (event: Event) => {
+            const detail = (event as CustomEvent<OnboardingRecoveryDetail>)
+                .detail;
+            if (detail.kind !== "install-plugin") return;
+            setSpotlightId(detail.pluginId);
+            setOpen(true);
+        };
+        window.addEventListener(ONBOARDING_RECOVERY_EVENT, onRecovery);
+        return () =>
+            window.removeEventListener(ONBOARDING_RECOVERY_EVENT, onRecovery);
+    }, []);
 
     const fetchOfficial = useCallback(async () => {
         setLoading(true);
@@ -249,7 +274,13 @@ export function PluginsDialog() {
     }, [gitUrl, reportResult, fetchOfficial]);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+                setOpen(isOpen);
+                if (!isOpen) setSpotlightId(null);
+            }}
+        >
             <Tooltip>
                 <TooltipTrigger asChild>
                     <DialogTrigger asChild>
@@ -311,117 +342,136 @@ export function PluginsDialog() {
                                     {t("emptyOfficial")}
                                 </div>
                             ) : (
-                                plugins.map((p) => (
-                                    <div
-                                        key={p.id}
-                                        className="flex items-center gap-2 rounded-lg border px-3 py-2"
-                                    >
-                                        <PluginCardIcon
-                                            icon={p.icon}
-                                            label={p.name || p.id}
-                                        />
-                                        <div className="min-w-0 flex-1">
-                                            <a
-                                                href={p.repoUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                title={t("openRepo")}
-                                                className="block truncate text-sm font-medium hover:text-primary hover:underline"
-                                            >
-                                                {p.name || p.id}
-                                            </a>
-                                            {p.description ? (
-                                                <p className="text-xs text-muted-foreground leading-snug">
-                                                    {p.description}
-                                                </p>
-                                            ) : null}
-                                        </div>
-                                        {p.installed ? (
-                                            updates[p.id] === false ? (
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    disabled
-                                                    className="text-green-600 dark:text-green-500"
+                                // Spotlighted plugin (recovery action target)
+                                // pinned first so "filtered to that plugin"
+                                // is true at a glance, not after scrolling.
+                                [...plugins]
+                                    .sort((a, b) =>
+                                        a.id === spotlightId
+                                            ? -1
+                                            : b.id === spotlightId
+                                              ? 1
+                                              : 0,
+                                    )
+                                    .map((p) => (
+                                        <div
+                                            key={p.id}
+                                            className={cn(
+                                                "flex items-center gap-2 rounded-lg border px-3 py-2",
+                                                p.id === spotlightId &&
+                                                    "border-primary ring-1 ring-primary",
+                                            )}
+                                        >
+                                            <PluginCardIcon
+                                                icon={p.icon}
+                                                label={p.name || p.id}
+                                            />
+                                            <div className="min-w-0 flex-1">
+                                                <a
+                                                    href={p.repoUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    title={t("openRepo")}
+                                                    className="block truncate text-sm font-medium hover:text-primary hover:underline"
                                                 >
-                                                    <Check className="h-4 w-4" />
-                                                    <span className="ml-1">
-                                                        {t("upToDate")}
-                                                    </span>
-                                                </Button>
+                                                    {p.name || p.id}
+                                                </a>
+                                                {p.description ? (
+                                                    <p className="text-xs text-muted-foreground leading-snug">
+                                                        {p.description}
+                                                    </p>
+                                                ) : null}
+                                            </div>
+                                            {p.installed ? (
+                                                updates[p.id] === false ? (
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        disabled
+                                                        className="text-green-600 dark:text-green-500"
+                                                    >
+                                                        <Check className="h-4 w-4" />
+                                                        <span className="ml-1">
+                                                            {t("upToDate")}
+                                                        </span>
+                                                    </Button>
+                                                ) : (
+                                                    <Button
+                                                        type="button"
+                                                        variant={
+                                                            updates[p.id]
+                                                                ? "default"
+                                                                : "ghost"
+                                                        }
+                                                        size="sm"
+                                                        disabled={busy[p.id]}
+                                                        onClick={() =>
+                                                            installOfficial(
+                                                                p.id,
+                                                            )
+                                                        }
+                                                        className={
+                                                            updates[p.id]
+                                                                ? "bg-amber-500 text-white hover:bg-amber-600"
+                                                                : "text-green-600 dark:text-green-500"
+                                                        }
+                                                    >
+                                                        {busy[p.id] ||
+                                                        (checking &&
+                                                            updates[p.id] ===
+                                                                undefined) ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : updates[p.id] ? (
+                                                            <ArrowUpCircle className="h-4 w-4" />
+                                                        ) : (
+                                                            <Check className="h-4 w-4" />
+                                                        )}
+                                                        <span className="ml-1">
+                                                            {t("update")}
+                                                        </span>
+                                                    </Button>
+                                                )
                                             ) : (
                                                 <Button
                                                     type="button"
-                                                    variant={
-                                                        updates[p.id]
-                                                            ? "default"
-                                                            : "ghost"
-                                                    }
+                                                    variant="outline"
                                                     size="sm"
                                                     disabled={busy[p.id]}
                                                     onClick={() =>
                                                         installOfficial(p.id)
                                                     }
-                                                    className={
-                                                        updates[p.id]
-                                                            ? "bg-amber-500 text-white hover:bg-amber-600"
-                                                            : "text-green-600 dark:text-green-500"
-                                                    }
                                                 >
-                                                    {busy[p.id] ||
-                                                    (checking &&
-                                                        updates[p.id] ===
-                                                            undefined) ? (
+                                                    {busy[p.id] ? (
                                                         <Loader2 className="h-4 w-4 animate-spin" />
-                                                    ) : updates[p.id] ? (
-                                                        <ArrowUpCircle className="h-4 w-4" />
                                                     ) : (
-                                                        <Check className="h-4 w-4" />
+                                                        <Download className="h-4 w-4" />
                                                     )}
                                                     <span className="ml-1">
-                                                        {t("update")}
+                                                        {t("install")}
                                                     </span>
                                                 </Button>
-                                            )
-                                        ) : (
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={busy[p.id]}
-                                                onClick={() =>
-                                                    installOfficial(p.id)
-                                                }
-                                            >
-                                                {busy[p.id] ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <Download className="h-4 w-4" />
-                                                )}
-                                                <span className="ml-1">
-                                                    {t("install")}
-                                                </span>
-                                            </Button>
-                                        )}
-                                        {p.installed && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                disabled={busy[p.id]}
-                                                onClick={() =>
-                                                    setConfirmUninstall(p.id)
-                                                }
-                                                title={t("uninstall")}
-                                                aria-label={t("uninstall")}
-                                                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-500"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                ))
+                                            )}
+                                            {p.installed && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    disabled={busy[p.id]}
+                                                    onClick={() =>
+                                                        setConfirmUninstall(
+                                                            p.id,
+                                                        )
+                                                    }
+                                                    title={t("uninstall")}
+                                                    aria-label={t("uninstall")}
+                                                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-red-500"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))
                             )}
                         </div>
                     </TabsContent>

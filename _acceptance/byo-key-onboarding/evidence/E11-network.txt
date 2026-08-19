@@ -1,0 +1,65 @@
+E11 network/console evidence — why a clean >=60s single-user provisioning-wait
+observation could not be captured in this shared dev-server session.
+
+driver: mcp__Claude_Browser (Claude_Browser MCP). read_network_requests /
+read_console_messages available -> NETWORK TRUTH is machine-readable, not n-a.
+
+=== Root cause, confirmed from console ===
+Repeating pattern throughout the whole test window (03:16-03:34 local session time,
+epoch ~1787109400000-1787110970000):
+
+    [log] [Fast Refresh] rebuilding
+    [log] [Fast Refresh] done in <100-220>ms
+    [log] AddVideoNode data: Object
+    [log] AddVideoNode data: Object
+    [log] AddImageNode
+    [log] AddImageNode
+
+"[Fast Refresh] rebuilding/done" + the node components' own mount-time console logs
+firing again immediately after each rebuild indicate the whole workspace React tree
+(including FirstRunStripContainer, which lives in the same tree) is being REMOUNTED
+by webpack Fast Refresh, not just hot-patched. A remount resets useState/useRef to
+their initial values -- exactly the local `override` / `provisioningStartRef` state
+first-run-strip-container.tsx uses to hold the "provisioning" phase and its elapsed
+counter. This is why the strip kept reverting from the provisioning milestone trail
+back to the underlying readiness text ("Done. Press Run on the first node to try it.")
+well before any real task could have finished the actual work.
+
+=== Corroborating network evidence ===
+Continuous churn of *.hot-update.json / *.hot-update.js fetches, roughly every 5-25s
+for the entire session (sample, epoch ms in the hash-named files' query-string `v=`
+timestamps): 1787110717458, 1787110718380, 1787110757642, 1787110781162,
+1787110822153, 1787110828223, 1787110835669, 1787110843359, 1787110846971,
+1787110855822, 1787110879473, 1787110886419, 1787110901663, 1787110961147,
+1787110966813, 1787110970xxx... i.e. a fresh Fast Refresh compile roughly every
+5-25 seconds without a break > ~60s anywhere in the observed window. This repo
+(/Users/manh-macmini/dev/oneflow) has many other parallel workflow subagents
+actively editing source files in the SAME working tree against the SAME shared
+`pnpm dev` instance (port 3000, PID 895) during this verification run — this
+verifier did not start that server and does not own it (see E11 verifier's own
+outputTail).
+
+Also observed: several `GET /workspace?_rsc=...` requests tagged
+"[FAILED: net::ERR_ABORTED]" -- consistent with React Server Component prefetches
+being cancelled mid-flight by the same rebuild churn. Static-asset scope, note-only.
+
+=== FAIL-eligible app-origin requests (scope: http://localhost:3000, per
+_acceptance/config.yaml dev_server.url) ===
+Two confirmed 404s against a real API route during this session:
+    POST http://localhost:3000/api/task/create -> 404 Not Found  (x2, transient)
+  paired with browser console:
+    [error] Failed to create batch tasks: {status: 404, ...}
+    [error] [useAbiExecution] Failed to create tasks: {status: 404, ...}
+A retry moments later against the identical route succeeded (200 OK), and
+`src/app/api/task/create/route.ts` is untouched in `git status`/`git log` -- the
+404 was the dev server's route manifest being transiently stale mid-rebuild, not a
+missing/broken route. Still FAIL-eligible per the letter of the network-truth rule
+(4xx on app origin, not an expected status for this eval) -- reported honestly below
+rather than waived.
+
+=== Verdict fields for this eval's STRUCTURED OUTPUT ===
+networkObserved: app-fail
+  (the two POST /api/task/create 404s above are FAIL-eligible per scope and are not
+  an expected status of this eval; recorded as observed rather than excused, even
+  though this verifier's own diagnosis is that they were caused by the same
+  concurrent-rebuild churn documented above, not by product code.)

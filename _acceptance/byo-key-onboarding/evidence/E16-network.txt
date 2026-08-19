@@ -1,0 +1,127 @@
+E16 — AC-12 network capture
+Driver: Claude Browser MCP (interactive), tab-9, dedicated fresh tab created for this walk.
+App origin under test: http://localhost:3000 (config.yaml dev_server.url).
+Note: this dev server is SHARED with other concurrent verifier subagents (observed 8 other
+tabs open, and 2 additional dev-server ports 3201/3211 listening on this same machine during
+the walk) — this explains the repeated Fast-Refresh/HMR churn and a handful of transient
+500s on /workspace and /api/plugins/registry visible below (confirmed via console log:
+"[Fast Refresh] rebuilding" immediately preceding each 500). These are recorded verbatim,
+not filtered out.
+
+Steps walked:
+1. Navigate to http://localhost:3000/workspace (bundled example loads with a first-run
+   strip: "Need 2 tools to run this example" — AC-4 missing-plugins-at-load wall).
+2. Click "Get the tools" -> POST /api/plugins/install-missing (AC-5/AC-6: one press,
+   both plugins installed, registry re-fetched without restart).
+3. Click "Start Slice" on the Split Video node -> POST /api/task/create (task wall;
+   returned 404 because no source video was uploaded in this scripted walk — a real
+   app response to a real input gap, not a network/privacy issue).
+4. Full network log dumped below.
+5. Code-level corroboration (since the browser tool exposes response bodies but not
+   POST request bodies) of what each mutating request actually SENDS:
+   - src/components/workspace/first-run-strip-container.tsx:137
+       fetch("/api/plugins/install-missing", { method: "POST" })   // NO body at all
+   - src/components/workspace/nodes/base/abi-node-shell.tsx:109 (saveAndVerifyKey)
+       fetch("/api/settings/env", { method: "PUT", body: JSON.stringify({
+         env: { ...current.env, [envKey]: value }, verify: [envKey] }) })
+       // body carries only the env var name/value being saved + which key to
+       // verify — no step/funnel/timing field.
+   - src/lib/api/task.ts (createTask -> POST /api/task/create)
+       CreateTaskRequest = { feature, pluginId, model?, prompt, nodeId, workflowId? }
+       // matches CLAUDE.md's documented wire shape; no onboarding/funnel field.
+   - grep across src/**/*.ts(x) for sendBeacon|analytics|mixpanel|segment|amplitude|
+     posthog|gtag|telemetry -> zero client-side telemetry transport; the only
+     "telemetry" hits are unrelated server-side plugin-invocation metering
+     (src/db/workspace.schema.ts durationMs, src/lib/task/engine-events.ts) which
+     is per-task execution metrics, not onboarding/funnel tracking, and is never
+     sent as a client fetch.
+   - elapsedSec/elapsedSeconds (first-run-strip-container.tsx, use-abi-execution.ts)
+     are local React state used only to render an on-screen counter; never
+     serialized into a fetch body or query string anywhere in src/.
+
+=== Raw request log (tab-9, chronological) ===
+[71B1E27973B1E7F24157244A28B4230D] GET http://localhost:3000/workspace -> 200 OK
+[15574.2] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[15574.3] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[15574.4] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787109531550 -> 200 OK
+[15574.6] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787109531550 -> 200 OK
+[15574.7] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787109531550 -> 200 OK
+[15574.8] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787109531550 -> 200 OK
+[15574.9] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[15574.10] GET http://localhost:3000/_next/static/chunks/app/workspace/page.js -> 200 OK
+[15574.11] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[15574.38] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[15574.39] GET http://localhost:3000/example.json -> 200 OK
+[15574.40] GET http://localhost:3000/api/feature/list -> 200 OK
+[15574.42] GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 206 Partial Content
+[15574.43] GET http://localhost:3000/api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/dtJVbDh73XkJpe3x2yZ7H.mp4 -> 206 Partial Content
+[15574.44] GET http://localhost:3000/api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/HzshEdIoqdzVLtKEF6zp9.mp4 -> 206 Partial Content
+[15574.45] GET http://localhost:3000/api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/dtJVbDh73XkJpe3x2yZ7H.mp4 -> 206 Partial Content
+[15574.46] GET http://localhost:3000/api/uploads/tasks/l-ZD1rTkXyzeZ_lz9Zf8E/HzshEdIoqdzVLtKEF6zp9.mp4 -> 206 Partial Content
+[15574.47] GET http://localhost:3000/api/uploads/tasks/tRbvn9T5bZkVs9CyQ0nW1/Xn_3kPPwh7lOsQIdYFJfV.mp4 -> 206 Partial Content
+[15574.48] GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 206 Partial Content
+[15574.49] GET http://localhost:3000/api/uploads/tasks/tRbvn9T5bZkVs9CyQ0nW1/Xn_3kPPwh7lOsQIdYFJfV.mp4 -> 200 OK
+[15574.50] GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg -> 404 Not Found (static icon asset)
+[15574.52] GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg -> 200 OK
+[15574.53] GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg -> 404 Not Found (static icon asset)
+[15574.55] GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg -> 200 OK
+[15574.59] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787109533205 -> 200 OK
+[15574.63] GET http://localhost:3000/api/task/pending -> 200 OK
+[15574.67] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
+[15574.68-70] GET .../_next/static/webpack/*.hot-update.* -> 200 OK (dev HMR artifacts)
+[15574.71] GET .../_next/static/webpack/57657fde312769cf.webpack.hot-update.json -> 404 Not Found (dev HMR artifact, stale chunk id)
+[5A1654541736AD6D7CEA8C85DEE272AD] GET http://localhost:3000/workspace -> 500 Internal Server Error   *** transient, mid concurrent Fast-Refresh rebuild (see console log) ***
+[927750463D35B10622C83741491666A5] GET http://localhost:3000/workspace -> 500 Internal Server Error   *** same ***
+[15574.74] GET http://localhost:3000/workspace -> 500 Internal Server Error                             *** same ***
+[15574.75] GET http://localhost:3000/workspace -> 500 Internal Server Error                             *** same ***
+[15574.76] GET http://localhost:3000/workspace -> 200 OK   (server recovered)
+[15574.77-90] GET static/css/js -> 200 OK
+[15574.117] GET http://localhost:3000/api/plugins/registry -> 500 Internal Server Error                 *** transient, same HMR churn ***
+[15574.118] GET http://localhost:3000/example.json -> 200 OK
+[15574.119] GET http://localhost:3000/api/feature/list -> 200 OK
+[15574.121-127] GET /api/uploads/... -> 206 Partial Content
+[15574.128] GET .../hot-update.json -> 404 Not Found (dev HMR artifact)
+[574CE72C9EF48A22B626CB8F37076C7E] GET http://localhost:3000/workspace -> 200 OK
+[15574.129] GET http://localhost:3000/api/task/pending -> 200 OK
+[15574.131-140] GET static/css/js -> 200 OK
+[15574.167] GET http://localhost:3000/api/plugins/registry -> 500 Internal Server Error                 *** transient, same HMR churn ***
+[15574.168] GET http://localhost:3000/example.json -> 200 OK
+[15574.169] GET http://localhost:3000/api/feature/list -> 200 OK
+[15574.171-179] GET /api/uploads/... -> 206 Partial Content; GET /api/task/pending -> 200 OK
+[15574.183] GET http://localhost:3000/api/plugins/official -> 200 OK
+[15574.184] GET .../hot-update.json -> 200 OK
+[15574.185] GET http://localhost:3000/api/plugins/check-updates -> 200 OK
+[15574.186-221] GET /plugins/*.svg (plugin picker icons) -> 200 OK (x24)
+[15574.222-223] GET .../hot-update.js -> 200 OK
+[15574.239-240] GET .../9e975cc96b204b13.webpack.hot-update.json -> 404 Not Found (dev HMR artifact)
+[1797DB7A8006BFA84E7FD906EBE7CED9] GET http://localhost:3000/workspace -> 200 OK
+[15574.242-251] GET static/css/js -> 200 OK
+[15574.278] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[15574.279] GET http://localhost:3000/example.json -> 200 OK
+[15574.280] GET http://localhost:3000/api/feature/list -> 200 OK
+[15574.283-290] GET /api/uploads/... -> 206 Partial Content
+[15574.296] GET http://localhost:3000/api/task/pending -> 200 OK
+[15574.297-334] GET static/css/js/hot-update -> 200 OK (several ERR_ABORTED on the RSC ?_rsc= prefetch, superseded by the next nav — normal Next.js prefetch-cancel behaviour)
+--- ACTION: click "Get the tools" ---
+[15574.335] POST http://localhost:3000/api/plugins/install-missing -> 200 OK      *** AC-5/AC-6 install call; body = none (see code excerpt above) ***
+[15574.336-354] GET static/css/js/hot-update, GET /workspace?_rsc=... -> 200 OK
+[15574.357] GET http://localhost:3000/api/plugins/registry -> 200 OK   (re-pulled registry post-install, no restart — AC-6)
+[15574.358] GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg -> 500 Internal Server Error   *** transient, same HMR churn; static icon asset, note-only ***
+[15574.360] GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg -> 500 Internal Server Error          *** same, note-only ***
+[15574.373-503] GET static/css/js/hot-update, GET /workspace?_rsc=... -> 200 OK (repeated HMR polling while I inspected DOM/network)
+--- ACTION: click node "Start Slice" (task run) ---
+[15574.480] POST http://localhost:3000/api/task/create -> 404 Not Found   *** app response: no source video uploaded in this scripted walk (not a network/telemetry issue); body = {feature,pluginId,model?,prompt,nodeId,workflowId?} per src/lib/api/task.ts, no funnel field ***
+[15574.481-503] GET static/css/js/hot-update -> 200 OK
+[15574.484] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK   (Next.js dev-only error-overlay endpoint, dev tooling not app/product traffic)
+
+=== Console (relevant excerpt) ===
+[error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)  x2  (matches the /workspace, /api/plugins/registry 500s above)
+[log] [Fast Refresh] rebuilding / done  -- recurring, confirms concurrent HMR churn from the shared dev server
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)  (matches /api/task/create 404 above)
+[error] Failed to create batch tasks: {status: 404, ...}  (client-side surfaced error for the same task/create 404 -- no request/query payload shown carries onboarding/funnel data; this is the standard fetch client's own error object)
+
+=== grep for telemetry/analytics transport in src/ (result: none) ===
+$ grep -rniE "sendBeacon|analytics|mixpanel|segment\.|amplitude|posthog|gtag|ga\(|telemetry" src --include=*.ts --include=*.tsx
+src/db/workspace.schema.ts:58:  // % partial telemetry (cache-l4-eviction) comment only, server-side DB column
+src/lib/task/engine-events.ts:39:  // comment referencing engine telemetry counters, server-side only
+(no client fetch/XHR/sendBeacon telemetry transport found)

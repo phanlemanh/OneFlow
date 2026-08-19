@@ -1,0 +1,114 @@
+{
+  "feature_plain": "Người mở OneFlow lần đầu chạy được một ví dụ thật ngay trên máy mình — không cần khoá, không cần tài khoản — rồi mới được hỏi khoá khi thật sự cần.",
+  "scope_plain": "Không đo lén hành vi người dùng dưới bất kỳ dạng nào, không dựng màn hình trả tiền, không bắt đi qua nhiều bước trước khi thấy kết quả, và không hứa hỗ trợ màn hình điện thoại.",
+  "analyst_plain": "",
+  "decisions": [
+    {
+      "id": "E20",
+      "q": "Người ngồi cạnh nhìn màn hình có biết người dùng đang tới đâu không?",
+      "why": "Hội đồng ba góc nhìn đề xuất THÔNG QUA. Bốn trong năm chặng có ảnh chứng minh rõ. Chặng 'đang tải công cụ' thì một góc nhìn chưa chắc: chỉ có một khung hình đứng yên ở '0 trên 2', không có khung thứ hai cho thấy con số nhích lên. Đây đúng là lỗi có thật, nằm trong danh sách ngoài hợp đồng ngay dưới. Việc này hạng T3 nên lời hội đồng chỉ để tham khảo — anh là người phán."
+    }
+  ],
+  "decisions_plain": [
+    {
+      "id": "d-20260807T051228Z-342",
+      "p": "Ôm trọn cả quãng đường (tìm công cụ → cài → chạy → nhập khoá) thay vì chỉ bước nhập khoá — đổi lại phạm vi rộng hơn, nhưng người rớt ở khúc đầu sẽ không bị đếm nhầm thành 'người dùng không nhập nổi khoá'."
+    },
+    {
+      "id": "d-20260807T051228Z-20093",
+      "p": "KHÔNG làm bất kỳ hình thức đo lén nào, kể cả đo tại máy rồi xuất tay — đổi lại chỉ đo được ở phiên quan sát trực tiếp, không có số liệu chảy về liên tục sau khi phát hành."
+    },
+    {
+      "id": "d-20260807T051228Z-1560",
+      "p": "Đổi ví dụ chào mừng sang một luồng chạy hoàn toàn tại máy, không cần khoá — đổi lại mất ấn tượng đầu mạnh của ảnh và video do AI sinh."
+    },
+    {
+      "id": "d-20260807T051228Z-4616",
+      "p": "Phát mốc tiến độ THẬT từ máy chủ thay vì báo trước 'lần đầu mất vài phút' — cố ý nhận: việc này chạm vùng nhạy cảm nên lên hạng T3, kéo theo cả một đợt ký lại cho các hồ sơ khác."
+    },
+    {
+      "id": "d-20260807T051228Z-2488",
+      "p": "KHÔNG làm màn hình hướng dẫn nhiều bước chặn đường — đổi lại khó đo từng bước hơn, nhưng không bắt người dùng trả giá trước khi thấy giá trị."
+    },
+    {
+      "id": "d-20260807T051228Z-7719",
+      "p": "KHÔNG viết phép thử tự động giả lập 'người mới có tự qua được không' — đổi lại mất một lớp bảo vệ tự động, nhưng tránh một màu xanh trả lời sai câu hỏi mà phiên nghiệm thu người thật mới trả lời được."
+    },
+    {
+      "id": "d-20260807T051409Z-12400",
+      "p": "Duyệt giao diện trên bản bấm được thay vì duyệt bằng chữ — tốn công dựng bản mẫu, đổi lại thứ anh duyệt là pixel thật."
+    },
+    {
+      "id": "d-20260807T092227Z-4401",
+      "p": "KHÔNG nhét việc chỉnh màu chữ mờ vào việc này dù đã được duyệt — đổi lại nó thành hạng mục riêng có tiêu chí riêng, giữ cho việc này đúng bán kính đã khai."
+    },
+    {
+      "id": "d-20260807T092227Z-8815",
+      "p": "Dùng bảng màu sẵn có của repo làm chuẩn thiết kế thay vì dựng bộ công cụ riêng — đổi lại chấp nhận bảng màu chưa có sắc thái 'thành công', nên trạng thái khoá-dùng-được phải mượn màu xanh lá thô."
+    },
+    {
+      "id": "d-20260807T094500Z-3310",
+      "p": "Mỗi bước chuẩn bị môi trường báo hai lần (bắt đầu và xong) thay vì chỉ báo lúc xong — đổi lại nhiều tin nhắn hơn, nhưng màn hình luôn có thứ đúng sự thật để nói trong lúc chờ."
+    },
+    {
+      "id": "d-20260807T094500Z-6127",
+      "p": "Dùng lại kho danh sách công cụ sẵn có thay vì tự hỏi máy chủ lần nữa — tránh việc hai bản sao đá nhau, và công cụ vừa cài hiện ra ngay khắp nơi."
+    },
+    {
+      "id": "d-20260819T001406Z-30562",
+      "p": "Chạy phần hàng rào an toàn tuần tự thay vì song song — mất một nhánh chạy nhanh, đổi lại hàng rào đo trên thay đổi THẬT chứ không đo trên một bản sao thiếu."
+    },
+    {
+      "id": "d-20260819T004525Z-4458",
+      "p": "Giữ nguyên cỡ nút như mọi nút khác trong app thay vì phóng to riêng ba nút của việc này — cố ý nhận là trượt một luật nhà, đổi lại vẫn đạt chuẩn tiếp cận quốc tế và giao diện không lệch."
+    },
+    {
+      "id": "d-20260819T013415Z-14934",
+      "p": "Chép sẵn đoạn phim mẫu vào kho dữ liệu khi mở workspace, dưới một tên cố định — loại hai cách khác đụng vào đường lưu trữ hoặc phá lời hứa 'thấy kết quả trước khi bị hỏi'."
+    },
+    {
+      "id": "d-20260819T013804Z-22784",
+      "p": "Chép đoạn phim mẫu lúc trang workspace mở, không dùng điểm khởi động dành riêng cho bản đám mây — vì đường đó bị loại khỏi kho mã nên sẽ âm thầm ngừng chạy."
+    },
+    {
+      "id": "d-20260819T015507Z-31903",
+      "p": "Khai thêm hai bề mặt nhạy cảm vào hàng rào thay vì giấu chúng đi — cố ý nhận: bán kính nổ thật rộng hơn kế hoạch đã duyệt, và điều đó hiện ra ở đây thay vì lọt im."
+    },
+    {
+      "id": "d-20260819T015815Z-19292",
+      "p": "Đính chính: hai bề mặt đó vốn CÓ trong kế hoạch đã duyệt; cái sai là kế hoạch phân loại mức nhạy cảm sai từ đầu — nên đây không phải người viết mã tự nới phạm vi."
+    },
+    {
+      "id": "d-20260819T020654Z-2344",
+      "p": "Vá hai lỗ trong bộ đo trước khi chấm: một phép đo đã khai nhưng chưa từng tồn tại, và một phép đo trỏ vào lệnh cụt — không vá thì hai tiêu chí sẽ 'xanh' mà chẳng đo gì."
+    },
+    {
+      "id": "d-20260819T031103Z-23570",
+      "p": "Sau vòng chấm một: máy chủ nay tự kiểm khoá bắt buộc trước khi chạy và nói đúng tên khoá thiếu; các nút gỡ lỗi nay có nơi nhận thật; khoá chưa kiểm được không còn bị báo nhầm là hỏng."
+    },
+    {
+      "id": "d-20260819T035953Z-4992",
+      "p": "Sau vòng chấm hai: DỪNG thay vì vá tiếp, vì cùng một loại nhiễu lặp lại — nhiều tiến trình giẫm nhau trên một máy. Vá tiếp là chữa triệu chứng."
+    },
+    {
+      "id": "d-20260819T072846Z-29430",
+      "p": "Anh chọn thu phạm vi: vẫn sửa hai lỗi đã truy đúng gốc, còn hai phép đo nhạy môi trường thì nhận bằng chứng đã có và ghi thành giới hạn đã biết."
+    },
+    {
+      "id": "d-20260819T081712Z-13591",
+      "p": "Hết hạn mức ba vòng nên dừng trình anh — kèm chẩn đoán: mọi chỗ đỏ của vòng ba đều hoá xanh khi chạy lại lúc máy rảnh."
+    },
+    {
+      "id": "d-20260819T090227Z-26020",
+      "p": "Anh cấp thêm một vòng: sửa hai cái thước (một cái tự hết giờ quá sớm, một cái đòi ảnh nhưng nhận bản kết xuất) — không đụng vào sản phẩm."
+    },
+    {
+      "id": "d-20260819T094531Z-18612",
+      "p": "Vòng bốn tắc vì hạ tầng chứ không vì phép đo nào sai; nhân đó bịt luôn lỗi đường dẫn khiến ảnh chứng minh ba vòng liền rơi sai thư mục, đúng chỗ hội đồng không đọc."
+    },
+    {
+      "id": "d-20260819T101050Z-4013",
+      "p": "Sửa bốn điều máy chỉ ra: một lỗi thật (công cụ tải về mà máy không nhận vẫn bị tính là cài xong) và ba cái thước chỉ đo nửa — nay cả hai nửa tự chạy trong chính lệnh đo."
+    }
+  ]
+}
