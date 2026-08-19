@@ -128,3 +128,14 @@ nền đen `1.34:1`. Thứ cứu tình huống không phải công cụ nào —
 đủ nhọn để không nhận một chữ PASS chung chung.
 
 Sau khi vá 5 lỗi contrast: **PASS thật — 20/20 trang, 0 vi phạm critical/serious.**
+
+## Đo lại sau khi bề mặt đổi (S3 Task 8 — 2026-08-19)
+
+Verdict design-pass ban đầu kiếm được trên component như chúng tồn tại lúc Cổng 1.
+Task 2–5 đã nối chúng vào sản phẩm thật (hook readiness, container SSE, form key tại
+node, i18n 5 locale) — phép đo phải kiếm lại chứ không thừa kế:
+
+- Fixture của prototype vẫn typecheck nguyên vẹn với prop types thật (`FirstRunState`,
+  `KeyPromptState` là type CHUNG giữa proto và bản ship — không có drift để chỉnh).
+- axe-core trong Chrome thật, đủ 20/20 trang (10 state × 2 theme):
+  **PASS — 0 vi phạm critical/serious.** JSON: `evidence/design-pass/a11y.json`.

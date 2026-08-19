@@ -33,7 +33,8 @@ const ANALYTICS_DEP =
     /^(?:posthog|mixpanel|amplitude|@amplitude\/|@segment\/|analytics|react-ga|@sentry\/|@vercel\/analytics|@vercel\/speed-insights|plausible|umami|heap|hotjar|fullstory|logrocket|@datadog\/)/;
 const BEACON = /\bsendBeacon\s*\(/;
 const EXTERNAL_FETCH = /\bfetch\s*\(\s*[`"']https?:\/\/([^/`"']+)/;
-const EXTERNAL_XHR = /\.open\s*\(\s*[`"']\w+[`"']\s*,\s*[`"']https?:\/\/([^/`"']+)/;
+const EXTERNAL_XHR =
+    /\.open\s*\(\s*[`"']\w+[`"']\s*,\s*[`"']https?:\/\/([^/`"']+)/;
 
 const SKIP_DIRS = new Set(["node_modules", ".next", "telemetry-fixture"]);
 // The fixture must stay scannable when it IS the target.
@@ -67,8 +68,7 @@ for (const file of walk(target)) {
             violations.push(`${where} — analytics SDK import`);
             return;
         }
-        const external =
-            EXTERNAL_FETCH.exec(line) ?? EXTERNAL_XHR.exec(line);
+        const external = EXTERNAL_FETCH.exec(line) ?? EXTERNAL_XHR.exec(line);
         if (external) {
             const host = external[1];
             const allowed = ALLOWED_ORIGIN_LINES.some(
