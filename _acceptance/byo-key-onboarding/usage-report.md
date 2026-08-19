@@ -181,3 +181,60 @@
 - **claude-opus-5**: 3 agent · 86 calls · out 51,498 · in 172 · cache_read 10,061,167 · cache_create 427,863
 - **claude-haiku-4-5-20251001**: 12 agent · 47 calls · out 11,728 · in 400 · cache_read 1,877,926 · cache_create 356,037
 
+### S4 round 4 — wf_762f99b7-00b (48 agent, 388,141 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| ui:E14 | claude-sonnet-5 | 192 | 67,095 | 384 | 29,618,802 | 1750 |
+| ui:E12 | claude-sonnet-5 | 252 | 55,284 | 504 | 35,075,884 | 1758 |
+| review:measurement | claude-opus-5 | 36 | 26,232 | 72 | 4,244,834 | 526 |
+| synthesize:report | claude-sonnet-5 | 2 | 26,082 | 4 | 92,706 | 266 |
+| triage | claude-sonnet-5 | 2 | 18,640 | 4 | 76,581 | 195 |
+| review:conventions | claude-opus-5 | 21 | 16,804 | 42 | 2,687,819 | 297 |
+| review:bugs | claude-opus-5 | 37 | 14,866 | 74 | 5,031,120 | 387 |
+| refute:t3-scan.mjs | claude-sonnet-5 | 14 | 13,646 | 28 | 1,148,702 | 206 |
+| refute:sse-error.ts | claude-sonnet-5 | 28 | 11,357 | 56 | 2,371,702 | 219 |
+| refute:task-failure-toaster.tsx | claude-sonnet-5 | 9 | 9,521 | 18 | 741,318 | 145 |
+| refute:abi-node-shell.tsx | claude-sonnet-5 | 20 | 9,364 | 40 | 1,581,016 | 176 |
+| refute:abi-node-shell.tsx | claude-sonnet-5 | 16 | 8,339 | 32 | 1,370,675 | 152 |
+| judge:E20:operational-feasibility | claude-sonnet-5 | 5 | 6,549 | 10 | 348,179 | 97 |
+| refute:abi-node-shell.tsx | claude-sonnet-5 | 16 | 6,382 | 32 | 1,275,737 | 133 |
+| refute:route.ts | claude-sonnet-5 | 11 | 6,148 | 22 | 803,889 | 120 |
+| refute:provisioning-events.test.ts | claude-sonnet-5 | 5 | 5,838 | 10 | 323,004 | 81 |
+| refute:first-run-strip-container.tsx | claude-sonnet-5 | 11 | 5,813 | 22 | 848,102 | 103 |
+| judge:E20:domain-correctness | claude-sonnet-5 | 4 | 5,590 | 8 | 230,471 | 93 |
+| judge:E20:spec-alignment | claude-sonnet-5 | 5 | 5,590 | 10 | 347,762 | 83 |
+| refute:example-needs-no-keys.mjs | claude-sonnet-5 | 12 | 5,480 | 24 | 881,782 | 122 |
+| refute:build-example-json.ts | claude-sonnet-5 | 11 | 5,208 | 22 | 784,635 | 111 |
+| refute:key-verify.test.ts | claude-sonnet-5 | 12 | 4,618 | 24 | 901,253 | 94 |
+| refute:E12-network.txt | claude-sonnet-5 | 7 | 4,049 | 14 | 467,611 | 71 |
+| refute:plugins-dialog.tsx | claude-sonnet-5 | 7 | 3,940 | 14 | 466,956 | 65 |
+| refute:abi-node-shell.tsx | claude-sonnet-5 | 11 | 3,834 | 22 | 829,174 | 89 |
+| refute:first-run-strip-container.tsx | claude-sonnet-5 | 6 | 3,542 | 12 | 397,376 | 60 |
+| refute:use-first-run-readiness.test.ts | claude-sonnet-5 | 5 | 3,449 | 10 | 320,599 | 54 |
+| refute:use-first-run-readiness.ts | claude-sonnet-5 | 7 | 3,422 | 14 | 483,530 | 54 |
+| machine:bash scripts/onboarding/check-a11y-proto | claude-haiku-4-5-20251001 | 15 | 3,096 | 122 | 721,043 | 796 |
+| refute:seed-example-asset.server.ts | claude-sonnet-5 | 6 | 2,944 | 12 | 396,243 | 48 |
+| refute:install-missing.server.ts | claude-sonnet-5 | 9 | 2,930 | 18 | 627,646 | 64 |
+| refute:use-first-run-readiness.test.ts | claude-sonnet-5 | 6 | 2,852 | 12 | 415,147 | 44 |
+| refute:check-a11y-proto.sh | claude-sonnet-5 | 6 | 2,694 | 12 | 440,790 | 54 |
+| refute:example-requirements.test.ts | claude-sonnet-5 | 4 | 2,685 | 8 | 239,924 | 41 |
+| refute:key-verify.ts | claude-sonnet-5 | 4 | 2,677 | 8 | 246,657 | 42 |
+| refute:seed-example-asset.server.ts | claude-sonnet-5 | 5 | 1,623 | 10 | 315,524 | 42 |
+| machine:bash scripts/acceptance/check-t3-untouch | claude-haiku-4-5-20251001 | 4 | 1,226 | 34 | 161,401 | 49 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 5 | 1,186 | 42 | 209,358 | 53 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 4 | 922 | 34 | 160,742 | 46 |
+| capture:provenance | claude-sonnet-5 | 2 | 865 | 4 | 67,014 | 18 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 3 | 850 | 26 | 112,883 | 33 |
+| machine:bash scripts/onboarding/check-no-telemet | claude-haiku-4-5-20251001 | 3 | 845 | 26 | 112,877 | 35 |
+| machine:BKO_E22=1 pnpm vitest run src/lib/onboar | claude-haiku-4-5-20251001 | 4 | 828 | 34 | 160,851 | 46 |
+| machine:cd sdk && PYTHONPATH=. uv run --no-proje | claude-haiku-4-5-20251001 | 3 | 786 | 26 | 112,964 | 34 |
+| machine:pnpm vitest run src/lib/onboarding/key-v | claude-haiku-4-5-20251001 | 3 | 767 | 26 | 112,863 | 33 |
+| machine:pnpm vitest run src/lib/plugin-executor/ | claude-haiku-4-5-20251001 | 2 | 687 | 18 | 44,574 | 26 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 4 | 504 | 34 | 160,576 | 45 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 4 | 492 | 34 | 160,591 | 44 |
+
+- **claude-sonnet-5**: 33 agent · 712 calls · out 318,050 · in 1,424 · cache_read 84,536,391 · cache_create 2,442,328
+- **claude-opus-5**: 3 agent · 94 calls · out 57,902 · in 188 · cache_read 11,963,773 · cache_create 467,077
+- **claude-haiku-4-5-20251001**: 12 agent · 54 calls · out 12,189 · in 456 · cache_read 2,230,723 · cache_create 355,385
+

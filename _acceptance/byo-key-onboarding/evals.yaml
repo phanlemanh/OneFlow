@@ -25,10 +25,10 @@ evals:
     executor: ui-check
     steps:
       - "Start dev server per config dev_server.start; clear the workspace's persisted state so this is a genuine first run"
-      - "Open {url}/workspace → capture evidence/E2-step1.png (example loaded, strip visible)"
-      - "Press the strip's single action → capture evidence/E2-step2.png (installing)"
-      - "Wait for ready, press Run on the first node → capture evidence/E2-step3.png (running)"
-      - "Wait for the output asset to appear → capture evidence/E2-step4.png"
+      - "Open {url}/workspace → capture _acceptance/byo-key-onboarding/evidence/E2-step1.png (example loaded, strip visible)"
+      - "Press the strip's single action → capture _acceptance/byo-key-onboarding/evidence/E2-step2.png (installing)"
+      - "Wait for ready, press Run on the first node → capture _acceptance/byo-key-onboarding/evidence/E2-step3.png (running)"
+      - "Wait for the output asset to appear → capture _acceptance/byo-key-onboarding/evidence/E2-step4.png"
       - "Assert: NO key prompt, key form or settings dialog appeared at any point in the sequence"
     expected: "an output asset is visible on the canvas and no key was ever requested; frames show strip → installing → running → result. The frame must show an asset the run PRODUCED — if what is on screen could be the bundled sample from public/example-assets/, that is not evidence and the eval FAILS (E22 carries the server half)"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -54,8 +54,8 @@ evals:
     criterion: AC-13
     executor: ui-check
     steps:
-      - "Open {url}/workspace on a first run with the strip visible → capture evidence/E4-step1.png"
-      - "Without touching the strip, drag a node, open the node picker, and add a node → capture evidence/E4-step2.png"
+      - "Open {url}/workspace on a first run with the strip visible → capture _acceptance/byo-key-onboarding/evidence/E4-step1.png"
+      - "Without touching the strip, drag a node, open the node picker, and add a node → capture _acceptance/byo-key-onboarding/evidence/E4-step2.png"
       - "Assert no modal overlay, no disabled canvas, no focus trap"
     expected: "the canvas is fully interactive while the strip is showing; frames show a node added with the strip still present"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -73,7 +73,7 @@ evals:
     criterion: AC-4
     executor: ui-check
     steps:
-      - "Open {url}/workspace with no plugins installed → capture evidence/E6-step1.png BEFORE pressing anything"
+      - "Open {url}/workspace with no plugins installed → capture _acceptance/byo-key-onboarding/evidence/E6-step1.png BEFORE pressing anything"
       - "Assert the missing plugins are named in the strip in that first frame"
     expected: "the first painted frame already names what is missing — detection at load, not at run"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -91,9 +91,9 @@ evals:
     executor: ui-check
     steps:
       - "Start dev server with an EMPTY plugins dir so every plugin the example needs is missing"
-      - "Open {url}/workspace → capture evidence/E21-step1.png (strip names >= 2 missing plugins)"
-      - "Press the strip's action EXACTLY ONCE — do not press again → capture evidence/E21-step2.png"
-      - "Wait for ready, then list the installed plugins via the plugin manager → capture evidence/E21-step3.png"
+      - "Open {url}/workspace → capture _acceptance/byo-key-onboarding/evidence/E21-step1.png (strip names >= 2 missing plugins)"
+      - "Press the strip's action EXACTLY ONCE — do not press again → capture _acceptance/byo-key-onboarding/evidence/E21-step2.png"
+      - "Wait for ready, then list the installed plugins via the plugin manager → capture _acceptance/byo-key-onboarding/evidence/E21-step3.png"
       - "Assert every id named in step 1 appears installed in step 3"
     expected: "one press installs the whole set; the relation between the single action and the full list is what is measured. E7 proves an install-all function works — this proves the button is wired to it"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -120,8 +120,8 @@ evals:
     executor: ui-check
     steps:
       - "Start dev server; remove any existing venv for the example's plugin so provisioning really runs"
-      - "Open {url}/workspace, complete install, press Run → capture evidence/E10-step1.png"
-      - "Capture a frame at each milestone change → evidence/E10-step2.png, E10-step3.png"
+      - "Open {url}/workspace, complete install, press Run → capture _acceptance/byo-key-onboarding/evidence/E10-step1.png"
+      - "Capture a frame at each milestone change → _acceptance/byo-key-onboarding/evidence/E10-step2.png, E10-step3.png"
       - "Assert each milestone label shown matches a milestone the server emitted (server-derived marker, not a client-side timer)"
     expected: "milestone labels on screen are the ones the executor emitted, in order; a client-side timer or fake sequence FAILS this eval"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -130,7 +130,7 @@ evals:
     criterion: AC-8
     executor: ui-check
     steps:
-      - "During a real provisioning wait, capture evidence/E11-step1.png at the start and evidence/E11-step2.png at least 60s later"
+      - "During a real provisioning wait, capture _acceptance/byo-key-onboarding/evidence/E11-step1.png at the start and evidence/E11-step2.png at least 60s later"
       - "Assert the last reached milestone and its label are still on screen in the later frame"
     expected: "after a minute of waiting the screen still says which step is in progress; a bare spinner or an empty node FAILS"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -140,9 +140,9 @@ evals:
     criterion: AC-9
     executor: ui-check
     steps:
-      - "With the example working, add or switch a node to a plugin whose manifest declares a required env key that is blank in the env store → capture evidence/E12-step1.png"
-      - "Press Run so it fails for a missing key → capture evidence/E12-step2.png (node shows the needs-key state)"
-      - "Enter the key from the node itself → capture evidence/E12-step3.png"
+      - "With the example working, add or switch a node to a plugin whose manifest declares a required env key that is blank in the env store → capture _acceptance/byo-key-onboarding/evidence/E12-step1.png"
+      - "Press Run so it fails for a missing key → capture _acceptance/byo-key-onboarding/evidence/E12-step2.png (node shows the needs-key state)"
+      - "Enter the key from the node itself → capture _acceptance/byo-key-onboarding/evidence/E12-step3.png"
       - "Assert the settings dialog was never opened during this sequence"
       - "Each of the three frames MUST be a real PNG of the live screen, captured with the browser's own screenshot, and step2 and step3 must differ visibly. `pnpm ui:capture` re-navigates and therefore cannot photograph an interactive moment; a DOM dump is not a frame. E20's panel judges the key wall from these two images alone, so identical or missing PNGs make that judgment unanswerable regardless of whether the product works (S4 round 3: E12 passed on HTML dumps while E20 failed on round-2 leftovers)"
     expected: "the key is entered at the node; frames show failure → needs-key state → inline form, with no settings dialog"
@@ -161,9 +161,9 @@ evals:
     criterion: AC-10
     executor: ui-check
     steps:
-      - "Enter a deliberately wrong key at the node and save → capture evidence/E14-step1.png"
+      - "Enter a deliberately wrong key at the node and save → capture _acceptance/byo-key-onboarding/evidence/E14-step1.png"
       - "Assert the UI states it does not work, citing a server-derived result rather than an optimistic toast"
-      - "Enter the correct key and save → capture evidence/E14-step2.png asserting the confirmed state"
+      - "Enter the correct key and save → capture _acceptance/byo-key-onboarding/evidence/E14-step2.png asserting the confirmed state"
     expected: "a well-formed but rejected key is reported as not working at save time, citing the verification result; a correct key is confirmed. Being told nothing until a later Run FAILS. A key rejected only for its SHAPE does not exercise this eval — the fixture must be shape-valid"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
@@ -181,7 +181,7 @@ evals:
     executor: ui-check
     steps:
       - "Walk the entire funnel with the browser network log recording"
-      - "Dump all requests to evidence/E16-network.txt and capture evidence/E16-step1.png at the end"
+      - "Dump all requests to _acceptance/byo-key-onboarding/evidence/E16-network.txt and capture _acceptance/byo-key-onboarding/evidence/E16-step1.png at the end"
       - "Assert no request body or query carries onboarding step, funnel position, timing or any behavioural record — to the app origin or anywhere else"
     expected: "POSITIVE CONTROL FIRST: the log must show the walk actually happened — a non-zero count of legitimate app requests (plugin install, settings, task) — otherwise an aborted walk yields an empty log and a vacuous green. Only then: zero behavioural/telemetry payloads anywhere"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
@@ -218,5 +218,10 @@ evals:
     criterion: AC-15
     executor: judgment
     question: "Walking the five walls (no plugin → install → provisioning wait → first result → key) with only the screen visible — no console, no logs, no devtools — can an observer sitting beside a user point at where that user is and say whether they are moving or stuck? Name any wall where the answer is no."
-    inputs: ["evidence/E2-step1.png", "evidence/E2-step2.png", "evidence/E2-step3.png", "evidence/E2-step4.png", "evidence/E6-step1.png", "evidence/E10-step2.png", "evidence/E11-step2.png", "evidence/E12-step2.png", "contract.md"]
+    # Paths are relative to this workspace directory and resolved to absolute
+    # when the round is dispatched. E11-step2 dropped: AC-8 is a known limit the
+    # owner accepted (see contract "Known limits"), and naming a file that is not
+    # produced costs the panel a lens. E12-step2/step3 are the key wall; E14-step1
+    # is the rejected-key state.
+    inputs: ["evidence/E2-step1.png", "evidence/E2-step2.png", "evidence/E2-step3.png", "evidence/E2-step4.png", "evidence/E6-step1.png", "evidence/E10-step2.png", "evidence/E12-step2.png", "evidence/E12-step3.png", "evidence/E14-step1.png", "contract.md"]
     evidence_required: [judged_by, verdict, rationale]

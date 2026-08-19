@@ -1,43 +1,69 @@
-E14 network dump — byo-key-onboarding, AC-10
-Scope per _acceptance/config.yaml dev_server.url: http://localhost:3000 (no api_base declared)
-
-=== App-scope (FAIL-eligible) requests observed during the E14 walk ===
-GET  /api/plugins/registry              200 OK
-GET  /example.json                      200 OK
-GET  /api/feature/list                  200 OK
-GET  /api/uploads/...mp4 (x multiple)   200 OK (some later duplicates show [FAILED: net::ERR_ABORTED] — browser-cancelled re-fetches on component remount from concurrent Fast Refresh, not app failures; see console dump below)
-GET  /api/task/pending                  200 OK
-POST /api/task/create                   200 OK   <- creating the Text-to-Image node's run
-GET  /api/task/wait?taskId=...          200 OK   <- polling; task ultimately reports FAILED (missing key) as EXPECTED, this is not a transport failure
-POST /api/task/update-status            200 OK
-GET  /api/settings/env                  200 OK   <- key-gate reads current env before merge
-PUT  /api/settings/env                  200 OK   <- save-and-verify call; server verdict came back "works:false, checked:true" (HTTP 401 from OpenAI), rendered as the "invalid" phase
-POST /__nextjs_original-stack-frames    200 OK   (Next.js dev-only diagnostics, not app traffic)
-
-=== Note-only (static assets, still app-origin but out of scope per rule) ===
-GET /plugins/oneflow-local-pyscenedetect.svg   404 Not Found  (icon asset; local variant not present, plugin still resolves via tongflow-modal-* fallback icon which loaded 200)
-GET /plugins/oneflow-local-ffmpeg.svg          404 Not Found  (same — icon asset only)
-
-=== Not FAIL-eligible: no request left the app origin ===
-No requests observed to any third-party / non-app-origin host. The OpenAI verification call
-(POST to api.openai.com/v1/models) happens SERVER-SIDE inside the /api/settings/env PUT handler
-(src/lib/onboarding/key-verify.ts) — it is intentionally never visible on the client network tab,
-which is itself evidence for AC-10's requirement that verification asks the real provider rather
-than the client evaluating a regex.
-
-=== Console (errors only) ===
-[error] Failed to load resource: the server responded with a status of 404 (Not Found)   x2 — the two plugin icon 404s above
-[error] [useAbiExecution] Task failed for node 4c4b10e6-...: {id: 72RMUpr60jiHgRTCA4nrJ, status: FAILED, progress: 0, data: Object, error: "Missing required env var OPENAI_API_KEY", ...}
-  -> EXPECTED: this is the precondition failure (missing key) that opens the node's inline key form; not a bug.
-
-=== Console (noise, for context) ===
-Repeated "[Fast Refresh] rebuilding / done in NNNms" and remounted node component logs
-(AddVideoNode/AddImageNode) throughout the session — confirms this dev server is a SHARED
-instance being edited concurrently by other workflow subagents during this verification run
-(same class of cross-talk documented in this feature's E11 evidence). This explains the
-ERR_ABORTED entries on /workspace RSC prefetch and duplicate video preview fetches above:
-those are browser-cancelled requests superseded by the next HMR remount, not failures of
-anything under test.
-
-Verdict: within the FAIL-eligible set (app origin, non-static), every request is 200 OK.
-network_observed = clean
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131766867 -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131766867 -> 200
+[ok] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200
+[ok] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200
+[ok] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787131766867 -> 200
+[ok] GET http://localhost:3000/workspace -> 200
+[ok] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200
+[ok] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200
+[ok] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787131766867 -> 200
+[ok] GET http://localhost:3000/_next/static/chunks/app/workspace/page.js -> 200
+[ok] GET http://localhost:3000/example.json -> 200
+[ok] GET http://localhost:3000/example.json -> 304
+[ok] GET http://localhost:3000/apple-touch-icon.png -> 200
+[ok] GET http://localhost:3000/apple-touch-icon.png -> 304
+[ok] GET http://localhost:3000/_next/static/webpack/ff5d3ab1c644ba5d.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.ff5d3ab1c644ba5d.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/bb7f096536743ef7.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.bb7f096536743ef7.hot-update.js -> 200
+[ok] GET http://localhost:3000/api/feature/list -> 200
+[ok] GET http://localhost:3000/api/plugins/registry -> 200
+[ok] GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg -> 200
+[ok] GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg -> 200
+[ok] GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 200
+[ok] GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 206
+[ok] GET http://localhost:3000/_next/static/webpack/acc8b4e40536537c.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.acc8b4e40536537c.hot-update.js -> 200
+[ok] GET http://localhost:3000/api/task/pending -> 200
+[ok] GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg -> 404
+[ok] GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg -> 404
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131769136 -> 200
+[ok] GET http://localhost:3000/plugins/tongflow-api-openai.svg -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/57da66b3761b4586.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/app/layout.57da66b3761b4586.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.57da66b3761b4586.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131775237 -> 200
+[ok] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131775237 -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/dfecdf924960e481.webpack.hot-update.json -> 200
+[ok] POST http://localhost:3000/api/task/create -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/app/layout.dfecdf924960e481.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.dfecdf924960e481.hot-update.js -> 200
+[ok] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131776406 -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131776406 -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/52182e1e1aefee5b.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/api/task/wait?taskId=BAYNdAtQz0CwYaF-HtOZd -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.52182e1e1aefee5b.hot-update.js -> 200
+[ok] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200
+[ok] POST http://localhost:3000/__nextjs_original-stack-frames -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/6d8fcc5b61ec2792.webpack.hot-update.json -> 200
+[ok] POST http://localhost:3000/api/task/update-status -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.6d8fcc5b61ec2792.hot-update.js -> 200
+[failed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131777289 -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131777289 -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/df70e2f87c8e2963.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/app/layout.df70e2f87c8e2963.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.df70e2f87c8e2963.hot-update.js -> 200
+[failed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131779008 -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131779008 -> 200
+[ok] GET http://localhost:3000/api/settings/env -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/cf42d23e05893b58.webpack.hot-update.json -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/app/layout.cf42d23e05893b58.hot-update.js -> 200
+[ok] GET http://localhost:3000/_next/static/webpack/webpack.cf42d23e05893b58.hot-update.js -> 200
+[failed] GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+[ok] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787131780404 -> 200
+[ok] GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787131780404 -> 200
+[ok] PUT http://localhost:3000/api/settings/env -> 200
