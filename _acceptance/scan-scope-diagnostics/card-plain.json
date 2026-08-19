@@ -1,0 +1,19 @@
+{
+  "feature_plain": "Khi một plugin không phục vụ được node nào, người viết plugin nhận đúng lý do và đúng dòng gây lỗi, thay vì một câu chung chung đổ lỗi cho tệp khởi động.",
+
+  "scope_plain": "Chỉ sửa phần BÁO LÝ DO, không đụng phần quyết định nhận hay không nhận handler; và không phát hành bản công cụ Python mới.",
+
+  "decisions_plain": [
+    { "id": "d-20260818T051709Z-11946", "p": "Xây trên nhánh của gói trước chứ không tách từ nhánh chính, vì mã cần sửa mới chỉ tồn tại ở đó; đổi lại việc này chỉ lên được sau khi gói trước lên." },
+    { "id": "d-20260818T051809Z-4471", "p": "Chỉ sửa phần báo lý do, giữ nguyên phần quyết định nhận handler; đổi lại phần sửa nhỏ và an toàn hơn, nhưng một lỗi anh em vẫn còn đó." },
+    { "id": "d-20260818T051909Z-21101", "p": "KHÔNG làm: chặn việc nhận nhầm handler nằm lồng trong hàm khác; đổi lại tránh đổi hành vi nhận handler ở một gói vốn đã rủi ro cao, nhưng lỗi đó chỉ lộ ra lúc chạy thật." },
+    { "id": "d-20260818T052009Z-15686", "p": "Nhận thêm đường thứ tư mà lượt quét không gian tìm ra, là lỗi cú pháp trong tệp khởi động bị nuốt; đổi lại thêm một tiêu chí và hai phép đo." },
+    { "id": "d-20260818T052109Z-30448", "p": "Tách việc không báo trùng lý do thành tiêu chí riêng; đổi lại bắt được đúng cái bẫy khiến bản sửa hồn nhiên làm mọi plugin thường báo lỗi hai lần." },
+    { "id": "d-20260818T052209Z-8486", "p": "Lấy đỉnh nhánh cha làm mốc so sánh thay vì nhánh chính; đổi lại phần rà soát chỉ đọc đúng thay đổi của việc này, không lẫn của gói trước." },
+    { "id": "d-20260818T053009Z-27714", "p": "Viết bộ kiểm vào một tệp mới thay vì nối vào tệp của gói trước; đổi lại không làm xê dịch thước đo của gói đang chờ duyệt." },
+    { "id": "d-20260818T061500Z-8821", "p": "Phép đo về một-cách-nói-duy-nhất bị sửa lại vì nó xanh nhờ đường sai: bản quét đọc cả tệp triển khai nên một bộ đọc đứng thay cho bộ kia; nay hai bộ đọc bị gọi riêng." },
+    { "id": "d-20260818T073000Z-14502", "p": "Dừng lại sửa lỗi công cụ pnpm trước khi chạy vòng nghiệm thu, thay vì kẹp cờ đi vòng; đổi lại chờ lâu hơn nhưng bằng chứng không mang vết đỏ mượn của người khác." },
+    { "id": "d-20260818T093000Z-22417", "p": "Sửa cả bốn phép đo yếu mà vòng một tìm ra, không chỉ hai cái được gọi tên; đổi lại rộng hơn yêu cầu nhưng cùng một lớp lỗi và không nới hợp đồng." },
+    { "id": "d-20260818T160000Z-31088", "p": "Nới bộ bắt lỗi để một tệp sai mã hoá tự xưng tên thay vì làm sập cả bản quét; đổi lại giữ đúng lời hứa một plugin hỏng không được kéo đổ đăng ký của mọi plugin khác." }
+  ]
+}
