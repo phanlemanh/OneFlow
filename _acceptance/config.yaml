@@ -327,7 +327,12 @@ executors:
     bko_one_action_installs_all: "bash scripts/onboarding/check-one-action-installs-all.sh"
     bko_no_restart_after_install: "bash scripts/onboarding/check-no-restart-after-install.sh"
     bko_no_telemetry_sinks: "bash scripts/onboarding/check-no-telemetry-sinks.sh"
-    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow src/lib/plugin-executor/**"
+    # Ba bề mặt t3 nhánh thật sự chạm. Hai cái dưới KHÔNG có trong kế hoạch
+    # duyệt ở Cổng 1.5 (Task 5 mang theo settings/env, Task 3 thêm hẳn route
+    # install-missing) — khai ra đây để chúng hiện ở Cổng 2 thay vì lọt im.
+    # --require giữ nguyên một đường: cửa sổ diff rỗng thì mọi lời khai
+    # "không chạm gì cấm" đều đúng một cách vô nghĩa.
+    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow src/lib/plugin-executor/** --allow src/app/api/settings/env/** --allow src/app/api/plugins/install-missing/** --require src/lib/plugin-executor/**"
     lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
     # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
     # stale evidence), which is narrower and answerable; check-gate-residual's
