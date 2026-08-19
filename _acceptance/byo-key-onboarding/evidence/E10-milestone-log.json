@@ -1,198 +1,41 @@
 {
-  "uploadFile": "/tmp/e10-input-1787110656.mp4",
-  "allDomSnapshots": [
-    {
-      "phase": "split",
-      "frame": 1,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step1.png",
-      "sinceClickMs": 178,
-      "stripText": "Done. Press Run on the first node to try it."
-    },
-    {
-      "phase": "split",
-      "frame": 2,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step2.png",
-      "sinceClickMs": 255,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries0s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 3,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step3.png",
-      "sinceClickMs": 1255,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries1s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 4,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step4.png",
-      "sinceClickMs": 2234,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries2s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 5,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step5.png",
-      "sinceClickMs": 3233,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries3s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 6,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step6.png",
-      "sinceClickMs": 4230,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries4s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 7,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step7.png",
-      "sinceClickMs": 5254,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries5s elapsed. Later runs start instantly."
-    },
-    {
-      "phase": "split",
-      "frame": 8,
-      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-step8.png",
-      "sinceClickMs": 6232,
-      "stripText": "Setting up environmentInstalling SDKInstalling libraries6s elapsed. Later runs start instantly."
-    }
+  "note": "Independent fresh verification round (verifier subagent, doer != grader). Driven end-to-end by a standalone puppeteer-core script (scripts/_e10-run.mjs, deleted after the run — not a repo artifact) rather than the shared Claude_Browser pane, because the pane was contended by multiple concurrent sibling verifier sessions in this shared dev environment (evidenced by localhost:3000 returning 500 from two Next.js dev servers racing on the same .next directory, tab-cap errors, and 'Browser pane not displayed' failures). The script drove a real Chrome instance against the app the same way a person would: loaded /workspace, uploaded a file into the Add Video node, and clicked the Split Video node's own 'Start Slice' button — no API calls were made directly.",
+  "preconditions": [
+    "rm -rf data/.tongflow/plugin-venv/oneflow-api-pyscenedetect data/.tongflow/plugin-venv/oneflow-api-ffmpeg -- confirmed absent immediately before AND immediately after the run (no sibling session recreated them mid-run)",
+    "dev server: verifier-started `pnpm dev --port 3001` (localhost:3000 was already occupied by another concurrent dev server and was returning 500 Internal Server Error at verification time -- not something this verifier started, so it was left running and not torn down)"
   ],
-  "clientEvents": [
-    {
-      "t": 1787110710280,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "SSE_CONNECTED",
-        "nodeId": null
-      }
-    },
-    {
-      "t": 1787110710280,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
-        "data": {
-          "message": "Task started"
-        }
-      }
-    },
-    {
-      "t": 1787110710312,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110ang t\u1ea1o m\u00f4i tr\u01b0\u1eddng Python",
-          "provisioning": {
-            "step": "create-venv",
-            "phase": "started"
-          }
-        }
-      }
-    },
-    {
-      "t": 1787110711298,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110\u00e3 t\u1ea1o xong m\u00f4i tr\u01b0\u1eddng Python",
-          "provisioning": {
-            "step": "create-venv",
-            "phase": "completed"
-          }
-        }
-      }
-    },
-    {
-      "t": 1787110711325,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110ang c\u00e0i b\u1ed9 th\u01b0 vi\u1ec7n l\u00f5i",
-          "provisioning": {
-            "step": "install-sdk",
-            "phase": "started"
-          }
-        }
-      }
-    },
-    {
-      "t": 1787110713267,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110\u00e3 c\u00e0i xong b\u1ed9 th\u01b0 vi\u1ec7n l\u00f5i",
-          "provisioning": {
-            "step": "install-sdk",
-            "phase": "completed"
-          }
-        }
-      }
-    },
-    {
-      "t": 1787110713292,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110ang c\u00e0i th\u01b0 vi\u1ec7n c\u1ee7a c\u00f4ng c\u1ee5",
-          "provisioning": {
-            "step": "install-requirements",
-            "phase": "started"
-          }
-        }
-      }
-    },
-    {
-      "t": 1787110715353,
-      "detail": {
-        "id": "w_kTUuT3zlzzmfxoAy6H8",
-        "status": "RUNNING",
-        "nodeId": null,
-        "data": {
-          "message": "\u0110\u00e3 c\u00e0i xong th\u01b0 vi\u1ec7n c\u1ee7a c\u00f4ng c\u1ee5",
-          "provisioning": {
-            "step": "install-requirements",
-            "phase": "completed"
-          }
-        }
-      }
-    }
-  ],
-  "taskCreateRequests": [
-    {
-      "t": 1787110710244,
-      "url": "http://localhost:3000/api/task/create",
-      "status": 200
-    }
-  ],
+  "whyByteDistinctUpload": "The bundled example's own asset (public/example-assets/two-scenes.mp4) already has warm node-result cache entries in this heavily-shared dev environment (many sibling sessions re-run the identical bundled example). A cache hit skips the plugin executor entirely -- and with it, ensurePluginPython -- so no provisioning milestone would fire even with the venv deleted. Uploaded a byte-distinct re-mux of the same clip (ffmpeg -metadata comment=<fresh-timestamp>, codec copy) into the Add Video node before pressing Run, guaranteeing a fresh business-input fingerprint and a genuine cache miss.",
+  "uploadFile": "e10-input-1787125794.mp4 (md5 512d95cd772fd01b1c7cd3a17a140da5, vs original two-scenes.mp4 md5 a3e1c41a09572271691c2d95ef67c34)",
+  "runClickedAt": 1787126009025,
   "officialFrameMapping": {
-    "note": "The screen-poll loop caught 8 distinct DOM text states (the strip's elapsed-seconds counter ticks every second, so most of the 8 frames differ only by that counter). E10-step1/2/3.png were curated from this set to show the three DISTINCT milestones as bold/current on screen, each cross-checked against the raw SSE events below.",
     "E10-step1.png": {
-      "source_frame": "domSnapshot #2 (sinceClickMs=255)",
-      "on_screen_current_milestone": "Setting up environment (creating-venv)",
-      "matches_server_event": "provisioning.step=create-venv phase=started (t=1787110710312) / node card shows literal server text \"Dang tao moi truong Python\""
+      "source": "raw frame #2, +98ms after clicking 'Start Slice'",
+      "on_screen": "Split Video node shows a small spinner and 'Loading plugin implementation...' -- the strip has not yet switched to the provisioning view (no provisioning SSE event had arrived yet: SSE_CONNECTED + 'Task started' only)",
+      "purpose": "captures the moment Run was pressed, before any milestone text appears"
     },
     "E10-step2.png": {
-      "source_frame": "domSnapshot #4 (sinceClickMs=2234)",
-      "on_screen_current_milestone": "Installing SDK (install-sdk), creating-venv shown checked/completed",
-      "matches_server_event": "provisioning.step=install-sdk phase=started (t=1787110711325..713267 window) / node card shows literal server text for install-sdk"
+      "source": "raw frame #5, +3171ms",
+      "on_screen": "Strip: 'Setting up environment' BOLD/current, 'Installing SDK' and 'Installing libraries' dim/unreached, '0s elapsed'. Split Video node's own status line shows the literal raw server text 'Đang tạo môi trường Python'.",
+      "matches_server_event": "provisioning.step=create-venv phase=started, arrived via SSE at t+3060ms (event index 3)"
     },
     "E10-step3.png": {
-      "source_frame": "domSnapshot #6 (sinceClickMs=4230)",
-      "on_screen_current_milestone": "Installing libraries (install-requirements), prior two shown checked/completed",
-      "matches_server_event": "provisioning.step=install-requirements phase=started (t=1787110713292..715353 window) / node card shows literal server text \"Dang cai thu vien cua cong cu\""
-    },
-    "how_forced_real_provisioning": "Deleted data/.tongflow/plugin-venv/oneflow-api-pyscenedetect and oneflow-api-ffmpeg, then uploaded a byte-distinct copy of the example video (ffmpeg -metadata comment=<fresh-timestamp>) via the Add Video node's file input before pressing Run, guaranteeing a fresh business-input fingerprint so no node-result cache could short-circuit the run. Two earlier attempts on the unmodified example asset completed in <1s with zero milestone events -- this shared dev environment has many concurrent sibling sessions re-running the identical bundled example, which warms both the venv and the node-result cache; the fresh upload was needed to get an honest, uncached execution."
-  }
+      "source": "raw frame #7, +4743ms",
+      "on_screen": "Strip: 'Setting up environment' now shows a checkmark (reached, no longer current), 'Installing SDK' BOLD/current, 'Installing libraries' still dim, '1s elapsed'. Node status line shows raw server text 'Đang cài bộ thư viện lõi'.",
+      "matches_server_event": "provisioning.step=install-sdk phase=started, arrived via SSE at t+4671ms (event index 5) -- a genuine milestone CHANGE from step2's create-venv"
+    }
+  },
+  "full_sse_event_sequence_server_emitted": [
+    { "offset_ms": 2603, "event": "SSE_CONNECTED" },
+    { "offset_ms": 2603, "event": "RUNNING", "message": "Task started" },
+    { "offset_ms": 3060, "provisioning": { "step": "create-venv", "phase": "started" }, "message": "Đang tạo môi trường Python" },
+    { "offset_ms": 4642, "provisioning": { "step": "create-venv", "phase": "completed" }, "message": "Đã tạo xong môi trường Python" },
+    { "offset_ms": 4671, "provisioning": { "step": "install-sdk", "phase": "started" }, "message": "Đang cài bộ thư viện lõi" },
+    { "offset_ms": 7140, "provisioning": { "step": "install-sdk", "phase": "completed" }, "message": "Đã cài xong bộ thư viện lõi" },
+    { "offset_ms": 7168, "provisioning": { "step": "install-requirements", "phase": "started" }, "message": "Đang cài thư viện của công cụ" },
+    { "offset_ms": 9694, "provisioning": { "step": "install-requirements", "phase": "completed" }, "message": "Đã cài xong thư viện của công cụ" }
+  ],
+  "order_check": "creating-venv -> installing-sdk -> installing-requirements matches MILESTONE_ORDER in first-run-strip.tsx exactly, and matches the order provisioning-events.test.ts / E9 pin server-side (create-venv, install-sdk, install-requirements).",
+  "server_derived_check": "The on-screen milestone identity comes from FirstRunStripContainer's SSE handler (readProvisioningEvent -> STEP_TO_MILESTONE[event.step]), which only changes when a 'provisioning' object arrives over the SSE task-message stream -- i.e. driven exclusively by what runners/generic.ts (server-side, via ensurePluginPython's onMilestone callback) emitted. The 'Ns elapsed' suffix is a separate client-side interval counter (a fact about wall-clock time since the first milestone, per source comment) and is not what identifies which milestone is bold/checked -- confirmed both by reading first-run-strip-container.tsx and by observing elapsedSec tick every second across frames 5-19 while the milestone stayed 'installing-requirements' as current after its own completion event (no further provisioning events after t+9694ms).",
+  "full_client_and_network_trace": "see E10-fresh-run-log.json (raw frame files removed after curation; this file is the record)",
+  "task_create_request": { "url": "http://localhost:3001/api/task/create", "status": 200 }
 }

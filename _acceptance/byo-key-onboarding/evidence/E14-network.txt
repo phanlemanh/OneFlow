@@ -1,38 +1,43 @@
-E14 network/console dump
-=========================
-App origin under test: http://localhost:3001 (port 3000 was occupied by another
-concurrent session's dev server; my own instance auto-shifted to 3001. Config's
-dev_server.url=http://localhost:3000 — differs only by port, same app/codebase,
-same working tree /Users/manh-macmini/dev/oneflow).
+E14 network dump — byo-key-onboarding, AC-10
+Scope per _acceptance/config.yaml dev_server.url: http://localhost:3000 (no api_base declared)
 
-Key console line (confirms the bug at the network/data layer):
-[error] [useAbiExecution] Task failed for node 260ffa96-b630-41b2-af2b-65d07f793ca9:
-  {id: wCk-nubcXAsJUyliagTOd, status: FAILED, progress: 0, data: Object, error: undefined, ...}
-  -> task.error is undefined despite the task genuinely failing for a missing-key
-     reason. Root cause traced in source: src/lib/task/runner.ts's catch block wraps
-     the thrown Error as SSE data {message:"Task execution failed", error: errorMsg},
-     but src/hooks/use-task.ts's BATCH SSE handler (~line 719) does
-     `error: message.error` only, with NO fallback to `message.data?.error` (the
-     single-task SSE handler at ~line 408 DOES have that fallback). Batch SSE is the
-     path AbiNodeShell/useAbiExecution uses for node-level Execute, so this is the
-     path actually exercised by the workspace canvas node.
+=== App-scope (FAIL-eligible) requests observed during the E14 walk ===
+GET  /api/plugins/registry              200 OK
+GET  /example.json                      200 OK
+GET  /api/feature/list                  200 OK
+GET  /api/uploads/...mp4 (x multiple)   200 OK (some later duplicates show [FAILED: net::ERR_ABORTED] — browser-cancelled re-fetches on component remount from concurrent Fast Refresh, not app failures; see console dump below)
+GET  /api/task/pending                  200 OK
+POST /api/task/create                   200 OK   <- creating the Text-to-Image node's run
+GET  /api/task/wait?taskId=...          200 OK   <- polling; task ultimately reports FAILED (missing key) as EXPECTED, this is not a transport failure
+POST /api/task/update-status            200 OK
+GET  /api/settings/env                  200 OK   <- key-gate reads current env before merge
+PUT  /api/settings/env                  200 OK   <- save-and-verify call; server verdict came back "works:false, checked:true" (HTTP 401 from OpenAI), rendered as the "invalid" phase
+POST /__nextjs_original-stack-frames    200 OK   (Next.js dev-only diagnostics, not app traffic)
 
-Other console errors observed: repeated "Failed to load resource: 404" for Next.js
-dev-server internals (.next/server/app/_not-found/page.js ENOENT) and static chunk
-404s — these are webpack cache races from MULTIPLE concurrent `next dev` processes
-in this shared repo/working tree writing to the same .next directory (verified in
-dev.log: "[webpack.cache.PackFileCacheStrategy] Caching failed... ENOENT ... rename").
-Infra noise from other concurrent sessions sharing this machine/repo, not app XHR
-4xx/5xx from a business endpoint, and not third-party. Not counted as app-fail.
+=== Note-only (static assets, still app-origin but out of scope per rule) ===
+GET /plugins/oneflow-local-pyscenedetect.svg   404 Not Found  (icon asset; local variant not present, plugin still resolves via tongflow-modal-* fallback icon which loaded 200)
+GET /plugins/oneflow-local-ffmpeg.svg          404 Not Found  (same — icon asset only)
 
-Network requests observed (read_network_requests, last ~60): all same-origin
-(http://localhost:3001), all Next.js static/HMR asset fetches (webpack hot-update
-chunks, page CSS with cache-busting query strings) plus a few
-"GET /workspace?_rsc=... [FAILED: net::ERR_ABORTED]" entries — normal RSC prefetch
-aborts caused by rapid navigation/HMR, not failed business requests. No 4xx/5xx
-observed on any /api/* endpoint in this window. DB inspection (sqlite3 direct query,
-not network-visible) confirms the task row itself has the CORRECT specific error:
-  id=wCk-nubcXAsJUyliagTOd  feature=gen-text  plugin=tongflow-api-openai
-  status=failed  error={"message":"Missing required env var OPENAI_API_KEY"}
-So the backend did the right thing; the bug is client-side, in how the batch SSE
-message is mapped onto the Task object consumed by the node's key-gate logic.
+=== Not FAIL-eligible: no request left the app origin ===
+No requests observed to any third-party / non-app-origin host. The OpenAI verification call
+(POST to api.openai.com/v1/models) happens SERVER-SIDE inside the /api/settings/env PUT handler
+(src/lib/onboarding/key-verify.ts) — it is intentionally never visible on the client network tab,
+which is itself evidence for AC-10's requirement that verification asks the real provider rather
+than the client evaluating a regex.
+
+=== Console (errors only) ===
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)   x2 — the two plugin icon 404s above
+[error] [useAbiExecution] Task failed for node 4c4b10e6-...: {id: 72RMUpr60jiHgRTCA4nrJ, status: FAILED, progress: 0, data: Object, error: "Missing required env var OPENAI_API_KEY", ...}
+  -> EXPECTED: this is the precondition failure (missing key) that opens the node's inline key form; not a bug.
+
+=== Console (noise, for context) ===
+Repeated "[Fast Refresh] rebuilding / done in NNNms" and remounted node component logs
+(AddVideoNode/AddImageNode) throughout the session — confirms this dev server is a SHARED
+instance being edited concurrently by other workflow subagents during this verification run
+(same class of cross-talk documented in this feature's E11 evidence). This explains the
+ERR_ABORTED entries on /workspace RSC prefetch and duplicate video preview fetches above:
+those are browser-cancelled requests superseded by the next HMR remount, not failures of
+anything under test.
+
+Verdict: within the FAIL-eligible set (app origin, non-static), every request is 200 OK.
+network_observed = clean

@@ -1,210 +1,51 @@
-{"t":1787110025177,"phase":"request","method":"GET","url":"http://localhost:3101/workspace","resourceType":"document"}
-{"t":1787110025683,"phase":"response","status":200,"url":"http://localhost:3101/workspace"}
-{"t":1787110025688,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/media/22a5144ee8d83bca-s.p.woff2","resourceType":"font"}
-{"t":1787110025688,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/media/7d4881bb7e1bf84d-s.p.woff2","resourceType":"font"}
-{"t":1787110025688,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110025242","resourceType":"stylesheet"}
-{"t":1787110025688,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110025242","resourceType":"stylesheet"}
-{"t":1787110025689,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/webpack.js?v=1787110025242","resourceType":"script"}
-{"t":1787110025689,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/main-app.js?v=1787110025242","resourceType":"script"}
-{"t":1787110025689,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app-pages-internals.js","resourceType":"script"}
-{"t":1787110025689,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app/layout.js","resourceType":"script"}
-{"t":1787110025689,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app/workspace/page.js","resourceType":"script"}
-{"t":1787110025692,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/media/22a5144ee8d83bca-s.p.woff2"}
-{"t":1787110025692,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/media/7d4881bb7e1bf84d-s.p.woff2"}
-{"t":1787110025693,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110025242"}
-{"t":1787110025693,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110025242"}
-{"t":1787110025703,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/webpack.js?v=1787110025242"}
-{"t":1787110025704,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app-pages-internals.js"}
-{"t":1787110025719,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app/layout.js"}
-{"t":1787110025839,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/main-app.js?v=1787110025242"}
-{"t":1787110026017,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app/workspace/page.js"}
-{"t":1787110026125,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110026130,"phase":"response","status":200,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110026139,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110026144,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110026180,"phase":"request","method":"GET","url":"http://localhost:3101/api/plugins/registry","resourceType":"fetch"}
-{"t":1787110026180,"phase":"request","method":"GET","url":"http://localhost:3101/example.json","resourceType":"fetch"}
-{"t":1787110026181,"phase":"request","method":"GET","url":"http://localhost:3101/api/feature/list","resourceType":"fetch"}
-{"t":1787110026181,"phase":"request","method":"GET","url":"http://localhost:3101/example.json","resourceType":"fetch"}
-{"t":1787110026183,"phase":"response","status":200,"url":"http://localhost:3101/example.json"}
-{"t":1787110026183,"phase":"response","status":304,"url":"http://localhost:3101/example.json"}
-{"t":1787110026265,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=","resourceType":"image"}
-{"t":1787110026266,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo="}
-{"t":1787110026266,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4","resourceType":"media"}
-{"t":1787110026267,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4","resourceType":"media"}
-{"t":1787110026272,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==","resourceType":"image"}
-{"t":1787110026272,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg=="}
-{"t":1787110026273,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110026273,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K"}
-{"t":1787110026274,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110026274,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K"}
-{"t":1787110026274,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110026274,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K"}
-{"t":1787110026274,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=","resourceType":"image"}
-{"t":1787110026274,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo="}
-{"t":1787110026455,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/e18b42d22b8e7cf7.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110026462,"phase":"response","status":404,"url":"http://localhost:3101/_next/static/webpack/e18b42d22b8e7cf7.webpack.hot-update.json"}
-{"t":1787110026462,"phase":"console-error","text":"Failed to load resource: the server responded with a status of 404 (Not Found)"}
-{"t":1787110026464,"phase":"request","method":"GET","url":"http://localhost:3101/workspace","resourceType":"document"}
-{"t":1787110026688,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/e18b42d22b8e7cf7.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110026695,"phase":"response","status":404,"url":"http://localhost:3101/_next/static/webpack/e18b42d22b8e7cf7.webpack.hot-update.json"}
-{"t":1787110026695,"phase":"console-error","text":"Failed to load resource: the server responded with a status of 404 (Not Found)"}
-{"t":1787110026890,"phase":"response","status":200,"url":"http://localhost:3101/api/plugins/registry"}
-{"t":1787110026920,"phase":"response","status":200,"url":"http://localhost:3101/api/feature/list"}
-{"t":1787110026963,"phase":"request","method":"GET","url":"http://localhost:3101/api/task/pending","resourceType":"fetch"}
-{"t":1787110027465,"phase":"response","status":200,"url":"http://localhost:3101/workspace"}
-{"t":1787110027470,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/media/22a5144ee8d83bca-s.p.woff2","resourceType":"font"}
-{"t":1787110027470,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/media/22a5144ee8d83bca-s.p.woff2"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/media/7d4881bb7e1bf84d-s.p.woff2","resourceType":"font"}
-{"t":1787110027471,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/media/7d4881bb7e1bf84d-s.p.woff2"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110026976","resourceType":"stylesheet"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110026976","resourceType":"stylesheet"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/webpack.js?v=1787110026976","resourceType":"script"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/main-app.js?v=1787110026976","resourceType":"script"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app-pages-internals.js","resourceType":"script"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app/layout.js","resourceType":"script"}
-{"t":1787110027471,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/chunks/app/workspace/page.js","resourceType":"script"}
-{"t":1787110027480,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110026976"}
-{"t":1787110027480,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110026976"}
-{"t":1787110027489,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/webpack.js?v=1787110026976"}
-{"t":1787110027499,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app-pages-internals.js"}
-{"t":1787110027538,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app/layout.js"}
-{"t":1787110027873,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/main-app.js?v=1787110026976"}
-{"t":1787110028212,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/chunks/app/workspace/page.js"}
-{"t":1787110028273,"phase":"request","method":"GET","url":"http://localhost:3101/api/plugins/registry","resourceType":"fetch"}
-{"t":1787110028273,"phase":"request","method":"GET","url":"http://localhost:3101/example.json","resourceType":"fetch"}
-{"t":1787110028273,"phase":"request","method":"GET","url":"http://localhost:3101/api/feature/list","resourceType":"fetch"}
-{"t":1787110028287,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110028287,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTggNXYxNGwxMS03eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K"}
-{"t":1787110028287,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo=","resourceType":"image"}
-{"t":1787110028288,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgogICAgPHBhdGggZD0iTTcgMTRINXY1aDV2LTJIN3YtM3ptLTItNGgyVjdoM1Y1SDV2NXptMTIgN2gtM3YyaDV2LTVoLTJ2M3pNMTQgNXYyaDN2M2gyVjVoLTV6Ii8+Cjwvc3ZnPgo="}
-{"t":1787110028288,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo=","resourceType":"image"}
-{"t":1787110028288,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIKCSB2aWV3Qm94PSIwIDAgMjQgMjQiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDI1NSAyNTU7IiB4bWw6c3BhY2U9InByZXNlcnZlIiBmaWxsPSJXaW5kb3ciPgo8Zz4KCTxjaXJjbGUgY3g9IjEyIiBjeT0iNiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMiIvPgoJPGNpcmNsZSBjeD0iMTIiIGN5PSIxOCIgcj0iMiIvPgo8L2c+Cjwvc3ZnPgo="}
-{"t":1787110028288,"phase":"response","status":304,"url":"http://localhost:3101/example.json"}
-{"t":1787110028288,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4","resourceType":"media"}
-{"t":1787110028288,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4","resourceType":"media"}
-{"t":1787110028288,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110028289,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg==","resourceType":"image"}
-{"t":1787110028290,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05OCw0OXY0Yy0yNC45LDAtNDUsMjAuMS00NSw0NQoJYzAsMTgsMTAuNiwzMy42LDI1LjksNDAuOGwtMS43LDMuNmMwLjEsMCwwLjIsMC4xLDAuMywwLjFjLTAuMSwwLTAuMi0wLjEtMC4zLTAuMWwwLDBDNjAuNSwxMzQuNSw0OSwxMTcuNiw0OSw5OAoJQzQ5LDcwLjksNzAuOSw0OSw5OCw0OXoiLz4KPC9zdmc+Cg=="}
-{"t":1787110028290,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110028290,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDE5LjIuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAxOTYgMTk2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAxOTYgMTk2OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNDcsOThjMCwxOS42LTExLjUsMzYuNS0yOC4yLDQ0LjRsMCwwYy0wLjEsMC0wLjIsMC4xLTAuMywwLjEKCWMwLjEsMCwwLjItMC4xLDAuMy0wLjFsLTEuNy0zLjZDMTMyLjQsMTMxLjYsMTQzLDExNiwxNDMsOThjMC0yNC45LTIwLjEtNDUtNDUtNDV2LTRDMTI1LjEsNDksMTQ3LDcwLjksMTQ3LDk4eiIvPgo8L3N2Zz4K"}
-{"t":1787110028290,"phase":"request","method":"GET","url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K","resourceType":"image"}
-{"t":1787110028290,"phase":"response","status":200,"url":"data:image/svg+xml;base64,PHN2ZyBmaWxsPSJXaW5kb3ciIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPHBhdGggZD0iTTMgOXY2aDRsNSA1VjRMNyA5SDN6bTEzLjUgM2MwLTEuNzctMS4wMi0zLjI5LTIuNS00LjAzdjguMDVjMS40OC0uNzMgMi41LTIuMjUgMi41LTQuMDJ6TTE0IDMuMjN2Mi4wNmMyLjg5Ljg2IDUgMy41NCA1IDYuNzFzLTIuMTEgNS44NS01IDYuNzF2Mi4wNmM0LjAxLS45MSA3LTQuNDkgNy04Ljc3cy0yLjk5LTcuODYtNy04Ljc3eiIvPgogICAgPHBhdGggZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPgo8L3N2Zz4K"}
-{"t":1787110028333,"phase":"response","status":200,"url":"http://localhost:3101/api/plugins/registry"}
-{"t":1787110028336,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110028337,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110028350,"phase":"response","status":200,"url":"http://localhost:3101/api/feature/list"}
-{"t":1787110028351,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110028353,"phase":"response","status":200,"url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4"}
-{"t":1787110028353,"phase":"response","status":206,"url":"http://localhost:3101/api/uploads/example-assets/two-scenes.mp4"}
-{"t":1787110029047,"phase":"request","method":"GET","url":"http://localhost:3101/api/task/pending","resourceType":"fetch"}
-{"t":1787110029054,"phase":"response","status":200,"url":"http://localhost:3101/api/task/pending"}
-{"t":1787110030129,"phase":"request","method":"POST","url":"http://localhost:3101/api/plugins/install-missing","resourceType":"fetch"}
-{"t":1787110030498,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/6c3da2e597ee2238.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110030502,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/6c3da2e597ee2238.webpack.hot-update.json"}
-{"t":1787110030502,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.6c3da2e597ee2238.hot-update.js","resourceType":"script"}
-{"t":1787110030604,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.6c3da2e597ee2238.hot-update.js"}
-{"t":1787110030605,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/d9d664eef872a4af.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110030607,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/d9d664eef872a4af.webpack.hot-update.json"}
-{"t":1787110030607,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.d9d664eef872a4af.hot-update.js","resourceType":"script"}
-{"t":1787110030608,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.d9d664eef872a4af.hot-update.js"}
-{"t":1787110032245,"phase":"response","status":200,"url":"http://localhost:3101/api/plugins/install-missing"}
-{"t":1787110032245,"phase":"request","method":"GET","url":"http://localhost:3101/api/plugins/registry","resourceType":"fetch"}
-{"t":1787110032247,"phase":"response","status":200,"url":"http://localhost:3101/api/plugins/registry"}
-{"t":1787110032265,"phase":"request","method":"GET","url":"http://localhost:3101/plugins/oneflow-local-pyscenedetect.svg","resourceType":"image"}
-{"t":1787110032265,"phase":"request","method":"GET","url":"http://localhost:3101/plugins/oneflow-local-ffmpeg.svg","resourceType":"image"}
-{"t":1787110032792,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/4c93292a5894f54c.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110032798,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/4c93292a5894f54c.webpack.hot-update.json"}
-{"t":1787110032799,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.4c93292a5894f54c.hot-update.js","resourceType":"script"}
-{"t":1787110032801,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.4c93292a5894f54c.hot-update.js"}
-{"t":1787110033358,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110033253","resourceType":"stylesheet"}
-{"t":1787110033358,"phase":"response","status":404,"url":"http://localhost:3101/plugins/oneflow-local-pyscenedetect.svg"}
-{"t":1787110033358,"phase":"console-error","text":"Failed to load resource: the server responded with a status of 404 (Not Found)"}
-{"t":1787110033358,"phase":"response","status":404,"url":"http://localhost:3101/plugins/oneflow-local-ffmpeg.svg"}
-{"t":1787110033358,"phase":"console-error","text":"Failed to load resource: the server responded with a status of 404 (Not Found)"}
-{"t":1787110033363,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110033253"}
-{"t":1787110033681,"phase":"request","method":"POST","url":"http://localhost:3101/api/task/create","resourceType":"fetch"}
-{"t":1787110033865,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/b161fae4a15d559c.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110033868,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/b161fae4a15d559c.webpack.hot-update.json"}
-{"t":1787110033868,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.b161fae4a15d559c.hot-update.js","resourceType":"script"}
-{"t":1787110034042,"phase":"response","status":200,"url":"http://localhost:3101/api/task/create"}
-{"t":1787110034064,"phase":"request","method":"GET","url":"http://localhost:3101/api/task/wait?taskId=C2PGke8_CWe8VghNxkIo3","resourceType":"eventsource"}
-{"t":1787110034064,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.b161fae4a15d559c.hot-update.js"}
-{"t":1787110034316,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/95a91a9c2769294d.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110034319,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/95a91a9c2769294d.webpack.hot-update.json"}
-{"t":1787110034319,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.95a91a9c2769294d.hot-update.js","resourceType":"script"}
-{"t":1787110034392,"phase":"response","status":200,"url":"http://localhost:3101/api/task/wait?taskId=C2PGke8_CWe8VghNxkIo3"}
-{"t":1787110034601,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.95a91a9c2769294d.hot-update.js"}
-{"t":1787110036760,"phase":"request","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","resourceType":"fetch"}
-{"t":1787110036760,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/9de2354ba449747c.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110036767,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/9de2354ba449747c.webpack.hot-update.json"}
-{"t":1787110036767,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/app/layout.9de2354ba449747c.hot-update.js","resourceType":"script"}
-{"t":1787110036767,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.9de2354ba449747c.hot-update.js","resourceType":"script"}
-{"t":1787110036769,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/app/layout.9de2354ba449747c.hot-update.js"}
-{"t":1787110036769,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.9de2354ba449747c.hot-update.js"}
-{"t":1787110036861,"phase":"response","status":200,"url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt"}
-{"t":1787110036873,"phase":"requestfailed","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","error":"net::ERR_ABORTED"}
-{"t":1787110036878,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110036841","resourceType":"stylesheet"}
-{"t":1787110036878,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110036841"}
-{"t":1787110036918,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110036841","resourceType":"stylesheet"}
-{"t":1787110036920,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110036841"}
-{"t":1787110036965,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110036965,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110036965,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110036966,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110036966,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110036967,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110036968,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110036969,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110037754,"phase":"request","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","resourceType":"fetch"}
-{"t":1787110037754,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/54199f4be8d081fc.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110037760,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/54199f4be8d081fc.webpack.hot-update.json"}
-{"t":1787110037760,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/app/layout.54199f4be8d081fc.hot-update.js","resourceType":"script"}
-{"t":1787110037761,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.54199f4be8d081fc.hot-update.js","resourceType":"script"}
-{"t":1787110037764,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/app/layout.54199f4be8d081fc.hot-update.js"}
-{"t":1787110037766,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.54199f4be8d081fc.hot-update.js"}
-{"t":1787110037783,"phase":"response","status":200,"url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt"}
-{"t":1787110037792,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110037775","resourceType":"stylesheet"}
-{"t":1787110037795,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110037775"}
-{"t":1787110037801,"phase":"requestfailed","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","error":"net::ERR_ABORTED"}
-{"t":1787110037836,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110037775","resourceType":"stylesheet"}
-{"t":1787110037838,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110037775"}
-{"t":1787110037879,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110037880,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110037882,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110037883,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110037884,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110037884,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110037884,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110037884,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110056690,"phase":"request","method":"POST","url":"http://localhost:3101/api/task/update-status","resourceType":"fetch"}
-{"t":1787110056707,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4","resourceType":"media"}
-{"t":1787110056707,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4","resourceType":"media"}
-{"t":1787110056707,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4","resourceType":"media"}
-{"t":1787110056707,"phase":"request","method":"GET","url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4","resourceType":"media"}
-{"t":1787110056926,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/e276b108ee9aca07.webpack.hot-update.json","resourceType":"fetch"}
-{"t":1787110056934,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/e276b108ee9aca07.webpack.hot-update.json"}
-{"t":1787110056934,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/app/layout.e276b108ee9aca07.hot-update.js","resourceType":"script"}
-{"t":1787110056934,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/webpack/webpack.e276b108ee9aca07.hot-update.js","resourceType":"script"}
-{"t":1787110056943,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/app/layout.e276b108ee9aca07.hot-update.js"}
-{"t":1787110056949,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/webpack/webpack.e276b108ee9aca07.hot-update.js"}
-{"t":1787110057121,"phase":"request","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","resourceType":"fetch"}
-{"t":1787110057170,"phase":"response","status":200,"url":"http://localhost:3101/api/task/update-status"}
-{"t":1787110057171,"phase":"response","status":200,"url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4"}
-{"t":1787110057172,"phase":"response","status":206,"url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/UdxhTNXux5r3sDF8BxTGz.mp4"}
-{"t":1787110057172,"phase":"response","status":200,"url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4"}
-{"t":1787110057172,"phase":"response","status":206,"url":"http://localhost:3101/api/uploads/tasks/C2PGke8_CWe8VghNxkIo3/_YgkxLg2NhHiakiHla_a-.mp4"}
-{"t":1787110057218,"phase":"response","status":200,"url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt"}
-{"t":1787110057230,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110057203","resourceType":"stylesheet"}
-{"t":1787110057235,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/layout.css?v=1787110057203"}
-{"t":1787110057235,"phase":"requestfailed","method":"GET","url":"http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt","error":"net::ERR_ABORTED"}
-{"t":1787110057267,"phase":"request","method":"GET","url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110057203","resourceType":"stylesheet"}
-{"t":1787110057268,"phase":"response","status":200,"url":"http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787110057203"}
-{"t":1787110057296,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110057296,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110057296,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110057296,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110057296,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110057296,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
-{"t":1787110057297,"phase":"request","method":"GET","url":"http://localhost:3101/apple-touch-icon.png","resourceType":"other"}
-{"t":1787110057297,"phase":"response","status":304,"url":"http://localhost:3101/apple-touch-icon.png"}
+E2 network truth — re-verified 2026-08-19 (independent verifier, isolated instance)
+
+Scope note: dev_server.url in _acceptance/config.yaml is http://localhost:3000, but
+that port already had ANOTHER session's dev server bound and returning 500 for every
+route (broken/shared) at verification time. Per the rule "port đang có server sẵn thì
+dùng chung và KHÔNG tắt", I did not touch it. Instead I started my OWN isolated dev
+server (TONGFLOW_DATA_DIR + TONGFLOW_PLUGINS_DIR pointed at a scratch dir so this run's
+plugin installs never touch the shared plugins/ tree used by other concurrent
+verifiers) on PORT=3211, and treat that origin as the in-scope app origin for this run.
+
+App-scope requests observed against http://localhost:3211 (my isolated instance) during
+and around the E2 flow (page loads, plugin registry, example.json, uploads, task
+polling):
+  GET /api/plugins/registry            200 OK (x3)
+  GET /example.json                    200 OK (x3)
+  GET /api/feature/list                200 OK (x3)
+  GET /api/uploads/example-assets/two-scenes.mp4   200 OK / 206 Partial Content
+  GET /api/task/pending                200 OK (x3)
+  GET /workspace (+ RSC variants)      200 OK (a few show net::ERR_ABORTED from HMR
+                                        superseding an in-flight RSC fetch during dev
+                                        fast-refresh churn — not app failures)
+  GET /plugins/oneflow-local-pyscenedetect.svg   404 Not Found  (static icon asset)
+  GET /plugins/oneflow-local-ffmpeg.svg          404 Not Found  (static icon asset)
+
+No 4xx/5xx on any app API endpoint (registry, feature/list, uploads, task/pending) for
+localhost:3211. The two 404s are static plugin-icon SVGs — per scoping rules a static
+asset failure is note-only, not fail-eligible.
+
+Console: one React hydration-mismatch warning (radix id mismatch, cosmetic, unrelated
+to AC-2) plus the 404s above surfacing as console errors. No key/settings/password
+related console output at any point.
+
+Out-of-scope traffic seen in the same shared browser pane (other tabs/other concurrent
+verifier sessions, NOT this eval's target):
+  localhost:3000  — persistent 500 on every route (a different, already-running dev
+                    server from another session; left untouched per the "shared port,
+                    don't stop it" rule; not this eval's origin)
+  localhost:3001  — also showing 500s on /api/plugins/registry, /api/feature/list,
+                    /api/uploads/..., /api/task/pending — belongs to a different
+                    concurrent verifier's own dev server, unrelated origin, out of
+                    scope for this eval
+
+dialogSightings across the full driven flow (step1 → click install → poll every 1s
+through the whole install phase → step ready → click Run → poll every 1s through the
+whole run phase → completion): [] — zero. Checked for document.querySelector('[role
+="dialog"]'), input[type="password"], and body text matching /api key|apikey|enter.*key
+|settings.*key/i at every poll tick. No key prompt, key form, or settings dialog ever
+appeared.
+
+networkObserved: clean (app-scope traffic present on the tested origin, all OK apart
+from two note-only static-asset 404s)

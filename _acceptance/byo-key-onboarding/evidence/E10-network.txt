@@ -1,41 +1,21 @@
-=== responses (app origin) ===
-RESPONSE 200 GET http://localhost:3000/workspace
-RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110826182
-RESPONSE 200 GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2
-RESPONSE 200 GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2
-RESPONSE 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110826182
-RESPONSE 200 GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787110826182
-RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app-pages-internals.js
-RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app/layout.js
-RESPONSE 200 GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787110826182
-RESPONSE 200 GET http://localhost:3000/_next/static/chunks/app/workspace/page.js
-RESPONSE 200 GET http://localhost:3000/apple-touch-icon.png
-RESPONSE 304 GET http://localhost:3000/apple-touch-icon.png
-RESPONSE 200 GET http://localhost:3000/example.json
-RESPONSE 304 GET http://localhost:3000/example.json
-RESPONSE 200 GET http://localhost:3000/api/plugins/registry
-RESPONSE 200 GET http://localhost:3000/api/feature/list
-RESPONSE 200 GET http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg
-RESPONSE 200 GET http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg
-RESPONSE 200 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
-RESPONSE 206 GET http://localhost:3000/api/uploads/example-assets/two-scenes.mp4
-RESPONSE 200 GET http://localhost:3000/_next/static/webpack/08d96f7ab9d9d2cd.webpack.hot-update.json
-RESPONSE 200 GET http://localhost:3000/_next/static/webpack/app/layout.08d96f7ab9d9d2cd.hot-update.js
-RESPONSE 200 GET http://localhost:3000/_next/static/webpack/webpack.08d96f7ab9d9d2cd.hot-update.js
-RESPONSE 404 GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg
-RESPONSE 404 GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg
-RESPONSE 200 GET http://localhost:3000/api/task/pending
-RESPONSE 200 GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt
-RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110828048
-RESPONSE 200 GET http://localhost:3000/_next/static/css/app/layout.css?v=1787110828200
-REQUEST-FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt :: net::ERR_ABORTED
-RESPONSE 200 GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787110828200
-RESPONSE 200 POST http://localhost:3000/api/task/create
-RESPONSE 200 GET http://localhost:3000/api/task/wait?taskId=1Hra1wC3gtkP1G0zPSrpk
+=== E10 fresh verification run — app-scope requests captured during the Run click ===
+(captured inline by the automation script scripts/_e10-run.mjs; the dev server used was
+http://localhost:3001, a verifier-owned instance — config.yaml's canonical
+http://localhost:3000 was returning 500 Internal Server Error at verification time due to
+a concurrent sibling dev-server process rebuilding the same .next directory. localhost:3001
+died shortly after this run completed (another concurrent session's server, not one this
+verifier started/stopped), which is why a supplementary full-asset network dump could not
+be taken afterward against it.)
 
-=== requestfailed ===
-REQUEST-FAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt :: net::ERR_ABORTED
+200	GET	http://localhost:3001/api/plugins/registry
+200	GET	http://localhost:3001/api/plugins/registry
+200	POST	http://localhost:3001/api/task/create
 
-=== console.error ===
-Failed to load resource: the server responded with a status of 404 (Not Found)
-Failed to load resource: the server responded with a status of 404 (Not Found)
+No failed (FAILED/4xx/5xx) requests observed among app-scope (localhost:3001) traffic
+during the walk: workspace load -> video upload -> Start Slice click -> provisioning
+milestones -> install-requirements completed.
+
+Full page-load network trace (separate earlier interactive session, localhost:3001,
+before/around the run) also showed only expected 200/206/307/404(static-asset) entries;
+see E10-fresh-run-log.json for the complete client-side SSE event trace correlated to
+on-screen frames.

@@ -1,0 +1,267 @@
+{
+  "uploadFile": "/private/tmp/claude-501/-Users-manh-macmini-dev-oneflow/ec32f803-71bc-4c13-8cfc-c067a2bd2a62/scratchpad/e10-input-1787125794.mp4",
+  "runClickedAt": 1787126009025,
+  "frames": [
+    {
+      "idx": 1,
+      "label": "before-run",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-1.png",
+      "t": 1787126009006,
+      "stripText": null
+    },
+    {
+      "idx": 2,
+      "label": "just-after-click",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-2.png",
+      "t": 1787126009123,
+      "stripText": null
+    },
+    {
+      "idx": 3,
+      "label": "poll (events=0)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-3.png",
+      "t": 1787126009395,
+      "stripText": "Done. Press Run on the first node to try it."
+    },
+    {
+      "idx": 4,
+      "label": "poll (events=2)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-4.png",
+      "t": 1787126011911,
+      "stripText": "Done. Press Run on the first node to try it."
+    },
+    {
+      "idx": 5,
+      "label": "poll (events=3)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-5.png",
+      "t": 1787126012196,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries0s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 6,
+      "label": "poll (events=3)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-6.png",
+      "t": 1787126013296,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries1s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 7,
+      "label": "poll (events=5)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-7.png",
+      "t": 1787126013768,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries1s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 8,
+      "label": "poll (events=5)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-8.png",
+      "t": 1787126014248,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries2s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 9,
+      "label": "poll (events=5)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-9.png",
+      "t": 1787126015382,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries3s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 10,
+      "label": "poll (events=7)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-10.png",
+      "t": 1787126016302,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries4s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 11,
+      "label": "poll (events=7)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-11.png",
+      "t": 1787126017190,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries5s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 12,
+      "label": "poll (events=7)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-12.png",
+      "t": 1787126018273,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries6s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 13,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-13.png",
+      "t": 1787126018967,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries6s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 14,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-14.png",
+      "t": 1787126019260,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries7s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 15,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-15.png",
+      "t": 1787126020348,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries8s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 16,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-16.png",
+      "t": 1787126021244,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries9s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 17,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-17.png",
+      "t": 1787126022337,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries10s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 18,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-18.png",
+      "t": 1787126023211,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries11s elapsed. Later runs start instantly."
+    },
+    {
+      "idx": 19,
+      "label": "poll (events=8)",
+      "file": "/Users/manh-macmini/dev/oneflow/_acceptance/byo-key-onboarding/evidence/E10-raw-19.png",
+      "t": 1787126024306,
+      "stripText": "Setting up environmentInstalling SDKInstalling libraries12s elapsed. Later runs start instantly."
+    }
+  ],
+  "clientSSEEvents": [
+    {
+      "t": 1787126011628,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "SSE_CONNECTED",
+        "nodeId": null
+      }
+    },
+    {
+      "t": 1787126011628,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+        "data": {
+          "message": "Task started"
+        }
+      }
+    },
+    {
+      "t": 1787126012085,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đang tạo môi trường Python",
+          "provisioning": {
+            "step": "create-venv",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787126013667,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đã tạo xong môi trường Python",
+          "provisioning": {
+            "step": "create-venv",
+            "phase": "completed"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787126013696,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đang cài bộ thư viện lõi",
+          "provisioning": {
+            "step": "install-sdk",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787126016165,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đã cài xong bộ thư viện lõi",
+          "provisioning": {
+            "step": "install-sdk",
+            "phase": "completed"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787126016193,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đang cài thư viện của công cụ",
+          "provisioning": {
+            "step": "install-requirements",
+            "phase": "started"
+          }
+        }
+      }
+    },
+    {
+      "t": 1787126018719,
+      "detail": {
+        "id": "At0d6lWcJkcIq-AQi5_0h",
+        "status": "RUNNING",
+        "nodeId": null,
+        "data": {
+          "message": "Đã cài xong thư viện của công cụ",
+          "provisioning": {
+            "step": "install-requirements",
+            "phase": "completed"
+          }
+        }
+      }
+    }
+  ],
+  "taskCreateRequests": [
+    {
+      "t": 1787126005613,
+      "url": "http://localhost:3001/api/plugins/registry",
+      "status": 200
+    },
+    {
+      "t": 1787126009161,
+      "url": "http://localhost:3001/api/plugins/registry",
+      "status": 200
+    },
+    {
+      "t": 1787126010686,
+      "url": "http://localhost:3001/api/task/create",
+      "status": 200
+    }
+  ]
+}

@@ -1,38 +1,54 @@
 {
-  "eval": "E4",
-  "criterion": "AC-13",
-  "run_url": "http://localhost:3201/workspace",
-  "note_on_url": "config dev_server.url (http://localhost:3000) had a pre-existing process already listening (PID 895, started before this verify run) that returned HTTP 500 for every route including / and /workspace. That process was not started by this verifier, so it was left running untouched. A fresh `pnpm dev --port 3201` in the same checkout served /workspace with HTTP 200, confirming the code itself is not the cause of the 500s. All E4 steps were run against that own, disposable dev server, which was shut down at the end of this run.",
-  "step1": {
-    "description": "Fresh browser profile (no localStorage), oneflow.firstRun.exampleCompleted cleared, reload, screenshot saved to E4-step1.png",
-    "stripText": "Done. Press Run on the first node to try it.",
-    "nodeCountOnCanvas": 6
-  },
-  "step2": {
-    "description": "Without touching the strip: dragged the 'Add Video' node (id 418a1943-6d00-490d-9cf2-b9a5bb2b9ab6) via real trusted mouse events (page.mouse down/move/up), then clicked the bottom toolbar's Video icon (the node-picker row rendered by smart-island.tsx) to add a new addVideoNode. Screenshot saved to E4-step2.png",
+  "url": "http://localhost:3000/workspace",
+  "steps": [
+    {
+      "step": 1,
+      "localStorageAtLoad": {
+        "edges": "[{\"id\":\"27324035-5499-453a-9534-733a596cd45c\",\"source\":\"418a1943-6d00-490d-9cf2-b9a5bb2b9ab6\",\"target\":\"97ebbb1d-8681-4e39-9bc8-31306e37ca30\",\"type\":\"custom-edge\",\"targetHandle\":\"in:videoNode\"},{\"id\":\"e2c78725-5d0a-46d1-92b1-398f73441777\",\"source\":\"97ebbb1d-8681-4e39-9bc8-31306e37ca30\",\"target\":\"2a0ab3e5-147a-49a3-a692-b89fb9f6e879\",\"type\":\"custom-edge\",\"sourceHandle\":\"out:videoNode\",\"targetHandle\":\"in:video\"},{\"id\":\"e9facdb0-ddbd-48c0-b432-ea2620819a22\",\"source\":\"2a0ab3e5-147a-49a3-a692-b89fb9f6e879\",\"target\":\"4acb468a-4144-43fc-b197-6fb380f7ad91\",\"type\":\"custom-edge\",\"sourceHandle\":\"out:video_parts\",\"targetHandle\":\"in:videoNode\"},{\"id\":\"2a0d2dc0-d948-4ba7-8761-d23075b86403\",\"source\":\"4acb468a-4144-43fc-b197-6fb380f7ad91\",\"target\":\"3674f5c0-818d-460f-825a-3d2ca7e7a4a2\",\"type\":\"custom-edge\",\"sourceHandle\":\"out:videoNode\",\"targetHandle\":\"in:videos\"},{\"id\":\"714ed430-f808-4261-88c5-19500f90e056\",\"source\":\"3674f5c0-818d-460f-825a-3d2ca7e7a4a2\",\"target\":\"e37eeba2-9e54-4f4a-812d-07548d9cfdb4\",\"type\":\"custom-edge\",\"sourceHandle\":\"out:video\",\"targetHandle\":\"in:videoNode\"}]",
+        "workflowMeta": "{\"id\":null,\"name\":\"Ví dụ / example\",\"description\":\"Tách cảnh rồi ghép lại — chạy hoàn toàn trên máy bạn, không cần khoá.\"}",
+        "exampleLoaded": "1",
+        "nodes": "[{\"id\":\"418a1943-6d00-490d-9cf2-b9a5bb2b9ab6\",\"type\":\"addVideoNode\",\"position\":{\"x\":27241.1129168165,\"y\":4832.398277987112},\"origin\":[0.5,0.5],\"data\":{},\"measured\":{\"width\":480,\"height\":318},\"selected\":false,\"dragging\":false},{\"id\":\"97ebbb1d-8681-4e39-9bc8-31306e37ca30\",\"type\":\"videoNode\",\"position\":{\"x\":27798.6129168165,\"y\":4877.398277987112},\"origin\":[0.5,0.5],\"data\":{\"fileKeys\":[\"example-assets/two-scenes.mp4\"]},\"measured\":{\"width\":120,\"height\":116},\"dragging\":false,\"selected\":false},{\"id\":\"2a0ab3e5-147a-49a3-a692-b89fb9f6e879\",\"type\":\"splitVideoNode\",\"position\":{\"x\":28108.6129168165,\"y\":4877.398277987112},\"origin\":[0.5,0.5],\"data\":{\"fileKeys\":[\"example-assets/two-scenes.mp4\"],\"threshold\":20,\"feature\":\"split-video\",\"pluginId\":\"oneflow-api-pyscenedetect\",\"prompt\":{\"video\":\"example-assets/two-scenes.mp4\",\"threshold\":20}},\"measured\":{\"width\":278,\"height\":200},\"selected\":false,\"dragging\":false},{\"id\":\"4acb468a-4144-43fc-b197-6fb380f7ad91\",\"type\":\"videoNode\",\"position\":{\"x\":28497.6129168165,\"y\":4877.398277987112},\"origin\":[0.5,0.5],\"data\":{\"fileKeys\":[]},\"measured\":{\"width\":256,\"height\":80},\"selected\":false,\"dragging\":false},{\"id\":\"3674f5c0-818d-460f-825a-3d2ca7e7a4a2\",\"type\":\"concatVideoNode\",\"position\":{\"x\":28939.6129168165,\"y\":4877.398277987112},\"origin\":[0.5,0.5],\"data\":{\"fileKeys\":[],\"pluginId\":\"oneflow-api-ffmpeg\",\"feature\":\"concat-videos\",\"prompt\":{\"videos\":[]}},\"measured\":{\"width\":480,\"height\":302},\"selected\":false,\"dragging\":false},{\"id\":\"e37eeba2-9e54-4f4a-812d-07548d9cfdb4\",\"type\":\"videoNode\",\"position\":{\"x\":29429.6129168165,\"y\":4877.398277987112},\"origin\":[0.5,0.5],\"data\":{\"fileKeys\":[]},\"measured\":{\"width\":256,\"height\":80},\"selected\":false,\"dragging\":false}]"
+      },
+      "stripText": "Done. Press Run on the first node to try it.",
+      "nodeCount": 6
+    }
+  ],
+  "assertions": {
     "dragNodeId": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
-    "dragStyleBefore": "z-index: 0; transform: translate(27001.1px, 4673.4px); pointer-events: all; visibility: visible;",
-    "dragStyleAfter": "z-index: 0; transform: translate(27001.1px, 4921.58px); pointer-events: all; visibility: visible;",
     "dragMovedNode": true,
+    "styleBefore": "z-index: 0; transform: translate(27001.1px, 4673.4px); pointer-events: all; visibility: visible;",
+    "styleAfter": "z-index: 0; transform: translate(27084.6px, 4921.58px); pointer-events: all; visibility: visible;",
+    "toolbarButtonCount": 7,
+    "toolbarOpenedBeforeAdd": true,
     "nodeCountBefore": 6,
     "nodeCountAfter": 7,
     "nodeAdded": true,
     "stripStillPresentAfter": true,
-    "stripText2": "Done. Press Run on the first node to try it."
-  },
-  "domAssertions": {
-    "dialogsOpen": 0,
-    "ariaModalCount": 0,
+    "stripText2": "Done. Press Run on the first node to try it.",
+    "dialogsOrModalsOpen": 0,
+    "focusGuardCount": 0,
     "canvasExists": true,
     "canvasPointerEvents": "auto",
+    "panePointerEvents": "auto",
+    "bodyPointerEvents": "auto",
+    "bodyScrollLocked": false,
     "stripWrapperClass": "pointer-events-none absolute left-1/2 top-16 z-10 flex w-full max-w-3xl -translate-x-1/2 justify-center px-4",
-    "stripWrapperIsPointerEventsNone": true
+    "stripWrapperIsPointerEventsNone": true,
+    "tabFocusStaysInBody": true
   },
-  "focusTrapCheck": {
-    "description": "12 sequential Tab presses after load; document.activeElement inspected each time",
-    "result": "focus moved through canvas elements (DIV/BUTTON/VIDEO nodes inside .react-flow) on every press; never landed on document.body; never stayed inside the strip's <output> wrapper",
-    "trappedInStrip": false
-  },
-  "verdict": "PASS — canvas stayed fully interactive (node drag succeeded, node-picker add succeeded) with the first-run strip visible throughout; no modal, no disabled canvas, no focus trap observed.",
-  "verified_at": "2026-08-19T03:35:00Z"
+  "errors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+    "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "network": {
+    "totalLogged": 58,
+    "appScopedCount": 46,
+    "failEligibleCount": 9,
+    "failingCount": 0,
+    "failing": []
+  }
 }

@@ -1,4 +1,32 @@
-STATUS 404 http://localhost:3210/plugins/oneflow-local-pyscenedetect.svg
-CONSOLE-ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
-STATUS 404 http://localhost:3210/plugins/oneflow-local-ffmpeg.svg
-CONSOLE-ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+E21 network dump (independent verifier run)
+Actual origin used: http://localhost:3011  (config.yaml dev_server.url = http://localhost:3000)
+Reason for a separate origin: step 1 requires "an EMPTY plugins dir so every plugin the
+example needs is missing". Port 3000 already had a pre-existing dev server (PID 97801,
+not started by this verifier) running against the repo's normal, already-populated
+plugins dir — reusing it would violate the eval's precondition. A second `next dev`
+instance was started on :3011 with TONGFLOW_PLUGINS_DIR/TONGFLOW_DATA_DIR pointed at
+fresh empty scratch directories, per "Tự quản dev server: start NỀN nếu steps yêu cầu".
+The pre-existing :3000 server was left untouched (never stopped, per the port-in-use rule).
+
+Requests failed or >=400 during the full E21 run (requestfailed + response>=400):
+HTTP404 GET http://localhost:3011/_next/static/webpack/117a168286d438af.webpack.hot-update.json
+HTTP404 GET http://localhost:3011/_next/static/webpack/117a168286d438af.webpack.hot-update.json
+REQFAIL GET http://localhost:3011/workspace?_rsc=z3Wp789TB5zg5EPt net::ERR_ABORTED
+HTTP404 GET http://localhost:3011/plugins/oneflow-local-ffmpeg.svg
+HTTP404 GET http://localhost:3011/plugins/oneflow-local-ffmpeg.svg
+HTTP404 GET http://localhost:3011/plugins/oneflow-local-pyscenedetect.svg
+HTTP404 GET http://localhost:3011/plugins/oneflow-local-pyscenedetect.svg
+
+Classification:
+- webpack.hot-update.json 404s: Next.js dev-mode HMR artifact, static asset class -> note only.
+- /workspace?_rsc=... ERR_ABORTED: RSC prefetch aborted by client-side navigation, not a
+  request that ever reached the server with an error status -> note only.
+- /plugins/oneflow-local-*.svg 404s: plugin icon images (static asset class, explicitly
+  note-only even in-scope) -> the two just-installed local plugins ship no icon file, so
+  the UI falls back to its monogram-letter icon (visible in E21-step3.png as "F"/"P"
+  overlapping the name text). Cosmetic gap, not an install/registration failure.
+- No FAIL-eligible request (app API call: /api/plugins/*, /example.json, /api/task/*)
+  returned >=400 or a connection error anywhere in the run.
+
+No app-scope (declared http://localhost:3000) traffic was observed at all, because this
+run's app instance runs on :3011 by necessity (see above) -> networkObserved = "unscoped-partial".
