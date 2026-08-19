@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5747c606b47b2a4604ea1b36653b0df92510ca63
+verified_commit: 6b08f6a289b423eb63a2f422416da9138e1bf207
 human_signoff: Manh 2026-08-18
 ---
 
@@ -270,3 +270,7 @@ Round 1: verify BLOCKED — Bash tool rate-limited (safety classifier khong xac 
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter
+
+### Re-pin lần 1 — 2026-08-19, do merge origin/main (nhánh cha #61 revert memoise + kit 2.2.0) vào nhánh sau khi ký
+run_id: repin-scan-scope-diagnostics-1
+sha: 6b08f6a289b423eb63a2f422416da9138e1bf207 · suites: 6 lệnh exit 0
