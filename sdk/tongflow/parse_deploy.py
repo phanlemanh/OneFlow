@@ -7,6 +7,7 @@ from pathlib import Path
 from ._ast_utils import (
     extract_node_slot_decorators,
     extract_node_slot_defaults,
+    parse_failure_reason,
     slot_rejection_reason,
 )
 
@@ -158,13 +159,14 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
     """Return (scan, error). On recoverable issues error is set; scan may still be partial."""
     try:
         src = path.read_text(encoding="utf-8")
-    except OSError as e:
-        return None, f"{path}:1: read failed: {e}; fix: make deploy.py readable"
+    except (OSError, ValueError) as e:
+        line, reason, hint = parse_failure_reason(e, path)
+        return None, f"{path}:{line}: {reason}; fix: {hint}"
     try:
         tree = ast.parse(src, filename=str(path))
-    except SyntaxError as e:
-        line = e.lineno or 1
-        return None, f"{path}:{line}: syntax error: {e.msg}; fix: correct Python syntax"
+    except (ValueError, SyntaxError) as e:
+        line, reason, hint = parse_failure_reason(e, path)
+        return None, f"{path}:{line}: {reason}; fix: {hint}"
 
     cls_name = "Inference"
     method_names: frozenset[str] = frozenset()
@@ -208,7 +210,15 @@ def parse_deploy_py(path: Path) -> tuple[DeployScan | None, str | None]:
                     default_problems,
                     legacy_slot_problems,
                 ) = _parse_methods_by_slot(node, tree)
-                slot_problems = legacy_slot_problems
+                # Extend, do not assign — a @deploy class that registered
+                # nothing still has reasons worth keeping. Dedupe on the
+                # (lineno, reason) tuple because in the ORDINARY shape the
+                # @deploy class IS `Inference`, so both readers parse the same
+                # class and produce identical tuples; a naive extend would
+                # report every reason twice for every deploy-first plugin.
+                for problem in legacy_slot_problems:
+                    if problem not in slot_problems:
+                        slot_problems.append(problem)
 
     return (
         DeployScan(

@@ -13,6 +13,8 @@ from ._ast_utils import (
     DEFAULT_SLOTS_CONST,
     REJECTION_HINT,
     SLOT_MODELS_CONST,
+    _walk_module_scope,
+    parse_failure_reason,
     extract_default_slots,
     extract_node_slot_decorators,
     extract_node_slot_defaults,
@@ -144,8 +146,12 @@ def _scan_methods_by_slot_in_file(
     try:
         src = path.read_text(encoding="utf-8")
         tree = ast.parse(src, filename=str(path))
-    except (OSError, SyntaxError):
-        return {}, set(), [], []
+    except (OSError, ValueError, SyntaxError) as exc:
+        # A file that will not parse HAS a reason. Returning it in the
+        # `rejections` slot both routes it into `errors` and lets the existing
+        # `if not rejections:` guard suppress the generic entry.py line.
+        line, reason, hint = parse_failure_reason(exc, path)
+        return {}, set(), [], [_scan_error(path, reason, hint, line=line)]
 
     out: dict[str, str] = {}
     defaults: set[str] = set()
@@ -153,7 +159,14 @@ def _scan_methods_by_slot_in_file(
     rejections: list[str] = []
     # Methods on a class are the deploy parser's business; reporting them here
     # too would make every healthy deploy-first plugin noisy (AC-11).
-    module_level = {id(node) for node in tree.body}
+    #
+    # Built ONCE per file, from the same boundary predicate the import collector
+    # uses. An identity set over `tree.body` reaches only the first level, while
+    # registration below walks the whole tree — that disagreement is the defect:
+    # a @node_slot function inside `with image.imports():` registered when
+    # well-formed and said nothing when malformed.
+    module_scope: set[int] = set()
+    _walk_module_scope(tree, lambda stmt: module_scope.add(id(stmt)))
 
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -163,7 +176,7 @@ def _scan_methods_by_slot_in_file(
         # Strict typing: require 1st arg annotation + return annotation (SDK models).
         reason = slot_rejection_reason(node, tree, input_index=0)
         if reason is not None:
-            if id(node) in module_level and extract_node_slot_decorators(node):
+            if id(node) in module_scope and extract_node_slot_decorators(node):
                 rejections.append(
                     _scan_error(path, reason, REJECTION_HINT, line=node.lineno)
                 )
@@ -217,7 +230,7 @@ def _scan_slot_models_in_dir(
     for p in _iter_plugin_py_files(plugin_dir):
         try:
             tree = ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
-        except (OSError, SyntaxError):
+        except (OSError, ValueError, SyntaxError):
             continue
         found, file_problems = extract_slot_models(tree)
         for lineno, reason in file_problems:
@@ -251,7 +264,7 @@ def _scan_default_slots_in_dir(plugin_dir: Path) -> tuple[list[str], list[str]]:
     for p in _iter_plugin_py_files(plugin_dir):
         try:
             tree = ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
-        except (OSError, SyntaxError):
+        except (OSError, ValueError, SyntaxError):
             continue
         found, file_problems = extract_default_slots(tree)
         for lineno, reason in file_problems:
@@ -371,7 +384,15 @@ def scan(plugins_root: Path, abi_path: Path) -> dict[str, object]:
         needs_deploy = False
         deploy_py = pdir / "deploy.py"
         if not methods_by_ident and deploy_py.is_file():
-            dscan, _derr = parse_deploy_py(deploy_py)
+            dscan, derr = parse_deploy_py(deploy_py)
+            if derr:
+                # Already framed as `path:line: reason; fix: hint`. Appending to
+                # `rejections` is what lets the generic entry.py line yield —
+                # an unreadable deploy.py, a syntax error, or one slot claimed
+                # twice across two @deploy classes each said strictly more than
+                # "no @node_slot methods found in entry.py".
+                rejections.append(derr)
+                errors.append({"pluginId": plugin_id, "message": derr})
             if dscan:
                 for lineno, reason in dscan.slot_problems:
                     message = _scan_error(

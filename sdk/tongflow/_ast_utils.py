@@ -4,17 +4,22 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Callable
+from pathlib import Path
 
 
 def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
     """
-    Visit every statement that binds names in the MODULE scope.
+    Visit every statement that binds a name in the MODULE scope.
 
     An import binds its name in the enclosing scope, and only ``def``, ``class``
     and ``lambda`` open a new one — ``with``, ``if``, ``for``, ``while``, ``try``
     and ``match`` do not. So the rule is a boundary, not a list of block types:
     recurse into everything except the scope openers. Naming block types is what
     made ``with image.imports():`` invisible; any such list is one idiom behind.
+
+    ``def`` and ``class`` are handed back too: each binds its own name here,
+    even though its body opens a new scope. Import collection is unaffected —
+    its ``take`` acts only on ``Import`` / ``ImportFrom``.
     """
 
     for child in ast.iter_child_nodes(node):
@@ -22,6 +27,11 @@ def _walk_module_scope(node: ast.AST, take: Callable[[ast.stmt], None]) -> None:
             child,
             (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda),
         ):
+            # A scope opener binds its OWN name in this scope, so it is a
+            # module-scope statement — but its body is a different scope, so
+            # stop here. `ast.Lambda` is an expr, not a stmt, and falls through.
+            if isinstance(child, ast.stmt):
+                take(child)
             continue
         if isinstance(child, ast.stmt):
             take(child)
@@ -116,6 +126,32 @@ REJECTION_HINT = (
     "annotate the input parameter and the return value with tongflow.models "
     "types imported at module scope"
 )
+
+
+def parse_failure_reason(
+    exc: OSError | ValueError | SyntaxError,
+    path: Path,
+) -> tuple[int, str, str]:
+    """
+    ``(line, reason, hint)`` for a file that could not be read or parsed.
+
+    Both readers word this the same way from here: a plugin file swallowed by
+    the directory scan and a ``deploy.py`` rejected by the deploy parser say the
+    same sentence, so a plugin author never sees two spellings of one failure.
+
+    ``ValueError`` is in the signature because two ordinary unparseable shapes
+    raise it rather than ``OSError``: non-UTF-8 bytes raise ``UnicodeDecodeError``
+    from ``read_text``, and a NUL byte in the source raises ``ValueError`` from
+    ``ast.parse``. ``SyntaxError`` is NOT a ``ValueError``, so it stays listed.
+    """
+
+    if isinstance(exc, SyntaxError):
+        return (exc.lineno or 1, f"syntax error: {exc.msg}", "correct Python syntax")
+    if isinstance(exc, UnicodeDecodeError):
+        return (1, f"not valid UTF-8: {exc}", f"save {path.name} as UTF-8")
+    if isinstance(exc, ValueError):
+        return (1, f"unreadable source: {exc}", f"remove NUL bytes from {path.name}")
+    return (1, f"read failed: {exc}", f"make {path.name} readable")
 
 
 def slot_rejection_reason(
