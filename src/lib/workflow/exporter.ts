@@ -339,8 +339,7 @@ export class WorkflowExporter {
         const offenders = executableNodes
             .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
             .filter(
-                (n) =>
-                    !hasUpstreamSlot(n.id, NORMALIZE_SLOT, executableNodes),
+                (n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, executableNodes),
             )
             .map((n) => n.id);
         if (offenders.length > 0) {

@@ -69,8 +69,7 @@ function buildChain(specs: Spec[]): { nodes: Node[]; edges: Edge[] } {
             edges.push({
                 id: `e-${from}-${spec.id}`,
                 source: from,
-                sourceHandle:
-                    from === "src" ? "out:textNode" : "out:text",
+                sourceHandle: from === "src" ? "out:textNode" : "out:text",
                 target: spec.id,
                 targetHandle: "in:text",
             });
@@ -85,19 +84,16 @@ afterEach(() => {
 });
 
 describe("violation", () => {
-    it.each(TTS_SLOTS)(
-        "blocks %s when no reader sits upstream",
-        (slot) => {
-            const { nodes, edges } = buildChain([
-                { id: "a", feature: "gen-text" },
-                { id: "b", feature: slot, deps: ["a"] },
-            ]);
+    it.each(TTS_SLOTS)("blocks %s when no reader sits upstream", (slot) => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            { id: "b", feature: slot, deps: ["a"] },
+        ]);
 
-            expect(() => exportWorkflow(nodes, edges, { name: "x" })).toThrow(
-                new RegExp(`${WORKFLOW_TTS_NEEDS_NORMALIZE}[\\s\\S]*\\bb\\b`),
-            );
-        },
-    );
+        expect(() => exportWorkflow(nodes, edges, { name: "x" })).toThrow(
+            new RegExp(`${WORKFLOW_TTS_NEEDS_NORMALIZE}[\\s\\S]*\\bb\\b`),
+        );
+    });
 
     it("names every offending node, not just the first", () => {
         const { nodes, edges } = buildChain([

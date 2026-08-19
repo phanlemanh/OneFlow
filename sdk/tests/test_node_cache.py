@@ -91,7 +91,7 @@ def test_shared_asset_stores_one_blob(tmp_path):
     assert len(_blob_files(tmp_path)) == 1
 
 
-def test_allowlist_holds_exactly_the_twelve_mechanical_slots():
+def test_tier_a_allowlist_pinned_and_in_abi():
     # Guard on the constant itself: the deferred three must NOT be in it until
     # 1.1-L1b lands, and a new slot must not be added silently.
     # compose-overlay joined 2026-08-02: deterministic CPU overlay

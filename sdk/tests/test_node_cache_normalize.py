@@ -20,7 +20,12 @@ from tongflow.engine import runner as runner_mod
 
 
 def _normalize_workflow(text: str = "Giá 1.999.000₫") -> dict:
-    """`gen-text` (tier B) → `normalize-text-vi` (tier A).
+    """`image-gen-text` (tier B) → `normalize-text-vi` (tier A).
+
+    The upstream is `image-gen-text` rather than the more obvious `gen-text`:
+    `gen-text` sits in DESCOPED_GENERATIVE_SLOTS and is deliberately NOT cached,
+    so it re-runs every time by design and could never demonstrate the hit this
+    test is about.
 
     `text` parametrizes ONLY the reader's own binding: the upstream
     generation's business input never changes with it, which is what lets one
@@ -30,7 +35,7 @@ def _normalize_workflow(text: str = "Giá 1.999.000₫") -> dict:
         "executableNodes": [
             {
                 "id": "n1",
-                "feature": "gen-text",
+                "feature": "image-gen-text",
                 "pluginId": "oneflow-text",
                 "bindings": {
                     "text": {"kind": "static", "value": "viết mô tả căn hộ"},
@@ -121,7 +126,7 @@ def test_changing_text_reruns_only_normalize(tmp_path):
     assert len(c2) == 0
 
     r3, c3 = _run(_normalize_workflow(text="Giá 2.499.000₫"), tmp_path)
-    gen_calls = [c for c in c3 if c["slot"] == "gen-text"]
+    gen_calls = [c for c in c3 if c["slot"] == "image-gen-text"]
     read_calls = [c for c in c3 if c["slot"] == "normalize-text-vi"]
     assert r3["status"] == "success"
     assert len(gen_calls) == 0  # generation NOT re-paid

@@ -156,10 +156,17 @@ describe("normalize-text-vi node", () => {
             ).toBeTruthy();
         });
         // No third handle: the slot declares exactly one input and one output.
+        // React Flow puts `data-nodeid` on the handle element itself, not on a
+        // wrapper — a descendant selector here silently matches nothing and
+        // would turn this count into a vacuous assertion.
         const handles = document.querySelectorAll(
-            `[data-nodeid="${NODE_ID}"] [data-handleid]`,
+            `[data-handleid][data-nodeid="${NODE_ID}"]`,
         );
-        expect(handles.length).toBe(2);
+        expect(
+            Array.from(handles)
+                .map((h) => h.getAttribute("data-handleid"))
+                .sort(),
+        ).toEqual(["in:text", "out:text"]);
     });
 
     it("fans out exactly like the TTS nodes it feeds", () => {
@@ -174,6 +181,8 @@ describe("normalize-text-vi node", () => {
             feature: "normalize-text-vi",
             sourceSpec: NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
         });
-        expect(NODE_TYPE_SOURCE_SPEC.normalizeTextViNode).toHaveProperty("text");
+        expect(NODE_TYPE_SOURCE_SPEC.normalizeTextViNode).toHaveProperty(
+            "text",
+        );
     });
 });
