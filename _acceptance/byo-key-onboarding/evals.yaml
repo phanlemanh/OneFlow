@@ -207,7 +207,7 @@ evals:
   - id: E19
     criterion: AC-13
     executor: script
-    cmd: config:executors.design.a11y
+    cmd: config:executors.script.bko_a11y_proto
     paths: ["src/components/workspace/first-run-strip.tsx", "src/components/workspace/node-key-prompt.tsx", "src/components/proto/**", "src/app/globals.css"]
     expected: "exit 0 across all ten onboarding states x light+dark (20 pages); zero axe-core violations at impact critical or serious, contrast included. REBOUND 2026-08-07 from the kit's jsdom design gate, which reported PASS on this repo while emitting 'Could not parse CSS stylesheet' x19 — the stylesheet uses oklch()/color-mix()/:is(), so no colour resolved and no contrast was ever computed. axe-core runs INSIDE Chrome and reads the same computed styles the eye does; it found 11 serious violations the jsdom gate had passed. The scan exits 3 rather than 0 when it reaches no page, so an unreachable dev server cannot read as clean. SCOPE, stated plainly: it scans the real feature components rendered in the /proto harness, not the shipped workspace canvas"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]

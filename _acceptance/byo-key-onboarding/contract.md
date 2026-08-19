@@ -5,7 +5,7 @@ slug: byo-key-onboarding
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [ui, api]
-status: approved
+status: implemented
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-07T09:22:27Z
 time_human_minutes: {gate1: 0, gate2: 0}
