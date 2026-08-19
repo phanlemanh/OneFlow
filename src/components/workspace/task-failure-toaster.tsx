@@ -9,6 +9,7 @@ import type { FailureAction } from "@/lib/onboarding/failure-actions";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { SerializedWorkflowFailure } from "@/lib/task/error-envelope";
 import { buildTaskErrorDetail } from "@/lib/task/error-format";
+import { taskErrorFromSSE } from "@/lib/task/sse-error";
 import { SSE_TASK_MESSAGE_EVENT } from "@/lib/task/sse-events";
 import type { SSEMessage } from "@/types/sse";
 
@@ -88,7 +89,7 @@ export function TaskFailureToaster() {
             toastedRef.current.add(taskId);
 
             const data = message.data;
-            const errorText = data?.message?.trim() || data?.error?.trim();
+            const errorText = taskErrorFromSSE(message);
             const detail = buildTaskErrorDetail({
                 message: errorText,
                 errors: data?.errors as string[] | undefined,

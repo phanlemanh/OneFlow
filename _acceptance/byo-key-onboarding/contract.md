@@ -148,3 +148,24 @@ ra khi được hỏi, nhưng thiếu là hỏng. Đây là lý do trục ngành
 - **`feature_loop.ui_standards_skill` chưa khai** trong `_acceptance/config.yaml` → artifact UI của
   feature này không có đối trọng chuẩn nội. Không chặn; ghi để Cổng 1 biết.
 - AC-15 là mục judgment duy nhất. T3 ⇒ verdict của judge chỉ tham khảo, người phải tự phán.
+
+## Known limits (người ký nhận trước khi phát hành)
+
+Owner chọn đường **thu phạm vi** tại điểm dừng chống-vá-mù sau vòng chấm thứ hai
+(sổ quyết định, 2026-08-19). Hai phép đo dưới đây KHÔNG được đo lại ở vòng cuối;
+chúng đi tới Cổng Bằng chứng kèm đúng bằng chứng đang có:
+
+- **AC-8 (màn hình nói gì suốt lúc chờ lâu) — E11.** Đạt ở vòng chấm thứ nhất.
+  Vòng hai không lặp lại được: nhiều phiên máy chạy song song trên cùng một cây mã
+  khiến trang tự nạp lại vài chục giây một lần, xoá sạch trạng thái đang đếm giờ
+  trên màn hình. Đó là nhiễu của bàn thí nghiệm, không phải hành vi người dùng
+  thật gặp trên máy họ. Cơ chế phát mốc tiến độ (AC-7) đã được đo độc lập và đạt
+  ở cả hai vòng, kể cả nửa phá-thử.
+- **AC-12 (không gửi dữ liệu hành vi đi đâu) — E16.** Hai phép đo nội dung ĐẠT ở
+  cả hai vòng: có bằng chứng người dùng đã đi hết phễu thật (đối chứng dương), và
+  không một yêu cầu mạng nào mang bước onboarding / vị trí phễu / số đo thời gian.
+  Cổng "mạng phải sạch lỗi" thì trượt ở cả hai vòng vì máy chủ phát triển dùng
+  chung trả lỗi 500 giữa lúc đo, do chính việc nạp lại nói trên. Phép đo bằng quét
+  mã (E17, có nửa phá-thử) xanh ở cả hai vòng.
+
+Cả hai được đo lại trên máy sạch ở phiên nghiệm thu người thật.

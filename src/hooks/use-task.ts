@@ -16,6 +16,7 @@ import {
 import { createTask as apiCreateTask, updateTaskStatus } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
 import { getTaskStopUrl, getTaskWaitUrl } from "@/lib/task/api-url";
+import { taskErrorFromSSE } from "@/lib/task/sse-error";
 import {
     emitSSEConnected,
     emitSSETaskMessage,
@@ -405,10 +406,7 @@ export function useTaskSubscription(
                             status: taskStatus,
                             progress: message.progress || 0,
                             data: message.data,
-                            error:
-                                message.error ||
-                                ((message.data as Record<string, unknown>)
-                                    ?.error as string),
+                            error: taskErrorFromSSE(message),
                             nodeId:
                                 (msgNodeId != null && msgNodeId !== ""
                                     ? String(msgNodeId)
@@ -721,7 +719,7 @@ export function useBatchTaskManager(
                                     status: taskStatus,
                                     progress: message.progress || 0,
                                     data: message.data,
-                                    error: message.error,
+                                    error: taskErrorFromSSE(message),
                                     nodeId:
                                         (msgNodeId != null && msgNodeId !== ""
                                             ? String(msgNodeId)

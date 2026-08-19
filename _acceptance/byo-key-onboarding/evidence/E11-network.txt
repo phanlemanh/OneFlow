@@ -1,44 +1,65 @@
-E11 network truth dump — tab-6 (continuous session used for step1/step2 HTML frames)
-Captured via mcp__Claude_Browser__read_network_requests / read_console_messages after the run.
-dev_server.url (app-scope) = http://localhost:3000
+E11 network/console evidence — why a clean >=60s single-user provisioning-wait
+observation could not be captured in this shared dev-server session.
 
-== FAIL-eligible requests (fetch/XHR to http://localhost:3000/api/*) ==
-POST /api/task/create -> 200 OK  (x3, one per triggered node run)
-GET  /api/task/wait?taskId=... -> 200 OK  (x3, SSE stream open)
-POST /api/task/update-status -> 200 OK  (x3)
-GET  /api/uploads/example-assets/two-scenes.mp4 -> 200 / 206 Partial Content
-GET  /api/uploads/tasks/<taskId>/<file>.mp4 -> 200 / 206 Partial Content (multiple, all OK)
-=> No 4xx/5xx, no connection-error, no timeout on any app-scope XHR/fetch endpoint.
+driver: mcp__Claude_Browser (Claude_Browser MCP). read_network_requests /
+read_console_messages available -> NETWORK TRUTH is machine-readable, not n-a.
 
-== Same-origin but NOT app data calls (Next.js RSC navigation prefetch) ==
-GET /workspace?_rsc=... -> repeatedly shows both "200 OK" and "[FAILED: net::ERR_ABORTED]"
-This is Next.js dev-mode React Server Component prefetch traffic triggered by repeated
-router re-renders / Fast Refresh during this verification session (I navigated/reloaded
-the tab several times while setting up the test). ERR_ABORTED here means a newer
-prefetch superseded an older one client-side — it never reached the server as a failed
-response, so it is not a connection-error/timeout/5xx against a real endpoint. Judged as
-noise from my own repeated navigation, not a product defect. Treated as note-only, not
-FAIL-eligible in the sense of the rubric (it is navigation plumbing, not an XHR/fetch the
-onboarding feature performs to get its own data).
+=== Root cause, confirmed from console ===
+Repeating pattern throughout the whole test window (03:16-03:34 local session time,
+epoch ~1787109400000-1787110970000):
 
-== Static assets (webpack HMR chunks, CSS) ==
-Many /_next/static/webpack/*.hot-update.{json,js} and /_next/static/css/*.css requests,
-all 200 OK. Expected Next dev-mode hot-reload chatter from edits happening elsewhere in
-this shared dev server during the session. Static-asset class -> note-only per rubric.
+    [log] [Fast Refresh] rebuilding
+    [log] [Fast Refresh] done in <100-220>ms
+    [log] AddVideoNode data: Object
+    [log] AddVideoNode data: Object
+    [log] AddImageNode
+    [log] AddImageNode
 
-== Console errors ==
-- 5x "Failed to load resource: the server responded with a status of 404 (Not Found)"
-  reported by the console API but the exact URL was not resolvable from
-  read_console_messages output, and no 404 status line appears in the captured
-  read_network_requests window (limit 200) for /api/* or /workspace routes. Likely a
-  favicon/icon or a stale HMR chunk reference evicted from the request ring buffer before
-  this read. Not tied to any /api/* call actually exercised by the FirstRunStrip /
-  provisioning flow under test.
-- 1x React hydration-mismatch warning for a Radix UI Tooltip/DropdownMenu `id` attribute
-  (server-rendered id vs client id differ — a pre-existing Radix `useId` SSR/CSR quirk in
-  the top-bar language switcher). Unrelated to AC-8 / the provisioning strip; not
-  reproduced inside the FirstRunStrip component itself.
+"[Fast Refresh] rebuilding/done" + the node components' own mount-time console logs
+firing again immediately after each rebuild indicate the whole workspace React tree
+(including FirstRunStripContainer, which lives in the same tree) is being REMOUNTED
+by webpack Fast Refresh, not just hot-patched. A remount resets useState/useRef to
+their initial values -- exactly the local `override` / `provisioningStartRef` state
+first-run-strip-container.tsx uses to hold the "provisioning" phase and its elapsed
+counter. This is why the strip kept reverting from the provisioning milestone trail
+back to the underlying readiness text ("Done. Press Run on the first node to try it.")
+well before any real task could have finished the actual work.
 
-== Verdict ==
-All FAIL-eligible (app-scope /api/* XHR/fetch) requests: clean (200/206, no 4xx/5xx, no
-connection error, no timeout). networkObserved = clean.
+=== Corroborating network evidence ===
+Continuous churn of *.hot-update.json / *.hot-update.js fetches, roughly every 5-25s
+for the entire session (sample, epoch ms in the hash-named files' query-string `v=`
+timestamps): 1787110717458, 1787110718380, 1787110757642, 1787110781162,
+1787110822153, 1787110828223, 1787110835669, 1787110843359, 1787110846971,
+1787110855822, 1787110879473, 1787110886419, 1787110901663, 1787110961147,
+1787110966813, 1787110970xxx... i.e. a fresh Fast Refresh compile roughly every
+5-25 seconds without a break > ~60s anywhere in the observed window. This repo
+(/Users/manh-macmini/dev/oneflow) has many other parallel workflow subagents
+actively editing source files in the SAME working tree against the SAME shared
+`pnpm dev` instance (port 3000, PID 895) during this verification run — this
+verifier did not start that server and does not own it (see E11 verifier's own
+outputTail).
+
+Also observed: several `GET /workspace?_rsc=...` requests tagged
+"[FAILED: net::ERR_ABORTED]" -- consistent with React Server Component prefetches
+being cancelled mid-flight by the same rebuild churn. Static-asset scope, note-only.
+
+=== FAIL-eligible app-origin requests (scope: http://localhost:3000, per
+_acceptance/config.yaml dev_server.url) ===
+Two confirmed 404s against a real API route during this session:
+    POST http://localhost:3000/api/task/create -> 404 Not Found  (x2, transient)
+  paired with browser console:
+    [error] Failed to create batch tasks: {status: 404, ...}
+    [error] [useAbiExecution] Failed to create tasks: {status: 404, ...}
+A retry moments later against the identical route succeeded (200 OK), and
+`src/app/api/task/create/route.ts` is untouched in `git status`/`git log` -- the
+404 was the dev server's route manifest being transiently stale mid-rebuild, not a
+missing/broken route. Still FAIL-eligible per the letter of the network-truth rule
+(4xx on app origin, not an expected status for this eval) -- reported honestly below
+rather than waived.
+
+=== Verdict fields for this eval's STRUCTURED OUTPUT ===
+networkObserved: app-fail
+  (the two POST /api/task/create 404s above are FAIL-eligible per scope and are not
+  an expected status of this eval; recorded as observed rather than excused, even
+  though this verifier's own diagnosis is that they were caused by the same
+  concurrent-rebuild churn documented above, not by product code.)
