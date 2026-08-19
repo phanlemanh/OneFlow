@@ -58,6 +58,40 @@ const _slot_gen_text_outputs = {
 } as const;
 export type GenTextOutput = FromSchema<typeof _slot_gen_text_outputs>;
 
+const _slot_normalize_text_vi_inputs = {
+    type: "object",
+    required: ["text"],
+    properties: {
+        text: {
+            type: "string",
+            minLength: 1,
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type NormalizeTextViInput = FromSchema<
+    typeof _slot_normalize_text_vi_inputs
+>;
+const _slot_normalize_text_vi_outputs = {
+    type: "object",
+    required: ["success"],
+    properties: {
+        success: {
+            type: "boolean",
+        },
+        error: {
+            type: "string",
+        },
+        text: {
+            type: "string",
+        },
+    },
+    additionalProperties: false,
+} as const;
+export type NormalizeTextViOutput = FromSchema<
+    typeof _slot_normalize_text_vi_outputs
+>;
+
 const _slot_split_text_inputs = {
     type: "object",
     required: ["text"],
@@ -4355,6 +4389,7 @@ export type ComposeOverlayOutput = FromSchema<
 // --- NodeSlot union ---
 export type NodeSlot =
     | "gen-text"
+    | "normalize-text-vi"
     | "split-text"
     | "combine-text"
     | "image-fusion"
@@ -4420,6 +4455,7 @@ export type NodeSlot =
 // --- Lookup maps ---
 export type SlotInputsMap = {
     "gen-text": GenTextInput;
+    "normalize-text-vi": NormalizeTextViInput;
     "split-text": SplitTextInput;
     "combine-text": CombineTextInput;
     "image-fusion": ImageFusionInput;
@@ -4485,6 +4521,7 @@ export type SlotInputsMap = {
 
 export type SlotOutputsMap = {
     "gen-text": GenTextOutput;
+    "normalize-text-vi": NormalizeTextViOutput;
     "split-text": SplitTextOutput;
     "combine-text": CombineTextOutput;
     "image-fusion": ImageFusionOutput;
@@ -4675,6 +4712,35 @@ export const ABI_NODES = {
                 },
                 userPrompt: {
                     type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+        outputs: {
+            type: "object",
+            required: ["success"],
+            properties: {
+                success: {
+                    type: "boolean",
+                },
+                error: {
+                    type: "string",
+                },
+                text: {
+                    type: "string",
+                },
+            },
+            additionalProperties: false,
+        },
+    },
+    "normalize-text-vi": {
+        inputs: {
+            type: "object",
+            required: ["text"],
+            properties: {
+                text: {
+                    type: "string",
+                    minLength: 1,
                 },
             },
             additionalProperties: false,
