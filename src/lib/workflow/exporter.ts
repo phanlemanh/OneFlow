@@ -30,6 +30,60 @@ import {
 import { WorkflowParser } from "./parser";
 
 /**
+ * Slots that turn written text into speech.
+ *
+ * An explicit allowlist, not a rule — both plausible rules are wrong on today's
+ * ABI. "text in, audio out" also matches the six music slots below, whose
+ * `text` describes the music to a model rather than words to be spoken; and
+ * "the name contains speech" matches `speech-text-gen-video` /
+ * `speech-video-gen-video`, which CONSUME speech. `tts-order-guard.test.ts`
+ * keeps this list in step with the ABI in BOTH directions, so a slot added by
+ * roadmap 1.4 cannot slip past the guard silently.
+ */
+export const TTS_SLOTS: readonly NodeSlot[] = [
+    "text-gen-speech-preset",
+    "text-gen-speech-clone",
+    "text-gen-speech-instruct",
+    "text-audio-gen-speech",
+];
+
+/** Text-in, audio-out slots that are NOT speech — the negative control. */
+export const MUSIC_SLOTS: readonly NodeSlot[] = [
+    "gen-music",
+    "music-repaint",
+    "music-cover",
+    "music-lego",
+    "music-complete",
+    "separate-sound",
+];
+
+/** Thrown by `export()` when a TTS node has no reader upstream (roadmap 1.3). */
+export const WORKFLOW_TTS_NEEDS_NORMALIZE = "WORKFLOW_TTS_NEEDS_NORMALIZE";
+
+const NORMALIZE_SLOT = "normalize-text-vi";
+
+/** Walk `dependencies` transitively looking for one slot. */
+function hasUpstreamSlot(
+    nodeId: string,
+    slot: string,
+    nodes: ExecutableNode[],
+): boolean {
+    const byId = new Map(nodes.map((n) => [n.id, n]));
+    const seen = new Set<string>();
+    const stack = [...(byId.get(nodeId)?.dependencies ?? [])];
+    while (stack.length) {
+        const id = stack.pop() as string;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        const upstream = byId.get(id);
+        if (!upstream) continue;
+        if (upstream.feature === slot) return true;
+        stack.push(...upstream.dependencies);
+    }
+    return false;
+}
+
+/**
  * Resolve a node's ABI spec from the mount registry. Returns the registration +
  * resolved spec, or undefined if the node isn't ABI-registered.
  */
@@ -278,6 +332,22 @@ export class WorkflowExporter {
                     dataNodeIds.has(edge.target),
             )
             .map((edge) => ({ source: edge.source, target: edge.target }));
+
+        // Roadmap 1.3: reading numbers aloud is mandatory before any TTS node.
+        // Enforced here because this is the one gate every workflow passes,
+        // whether the Director planned it or a person wired it by hand.
+        const offenders = executableNodes
+            .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
+            .filter(
+                (n) =>
+                    !hasUpstreamSlot(n.id, NORMALIZE_SLOT, executableNodes),
+            )
+            .map((n) => n.id);
+        if (offenders.length > 0) {
+            throw new Error(
+                `${WORKFLOW_TTS_NEEDS_NORMALIZE}: node ${offenders.join(", ")} đọc chữ thành tiếng nhưng phía trên không có node "Đọc số thành chữ". Thêm node đó vào giữa nguồn chữ và node giọng đọc.`,
+            );
+        }
 
         return {
             name: options.name ?? "Untitled Workflow",

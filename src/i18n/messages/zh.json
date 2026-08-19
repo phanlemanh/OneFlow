@@ -494,7 +494,8 @@
                 "musicExtract": "分离音轨",
                 "musicLego": "添加乐轨",
                 "musicComplete": "补全编曲",
-                "musicBrief": "音乐企划"
+                "musicBrief": "音乐企划",
+                "normalizeTextVi": "数字转文字"
             },
             "options": {
                 "portrait": "竖屏",
@@ -556,7 +557,8 @@
                 "addTrack": "生成乐轨",
                 "completeMusic": "开始补全",
                 "musicBrief": "生成企划",
-                "applyOverlay": "应用叠加"
+                "applyOverlay": "应用叠加",
+                "normalizeTextVi": "规范化"
             },
             "params": {
                 "prompt": "提示词",

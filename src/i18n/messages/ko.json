@@ -494,7 +494,8 @@
                 "musicExtract": "스템 추출",
                 "musicLego": "트랙 추가",
                 "musicComplete": "편곡 완성",
-                "musicBrief": "음악 브리프"
+                "musicBrief": "음악 브리프",
+                "normalizeTextVi": "숫자를 읽기용으로 변환"
             },
             "options": {
                 "portrait": "세로",
@@ -556,7 +557,8 @@
                 "addTrack": "트랙 생성",
                 "completeMusic": "보완 시작",
                 "musicBrief": "브리프 생성",
-                "applyOverlay": "오버레이 적용"
+                "applyOverlay": "오버레이 적용",
+                "normalizeTextVi": "정규화"
             },
             "params": {
                 "prompt": "프롬프트",

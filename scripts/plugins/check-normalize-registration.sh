@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# E13 (normalize-text-vi AC-13) — registration is synced across every place that
+# has to know about the plugin.
+#
+# The three READMEs are hand-maintained and drift silently (CLAUDE.md says so in
+# as many words), and the five locale files are the other half of "the node is
+# actually usable". Both are product requirements, not documentation chores, so
+# they are measured rather than trusted.
+set -euo pipefail
+
+# Root from the script's own location, never cwd.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+PLUGIN_ID="oneflow-api-normalize-text-vi"
+ORIGIN="https://github.com/phanlemanh"
+fails=0
+
+fail() {
+    echo "FAIL: $1"
+    fails=$((fails + 1))
+}
+
+# 1. Manifest entry, with the right origin.
+node -e "
+  const fs = require('fs');
+  const m = JSON.parse(fs.readFileSync('$ROOT/config/official-plugins.json', 'utf8'));
+  const e = m.plugins.find((p) => typeof p === 'object' && p !== null && p.id === '$PLUGIN_ID');
+  if (!e) { console.error('FAIL: manifest thiếu entry $PLUGIN_ID'); process.exit(1); }
+  if (e.origin !== '$ORIGIN') { console.error('FAIL: origin sai: ' + e.origin); process.exit(1); }
+" || fail "manifest chưa đăng ký $PLUGIN_ID dưới $ORIGIN"
+
+# 2. All three READMEs list the plugin AND carry the new capability row.
+#    The row is an ADDITION under Transform -> Text: that section had exactly one
+#    row before this feature, so there was no empty box to tick.
+check_doc() {
+    local file="$1" row_marker="$2"
+    grep -q "$PLUGIN_ID" "$ROOT/$file" || fail "$file không nhắc $PLUGIN_ID"
+    grep -q "$row_marker" "$ROOT/$file" || fail "$file thiếu hàng ma trận năng lực mới"
+}
+check_doc "README.md" "Read numbers aloud (Vietnamese)"
+check_doc "docs/README_ZH.md" "数字转文字（越南语）"
+check_doc "docs/README_JA.md" "数字を読み上げ用に変換（ベトナム語）"
+
+# 3. Five locales, both key buckets. A node whose title renders as the raw key
+#    is not shipped, it is broken in four languages.
+for locale in en vi ja ko zh; do
+    file="$ROOT/src/i18n/messages/${locale}.json"
+    for bucket in titles actions; do
+        node -e "
+          const d = require('$file');
+          const v = d?.Workspace?.nodes?.['$bucket']?.normalizeTextVi;
+          if (typeof v !== 'string' || !v.trim()) process.exit(1);
+        " || fail "$locale.json thiếu Workspace.nodes.$bucket.normalizeTextVi"
+    done
+done
+
+if [ "$fails" -gt 0 ]; then
+    echo "FAIL: $fails chỗ chưa đồng bộ"
+    exit 1
+fi
+echo "OK: manifest + 3 README (danh sách & hàng ma trận) + 5 locale đều đồng bộ"

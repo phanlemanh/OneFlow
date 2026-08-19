@@ -88,6 +88,7 @@ import TextGenSpeechCloneNode from "./nodes/transfer/text-gen-speech-clone";
 import TextGenSpeechInstructNode from "./nodes/transfer/text-gen-speech-instruct";
 import TextGenSpeechPresetNode from "./nodes/transfer/text-gen-speech-preset";
 import GenTextNode from "./nodes/transfer/text-gen-text";
+import NormalizeTextViNode from "./nodes/transfer/normalize-text-vi";
 import TextGenVideoNode from "./nodes/transfer/text-gen-video";
 import VideoEditNode from "./nodes/transfer/video-edit";
 import VideoGenModelNode from "./nodes/transfer/video-gen-model";
@@ -132,6 +133,7 @@ export const NODE_TYPES: NodeTypes = {
     imageGenImageNode: ImageGenImageNode,
     imageGenImageUpscaleNode: ImageGenImageUpscaleNode,
     genTextNode: GenTextNode,
+    normalizeTextViNode: NormalizeTextViNode,
     textGenImageNode: TextGenImageNode,
     textGenMusicNode: TextGenMusicNode,
     textGenSpeechCloneNode: TextGenSpeechCloneNode,
@@ -238,6 +240,7 @@ export const NODE_CATEGORIES = {
         "imageGenImageNode",
         "imageGenImageUpscaleNode",
         "genTextNode",
+        "normalizeTextViNode",
         "textGenImageNode",
         "textGenMusicNode",
         "textGenSpeechCloneNode",

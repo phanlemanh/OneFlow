@@ -97,6 +97,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
+- ✅ **Read numbers aloud (Vietnamese)**: turn numbers, prices, dates and abbreviations into spoken Vietnamese — required before text-to-speech.
 
 #### Image
 
@@ -188,6 +189,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 
 - [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — transcoding, muxing, media pipelines
 - [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — shot-boundary detection for splitting clips
+- [oneflow-api-normalize-text-vi](https://github.com/phanlemanh/oneflow-api-normalize-text-vi) — reads Vietnamese numbers, prices and dates out as words before TTS
 
 ### GPU/CPU plugins
 

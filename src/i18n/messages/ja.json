@@ -494,7 +494,8 @@
                 "musicExtract": "ステム抽出",
                 "musicLego": "トラック追加",
                 "musicComplete": "編曲補完",
-                "musicBrief": "音楽ブリーフ"
+                "musicBrief": "音楽ブリーフ",
+                "normalizeTextVi": "数字を読み上げ用に変換"
             },
             "options": {
                 "portrait": "縦向き",
@@ -556,7 +557,8 @@
                 "addTrack": "トラック生成",
                 "completeMusic": "補完開始",
                 "musicBrief": "ブリーフ生成",
-                "applyOverlay": "オーバーレイを適用"
+                "applyOverlay": "オーバーレイを適用",
+                "normalizeTextVi": "正規化"
             },
             "params": {
                 "prompt": "プロンプト",

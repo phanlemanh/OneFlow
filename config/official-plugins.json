@@ -16,6 +16,10 @@
             "id": "oneflow-api-pyscenedetect",
             "origin": "https://github.com/phanlemanh"
         },
+        {
+            "id": "oneflow-api-normalize-text-vi",
+            "origin": "https://github.com/phanlemanh"
+        },
         "tongflow-modal-z-image",
         "tongflow-modal-ernie-image",
         "tongflow-modal-flux2-klein9b",

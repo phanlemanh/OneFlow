@@ -90,6 +90,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 #### 文本
 
 - ✅ **生成 / 改写**: 根据提示创建或编辑文案。
+- ✅ **数字转文字（越南语）**: 把数字、价格、日期和缩写转成越南语口语形式 — 语音合成前必需。
 
 #### 图像
 
@@ -181,6 +182,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 
 - [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — 转码、混流、媒体处理管线
 - [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — 镜头边界检测，用于分割片段
+- [oneflow-api-normalize-text-vi](https://github.com/phanlemanh/oneflow-api-normalize-text-vi) — 语音合成前把越南语数字、价格、日期读成文字
 
 ### GPU/CPU 插件
 
