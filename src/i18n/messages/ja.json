@@ -962,6 +962,20 @@
                 "editOp": "オペを編集",
                 "removeOp": "オペを削除"
             }
+        },
+        "firstRun": {
+            "missingTitle": "この例を実行するには {count} 個のツールが必要です",
+            "missingTitleWithSize": "この例を実行するには {count} 個のツール（約 {mb} MB）が必要です",
+            "prepare": "ツールを取得",
+            "installing": "ツールをダウンロード中…（{done}/{total}）",
+            "milestoneCreatingVenv": "環境を作成",
+            "milestoneInstallingSdk": "SDK をインストール",
+            "milestoneInstallingRequirements": "ライブラリをインストール",
+            "elapsed": "{sec} 秒経過。次回からはすぐ起動します。",
+            "ready": "完了。最初のノードの Run を押して試してください。",
+            "blocked": "準備できませんでした",
+            "blockedReasonDownload": "ツールをダウンロードできませんでした。接続を確認してください。",
+            "retry": "再試行"
         }
     },
     "Upload": {

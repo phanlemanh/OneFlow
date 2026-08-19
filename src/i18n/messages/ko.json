@@ -1048,6 +1048,20 @@
                 "editOp": "작업 편집",
                 "removeOp": "작업 삭제"
             }
+        },
+        "firstRun": {
+            "missingTitle": "이 예제를 실행하려면 도구 {count}개가 필요합니다",
+            "missingTitleWithSize": "이 예제를 실행하려면 도구 {count}개(약 {mb} MB)가 필요합니다",
+            "prepare": "도구 받기",
+            "installing": "도구 다운로드 중… ({done}/{total})",
+            "milestoneCreatingVenv": "환경 만들기",
+            "milestoneInstallingSdk": "SDK 설치",
+            "milestoneInstallingRequirements": "라이브러리 설치",
+            "elapsed": "{sec}초 경과. 다음부터는 바로 실행됩니다.",
+            "ready": "완료. 첫 번째 노드의 Run을 눌러 실행해 보세요.",
+            "blocked": "준비하지 못했습니다",
+            "blockedReasonDownload": "도구를 내려받지 못했습니다 — 연결을 확인하세요.",
+            "retry": "다시 시도"
         }
     },
     "Upload": {
