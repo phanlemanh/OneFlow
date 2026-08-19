@@ -7,7 +7,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 5747c606b47b2a4604ea1b36653b0df92510ca63
-human_signoff:
+human_signoff: Manh 2026-08-18
 ---
 
 # Evidence Report: scan-scope-diagnostics

@@ -1,42 +1,7 @@
 {
   "feature_plain": "Khi một plugin không phục vụ được node nào, người viết plugin nhận đúng lý do và đúng dòng gây lỗi, thay vì một câu chung chung đổ lỗi cho tệp khởi động.",
 
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ nêu đúng lý do và đúng dòng khi handler viết sai nằm trong một khối điều kiện hoặc khối nạp thư viện ở đầu tệp." },
-    { "id": "AC-2", "p": "Sẽ làm được điều đó với cả mười kiểu khối của Python, kiểm riêng từng kiểu nên sót kiểu nào là gọi tên kiểu đó ra." },
-    { "id": "AC-3", "p": "Sẽ im lặng tuyệt đối khi handler trong khối được viết đúng, không đẻ thêm cảnh báo thừa." },
-    { "id": "AC-4", "p": "Sẽ không nhắc tới hàm nằm lồng bên trong một hàm khác, vì đó không phải handler cấp tệp." },
-    { "id": "AC-5", "p": "Sẽ không nhắc tới phương thức nằm trong thân class, vì phần đó đã có bộ đọc riêng lo." },
-    { "id": "AC-15", "p": "Sẽ vẫn nêu đúng lý do cho handler đặt thẳng ở đầu tệp, hình dạng phổ biến nhất và là thứ đang chạy đúng hôm nay." },
-    { "id": "AC-7", "p": "Sẽ chỉ thẳng tệp và dòng khi một tệp của plugin có lỗi cú pháp." },
-    { "id": "AC-8", "p": "Sẽ nói rõ khi một tệp của plugin không đọc được." },
-    { "id": "AC-9", "p": "Sẽ giữ lại lời giải thích của bộ đọc tệp triển khai, ví dụ hai class cùng giành một slot, thay vì vứt đi." },
-    { "id": "AC-10", "p": "Sẽ dùng chung một câu chữ cho lỗi tệp không phân tích được, bất kể lỗi đến từ bộ đọc nào." },
-    { "id": "AC-11", "p": "Sẽ giữ đủ lý do từ cả hai class khi một tệp triển khai có class đánh dấu nằm cạnh một class tên cũ." },
-    { "id": "AC-12", "p": "Sẽ không lặp lại cùng một lý do hai lần ở hình dạng plugin thông thường." },
-    { "id": "AC-13", "p": "Sẽ không làm plugin nào đang sạch bỗng dưng bị báo lỗi." },
-    { "id": "AC-14", "p": "Sẽ không đụng tới hợp đồng dữ liệu, cơ sở dữ liệu, hay số hiệu phát hành của bộ công cụ Python." }
-  ],
-
-  "wont_do": [
-    { "id": "AC-6", "p": "Sẽ KHÔNG để hai nửa của bộ quét tự trả lời riêng câu hỏi handler này có ở đầu tệp hay không, và điều đó được chứng minh bằng cách phá hỏng đúng chỗ trả lời duy nhất." }
-  ],
-
   "scope_plain": "Chỉ sửa phần BÁO LÝ DO, không đụng phần quyết định nhận hay không nhận handler; và không phát hành bản công cụ Python mới.",
-
-  "coverage_plain": [
-    { "i": 0, "p": "Đã soi đủ bảy chỗ một handler có thể nằm, từ đầu tệp, trong khối, trong hàm khác, trong thân class, tới ba hình dạng tệp triển khai. Bằng chứng đủ là luật phạm vi của chính Python. Phủ bởi AC-1 tới AC-5, AC-15 (handler ở đầu tệp), AC-9, AC-11, AC-12." },
-    { "i": 1, "p": "Đã soi đủ bốn loại lý do: không có lỗi, lỗi ở từng handler, tệp hỏng, và hai class giành nhau một slot. Bằng chứng đủ là cách các công cụ soát mã Python quen thuộc luôn đặt lỗi ngay tại dòng định nghĩa. Phủ bởi AC-1, AC-7, AC-8, AC-9, AC-11." },
-    { "i": 2, "p": "Đã soi đủ mười kiểu khối và cả trường hợp lồng nhau. Bằng chứng đủ là bộ kiểm mười kiểu khối gói trước đã dựng cho phần đọc thư viện. Phủ bởi AC-2 (ma trận mười kiểu khối)." }
-  ],
-
-  "gap_probe_plain": [
-    { "i": 0, "p": "Bộ tiêu chí bỏ sót hình dạng phổ biến nhất: handler đặt thẳng ở đầu tệp, không lồng trong khối nào. Vì phép đo tiếng ồn chỉ báo động khi lỗi TĂNG, một bản sửa làm MẤT lời giải thích đang chạy đúng sẽ lọt qua toàn bộ phép đo. Đã thêm một tiêu chí và một phép đo riêng cho hình dạng đó." },
-    { "i": 1, "p": "Lời hứa giữ nguyên phần đọc thư viện gồm bốn trường hợp, nhưng phép đo chỉ chạm hai. Đã mở phép đo ra đủ bốn. Nửa còn lại của góp ý, rằng không phép đo nào chạy toàn bộ bộ kiểm Python, thì KHÔNG nhận: cấu hình vòng lặp vốn đã chạy toàn bộ bộ kiểm đó ở mỗi vòng nghiệm thu." },
-    { "i": 2, "p": "Lời hứa chỉ một chỗ trả lời câu hỏi phạm vi là một QUAN HỆ, nhưng phép đo lại chỉ kiểm riêng cái hàm đó đứng một mình. Người viết mã vẫn có thể lặng lẽ thêm một bản sao riêng mà mọi phép đo vẫn xanh. Đã thêm phép đo phá hỏng đúng một chỗ và đòi cả hai bên cùng đổi hành vi." },
-    { "i": 3, "p": "Phép đo tiếng ồn chỉ đọc thư mục plugin vốn không nằm trong kho và chỉ có khi cài thật, nên trên máy sạch nó so hai tập rỗng rồi báo xanh. Đã tách làm hai: một bản luôn chạy trên cây mẫu đã lưu trong kho, một bản chạy trên cây thật và bỏ qua CÓ NÊU TÊN khi chưa cài." },
-    { "i": 4, "p": "Phép đo bán kính ảnh hưởng không ghim mốc so sánh, nên nếu mốc trôi lên trùng đỉnh thì nó báo sạch mà thật ra chưa so gì. Đã ghim mốc là đỉnh nhánh cha, buộc in mốc ra bằng chứng, và đòi phần khác biệt không được rỗng." }
-  ],
 
   "decisions_plain": [
     { "id": "d-20260818T051709Z-11946", "p": "Xây trên nhánh của gói trước chứ không tách từ nhánh chính, vì mã cần sửa mới chỉ tồn tại ở đó; đổi lại việc này chỉ lên được sau khi gói trước lên." },
@@ -45,6 +10,10 @@
     { "id": "d-20260818T052009Z-15686", "p": "Nhận thêm đường thứ tư mà lượt quét không gian tìm ra, là lỗi cú pháp trong tệp khởi động bị nuốt; đổi lại thêm một tiêu chí và hai phép đo." },
     { "id": "d-20260818T052109Z-30448", "p": "Tách việc không báo trùng lý do thành tiêu chí riêng; đổi lại bắt được đúng cái bẫy khiến bản sửa hồn nhiên làm mọi plugin thường báo lỗi hai lần." },
     { "id": "d-20260818T052209Z-8486", "p": "Lấy đỉnh nhánh cha làm mốc so sánh thay vì nhánh chính; đổi lại phần rà soát chỉ đọc đúng thay đổi của việc này, không lẫn của gói trước." },
-    { "id": "d-20260818T053009Z-27714", "p": "Viết bộ kiểm vào một tệp mới thay vì nối vào tệp của gói trước; đổi lại không làm xê dịch thước đo của gói đang chờ duyệt." }
+    { "id": "d-20260818T053009Z-27714", "p": "Viết bộ kiểm vào một tệp mới thay vì nối vào tệp của gói trước; đổi lại không làm xê dịch thước đo của gói đang chờ duyệt." },
+    { "id": "d-20260818T061500Z-8821", "p": "Phép đo về một-cách-nói-duy-nhất bị sửa lại vì nó xanh nhờ đường sai: bản quét đọc cả tệp triển khai nên một bộ đọc đứng thay cho bộ kia; nay hai bộ đọc bị gọi riêng." },
+    { "id": "d-20260818T073000Z-14502", "p": "Dừng lại sửa lỗi công cụ pnpm trước khi chạy vòng nghiệm thu, thay vì kẹp cờ đi vòng; đổi lại chờ lâu hơn nhưng bằng chứng không mang vết đỏ mượn của người khác." },
+    { "id": "d-20260818T093000Z-22417", "p": "Sửa cả bốn phép đo yếu mà vòng một tìm ra, không chỉ hai cái được gọi tên; đổi lại rộng hơn yêu cầu nhưng cùng một lớp lỗi và không nới hợp đồng." },
+    { "id": "d-20260818T160000Z-31088", "p": "Nới bộ bắt lỗi để một tệp sai mã hoá tự xưng tên thay vì làm sập cả bản quét; đổi lại giữ đúng lời hứa một plugin hỏng không được kéo đổ đăng ký của mọi plugin khác." }
   ]
 }

@@ -5,7 +5,7 @@ slug: scan-scope-diagnostics
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [plugins, sdk]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-18
 ---
@@ -217,3 +217,42 @@ pairwise.
 - **Sóng ký lại:** thay đổi trong `sdk/**` làm hết hiệu lực bằng chứng của các feature sở hữu
   file trong đó — ứng viên là `conformance-l0`, `oneflow-plugin-prefix` và chính
   `scan-with-block-imports`. Chi phí thật tính bằng máy ở Cổng 1.
+
+### Known limits (Cổng 2 — người ký chấp nhận, ship bản này)
+
+Năm hạn chế do vòng review S4 xác nhận, đều NGOÀI phạm vi đã duyệt ở Cổng 1; hai mục đầu
+được chủ động tái hiện lại bằng tay trước khi ký. Hai gốc rễ của chúng chuyển sang hợp
+đồng con (mục kế).
+
+- **`deploy.py` không phân tích được bị báo HAI lần, giống hệt từng byte.** Bản quét thư
+  mục đọc mọi `*.py` kể cả `deploy.py` (`scan.py:149`), rồi `parse_deploy_py` đọc lại chính
+  tệp đó (`scan.py:~390`); vì hai bộ đọc cố ý nói chung một câu (AC-10), hai dòng trùng
+  khít. Hai finder độc lập cùng hội tụ về lỗi này. Tái hiện: `deploy.py` chứa
+  `class Inference(:` → hai entry `errors` y hệt.
+- **Một tệp `.py` lạc lối hỏng cú pháp dập mất câu chẩn đoán đăng ký thật.** Tái hiện:
+  plugin có `entry.py` lành không handler + `tests/legacy.py` chứa `print "py2"` → chỉ còn
+  lỗi cú pháp của tệp rác, câu `no @node_slot ... found` biến mất. Hành vi này là ĐÚNG
+  NGUYÊN VĂN AC-7 đã duyệt ("a plugin `.py` file", không giới hạn tệp) — lỗi nằm ở câu chữ
+  tiêu chí viết quá rộng, nên sửa nó bắt buộc đi đường amend ở hợp đồng con, không có
+  đường vá im lặng trong gói này.
+- **Ca đo NUL-byte xanh được bằng đường sai.** Khẳng định duy nhất của nó là chuỗi đường
+  dẫn có mặt trong danh sách lỗi, mà câu chung chung của chính plugin đó cũng chứa đúng
+  chuỗi ấy — nếu lỗi parse bị nuốt trở lại, phép đo vẫn xanh. (`test_scan_diagnostics.py`,
+  ca NUL-byte.)
+- **Răng `scope-gate` tuyên quét cả nhóm nhưng chỉ chạy điểm-case.** Lượt phá thử phủ hẹp
+  hơn danh sách phép đo nó nhân danh.
+- **Răng `parse-failure` chạy 2/7 ca của nhóm nó tuyên.** Cùng lớp với mục trên — lớp
+  thước-lỏng này xuất hiện ở cả ba vòng review, dấu hiệu khuôn viết thước sai chứ không
+  phải chín cái thước tình cờ sai.
+
+### Việc tách ra hợp đồng riêng
+
+- **`scan-parse-failure-semantics`** — một hợp đồng con ôm cả hai gốc rễ còn sống:
+  1. *Ngữ nghĩa lỗi-đọc-tệp ở tầng `scan()`:* một lý do chỉ xuất hiện MỘT lần tại nơi hai
+     bộ đọc gặp nhau (nâng bất biến "exactly once" của AC-12 từ `parse_deploy` lên
+     `scan()`), và câu chẩn đoán chung chung chỉ nhường chỗ cho lỗi ở tệp CÓ THỂ chứa
+     handler (`entry.py` / `deploy.py`) — điều này **supersede câu chữ AC-7 của hợp đồng
+     này**, đi qua Cổng 1 của chính nó.
+  2. *Luật đo:* mọi khẳng định âm phải ghim thông điệp và có đối chứng dương; mọi lượt phá
+     thử chạy TRỌN nhóm nó tuyên; tái cắt các thước lỏng nêu trên dưới luật đó một thể.
+  Xem `HANDOFF.md` cùng thư mục cho đầu vào đầy đủ (tái hiện, con trỏ dòng, phác tiêu chí).
