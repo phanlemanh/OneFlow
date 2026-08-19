@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { logger } from "@/lib/logger";
 import { readExampleRequirements } from "@/lib/onboarding/example-requirements";
 import {
     installPlugin,
@@ -14,6 +15,11 @@ export type InstallMissingResult = {
     /** Already present — never re-cloned. */
     skipped: string[];
     failed: string[];
+    /**
+     * Why each failed id failed, in the same order. A bare id told the user
+     * "something went wrong" and told the log nothing at all.
+     */
+    failureReasons: Record<string, string>;
 };
 
 /**
@@ -29,6 +35,7 @@ export async function installMissingForExample(
     const installed: string[] = [];
     const skipped: string[] = [];
     const failed: string[] = [];
+    const failureReasons: Record<string, string> = {};
 
     for (const id of ids) {
         if (isPluginInstalled(id)) {
@@ -36,14 +43,31 @@ export async function installMissingForExample(
             continue;
         }
         try {
-            await installPlugin({ id });
+            const result = await installPlugin({ id });
+            if (!result.recognized) {
+                // Cloned, but the scanner found no slots in it — the plugin is
+                // on disk and still cannot run a node. Counting that as
+                // "installed" is how the strip reports success while the run
+                // fails afterwards with "no plugin installed for nodeSlot".
+                failed.push(id);
+                failureReasons[id] =
+                    "downloaded but not recognized by the plugin scanner";
+                logger.warn(
+                    `[onboarding] ${id} cloned but unrecognized by the scanner`,
+                );
+                continue;
+            }
             installed.push(id);
-        } catch {
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : String(error);
             failed.push(id);
+            failureReasons[id] = message;
+            logger.error(`[onboarding] install failed for ${id}: ${message}`);
         }
     }
 
-    return { installed, skipped, failed };
+    return { installed, skipped, failed, failureReasons };
 }
 
 /**
