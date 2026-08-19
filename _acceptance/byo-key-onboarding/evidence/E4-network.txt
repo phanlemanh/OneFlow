@@ -1,0 +1,16 @@
+STATUS 404 GET http://localhost:3000/_next/static/webpack/703f3a8a5b0264b0.webpack.hot-update.json
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/_next/static/webpack/703f3a8a5b0264b0.webpack.hot-update.json
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/_next/static/webpack/703f3a8a5b0264b0.webpack.hot-update.json
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+CONSOLE_ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 GET http://localhost:3000/plugins/oneflow-local-ffmpeg.svg
+REQUESTFAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED
+REQUESTFAILED GET http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt — net::ERR_ABORTED

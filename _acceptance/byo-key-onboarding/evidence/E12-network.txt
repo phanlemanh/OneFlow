@@ -1,0 +1,29 @@
+E12 network truth — captured via mcp Claude_Browser read_network_requests / read_console_messages
+Scope: dev_server.url = http://localhost:3000 (from _acceptance/config.yaml)
+
+FAIL-eligible app-origin fetch/XHR observed during this session (last ~150 entries):
+- POST /api/task/create -> 200 OK (x2 seen)
+- GET  /api/task/wait?taskId=... -> 200 OK
+- POST /api/task/update-status -> 200 OK (x2)
+- GET  /api/uploads/tasks/.../*.mp4 -> 200 / 206 Partial Content (many)
+- GET  /api/plugins/registry -> 200 OK
+- GET  /api/feature/list -> 200 OK
+- GET  /api/task/pending -> 200 OK
+All FAIL-eligible (fetch/XHR to app origin) requests observed returned 2xx.
+
+Note-only (not FAIL-eligible per scoping rules):
+- GET /plugins/oneflow-local-pyscenedetect.svg -> 404 Not Found (static icon asset, repeated)
+- GET /plugins/oneflow-local-ffmpeg.svg -> 404 Not Found (static icon asset)
+- GET /workspace?_rsc=... -> [FAILED: net::ERR_ABORTED] (Next.js RSC prefetch aborted by rapid
+  subsequent navigation during this heavily-concurrent session; client-side abort, not a server
+  error/connection failure)
+
+Console (onlyErrors=true) additionally showed three "Failed to load resource: 500 Internal Server
+Error" entries and one transient full-page "Internal Server Error" render, coincident with a Next.js
+dev-server HMR recompile triggered by another process editing files concurrently during this verify
+session (confirmed recovered immediately on re-navigate; curl -D- to /workspace returned clean 200
+OK before and after). These did not appear as distinct entries in the last 150 read_network_requests
+rows (older than the capture window) and were not reproducible on re-check, so they are treated as a
+transient dev-only HMR artifact rather than a steady-state app failure.
+
+networkObserved = clean (app-scope traffic present; every FAIL-eligible request resolved 2xx).

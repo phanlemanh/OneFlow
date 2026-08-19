@@ -1,0 +1,96 @@
+[
+  {
+    "t": 1787106213191,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "SSE_CONNECTED",
+      "nodeId": null
+    }
+  },
+  {
+    "t": 1787106213192,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+      "data": {
+        "message": "Task started"
+      }
+    }
+  },
+  {
+    "t": 1787106213400,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": null,
+      "data": {
+        "message": "Đang tạo môi trường Python",
+        "provisioning": {
+          "step": "create-venv",
+          "phase": "started"
+        }
+      }
+    }
+  },
+  {
+    "t": 1787106215831,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": null,
+      "data": {
+        "message": "Đã tạo xong môi trường Python",
+        "provisioning": {
+          "step": "create-venv",
+          "phase": "completed"
+        }
+      }
+    }
+  },
+  {
+    "t": 1787106215859,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": null,
+      "data": {
+        "message": "Đang cài bộ thư viện lõi",
+        "provisioning": {
+          "step": "install-sdk",
+          "phase": "started"
+        }
+      }
+    }
+  },
+  {
+    "t": 1787106218597,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": null,
+      "data": {
+        "message": "Đã cài xong bộ thư viện lõi",
+        "provisioning": {
+          "step": "install-sdk",
+          "phase": "completed"
+        }
+      }
+    }
+  },
+  {
+    "t": 1787106218623,
+    "data": {
+      "id": "JZYM1CEjaDGSUt71WXcnP",
+      "status": "RUNNING",
+      "nodeId": null,
+      "data": {
+        "message": "Đang cài thư viện của công cụ",
+        "provisioning": {
+          "step": "install-requirements",
+          "phase": "started"
+        }
+      }
+    }
+  }
+]

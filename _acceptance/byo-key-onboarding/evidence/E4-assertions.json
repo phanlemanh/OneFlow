@@ -1,0 +1,135 @@
+{
+  "assertions": [
+    {
+      "name": "no visible modal/dialog overlay",
+      "pass": true
+    },
+    {
+      "name": "canvas pane not pointer-events:none (not disabled)",
+      "pass": true
+    },
+    {
+      "name": "body not pointer-events:none (no page-level block)",
+      "pass": true
+    },
+    {
+      "name": "active element still inside document body (no external focus trap)",
+      "pass": true
+    },
+    {
+      "name": "strip still present after interaction",
+      "pass": true
+    },
+    {
+      "name": "node count increased (a node was added)",
+      "pass": true
+    },
+    {
+      "name": "dragged node changed position",
+      "pass": true
+    },
+    {
+      "name": "Tab key still moves focus within the document (no trap)",
+      "pass": true
+    }
+  ],
+  "step1_strip_present": true,
+  "nodeBoxes": [
+    {
+      "id": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
+      "x": 58,
+      "y": 319.1824951171875,
+      "w": 218.548828125,
+      "h": 144.78857421875
+    },
+    {
+      "id": "97ebbb1d-8681-4e39-9bc8-31306e37ca30",
+      "x": 393.791015625,
+      "y": 385.6578369140625,
+      "w": 54.63671875,
+      "h": 52.986572265625
+    },
+    {
+      "id": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+      "x": 498.9677734375,
+      "y": 366.5347900390625,
+      "w": 126.7041015625,
+      "h": 91.06201171875
+    },
+    {
+      "id": "4acb468a-4144-43fc-b197-6fb380f7ad91",
+      "x": 681.0908203125,
+      "y": 393.8533935546875,
+      "w": 116.5595703125,
+      "h": 36.4248046875
+    },
+    {
+      "id": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
+      "x": 831.34375,
+      "y": 343.3138427734375,
+      "w": 218.548828125,
+      "h": 137.503662109375
+    },
+    {
+      "id": "e37eeba2-9e54-4f4a-812d-07548d9cfdb4",
+      "x": 1105.4404296875,
+      "y": 393.8533935546875,
+      "w": 116.5595703125,
+      "h": 36.4248046875
+    }
+  ],
+  "nodeBoxesAfterDrag": [
+    {
+      "id": "418a1943-6d00-490d-9cf2-b9a5bb2b9ab6",
+      "x": 58,
+      "y": 319.1824951171875
+    },
+    {
+      "id": "97ebbb1d-8681-4e39-9bc8-31306e37ca30",
+      "x": 392.7900390625,
+      "y": 514.6575927734375
+    },
+    {
+      "id": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+      "x": 498.9677734375,
+      "y": 366.5347900390625
+    },
+    {
+      "id": "4acb468a-4144-43fc-b197-6fb380f7ad91",
+      "x": 681.0908203125,
+      "y": 393.8533935546875
+    },
+    {
+      "id": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
+      "x": 831.34375,
+      "y": 343.3138427734375
+    },
+    {
+      "id": "e37eeba2-9e54-4f4a-812d-07548d9cfdb4",
+      "x": 1105.4404296875,
+      "y": 393.8533935546875
+    }
+  ],
+  "toolbarBtn": {
+    "x": 640,
+    "y": 756,
+    "count": 7
+  },
+  "addedViaTextarea": true,
+  "nodeCountBefore": 6,
+  "nodeCountAfter": 7,
+  "assertionData": {
+    "visibleDialogCount": 0,
+    "visibleDialogInfo": [],
+    "panePointerEvents": "auto",
+    "bodyPointerEvents": "auto",
+    "activeElementTag": "DIV",
+    "activeElementInBody": true,
+    "stripStillPresent": true
+  },
+  "afterTabPress": {
+    "tag": "TEXTAREA",
+    "inBody": true
+  },
+  "allPass": true
+}

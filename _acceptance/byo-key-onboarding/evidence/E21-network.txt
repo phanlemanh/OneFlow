@@ -1,0 +1,4 @@
+STATUS 404 http://localhost:3210/plugins/oneflow-local-pyscenedetect.svg
+CONSOLE-ERROR Failed to load resource: the server responded with a status of 404 (Not Found)
+STATUS 404 http://localhost:3210/plugins/oneflow-local-ffmpeg.svg
+CONSOLE-ERROR Failed to load resource: the server responded with a status of 404 (Not Found)

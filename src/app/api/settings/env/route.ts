@@ -24,18 +24,25 @@ export async function GET() {
 
 /**
  * Asks each provider whether the key it was just handed actually works.
- * Only keys whose value changed in this request are probed — an unchanged
- * store must not fire an outbound call per save.
+ * Keys whose value changed in this request are probed; `requested` keys are
+ * probed even when unchanged — a re-save of the same value used to return NO
+ * verdict at all, which the node prompt could only render as "invalid" (S4
+ * round 1 finding). The change-detection optimisation still protects the
+ * bulk settings dialog from firing one outbound call per stored key.
  */
 async function verifyChangedKeys(
     previous: EnvStore,
     next: EnvStore,
+    requested: readonly string[],
 ): Promise<Record<string, KeyVerdict>> {
-    const changed = Object.keys(next).filter(
-        (key) => next[key] !== "" && next[key] !== previous[key],
+    const wanted = new Set(requested);
+    const toVerify = Object.keys(next).filter(
+        (key) =>
+            next[key] !== "" &&
+            (next[key] !== previous[key] || wanted.has(key)),
     );
     const verdicts = await Promise.all(
-        changed.map(
+        toVerify.map(
             async (key) => [key, await verifyKey(key, next[key])] as const,
         ),
     );
@@ -77,8 +84,13 @@ export async function PUT(request: NextRequest) {
         if (typeof v === "string") env[k] = v;
     }
 
+    const requestedRaw = (body as { verify?: unknown })?.verify;
+    const requested = Array.isArray(requestedRaw)
+        ? requestedRaw.filter((k): k is string => typeof k === "string")
+        : [];
+
     const previous = await loadEnvStore();
     await saveEnvStore(env);
-    const verdicts = await verifyChangedKeys(previous, env);
+    const verdicts = await verifyChangedKeys(previous, env, requested);
     return NextResponse.json({ env: await loadEnvStore(), verdicts });
 }

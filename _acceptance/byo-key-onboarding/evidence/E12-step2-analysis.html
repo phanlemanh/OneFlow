@@ -1,0 +1,83 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>E12 step2/step3 — fallback evidence (no capture.ui coverage for interactive client state)</title></head>
+<body>
+<h1>E12 (AC-9) — why steps 2 and 3 could not be captured as PNG frames</h1>
+
+<p><b>Why capture.ui (pnpm ui:capture) can't produce these frames:</b> it navigates puppeteer to a URL and screenshots
+a fresh page load. The "needs-key" node state (<code>KeyPromptState</code> in
+<code>src/components/workspace/node-key-prompt.tsx</code>, driven by <code>useNodeKeyGate()</code> in
+<code>src/components/workspace/nodes/base/abi-node-shell.tsx</code>) is transient React client state set only when a
+live task-update callback fires during the same browser session that triggered the run
+(<code>noteTask()</code> → <code>setEnvKey</code>/<code>setState</code>). It is not persisted server-side, so a fresh
+navigation never reproduces it. This is a real limitation of the reference capture script for this specific
+AC, not a workaround I chose for convenience.</p>
+
+<h2>What I did instead: drove the real UI/task pipeline directly and inspected the real result</h2>
+
+<ol>
+<li>With the onboarding example loaded and previously verified working (Add Video → Split Video → Concat Video
+completing with zero keys using the "(local)" plugin variants), I switched the Split Video node's
+Implementation dropdown from "PySceneDetect (local)" to "PySceneDetect" — the Modal-backed
+<code>tongflow-modal-pyscenedetect</code> plugin, whose <code>tongflow.plugin.json</code> declares
+<code>MODAL_TOKEN_ID</code> and <code>MODAL_TOKEN_SECRET</code> as <code>"required": true</code>. Both are blank in
+<code>.env</code>. This is the only plugin actually installed in this repo (<code>plugins/</code>) that declares a
+required key — confirmed by grepping every installed plugin's <code>tongflow.plugin.json</code> for
+<code>"required": true</code>.</li>
+<li>I clicked "Start Slice" to run it. This created a real task against the real Modal SDK, which failed for lack of
+credentials (verified independently via <code>GET /api/task/list</code>, saved to
+<code>evidence/E12-real-task-list.json</code>).</li>
+<li>The real, repeated (5 separate real runs across this verify session) task.error text is:
+<pre>downloading weights failed (exit 1): ╭─ Error ──────────────────────────╮
+│ Token missing. Could not authenticate client. If you have token credentials, │
+│ see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     │
+│ user, register an account at modal.com, then run `modal token new`.          │
+╰──────────────────────────────────────────────────────────────────────────────╯</pre>
+</li>
+</ol>
+
+<h2>Why this real failure does not (and, per the regex, structurally cannot) drive the node into "needs-key"</h2>
+
+<p><code>src/components/workspace/nodes/base/abi-node-shell.tsx</code>:</p>
+<pre>
+const KEY_FAILURE_PATTERN =
+    /(missing|invalid|unauthorized|not set|401|403|thiếu khoá|sai khoá)/i;
+const ENV_KEY_PATTERN =
+    /\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_(?:API_KEY|KEY|TOKEN|SECRET))\b/;
+
+function envKeyFromFailure(task: Task): string | null {
+    const message = task.error ?? "";
+    if (!KEY_FAILURE_PATTERN.test(message)) return null;
+    return ENV_KEY_PATTERN.exec(message)?.[1] ?? null;
+}
+</pre>
+
+<p>Applying this to the real message above: <code>KEY_FAILURE_PATTERN</code> matches ("Token <b>missing</b>"), but
+<code>ENV_KEY_PATTERN</code> requires an ALL-CAPS, underscore-separated token ending in
+<code>_API_KEY</code>/<code>_KEY</code>/<code>_TOKEN</code>/<code>_SECRET</code> literally present in the message. The
+real Modal CLI error text never names <code>MODAL_TOKEN_ID</code> or <code>MODAL_TOKEN_SECRET</code> — it only says
+"Token missing." in prose. So <code>ENV_KEY_PATTERN.exec()</code> returns <code>null</code>,
+<code>envKeyFromFailure()</code> returns <code>null</code>, and <code>noteTask()</code> takes its early return
+(<code>if (!key) return;</code>) without ever calling <code>setState({ phase: "needs-key" })</code>. The node stays in
+its default/idle key-gate state; <code>NodeKeyPrompt</code> never renders
+(<code>{keyGate.envKey ? &lt;NodeKeyPrompt ... />: null}</code>, and <code>envKey</code> is never set).</p>
+
+<p>I watched this live in the Browser pane after triggering the run: the Split Video node went through its normal
+"running → failed" cycle and returned to its plain idle card — no amber "Bước này cần một khoá API" panel, no inline
+input, appeared on the node. (A generic failure indicator/toast is a separate code path — AC-11/E15 — not this AC.)</p>
+
+<h2>Step 3 (enter the key at the node) — never reachable</h2>
+<p>Because step 2's needs-key panel never appears for this real failure, there is no inline form to type a key into.
+Step 3 could not be performed against the real pipeline. No settings dialog was opened at any point during this
+specific sequence (separately confirmed by not touching Settings during these particular actions).</p>
+
+<h2>Caveat: shared dev environment</h2>
+<p>This verify session ran against a dev server/workspace/plugins directory that was being concurrently mutated by
+other agents in the same batch (nodes appearing/disappearing, an unrelated "Internal Server Error" HMR blip, and —
+critically — <code>plugins/tongflow-modal-pyscenedetect</code> and <code>plugins/tongflow-modal-ffmpeg</code> being
+deleted from disk partway through this session by another process, which is why the Implementation dropdown later
+showed only the local option). This made a clean, race-free PNG capture of the exact "Modal implementation selected"
+moment impractical after that point. The conclusion above does not depend on that instability, however — it rests on
+(a) the plugin's own declared "required" env keys, (b) five independent real task-failure records with identical
+error text, and (c) direct reading of the current <code>abi-node-shell.tsx</code> regex logic against that exact
+text.</p>
+</body></html>

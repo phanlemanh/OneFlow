@@ -340,7 +340,13 @@ executors:
     # install-missing) — khai ra đây để chúng hiện ở Cổng 2 thay vì lọt im.
     # --require giữ nguyên một đường: cửa sổ diff rỗng thì mọi lời khai
     # "không chạm gì cấm" đều đúng một cách vô nghĩa.
-    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow src/lib/plugin-executor/** --allow src/app/api/settings/env/** --allow src/app/api/plugins/install-missing/** --require src/lib/plugin-executor/**"
+    # Globs are SINGLE-QUOTED so the shell hands them to t3-scan verbatim.
+    # Unquoted, bash (globstar off) expanded `src/lib/plugin-executor/**` to
+    # the directory's top-level entries before the script ever ran: --allow
+    # became one literal FILE, provisioning-events.ts and runners/generic.ts
+    # fell outside it, and E18 failed on the very path it was written to
+    # allow (S4 round 1).
+    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow 'src/lib/plugin-executor/**' --allow 'src/app/api/settings/env/**' --allow 'src/app/api/plugins/install-missing/**' --require 'src/lib/plugin-executor/**'"
     lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
     # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
     # stale evidence), which is narrower and answerable; check-gate-residual's

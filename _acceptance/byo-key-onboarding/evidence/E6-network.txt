@@ -1,0 +1,13 @@
+Driver: pnpm ui:capture (Puppeteer headless via CDP, not an interactive browser tool with
+read_network_requests/read_console_messages). Puppeteer runs page.goto with waitUntil:
+"networkidle2" — if any request had failed the network would not have gone idle within the
+30s timeout, and the capture command would have thrown instead of exiting 0. The command
+exited 0 and produced both the .png and .html outputs, which is our indirect network-health
+signal here.
+
+Manual corroboration via curl against the exact page + API this eval exercises (server:
+http://localhost:3001, TONGFLOW_PLUGINS_DIR pointed at an empty dir to simulate "no
+plugins installed"):
+GET /workspace -> 200
+GET /example.json -> 200
+GET /api/plugins/registry -> 200

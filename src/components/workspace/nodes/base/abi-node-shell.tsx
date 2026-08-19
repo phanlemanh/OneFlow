@@ -6,14 +6,18 @@
  *   - presentation: title / icon / executeLabel / children
  */
 
-import { useNodeId, useStore } from "@xyflow/react";
-import { type ReactNode, useCallback, useState } from "react";
+import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import {
     type KeyPromptState,
     NodeKeyPrompt,
     type NodeKeyPromptLabels,
 } from "@/components/workspace/node-key-prompt";
+import {
+    ONBOARDING_RECOVERY_EVENT,
+    type OnboardingRecoveryDetail,
+} from "@/components/workspace/task-failure-toaster";
 import type { NodeSlot } from "@/generated/abi";
 import { useAbiExecution } from "@/hooks/use-abi-execution";
 import type { UseAbiFormReturn } from "@/hooks/use-abi-form";
@@ -23,6 +27,7 @@ import {
 } from "@/hooks/use-plugins-registry";
 import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
+import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import type { BaseNodeData } from "@/types/nodes";
 
@@ -43,6 +48,7 @@ const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
     verifying: "Đang kiểm tra khoá…",
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
+    savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
 };
 
 /** Failure messages that mean "a key is missing or was rejected". */
@@ -54,11 +60,18 @@ const ENV_KEY_PATTERN =
 
 /**
  * The env key a failed task is asking for, or null when the failure is about
- * something else. This reads the server's error message; it never inspects the
- * shape of a key.
+ * something else. The FIRST reading is the shared classifier — the same one
+ * the failure toast routes on — which understands the executor's canonical
+ * "Missing required env var X" sentence for ANY key name (S4 round 1: the
+ * suffix-shaped pattern below never matched MODAL_TOKEN_ID, so the prompt
+ * never mounted for the one real required-key plugin). The legacy patterns
+ * stay as a fallback for provider-worded failures that happen to name a
+ * conventionally-shaped key. Never inspects the shape of a key VALUE.
  */
 function envKeyFromFailure(task: Task): string | null {
     const message = task.error ?? "";
+    const action = classifyFailure(message);
+    if (action.kind === "enter-key") return action.envKey;
     if (!KEY_FAILURE_PATTERN.test(message)) return null;
     return ENV_KEY_PATTERN.exec(message)?.[1] ?? null;
 }
@@ -98,6 +111,12 @@ async function saveAndVerifyKey(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             env: { ...(current.env ?? {}), [envKey]: value },
+            // Explicit: probe THIS key even when its value is unchanged. A
+            // re-save of the same string used to come back with no verdict at
+            // all, which the UI could only render as "invalid" (S4 round 1
+            // finding) — the change-detection optimisation stays for the bulk
+            // settings dialog, but a key the user just typed is always asked.
+            verify: [envKey],
         }),
     });
     if (!res.ok) throw new Error(`Không lưu được khoá (HTTP ${res.status}).`);
@@ -107,6 +126,7 @@ async function saveAndVerifyKey(
     return (
         saved.verdicts?.[envKey] ?? {
             works: false,
+            checked: false,
             detail: "Máy chủ không trả về kết quả kiểm tra khoá.",
         }
     );
@@ -129,6 +149,8 @@ function useNodeKeyGate(): NodeKeyGate {
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
     const [value, setValue] = useState("");
+    const nodeId = useNodeId();
+    const reactFlow = useReactFlow();
 
     const noteTask = useCallback((task: Task) => {
         if (task.status !== "FAILED") return;
@@ -138,16 +160,46 @@ function useNodeKeyGate(): NodeKeyGate {
         setState({ phase: "needs-key" });
     }, []);
 
+    // The failure toast's "enter key" control routes HERE: the node whose
+    // prompt owns this env key brings itself into view, so the recovery
+    // action lands on the form instead of dispatching into silence (the S4
+    // round 1 finding: an event nothing listened to).
+    useEffect(() => {
+        if (!envKey || !nodeId) return;
+        const onRecovery = (event: Event) => {
+            const detail = (event as CustomEvent<OnboardingRecoveryDetail>)
+                .detail;
+            if (detail.kind !== "enter-key" || detail.envKey !== envKey) {
+                return;
+            }
+            setState({ phase: "needs-key" });
+            void reactFlow.fitView({
+                nodes: [{ id: nodeId }],
+                duration: 400,
+                maxZoom: 1.2,
+            });
+        };
+        window.addEventListener(ONBOARDING_RECOVERY_EVENT, onRecovery);
+        return () =>
+            window.removeEventListener(ONBOARDING_RECOVERY_EVENT, onRecovery);
+    }, [envKey, nodeId, reactFlow]);
+
     const save = useCallback(async () => {
         if (!envKey) return;
         setState({ phase: "verifying" });
         try {
             const verdict = await saveAndVerifyKey(envKey, value);
-            setState(
-                verdict.works
-                    ? { phase: "verified" }
-                    : { phase: "invalid", reason: verdict.detail },
-            );
+            if (verdict.works) {
+                setState({ phase: "verified" });
+            } else if (verdict.checked) {
+                // The provider was asked and said no — genuinely unusable.
+                setState({ phase: "invalid", reason: verdict.detail });
+            } else {
+                // Nobody could ask (no prober / provider unreachable). Saved
+                // is true, unusable is NOT established — showing destructive
+                // "invalid" here was S4 round 1's false negative.
+                setState({ phase: "saved-unverified", reason: verdict.detail });
+            }
         } catch (error) {
             setState({
                 phase: "invalid",

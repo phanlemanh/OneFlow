@@ -1,0 +1,97 @@
+NETWORK-TRUTH FLAG: multiple app-origin (http://localhost:3000) requests under /api/uploads/**
+returned "500 Internal Server Error" during this walk (9 occurrences total — see the
+"intermittent 500" line below and the raw log excerpt). These are FAIL-eligible under the
+dev_server.url scope (config/config.yaml: dev_server.url = http://localhost:3000, no
+api_base override) and are NOT static-asset-exempt (served through the app's own /api/
+route, not a .map/favicon/image/font under /public). Per network-truth scoping rules this
+makes the eval run FAIL (exitCode != 0) regardless of the AC-12 content assertions below,
+which pass on their own merits. Root cause observed: the shared dev server on :3000
+underwent a webpack HMR rebuild mid-walk (visible as a burst of *.hot-update.json/js
+requests and a page auto-reload) — the in-flight video byte-range requests were aborted by
+that restart. This is almost certainly caused by other, concurrent activity on the same
+shared dev server (multiple eval subagents reuse this one process per the task's own
+instructions), not by anything AC-12-specific — but the grading rule here is explicit and
+literal, so it is reported as app-fail rather than rationalized away.
+
+E16 — AC-12 — full-funnel network capture
+Driver: Claude_Browser (Chromium DevTools Protocol), tab-3, http://localhost:3000 (dev server, port 3000)
+Walk performed: /workspace load -> zoom/pan canvas -> click "Start Slice" on Split Video node
+(triggers provisioning: "Setting up environment / Installing SDK / Installing libraries", local
+PySceneDetect env build) -> split task completes (2 output clips) -> click "Concat Video" on
+Concat Video node -> concat task runs -> open Settings panel (gear icon, top right) showing
+MODAL_TOKEN_ID / MODAL_TOKEN_SECRET / OPENAI_API_KEY fields (the "nhập-key" wall surface).
+
+=== Raw request log (method + URL + status), captured via read_network_requests ===
+
+GET http://localhost:3000/_next/static/chunks/pages/_error.js -> 200 OK
+GET http://localhost:3000/_next/static/development/_buildManifest.js -> 200 OK
+GET http://localhost:3000/_next/static/development/_ssgManifest.js -> 200 OK
+GET http://localhost:3000/_next/static/chunks/react-refresh.js -> 200 OK
+GET http://localhost:3000/_next/static/development/_devMiddlewareManifest.json -> 200 OK
+GET http://localhost:3000/workspace -> 200 OK
+GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+GET http://localhost:3000/_next/static/css/app/layout.css?v=... -> 200 OK (repeated, dev cache-bust query only)
+GET http://localhost:3000/_next/static/css/app/workspace/page.css?v=... -> 200 OK (repeated)
+GET http://localhost:3000/_next/static/chunks/webpack.js?v=... -> 200 OK
+GET http://localhost:3000/_next/static/chunks/main-app.js?v=... -> 200 OK
+GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+GET http://localhost:3000/_next/static/chunks/app/workspace/page.js -> 200 OK
+
+--- Legitimate app requests (positive control) ---
+GET  http://localhost:3000/api/plugins/registry            -> 200 OK   (x8, one per workspace mount — find/install-plugin wall)
+GET  http://localhost:3000/example.json                    -> 200 OK   (x8)
+GET  http://localhost:3000/api/feature/list                -> 200 OK   (x8)
+GET  http://localhost:3000/api/task/pending                -> 200 OK   (x8)
+POST http://localhost:3000/api/task/create                 -> 200 OK   (x2 — Split Video run, Concat Video run)
+GET  http://localhost:3000/api/task/wait?taskId=M0FIA8gszP5Fn_UAMzpTp -> 200 OK
+GET  http://localhost:3000/api/task/wait?taskId=4pdmgz3Op4uELIXxj99oH -> 200 OK
+POST http://localhost:3000/api/task/update-status           -> 200 OK   (frontend terminal-status backup write)
+GET  http://localhost:3000/api/settings/env                 -> 200 OK   (Settings panel opened — nhập-key wall)
+GET  http://localhost:3000/api/uploads/example-assets/two-scenes.mp4 -> 206/200 OK (seeded example asset)
+GET  http://localhost:3000/api/uploads/tasks/M0FIA8gszP5Fn_UAMzpTp/_Ht21cc8qG1ATPEiP0quk.mp4 -> 200/206 OK (split output #1)
+GET  http://localhost:3000/api/uploads/tasks/M0FIA8gszP5Fn_UAMzpTp/bI9a3Zhmyrw5QeHgXXW0k.mp4 -> 200/206 OK (split output #2)
+GET  http://localhost:3000/plugins/tongflow-modal-pyscenedetect.svg -> 200 OK
+GET  http://localhost:3000/plugins/tongflow-modal-ffmpeg.svg -> 200 OK
+GET  http://localhost:3000/plugins/oneflow-local-pyscenedetect.svg -> 404 Not Found (icon asset only, not present locally — cosmetic)
+GET  http://localhost:3000/plugins/oneflow-local-ffmpeg.svg -> 404 Not Found (icon asset only)
+
+--- Dev-only noise (Next.js HMR, unrelated to app traffic, some intermittent 500s from a
+    concurrent dev-server rebuild while this walk ran on a shared server) ---
+GET  http://localhost:3000/_next/static/webpack/*.hot-update.json / .hot-update.js -> 200/404
+GET  http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt -> 200 OK / ERR_ABORTED (RSC prefetch)
+POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK (Next dev error overlay, local only)
+GET  http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
+GET  http://localhost:3000/api/uploads/tasks/.../*.mp4 -> intermittent 500 (dev-server hot-reload restart mid-request; retried by video element, not app logic)
+
+=== Query-string audit ===
+Every request query string observed above is one of: `v=<webpack build hash>` (cache-busting),
+`_rsc=<router state token>` (Next.js RSC prefetch marker), or `taskId=<opaque id>` (the task's own
+id, needed to poll its own status — not a funnel/step marker). No query string anywhere contains
+step, funnel, position, stage, elapsed, timing, duration, or any other behavioural/progress marker.
+
+=== Request-body audit (network tool here surfaces method/URL/status, not request payloads —
+     cross-checked against the client source that constructs each POST body) ===
+- POST /api/plugins/install-missing — sent with method: "POST" and NO body at all
+  (src/components/workspace/first-run-strip-container.tsx:137).
+- POST /api/task/create — body is CreateTaskRequest = {feature, pluginId, model?, prompt, nodeId,
+  workflowId?} (src/lib/api/task.ts) — matches the documented wire shape in CLAUDE.md; no
+  onboarding/funnel/timing field exists on the type or the route handler
+  (src/app/api/task/create/route.ts).
+- POST /api/task/update-status — body is UpdateStatusRequest = {taskId, status, data?} where
+  `data` is the task's own result/business payload (src/hooks/use-task.ts:435,749), not an
+  onboarding-progress record.
+- GET /api/settings/env — no body (GET); save path posts only the env var key/value map the user
+  typed (MODAL_TOKEN_ID, MODAL_TOKEN_SECRET, OPENAI_API_KEY, etc.), no step/funnel metadata
+  (src/app/api/settings/env/route.ts).
+- The `elapsedSec` / `step` / `milestone` values visible in the first-run strip UI
+  ("Setting up environment · Installing SDK · Installing libraries, 13s elapsed") are consumed
+  FROM a server-sent provisioning-events stream (server -> client) and rendered locally; grep of
+  src/components/workspace/first-run-strip-container.tsx confirms they are never included in any
+  outgoing fetch/apiPost call.
+
+Verdict: legitimate app traffic is non-zero (plugin registry, settings, task create/wait/update
+all fired) — walk is a real positive control, not an aborted/empty log. Within that traffic, zero
+request bodies or query strings carry onboarding step, funnel position, timing, or any other
+behavioural record.

@@ -27,6 +27,8 @@ describe("verifyKey", () => {
             probe,
         );
         expect(verdict.works).toBe(false);
+        // The provider ANSWERED — this verdict is real, not "could not ask".
+        expect(verdict.checked).toBe(true);
         expect(verdict.detail).toContain("401");
     });
 
@@ -48,12 +50,16 @@ describe("verifyKey", () => {
             .mockRejectedValue(new Error("getaddrinfo ENOTFOUND"));
         const verdict = await verifyKey("OPENAI_API_KEY", "sk-proj-x", probe);
         expect(verdict.works).toBe(false);
+        // Unreachable is NOT a rejection: nobody answered, so checked stays
+        // false and the UI must not paint the key as broken.
+        expect(verdict.checked).toBe(false);
         expect(verdict.detail).toContain("ENOTFOUND");
     });
 
     it("refuses a key for an env var it has no prober for, without inventing a verdict", async () => {
         const verdict = await verifyKey("SOME_UNKNOWN_KEY", "x");
         expect(verdict.works).toBe(false);
+        expect(verdict.checked).toBe(false);
         expect(verdict.detail).toMatch(/không kiểm tra được|no prober/i);
     });
 });

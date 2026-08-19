@@ -27,6 +27,14 @@ export type KeyPromptState =
     | { phase: "needs-key" }
     | { phase: "verifying" }
     | { phase: "invalid"; reason: string }
+    /**
+     * Saved, but no verdict exists: there is no prober for this env key, or
+     * the provider was unreachable. Distinct from `invalid` on purpose —
+     * "could not ask" and "asked and was told no" are different facts, and
+     * rendering the first as the second told users their working keys were
+     * broken (S4 round 1 finding).
+     */
+    | { phase: "saved-unverified"; reason: string }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -49,6 +57,7 @@ export interface NodeKeyPromptLabels {
     verifying: string;
     invalid: string;
     verified: string;
+    savedUnverified: string;
 }
 
 export function NodeKeyPrompt({
@@ -112,6 +121,15 @@ export function NodeKeyPrompt({
                     <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
                     <span>
                         {labels.invalid} — {state.reason}
+                    </span>
+                </p>
+            ) : null}
+
+            {state.phase === "saved-unverified" ? (
+                <p className="flex items-start gap-1 text-xs text-muted-foreground">
+                    <Check className="mt-0.5 h-3 w-3 shrink-0" />
+                    <span>
+                        {labels.savedUnverified} — {state.reason}
                     </span>
                 </p>
             ) : null}
