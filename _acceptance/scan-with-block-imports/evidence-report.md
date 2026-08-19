@@ -1,18 +1,26 @@
 ---
 schema_version: 2
 feature_slug: scan-with-block-imports
-verdict: PENDING-JUDGMENT
+verdict: PASS
 triage_failed: true
 failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a33e0df4db5253e190051a947576c97a6bd564dc
-human_signoff:
+verified_commit: 0928f8a74c2c3f564efccbb06fdf0feae705077a
+human_signoff: Manh Phan 2026-08-18
 ---
 
 # Evidence Report: scan-with-block-imports
+
+> **Nâng PENDING-JUDGMENT lên PASS tại Cổng 2 — Manh Phan, 2026-08-18.** Vòng chấm
+> để verdict ở PENDING-JUDGMENT vì phân loại phạm vi chạy không trọn
+> (`triage_failed: true`), tức máy KHÔNG khai là đã kiểm hết. Việc nâng lên PASS là
+> chữ ký của người đã tự đọc toàn bộ `review-findings.md`, không phải kết luận của
+> máy. Hai điều đã chốt kèm chữ ký: đường `entry.py` không thuộc gói này (AC-2 đã thu
+> phạm vi, hợp đồng kế đóng nó) và năm giới hạn đã biết ghi trong `## Notes` của
+> contract.
 
 > **Ghi chú của người vận hành (không do máy chấm viết).** Vòng 2 có HAI lượt trên
 > cùng commit `a33e0df`, không đổi một dòng mã nào giữa hai lượt:
@@ -28,6 +36,18 @@ human_signoff:
 > mất bằng chứng rằng vòng đó từng không đo được gì. Một agent trong workflow đã tự
 > xoá 13 dòng đó và commit kèm nhãn "(PASS)" (commit `3a83a13`); các dòng đã được
 > khôi phục từ kết quả gốc của lượt bị chặn.
+>
+> **Vòng 3 (05:07Z) — BLOCKED, rồi bị gỡ bỏ lý do tồn tại.** Vòng 3 được mở vì sau
+> vòng 2 có thêm hai thay đổi mã: nhớ-đệm `_collect_models_roots` và phép đo đếm của
+> nó. Vòng đó cũng bị bộ phân loại chặn (14/16 eval `cannot_run`, còn trong sổ chạy).
+> Ở Cổng 2, người ký chọn **bỏ phần vá tốc độ khỏi gói này** sau khi đo được rằng nó
+> đáng 2.5 ms trên cây plugin thật (con số 63x là ca tổng hợp cực đoan). Hai file đó
+> đã hoàn nguyên, nên mã của nhánh này **trùng khớp từng byte** với `a33e0df` — đúng
+> commit mà báo cáo này đo. Phần vá tốc độ thuộc về hợp đồng kế
+> (`fix/scan-scope-diagnostics`), nơi nó sẽ có bằng chứng của riêng nó.
+>
+> Vì vậy `verified_commit` ở đây là `a33e0df` chứ không phải HEAD: các commit sau nó
+> chỉ chạm `_acceptance/**` và `docs/**`, không chạm mã sản phẩm.
 
 ⚠ phân loại phạm vi KHÔNG chạy được: không có lỗi nào được máy tự sửa vòng này; danh sách đầy đủ nằm trong review-findings.md; người xem lại toàn bộ trước khi ký.
 
@@ -247,3 +267,7 @@ Round 2: this attempt was retried after an earlier same-round pass ended BLOCKED
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter
+
+### Re-pin lần 1 — 2026-08-18, do merge `origin/main` mang vào ba file ngoài gói này (`package.json`, `pnpm-workspace.yaml`, `scripts/pnpm/check-build-approvals.sh`); mã của gói này không đổi một byte so với mốc cũ
+run_id: repin-scan-with-block-imports-20260818T085452Z
+sha: 0928f8a74c2c3f564efccbb06fdf0feae705077a · suites: 6 lệnh exit 0

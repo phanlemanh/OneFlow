@@ -968,6 +968,29 @@ if [ "$RECHECK_MODE" != off ] && [ "$RECHECK_ALL" -eq 1 ]; then
   echo "NOTE: recheck scope — --recheck-all: the committed-evidence re-check runs on ALL slugs, ignoring the PR diff scope"
 fi
 
+# ─── Phân loại diff-chịu-cổng (hoist từ khối T1-escape — status-chua-arm-cong) ─
+# Khối T1-escape cuối file cần biết PR có đổi file chịu cổng không (khớp
+# t3_paths, hoặc ngoài t1_skip_globs). Luật «hồ sơ chưa arm cổng» trong vòng
+# per-slug cũng cần đúng ba con số đó, và vòng per-slug chạy TRƯỚC — nên tính
+# một lần ở đây, T1-escape dùng lại (thông điệp và thứ tự output của nó giữ
+# nguyên văn; răng ARM08/ARM08b canh). Chỉ có nghĩa khi DIFF_READY=1.
+DIFF_GATE_TOUCHED=0; DIFF_T3_HITS=""; DIFF_NONT1_HITS=""
+if [ "$DIFF_READY" -eq 1 ]; then
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    case "$f" in _acceptance/*|*/_acceptance/*) DIFF_GATE_TOUCHED=1; continue ;; esac
+    if [ -n "$T3_PATHS" ] && match_globs "$f" "$T3_PATHS"; then
+      DIFF_T3_HITS="${DIFF_T3_HITS}${f}"$'\n'
+    elif ! match_globs "$f" "$T1_GLOBS"; then
+      DIFF_NONT1_HITS="${DIFF_NONT1_HITS}${f}"$'\n'
+    fi
+  done <<CHANGED
+$DIFF_FILES
+CHANGED
+fi
+# File chịu cổng ĐẦU TIÊN trong diff — để thông điệp per-slug nêu đích danh.
+DIFF_GATED_FIRST="$(printf '%s%s' "$DIFF_T3_HITS" "$DIFF_NONT1_HITS" | head -1)"
+
 # per-slug: hai đường dẫn độc lập về lexical — vòng đếm dưới đây dùng biến
 # _sd, vòng luật thật dùng dir. Tiêm hỏng một vòng thì con số lệch và điểm
 # nghẽn từ chối kết luận (AC-9: bắt cả biến thể CHƯA nghĩ ra).
@@ -999,9 +1022,10 @@ for dir in "$ACC"/*/; do
   tier="$(fm_field "$contract" risk_tier)"
   status="$(fm_field "$contract" status)"
 
-  # Thiếu field ≠ khai báo → bị flag. Field CÓ mặt nhưng ngoài phạm vi (status
-  # draft/approved, tier ngoài required_for) LÀ khai báo → vẫn im lặng đúng
-  # thiết kế, xử ở hai `case` ngay dưới.
+  # Thiếu field ≠ khai báo → bị flag. Field CÓ mặt nhưng tier ngoài
+  # required_for LÀ khai báo có chủ đích của config → im lặng đúng thiết kế.
+  # Status draft/approved thì KHÔNG còn im lặng vô điều kiện — xem nhánh
+  # «chưa arm cổng» ngay dưới `case REQUIRED_FOR`.
   if [ -z "$tier" ] || [ -z "$status" ]; then
     if claims_released "$dir"; then
       if   [ -z "$tier" ] && [ -z "$status" ]; then uj_missing="status nor risk_tier"
@@ -1014,7 +1038,36 @@ for dir in "$ACC"/*/; do
     continue
   fi
   case "$REQUIRED_FOR" in *"$tier"*) ;; *) continue ;; esac
-  case "$status" in implemented|verified|signed-off) ;; *) continue ;; esac
+  # ── Hồ sơ CHƯA ARM cổng (status ngoài implemented/verified/signed-off) ──
+  # Bản cũ `continue` im lặng ở đây — cửa thứ ba của lớp «PASS chưa ai phán»
+  # (hai cửa đầu: không contract / thiếu field, xử ở trên). Vòng 4 hồ sơ
+  # release-2-2-0 (18/08): status approved + evidence-report REJECT + chữ ký
+  # rỗng → «clean» không một dòng, T1-escape lại được thoả bởi chính hồ sơ đó.
+  # Hai điều kiện, trúng một là VIOLATION, không trúng mới im lặng (đường
+  # đọc-cũ: draft/approved KHÔNG bằng chứng + PR không chạm code chịu cổng —
+  # hạt giống hồ sơ merge kèm docs vẫn qua; scaffold bỏ hoang vẫn im):
+  #   (a) đã có evidence-report.md (verdict BẤT KỲ) và hồ sơ trong phạm vi
+  #       diff PR — hoặc không dựng được phạm vi thì xét mọi slug (fail-safe,
+  #       cùng nếp luật staleness);
+  #   (b) hồ sơ trong diff PR mà PR đổi ít nhất một file chịu cổng — hồ sơ
+  #       này đang thoả T1-escape cho code đó, mà chưa arm thì không luật nào
+  #       chấm.
+  # Đặt SAU `case REQUIRED_FOR`: tier ngoài required_for vẫn im (ARM12).
+  case "$status" in
+    implemented|verified|signed-off) ;;
+    *)
+      _arm_why=""
+      if [ -f "$dir/evidence-report.md" ] && { [ "$DIFF_READY" -eq 0 ] || slug_in_diff "$slug"; }; then
+        _arm_why="evidence-report.md verdict=$(fm_field "$dir/evidence-report.md" verdict) đã có"
+      elif [ "$DIFF_READY" -eq 1 ] && [ -n "$DIFF_GATED_FIRST" ] && slug_in_diff "$slug"; then
+        _arm_why="PR đổi code chịu cổng ($DIFF_GATED_FIRST…) mà hồ sơ trong PR chưa arm"
+      fi
+      if [ -n "$_arm_why" ]; then
+        echo "VIOLATION [$slug]: hồ sơ có bằng chứng nhưng status chưa arm cổng — status=$status; $_arm_why. Cổng chỉ chấm hồ sơ ở implemented/verified/signed-off, hồ sơ này đang tàng hình. Đặt status: implemented để cổng chấm, hoặc gỡ evidence-report.md / tách hồ sơ khỏi PR nếu bằng chứng thuộc phạm vi đã bỏ."
+        violations=$((violations+1))
+      fi
+      continue ;;
+  esac
 
   # Gate 1 must have been recorded BEFORE any post-approval status: a contract
   # that reached implemented+ with an empty approved_by jumped the gate. The
@@ -1659,19 +1712,9 @@ elif [ "$DIFF_READY" -eq 0 ]; then
   # AC-3: thiếu --base là tắt CÓ khai báo (bỏ-qua-có-tín-hiệu, hành vi cũ).
   ledger_mark declared-off t1-escape
 else
-  changed="$DIFF_FILES"
-  gate_touched=0; t3_hits=""; nont1_hits=""
-  while IFS= read -r f; do
-    [ -n "$f" ] || continue
-    case "$f" in _acceptance/*|*/_acceptance/*) gate_touched=1; continue ;; esac
-    if [ -n "$T3_PATHS" ] && match_globs "$f" "$T3_PATHS"; then
-      t3_hits="${t3_hits}${f}"$'\n'
-    elif ! match_globs "$f" "$T1_GLOBS"; then
-      nont1_hits="${nont1_hits}${f}"$'\n'
-    fi
-  done <<CHANGED
-$changed
-CHANGED
+  # Phân loại đã tính MỘT lần trước vòng per-slug (khối «Phân loại
+  # diff-chịu-cổng») — dùng lại, không tính lại.
+  gate_touched="$DIFF_GATE_TOUCHED"; t3_hits="$DIFF_T3_HITS"; nont1_hits="$DIFF_NONT1_HITS"
   if [ "$gate_touched" -eq 0 ]; then
     if [ -n "$t3_hits" ]; then
       echo "VIOLATION [PR]: T3 paths (t3_paths) changed but the PR carries NO _acceptance/<slug>/ artifacts — critical code changed without the gate. Changed:"

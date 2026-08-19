@@ -367,6 +367,23 @@ executors:
     # shape (scan-with-block-imports#F2) and split it. fixture ALWAYS runs; real skips by name.
     diag_noise_fixture: bash scripts/plugins/check-diagnostics-noise.sh fixture
     diag_noise_real: bash scripts/plugins/check-diagnostics-noise.sh real
+    # pnpm-build-approvals Gate 1 (2026-08-18): one key per criterion via --case
+    # (standing rule) — several criteria behind one exit code collapse into a
+    # single signal, and a case never implemented then looks like a case passing.
+    # The teeth/CI cases install into a throwaway project with an isolated store,
+    # so they need the network: local verify only, not wired into CI (same
+    # precedent as the overlay_* keys).
+    pnpm_no_pnpm_field: "bash scripts/pnpm/check-build-approvals.sh --case no-pnpm-field"
+    pnpm_install_clean: "bash scripts/pnpm/check-build-approvals.sh --case install-clean"
+    pnpm_addon_built: "bash scripts/pnpm/check-build-approvals.sh --case addon-built"
+    pnpm_teeth_removed: "bash scripts/pnpm/check-build-approvals.sh --case teeth-removed"
+    pnpm_teeth_legacy_key: "bash scripts/pnpm/check-build-approvals.sh --case teeth-legacy-key"
+    pnpm_ci_pnpm10: "bash scripts/pnpm/check-build-approvals.sh --case ci-pnpm10"
+    pnpm_tracked_not_ignored: "bash scripts/pnpm/check-build-approvals.sh --case tracked-not-ignored"
+    pnpm_explicit_decisions: "bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"
+    pnpm_keys_intact: "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
+    pnpm_scope_confined: "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
+    pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
