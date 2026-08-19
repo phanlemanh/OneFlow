@@ -204,7 +204,8 @@
             "extractStem": "Tách track nhạc cụ",
             "addTrack": "Thêm track",
             "completeMusic": "Hoàn thiện",
-            "musicBrief": "Kế hoạch nhạc"
+            "musicBrief": "Kế hoạch nhạc",
+            "tooltipMediaLibrary": "Kho media"
         },
         "toast": {
             "executing": "Đang thực thi...",
@@ -1047,6 +1048,22 @@
                 "endLabel": "Kết thúc (giây)",
                 "editOp": "Sửa op",
                 "removeOp": "Xoá op"
+            },
+            "addMediaLibrary": {
+                "title": "Nạp từ kho",
+                "searchPlaceholder": "Mô tả cảnh bạn cần, ví dụ: phòng khách ngập nắng",
+                "search": "Tìm",
+                "searching": "Đang tìm…",
+                "importing": "Đang nạp clip về kho file của bạn… Xong sẽ hiện thành node video trên canvas.",
+                "results": "clip khớp mô tả. Chọn một clip để nạp về workspace.",
+                "thinShelf": "Không clip nào dựng được thẻ cho mô tả này (kho có {candidates} clip qua bộ lọc). Thử mô tả khác hoặc nới yêu cầu.",
+                "unranked": "Kết quả chưa xếp hạng theo ngữ nghĩa: kho đang thiếu embedding. Danh sách vẫn đúng bộ lọc, thứ tự không phản ánh độ hợp.",
+                "error": "Lời gọi tới kho không thành công.",
+                "missingConfig": "Chưa nối với kho media.",
+                "saveConfig": "Lưu rồi tìm lại",
+                "savingConfig": "Đang lưu…",
+                "urlLabel": "https://kho.vidu.com",
+                "keyLabel": "Khoá có scope search"
             }
         },
         "firstRun": {

@@ -204,7 +204,8 @@
             "extractStem": "ステム抽出",
             "addTrack": "トラック追加",
             "completeMusic": "編曲補完",
-            "musicBrief": "音楽ブリーフ"
+            "musicBrief": "音楽ブリーフ",
+            "tooltipMediaLibrary": "メディアライブラリ"
         },
         "toast": {
             "executing": "実行中...",
@@ -961,6 +962,22 @@
                 "endLabel": "終了（秒）",
                 "editOp": "オペを編集",
                 "removeOp": "オペを削除"
+            },
+            "addMediaLibrary": {
+                "title": "ライブラリから読み込む",
+                "searchPlaceholder": "必要なシーンを記述してください（例：日差しの入るリビング）",
+                "search": "検索",
+                "searching": "検索中…",
+                "importing": "クリップをファイルストアに取り込んでいます… 完了するとキャンバスに動画ノードとして表示されます。",
+                "results": "件のクリップが一致しました。ワークスペースに取り込むクリップを選んでください。",
+                "thinShelf": "この記述に合うクリップはありませんでした（フィルタを通過したクリップは {candidates} 件）。表現を変えるか条件を緩めてください。",
+                "unranked": "結果は意味順に並んでいません（ライブラリの埋め込みが未生成）。フィルタ条件は満たしていますが、順序は適合度を表しません。",
+                "error": "ライブラリの呼び出しに失敗しました。",
+                "missingConfig": "メディアライブラリがまだ接続されていません。",
+                "saveConfig": "保存して再検索",
+                "savingConfig": "保存中…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "search スコープを持つキー"
             }
         },
         "firstRun": {

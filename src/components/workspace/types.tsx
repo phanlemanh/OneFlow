@@ -15,6 +15,7 @@ import AddFileNode from "./nodes/add/add-file-node";
 // Add nodes
 import AddImageNode from "./nodes/add/add-image-node";
 import AddLinkNode from "./nodes/add/add-link-node";
+import AddMediaLibraryNode from "./nodes/add/add-media-library-node";
 import { AddModelNode } from "./nodes/add/add-model-node";
 import AddTextNode from "./nodes/add/add-text-node";
 import AddVideoNode from "./nodes/add/add-video-node";
@@ -117,6 +118,7 @@ export const NODE_TYPES: NodeTypes = {
     addLinkNode: AddLinkNode,
     addFileNode: AddFileNode,
     addModelNode: AddModelNode,
+    addMediaLibraryNode: AddMediaLibraryNode,
 
     // Transform nodes - Implemented
     imageGenVideoNode: ImageGenVideoNode,
@@ -224,6 +226,7 @@ export const NODE_CATEGORIES = {
         "addLinkNode",
         "addFileNode",
         "addModelNode",
+        "addMediaLibraryNode",
     ],
     TRANSFORM: [
         "imageGenVideoNode",

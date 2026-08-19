@@ -16,7 +16,10 @@ describe("extensionFor — three rungs, in order (E18)", () => {
 
     it("rung 3: falls back to mp4 when neither says anything usable", () => {
         expect(
-            extensionFor("https://s.example/a/blob", "application/octet-stream"),
+            extensionFor(
+                "https://s.example/a/blob",
+                "application/octet-stream",
+            ),
         ).toBe("mp4");
         expect(extensionFor("https://s.example/a/blob", null)).toBe("mp4");
     });

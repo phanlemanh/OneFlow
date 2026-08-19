@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AddMediaLibraryProto } from "@/components/proto/add-media-library-proto";
 import { ByoKeyOnboardingProto } from "@/components/proto/byo-key-onboarding-proto";
 
 /**
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 const PROTOS: Record<string, (state: string) => React.ReactNode> = {
     "byo-key-onboarding": (state) => <ByoKeyOnboardingProto state={state} />,
+    "add-media-library": (state) => <AddMediaLibraryProto state={state} />,
 };
 
 // Dark mode is class-based (`@custom-variant dark (&:is(.dark *))`), so the

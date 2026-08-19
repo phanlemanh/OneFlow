@@ -1,13 +1,10 @@
 import "server-only";
 
+import { logger } from "@/lib/logger";
 import { resolveConfig } from "@/lib/media-library/config.server";
-import {
-    classify,
-    type MediaLibraryFailure,
-} from "@/lib/media-library/errors";
+import { classify, type MediaLibraryFailure } from "@/lib/media-library/errors";
 import type { AssetDetail, SearchResponse } from "@/lib/media-library/types";
 import { checkContractsVersion } from "@/lib/media-library/version";
-import { logger } from "@/lib/logger";
 
 export type ClientResult<T> =
     | { ok: true; data: T }
@@ -89,8 +86,7 @@ async function call<T>(
     }
 
     if (!response.ok) {
-        const errorField =
-            typeof record.error === "string" ? record.error : "";
+        const errorField = typeof record.error === "string" ? record.error : "";
         return { ok: false, failure: classify(response.status, errorField) };
     }
 

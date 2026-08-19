@@ -8,7 +8,11 @@ vi.mock("@/lib/settings/env-store.server", () => ({
 }));
 
 import { VIDEO_CARD } from "./__fixtures__/cards";
-import { startStub, type StubHandle, type StubOptions } from "./__fixtures__/stub-server";
+import {
+    type StubHandle,
+    type StubOptions,
+    startStub,
+} from "./__fixtures__/stub-server";
 import { searchVideos } from "./client.server";
 
 let stub: StubHandle | undefined;

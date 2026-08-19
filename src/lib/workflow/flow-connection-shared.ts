@@ -18,6 +18,7 @@ export const ADD_NODE_OUTPUT_TYPE: Record<string, string> = {
     addModelNode: "modelNode",
     addFileNode: "fileNode",
     addLinkNode: "linkNode",
+    addMediaLibraryNode: "videoNode",
 };
 
 /**

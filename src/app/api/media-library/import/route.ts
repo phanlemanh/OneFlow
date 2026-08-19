@@ -33,7 +33,9 @@ export async function POST(request: Request) {
         );
     }
 
-    const assetId = String((body as { assetId?: unknown })?.assetId ?? "").trim();
+    const assetId = String(
+        (body as { assetId?: unknown })?.assetId ?? "",
+    ).trim();
     if (!assetId) {
         return NextResponse.json(
             { code: "BAD_REQUEST", message: "Thiếu mã asset." },

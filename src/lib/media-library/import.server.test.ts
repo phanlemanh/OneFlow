@@ -19,7 +19,7 @@ vi.mock("@/lib/file/file-utils", () => ({
 }));
 
 import { VIDEO_CARD } from "./__fixtures__/cards";
-import { startStub, type StubHandle } from "./__fixtures__/stub-server";
+import { type StubHandle, startStub } from "./__fixtures__/stub-server";
 import { importAsset } from "./import.server";
 
 const BYTES = Buffer.from("pretend this is an mp4 file");

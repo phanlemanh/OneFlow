@@ -3,10 +3,8 @@ import { describe, expect, it } from "vitest";
 import { CARD_FIELDS, VIDEO_CARD } from "./cards";
 
 type CardField = (typeof CARD_FIELDS)[number];
-const unknownFields = (card: Record<string, unknown>): string[] =>
-    Object.keys(card).filter(
-        (key) => !CARD_FIELDS.includes(key as CardField),
-    );
+const unknownFields = (card: object): string[] =>
+    Object.keys(card).filter((key) => !CARD_FIELDS.includes(key as CardField));
 
 describe("fixture provenance (E28)", () => {
     it("cites the contract file, line range and read date", () => {

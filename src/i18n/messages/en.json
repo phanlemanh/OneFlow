@@ -204,7 +204,8 @@
             "extractStem": "Extract Stem",
             "addTrack": "Add Track",
             "completeMusic": "Complete",
-            "musicBrief": "Music Brief"
+            "musicBrief": "Music Brief",
+            "tooltipMediaLibrary": "Media library"
         },
         "toast": {
             "executing": "Executing...",
@@ -1047,6 +1048,22 @@
                 "endLabel": "End (s)",
                 "editOp": "Edit op",
                 "removeOp": "Remove op"
+            },
+            "addMediaLibrary": {
+                "title": "Load from library",
+                "searchPlaceholder": "Describe the scene you need, e.g. a living room full of sunlight",
+                "search": "Search",
+                "searching": "Searching…",
+                "importing": "Pulling the clip into your file store… it will appear as a video node on the canvas.",
+                "results": "clips match your description. Pick one to pull into the workspace.",
+                "thinShelf": "No clip could be shown for this description ({candidates} clips passed the filters). Try another wording or loosen the request.",
+                "unranked": "Results are not ranked by meaning: the library is missing embeddings. The list still matches the filters, but the order does not reflect fit.",
+                "error": "The library call did not go through.",
+                "missingConfig": "The media library is not connected yet.",
+                "saveConfig": "Save and search again",
+                "savingConfig": "Saving…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "A key with the search scope"
             }
         },
         "firstRun": {
