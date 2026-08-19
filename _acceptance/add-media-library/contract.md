@@ -5,9 +5,9 @@ slug: add-media-library
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [ui, api]
-status: draft
-approved_by:
-approved_at:
+status: approved
+approved_by: Phan Le Manh
+approved_at: 2026-08-19T14:58:44Z
 ---
 
 # Acceptance Contract: add-media-library
