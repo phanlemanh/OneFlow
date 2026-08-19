@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { type KeyVerdict, verifyKey } from "@/lib/onboarding/key-verify";
 import { loadPluginEnvDecls } from "@/lib/plugins/plugin-env-manifests.server";
 import {
     type EnvStore,
@@ -22,10 +23,35 @@ export async function GET() {
 }
 
 /**
+ * Asks each provider whether the key it was just handed actually works.
+ * Only keys whose value changed in this request are probed — an unchanged
+ * store must not fire an outbound call per save.
+ */
+async function verifyChangedKeys(
+    previous: EnvStore,
+    next: EnvStore,
+): Promise<Record<string, KeyVerdict>> {
+    const changed = Object.keys(next).filter(
+        (key) => next[key] !== "" && next[key] !== previous[key],
+    );
+    const verdicts = await Promise.all(
+        changed.map(
+            async (key) => [key, await verifyKey(key, next[key])] as const,
+        ),
+    );
+    return Object.fromEntries(verdicts);
+}
+
+/**
  * PUT /api/settings/env
  * Replaces the entire env map. Body: `{ env: Record<string,string> }`.
  * OneFlow stays platform-agnostic: it does not validate which keys are present;
  * each plugin documents the keys it needs in its own README.
+ *
+ * Saving is followed by verification: every key whose value changed is tested
+ * against the thing it unlocks, and the verdicts come back in the response so
+ * the caller states a server-derived result instead of an optimistic "saved".
+ * The storage path itself is unchanged — this only adds a road to it.
  */
 export async function PUT(request: NextRequest) {
     let body: unknown;
@@ -51,6 +77,8 @@ export async function PUT(request: NextRequest) {
         if (typeof v === "string") env[k] = v;
     }
 
+    const previous = await loadEnvStore();
     await saveEnvStore(env);
-    return NextResponse.json({ env: await loadEnvStore() });
+    const verdicts = await verifyChangedKeys(previous, env);
+    return NextResponse.json({ env: await loadEnvStore(), verdicts });
 }
