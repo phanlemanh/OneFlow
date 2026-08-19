@@ -1,0 +1,127 @@
+/**
+ * A local stand-in for media-library, shaped from its real contract.
+ *
+ * It RECORDS every request so a test can assert the request OneFlow actually
+ * sent, and it 401s when the Authorization header is absent — so an adapter
+ * that forgets auth fails loudly instead of quietly returning an empty list.
+ */
+import { createServer, type IncomingMessage, type Server } from "node:http";
+
+export interface RecordedRequest {
+    method: string;
+    path: string;
+    headers: Record<string, string>;
+    body: unknown;
+}
+
+export interface StubOptions {
+    searchResponse?: unknown;
+    searchStatus?: number;
+    assetResponse?: unknown;
+    assetStatus?: number;
+    contractsVersion?: string;
+    bytes?: Buffer;
+    bytesContentType?: string;
+    /** Default true: a request without a Bearer header gets 401, like the real service. */
+    requireAuth?: boolean;
+    /** Answer with a body that is not JSON, to exercise the parse-failure arm. */
+    nonJsonBody?: boolean;
+}
+
+export interface StubHandle {
+    url: string;
+    requests: RecordedRequest[];
+    close(): Promise<void>;
+}
+
+async function readBody(req: IncomingMessage): Promise<unknown> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(chunk as Buffer);
+    if (chunks.length === 0) return undefined;
+    try {
+        return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    } catch {
+        return undefined;
+    }
+}
+
+export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
+    const version = opts.contractsVersion ?? "0.2.0";
+    const requests: RecordedRequest[] = [];
+
+    const server: Server = createServer((req, res) => {
+        void (async () => {
+            const path = req.url ?? "";
+            requests.push({
+                method: req.method ?? "",
+                path,
+                headers: Object.fromEntries(
+                    Object.entries(req.headers).map(([k, v]) => [k, String(v)]),
+                ),
+                body: await readBody(req),
+            });
+
+            const send = (status: number, payload: unknown) => {
+                res.writeHead(status, { "content-type": "application/json" });
+                res.end(JSON.stringify(payload));
+            };
+
+            if (path.startsWith("/bytes")) {
+                res.writeHead(200, {
+                    "content-type": opts.bytesContentType ?? "video/mp4",
+                });
+                res.end(opts.bytes ?? Buffer.from("fake-mp4-bytes"));
+                return;
+            }
+            if ((opts.requireAuth ?? true) && !req.headers.authorization) {
+                send(401, {
+                    error: "unauthorized",
+                    contracts_version: version,
+                });
+                return;
+            }
+            if (opts.nonJsonBody) {
+                res.writeHead(200, { "content-type": "text/html" });
+                res.end("<html>not json</html>");
+                return;
+            }
+            if (path.startsWith("/v1/search")) {
+                send(
+                    opts.searchStatus ?? 200,
+                    opts.searchResponse ?? {
+                        cards: [],
+                        context: null,
+                        candidates: 0,
+                        skipped: 0,
+                        warnings: [],
+                        contracts_version: version,
+                    },
+                );
+                return;
+            }
+            if (path.startsWith("/v1/assets/")) {
+                send(
+                    opts.assetStatus ?? 200,
+                    opts.assetResponse ?? { contracts_version: version },
+                );
+                return;
+            }
+            send(404, { error: "not_found", contracts_version: version });
+        })();
+    });
+
+    await new Promise<void>((resolve) => {
+        server.listen(0, "127.0.0.1", resolve);
+    });
+    const address = server.address();
+    const port = typeof address === "object" && address ? address.port : 0;
+
+    return {
+        url: `http://127.0.0.1:${port}`,
+        requests,
+        close: () =>
+            new Promise<void>((resolve) => {
+                server.close(() => resolve());
+            }),
+    };
+}
