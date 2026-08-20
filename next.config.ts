@@ -5,13 +5,26 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
     output: "standalone",
-    // `next build` and `next dev` write incompatible layouts into the SAME
-    // directory, so a build that runs while a dev server is serving pulls the
-    // chunks out from under it and every route starts returning 500. That is
-    // not hypothetical here: `pnpm build && pnpm typecheck` sits in
-    // `feature_loop.suite_keys`, so it runs on every verify round — alongside
-    // the ui-check evals, which need a live dev server. Measured on both lanes
-    // of the N=2 pilot: it killed 9 ui-check runs before anyone found it.
+    // A build that lands WHILE a dev server is serving from the same directory
+    // deletes the chunk files that server is still handing out. Measured, three
+    // arms, 2026-08-20:
+    //   · build during serving  → served page 500s, its static chunk 404s
+    //   · build first, dev after (same dir, no overlap) → 200; the dev server
+    //     rebuilds what it needs, so the two layouts CAN share a directory —
+    //     the failure is about timing, not about layout incompatibility
+    //   · dev in its own dir, build into .next → 200 throughout
+    // Pinned message from the broken arm: `Could not find the module
+    // "…/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest`.
+    //
+    // Scope, and this is the part that misleads: only PAGES die. Route handlers
+    // kept answering correctly in every arm, so a verify round can lose all of
+    // its UI evidence while the API evals stay green — and that green cluster
+    // reads exactly like a healthy tree.
+    //
+    // Not hypothetical here: `pnpm build && pnpm typecheck` sits in
+    // `feature_loop.suite_keys`, so it runs on every verify round, alongside the
+    // ui-check evals that need a live dev server. It killed 9 capture runs
+    // across the N=2 pilot before anyone found it.
     // Default is unchanged, so CI and the desktop assemble script see `.next`
     // exactly as before; a capture run opts out with NEXT_DIST_DIR=build, which
     // .gitignore and biome.json already exclude, so it needs no config change of
