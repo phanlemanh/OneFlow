@@ -1,0 +1,60 @@
+E20 network truth (captured via Browser pane tabId tab-6, http://localhost:3000/workspace)
+
+--- read_network_requests ---
+[43025.13] GET http://localhost:3000/_next/static/development/_devMiddlewareManifest.json -> 200 OK
+[43025.14] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK
+[43025.17] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
+[43025.18] GET http://localhost:3000/__nextjs_font/geist-mono-latin.woff2 -> 200 OK
+[6E84F22C2A985409104E4B7D5F2653F2] GET http://localhost:3000/workspace [FAILED: net::ERR_ABORTED]
+[43025.19] GET http://localhost:3000/_next/static/webpack/5e91f54f097e83e5.webpack.hot-update.json -> 404 Not Found
+[01DDBE327BC03C74507BF8DBDA5CD1DD] GET http://localhost:3000/workspace -> 500 Internal Server Error
+[43025.21..25] GET fallback chunks (webpack.js, main.js, pages/_app.js, pages/_error.js, react-refresh.js) -> 200 OK
+[43025.32] GET http://localhost:3000/_next/static/development/_devMiddlewareManifest.json -> 200 OK
+[43025.33] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK
+[43025.36] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
+[43025.37] GET http://localhost:3000/__nextjs_font/geist-mono-latin.woff2 -> 200 OK
+
+--- read_console_messages (onlyErrors) ---
+[error] Uncaught Error: Cannot find module './6471.js'
+Require stack: .../next/dist/server/lib/router-server.js:240:21 ... start-server.js, __NEXT_ERROR_CODE: E394
+[error] Failed to load resource: the server responded with a status of 404 (Not Found)
+[error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+[error] Uncaught Error: Cannot find module './6471.js' (repeat, second hydration attempt)
+
+--- Next.js dev error overlay (screenshot) ---
+Runtime Error: Cannot find module './6471.js'
+Require stack:
+- /Users/manh-macmini/dev/oneflow-lane-13b/.next/server/webpack-runtime.js
+- /Users/manh-macmini/dev/oneflow-lane-13b/.next/server/app/api/media-library/search/route.js
+- .../node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/require.js
+- .../next/dist/server/load-components.js
+Call stack root frames: .next/server/pages/_document.js (1:327), Object.<anonymous> .next/server/pages/_document.js (1:374)
+
+--- Root cause ---
+Stale/corrupted .next dev build: webpack runtime for the media-library search
+API route (and the pages/_document fallback shim) reference chunk id 6471
+which is not resolvable at ./6471.js relative to .next/server/ (the chunk
+physically exists at .next/server/chunks/6471.js and
+.next/standalone/.next/server/chunks/6471.js, but the runtime require path
+does not resolve there). Confirmed non-transient: 3 curl retries over ~20s
+plus one wait-and-retry after 15s all return the identical 500 body/stack.
+Other routes on the same server (/, /login, /api/media-library/search GET)
+respond normally (307, 404, 405) -> the server process itself is alive and
+serving; only /workspace (which appears to eagerly reference the broken
+media-library search route chunk) is affected.
+
+--- Corroborating peer evidence already on disk before this run ---
+_acceptance/add-media-library/evidence/E9-step1-BLOCKED-500.html
+_acceptance/add-media-library/evidence/E9-step2-BLOCKED-500.html
+_acceptance/add-media-library/evidence/E11-step1-BLOCKED-500.html
+_acceptance/add-media-library/evidence/E11-step2-BLOCKED-500.html
+_acceptance/add-media-library/evidence/E6-step1-error.html
+_acceptance/add-media-library/evidence/E29-step1-ERROR-500.html
+-> other independent verifier subagents in this same eval batch hit the
+   identical /workspace 500 and independently landed on the same
+   BLOCKED-500 fallback convention, corroborating this is a shared
+   environment-level break, not specific to E20's steps.
+
+networkObserved verdict: app-fail (FAIL-eligible origin = dev_server.url
+http://localhost:3000; GET /workspace -> 500, which is >=500 => FAIL-eligible
+per scoping rule).

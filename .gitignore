@@ -6,6 +6,10 @@ node_modules
 
 # next.js
 .next/
+# Dev-server dist dir (NEXT_DIST_DIR) — kept apart from .next so a verify
+# suite running `next build` cannot pull the chunks out from under a live
+# dev server serving the UI checks.
+.next-dev/
 out/
 
 # production

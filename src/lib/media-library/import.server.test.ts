@@ -194,7 +194,10 @@ describe("importAsset — the three guards (E17)", () => {
                 return new Response(null, {
                     status: 302,
                     headers: {
-                        location: "http://169.254.169.254/latest/meta-data/",
+                        // https on purpose: the scheme rule cannot be what
+                        // refuses this, so only the HOST rule can — and only if
+                        // it runs on the redirect hop rather than hop one.
+                        location: "https://169.254.169.254/latest/meta-data/",
                     },
                 });
             }

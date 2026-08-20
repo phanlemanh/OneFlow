@@ -1,0 +1,175 @@
+base=http://localhost:3101
+
+buttonCountFound=8
+
+clickedImageButton=true
+
+nodeCountBefore=6
+
+nodeCountAfter=7
+
+bannerOrToastTexts=[]
+
+consoleErrors=[]
+
+pageErrors=[]
+
+failedRequests=[]
+
+allResponses(app-origin only)=[
+  {
+    "url": "http://localhost:3101/workspace",
+    "status": 200,
+    "resourceType": "document"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787186636683",
+    "status": 200,
+    "resourceType": "stylesheet"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/css/app/layout.css?v=1787186636683",
+    "status": 200,
+    "resourceType": "stylesheet"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/media/7d4881bb7e1bf84d-s.p.woff2",
+    "status": 200,
+    "resourceType": "font"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+    "status": 200,
+    "resourceType": "font"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/chunks/webpack.js?v=1787186636683",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/chunks/app-pages-internals.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/chunks/app/layout.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/chunks/main-app.js?v=1787186636683",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/chunks/app/workspace/page.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/apple-touch-icon.png",
+    "status": 200,
+    "resourceType": "other"
+  },
+  {
+    "url": "http://localhost:3101/example.json",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/example.json",
+    "status": 304,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/apple-touch-icon.png",
+    "status": 304,
+    "resourceType": "other"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/cc10f2d92778e513.webpack.hot-update.json",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/webpack.cc10f2d92778e513.hot-update.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/e7941933949c06e5.webpack.hot-update.json",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/api/feature/list",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/api/plugins/registry",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/webpack.e7941933949c06e5.hot-update.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/api/uploads/example-assets/two-scenes.mp4",
+    "status": 200,
+    "resourceType": "media"
+  },
+  {
+    "url": "http://localhost:3101/api/uploads/example-assets/two-scenes.mp4",
+    "status": 206,
+    "resourceType": "media"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/8064cb769ec104cd.webpack.hot-update.json",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/api/task/pending",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/webpack.8064cb769ec104cd.hot-update.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/b0d9f347d91d0952.webpack.hot-update.json",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/app/layout.b0d9f347d91d0952.hot-update.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/webpack/webpack.b0d9f347d91d0952.hot-update.js",
+    "status": 200,
+    "resourceType": "script"
+  },
+  {
+    "url": "http://localhost:3101/workspace?_rsc=z3Wp789TB5zg5EPt",
+    "status": 200,
+    "resourceType": "fetch"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/css/app/layout.css?v=1787186639728",
+    "status": 200,
+    "resourceType": "stylesheet"
+  },
+  {
+    "url": "http://localhost:3101/_next/static/css/app/workspace/page.css?v=1787186639728",
+    "status": 200,
+    "resourceType": "stylesheet"
+  }
+]
