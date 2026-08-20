@@ -214,8 +214,8 @@ executors:
     # seam's exit code (standing rule, lesson: cache-l1 round 1).
     unit_aml_config: "pnpm vitest run src/lib/media-library/config.server.test.ts"
     unit_aml_client: "pnpm vitest run src/lib/media-library/client.server.test.ts"
-    unit_aml_import: "pnpm vitest run src/lib/media-library/import.server.test.ts"
-    unit_aml_ext: "pnpm vitest run src/lib/media-library/extension.test.ts"
+    unit_aml_import: "pnpm vitest run src/lib/media-library/import.server.test.ts src/lib/media-library/import-roundtrip.server.test.ts"
+    unit_aml_ext: "pnpm vitest run src/lib/media-library/extension.test.ts src/lib/media-library/extension-serving.server.test.ts"
     unit_aml_node: "pnpm vitest run src/components/workspace/nodes/add/add-media-library-node.test.tsx"
     unit_aml_wiring: "pnpm vitest run src/lib/workflow/media-library-wiring.test.ts"
     # Sinh sau gap-probe P0: đo call-site qua chính route, không qua lời gọi hàm.
