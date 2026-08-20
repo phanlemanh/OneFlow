@@ -17,10 +17,11 @@ from dataclasses import dataclass
 from vietnormalizer import VietnameseNormalizer
 
 from .vi_dictionary import (
-    ABBREVIATIONS,
-    CURRENCY_SIGNS,
+    ABBREVIATION_PATTERNS,
+    CURRENCY_SIGN_PATTERNS,
     CURRENCY_WORD,
-    PREFIXES,
+    LETTER,
+    PREFIX_PATTERNS,
 )
 
 _NORMALIZER = VietnameseNormalizer()
@@ -46,8 +47,17 @@ _RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)")
 # "Money is present" must be a precise test, not a substring search: the letter
 # "d" alone appears inside ordinary words ("do", "dep"), so `"d" in text` marks
 # every second Vietnamese sentence as a price. Measured: "-7 do" and "Can ho
-# dep..." both tripped it before this was tightened.
-_MONEY = re.compile(r"₫|VNĐ|VND|(?<=\d)\s*đ\b|(?<=\d)\s*đồng\b")
+# dep..." both tripped it before this was tightened. VNĐ/VND carry the same
+# letter-boundary anchors as the dictionary replacement — without them,
+# "VNDirect" counts as money going in, no currency word comes out, and the
+# relational rule rejects a perfectly clean sentence.
+_MONEY = re.compile(
+    rf"₫"
+    rf"|(?<!{LETTER})VNĐ(?!{LETTER})"
+    rf"|(?<!{LETTER})VND(?!{LETTER})"
+    rf"|(?<=\d)\s*đ\b"
+    rf"|(?<=\d)\s*đồng\b"
+)
 
 # The library writes compound loanwords with hyphens ("ki-lo-met"), and reading
 # its own output back splits them again ("ki lo met") — so the hyphen makes the
@@ -83,13 +93,16 @@ def has_money(text: str) -> bool:
 
 
 def _pre(text: str) -> str:
+    # Anchored patterns, never bare str.replace: "VNDirect" must not become
+    # "đồngirect" and "H.264" must not become "huyện 264" — both measured,
+    # see vi_dictionary's module docstring.
     out = unicodedata.normalize("NFC", text)
-    for src, dst in ABBREVIATIONS:
-        out = out.replace(src, dst)
-    for src, dst in PREFIXES:
-        out = out.replace(src, dst)
-    for src, dst in CURRENCY_SIGNS:
-        out = out.replace(src, dst)
+    for pattern, dst in ABBREVIATION_PATTERNS:
+        out = pattern.sub(dst, out)
+    for pattern, dst in PREFIX_PATTERNS:
+        out = pattern.sub(dst, out)
+    for pattern, dst in CURRENCY_SIGN_PATTERNS:
+        out = pattern.sub(dst, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
     out = _RANGE.sub(" đến ", out)
     # Ranges are resolved first, so any dash still sitting in front of a number

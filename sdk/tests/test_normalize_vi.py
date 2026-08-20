@@ -31,8 +31,12 @@ CORPUS_MONEY: tuple[tuple[str, str], ...] = (
     ("2,5 tỷ", "hai phẩy năm tỷ"),
     ("-7 độ", "âm bảy độ"),
     ("15%", "mười lăm phần trăm"),
+    # The two ISO-code spellings, absent from the first corpus — which is
+    # exactly why the unanchored "VND" replacement shipped (S4 round 1).
+    ("Vé 500.000VND", "vé năm trăm nghìn đồng"),
+    ("Giá 2 triệu VNĐ", "giá hai triệu đồng"),
 )
-MONEY_COUNT = 11
+MONEY_COUNT = 13
 
 # Which matrix cells each case is claimed to cover. Written by hand: deriving
 # this from the expected string would only make the matrix agree with itself.
@@ -137,6 +141,32 @@ def test_identifiers_units_abbrev_golden() -> None:
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
         # No abbreviation dot may survive into speech.
         assert "." not in got.text, f"{raw!r}: còn dấu chấm viết tắt trong {got.text!r}"
+
+
+# --------------------------------------------------------------------------
+# AC-2/AC-4 amendment (S4 round 1, confirmed finding) — brand tokens must
+# SURVIVE the currency and prefix rules. Before the dictionary was anchored,
+# "VNDirect" came back as "đồngirect" and "H.264" as "huyện 264", and every
+# guard stayed green: no digits were left for the residual rule, and the money
+# relation saw the word "đồng" — the very fragment spliced into the brand name.
+# These asserts pin the RELATION (nothing injected), not the exact spelling of
+# a foreign word — how the library sounds out "VNDS" is the library's policy.
+# --------------------------------------------------------------------------
+
+
+def test_brand_tokens_survive_currency_and_prefix_rules() -> None:
+    for raw in ("Công ty VNDirect niêm yết", "Mã VNDS tăng trần"):
+        assert has_money(raw) is False, f"{raw!r} không phải giá tiền"
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert "đồng" not in got.text, (
+            f"{raw!r}: chữ 'đồng' bị tiêm vào tên riêng — {got.text!r}"
+        )
+
+    got = normalize_vi("Xem chuẩn H.264 nhé")
+    assert "huyện" not in got.text, (
+        f"mã codec bị đọc thành đơn vị hành chính — {got.text!r}"
+    )
 
 
 # --------------------------------------------------------------------------

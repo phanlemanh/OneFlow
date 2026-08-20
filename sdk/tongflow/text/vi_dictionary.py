@@ -4,13 +4,40 @@ Measured against vietnormalizer 0.2.3 on 2026-08-19: it spells "TP.HCM" out
 letter by letter ("tê pê.hát xê em") and leaves "Q.7" as "q.bảy", so
 administrative abbreviations are ours to expand. Everything here is a
 plugin-internal constant, never an ABI field (CLAUDE.md, ABI hygiene).
+
+Every entry is applied as an ANCHORED regex, never a bare str.replace.
+Measured 2026-08-20 (S4 round 1 finding): unanchored "VND" replacement turned
+"VNDirect" — a real brokerage name — into "đồngirect", and every downstream
+guard stayed green because the guards only assert absence (no digits left) and
+presence (a currency word somewhere), both of which the corruption satisfies.
+The anchor is "not adjacent to a letter": digits stay adjacent on purpose so
+"500.000VND" still reads as money.
 """
 
 from __future__ import annotations
 
+import re
+
+# Any Unicode letter (\w minus digits and underscore). Used as the boundary for
+# every replacement: a match may touch digits or punctuation, never a letter.
+LETTER = r"[^\W\d_]"
+
+# Uppercase Vietnamese alphabet, spelled out. `[A-ZÀ-Ỹ]` is wrong here — the
+# precomposed Vietnamese block interleaves cases (Ề U+1EC0, ề U+1EC1), so a
+# codepoint range silently admits lowercase letters.
+_UPPER = (
+    "A-Z"
+    "ĐÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶ"
+    "ÈÉẺẼẸÊỀẾỂỄỆ"
+    "ÌÍỈĨỊ"
+    "ÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢ"
+    "ÙÚỦŨỤƯỪỨỬỮỰ"
+    "ỲÝỶỸỴ"
+)
+
 # Longest-first: "TP.HCM" must win over the "TP." prefix rule below, which in
 # turn must win over "P." — otherwise "TP.Thu Duc" becomes "T" + "phuong ...".
-ABBREVIATIONS: tuple[tuple[str, str], ...] = (
+_ABBREVIATIONS: tuple[tuple[str, str], ...] = (
     ("TP.HCM", "thành phố Hồ Chí Minh"),
     ("TPHCM", "thành phố Hồ Chí Minh"),
     ("TP.HN", "thành phố Hà Nội"),
@@ -19,24 +46,43 @@ ABBREVIATIONS: tuple[tuple[str, str], ...] = (
     ("BĐS", "bất động sản"),
 )
 
+ABBREVIATION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
+    (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?!{LETTER})"), dst)
+    for src, dst in _ABBREVIATIONS
+)
+
 # Prefix plus a value the reader still has to read: "Q.7" -> "quan " + "7".
-# Order matters for the same reason as above.
-PREFIXES: tuple[tuple[str, str], ...] = (
-    ("TP.", "thành phố "),
-    ("TT.", "thị trấn "),
-    ("Q.", "quận "),
-    ("P.", "phường "),
-    ("H.", "huyện "),
+# Order matters for the same reason as above. The third column pins what may
+# FOLLOW the prefix for it to count as administrative: districts and wards are
+# numbered (Q.7, P.15), the other levels are only ever named — and "H." followed
+# by digits is a video codec (H.264 → "huyện 264", measured), not a district.
+_NEXT_UPPER = rf"[{_UPPER}]"
+_NEXT_DIGIT_OR_UPPER = rf"[\d{_UPPER}]"
+_PREFIXES: tuple[tuple[str, str, str], ...] = (
+    ("TP.", "thành phố ", _NEXT_UPPER),
+    ("TT.", "thị trấn ", _NEXT_UPPER),
+    ("Q.", "quận ", _NEXT_DIGIT_OR_UPPER),
+    ("P.", "phường ", _NEXT_DIGIT_OR_UPPER),
+    ("H.", "huyện ", _NEXT_UPPER),
+)
+
+PREFIX_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
+    (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?={nxt})"), dst)
+    for src, dst, nxt in _PREFIXES
 )
 
 # The library understands "d" but not the currency sign, and silently drops the
 # sign together with the word "dong" -- the single most expensive defect found
 # in the 2026-08-19 measurement, because the result still reads as clean.
-CURRENCY_SIGNS: tuple[tuple[str, str], ...] = (
+_CURRENCY_SIGNS: tuple[tuple[str, str], ...] = (
     ("₫", "đ"),
     ("VNĐ", "đồng"),
     ("VND", "đồng"),
 )
 
-CURRENCY_MARKERS: tuple[str, ...] = ("₫", "đ", "VNĐ", "VND")
+CURRENCY_SIGN_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
+    (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?!{LETTER})"), dst)
+    for src, dst in _CURRENCY_SIGNS
+)
+
 CURRENCY_WORD = "đồng"
