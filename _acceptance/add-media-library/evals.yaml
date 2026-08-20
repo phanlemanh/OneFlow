@@ -41,7 +41,7 @@ evals:
     steps:
       - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E2-step1.png"
       - "Assert: tên biến còn thiếu hiện NGUYÊN VĂN trên màn hình (đọc được bằng mắt trong ảnh), không phải câu chung chung 'chưa cấu hình dịch vụ'"
-    expected: "khung hình đầu tiên đã nêu đúng tên biến còn thiếu; một thông điệp không chứa tên biến là FAIL kể cả khi nó lịch sự hơn"
+    expected: "khung hình nêu đúng tên biến còn thiếu; một thông điệp không chứa tên biến là FAIL kể cả khi nó lịch sự hơn"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   - id: E3
@@ -59,7 +59,7 @@ evals:
       - "Kho khoá RỖNG; mở {url}/workspace → chụp _acceptance/add-media-library/evidence/E4-step1.png"
       - "Thêm một node KHÁC (add ảnh) từ bảng chọn → chụp _acceptance/add-media-library/evidence/E4-step2.png"
       - "Assert: không banner lỗi toàn cục, không toast, console không có lỗi chưa bắt"
-    expected: "studio dùng được bình thường khi chưa hề cấu hình library; ĐIỀU KHIỂN DƯƠNG trước: khung hình phải cho thấy node mới THẬT SỰ được thêm, nếu không thì một trang trắng cũng 'không có lỗi'"
+    expected: "studio dùng được bình thường khi chưa hề cấu hình library; ĐIỀU KHIỂN DƯƠNG trước: khung hình phải cho thấy node mới THẬT SỰ được thêm, nếu không thì một trang trắng cũng không có lỗi"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- B. Tìm trong kho ----------
@@ -78,7 +78,7 @@ evals:
     steps:
       - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E6-step1.png"
       - "Assert: các thẻ hiện ra kèm ảnh thu nhỏ và caption, và có dòng nói bao nhiêu clip khớp"
-    expected: "thẻ trả về hiện trên node; khung hình phải cho thấy thẻ ĐẾN TỪ lượt tìm (danh sách rỗng trước khi bấm, có thẻ sau khi bấm)"
+    expected: "thẻ hiện trên node kèm ảnh thu nhỏ, caption và dòng đếm số clip khớp; danh sách rỗng hoặc thiếu caption là FAIL"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   - id: E7
@@ -124,7 +124,7 @@ evals:
       - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E11-step1.png"
       - "Mở {url}/proto/add-media-library?state=thin-shelf → chụp _acceptance/add-media-library/evidence/E11-step2.png"
       - "Assert: hai khung mang hai câu KHÁC NHAU; khung lỗi gọi đúng tên nguyên nhân và nêu tên biến khoá, khung kệ mỏng nói về kho chứ không nói về hỏng"
-    expected: "ba nguyên nhân khác nhau đọc ra được ba việc-phải-làm khác nhau; ba khung hình giống hệt nhau là FAIL"
+    expected: "lỗi và kệ mỏng đọc ra hai việc-phải-làm khác nhau; hai khung mang cùng một thông điệp là FAIL"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- C. Thẻ Media Card (bảo đảm #3) ----------
@@ -169,7 +169,7 @@ evals:
       - "Mở {url}/proto/add-media-library?state=importing → chụp _acceptance/add-media-library/evidence/E16-step1.png"
       - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E16-step2.png"
       - "Assert: khung 1 nói rõ đang nạp về kho file và cho biết xong sẽ thành node video trên canvas, và thẻ đang nạp bị khoá"
-    expected: "người dùng thấy được chuyển từ 'đang nạp' sang 'đã có trong kho'; một khung vẫn hiện ảnh thu nhỏ của library (chưa nạp) là FAIL — E15 gánh nửa server"
+    expected: "trạng thái đang-nạp phân biệt được với đang-chọn và thẻ đang nạp không bấm lại được; E15 gánh nửa server chứng minh bytes thật sự về kho"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   - id: E17
@@ -204,7 +204,7 @@ evals:
     steps:
       - "Mở {url}/workspace, thêm node nạp-từ-kho từ bảng chọn → chụp _acceptance/add-media-library/evidence/E20-step1.png"
       - "Assert: node hiện trên canvas với tiêu đề nạp-từ-kho và có một handle nguồn bên phải"
-    expected: "node modality nở ra và nối đúng; một node nạp-từ-kho đứng một mình sau khi nạp là FAIL"
+    expected: "node đăng ký thành công và render được trên canvas THẬT (không phải proto); E19 gánh nửa chứng minh modality đúng"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- F. Ranh giới có phiên bản (bảo đảm #7) ----------
@@ -223,7 +223,7 @@ evals:
     steps:
       - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E22-step1.png"
       - "Assert: màn hình lỗi gọi đúng tên nguyên nhân và nêu tên biến liên quan, KHÔNG hiện danh sách thẻ nào"
-    expected: "lệch phiên bản thì từ chối gọi đúng tên và không render dữ liệu đoán theo hình dạng cũ"
+    expected: "trạng thái từ-chối-có-tên không render dữ liệu đoán theo hình dạng cũ; E21 gánh nửa server chứng minh chính lệch phiên bản bị chặn"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- G. Ranh giới hạng + sàn giao diện ----------
@@ -277,7 +277,7 @@ evals:
     steps:
       - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E29-step1.png"
       - "Assert: từ chính trạng thái thiếu-cấu-hình có ô nhập cho CẢ HAI biến và một nút lưu — người dùng có đường ra ngay tại chỗ, không phải đi tìm màn hình khác"
-    expected: "vòng trọn: từ chỗ kẹt, người dùng tự tới được chỗ nhập khoá và tìm được. E2 chứng minh thông điệp nêu đúng tên; eval này chứng minh CÓ ĐƯỜNG RA — một sản phẩm nêu đúng tên biến rồi bỏ mặc người dùng không có ô nào để nhập vẫn làm E2 xanh"
+    expected: "vòng ra tồn tại: người kẹt vì thiếu cấu hình nhìn thấy ngay chỗ nhập. E2 chứng minh thông điệp nêu đúng tên; eval này chứng minh CÓ ĐƯỜNG RA"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- Judgment ----------
