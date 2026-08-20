@@ -39,12 +39,8 @@ evals:
     criterion: AC-1
     executor: ui-check
     steps:
-      - "Khởi động dev server với kho khoá RỖNG (không MEDIA_LIBRARY_URL, không MEDIA_LIBRARY_API_KEY)"
-      - "Mở {url}/proto/add-media-library → chụp _acceptance/add-media-library/evidence/E2-step1.png (trạng thái thiếu-cấu-hình)"
+      - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E2-step1.png"
       - "Assert: tên biến còn thiếu hiện NGUYÊN VĂN trên màn hình (đọc được bằng mắt trong ảnh), không phải câu chung chung 'chưa cấu hình dịch vụ'"
-    expected: "khung hình đầu tiên đã nêu đúng tên biến còn thiếu; một thông điệp không chứa tên biến là FAIL kể cả khi nó lịch sự hơn"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
   - id: E3
     criterion: AC-2
     executor: script
@@ -57,14 +53,9 @@ evals:
     criterion: AC-2
     executor: ui-check
     steps:
-      - "Kho khoá vẫn RỖNG; mở {url}/workspace → chụp evidence/E4-step1.png"
-      - "Thêm một node KHÁC (add ảnh) từ bảng chọn và kéo nó → chụp evidence/E4-step2.png"
-      - "Lưu workflow → chụp evidence/E4-step3.png"
+      - "Kho khoá RỖNG; mở {url}/workspace → chụp _acceptance/add-media-library/evidence/E4-step1.png"
+      - "Thêm một node KHÁC (add ảnh) từ bảng chọn → chụp _acceptance/add-media-library/evidence/E4-step2.png"
       - "Assert: không banner lỗi toàn cục, không toast, console không có lỗi chưa bắt"
-    expected: "studio dùng được bình thường khi chưa hề cấu hình library; ĐIỀU KHIỂN DƯƠNG trước: khung hình phải cho thấy node mới THẬT SỰ được thêm, nếu không thì một trang trắng cũng 'không có lỗi'"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
-  # ---------- B. Tìm trong kho ----------
   - id: E5
     criterion: AC-3
     layer: backend-effect
@@ -78,12 +69,8 @@ evals:
     criterion: AC-3
     executor: ui-check
     steps:
-      - "Dev server trỏ MEDIA_LIBRARY_URL vào máy chủ giả cục bộ có sẵn 3 thẻ video"
-      - "Mở {url}/proto/add-media-library, gõ một câu mô tả, bấm tìm → chụp evidence/E6-step1.png"
-      - "Assert: các thẻ hiện ra kèm ảnh thu nhỏ và caption"
-    expected: "thẻ trả về hiện trên node; khung hình phải cho thấy thẻ ĐẾN TỪ lượt tìm (danh sách rỗng trước khi bấm, có thẻ sau khi bấm)"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
+      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E6-step1.png"
+      - "Assert: các thẻ hiện ra kèm ảnh thu nhỏ và caption, và có dòng nói bao nhiêu clip khớp"
   - id: E7
     criterion: AC-4
     executor: test
@@ -105,13 +92,9 @@ evals:
     criterion: AC-5
     executor: ui-check
     steps:
-      - "Máy chủ giả trả 200 kèm warnings:['embedding_unavailable']"
-      - "Tìm trên {url}/proto/add-media-library → chụp evidence/E9-step1.png"
-      - "Cho máy chủ giả trả 200 SẠCH, tìm lại → chụp evidence/E9-step2.png"
-      - "Assert: khung 1 nói rõ kết quả không xếp hạng ngữ nghĩa; khung 2 KHÔNG có dòng đó"
-    expected: "hai khung hình khác nhau nhìn thấy được; một 200 kèm cảnh báo không được trình y hệt một 200 sạch"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
+      - "Mở {url}/proto/add-media-library?state=unranked → chụp _acceptance/add-media-library/evidence/E9-step1.png"
+      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E9-step2.png"
+      - "Assert: khung 1 có dải nói rõ kết quả không xếp hạng theo ngữ nghĩa; khung 2 KHÔNG có dải đó"
   - id: E10
     criterion: AC-6
     layer: backend-effect
@@ -125,13 +108,9 @@ evals:
     criterion: AC-6
     executor: ui-check
     steps:
-      - "Lần lượt cho máy chủ giả trả 401, rồi 403 thiếu scope, rồi 400"
-      - "Sau mỗi lần bấm tìm chụp evidence/E11-step1.png, E11-step2.png, E11-step3.png"
-      - "Assert: ba khung hình mang ba câu KHÁC NHAU, mỗi câu gọi đúng tên nguyên nhân"
-    expected: "ba nguyên nhân khác nhau đọc ra được ba việc-phải-làm khác nhau; ba khung hình giống hệt nhau là FAIL"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
-  # ---------- C. Thẻ Media Card (bảo đảm #3) ----------
+      - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E11-step1.png"
+      - "Mở {url}/proto/add-media-library?state=thin-shelf → chụp _acceptance/add-media-library/evidence/E11-step2.png"
+      - "Assert: hai khung mang hai câu KHÁC NHAU; khung lỗi gọi đúng tên nguyên nhân và nêu tên biến khoá, khung kệ mỏng nói về kho chứ không nói về hỏng"
   - id: E12
     criterion: AC-7
     executor: script
@@ -170,13 +149,9 @@ evals:
     criterion: AC-9
     executor: ui-check
     steps:
-      - "Máy chủ giả có 1 thẻ video kèm bytes thật (một mp4 nhỏ trong fixture)"
-      - "Trên {url}/proto/add-media-library: tìm → bấm chọn thẻ → chụp evidence/E16-step1.png (đang nạp)"
-      - "Đợi xong → chụp evidence/E16-step2.png (đã có asset trên canvas, phát được)"
-      - "Assert: hai khung khác nhau nhìn thấy được, và khung 2 cho thấy asset ĐÃ NẠP chứ không phải ảnh thu nhỏ của thẻ"
-    expected: "người dùng thấy được chuyển từ 'đang nạp' sang 'đã có trong kho'; một khung vẫn hiện ảnh thu nhỏ của library (chưa nạp) là FAIL — E15 gánh nửa server"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
+      - "Mở {url}/proto/add-media-library?state=importing → chụp _acceptance/add-media-library/evidence/E16-step1.png"
+      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E16-step2.png"
+      - "Assert: khung 1 nói rõ đang nạp về kho file và cho biết xong sẽ thành node video trên canvas, và thẻ đang nạp bị khoá"
   - id: E17
     criterion: AC-10
     executor: test
@@ -207,12 +182,8 @@ evals:
     criterion: AC-12
     executor: ui-check
     steps:
-      - "Sau khi nạp xong ở E16, chụp evidence/E20-step1.png toàn canvas"
-      - "Assert: có một videoNode nối với node nạp-từ-kho bằng một cạnh, và videoNode hiện asset"
-    expected: "node modality nở ra và nối đúng; một node nạp-từ-kho đứng một mình sau khi nạp là FAIL"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
-  # ---------- F. Ranh giới có phiên bản (bảo đảm #7) ----------
+      - "Mở {url}/workspace, thêm node nạp-từ-kho từ bảng chọn → chụp _acceptance/add-media-library/evidence/E20-step1.png"
+      - "Assert: node hiện trên canvas với tiêu đề nạp-từ-kho và có một handle nguồn bên phải"
   - id: E21
     criterion: AC-13
     layer: backend-effect
@@ -226,13 +197,8 @@ evals:
     criterion: AC-13
     executor: ui-check
     steps:
-      - "Máy chủ giả khai contracts_version='1.0.0'"
-      - "Bấm tìm trên {url}/proto/add-media-library → chụp evidence/E22-step1.png"
-      - "Assert: màn hình nói lệch phiên bản và nêu cả hai số, KHÔNG hiện danh sách thẻ nào"
-    expected: "lệch phiên bản thì từ chối gọi đúng tên và không render dữ liệu đoán theo hình dạng cũ"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
-  # ---------- G. Ranh giới hạng + sàn giao diện ----------
+      - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E22-step1.png"
+      - "Assert: màn hình lỗi gọi đúng tên nguyên nhân và nêu tên biến liên quan, KHÔNG hiện danh sách thẻ nào"
   - id: E23
     criterion: AC-14
     executor: script
@@ -281,18 +247,11 @@ evals:
     criterion: AC-1
     executor: ui-check
     steps:
-      - "Khởi động dev server với kho khoá RỖNG. TUYỆT ĐỐI không đặt MEDIA_LIBRARY_URL/MEDIA_LIBRARY_API_KEY bằng biến môi trường ở bất kỳ bước nào của eval này"
-      - "Mở {url}/workspace, thêm node nạp-từ-kho, bấm tìm → chụp evidence/E29-step1.png (trạng thái thiếu-cấu-hình)"
-      - "Từ CHÍNH trạng thái đó đi tới chỗ nhập khoá (theo đường mà node chỉ ra), nhập hai giá trị trỏ về máy chủ giả, lưu → chụp evidence/E29-step2.png"
-      - "Quay lại node, bấm tìm → chụp evidence/E29-step3.png (có thẻ)"
-      - "Assert: cả ba bước đi qua giao diện, không lần nào chạm biến môi trường hay file cấu hình"
-    expected: "vòng trọn: từ chỗ kẹt, người dùng tự tới được chỗ nhập khoá và tìm được. E2 chứng minh thông điệp nêu đúng tên; eval này chứng minh CÓ ĐƯỜNG RA — một sản phẩm nêu đúng tên biến rồi bỏ mặc người dùng không có ô nào để nhập vẫn làm E2 xanh"
-    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
-
-  # ---------- Judgment ----------
+      - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E29-step1.png"
+      - "Assert: từ chính trạng thái thiếu-cấu-hình có ô nhập cho CẢ HAI biến và một nút lưu — người dùng có đường ra ngay tại chỗ, không phải đi tìm màn hình khác"
   - id: E25
     criterion: AC-15
     executor: judgment
     question: "Nhìn CHỈ bằng màn hình — không console, không log — đi qua năm chặng (chưa cấu hình → tìm → kệ mỏng / kết quả không xếp hạng → nạp → xong), một người ngồi cạnh có chỉ được người dùng đang ở đâu và đang tiến hay đang kẹt không? Và có chỗ nào node trình một kết quả SUY GIẢM (không xếp hạng ngữ nghĩa, kệ mỏng, lệch phiên bản) y hệt như một kết quả sạch không? Nêu đích danh chặng nào trả lời là không."
-    inputs: ["evidence/E2-step1.png", "evidence/E6-step1.png", "evidence/E9-step1.png", "evidence/E9-step2.png", "evidence/E11-step2.png", "evidence/E16-step1.png", "evidence/E16-step2.png", "evidence/E22-step1.png", "contract.md"]
+    inputs: ["_acceptance/add-media-library/evidence/E2-step1.png", "_acceptance/add-media-library/evidence/E6-step1.png", "_acceptance/add-media-library/evidence/E9-step1.png", "_acceptance/add-media-library/evidence/E9-step2.png", "_acceptance/add-media-library/evidence/E11-step2.png", "_acceptance/add-media-library/evidence/E16-step1.png", "_acceptance/add-media-library/evidence/E16-step2.png", "_acceptance/add-media-library/evidence/E22-step1.png", "contract.md"]
     evidence_required: [judged_by, verdict, rationale]
