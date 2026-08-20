@@ -80,11 +80,29 @@ function buildGraph(state: string): { nodes: Node[]; edges: Edge[] } {
     return { nodes, edges };
 }
 
+const KNOWN_STATES = ["idle", "wired"] as const;
+
 export function NormalizeTextViProto({ state }: { state: string }) {
-    const { nodes, edges } = buildGraph(state);
+    // An empty `?state=` means idle; anything else must be a state we know.
+    // Falling back to idle for unknown names is how a typo'd capture still
+    // returns 200, still passes the design gate, and still gets filed as the
+    // state it is not — a frame that looks like evidence and is not. Say so on
+    // the page and in the attribute the capture guard reads.
+    const requested = state || "idle";
+    const known = (KNOWN_STATES as readonly string[]).includes(requested);
+    const { nodes, edges } = buildGraph(known ? requested : "");
 
     return (
-        <div className="h-screen w-full">
+        <div
+            className="h-screen w-full"
+            data-proto-state={known ? requested : `unknown:${requested}`}
+        >
+            {known ? null : (
+                <p role="alert" className="p-4 text-sm">
+                    Không có state tên “{requested}” — chỉ có:{" "}
+                    {KNOWN_STATES.join(", ")}
+                </p>
+            )}
             <ReactFlowProvider>
                 <ReactFlow
                     nodes={nodes}
