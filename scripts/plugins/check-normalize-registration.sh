@@ -29,6 +29,16 @@ node -e "
   if (e.origin !== '$ORIGIN') { console.error('FAIL: origin sai: ' + e.origin); process.exit(1); }
 " || fail "manifest chưa đăng ký $PLUGIN_ID dưới $ORIGIN"
 
+# 1b. The two manifest guards, RUN — not merely named.
+#     The eval's `expected` used to claim the re-cut guard was updated and that
+#     its teeth still bite, while this script checked neither: both were verified
+#     by hand once and then asserted in prose forever after. Prose is not
+#     executed. Run them.
+bash "$ROOT/scripts/plugins/check-manifest-unmoved.sh" >/dev/null ||
+    fail "check-manifest-unmoved.sh đỏ — mốc manifest chưa cắt lại đúng"
+bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
+    fail "check-manifest-guard-teeth.sh đỏ — guard manifest đã mất răng"
+
 # 2. All three READMEs list the plugin AND carry the new capability row.
 #    The row is an ADDITION under Transform -> Text: that section had exactly one
 #    row before this feature, so there was no empty box to tick.
