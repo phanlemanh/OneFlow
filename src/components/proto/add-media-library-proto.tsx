@@ -42,6 +42,8 @@ const CONFIG_LABELS = {
     keyLabel: "Khoá có scope search",
     save: "Lưu rồi tìm lại",
     saving: "Đang lưu…",
+    readFailed: "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
+    writeFailed: "Không lưu được khoá. Chưa có gì thay đổi.",
 };
 
 const THUMB =

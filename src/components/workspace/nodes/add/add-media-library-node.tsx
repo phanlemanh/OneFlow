@@ -13,12 +13,11 @@ import { BaseNodeShell } from "../base/base-node-shell";
 import { MediaCardList } from "./media-card-list";
 import { MediaLibraryConfigPanel } from "./media-library-config-panel";
 import {
+    failureMessageKey,
     isUnranked,
     type Outcome,
     outcomeMessageKey,
 } from "./media-library-outcome";
-
-export { outcomeMessageKey } from "./media-library-outcome";
 
 /**
  * Stage A of ADR-0012: search the shared library, pick one clip, and pull its
@@ -83,7 +82,16 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
     };
 
     const pick = async (card: MediaCard) => {
-        setOutcome({ kind: "importing", cardId: card.id });
+        // Keep the result set on screen while the import runs; the chosen card
+        // is disabled rather than the whole list disappearing.
+        const from = outcome.kind === "results" ? outcome : null;
+        setOutcome({
+            kind: "importing",
+            cardId: card.id,
+            cards: from?.cards ?? [card],
+            candidates: from?.candidates ?? 0,
+            warnings: from?.warnings ?? [],
+        });
         try {
             const response = await fetch("/api/media-library/import", {
                 method: "POST",
@@ -169,6 +177,8 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                             keyLabel: t("keyLabel"),
                             save: t("saveConfig"),
                             saving: t("savingConfig"),
+                            readFailed: t("readFailed"),
+                            writeFailed: t("writeFailed"),
                         }}
                         onSaved={() => void search()}
                     />
@@ -183,7 +193,8 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                     </p>
                 ) : null}
 
-                {outcome.kind === "results" && outcome.cards.length > 0 ? (
+                {(outcome.kind === "results" || outcome.kind === "importing") &&
+                outcome.cards.length > 0 ? (
                     <>
                         <p className="text-sm text-muted-foreground">
                             {t("results", { count: outcome.cards.length })}
@@ -191,6 +202,11 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                         <MediaCardList
                             cards={outcome.cards}
                             onPick={(card) => void pick(card)}
+                            busyId={
+                                outcome.kind === "importing"
+                                    ? outcome.cardId
+                                    : undefined
+                            }
                         />
                     </>
                 ) : null}
@@ -214,7 +230,13 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
 
                 {outcome.kind === "failure" ? (
                     <p className="text-sm text-destructive">
-                        {outcome.message}
+                        {/*
+                         * The translated sentence, keyed off the machine-readable
+                         * code. The server's own message is Vietnamese and stays
+                         * where it belongs — the server log — instead of landing
+                         * in front of an en/ja/ko/zh user.
+                         */}
+                        {t(failureMessageKey(outcome.code))}
                     </p>
                 ) : null}
             </div>

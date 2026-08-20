@@ -20,7 +20,7 @@ vi.mock("@/lib/file/file-utils", () => ({
 
 import { VIDEO_CARD } from "./__fixtures__/cards";
 import { type StubHandle, startStub } from "./__fixtures__/stub-server";
-import { importAsset } from "./import.server";
+import { importAsset, readCapped } from "./import.server";
 
 const BYTES = Buffer.from("pretend this is an mp4 file");
 const realFetch = globalThis.fetch;
@@ -164,6 +164,107 @@ describe("importAsset — the three guards (E17)", () => {
         expect(saved.calls[0].ext).toBe("mp4");
     });
 
+    /**
+     * The guard bypass the adversarial review found: `fetch` defaults to
+     * `redirect: "follow"`, so checking only the URL the library named leaves
+     * every guard one hop deep. A signed URL that passes can 302 anywhere.
+     */
+    it("re-guards every redirect hop, so a 302 to a link-local host is refused", async () => {
+        globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+            const url = String(input);
+            if (url.includes("/v1/assets/")) {
+                return new Response(
+                    JSON.stringify({
+                        card: VIDEO_CARD,
+                        urls: {
+                            original: "https://cdn.example/clip.mp4",
+                            proxy: null,
+                            thumb: null,
+                        },
+                        expires_in_s: 900,
+                        contracts_version: "0.2.0",
+                    }),
+                    {
+                        status: 200,
+                        headers: { "content-type": "application/json" },
+                    },
+                );
+            }
+            if (url === "https://cdn.example/clip.mp4") {
+                return new Response(null, {
+                    status: 302,
+                    headers: {
+                        location: "http://169.254.169.254/latest/meta-data/",
+                    },
+                });
+            }
+            // Reaching here means the redirect was followed — the bug.
+            return new Response(Buffer.from("secrets"), {
+                status: 200,
+                headers: { "content-type": "video/mp4" },
+            });
+        }) as unknown as typeof fetch;
+        store.env = {
+            MEDIA_LIBRARY_URL: "https://lib.example",
+            MEDIA_LIBRARY_API_KEY: "k",
+        };
+
+        const result = await importAsset(VIDEO_CARD.id);
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.message).toMatch(/nội bộ/i);
+        expect(saved.calls).toHaveLength(0);
+    });
+
+    /** POSITIVE CONTROL: a redirect to a legitimate public https host still works. */
+    it("follows a redirect to another public https host", async () => {
+        globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+            const url = String(input);
+            if (url.includes("/v1/assets/")) {
+                return new Response(
+                    JSON.stringify({
+                        card: VIDEO_CARD,
+                        urls: {
+                            original: "https://cdn.example/clip.mp4",
+                            proxy: null,
+                            thumb: null,
+                        },
+                        expires_in_s: 900,
+                        contracts_version: "0.2.0",
+                    }),
+                    {
+                        status: 200,
+                        headers: { "content-type": "application/json" },
+                    },
+                );
+            }
+            if (url === "https://cdn.example/clip.mp4") {
+                return new Response(null, {
+                    status: 302,
+                    headers: { location: "https://edge.example/clip.mp4" },
+                });
+            }
+            return new Response(BYTES, {
+                status: 200,
+                headers: { "content-type": "video/mp4" },
+            });
+        }) as unknown as typeof fetch;
+        store.env = {
+            MEDIA_LIBRARY_URL: "https://lib.example",
+            MEDIA_LIBRARY_API_KEY: "k",
+        };
+
+        const result = await importAsset(VIDEO_CARD.id);
+
+        expect(result.ok).toBe(true);
+        expect(saved.calls).toHaveLength(1);
+    });
+
+    /**
+     * The other half the review found: with no content-length the declared-size
+     * check reads 0 and the whole body lands in memory before anything objects.
+     */
     it("refuses a body whose declared size is over the cap", async () => {
         globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
             if (String(input).includes("/v1/assets/")) {
@@ -203,5 +304,66 @@ describe("importAsset — the three guards (E17)", () => {
         if (result.ok) return;
         expect(result.failure.message).toMatch(/trần kích thước/i);
         expect(saved.calls).toHaveLength(0);
+    });
+});
+
+/**
+ * The streaming cap, measured directly with a small ceiling so the test does
+ * not have to allocate a gigabyte to prove the point.
+ *
+ * The bug this closes: with no content-length the declared-size check reads 0,
+ * so the old code buffered the WHOLE body before anything could object. A
+ * chunked upstream could therefore push unbounded bytes into the process.
+ */
+describe("readCapped — the cap survives a missing content-length (E17)", () => {
+    const streamOf = (buf: Buffer, headers: Record<string, string>) =>
+        new Response(
+            new ReadableStream({
+                start(controller) {
+                    // Two chunks, so the running total crosses the cap mid-read.
+                    controller.enqueue(
+                        new Uint8Array(buf.subarray(0, buf.length / 2)),
+                    );
+                    controller.enqueue(
+                        new Uint8Array(buf.subarray(buf.length / 2)),
+                    );
+                    controller.close();
+                },
+            }),
+            { status: 200, headers },
+        );
+
+    it("refuses an oversize chunked body that declares NO content-length", async () => {
+        const body = Buffer.alloc(4096, 7);
+        const result = await readCapped(
+            streamOf(body, { "content-type": "video/mp4" }),
+            1024,
+        );
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.message).toMatch(/trần kích thước/i);
+    });
+
+    /** POSITIVE CONTROL: a body under the cap still reads through intact. */
+    it("reads a body under the cap byte-for-byte", async () => {
+        const body = Buffer.from("small clip bytes");
+        const result = await readCapped(
+            streamOf(body, { "content-type": "video/mp4" }),
+            1024,
+        );
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.buffer.equals(body)).toBe(true);
+    });
+
+    it("still refuses on the DECLARED size, one round-trip earlier", async () => {
+        const result = await readCapped(
+            new Response(Buffer.from("x"), {
+                status: 200,
+                headers: { "content-length": "999999" },
+            }),
+            1024,
+        );
+        expect(result.ok).toBe(false);
     });
 });

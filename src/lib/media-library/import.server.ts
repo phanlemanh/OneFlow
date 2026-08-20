@@ -3,6 +3,7 @@ import "server-only";
 import { saveFile } from "@/lib/file/file-utils";
 import { logger } from "@/lib/logger";
 import { getAsset } from "@/lib/media-library/client.server";
+import { resolveConfig } from "@/lib/media-library/config.server";
 import type { MediaLibraryFailure } from "@/lib/media-library/errors";
 import { extensionFor } from "@/lib/media-library/extension";
 
@@ -14,8 +15,15 @@ import { extensionFor } from "@/lib/media-library/extension";
  * into it would inherit an SSRF hole wholesale, so it stays dead and this path
  * carries its own three guards — scheme, host, and size.
  */
-const MAX_BYTES = 2 * 1024 * 1024 * 1024;
+/**
+ * 1 GiB, not 2: the body is accumulated into a single Buffer, and 2 GiB sits at
+ * Node's practical ceiling for one — so the legitimate large-clip case would
+ * fail in an unhelpful way rather than being refused cleanly.
+ */
+const MAX_BYTES = 1024 * 1024 * 1024;
 const DOWNLOAD_TIMEOUT_MS = 120_000;
+/** Redirects are followed by hand so each hop can be re-guarded; bound the chain. */
+const MAX_REDIRECTS = 5;
 
 export type ImportResult =
     | { ok: true; fileKey: string }
@@ -24,7 +32,16 @@ export type ImportResult =
 const PRIVATE_HOST =
     /^(localhost$|127\.|0\.0\.0\.0$|169\.254\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1)/i;
 
-function guardUrl(raw: string): MediaLibraryFailure | null {
+/**
+ * `devLocalHost` is the host:port of the configured library when — and only
+ * when — that library is itself a localhost dev instance. A bare "any localhost
+ * is fine in development" exemption would let a library response point at ANY
+ * port on the developer's machine and have OneFlow fetch it.
+ */
+function guardUrl(
+    raw: string,
+    devLocalHost: string | null,
+): MediaLibraryFailure | null {
     let url: URL;
     try {
         url = new URL(raw);
@@ -35,20 +52,15 @@ function guardUrl(raw: string): MediaLibraryFailure | null {
         };
     }
 
-    // http is tolerated only for a localhost dev instance of the library, which
-    // is the single case where the private-host rule below would also fire.
-    const devLocal =
-        PRIVATE_HOST.test(url.hostname) &&
-        process.env.NODE_ENV !== "production" &&
-        (url.hostname === "localhost" || url.hostname.startsWith("127."));
+    const exempt = devLocalHost !== null && url.host === devLocalHost;
 
-    if (url.protocol !== "https:" && !devLocal) {
+    if (url.protocol !== "https:" && !exempt) {
         return {
             code: "BAD_RESPONSE",
             message: `Từ chối tải: URL ký không dùng https (${url.protocol}//).`,
         };
     }
-    if (PRIVATE_HOST.test(url.hostname) && !devLocal) {
+    if (PRIVATE_HOST.test(url.hostname) && !exempt) {
         return {
             code: "BAD_RESPONSE",
             message: `Từ chối tải: URL ký trỏ tới host nội bộ (${url.hostname}).`,
@@ -57,29 +69,138 @@ function guardUrl(raw: string): MediaLibraryFailure | null {
     return null;
 }
 
+/** The configured library's host:port, but only if it is a local dev instance. */
+function devLocalHostOf(baseUrl: string): string | null {
+    if (process.env.NODE_ENV === "production") return null;
+    try {
+        const url = new URL(baseUrl);
+        return PRIVATE_HOST.test(url.hostname) ? url.host : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Follow redirects BY HAND, re-guarding every hop.
+ *
+ * `fetch` defaults to `redirect: "follow"`, which would make every guard above
+ * apply to the first URL only: a signed URL that passes can 302 to
+ * http://169.254.169.254/... and the bytes come back anyway. The guards were
+ * written, they were simply never reached past hop one.
+ */
+async function fetchGuarded(
+    startUrl: string,
+    devLocalHost: string | null,
+): Promise<
+    | { ok: true; response: Response; finalUrl: string }
+    | { ok: false; failure: MediaLibraryFailure }
+> {
+    let current = startUrl;
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+        const refusal = guardUrl(current, devLocalHost);
+        if (refusal) return { ok: false, failure: refusal };
+
+        let response: Response;
+        try {
+            response = await fetch(current, {
+                redirect: "manual",
+                signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+            });
+        } catch (error) {
+            logger.error("[media-library] byte download failed:", error);
+            return {
+                ok: false,
+                failure: {
+                    code: "NETWORK_ERROR",
+                    message: "Không tải được bytes của clip.",
+                },
+            };
+        }
+
+        if (response.status < 300 || response.status >= 400) {
+            return { ok: true, response, finalUrl: current };
+        }
+
+        const location = response.headers.get("location");
+        if (!location) {
+            return {
+                ok: false,
+                failure: {
+                    code: "BAD_RESPONSE",
+                    message: `Chuyển hướng ${response.status} nhưng không có Location.`,
+                },
+            };
+        }
+        current = new URL(location, current).toString();
+    }
+
+    return {
+        ok: false,
+        failure: {
+            code: "BAD_RESPONSE",
+            message: `Từ chối tải: quá ${MAX_REDIRECTS} lần chuyển hướng.`,
+        },
+    };
+}
+
+/**
+ * Read the body with a running byte count so an upstream that omits
+ * content-length cannot push unbounded bytes into memory. The declared header
+ * is still checked first — it refuses the honest oversize case one round-trip
+ * earlier — but it is no longer the only cap.
+ */
+export async function readCapped(
+    response: Response,
+    maxBytes: number = MAX_BYTES,
+): Promise<
+    { ok: true; buffer: Buffer } | { ok: false; failure: MediaLibraryFailure }
+> {
+    const tooBig: MediaLibraryFailure = {
+        code: "BAD_RESPONSE",
+        message: "Clip vượt trần kích thước cho phép.",
+    };
+
+    const declared = Number(response.headers.get("content-length") ?? "0");
+    if (declared > maxBytes) return { ok: false, failure: tooBig };
+
+    const body = response.body;
+    if (!body) {
+        const buffer = Buffer.from(await response.arrayBuffer());
+        return buffer.byteLength > maxBytes
+            ? { ok: false, failure: tooBig }
+            : { ok: true, buffer };
+    }
+
+    const chunks: Buffer[] = [];
+    let total = 0;
+    const reader = body.getReader();
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > maxBytes) {
+            await reader.cancel();
+            return { ok: false, failure: tooBig };
+        }
+        chunks.push(Buffer.from(value));
+    }
+    return { ok: true, buffer: Buffer.concat(chunks) };
+}
+
 export async function importAsset(assetId: string): Promise<ImportResult> {
     const detail = await getAsset(assetId);
     if (!detail.ok) return { ok: false, failure: detail.failure };
 
     const original = detail.data.urls?.original ?? "";
-    const refusal = guardUrl(original);
-    if (refusal) return { ok: false, failure: refusal };
 
-    let response: Response;
-    try {
-        response = await fetch(original, {
-            signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
-        });
-    } catch (error) {
-        logger.error("[media-library] byte download failed:", error);
-        return {
-            ok: false,
-            failure: {
-                code: "NETWORK_ERROR",
-                message: "Không tải được bytes của clip.",
-            },
-        };
-    }
+    // The dev exemption is scoped to the CONFIGURED library, so read the config
+    // rather than trusting any localhost URL the response happens to carry.
+    const cfg = await resolveConfig();
+    const devLocalHost = cfg.ok ? devLocalHostOf(cfg.config.baseUrl) : null;
+
+    const fetched = await fetchGuarded(original, devLocalHost);
+    if (!fetched.ok) return { ok: false, failure: fetched.failure };
+    const { response, finalUrl } = fetched;
 
     if (!response.ok) {
         return {
@@ -91,30 +212,12 @@ export async function importAsset(assetId: string): Promise<ImportResult> {
         };
     }
 
-    // Declared size first, so an oversize body is refused before it is read.
-    const declared = Number(response.headers.get("content-length") ?? "0");
-    if (declared > MAX_BYTES) {
-        return {
-            ok: false,
-            failure: {
-                code: "BAD_RESPONSE",
-                message: "Clip vượt trần kích thước cho phép.",
-            },
-        };
-    }
+    const read = await readCapped(response, MAX_BYTES);
+    if (!read.ok) return { ok: false, failure: read.failure };
 
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.byteLength > MAX_BYTES) {
-        return {
-            ok: false,
-            failure: {
-                code: "BAD_RESPONSE",
-                message: "Clip vượt trần kích thước cho phép.",
-            },
-        };
-    }
-
-    const ext = extensionFor(original, response.headers.get("content-type"));
-    const fileKey = await saveFile(buffer, ext);
+    // The extension is derived from the URL actually fetched, not the one the
+    // library first named: after a redirect those differ.
+    const ext = extensionFor(finalUrl, response.headers.get("content-type"));
+    const fileKey = await saveFile(read.buffer, ext);
     return { ok: true, fileKey };
 }

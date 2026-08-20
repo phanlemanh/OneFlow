@@ -1063,7 +1063,20 @@
                 "saveConfig": "保存并重新搜索",
                 "savingConfig": "保存中…",
                 "urlLabel": "https://library.example.com",
-                "keyLabel": "具有 search 权限的密钥"
+                "keyLabel": "具有 search 权限的密钥",
+                "failure": {
+                    "AUTH_REJECTED": "素材库密钥未被接受。请检查 MEDIA_LIBRARY_API_KEY。",
+                    "MISSING_SCOPE": "密钥缺少 search 权限，请为该密钥申请 search 范围。",
+                    "BAD_REQUEST": "发往素材库的请求不合法。",
+                    "NOT_FOUND": "找不到该片段（已删除，或此密钥看不到）。",
+                    "NOT_IMPLEMENTED": "素材库尚未接通此路径。",
+                    "VERSION_MISMATCH": "素材库更改了契约版本。已停止，不猜测数据结构。",
+                    "BAD_RESPONSE": "素材库返回的结构本版本无法接受。",
+                    "NETWORK_ERROR": "无法连接素材库。",
+                    "UPSTREAM_ERROR": "素材库返回错误。"
+                },
+                "readFailed": "无法读取已保存的密钥，因此未做任何更改，请重试。",
+                "writeFailed": "无法保存密钥，未做任何更改。"
             }
         },
         "firstRun": {

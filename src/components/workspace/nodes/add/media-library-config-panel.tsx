@@ -27,6 +27,8 @@ export function MediaLibraryConfigPanel({
         keyLabel: string;
         save: string;
         saving: string;
+        readFailed: string;
+        writeFailed: string;
     };
     onSaved: () => void;
 }) {
@@ -39,11 +41,28 @@ export function MediaLibraryConfigPanel({
         setSaving(true);
         setError("");
         try {
-            const current = await fetch("/api/settings/env");
-            const { env } = (await current.json()) as {
-                env: Record<string, string>;
+            // PUT /api/settings/env REPLACES the whole map, so this read is
+            // load-bearing: merging onto `undefined` would silently delete every
+            // other stored BYO key. Refuse to write unless the read really
+            // produced a map.
+            const current = await fetch("/api/settings/env", {
+                cache: "no-store",
+            });
+            if (!current.ok) {
+                throw new Error(labels.readFailed);
+            }
+            const payload = (await current.json()) as {
+                env?: Record<string, string>;
             };
-            const next = { ...env };
+            if (
+                !payload.env ||
+                typeof payload.env !== "object" ||
+                Array.isArray(payload.env)
+            ) {
+                throw new Error(labels.readFailed);
+            }
+
+            const next = { ...payload.env };
             if (url.trim()) next.MEDIA_LIBRARY_URL = url.trim();
             if (key.trim()) next.MEDIA_LIBRARY_API_KEY = key.trim();
 
@@ -52,10 +71,17 @@ export function MediaLibraryConfigPanel({
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ env: next }),
             });
-            if (!saved.ok) throw new Error(String(saved.status));
+            if (!saved.ok) {
+                throw new Error(labels.writeFailed);
+            }
             onSaved();
         } catch (cause) {
-            setError(String(cause));
+            // A product sentence, not a raw `Error: 500` in front of the user.
+            setError(
+                cause instanceof Error && cause.message
+                    ? cause.message
+                    : labels.writeFailed,
+            );
         } finally {
             setSaving(false);
         }

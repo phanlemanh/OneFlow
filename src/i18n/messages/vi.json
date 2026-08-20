@@ -1063,7 +1063,20 @@
                 "saveConfig": "Lưu rồi tìm lại",
                 "savingConfig": "Đang lưu…",
                 "urlLabel": "https://kho.vidu.com",
-                "keyLabel": "Khoá có scope search"
+                "keyLabel": "Khoá có scope search",
+                "failure": {
+                    "AUTH_REJECTED": "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY.",
+                    "MISSING_SCOPE": "Khoá thiếu quyền search — xin cấp scope search cho khoá này.",
+                    "BAD_REQUEST": "Yêu cầu gửi tới kho không hợp lệ.",
+                    "NOT_FOUND": "Không thấy clip — đã xoá, hoặc khoá này không thấy được nó.",
+                    "NOT_IMPLEMENTED": "Kho chưa nối đủ phụ thuộc cho lối gọi này.",
+                    "VERSION_MISMATCH": "Kho đổi phiên bản giao kèo. Đã dừng, không đoán hình dạng dữ liệu.",
+                    "BAD_RESPONSE": "Kho trả về hình dạng bản này không nhận.",
+                    "NETWORK_ERROR": "Không gọi được tới kho.",
+                    "UPSTREAM_ERROR": "Kho trả lỗi."
+                },
+                "readFailed": "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
+                "writeFailed": "Không lưu được khoá. Chưa có gì thay đổi."
             }
         },
         "firstRun": {

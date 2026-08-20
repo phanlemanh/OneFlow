@@ -246,3 +246,49 @@ describe("searchVideos — degraded results and the version pin", () => {
         }
     });
 });
+
+/**
+ * The gap the adversarial review found: the version check ran only `if
+ * (version)`, so a 200 that omits contracts_version entirely sailed through as
+ * compatible and was cast straight into SearchResponse. An ABSENT contract line
+ * is a mismatch, not a pass — that is the whole point of guarantee #7.
+ */
+describe("searchVideos — an absent contracts_version is a mismatch (E21)", () => {
+    it("refuses a 200 that carries no contracts_version at all", async () => {
+        stub = await startStub({
+            searchResponse: {
+                cards: [],
+                context: null,
+                candidates: 0,
+                skipped: 0,
+                warnings: [],
+                // contracts_version deliberately absent
+            },
+        });
+        point(stub);
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe("VERSION_MISMATCH");
+        expect(result.failure.message).toContain("0.2");
+    });
+
+    /**
+     * SUPPRESSION: error bodies may legitimately omit the field — a proxy's own
+     * 502 page has never heard of it — so the requirement is scoped to success.
+     * Without this half the fix would turn every upstream error into a version
+     * mismatch and hide the real cause.
+     */
+    it("still classifies an error body that omits the field by its status", async () => {
+        stub = await startStub({ searchStatus: 500, searchResponse: {} });
+        point(stub);
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe("UPSTREAM_ERROR");
+    });
+});

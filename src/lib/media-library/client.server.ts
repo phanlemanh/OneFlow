@@ -4,7 +4,10 @@ import { logger } from "@/lib/logger";
 import { resolveConfig } from "@/lib/media-library/config.server";
 import { classify, type MediaLibraryFailure } from "@/lib/media-library/errors";
 import type { AssetDetail, SearchResponse } from "@/lib/media-library/types";
-import { checkContractsVersion } from "@/lib/media-library/version";
+import {
+    checkContractsVersion,
+    SUPPORTED_CONTRACTS,
+} from "@/lib/media-library/version";
 
 export type ClientResult<T> =
     | { ok: true; data: T }
@@ -76,6 +79,13 @@ async function call<T>(
 
     // Version is checked BEFORE status: once the contract line differs, every
     // other reading of this body — including the error shape — is a guess.
+    //
+    // An ABSENT field is a mismatch too, not a pass. The contract declares
+    // contracts_version required on every success body, so a 200 without it is
+    // a service OneFlow does not recognise — treating it as compatible is
+    // exactly the guessing guarantee #7 forbids. Error bodies are the one place
+    // the field may legitimately be missing (a proxy's own 502 page), so the
+    // requirement is scoped to successful responses.
     if (version) {
         const verdict = checkContractsVersion(version);
         if (!verdict.ok) {
@@ -87,6 +97,14 @@ async function call<T>(
                 },
             };
         }
+    } else if (response.ok) {
+        return {
+            ok: false,
+            failure: {
+                code: "VERSION_MISMATCH",
+                message: `Phản hồi thành công nhưng thiếu hẳn contracts_version — OneFlow ghim ${SUPPORTED_CONTRACTS} và không đoán hình dạng dữ liệu.`,
+            },
+        };
     }
 
     if (!response.ok) {

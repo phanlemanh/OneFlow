@@ -39,3 +39,37 @@ describe("extensionFor — three rungs, in order (E18)", () => {
         );
     });
 });
+
+/**
+ * The stored suffix decides the Content-Type /api/uploads serves, and rung 1
+ * reads that suffix off a URL an OUTSIDE service chose. Unconstrained, a `.svg`
+ * object key becomes a file served same-origin as image/svg+xml — active
+ * content. Rung 1 is therefore allow-listed to the same video set as rung 2.
+ */
+describe("extensionFor — rung 1 is allow-listed (E18)", () => {
+    it("refuses a .svg suffix and falls through to the declared type", () => {
+        expect(extensionFor("https://s.example/a/clip.svg", "video/mp4")).toBe(
+            "mp4",
+        );
+    });
+
+    it("refuses any other unknown suffix and falls through", () => {
+        expect(
+            extensionFor("https://s.example/a/download.aspx", "video/webm"),
+        ).toBe("webm");
+        expect(extensionFor("https://s.example/a/asset.bin", null)).toBe("mp4");
+    });
+
+    /**
+     * SUPPRESSION: the allow-list must not swallow the rung-1 behaviour it was
+     * added to constrain — a real video suffix still wins over Content-Type.
+     */
+    it("still prefers a KNOWN video suffix over a disagreeing Content-Type", () => {
+        expect(extensionFor("https://s.example/a/clip.webm", "video/mp4")).toBe(
+            "webm",
+        );
+        expect(extensionFor("https://s.example/a/clip.mov", "video/mp4")).toBe(
+            "mov",
+        );
+    });
+});

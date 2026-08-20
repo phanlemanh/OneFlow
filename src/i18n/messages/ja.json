@@ -977,7 +977,20 @@
                 "saveConfig": "保存して再検索",
                 "savingConfig": "保存中…",
                 "urlLabel": "https://library.example.com",
-                "keyLabel": "search スコープを持つキー"
+                "keyLabel": "search スコープを持つキー",
+                "failure": {
+                    "AUTH_REJECTED": "ライブラリのキーが拒否されました。MEDIA_LIBRARY_API_KEY を確認してください。",
+                    "MISSING_SCOPE": "キーに search 権限がありません。search スコープを付与してください。",
+                    "BAD_REQUEST": "ライブラリへのリクエストが不正でした。",
+                    "NOT_FOUND": "クリップが見つかりません（削除済み、またはこのキーでは見えません）。",
+                    "NOT_IMPLEMENTED": "ライブラリ側でこの経路がまだ有効化されていません。",
+                    "VERSION_MISMATCH": "ライブラリの契約バージョンが変わりました。推測せず停止しました。",
+                    "BAD_RESPONSE": "ライブラリの応答形式をこのバージョンは受け付けません。",
+                    "NETWORK_ERROR": "ライブラリに接続できませんでした。",
+                    "UPSTREAM_ERROR": "ライブラリがエラーを返しました。"
+                },
+                "readFailed": "保存済みのキーを読み取れなかったため、何も変更していません。もう一度お試しください。",
+                "writeFailed": "キーを保存できませんでした。変更はありません。"
             }
         },
         "firstRun": {

@@ -12,7 +12,19 @@ import type { MediaCard } from "@/lib/media-library/types";
 export type Outcome =
     | { kind: "idle" }
     | { kind: "searching" }
-    | { kind: "importing"; cardId: string }
+    /**
+     * Carries the result set it was launched from, so the list stays on screen
+     * with the chosen card disabled instead of vanishing mid-import — which is
+     * both what the approved prototype shows and the only way `busyId` on the
+     * card list is reachable in production.
+     */
+    | {
+          kind: "importing";
+          cardId: string;
+          cards: MediaCard[];
+          candidates: number;
+          warnings: string[];
+      }
     | {
           kind: "results";
           cards: MediaCard[];
@@ -54,6 +66,32 @@ export function outcomeMessageKey(outcome: Outcome): OutcomeMessageKey {
  * alone. A 200 with that warning is not the same quality of answer as a clean
  * 200, and the node has to say so.
  */
+/** The nine failure codes the boundary can produce, as i18n sub-keys. */
+const FAILURE_KEYS = new Set([
+    "AUTH_REJECTED",
+    "MISSING_SCOPE",
+    "BAD_REQUEST",
+    "NOT_FOUND",
+    "NOT_IMPLEMENTED",
+    "VERSION_MISMATCH",
+    "BAD_RESPONSE",
+    "NETWORK_ERROR",
+    "UPSTREAM_ERROR",
+]);
+
+/**
+ * Which translated sentence a failure code maps to.
+ *
+ * The server's own message is Vietnamese and belongs in logs; rendering it in
+ * the node would hand en/ja/ko/zh users Vietnamese inside an otherwise
+ * translated surface. The code is the machine-readable half and is what the UI
+ * keys off. An unrecognised code falls back to the generic line rather than
+ * inventing one.
+ */
+export function failureMessageKey(code: string): string {
+    return FAILURE_KEYS.has(code) ? `failure.${code}` : "error";
+}
+
 export function isUnranked(outcome: Outcome): boolean {
     return (
         outcome.kind === "results" &&

@@ -1063,7 +1063,20 @@
                 "saveConfig": "Save and search again",
                 "savingConfig": "Saving…",
                 "urlLabel": "https://library.example.com",
-                "keyLabel": "A key with the search scope"
+                "keyLabel": "A key with the search scope",
+                "failure": {
+                    "AUTH_REJECTED": "The library key was not accepted. Check MEDIA_LIBRARY_API_KEY.",
+                    "MISSING_SCOPE": "The key lacks the search permission. Ask for the search scope on this key.",
+                    "BAD_REQUEST": "The request sent to the library was not valid.",
+                    "NOT_FOUND": "That clip is gone, or this key cannot see it.",
+                    "NOT_IMPLEMENTED": "The library has not wired up this route yet.",
+                    "VERSION_MISMATCH": "The library changed its contract version. Stopped rather than guess at the data.",
+                    "BAD_RESPONSE": "The library answered in a shape this version does not accept.",
+                    "NETWORK_ERROR": "Could not reach the library.",
+                    "UPSTREAM_ERROR": "The library returned an error."
+                },
+                "readFailed": "Could not read the saved keys, so nothing was changed — try again.",
+                "writeFailed": "Could not save the keys. Nothing was changed."
             }
         },
         "firstRun": {
