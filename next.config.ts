@@ -13,7 +13,16 @@ const nextConfig: NextConfig = {
     // the ui-check evals, which need a live dev server. Measured on both lanes
     // of the N=2 pilot: it killed 9 ui-check runs before anyone found it.
     // Default is unchanged, so CI and the desktop assemble script see `.next`
-    // exactly as before; a capture run opts out with NEXT_DIST_DIR=.next-dev.
+    // exactly as before; a capture run opts out with NEXT_DIST_DIR=build, which
+    // .gitignore and biome.json already exclude, so it needs no config change of
+    // its own.
+    //
+    // KNOWN COST, measured: Next rewrites tsconfig.json on every start whose
+    // dist dir differs from the one recorded there — it changes CONTENT, not
+    // just formatting (`include` points at <distDir>/types). So switching modes
+    // flips that file back and forth, and a capture run must restore it
+    // afterwards or the same round's lint goes red on an otherwise clean tree.
+    // The capture eval (E15) carries that cleanup as an explicit final step.
     distDir: process.env.NEXT_DIST_DIR || ".next",
     // NOTE: do not add outputFileTracingExcludes for data//plugins//desktop
     // here — its glob matching is unanchored, so "data/**" (even as
