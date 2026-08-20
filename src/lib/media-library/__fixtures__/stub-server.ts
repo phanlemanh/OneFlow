@@ -34,6 +34,13 @@ export interface StubOptions {
     nonJsonBody?: boolean;
     /** Status for that body — an error page from a proxy is the real-world case. */
     nonJsonStatus?: number;
+    /**
+     * Send headers, then never finish the body. This is what a stalled CDN
+     * looks like, and it is the ONLY way the download timeout is reachable:
+     * the abort signal is attached to a fetch that has already returned its
+     * response, so a timeout can only fire while the stream is being read.
+     */
+    hangBytes?: boolean;
 }
 
 export interface StubHandle {
@@ -80,6 +87,12 @@ export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
                 res.writeHead(200, {
                     "content-type": opts.bytesContentType ?? "video/mp4",
                 });
+                if (opts.hangBytes) {
+                    // Headers out, first chunk out, then silence — the socket
+                    // stays open until the client gives up.
+                    res.write(Buffer.from("first-chunk"));
+                    return;
+                }
                 res.end(opts.bytes ?? Buffer.from("fake-mp4-bytes"));
                 return;
             }

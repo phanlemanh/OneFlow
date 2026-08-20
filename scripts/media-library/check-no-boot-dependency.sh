@@ -9,17 +9,4 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-TARGET="${1:-src}"
-ALLOWED='(^|/)(app/api/media-library/|lib/media-library/|components/workspace/nodes/add/(add-)?media-|components/proto/add-media-library)'
-
-OFFENDERS="$(grep -rln "@/lib/media-library/" "$TARGET" \
-    --include="*.ts" --include="*.tsx" \
-    | grep -Ev "$ALLOWED" || true)"
-
-if [ -n "$OFFENDERS" ]; then
-    echo "FAIL: media-library is imported outside its own feature surface:"
-    echo "$OFFENDERS"
-    exit 1
-fi
-
-echo "media-library imported only by its own routes, lib and node — scanned $TARGET"
+exec node scripts/media-library/no-boot-dependency.mjs "${1:-src}"

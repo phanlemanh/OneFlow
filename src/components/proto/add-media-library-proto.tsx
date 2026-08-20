@@ -35,6 +35,11 @@ const COPY = {
     missingConfig:
         "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY.",
     error: "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY.",
+    imported:
+        "Đã nạp xong. Clip nằm trong kho file của bạn — từ giờ nó không còn phụ thuộc vào kho ngoài hay URL ký nào nữa.",
+    importedNodeTitle: "Node video mới trên canvas",
+    importedFileKey: "file_key: aH8xK2m9qP.mp4",
+    unknownState: "Prototype không có trạng thái này:",
 };
 
 const CONFIG_LABELS = {
@@ -69,9 +74,28 @@ const CARDS: MediaCard[] = [
     card("c", "Toàn cảnh từ flycam lúc hoàng hôn", "Phối cảnh 3D"),
 ];
 
-function Frame({ children }: { children: React.ReactNode }) {
+/**
+ * `data-proto-state` is how a scanner can tell WHICH state a page actually drew.
+ *
+ * The a11y guard used to count URLs it could reach and pages axe returned, both
+ * of which stay at sixteen when a state name is misspelled or deleted: the
+ * switch below falls through to a default frame, the URL still answers 200, and
+ * the report still says 16/16 while sixteen visits landed on the same screen.
+ * Stamping the resolved state on the root lets the guard assert sixteen
+ * DISTINCT states instead of sixteen successful fetches.
+ */
+function Frame({
+    state,
+    children,
+}: {
+    state: string;
+    children: React.ReactNode;
+}) {
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div
+            data-proto-state={state}
+            className="min-h-screen bg-background p-8"
+        >
             <div className="mx-auto w-[460px] rounded-xl border border-border bg-card shadow-sm">
                 <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                     <Library className="h-5 w-5 text-muted-foreground" />
@@ -116,7 +140,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
     switch (state) {
         case "missing-config":
             return (
-                <Frame>
+                <Frame state="missing-config">
                     <SearchRow />
                     <MediaLibraryConfigPanel
                         missing={["MEDIA_LIBRARY_URL", "MEDIA_LIBRARY_API_KEY"]}
@@ -128,7 +152,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "searching":
             return (
-                <Frame>
+                <Frame state="searching">
                     <SearchRow busy />
                     <p className="text-sm text-muted-foreground">
                         {COPY.searching} Có thể mất vài giây.
@@ -137,7 +161,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "results":
             return (
-                <Frame>
+                <Frame state="results">
                     <SearchRow />
                     <p className="text-sm text-muted-foreground">
                         {CARDS.length} clip khớp mô tả. Chọn một clip để nạp về
@@ -148,7 +172,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "thin-shelf":
             return (
-                <Frame>
+                <Frame state="thin-shelf">
                     <SearchRow />
                     <p className="text-sm text-muted-foreground">
                         {COPY.thinShelf}
@@ -157,7 +181,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "unranked":
             return (
-                <Frame>
+                <Frame state="unranked">
                     <SearchRow />
                     <p className="rounded-md border border-amber-500/60 bg-amber-50 px-2 py-1 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
                         {COPY.unranked}
@@ -167,7 +191,7 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "importing":
             return (
-                <Frame>
+                <Frame state="importing">
                     <SearchRow />
                     <MediaCardList cards={CARDS} onPick={() => {}} busyId="a" />
                     <p className="text-sm text-muted-foreground">
@@ -177,17 +201,60 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
             );
         case "error":
             return (
-                <Frame>
+                <Frame state="error">
                     <SearchRow />
                     <p className="text-sm text-destructive">{COPY.error}</p>
                 </Frame>
             );
-        default:
+        /**
+         * The stage AC-9 promises and this prototype did not have.
+         *
+         * `state=results` was standing in for "done", and it is the screen from
+         * BEFORE the import — the same three library thumbnails, nothing about
+         * the store. So the one transition the criterion is about ("it is in
+         * your workspace now") could not be seen anywhere, and a judge asked to
+         * check it had only the pre-import list to look at.
+         */
+        case "imported":
             return (
-                <Frame>
+                <Frame state="imported">
+                    <SearchRow />
+                    <p className="rounded-md border border-emerald-600/60 bg-emerald-50 px-2 py-1 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+                        {COPY.imported}
+                    </p>
+                    <div className="rounded-lg border border-border bg-muted/40 p-3">
+                        <p className="text-xs font-medium text-foreground">
+                            {COPY.importedNodeTitle}
+                        </p>
+                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                            {COPY.importedFileKey}
+                        </p>
+                    </div>
+                </Frame>
+            );
+        case "":
+        case "idle":
+            return (
+                <Frame state="idle">
                     <SearchRow />
                     <p className="text-sm text-muted-foreground">
                         {COPY.searchPlaceholder}
+                    </p>
+                </Frame>
+            );
+        /**
+         * NOT idle. An unrecognised state used to fall through to the idle
+         * frame, which is why renaming or deleting a case left every scanner
+         * green: the URL answered 200, axe scanned a real page, and the report
+         * counted it. Naming the miss makes a typo visible instead of silently
+         * scanning idle sixteen times.
+         */
+        default:
+            return (
+                <Frame state={`unknown:${state}`}>
+                    <SearchRow />
+                    <p className="text-sm text-destructive">
+                        {COPY.unknownState} <code>{state}</code>
                     </p>
                 </Frame>
             );

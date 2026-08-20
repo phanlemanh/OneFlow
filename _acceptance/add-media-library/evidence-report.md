@@ -2,18 +2,18 @@
 schema_version: 2
 feature_slug: add-media-library
 verdict: REJECT
-failed_evals: []
+failed_evals: ["E16"]
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 0df11aaa676a26b65902e389328b19e22bc192a2
+verified_commit: 2b29e12c7552febdf904a2911cf1eca8f52e0a05
 human_signoff:
 ---
 
 # Evidence Report: add-media-library
 
-⚠ REJECT: cả 28 eval máy/UI (E1–E24, E26–E29) đều PASS và E25 (judgment) là UNCERTAIN, nhưng hai lệnh KHÔNG gắn eval nào — `pnpm build && pnpm typecheck` và `pnpm lint:check` — FAIL (exit 1) trên đúng cây đã verify (`verified_commit` ở trên). Verdict tổng đã được tính sẵn là REJECT vì hai lệnh này nằm trong checklist commit/PR bắt buộc của CLAUDE.md. `failed_evals` giữ nguyên rỗng vì không eval nào trong 29 eval bị đỏ — nguyên nhân REJECT nằm ngoài danh sách eval, xem section "Lệnh không gắn eval" bên dưới.
+⚠ REJECT (round 2): 27/29 eval máy/UI (E1–E15, E17–E24, E26–E29) PASS, E25 (judgment, AC-15) vẫn UNCERTAIN, nhưng **E16 (AC-9, ui-check) FAIL** — bước "đang nạp" → "đã có trong kho" không có trạng thái riêng biệt trong `src/components/proto/add-media-library-proto.tsx`: `state=results` trả về đúng màn hình pre-import (danh sách ảnh thu nhỏ chưa nạp) chứ không phải một xác nhận hậu-nạp. `failed_evals` = `["E16"]`. Ngoài ra `pnpm build && pnpm typecheck` vẫn đỏ (exit 1) như round 1, nhưng nguyên nhân lần này khác hẳn: round 1 là lỗi biên dịch thật (`Cannot find module 'next/server.js'`), round 2 là `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` — pnpm cố xoá `node_modules` và bị chặn vì môi trường sandbox không có TTY để xác nhận, không phải lỗi mã nguồn. `pnpm lint:check` đã CHUYỂN TỪ ĐỎ (round 1) SANG XANH (round 2) — vấn đề `.next-dev/**` bị lint đã được xử lý.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -32,7 +32,7 @@ human_signoff:
 | E13 | AC-7 | test | PASS |
 | E14 | AC-8 | test | PASS |
 | E15 | AC-9 | test | PASS |
-| E16 | AC-9 | ui-check | PASS |
+| E16 | AC-9 | ui-check | FAIL |
 | E17 | AC-10 | test | PASS |
 | E18 | AC-11 | test | PASS |
 | E19 | AC-12 | test | PASS |
@@ -49,40 +49,21 @@ human_signoff:
 
 ## Lệnh không gắn eval
 
-Hai lệnh bắt buộc trong checklist commit/PR của CLAUDE.md, không gắn với eval nào trong contract, FAIL trên cây `verified_commit` ở trên:
-
 - cmd: `pnpm build && pnpm typecheck`
   exit_code: 1
   output: |
-    Failed to compile.
+    pnpm: Command failed with exit code 1: /opt/homebrew/Cellar/node/26.7.0/bin/node /Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/bin/pnpm.mjs install
+        at getFinalError (file:///Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/dist/pnpm.mjs:34090:14)
+        at makeError (file:///Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/dist/pnpm.mjs:36397:21)
+        at getSyncResult (file:///Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/dist/pnpm.mjs:38241:10)
+        at spawnSubprocessSync (file:///Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/dist/pnpm.mjs:38201:14)
+        at execaCoreSync (file:///Users/manh-macmini/.cache/node/corepack/v1/pnpm/11.5.1/dist/pnpm.mjs:38131:23)
+    [ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY] Aborted removal of modules directory due to no TTY
+  ghi chú: khác nguyên nhân với round 1 (lúc đó là lỗi biên dịch thật `Cannot find module 'next/server.js'` trong `.next-dev/types/**`). Lần này pnpm tự kích hoạt bước cài lại phụ thuộc trước build và bị chặn vì sandbox không cấp TTY để xác nhận xoá `node_modules` — biểu hiện môi trường/hạ tầng CI cục bộ, chưa xác nhận được là hồi quy mã nguồn. Không gắn eval nào trong contract.
 
-    .next-dev/types/app/api/feature/list/route.ts:3:34
-    Type error: Cannot find module 'next/server.js' or its corresponding type declarations.
-
-    > 3 | import type { NextRequest } from 'next/server.js'
-
-    Next.js build worker exited with code: 1 and signal: null
-    ELIFECYCLE Command failed with exit code 1.
-
-- cmd: `pnpm lint:check`
-  exit_code: 1
-  output: |
-    .next-dev/server/_rsc_src_i18n_messages_zh_json.js format errors
-        13 | + ····/***/·"(rsc)/./src/i18n/messages/zh.json":
-        14 | + ········/*!***
-        18 | - /***/·((module)·=>·{
-        19 | -
-        20 | - ...리오의·취득에·실패했습니다.·다시·시도·주세요"}}');
-        17 | + ········/***/·(module)·=>·{
-        18 | + ············module.exports·=·/*#__PURE__*/·JSON.parse(
-    Multiple formatting violations in .next-dev/* generated files
-    1 files with lint/suspicious/noTemplateCurlyInString error
-    pnpm lint:check failed with exit code 1
-
-Cả hai lỗi trên đều xảy ra trong thư mục `.next-dev/**` (dev dist dir tạo bởi `NEXT_DIST_DIR`), không phải trong code nguồn của feature — xem review-findings.md mục "tsconfig.json committed reformatted" và "New `.next-dev` dist dir is not excluded in biome.json" để biết nguyên nhân gốc. Dù nguyên nhân nằm ngoài phạm vi feature, hai lệnh này vẫn nằm trong checklist commit/PR bắt buộc, nên overall verdict là REJECT cho đến khi được sửa hoặc loại trừ có chủ đích.
-
-Bốn lệnh còn lại không gắn eval đều PASS và không cần liệt vào `## Analyst` (regression-guard suite bình thường):
-- `pnpm test` — exit 0, 529 passed | 5 skipped (534)
+Bốn lệnh còn lại không gắn eval đều PASS (không liệt vào `## Analyst` — regression-guard suite bình thường):
+- `pnpm lint:check` — exit 0 (round 1 từng đỏ; nay xanh) — `Checked 491 files in 124ms. No fixes applied.`
+- `pnpm test` — exit 0, 570 passed | 5 skipped (575)
 - `cd sdk && pytest` — exit 0, 245 passed
 - `pnpm verify:plugins` — exit 0, `[verify-plugins-scan] OK`
 - `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` — exit 0, no diff
@@ -90,355 +71,349 @@ Bốn lệnh còn lại không gắn eval đều PASS và không cần liệt v�
 ## Evidence
 
 - eval: E1
-  run_id: minted-add-media-library-E1-r1
+  run_id: minted-add-media-library-E1-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_config
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:53Z
   output: |
     Tests  4 passed (4)
-    Start at  08:08:27
-    Duration  91ms (transform 15ms, setup 0ms, import 23ms, tests 2ms, environment 0ms)
+    Start at  09:27:53
+    Duration  102ms (transform 16ms, setup 0ms, import 24ms, tests 2ms, environment 0ms)
 
 - eval: E2
-  run_id: minted-add-media-library-E2-r1
+  run_id: minted-add-media-library-E2-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
+  verified_at: 2026-08-20T09:29:10Z
   screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E2-step1.png
   observed: |
-    Đọc trực tiếp file E2-step1.png (390x844, viewport mobile-first của ui:capture): khung hình hiển thị node "Nạp từ kho" đang mở, dưới ô mô tả cảnh là khối cảnh báo cấu hình: dòng văn bản "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY." rồi ngay dưới là hai field nhập liệu có label monospace hiện NGUYÊN VĂN và đầy đủ: "MEDIA_LIBRARY_URL" (placeholder https://kho.vidu.com) và "MEDIA_LIBRARY_API_KEY" (placeholder "Khoá có scope search"), cùng nút "Lưu rồi tìm lại". Hai tên biến còn thiếu đọc được rõ ràng bằng mắt trong ảnh, không phải câu chung chung "chưa cấu hình dịch vụ" — khớp Expected.
+    Đọc trực tiếp file ảnh _acceptance/add-media-library/evidence/E2-step1.png (dark theme, viewport 390x844): khung node "Nạp từ kho" hiện đoạn văn "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY." (dòng đầu bị wrap sát mép viewport nhưng dòng 2 "MEDIA_LIBRARY_API_KEY." đọc trọn vẹn bằng mắt). Ngay dưới, hai label monospace in đậm hiển thị NGUYÊN VĂN tên biến: "MEDIA_LIBRARY_URL" (phía trên ô input placeholder "https://kho.vidu.com") và "MEDIA_LIBRARY_API_KEY" (phía trên ô input password placeholder "Khoá có scope search"), cả hai đều đọc được rõ ràng bằng mắt trong ảnh, không bị cắt. Đối chiếu Expected: khung hình đầu tiên nêu đúng tên biến còn thiếu — PASS (đây là identifier cụ thể, không phải câu chung chung kiểu "chưa cấu hình dịch vụ").
   network_observed: n-a (driver)
   output: |
-    Kết luận: cả 2 assertion (HTTP 200 + tên biến hiện nguyên văn, đọc được bằng mắt trong ảnh) đều PASS → exitCode 0. Network: driver là node script gọi puppeteer trực tiếp qua Bash, không có đường đọc network theo hợp đồng của eval này → networkObserved = "n-a (driver)". Frame đã lưu: _acceptance/add-media-library/evidence/E2-step1.png (duy nhất, bước 1 duy nhất có screenshot trong steps).
+    Evidence đã lưu: _acceptance/add-media-library/evidence/E2-step1.png (1 frame duy nhất, đúng bước 1 trong steps). Server: port 3000 đã có server chạy sẵn (KHÔNG do phiên này start) → không tắt, dùng chung. Network: driver dùng curl (SSR check) + scripts/ui-capture.mjs (puppeteer headless, không expose network log ra ngoài) — không có đường đọc network requests → networkObserved = "n-a (driver)", không dump evidence/E2-network.txt vì không có nguồn dữ liệu network để đọc.
 
 - eval: E3
-  run_id: minted-add-media-library-E3-r1
+  run_id: minted-add-media-library-E3-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.script.aml_no_boot_dependency
-  verified_at: 2026-08-20T08:09:00Z
+  verified_at: 2026-08-20T09:28:00Z
   output: |
     media-library imported only by its own routes, lib and node — scanned src
 
 - eval: E4
-  run_id: minted-add-media-library-E4-r1
+  run_id: minted-add-media-library-E4-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
+  verified_at: 2026-08-20T09:29:30Z
   screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E4-step1.png
   observed: |
-    E4-step1.png: /workspace mở với khoá thư viện RỖNG (không có MEDIA_LIBRARY_API_KEY trong .env* nào và không có settings.json nào được ghi ở env-store), hiển thị canvas ví dụ mặc định (Add Video → Video → Split Video → Videos(0) → Concat Video → Videos(0)), 6 node react-flow. Có 1 banner xám thông tin "Need 2 tools to run this example / Get the tools" — không liên quan khoá thư viện, không phải banner lỗi, đã tồn tại TRƯỚC khi thao tác nào xảy ra. E4-step2.png: sau khi bấm icon Image trên smart-island toolbar, một node "Add Image" MỚI THẬT SỰ xuất hiện giữa canvas với các tab Upload/Camera/Canvas/Library, tab Upload đang mở — không có thông báo lỗi nào trong node, không banner lỗi toàn cục mới, không toast. nodeCountBefore=6 → nodeCountAfter=7 xác nhận điều khiển dương: node thực sự được thêm (không phải trang trắng đánh lừa assertion âm).
+    E4-step1.png (fresh GET http://localhost:3000/workspace, MEDIA_LIBRARY_URL/MEDIA_LIBRARY_API_KEY unset — confirmed no .env.local override, only commented-out placeholders in .env.example): shows the default example workflow ("Ví dụ / example") fully rendered — Add Video, Video, Split Video, Videos(0), Concat Video, Videos(0) nodes wired with edges, top toolbar, "Need 2 tools to run this example" info banner (a normal product banner, not an error state, present on a clean checkout too), bottom add-node picker with 8 icons, zoom controls bottom-left. No red/error banner, no toast, no blank/broken page. Matches Expected precondition: studio usable before media-library is ever configured. E4-step2.png (same session, after clicking the 3rd icon — Image — in the bottom add-node picker toolbar): a new "Add Image" node card is now centered on canvas with Upload/Camera/Canvas/Library tabs and a working "Drag files here or click to upload / Browse Files" dropzone, layered over the pre-existing nodes (Video, Split Video, Concat Video still visible in the background, confirming this is an addition, not a fresh/reset canvas). This is the POSITIVE CONTROL the eval explicitly requires: nodeCountBefore=6, nodeCountAfter=7, addImageHeadingPresent=true. Assertions checked (final authoritative isolated-Chrome puppeteer-core run, evidence/E4-fresh-capture-result.json): no global error banner/toast, no console errors, no page exceptions, no failed app-origin network requests in the authoritative run. One earlier attempt logged a single aborted GET /workspace?_rsc=... coincident with a concurrent peer verifier session re-capturing other evals on the same shared `pnpm dev` process; re-running twice more with no other tab open reproduced zero failures — transient peer-triggered HMR noise, not a deterministic effect.
   network_observed: n-a (driver)
   output: |
-    Cleanup: xoá script verifier tạm .e4-verify-tmp.mjs khỏi repo (không commit vào codebase). Không tắt server 3000 (không phải server do mình start). KẾT LUẬN: exit 0 — mọi assertion PASS, kể cả điều khiển dương (node mới thật sự được thêm, không phải trang trắng/giả im lặng).
+    Dev server: reused an already-running `pnpm dev` on :3000, not stopped. Environment precondition verified: no .env.local in the repo. Result: exitCode=0, AC-2 / E4 PASS.
 
 - eval: E5
-  run_id: minted-add-media-library-E5-r1
+  run_id: minted-add-media-library-E5-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_client
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
-    Tests  20 passed (20)
-    Start at  08:08:27
-    Duration  159ms (transform 31ms, setup 0ms, import 49ms, tests 39ms, environment 0ms)
+    Tests  25 passed (25)
+    Start at  09:27:51
+    Duration  265ms (transform 81ms, setup 0ms, import 116ms, tests 61ms, environment 0ms)
 
 - eval: E6
-  run_id: minted-add-media-library-E6-r1
+  run_id: minted-add-media-library-E6-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
+  verified_at: 2026-08-20T09:29:50Z
   screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E6-step1.png
   observed: |
-    Đã đọc trực tiếp file _acceptance/add-media-library/evidence/E6-step1.png bằng Read (ảnh). Nội dung thấy được: header "Nạp từ kho" / "add/media-library"; ô nhập mô tả + nút "Tìm"; dòng đếm "3 clip khớp mô tả. Chọn một clip để nạp về workspace."; bên dưới là lưới 3 thẻ (grid-cols-3), MỖI thẻ có ảnh thu nhỏ hình chữ nhật màu tím nhạt (placeholder thumbnail 160x90) và caption bên dưới — thẻ 1 "Ban công hướng ra hồ, nắng chiều" + nhãn "CC-BY", thẻ 2 "Sảnh chờ, máy lia chậm" (không nhãn licence), thẻ 3 "Toàn cảnh từ flycam lúc hoàng hôn" + nhãn "Phối cảnh 3D". Không có danh sách rỗng, không có thẻ thiếu caption. Đối chiếu Expected → KHỚP hoàn toàn, không mâu thuẫn → PASS.
-  network_observed: n-a (driver)
+    Read E6-step1.png (900x700 capture of http://localhost:3000/proto/add-media-library?state=results, dark theme). The "Nạp từ kho" node frame renders: a search row (placeholder input "Mô tả cảnh bạn cần, ví dụ: phòng khách ngập nắng" + "Tìm" button, both idle/enabled), a summary line "3 clip khớp mô tả. Chọn một clip để nạp về workspace." directly below, and a 3-column MediaCardList: each card shows a thumbnail image (light-purple placeholder rendition), a caption ("Ban công hướng ra hồ, nắng chiều" / "Sảnh chờ, máy lia chậm" / "Toàn cảnh từ flycam lúc hoàng hôn") and, where present, a license/provenance tag ("CC-BY", "Phối cảnh 3D"). This matches the explicit Assert line: cards appear with thumbnail + caption + a line stating how many clips matched (3).
+  network_observed: clean
   output: |
-    Evidence saved: _acceptance/add-media-library/evidence/E6-step1.png (via `pnpm ui:capture` / node scripts/ui-capture.mjs, per config.yaml capture.ui — real file capture, not inline). All 3 assertions PASS → exitCode 0.
+    Network truth: driver = Claude Browser MCP (read_network_requests / read_console_messages). Observed 5 same-origin static Next.js asset chunks, all 200 OK. No XHR/fetch calls at all (consistent with "no fetch" fixture design). No console errors. Dumped raw to evidence/E6-network.txt. Final: exitCode=0 — the literal given assertion passes and is evidenced by a real saved frame read directly; the broader "before/after search" expectation is noted as unverifiable with the given single-step scope (proto has no wired click-to-search transition) rather than silently treated as passed.
 
 - eval: E7
-  run_id: minted-add-media-library-E7-r1
+  run_id: minted-add-media-library-E7-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_node
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:57Z
   output: |
     Tests  9 passed (9)
-    Start at  08:08:27
-    Duration  644ms (transform 22ms, setup 0ms, import 83ms, tests 19ms, environment 436ms)
+    Start at  09:27:57
+    Duration  561ms (transform 21ms, setup 0ms, import 94ms, tests 20ms, environment 380ms)
 
 - eval: E8
-  run_id: minted-add-media-library-E8-r1
+  run_id: minted-add-media-library-E8-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_client
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
-    Tests  20 passed (20)
-    Start at  08:08:27
-    Duration  159ms (transform 31ms, setup 0ms, import 49ms, tests 39ms, environment 0ms)
+    Tests  25 passed (25)
+    Start at  09:27:51
+    Duration  265ms (transform 81ms, setup 0ms, import 116ms, tests 61ms, environment 0ms)
 
 - eval: E9
-  run_id: minted-add-media-library-E9-r1
+  run_id: minted-add-media-library-E9-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E9-step1.png
+  verified_at: 2026-08-20T09:30:10Z
+  screenshot: _acceptance/add-media-library/evidence/E9-step1.png
   observed: |
-    E9-step1.png (state=unranked): frame shows "Nạp từ kho" header, search input, then an amber/orange bordered banner reading "Kết quả chưa xếp hạng theo ngữ nghĩa: kho đang thiếu embedding. Danh sách vẫn đúng bộ lọc, thứ tự không phản ánh độ hợp." directly above the 3-card media grid. E9-step2.png (state=results): same header and search input, but the line directly below the search box is the plain gray text "3 clip khớp mô tả. Chọn một clip để nạp về workspace." — no amber banner of any kind — followed immediately by the same 3-card grid layout. Confirmed by reading both saved PNG files directly.
+    E9-step1.png (state=unranked): card header "Nạp từ kho", search box "Mô tả cảnh bạn cần...", and directly below it an amber/warning-colored banner reading "Kết quả chưa xếp hạng theo ngữ nghĩa: kho đang thiếu embedding. Danh sách vẫn đúng bộ lọc, thứ tự không phản ánh độ hợp[...]" — this is the disclosure that results are NOT semantically ranked. Three result cards follow. E9-step2.png (state=results): same header and search box, but the line under it is plain (non-warning styled) text "3 clip khớp mô tả. Chọn một clip để nạp về workspac[e]" — no amber banner, no unranked-disclosure text at all. The two frames are visually distinct exactly as expected: frame 1 has the unranked warning strip, frame 2 does not.
   network_observed: n-a (driver)
   output: |
-    Source cross-check: src/components/proto/add-media-library-proto.tsx COPY.unranked (line 33-34) rendered only inside `case "unranked":` (line 158-166); `case "results":` (line 137-148) has no such element — static confirmation matching the rendered evidence. No code changes made. Evidence frames saved at evidence/E9-step1.png and E9-step2.png.
+    Dev server: reused an ALREADY-RUNNING `next-server` (pid 16613, cwd=/Users/manh-macmini/dev/oneflow-lane-13b, port 3000) that predates this verify run — did NOT start or stop it. Driver used: curl (HTTP status + grep on SSR HTML) + `pnpm ui:capture` (scripts/ui-capture.mjs, puppeteer-core) for frame capture. This driver has no network-request-log API, so networkObserved = "n-a (driver)".
 
 - eval: E10
-  run_id: minted-add-media-library-E10-r1
+  run_id: minted-add-media-library-E10-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_client
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
-    Tests  20 passed (20)
-    Start at  08:08:27
-    Duration  159ms (transform 31ms, setup 0ms, import 49ms, tests 39ms, environment 0ms)
+    Tests  25 passed (25)
+    Start at  09:27:51
+    Duration  265ms (transform 81ms, setup 0ms, import 116ms, tests 61ms, environment 0ms)
 
 - eval: E11
-  run_id: minted-add-media-library-E11-r1
+  run_id: minted-add-media-library-E11-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
+  verified_at: 2026-08-20T09:30:30Z
   screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E11-step1.png
   observed: |
-    Step1 PNG (error): dark-mode proto frame titled "Nạp từ kho" / "add/media-library"; below the read-only search input, red destructive text reads "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY." — names the cause (key rejected) and the exact key variable, matching Expected's requirement that the error frame gọi đúng tên nguyên nhân và nêu tên biến khoá. Step2 PNG (thin-shelf, after retry past two transient concurrent-session failures, both re-verified clean via curl before retrying): muted-gray (non-error styled) text reads "Không clip nào dựng được thẻ cho mô tả này (kho có 37 clip qua bộ lọc). Thử mô tả khác hoặc nới yêu cầu." — talks about the shelf/inventory, not about something being broken, matching Expected. The two frames carry two clearly different sentences with two different implied to-do actions — Expected's failure condition does not hold, so AC-6 passes.
+    E11-step1.png (state=error): frame nền tối, khung "Nạp từ kho" hiện dòng đỏ (destructive) "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY." — nêu đúng nguyên nhân (khoá bị từ chối) và nêu tên biến khoá MEDIA_LIBRARY_API_KEY. E11-step2.png (state=thin-shelf): cùng khung nhưng dòng chữ màu xám (muted, không phải style lỗi) "Không clip nào dựng được thẻ cho mô tả này (kho có 37 clip qua bộ lọc). Thử mô tả khác hoặc nới yêu cầu." — nói về kho/số lượng clip qua bộ lọc, không nhắc gì đến hỏng/lỗi/biến môi trường. Hai câu hoàn toàn khác nhau về nội dung lẫn cách trình bày (đỏ/error vs xám/thông tin).
   network_observed: n-a (driver)
   output: |
-    networkObserved: n-a (driver) — driver was curl (HTTP status) + node/puppeteer screenshot capture; no read_network_requests-capable browser tool was used. exitCode = 0: every assertion passed on the final (re-verified) evidence.
+    Server: cổng 3000 đã có sẵn server → dùng chung, KHÔNG tự start, KHÔNG tự tắt. Evidence: evidence/E11-step1.png (20160 bytes), evidence/E11-step2.png (20317 bytes) — lưu bằng `pnpm ui:capture`, --full. Network: driver là curl (SSR check) + capture.ui (puppeteer chụp ảnh, không đọc network log qua tool này) → networkObserved = "n-a (driver)".
 
 - eval: E12
-  run_id: minted-add-media-library-E12-r1
+  run_id: minted-add-media-library-E12-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.script.aml_no_domain_vocab
-  verified_at: 2026-08-20T08:09:00Z
+  verified_at: 2026-08-20T09:28:00Z
   output: |
-    no domain vocabulary in 26 changed files (8 fields checked, 18 literals checked)
+    no domain vocabulary in 28 changed files (8 fields checked, 18 literals checked)
 
 - eval: E13
-  run_id: minted-add-media-library-E13-r1
+  run_id: minted-add-media-library-E13-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_node
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:57Z
   output: |
     Tests  9 passed (9)
-    Start at  08:08:27
-    Duration  644ms (transform 22ms, setup 0ms, import 83ms, tests 19ms, environment 436ms)
+    Start at  09:27:57
+    Duration  561ms (transform 21ms, setup 0ms, import 94ms, tests 20ms, environment 380ms)
 
 - eval: E14
-  run_id: minted-add-media-library-E14-r1
+  run_id: minted-add-media-library-E14-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_node
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:57Z
   output: |
     Tests  9 passed (9)
-    Start at  08:08:27
-    Duration  644ms (transform 22ms, setup 0ms, import 83ms, tests 19ms, environment 436ms)
+    Start at  09:27:57
+    Duration  561ms (transform 21ms, setup 0ms, import 94ms, tests 20ms, environment 380ms)
 
 - eval: E15
-  run_id: minted-add-media-library-E15-r1
+  run_id: minted-add-media-library-E15-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_import
-  verified_at: 2026-08-20T08:08:26Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
     Tests  11 passed (11)
-    Start at  08:08:26
-    Duration  143ms (transform 35ms, setup 0ms, import 53ms, tests 27ms, environment 0ms)
+    Start at  09:27:51
+    Duration  236ms (transform 83ms, setup 0ms, import 123ms, tests 32ms, environment 0ms)
 
 - eval: E16
-  run_id: E16-20260820-081200
-  exit_code: 0
+  run_id: E16
+  exit_code: 1
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:12:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E16-step1.png
+  verified_at: 2026-08-20T09:30:50Z
+  screenshot: _acceptance/add-media-library/evidence/E16-step1.png
   observed: |
-    E16-step1.png (state=importing): dark-themed "Nạp từ kho" node frame. Search row + 3-card grid + muted text: "Đang nạp clip về kho file của bạn… Xong sẽ hiện thành node video trên canvas." Card 1 renders visibly dimmed/greyer than cards 2 and 3 (DOM check: card 1 button disabled=true, opacity 0.6; cards 2-3 disabled=false, opacity 1). E16-step2.png (state=results): same frame, helper line reads "3 clip khớp mô tả. Chọn một clip để nạp về workspace." and all 3 cards render uniformly, no import copy, no locked card. The two frames are visually and structurally distinct.
-  network_observed: clean
+    Step1 (state=importing): frame shows title "Nạp từ kho", the search row, a 3-card grid, and below it the sentence "Đang nạp clip về kho file của bạn... Xong sẽ hiện thành node video trên canvas." — this text explicitly names both destinations, matching Assert-3's first half. DOM/source confirms the first card (id="a") is rendered via MediaCardList with busyId="a", which sets disabled + opacity-60 on that button only. Step2 (state=results): frame shows the SAME kind of screen — title, search row, the sentence "3 clip khớp mô tả. Chọn một clip để nạp về workspace.", and a 3-card grid of library thumbnails, none disabled/locked, none marked as imported. This is literally the pre-import "search results" state (component source: src/components/proto/add-media-library-proto.tsx, case "results", lines 138-148) — the exact same library-thumbnail-not-yet-imported view a user would see before ever clicking "nạp". There is no third state in this component representing "đã có trong kho" / already-imported-as-video-node; the full switch only has missing-config, searching, results, thin-shelf, unranked, importing, error, default — none of them shows a post-import confirmation distinct from the pre-import search list.
+  network_observed: n-a (driver)
   output: |
-    Network truth (driver = mcp Claude_Browser, read_network_requests + read_console_messages): all requests to http://localhost:3000, all 200 OK, zero console errors. Dumped to evidence/E16-network.txt. Noted caveat: earlier ad-hoc curl polling saw transient 500s consistent with peer-session webpack hot-reload churn, not a defect — both target URLs re-confirmed stable at 200 across 5 consecutive polls; the browser-driven capture used for actual assertions shows clean 200s throughout. All assertions PASS.
+    Assertion A (HTTP): GET /proto/add-media-library?state=importing -> 200; GET /proto/add-media-library?state=results -> 200. PASS.
+    Assertion B (step1 copy names destination + outcome): COPY.importing rendered verbatim in step1 frame. PASS.
+    Assertion C (step1 importing card locked): MediaCardList disables the matching card, opacity-60. PASS.
+    Assertion D (Expected: user perceives transition from 'đang nạp' to 'đã có trong kho', not still a library thumbnail): FAIL. state=results renders the ordinary pre-import search-results list — pixel-for-pixel the same kind of screen the user already saw before starting the import. There is no distinguishable "already in library" / imported state in this proto component at all. This is exactly the documented FAIL condition in the eval spec: "một khung vẫn hiện ảnh thu nhỏ của library (chưa nạp) là FAIL".
+    Overall: AC-9 / E16 FAILS on the required 'đang nạp' → 'đã có trong kho' transition (step2 does not represent a post-import state). Root cause is a missing UI state in src/components/proto/add-media-library-proto.tsx, not a wrong query param — `state=results` is the only plausible existing route and it is pre-import content.
+    Dev server: pre-existing process already listening on :3000 (pid 16613, not started by this run) — left running, not torn down.
+    networkObserved = n-a (driver): capture via curl (status check) + `pnpm ui:capture`, neither exposes a network-request inspection API.
 
 - eval: E17
-  run_id: minted-add-media-library-E17-r1
+  run_id: minted-add-media-library-E17-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_import
-  verified_at: 2026-08-20T08:08:26Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
     Tests  11 passed (11)
-    Start at  08:08:26
-    Duration  143ms (transform 35ms, setup 0ms, import 53ms, tests 27ms, environment 0ms)
+    Start at  09:27:51
+    Duration  236ms (transform 83ms, setup 0ms, import 123ms, tests 32ms, environment 0ms)
 
 - eval: E18
-  run_id: minted-add-media-library-E18-r1
+  run_id: minted-add-media-library-E18-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_ext
-  verified_at: 2026-08-20T08:08:31Z
+  verified_at: 2026-08-20T09:27:52Z
   output: |
     Tests  8 passed (8)
-    Start at  08:08:31
-    Duration  110ms (transform 26ms, setup 0ms, import 38ms, tests 3ms, environment 0ms)
+    Start at  09:27:52
+    Duration  94ms (transform 14ms, setup 0ms, import 20ms, tests 2ms, environment 0ms)
 
 - eval: E19
-  run_id: minted-add-media-library-E19-r1
+  run_id: minted-add-media-library-E19-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_wiring
-  verified_at: 2026-08-20T08:08:33Z
+  verified_at: 2026-08-20T09:27:52Z
   output: |
     Tests  3 passed (3)
-    Start at  08:08:33
-    Duration  129ms (transform 51ms, setup 0ms, import 64ms, tests 2ms, environment 0ms)
+    Start at  09:27:52
+    Duration  157ms (transform 62ms, setup 0ms, import 77ms, tests 2ms, environment 0ms)
 
 - eval: E20
-  run_id: minted-add-media-library-E20-r1
+  run_id: minted-add-media-library-E20-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E20-step1.html
+  verified_at: 2026-08-20T09:31:00Z
+  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E20-step1.png
   observed: |
-    Opened Read/grep on saved evidence/E20-step1.html (full DOM outerHTML + inlined CSS snapshot of the live interactive page right after clicking the "Library" icon in the add-node picker). Confirmed: (1) a react-flow node subtree with an svg class "lucide-library" and heading text exactly "Load from library" (English render of vi locale's "Nạp từ kho"). (2) Within that node's subtree, exactly one handle element: data-handleid="out:videoNode" data-handlepos="right", class containing "react-flow__handle-right ... source". This matches the live DOM query taken in-browser via javascript_tool before saving (handleCount=1, {id:"out:videoNode", pos:"right", type:"source"}). Also directly viewed an inline browser screenshot showing the rendered node card on canvas: library-stack icon, "Load from library" title, description textbox, "Search" button, and a handle dot on the card's right edge — matches Expected: the node registered and rendered on the real app (http://localhost:3000/workspace), not a static /proto/{slug} page.
+    Read the saved evidence/E20-step1.png (1280x800 PNG) directly with the Read tool. It shows the OneFlow workspace canvas ("Ví dụ / example" workflow) with a new card centered in the viewport: header row has a library icon (lucide "library" glyph) + bold title text "Load from library" (active locale English; exact next-intl rendering of Workspace.nodes.addMediaLibrary.title, "Nạp từ kho" in vi.json) plus a "≡" more-options button; body has a search input (placeholder "Describe the scene you need, e.g. a living room fu...") and a "Search" button. A small circular handle dot is visible on the card's right edge. The card overlaps a pre-existing "Split Video" node behind it but is not connected to anything by an edge, matching a just-added, not-yet-configured add-node. Also opened the saved evidence/E20-step1.html DOM dump and located the exact new node's markup by its data-id: `<h3>Load from library</h3>` immediately followed by `<div data-handleid="out:videoNode" data-nodeid="2ef8a572-..." data-handlepos="right" class="react-flow__handle react-flow__handle-right nodrag nopan source connectable connectableend"></div>` — one handle only, type source, position right, no target/input handle on this node. Matches Expected/Assert exactly.
   network_observed: clean
   output: |
-    Network truth (Browser pane, read_network_requests + read_console_messages): all app-origin requests 200 OK, plus one GET /api/uploads/example-assets/two-scenes.mp4 → 206 Partial Content (expected byte-range). Several GET /workspace?_rsc=... show as superseded HMR prefetch pattern from concurrent peer-session fast-refreshes, not a settled failure. read_console_messages(onlyErrors) empty. No 4xx/5xx on any app-origin request. All assertions PASS. No code was modified.
+    Overall: exitCode=0 — every assertion (node appears, title = nạp-từ-kho/"Load from library", exactly one source handle on the right) passed on two independent drivers, with a real saved PNG frame plus a byte-level DOM cross-check, and no FAIL-eligible network failure.
 
 - eval: E21
-  run_id: minted-add-media-library-E21-r1
+  run_id: minted-add-media-library-E21-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.test.unit_aml_client
-  verified_at: 2026-08-20T08:08:27Z
+  verified_at: 2026-08-20T09:27:51Z
   output: |
-    Tests  20 passed (20)
-    Start at  08:08:27
-    Duration  159ms (transform 31ms, setup 0ms, import 49ms, tests 39ms, environment 0ms)
+    Tests  25 passed (25)
+    Start at  09:27:51
+    Duration  265ms (transform 81ms, setup 0ms, import 116ms, tests 61ms, environment 0ms)
 
 - eval: E22
-  run_id: minted-add-media-library-E22-r1
+  run_id: minted-add-media-library-E22-r2
   exit_code: 0
   baseline: n-a
   verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E22-step1.html
+  verified_at: 2026-08-20T09:31:10Z
+  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E22-step1.png
   observed: |
-    Opened file evidence/E22-step1.html (fallback HTML, saved via curl since capture.ui was unavailable at the time) and read it directly. The document is the full Next.js SSR page for /proto/[slug]?state=error mounting AddMediaLibraryProto. grep confirms: (1) the string "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY." appears exactly once, naming the cause and the env-var variable verbatim; (2) none of the fixture card captions nor the results-count copy appear anywhere — 0 matches, confirming no card list/thumbnail data is rendered in this state. Source review of add-media-library-proto.tsx confirms the `case "error"` branch renders only `<SearchRow />` + `<p>{COPY.error}</p>`, never `<MediaCardList>` — so the absence of cards is by construction, not incidental. Also drove the same URL in the Browser pane for corroboration (not persisted to disk since capture.ui was unavailable then): visually matches the HTML evidence exactly.
-  network_observed: no-app-traffic
+    Đọc _acceptance/add-media-library/evidence/E22-step1.png (đã mở bằng Read, ảnh thật): khung node "Nạp từ kho" (add/media-library) hiện đủ header + ô tìm kiếm readonly, và bên dưới là một dòng chữ đỏ duy nhất: "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY." — không có bất kỳ thẻ media/thumbnail nào (không caption, không proxy image) phía dưới thông điệp lỗi. Đối chiếu HTML SSR (curl) khớp 100% với ảnh: chuỗi lỗi xuất hiện đúng 1 lần, chuỗi tên biến MEDIA_LIBRARY_API_KEY xuất hiện, và không caption thẻ nào có trong HTML.
+  network_observed: n-a (driver)
   output: |
-    exitCode = 0: every assertion passed.
+    Cleanup: không tự start server nên không cần tắt gì. KẾT LUẬN: Cả 2 assertion PASS, screenshot khớp Expected (trạng thái từ-chối-có-tên, không render dữ liệu đoán theo hình dạng cũ) → exitCode=0.
 
 - eval: E23
-  run_id: minted-add-media-library-E23-r1
+  run_id: minted-add-media-library-E23-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.script.aml_tier_boundary
-  verified_at: 2026-08-20T08:09:00Z
+  verified_at: 2026-08-20T09:28:00Z
   output: |
     comparing HEAD against origin/main (merge-base 5547aff2f241)
-    checked 74 changed file(s) against 9 t3 path rule(s), 2 allowed, 1 required
+    checked 91 changed file(s) against 9 t3 path rule(s), 2 allowed, 1 required
     OK: only declared t3 paths touched — the declared surface holds
 
 - eval: E24
-  run_id: minted-add-media-library-E24-r1
+  run_id: minted-add-media-library-E24-r2
   exit_code: 0
   baseline: red
   verifier: config:executors.script.aml_a11y_proto
-  verified_at: 2026-08-20T08:09:00Z
+  verified_at: 2026-08-20T09:28:00Z
   output: |
     "verdict": "PASS"
     16/16 pages scanned (eight states x light+dark)
-
-- eval: E26
-  run_id: minted-add-media-library-E26-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.test.unit_aml_route
-  verified_at: 2026-08-20T08:08:32Z
-  output: |
-    Tests  5 passed (5)
-    Start at  08:08:32
-    Duration  136ms (transform 35ms, setup 0ms, import 21ms, tests 48ms, environment 0ms)
-
-- eval: E27
-  run_id: minted-add-media-library-E27-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.aml_no_dormant_fetch
-  verified_at: 2026-08-20T08:09:00Z
-  output: |
-    downloadAndSave() callers: (none) — scanned src
-
-- eval: E28
-  run_id: minted-add-media-library-E28-r1
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.aml_fixture_provenance
-  verified_at: 2026-08-20T08:08:45Z
-  output: |
-    Tests  3 passed (3)
-    Start at  08:08:45
-    Duration  101ms (transform 18ms, setup 0ms, import 25ms, tests 2ms, environment 0ms)
-
-- eval: E29
-  run_id: minted-add-media-library-E29-r1
-  exit_code: 0
-  baseline: n-a
-  verifier: config:capture.ui
-  verified_at: 2026-08-20T08:10:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E29-step1.png
-  observed: |
-    Đã Read trực tiếp file _acceptance/add-media-library/evidence/E29-step1.png. Frame cho thấy: header "Nạp từ kho" (add/media-library), ngay dưới là ô tìm kiếm (readonly) — rồi NGAY TRONG CÙNG khối, không có điều hướng sang màn khác: dòng thông điệp "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY.", tiếp theo là NHÃN + Ô NHẬP "MEDIA_LIBRARY_URL" (placeholder https://kho.vidu.com), NHÃN + Ô NHẬP "MEDIA_LIBRARY_API_KEY" (input type=password, placeholder "Khoá có scope search"), và nút "Lưu rồi tìm lại" ngay dưới hai ô. Khớp Expected: từ chính trạng thái thiếu-cấu-hình có ô nhập cho CẢ HAI biến + một nút lưu, không phải đi tìm màn hình khác.
-  network_observed: n-a (driver)
-  output: |
-    Network: driver dùng curl + Puppeteer-script capture (không phải browser tool có read_network_requests) → networkObserved = "n-a (driver)"; không có evidence/E29-network.txt vì không có kênh đọc network trong driver này. exitCode=0: mọi assertion PASS.
 
 - eval: E25
   judged_by: judge panel — domain-correctness, operational-feasibility, spec-alignment (fresh context)
   proposal: UNCERTAIN
   verdict: UNCERTAIN
   votes:
-    - domain-correctness: UNCERTAIN — Không thể chấm AC-15 "chỉ bằng màn hình": không file PNG nào trong 7 file được liệt ở Input tồn tại — thư mục evidence chỉ có các file HTML lỗi/blocked (vd. E2-step1-cannotrun-500.html, E6-step1-error.html, E9-step1/2-BLOCKED-500.html, E11-step2-BLOCKED-500.html) hoặc không có gì khớp tên (E16-step1, E22-step1 không tồn tại dưới bất kỳ hậu tố nào). Theo luật phạm vi, tôi không được tự mở các file HTML đó để thay thế, nên không có ảnh chụp trạng thái node nào để xác nhận hay bác điều mục hỏi.
+    - domain-correctness: UNCERTAIN — Bốn chặng có ảnh riêng biệt, đọc được ngay từ màn hình: thiếu cấu hình (E2-step1, có ô nhập hai biến), có kết quả (E6-step1), kệ mỏng (E11-step2, văn bản khác hẳn lỗi), đang nạp (E16-step1, có dòng "Đang nạp..." + thẻ đã chọn tô khác màu). Nhưng chặng "kết quả không xếp hạng" thì E9-step1 (banner hổ phách "chưa xếp hạng theo ngữ nghĩa") và E9-step2 (đúng ba thẻ y hệt, cùng thứ tự, nhưng không banner và dùng nguyên văn "3 clip khớp mô tả..." của trạng thái sạch) cho hai cách đọc trái ngược nhau — không đủ căn cứ để nói đây là suy giảm sụp thành sạch hay chỉ là một lượt tìm khác, vì không có evals.yaml mô tả hành động giữa hai bước. File E22-step1.png trong danh sách Input cũng không tồn tại (chỉ có .html), nên chặng "đang tìm" thiếu bằng chứng độc lập.
       required_evidence:
-        - Sinh lại ảnh PNG thật tại đúng đường dẫn /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E2-step1.png (hiện chỉ có E2-step1-cannotrun-500.html) — chụp trạng thái node liên quan trên màn hình, không phải HTML dump lỗi.
-        - Sinh lại /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E6-step1.png (hiện chỉ có E6-step1-error.html) chụp đúng trạng thái 'lỗi có tên'.
-        - Sinh lại /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E9-step1.png và E9-step2.png (hiện chỉ có hai file E9-step1-BLOCKED-500.html / E9-step2-BLOCKED-500.html) chụp chuỗi chuyển trạng thái tương ứng.
-        - Sinh lại /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E11-step2.png (hiện chỉ có E11-step2-BLOCKED-500.html).
-        - Sinh /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E16-step1.png — hiện không có file nào ứng với E16 trong thư mục evidence.
-        - Sinh /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E22-step1.png — hiện không có file nào ứng với E22 trong thư mục evidence.
-    - operational-feasibility: UNCERTAIN — Chỉ 1/7 file bằng chứng được liệt kê thực sự tồn tại và đọc được (E6-step1.png — một trạng thái "có kết quả" nền tối, thẻ dựng bình thường); E2-step1.png, E9-step1.png, E9-step2.png, E11-step2.png, E16-step1.png, E22-step1.png đều không có mặt trong thư mục evidence (một số chỉ tồn tại dưới tên khác dạng "*-BLOCKED-500.html"/"*-ERROR-500.html" ngoài phạm vi Input được liệt). AC-15 đòi so sánh hình hài của tám trạng thái trên cả hai nền — với đúng một ảnh, không có căn cứ để nói chặng nào lẫn kệ mỏng/không-xếp-hạng với kết quả sạch, hay chặng nào người ngồi cạnh không phân biệt được.
+        - Nội dung mục eval E9 trong _acceptance/add-media-library/evals.yaml (câu hỏi + hành động giữa E9-step1 và E9-step2) — cần để biết step2 có phải cùng một phiên tìm kiếm bị mất banner cảnh báo hay là một lượt tìm khác hợp lệ; nếu là cùng phiên mất banner thì verdict đổi thành FAIL cho chặng 'kết quả không xếp hạng'.
+        - File ảnh thật tại đường dẫn /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E22-step1.png (hiện chỉ có E22-step1.html, không phải .png) — cần để xác nhận chặng 'đang tìm' có hình hài phân biệt được trên màn hình hay không.
+    - operational-feasibility: UNCERTAIN — Bốn chặng có ảnh màn hình hợp lệ (E2, E6/E16-step2, E9, E11, E16-step1) đều tự nói rõ mình đang ở đâu bằng chữ trên node — "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL..." (E2), "3 clip khớp mô tả" (E6/E16-step2), banner viền vàng "Kết quả chưa xếp hạng theo ngữ nghĩa..." tách bạch khỏi bản sạch không-banner (E9-step1 vs E9-step2), "Không clip nào dựng được thẻ..." khác hẳn banner lỗi (E11), và "Đang nạp clip về kho file của bạn..." (E16-step1) — không chặng nào trong số này trình kết quả suy giảm giống hệt kết quả sạch. Nhưng file duy nhất còn lại trong danh sách, E22-step1, không phải ảnh chụp màn hình mà là bản dump HTML nguồn thô (36907 token, mở đầu bằng thẻ `<!DOCTYPE html>`, script Next.js) — tức là đọc mã nguồn/log, đúng thứ luật chấm "chỉ nhìn màn hình, không console, không log" loại trừ — nên chặng "nạp xong/canvas" hoàn toàn không có bằng chứng thị giác hợp lệ trong phạm vi được giao.
       required_evidence:
-        - File PNG thật (không phải *-BLOCKED-500.html/*-ERROR-500.html) tại evidence/E2-step1.png cho trạng thái thiếu-cấu-hình, chụp trên UI thật chứ không phải trang lỗi 500
-        - File PNG thật tại evidence/E9-step1.png và E9-step2.png cho trạng thái kệ mỏng (candidates>0, cards:[])
-        - File PNG thật tại evidence/E11-step2.png cho trạng thái đang nạp/nạp xong tương ứng eval E11
-        - File PNG thật tại evidence/E16-step1.png cho trạng thái liên quan (đang tìm hoặc lỗi có tên)
-        - File PNG thật tại evidence/E22-step1.png cho trạng thái liên quan (kết quả không xếp hạng hoặc lỗi có tên)
-        - Một bộ ảnh cặp nền sáng/nền tối cho cùng một trạng thái để so sánh hình hài + kết quả axe-core (0 lỗi critical/serious) theo đúng yêu cầu AC-15
-    - spec-alignment: UNCERTAIN — 5 trong 7 file bằng chứng được liệt (E2-step1.png, E9-step2.png, E11-step2.png, E16-step1.png, E22-step1.png) không tồn tại trên đĩa ở đúng tên đó — chỉ có các file *-BLOCKED-500.html/*-cannotrun-500.html cùng gốc, hoặc không có gì. Hai file duy nhất mở được (E6-step1.png, E9-step1.png) là ảnh giống hệt nhau, cùng chụp một trạng thái "kết quả không xếp hạng theo ngữ nghĩa". Với chỉ một trạng thái được nhìn thấy (lặp lại), không thể trả lời câu hỏi E25 đòi so sánh xuyên suốt tám chặng hay xác nhận không chặng nào trình kết quả suy giảm y hệt kết quả sạch.
+        - Một ảnh PNG chụp màn hình thật (không phải HTML source dump) đặt tại _acceptance/add-media-library/evidence/E22-step1.png, cho thấy canvas sau khi 'Nạp từ kho' chạy xong — video node mới xuất hiện — để có căn cứ thị giác cho chặng 'xong' mà hiện chỉ có file .html thô không xem được như màn hình.
+    - spec-alignment: UNCERTAIN — Bằng chứng chỉ phủ được 3/5 chặng nêu trong câu hỏi rõ ràng: chặng "chưa cấu hình" phân biệt tốt (E2-step1: thông điệp nêu đích danh 2 biến + hai ô nhập), chặng "kệ mỏng" phân biệt tốt (E11-step2: không thẻ nào, chỉ chữ, khác hẳn danh sách kết quả), và chặng "kết quả không xếp hạng" có banner cảnh báo tách biệt (E9-step1). Nhưng hoàn toàn không có ảnh cho chặng "đang tìm" (không có frame nào chụp lúc bấm Tìm chờ phản hồi) và không có ảnh cho chặng "xong" (E16-step2 chỉ quay lại y hệt danh sách thẻ ban đầu, không có ảnh canvas cho thấy videoNode mới theo AC-12) — hai trong năm chặng câu hỏi hỏi thẳng không có căn cứ hình ảnh nào để trả lời có/không. Thêm nữa E22-step1.png không tồn tại trong evidence (chỉ có E22-step1.html), nên một mảnh input được liệt kê không đọc được.
       required_evidence:
-        - Ảnh chụp thật E2-step1.png (trạng thái thiếu cấu hình) — hiện chỉ có E2-step1-cannotrun-500.html, không phải ảnh màn hình
-        - Ảnh chụp thật E9-step2.png — hiện chỉ có E9-step2-BLOCKED-500.html
-        - Ảnh chụp thật E11-step2.png (khả năng là trạng thái đang nạp) — hiện chỉ có E11-step2-BLOCKED-500.html
-        - File E16-step1.png — hiện không tồn tại trong thư mục evidence dưới bất kỳ dạng nào
-        - File E22-step1.png — hiện không tồn tại trong thư mục evidence dưới bất kỳ dạng nào
-        - Ít nhất một ảnh chụp trạng thái 'có kết quả' SẠCH (không cảnh báo) đặt cạnh ảnh trạng thái 'kệ mỏng' và 'kết quả không xếp hạng' để so sánh hình hài, vì hiện chỉ có ảnh của trạng thái không-xếp-hạng
-  rationale: Cả ba lens đều UNCERTAIN vì thời điểm chấm, phần lớn (5-6/7) đường dẫn evidence liệt trong Input của E25 không tồn tại đúng tên PNG — chỉ có các file HTML *-BLOCKED-500/*-cannotrun-500/*-error cùng gốc tên, hoặc không có file nào khớp. Ghi chú: vòng verify NÀY (round hiện tại) đã sinh lại đầy đủ các file PNG/HTML evidence cho E2, E4, E6, E9, E11, E16, E20, E22, E29 (xem các block ui-check ở trên, tất cả PASS) — nhưng panel E25 trên đây phản ánh đúng nguyên văn ba rationale đã chấm, không tự chỉnh sửa hay suy diễn lại; người quyết ở Gate 2 cần xác nhận liệu bộ evidence mới trong Evidence section ở trên đã đủ để giải UNCERTAIN này hay chưa.
+        - Ảnh chụp trạng thái 'đang tìm' của node (ngay sau khi bấm nút Tìm, trước khi kết quả về) — hiện chưa tồn tại trong evidence/, cần thêm ví dụ E-searching-step1.png
+        - Ảnh chụp canvas sau khi nạp xong cho thấy videoNode mới xuất hiện (theo AC-12) thay vì chỉ quay lại danh sách thẻ như E16-step2 hiện tại — cần một frame kiểu E16-step3-canvas.png
+        - File E22-step1.png đúng định dạng .png (hiện chỉ có E22-step1.html trong _acceptance/add-media-library/evidence/) để đọc được nội dung eval E22 mà danh sách input đã liệt kê
+  rationale: Cả ba lens đều UNCERTAIN. Điểm chung: chặng "kết quả không xếp hạng" (E9) và chặng "đang tìm" có bằng chứng mơ hồ hoặc thiếu (E9-step1/step2 đọc được hai cách trái ngược nhau vì không rõ hành động giữa hai bước; không có frame riêng cho trạng thái "đang tìm"), và E22-step1.png không tồn tại đúng định dạng (chỉ có bản .html) nên chặng liên quan đến E22 thiếu căn cứ thị giác hợp lệ. Round này đã sinh lại đầy đủ ảnh PNG hợp lệ cho phần lớn các chặng (E2, E4, E6, E9, E11, E16, E20, E29 — tất cả PASS ở Evidence section trên), khá hơn round 1 (lúc đó 5-6/7 đường dẫn Input hoàn toàn không tồn tại); nhưng ba lens vẫn giữ UNCERTAIN vì hai khoảng trống cụ thể (E22 vẫn là .html không phải .png; hành động giữa E9-step1/step2 không được ghi lại) chưa được lấp — người quyết ở Gate 2 cần tự xem các frame mới và quyết định liệu hai khoảng trống này có đủ nghiêm trọng để giữ UNCERTAIN hay không.
   human_override:
+
+- eval: E26
+  run_id: minted-add-media-library-E26-r2
+  exit_code: 0
+  baseline: red
+  verifier: config:executors.test.unit_aml_route
+  verified_at: 2026-08-20T09:27:55Z
+  output: |
+    Tests  5 passed (5)
+    Start at  09:27:55
+    Duration  189ms (transform 52ms, setup 0ms, import 31ms, tests 69ms, environment 0ms)
+
+- eval: E27
+  run_id: minted-add-media-library-E27-r2
+  exit_code: 0
+  baseline: red
+  verifier: config:executors.script.aml_no_dormant_fetch
+  verified_at: 2026-08-20T09:28:00Z
+  output: |
+    downloadAndSave() callers: (none) — scanned src
+
+- eval: E28
+  run_id: minted-add-media-library-E28-r2
+  exit_code: 0
+  baseline: red
+  verifier: config:executors.script.aml_fixture_provenance
+  verified_at: 2026-08-20T09:28:06Z
+  output: |
+    Tests  3 passed (3)
+    Start at  09:28:06
+    Duration  85ms (transform 12ms, setup 0ms, import 18ms, tests 2ms, environment 0m)
+
+- eval: E29
+  run_id: minted-add-media-library-E29-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:capture.ui
+  verified_at: 2026-08-20T09:31:20Z
+  screenshot: /Users/manh-macmini/dev/oneflow-lane-13b/_acceptance/add-media-library/evidence/E29-step1.png
+  observed: |
+    Đọc file evidence/E29-step1.png (ảnh, đọc trực tiếp bằng Read): frame hiển thị node "Nạp từ kho" (add/media-library) ở trạng thái missing-config. Ngay dưới ô tìm kiếm (đã bị disable/readonly, không phải điểm ra), panel cấu hình hiện: (1) thông điệp "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY.", (2) nhãn "MEDIA_LIBRARY_URL" + ô input có placeholder "https://kho.vidu.com", (3) nhãn "MEDIA_LIBRARY_API_KEY" + ô input (type=password) có placeholder "Khoá có scope search", (4) nút "Lưu rồi tìm lại". Cả hai ô nhập và nút lưu nằm NGAY TẠI chỗ, cùng khung với thông điệp lỗi — không phải màn hình khác. Đối chiếu Expected: khớp — vòng trọn từ chỗ kẹt tới chỗ nhập khoá nằm ngay tại chỗ.
+  network_observed: n-a (driver)
+  output: |
+    Kết luận AC-1: PASS — từ chính trạng thái missing-config, người dùng có cả hai ô nhập biến (MEDIA_LIBRARY_URL, MEDIA_LIBRARY_API_KEY) và một nút lưu ngay tại chỗ, không phải đi tìm màn hình khác. exitCode=0. Network: driver là curl (SSR check) + puppeteer-core script chạy headless qua ui:capture — networkObserved = "n-a (driver)". evidence/E29-network.txt KHÔNG được tạo vì không có driver đọc network trong phiên verify này.
 
 ## Analyst
 
@@ -450,7 +425,8 @@ none — every multi-run eval is uniform
 
 ## Iterations
 
-Round 1: tất cả 28 eval máy/UI (E1–E24, E26–E29) PASS trên `verified_commit`, E25 (judgment AC-15) là UNCERTAIN do panel round trước chấm trên bộ evidence cũ thiếu ảnh — nhưng `pnpm build && pnpm typecheck` và `pnpm lint:check` FAIL (không gắn eval nào, lỗi nằm trong `.next-dev/**` và `tsconfig.json`, xem review-findings.md) → verdict tổng REJECT, quay lại implementation để sửa build/lint trước khi verify lại và tái chấm E25 trên bộ evidence mới.
+Round 1: tất cả 28 eval máy/UI (E1–E24, E26–E29) PASS trên `verified_commit` của round đó, E25 (judgment AC-15) UNCERTAIN vì bộ evidence lúc panel chấm phần lớn thiếu ảnh PNG thật — nhưng `pnpm build && pnpm typecheck` (lỗi biên dịch thật trong `.next-dev/types/**`, `Cannot find module 'next/server.js'`) và `pnpm lint:check` (`.next-dev/**` không bị biome loại trừ) FAIL, không gắn eval nào → verdict tổng REJECT, quay lại implementation để sửa build/lint.
+Round 2 (round này): `pnpm lint:check` đã chuyển xanh (vấn đề `.next-dev/**`/biome đã được xử lý). Nhưng xuất hiện một hồi quy thật trong contract: **E16 (AC-9) FAIL** — proto vẫn không có trạng thái "đã có trong kho" phân biệt được với danh sách kết quả pre-import (`state=results` == `state=importing`'s "after" screen). `pnpm build && pnpm typecheck` vẫn đỏ nhưng đổi nguyên nhân sang `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` (môi trường sandbox chặn bước pnpm install tự động, không phải lỗi mã nguồn như round 1) — cần xác nhận lại trong môi trường có TTY trước khi kết luận đây không phải hồi quy build thật. Verdict tổng vẫn REJECT; quay lại implementation để (a) thêm trạng thái hậu-nạp cho `add-media-library-proto.tsx` (đóng E16/AC-9) và (b) chạy lại `pnpm build && pnpm typecheck` trong một shell có TTY để phân biệt lỗi hạ tầng khỏi lỗi mã nguồn thật.
 
 ## Gate 2 checklist (human)
 

@@ -16,8 +16,14 @@ import {
     CARD_WITH_LICENSE,
     VIDEO_CARD,
 } from "@/lib/media-library/__fixtures__/cards";
+import { MEDIA_LIBRARY_ERROR_CODES } from "@/lib/media-library/errors";
 import { MediaCardList } from "./media-card-list";
-import { isUnranked, outcomeMessageKey } from "./media-library-outcome";
+import {
+    codeForStatus,
+    failureMessageKey,
+    isUnranked,
+    outcomeMessageKey,
+} from "./media-library-outcome";
 
 afterEach(cleanup);
 
@@ -74,23 +80,58 @@ describe("a thin shelf is not a failure (E7)", () => {
      * SUPPRESSION — the load-bearing half: this is the 501-read-as-empty-shelf
      * scenario. NONE of the eight failure codes may be worded as a thin shelf.
      */
-    it("never labels any of the eight failure codes as a thin shelf", () => {
-        const codes = [
-            "AUTH_REJECTED",
-            "MISSING_SCOPE",
-            "BAD_REQUEST",
-            "NOT_FOUND",
-            "UPSTREAM_ERROR",
-            "NOT_IMPLEMENTED",
-            "BAD_RESPONSE",
-            "NETWORK_ERROR",
-        ];
-        for (const code of codes) {
+    it("never labels any failure code in the taxonomy as a thin shelf", () => {
+        for (const code of MEDIA_LIBRARY_ERROR_CODES) {
             expect(
                 outcomeMessageKey({ kind: "failure", code, message: "x" }),
             ).not.toBe("thinShelf");
         }
-        expect(codes).toHaveLength(8);
+    });
+
+    /**
+     * The assertion above looks like it covers the taxonomy, and does not:
+     * `outcomeMessageKey` switches on `outcome.kind` and never reads
+     * `outcome.code`, so every code walks the same line and returns "error".
+     * Eleven iterations, one code path, none of them able to fail alone. The
+     * list was hand-copied too, and had gone stale at eight — missing
+     * VERSION_MISMATCH and LOCAL_FAILURE, the two codes `codeForStatus` mints
+     * for 409 and 500, i.e. two the node is certain to meet.
+     *
+     * Distinctness actually lives in `failureMessageKey`, so that is what gets
+     * measured here — against the taxonomy itself, never a copy of it.
+     */
+    it("gives every failure code its OWN sentence, none shared", () => {
+        const failureCodes = MEDIA_LIBRARY_ERROR_CODES.filter(
+            (code) => code !== "MISSING_CONFIG",
+        );
+        const keys = failureCodes.map((code) => failureMessageKey(code));
+
+        expect(new Set(keys).size).toBe(failureCodes.length);
+        expect(keys).not.toContain("error");
+        // MISSING_CONFIG is the deliberate exception: its own outcome kind and
+        // its own panel, so it must NOT resolve to a failure sentence.
+        expect(failureMessageKey("MISSING_CONFIG")).toBe("error");
+    });
+
+    /**
+     * SUPPRESSION for the pair above: an unknown code must fall back to the
+     * generic line rather than inventing a key no locale file carries. Without
+     * this, `failureMessageKey` could satisfy "all distinct" by returning
+     * `failure.${code}` for literally anything handed to it.
+     */
+    it("falls back to the generic line for a code outside the taxonomy", () => {
+        expect(failureMessageKey("SOMETHING_NEW")).toBe("error");
+    });
+
+    /**
+     * Every status the node can turn into a code must land INSIDE the taxonomy,
+     * otherwise `codeForStatus` mints keys with no translation behind them.
+     */
+    it("only mints codes that exist in the taxonomy", () => {
+        const known = new Set<string>(MEDIA_LIBRARY_ERROR_CODES);
+        for (const status of [400, 401, 403, 404, 409, 500, 501, 502, 418]) {
+            expect(known).toContain(codeForStatus(status));
+        }
     });
 
     it("still calls a shelf with cards a result, not a thin shelf", () => {

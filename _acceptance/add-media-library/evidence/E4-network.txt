@@ -1,3 +1,37 @@
+== THIS RUN, final authoritative pass (isolated headless Chrome via
+   puppeteer-core, .e4-capture-tmp.mjs, run twice for stability) ==
+base="http://localhost:3000"
+driver="dedicated headless Chrome instance (puppeteer-core), independent of
+        any other Browser-pane tab so peer-session HMR churn cannot leak in"
+clicked="bottom add-node toolbar, image icon (3rd of the 40x40 button row)"
+nodeCountBefore=6
+nodeCountAfter=7
+addImageHeadingPresent=true  (DOM now has an <h*>/[role=heading] with exact
+  text "Add Image" -> POSITIVE CONTROL: the node genuinely mounted, this is
+  not just an absence of errors on a blank/unchanged page)
+bannerOrToastTexts=[] (queried [role=alert], *toast*, *error-banner*,
+  [data-sonner-toast] across the whole document)
+consoleErrors=[] (page 'console' events of type error)
+pageErrors=[] (uncaught exceptions / page 'pageerror' events)
+failedRequests=[] (page 'requestfailed' events) -- final run, clean
+
+Earlier attempts in this same session intermittently showed one aborted
+request: "GET /workspace?_rsc=... -> net::ERR_ABORTED", coincident with
+this shared dev server's webpack.hot-update.json/js pushes at the same
+timestamps (visible via the Browser-pane's tabs_context showing tab-2..
+tab-11, i.e. multiple concurrent verifier sessions/tabs hitting this one
+`pnpm dev` process while other evals were being (re-)captured, per
+_acceptance/add-media-library/evidence/E9,E11,E16,E20,E22,E29* timestamps
+04:29-09:31). Re-running the identical isolated script with no other tab
+open reproduced zero failures both times it was retried clean, and a
+bare navigate-only isolated run also showed zero _rsc calls at all,
+confirming the abort is transient dev-server/HMR-churn noise from a peer
+process's file edits, not a deterministic effect of this eval's action or
+of the empty-media-library state. Full request/response evidence from an
+earlier interleaved-with-peers pass is preserved below for audit.
+
+== PRIOR RUN ON THIS EVAL (found already on disk, peer/earlier attempt,
+   puppeteer-driven script instrumenting click+DOM count) ==
 base="http://localhost:3000"
 
 clicked="matched-by-icon-class"

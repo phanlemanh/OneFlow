@@ -1,3 +1,53 @@
+E20 network truth (RE-RUN 2, this verifier round — Claude_Browser tabId tab-11 +
+a one-off puppeteer-core capture script, http://localhost:3000/workspace)
+
+Dev server: already running for this exact worktree before this round started (pid 16613,
+cwd /Users/manh-macmini/dev/oneflow-lane-13b, confirmed via `lsof`/`ps`) — reused, not
+started or stopped by this verifier.
+
+Step: clicked the "Load from library" icon in the bottom add-node toolbar (the 8th
+IconButton in smart-island.tsx's addToolbar, svg.lucide-library, inside the rounded-2xl
+toolbar container) via two independent drivers:
+  1. Claude_Browser (interactive tab-11) — DOM check after click: node
+     2ef8a572-187f-4645-a694-6092c1a678f2, textSnippet "Load from librarySearch", exactly
+     one handle {id: out:videoNode, pos: right, sourceType: source}. No target handle.
+  2. A fresh puppeteer-core session (own Chrome process, own page) — nodeCountBefore=6,
+     nodeCountAfter=7, newNode {title: "Load from library", handles: [{id: out:videoNode,
+     pos: right, source: true, target: false}]}, consoleErrors=[], failedRequests=[].
+     Screenshot saved to evidence/E20-step1.png (1280x800 PNG, verified by opening it).
+
+--- read_network_requests on tab-11 (post add-node interaction, last 60) ---
+All app-origin (http://localhost:3000) business calls (/api/plugins/registry,
+/example.json, /api/feature/list, /api/uploads/example-assets/two-scenes.mp4,
+/api/task/pending) -> 200/206 OK. No 4xx/5xx anywhere in the log.
+
+Also present: a burst of "/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]" and one
+"/proto/add-media-library?state=results&_rsc=... [FAILED: net::ERR_ABORTED]", interleaved
+with a continuous webpack hot-update cascade (css ?v= timestamps climbing
+1787193061102..1787193266895, i.e. ~200s of back-to-back HMR recompiles). net::ERR_ABORTED
+here is a client-side cancellation (Next.js superseding an in-flight RSC prefetch with the
+next one on every fast-refresh), not a reachability/server failure — consistent with a peer
+session actively editing source files on this same shared dev server while this tab sat
+open (see MEMORY: "Hai phiên một cây" / "Eval đỏ oan vì tải máy song song"; this round's
+evidence dir already contained fresh E2/E4/E6/E9/E11/E16/E22/E29 PNGs written minutes
+earlier, confirming a concurrent peer verifier was running other evals of this same batch).
+No request in this set has a genuine connection-error/timeout/5xx as its settled outcome.
+
+--- read_console_messages (onlyErrors) on tab-11, taken right after the add-node click ---
+(empty — "No console logs.")
+
+--- puppeteer-core session (independent page/process) ---
+requestfailed listener: [] (empty)
+console "error" listener: [] (empty)
+
+networkObserved verdict (this round): clean — app-scope traffic observed across both
+drivers, no unexpected 4xx/5xx, no genuine unreachable/timeout; the ERR_ABORTED lines are
+superseded dev-HMR RSC prefetches from concurrent peer activity, not settled failures.
+Matches the RE-RUN 1 verdict below independently.
+
+================================================================================
+--- Prior attempt (RE-RUN 1, ~08:19) kept for audit trail ---
+================================================================================
 E20 network truth (RE-RUN — captured via Browser pane tabId tab-7, http://localhost:3000/workspace)
 
 This replaces the earlier BLOCKED-500 attempt recorded below (kept for context): the dev

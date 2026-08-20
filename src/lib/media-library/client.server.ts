@@ -60,11 +60,34 @@ async function call<T>(
 
     let body: unknown;
     let parsed = true;
+    /**
+     * `response.json()` rejects for two unrelated reasons and they must not
+     * collapse into one message. A SyntaxError means the far side really did
+     * answer in a shape this version cannot read. An AbortError or a TypeError
+     * means the connection died or the timeout fired AFTER the headers arrived
+     * — the body never finished. Reporting the second as BAD_RESPONSE
+     * ("the library answered in a shape this version does not accept") sends
+     * the user to check a contract version when the truth was a dropped
+     * connection, and swallowing the cause entirely left nothing in the log to
+     * tell them apart.
+     */
+    let parseFailure: "shape" | "transport" = "shape";
     try {
         body = await response.json();
-    } catch {
+    } catch (error) {
         parsed = false;
         body = {};
+        const name = error instanceof Error ? error.name : "";
+        parseFailure =
+            name === "AbortError" || name === "TimeoutError"
+                ? "transport"
+                : "shape";
+        // The fetch catch above logs; this one used to stay silent, which is
+        // why a truncated body was indistinguishable from a malformed one.
+        logger.error(
+            `[media-library] response body did not parse (${parseFailure}):`,
+            error,
+        );
     }
 
     // A body that will not parse is only fatal on a SUCCESS response. On an
@@ -76,13 +99,22 @@ async function call<T>(
     // rejected key, and pointed them at the wrong fix. Parsing before looking at
     // the status is what made that unreachable.
     if (!parsed && response.ok) {
-        return {
-            ok: false,
-            failure: {
-                code: "BAD_RESPONSE",
-                message: "media-library trả về thân không phải JSON.",
-            },
-        };
+        return parseFailure === "transport"
+            ? {
+                  ok: false,
+                  failure: {
+                      code: "NETWORK_ERROR",
+                      message:
+                          "Kết nối tới media-library đứt giữa chừng khi đang nhận dữ liệu.",
+                  },
+              }
+            : {
+                  ok: false,
+                  failure: {
+                      code: "BAD_RESPONSE",
+                      message: "media-library trả về thân không phải JSON.",
+                  },
+              };
     }
 
     const record = (body ?? {}) as Record<string, unknown>;

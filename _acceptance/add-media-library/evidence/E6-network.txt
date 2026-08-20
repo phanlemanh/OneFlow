@@ -1,0 +1,14 @@
+# E6 network dump — http://localhost:3000/proto/add-media-library?state=results
+# captured via mcp__Claude_Browser__read_network_requests / read_console_messages
+
+## Network requests
+[38453.6] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787193047949 -> 200 OK
+[38453.7] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787193047949 -> 200 OK
+[38453.8] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[38453.9] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[38453.10] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+
+All requests are same-origin static Next.js asset chunks (app-origin per dev_server.url http://localhost:3000). No XHR/fetch calls observed (proto uses hardcoded CARDS fixture, no network-backed search). All 200 OK.
+
+## Console messages
+No console logs / no errors.

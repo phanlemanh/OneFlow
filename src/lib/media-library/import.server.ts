@@ -25,7 +25,16 @@ import {
  * fail in an unhelpful way rather than being refused cleanly.
  */
 const MAX_BYTES = 1024 * 1024 * 1024;
-const DOWNLOAD_TIMEOUT_MS = 120_000;
+/**
+ * Overridable ONLY so it can be measured. At 120 seconds the timeout was
+ * unreachable from a test, so nothing asserted it, and deleting the signal
+ * entirely kept the whole suite green — a guard nobody could see was a guard
+ * nobody was keeping. Production never sets this variable.
+ */
+function downloadTimeoutMs(): number {
+    const override = Number(process.env.MEDIA_LIBRARY_DOWNLOAD_TIMEOUT_MS);
+    return Number.isFinite(override) && override > 0 ? override : 120_000;
+}
 /** Redirects are followed by hand so each hop can be re-guarded; bound the chain. */
 const MAX_REDIRECTS = 5;
 
@@ -86,7 +95,7 @@ async function fetchGuarded(
         try {
             response = await fetch(current, {
                 redirect: "manual",
-                signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+                signal: AbortSignal.timeout(downloadTimeoutMs()),
             });
         } catch (error) {
             logger.error("[media-library] byte download failed:", error);

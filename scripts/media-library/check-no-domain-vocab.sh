@@ -30,22 +30,39 @@ if [ -z "$FILES" ]; then
     exit 1
 fi
 
-# The library's own real-estate vocabulary, as string literals.
-VOCAB='noi-that|ngoai-canh|flycam|tien-ich|cong-truong|duong-pho|du-an|phan-khu|cung-truc|cung-layout|cung-tang|cung-toa|dung-can|render-3d|scale-model|real-model|full-noi-that|co-ban'
-# shellcheck disable=SC2086
-HITS="$(grep -nE "\"($VOCAB)\"|'($VOCAB)'" $FILES || true)"
+# The library's own real-estate vocabulary, as string literals — an ARRAY, so
+# each entry is checked on its own pass and the printed count is derived from
+# the list rather than typed into the echo. The previous shape ran two greps
+# with an alternation and then printed a hardcoded "8 fields, 18 literals":
+# deleting an entry changed nothing that anyone could see, and the evidence line
+# went on claiming both numbers.
+VOCAB=(noi-that ngoai-canh flycam tien-ich cong-truong duong-pho du-an phan-khu
+       cung-truc cung-layout cung-tang cung-toa dung-can render-3d scale-model
+       real-model full-noi-that co-ban)
+# The fields that must stay opaque `string`. A closed union on any of them is
+# the same failure written as a type instead of a comparison.
+FIELDS=(provenance scene_kind kind specificity energy interior_state
+        license_label slot_role)
 
-# The eight fields that must stay opaque `string`. A closed union on any of them
-# is the same failure written as a type instead of a comparison.
-FIELDS='provenance|scene_kind|kind|specificity|energy|interior_state|license_label|slot_role'
-# shellcheck disable=SC2086
-UNIONS="$(grep -nE "($FIELDS)\??[[:space:]]*:[[:space:]]*\"[^\"]+\"[[:space:]]*\|" $FILES || true)"
+FAILURES=""
+for literal in "${VOCAB[@]}"; do
+    # shellcheck disable=SC2086
+    hit="$(grep -nE "\"$literal\"|'$literal'" $FILES || true)"
+    [ -n "$hit" ] && FAILURES="$FAILURES\nliteral '$literal':\n$hit"
+done
 
-if [ -n "$HITS$UNIONS" ]; then
+for field in "${FIELDS[@]}"; do
+    # Both quote styles, matching the literal scan above — the union check used
+    # to accept only double quotes, so a single-quoted union walked past it.
+    # shellcheck disable=SC2086
+    hit="$(grep -nE "$field\\??[[:space:]]*:[[:space:]]*(\"[^\"]+\"|'[^']+')[[:space:]]*\\|" $FILES || true)"
+    [ -n "$hit" ] && FAILURES="$FAILURES\nclosed union on '$field':\n$hit"
+done
+
+if [ -n "$FAILURES" ]; then
     echo "FAIL: domain vocabulary hardcoded on the OneFlow side:"
-    [ -n "$HITS" ] && echo "$HITS"
-    [ -n "$UNIONS" ] && echo "$UNIONS"
+    printf '%b\n' "$FAILURES"
     exit 1
 fi
 
-echo "no domain vocabulary in $(echo "$FILES" | wc -l | tr -d ' ') changed files (8 fields checked, 18 literals checked)"
+echo "no domain vocabulary in $(echo "$FILES" | wc -l | tr -d ' ') changed files (${#FIELDS[@]} fields checked, ${#VOCAB[@]} literals checked)"

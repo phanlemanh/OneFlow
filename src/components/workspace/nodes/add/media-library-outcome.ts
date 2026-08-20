@@ -1,3 +1,4 @@
+import { MEDIA_LIBRARY_ERROR_CODES } from "@/lib/media-library/errors";
 import type { MediaCard } from "@/lib/media-library/types";
 
 /**
@@ -90,19 +91,18 @@ export function codeForStatus(status: number): string {
     return STATUS_TO_CODE[status] ?? "UPSTREAM_ERROR";
 }
 
-/** The failure codes the boundary can produce, as i18n sub-keys. */
-const FAILURE_KEYS = new Set([
-    "AUTH_REJECTED",
-    "MISSING_SCOPE",
-    "BAD_REQUEST",
-    "NOT_FOUND",
-    "NOT_IMPLEMENTED",
-    "VERSION_MISMATCH",
-    "BAD_RESPONSE",
-    "NETWORK_ERROR",
-    "UPSTREAM_ERROR",
-    "LOCAL_FAILURE",
-]);
+/**
+ * The failure codes the boundary can produce, as i18n sub-keys — DERIVED from
+ * the taxonomy rather than copied out of it. The copy drifted twice: it was
+ * still listing eight codes after two more were added, and nothing went red
+ * because the tests kept their own copy of the same stale list.
+ *
+ * MISSING_CONFIG is the one code excluded: it has its own outcome kind and its
+ * own panel, so it never resolves to a `failure.*` sentence.
+ */
+const FAILURE_KEYS: ReadonlySet<string> = new Set(
+    MEDIA_LIBRARY_ERROR_CODES.filter((code) => code !== "MISSING_CONFIG"),
+);
 
 /**
  * Which translated sentence a failure code maps to.

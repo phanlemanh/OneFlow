@@ -49,7 +49,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_no_boot_dependency
     paths: ["src/lib/media-library/**", "src/app/**", "src/components/workspace/**"]
-    expected: "exit 0; quét đồ thị import và khẳng định module src/lib/media-library/** CHỈ được nhập bởi hai route của chính nó và file node — không layout, không page, không instrumentation, không provider toàn cục. RĂNG: chạy lại trên fixture có thêm một dòng import từ src/app/workspace/page.tsx thì guard PHẢI exit khác 0 và nêu đúng đường dẫn vi phạm; một guard chỉ grep tên package sẽ xanh trên fixture đó"
+    expected: "exit 0; quét đồ thị import THẬT (parse AST, phân giải specifier thành ĐƯỜNG DẪN nên import tương đối `../../lib/media-library/...` bị bắt y như alias `@/`; allow-list là danh sách file CHÍNH XÁC chứ không phải tiền tố tên file tự miễn trừ) và khẳng định module src/lib/media-library/** CHỈ được nhập bởi các file đã khai — không layout, không page, không instrumentation, không provider toàn cục. RĂNG: chạy lại trên fixture có thêm một dòng import từ src/app/workspace/page.tsx thì guard PHẢI exit khác 0 và nêu đúng đường dẫn vi phạm; một guard chỉ grep tên package sẽ xanh trên fixture đó"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E4
@@ -133,7 +133,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_no_domain_vocab
     paths: ["src/**"]
-    expected: "exit 0; PHẠM VI QUÉT SUY TỪ CỬA SỔ DIFF merge-base(origin/main,HEAD)..HEAD — mọi file thêm hoặc sửa dưới src/ — chứ KHÔNG từ một danh sách tên file viết tay (một danh sách tay không bao giờ chứa file mà impl chưa đặt tên); guard khẳng định cửa sổ KHÔNG RỖNG trước, vì cửa sổ rỗng làm mọi lời khai vắng-mặt thành vô nghĩa. Trong phạm vi đó, đỏ khi thấy: (a) một trong 18 chuỗi từ vựng lĩnh vực (noi-that, ngoai-canh, flycam, tien-ich, cong-truong, duong-pho, du-an, phan-khu, cung-truc, cung-layout, cung-tang, cung-toa, dung-can, render-3d, scale-model, real-model, full-noi-that, co-ban); (b) MA TRẬN 8 TRƯỜNG — khai báo union đóng cho bất kỳ trường nào trong provenance, scene_kind, entity.kind, entity.specificity, energy, interior_state, license_label, slot_role (số assert bằng số trường). RĂNG: chạy lại trên bản sao có cắm scene_kind === 'noi-that' vào một file MỚI chưa từng có tên trong bất kỳ danh sách nào của hồ sơ này, guard PHẢI exit khác 0 và in đúng đường dẫn + số dòng; một guard neo vào danh sách tay sẽ xanh trên fixture đó và đó chính là lỗ hổng bị bịt"
+    expected: "exit 0; PHẠM VI QUÉT SUY TỪ CỬA SỔ DIFF merge-base(origin/main,HEAD)..HEAD — mọi file thêm hoặc sửa dưới src/ — chứ KHÔNG từ một danh sách tên file viết tay (một danh sách tay không bao giờ chứa file mà impl chưa đặt tên); guard khẳng định cửa sổ KHÔNG RỖNG trước, vì cửa sổ rỗng làm mọi lời khai vắng-mặt thành vô nghĩa. Trong phạm vi đó, đỏ khi thấy: (a) một trong 18 chuỗi từ vựng lĩnh vực (noi-that, ngoai-canh, flycam, tien-ich, cong-truong, duong-pho, du-an, phan-khu, cung-truc, cung-layout, cung-tang, cung-toa, dung-can, render-3d, scale-model, real-model, full-noi-that, co-ban); (b) MA TRẬN 8 TRƯỜNG — khai báo union đóng cho bất kỳ trường nào trong provenance, scene_kind, entity.kind, entity.specificity, energy, interior_state, license_label, slot_role (một lượt grep RIÊNG cho từng trường và từng literal, không dùng alternation gộp; con số in ra suy từ ${#FIELDS[@]}/${#VOCAB[@]} chứ không viết cứng; phép kiểm union khớp CẢ nháy đơn lẫn nháy kép). RĂNG: chạy lại trên bản sao có cắm scene_kind === 'noi-that' vào một file MỚI chưa từng có tên trong bất kỳ danh sách nào của hồ sơ này, guard PHẢI exit khác 0 và in đúng đường dẫn + số dòng; một guard neo vào danh sách tay sẽ xanh trên fixture đó và đó chính là lỗ hổng bị bịt"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E13
@@ -159,7 +159,7 @@ evals:
     executor: test
     cmd: config:executors.test.unit_aml_import
     paths: ["src/lib/media-library/import.server.ts", "src/lib/file/file-utils.ts", "src/lib/file/storage.server.ts"]
-    expected: "exit 0; trên nonce riêng: adapter gọi GET /v1/assets/:id (máy chủ giả ghi nhận), tải bytes từ urls.original, và file_key sinh ra ĐỌC LẠI ĐƯỢC từ kho với sha256 TRÙNG sha256 của bytes máy chủ giả phát ra. NỬA ĐÀN ÁP — nửa gánh việc: khi urls.original trả 404 thì KHÔNG file_key nào được tạo và KHÔNG file rỗng nào bị bỏ lại trong kho; một cài đặt lưu trước-kiểm-sau sẽ đỏ đúng ở đây"
+    expected: "exit 0; trên nonce riêng: adapter gọi GET /v1/assets/:id (máy chủ giả ghi nhận), tải bytes từ urls.original, và file_key sinh ra ĐỌC LẠI ĐƯỢC từ kho với sha256 TRÙNG sha256 của bytes máy chủ giả phát ra — round-trip THẬT trong import-roundtrip.server.test.ts: TONGFLOW_DATA_DIR trỏ thư mục tạm, driver production ghi file thật, readUploadFileByFileKey đọc lại bằng đường code KHÁC. GIỚI HẠN đã khai: chỉ phủ driver đĩa cục bộ; driver của cloud shell (@ext/storage-driver) không được phủ ở đây. NỬA ĐÀN ÁP — nửa gánh việc: khi urls.original trả 404 thì KHÔNG file_key nào được tạo và KHÔNG file rỗng nào bị bỏ lại trong kho; một cài đặt lưu trước-kiểm-sau sẽ đỏ đúng ở đây"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   - id: E16
@@ -177,7 +177,7 @@ evals:
     executor: test
     cmd: config:executors.test.unit_aml_import
     paths: ["src/lib/media-library/import.server.ts"]
-    expected: "exit 0; urls.original dạng http:// (khi cấu hình KHÔNG phải localhost) bị từ chối kèm lý do gọi đúng tên; phản hồi vượt trần kích thước bị cắt và báo; phản hồi treo quá hạn chờ bị huỷ. ĐIỀU KHIỂN DƯƠNG bắt buộc trong cùng test: một URL https dưới trần PHẢI thành công — nếu không, một hàm từ chối tất cả cũng qua được cả ba vế"
+    expected: "exit 0; urls.original dạng http:// (khi cấu hình KHÔNG phải localhost) bị từ chối kèm lý do gọi đúng tên; phản hồi vượt trần kích thước bị cắt và báo; phản hồi treo quá hạn chờ bị huỷ — ĐO THẬT: stub giữ body mở (hangBytes), MEDIA_LIBRARY_DOWNLOAD_TIMEOUT_MS hạ deadline xuống 300ms, assert kết thúc dưới 10s và kho KHÔNG còn file nào; nửa đàn áp: cùng deadline đó một body hoàn tất vẫn phải nạp được. PHẠM VI: AC-10 đòi CẮT, không đòi gọi đúng tên nguyên nhân — việc treo hiện báo LOCAL_FAILURE là lỗi đã xác nhận, triage xếp NGOÀI hợp đồng, để Cổng 2. ĐIỀU KHIỂN DƯƠNG bắt buộc trong cùng test: một URL https dưới trần PHẢI thành công — nếu không, một hàm từ chối tất cả cũng qua được cả ba vế"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   - id: E18
@@ -185,7 +185,7 @@ evals:
     executor: test
     cmd: config:executors.test.unit_aml_ext
     paths: ["src/lib/media-library/import.server.ts", "src/app/api/uploads/[...path]/route.ts"]
-    expected: "exit 0; ba bậc suy đuôi chạy đúng thứ tự: URL có '.webm' → key đuôi webm; URL không đuôi + Content-Type 'video/mp4' → mp4; không đuôi + Content-Type vô nghĩa → mp4 mặc định. Và với key sinh ra, bảng Content-Type của /api/uploads phải trả kiểu phát được. NỬA ĐÀN ÁP — nửa gánh việc: URL '.webm' KHÔNG được thành .mp4; một cài đặt luôn gán mp4 qua được hai bậc sau và hỏng đúng bậc đầu"
+    expected: "exit 0; ba bậc suy đuôi chạy đúng thứ tự: URL có '.webm' → key đuôi webm; URL không đuôi + Content-Type 'video/mp4' → mp4; không đuôi + Content-Type vô nghĩa → mp4 mặc định. Và với key sinh ra, bảng Content-Type của /api/uploads phải trả kiểu phát được — ĐO THẬT trong extension-serving.server.test.ts: lưu bytes qua saveFile rồi GỌI handler GET của route uploads và đọc header Content-Type; nửa đàn áp: một đuôi mà thang từ chối (.svg) không được phục vụ như video, và key chưa từng ghi phải 404. NỬA ĐÀN ÁP — nửa gánh việc: URL '.webm' KHÔNG được thành .mp4; một cài đặt luôn gán mp4 qua được hai bậc sau và hỏng đúng bậc đầu"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   # ---------- E. Giao cho canvas ----------
@@ -195,7 +195,7 @@ evals:
     executor: test
     cmd: config:executors.test.unit_aml_wiring
     paths: ["src/lib/workflow/flow-connection-shared.ts", "src/lib/workflow/exporter.ts", "src/components/workspace/types.tsx"]
-    expected: "exit 0; ĐỐI XỨNG HAI BẢN SAO: test đọc CẢ ADD_NODE_OUTPUT_TYPE (flow-connection-shared.ts) LẪN typeMap trong exporter.getAddNodeOutputType và khẳng định hai bảng khớp nhau trên MỌI khoá, và addMediaLibraryNode->videoNode có trong cả hai. Rồi: cạnh addMediaLibraryNode->videoNode qua được validator, và exporter xuất ra node dữ liệu mang fileKeys. NỬA ĐÀN ÁP: sửa chỉ MỘT trong hai bảng phải làm test đỏ — hai bản sao lệch nhau là lỗi đã có sẵn trong repo, đây là cái bẫy được đặt"
+    expected: "exit 0; ĐỐI XỨNG HAI BẢN SAO: test đọc CẢ ADD_NODE_OUTPUT_TYPE (flow-connection-shared.ts) LẪN typeMap trong exporter.getAddNodeOutputType và khẳng định hai bảng khớp nhau trên MỌI khoá, và addMediaLibraryNode->videoNode có trong cả hai. Rồi: cạnh addMediaLibraryNode->videoNode qua được validator (gọi THẬT getEffectiveOutputType, kèm nửa đàn áp: addImageNode/addTextNode phải ra modality của CHÚNG, nếu không thì một hàm luôn trả videoNode cũng qua), và exporter xuất ra node dữ liệu mang fileKeys (gọi THẬT exportWorkflow rồi assert dataNodes không rỗng TRƯỚC khi soi nội dung — exporter bỏ qua node không phân giải được và vẫn trả về một workflow rỗng trông hợp lệ). GIỚI HẠN: vế đối xứng hai bảng vẫn đọc VĂN BẢN NGUỒN của exporter vì getAddNodeOutputType là private. NỬA ĐÀN ÁP: sửa chỉ MỘT trong hai bảng phải làm test đỏ — hai bản sao lệch nhau là lỗi đã có sẵn trong repo, đây là cái bẫy được đặt"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   - id: E20
@@ -242,7 +242,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_a11y_proto
     paths: ["src/components/workspace/nodes/add/add-media-library-node.tsx", "src/components/workspace/nodes/add/media-card-list.tsx", "src/components/proto/**", "src/app/globals.css"]
-    expected: "exit 0 trên TÁM trạng thái x nền sáng/tối; guard assert SỐ CẶP (trạng thái, nền) chạm được ĐÚNG BẰNG 16 trước khi kết luận sạch — tới được 4/16 mà vẫn exit 0 là đúng lỗ hổng bị bịt. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
+    expected: "exit 0 trên CHÍN trạng thái x nền sáng/tối (thêm 'imported' — xác nhận hậu-nạp mà AC-9 đòi và proto trước đây không có); guard đọc data-proto-state TỪNG trang và assert đủ 18 cặp VẼ ĐÚNG trạng thái được hỏi, không chỉ đếm URL tới được — proto giờ trả 'unknown:<tên>' cho state lạ thay vì lặng lẽ rơi về idle, nên gõ sai một tên case sẽ ĐỎ thay vì quét idle 18 lần. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- Sinh sau lượt phản biện context sạch (gap-probe P0 + 3 P1) ----------
@@ -260,7 +260,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_no_dormant_fetch
     paths: ["src/**"]
-    expected: "exit 0; downloadAndSave() trong src/lib/file/file-utils.ts vẫn có ĐÚNG 0 caller trong toàn cây sau thay đổi (đường tải không kiểm scheme/host/kích thước phải ở nguyên trạng thái chết). Guard đếm caller bằng cách phân giải định danh, và in ra danh sách rỗng đó chứ không chỉ nói 'sạch'. RĂNG: chạy lại trên bản sao có cắm đúng MỘT caller thì guard PHẢI exit khác 0 và nêu đường dẫn + số dòng của caller đó"
+    expected: "exit 0; downloadAndSave() trong src/lib/file/file-utils.ts vẫn có ĐÚNG 0 caller trong toàn cây sau thay đổi (đường tải không kiểm scheme/host/kích thước phải ở nguyên trạng thái chết). Guard đếm caller bằng cách phân giải định danh THẬT: parse AST bằng TypeScript, khớp import theo ĐƯỜNG DẪN đã phân giải rồi tìm call site của tên CỤC BỘ mà import đó gắn — nên `{ downloadAndSave as dl }` rồi `dl(u)`, `ns.downloadAndSave(u)`, và file .mjs/.cjs/.js đều bị bắt (cả ba đều đi lọt bản grep cũ). In ra danh sách rỗng đó chứ không chỉ nói 'sạch'. GIỚI HẠN: không phải type-checker — một lời gọi qua giá trị truyền lòng vòng lúc chạy thì không thấy. RĂNG: chạy lại trên bản sao có cắm đúng MỘT caller thì guard PHẢI exit khác 0 và nêu đường dẫn + số dòng của caller đó"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E28

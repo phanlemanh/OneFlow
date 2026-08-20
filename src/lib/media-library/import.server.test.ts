@@ -57,8 +57,19 @@ async function stubServing(original: string, opts: { bytes?: Buffer } = {}) {
     return stub;
 }
 
-describe("importAsset — bytes reach the store intact (E15)", () => {
-    it("calls GET /v1/assets/:id, downloads urls.original, and saves those exact bytes", async () => {
+/**
+ * NOTE ON SCOPE — this block used to be titled "bytes reach the store intact"
+ * and stood in for AC-9's round trip. It cannot: `@/lib/file/file-utils` is
+ * mocked at the top of this file, so the sha256 below is taken from the buffer
+ * handed TO the stub, not from anything a store gave back. What it does prove
+ * is the step BEFORE that — the right endpoint is called and the bytes arriving
+ * off the wire are the bytes passed onward, unaltered.
+ *
+ * The actual write-then-read lives in `import-roundtrip.server.test.ts`, which
+ * mocks nothing below the store.
+ */
+describe("importAsset — the bytes handed to the store are the bytes downloaded", () => {
+    it("calls GET /v1/assets/:id and passes urls.original's bytes through unaltered", async () => {
         // The stub spells its own signed URL: the port only exists after listen.
         stub = await startStub({
             bytes: BYTES,

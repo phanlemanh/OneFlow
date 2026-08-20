@@ -9,24 +9,37 @@
  * There is deliberately no RATE_LIMITED arm: the service has no rate limiting
  * anywhere, so a 429 branch would be dead code impersonating care.
  */
-export type MediaLibraryErrorCode =
-    | "MISSING_CONFIG"
-    | "AUTH_REJECTED"
-    | "MISSING_SCOPE"
-    | "BAD_REQUEST"
-    | "NOT_FOUND"
-    | "UPSTREAM_ERROR"
-    | "NOT_IMPLEMENTED"
-    | "BAD_RESPONSE"
-    | "NETWORK_ERROR"
-    | "VERSION_MISMATCH"
-    /**
-     * OneFlow's own side failed — the file store, most likely. Separate from
-     * NETWORK_ERROR on purpose: a full disk reported as "could not reach the
-     * library" sends the user to check a key or a URL that were never the
-     * problem.
-     */
-    | "LOCAL_FAILURE";
+/**
+ * The taxonomy as a VALUE, not just a type.
+ *
+ * A test that wants to say "every failure code gets its own message" has to be
+ * able to enumerate them; when the only artifact was a type, the tests wrote
+ * their own literal list instead — and those lists went stale twice without a
+ * single assertion going red (they still said eight after VERSION_MISMATCH and
+ * LOCAL_FAILURE joined). Deriving the type from this array means a code added
+ * here reaches every test that iterates it, and a list that drifts stops
+ * compiling rather than quietly measuring less.
+ *
+ * LOCAL_FAILURE is OneFlow's own side failing — the file store, most likely.
+ * Separate from NETWORK_ERROR on purpose: a full disk reported as "could not
+ * reach the library" sends the user to check a key or a URL that were never the
+ * problem.
+ */
+export const MEDIA_LIBRARY_ERROR_CODES = [
+    "MISSING_CONFIG",
+    "AUTH_REJECTED",
+    "MISSING_SCOPE",
+    "BAD_REQUEST",
+    "NOT_FOUND",
+    "UPSTREAM_ERROR",
+    "NOT_IMPLEMENTED",
+    "BAD_RESPONSE",
+    "NETWORK_ERROR",
+    "VERSION_MISMATCH",
+    "LOCAL_FAILURE",
+] as const;
+
+export type MediaLibraryErrorCode = (typeof MEDIA_LIBRARY_ERROR_CODES)[number];
 
 export interface MediaLibraryFailure {
     code: MediaLibraryErrorCode;
