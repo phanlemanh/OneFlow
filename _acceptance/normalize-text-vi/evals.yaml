@@ -217,7 +217,7 @@ evals:
     paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/"]
     steps:
       - "Kiểm cổng 3000 TRƯỚC: nếu đã có tiến trình lạ nghe ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"
-      - "Khởi động dev server theo config dev_server.start (pnpm dev)"
+      - "Khởi động dev server với thư mục build RIÊNG: NEXT_DIST_DIR=.next-dev pnpm dev. BẮT BUỘC — bộ kiểm của cùng vòng này có bước build ghi vào .next, và next build với next dev dùng chung thư mục đó với hai layout không tương thích: server mất chunk giữa chừng rồi trả 500 ở mọi route. Đã giết 9 lượt chụp của làn kia trước khi tìm ra"
       - "KIỂM XUẤT XỨ, bắt buộc trước mọi lượt chụp: curl -s {url}/proto/normalize-text-vi phải chứa chuỗi 'Đọc số thành chữ'. Không thấy → DỪNG và báo là chụp nhầm cây hoặc trang hỏng, KHÔNG ghi là đỏ tiêu chí"
       - "Mở {url}/proto/normalize-text-vi (node THẬT trong canvas React Flow thật, chỉ dữ liệu là fixture) → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png"
       - "Mở {url}/proto/normalize-text-vi?state=wired → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-2-wired.png"
