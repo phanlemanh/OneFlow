@@ -1,14 +1,30 @@
-# E6 network dump — http://localhost:3000/proto/add-media-library?state=results
-# captured via mcp__Claude_Browser__read_network_requests / read_console_messages
+# E6 network dump — re-verified 2026-08-20
+# Steps: GET /proto/add-media-library?state=searching ; GET /proto/add-media-library?state=results
+# Captured via mcp__Claude_Browser__read_network_requests / read_console_messages on a
+# reused tab (tab-11) that already carried history from earlier eval runs in this session
+# (visits to /workspace, /proto/add-media-library?state=error, hot-update chunks, etc.).
+# Only the entries at/after this eval's own two navigations are in scope for AC-3.
 
-## Network requests
-[38453.6] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787193047949 -> 200 OK
-[38453.7] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787193047949 -> 200 OK
-[38453.8] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-[38453.9] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-[38453.10] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+## This eval's own navigations (document loads)
+[7F69567900571265C52867643EE37CCF] GET http://localhost:3000/proto/add-media-library?state=searching -> 200 OK
+[5AFEDD7FACFF9BA4105EADE4AA40002F] GET http://localhost:3000/proto/add-media-library?state=results -> 200 OK
+Supporting static assets for both (fonts .woff2, /_next/static/css/*, /_next/static/chunks/*) all -> 200 OK.
+No XHR/fetch calls issued by the proto itself (fixtures only, no network-backed search per
+component doc comment in add-media-library-proto.tsx).
 
-All requests are same-origin static Next.js asset chunks (app-origin per dev_server.url http://localhost:3000). No XHR/fetch calls observed (proto uses hardcoded CARDS fixture, no network-backed search). All 200 OK.
+## Pre-existing entry from earlier history on this reused tab (NOT part of this eval's steps)
+[38453.1143] GET http://localhost:3000/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]
+This occurred before this eval's two navigations (visible earlier in the same request list,
+timestamp index 1143 vs this eval's 1215/1251) — leftover from a prior eval's /workspace visit
+in this shared tab, superseded by a retry that succeeded (see the following 200 OK immediately
+after). Not caused by, or relevant to, the add-media-library?state=searching/results steps.
 
 ## Console messages
-No console logs / no errors.
+No errors. Only informational/dev logs (Fast Refresh rebuilds, React DevTools notice,
+task-store/workflow-recovery debug logs from unrelated workspace nodes still mounted
+in this reused tab's history).
+
+## Verdict
+FAIL-eligible scope (app-origin http://localhost:3000, per dev_server.url; no api_base configured):
+this eval's own two document loads + their static assets: all 200 OK, no XHR/fetch failures.
+networkObserved = clean.

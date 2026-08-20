@@ -1,10 +1,12 @@
 "use client";
 
 import { Library } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MediaCardList } from "@/components/workspace/nodes/add/media-card-list";
 import { MediaLibraryConfigPanel } from "@/components/workspace/nodes/add/media-library-config-panel";
+import { failureMessageKey } from "@/components/workspace/nodes/add/media-library-outcome";
 import type { MediaCard } from "@/lib/media-library/types";
 
 /**
@@ -136,6 +138,18 @@ function SearchRow({ busy = false }: { busy?: boolean }) {
     );
 }
 
+function FailureFrame({ state, code }: { state: string; code: string }) {
+    const t = useTranslations("Workspace.nodes.addMediaLibrary");
+    return (
+        <Frame state={state}>
+            <SearchRow />
+            <p className="text-sm text-destructive">
+                {t(failureMessageKey(code))}
+            </p>
+        </Frame>
+    );
+}
+
 export function AddMediaLibraryProto({ state }: { state: string }) {
     switch (state) {
         case "missing-config":
@@ -199,12 +213,26 @@ export function AddMediaLibraryProto({ state }: { state: string }) {
                     </p>
                 </Frame>
             );
+        /**
+         * The failure frames resolve their sentence the way the node does —
+         * `failureMessageKey(code)` then `t()` — instead of printing a constant
+         * typed into this file.
+         *
+         * A hand-written constant made the AC-13 frame prove nothing: it showed
+         * the AUTH_REJECTED sentence under the name "error", so the version
+         * mismatch path was never rendered, and the capture stayed green even if
+         * VERSION_MISMATCH had no translation at all or could never reach the
+         * screen. Same defect the previous round fixed for E16, still standing
+         * here.
+         */
         case "error":
+            return <FailureFrame state="error" code="AUTH_REJECTED" />;
+        case "version-mismatch":
             return (
-                <Frame state="error">
-                    <SearchRow />
-                    <p className="text-sm text-destructive">{COPY.error}</p>
-                </Frame>
+                <FailureFrame
+                    state="version-mismatch"
+                    code="VERSION_MISMATCH"
+                />
             );
         /**
          * The stage AC-9 promises and this prototype did not have.

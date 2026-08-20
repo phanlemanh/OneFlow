@@ -222,9 +222,9 @@ evals:
     criterion: AC-13
     executor: ui-check
     steps:
-      - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E22-step1.png"
-      - "Assert: màn hình lỗi gọi đúng tên nguyên nhân và nêu tên biến liên quan, KHÔNG hiện danh sách thẻ nào"
-    expected: "trạng thái từ-chối-có-tên không render dữ liệu đoán theo hình dạng cũ; E21 gánh nửa server chứng minh chính lệch phiên bản bị chặn"
+      - "Mở {url}/proto/add-media-library?state=version-mismatch → chụp _acceptance/add-media-library/evidence/E22-step1.png"
+      - "Assert: màn hình LỆCH PHIÊN BẢN hiện câu của chính mã VERSION_MISMATCH (khác hẳn câu khoá-bị-từ-chối của AC-6), KHÔNG hiện danh sách thẻ nào"
+    expected: "trạng thái từ-chối-có-tên không render dữ liệu đoán theo hình dạng cũ. Khung này đi qua ĐƯỜNG THẬT: proto gọi failureMessageKey(code) rồi t() y như node, nên thiếu bản dịch VERSION_MISMATCH sẽ ĐỎ. Round 3 FAIL đúng ở đây: proto render một hằng chuỗi viết cứng mang câu AUTH_REJECTED dưới cái tên 'error', nên đường lệch-phiên-bản chưa từng được vẽ. E21 gánh nửa server"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   # ---------- G. Ranh giới hạng + sàn giao diện ----------
@@ -243,7 +243,7 @@ evals:
     executor: script
     cmd: config:executors.script.aml_a11y_proto
     paths: ["src/components/workspace/nodes/add/add-media-library-node.tsx", "src/components/workspace/nodes/add/media-card-list.tsx", "src/components/proto/**", "src/app/globals.css"]
-    expected: "exit 0 trên CHÍN trạng thái x nền sáng/tối (thêm 'imported' — xác nhận hậu-nạp mà AC-9 đòi và proto trước đây không có); guard đọc data-proto-state TỪNG trang và assert đủ 18 cặp VẼ ĐÚNG trạng thái được hỏi, không chỉ đếm URL tới được — proto giờ trả 'unknown:<tên>' cho state lạ thay vì lặng lẽ rơi về idle, nên gõ sai một tên case sẽ ĐỎ thay vì quét idle 18 lần. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
+    expected: "exit 0 trên MƯỜI trạng thái x nền sáng/tối (thêm 'imported' cho AC-9 và 'version-mismatch' cho AC-13); guard đọc TỪNG trang và assert CẢ HAI TRỤC: data-proto-state khớp state được hỏi, VÀ lớp bọc lấy từ tham số theme có mặt đúng chỗ (dark có, sáng không), rồi đếm 10 sáng + 10 tối. Round 3 FAIL đúng ở trục thứ hai: nửa nền tối chỉ được khẳng định bằng THAM SỐ URL, nên nếu lớp bọc theme hỏng thì 10 URL tối thành 10 lượt quét lại trang sáng mà guard vẫn tuyên đủ — proto giờ trả 'unknown:<tên>' cho state lạ thay vì lặng lẽ rơi về idle, nên gõ sai một tên case sẽ ĐỎ thay vì quét idle 18 lần. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- Sinh sau lượt phản biện context sạch (gap-probe P0 + 3 P1) ----------

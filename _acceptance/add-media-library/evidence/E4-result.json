@@ -1,0 +1,25 @@
+{
+  "nodeCountBefore": 6,
+  "nodeCountAfter": 7,
+  "clickResult": {
+    "ok": true,
+    "count": 9,
+    "rect": {
+      "x": 548,
+      "y": 736,
+      "w": 40,
+      "h": 40
+    }
+  },
+  "toastAlerts": [],
+  "errorBannerText": [],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failEligible": [
+    {
+      "url": "http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt",
+      "kind": "requestfailed",
+      "detail": "net::ERR_ABORTED"
+    }
+  ]
+}

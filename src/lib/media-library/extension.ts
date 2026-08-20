@@ -42,8 +42,19 @@ export function extensionFor(url: string, contentType: string | null): string {
     if (fromPath && ALLOWED_EXT.has(fromPath)) return fromPath;
 
     // Rung 2: the byte response's own declared type.
+    //
+    // `Object.hasOwn`, not a truthiness check on the index. `MIME_TO_EXT` is a
+    // plain object literal, so an index lookup walks the PROTOTYPE CHAIN with a
+    // string taken straight from an upstream header: `content-type: constructor`
+    // returned the `Object` function and `content-type: __proto__` returned
+    // `Object.prototype`. Both truthy, neither a string — the value is typed
+    // `string` and is not one. It reaches `${nanoid()}.${ext}` in the storage
+    // driver and persists a file named `aH8xK2m9qP.function Object() { [native
+    // code] }`, whose key then goes into /api/uploads unencoded. Rung 1 is
+    // allow-listed and rung 3 is a constant; this was the only rung accepting an
+    // unfiltered value from the far side.
     const mime = (contentType ?? "").split(";")[0].trim().toLowerCase();
-    if (MIME_TO_EXT[mime]) return MIME_TO_EXT[mime];
+    if (Object.hasOwn(MIME_TO_EXT, mime)) return MIME_TO_EXT[mime];
 
     // Rung 3.
     return DEFAULT_EXT;

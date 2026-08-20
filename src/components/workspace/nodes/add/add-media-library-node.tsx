@@ -36,6 +36,49 @@ import {
  * what a server-side throw produces) was reported as a network problem with the
  * remote service. The status is the part that always exists; the body is a bonus.
  */
+/**
+ * Read a SUCCESSFUL search response without trusting its shape.
+ *
+ * `readFailure` closed this gap on the failing branch and the 2xx branch kept
+ * both halves of it. First, `await response.json()` sat inside a try whose only
+ * catch said "could not reach the library", so a 200 whose body will not parse —
+ * a dev-server or proxy interposing — was reported as a network problem with the
+ * remote service. Second, `body.cards as MediaCard[]` was an unchecked cast:
+ * `NextResponse.json` drops `undefined` keys, so a 200 carrying a valid
+ * `contracts_version` but no `cards` produced `cards: undefined`, and the very
+ * next render evaluated `outcome.cards.length` and threw inside React — taking
+ * the node down rather than showing the BAD_RESPONSE state the taxonomy already
+ * defines for exactly this.
+ *
+ * This is the narrow fix at the consumer. Validating the payload once at the
+ * boundary in `client.server.ts` is the better shape and is a confirmed
+ * out-of-contract finding; it goes to Gate 2 rather than being widened here.
+ */
+async function readResults(response: Response): Promise<Outcome> {
+    let body: unknown;
+    try {
+        body = await response.json();
+    } catch {
+        return {
+            kind: "failure",
+            code: "BAD_RESPONSE",
+            message: "",
+        };
+    }
+    const record = (body ?? {}) as Record<string, unknown>;
+    if (!Array.isArray(record.cards)) {
+        return { kind: "failure", code: "BAD_RESPONSE", message: "" };
+    }
+    return {
+        kind: "results",
+        cards: record.cards as MediaCard[],
+        candidates: Number(record.candidates ?? 0),
+        warnings: Array.isArray(record.warnings)
+            ? (record.warnings as string[])
+            : [],
+    };
+}
+
 async function readFailure(
     response: Response,
 ): Promise<{ code: string; message: string; missing: string[] }> {
@@ -92,13 +135,8 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 );
                 return;
             }
-            const body = await response.json();
-            setOutcome({
-                kind: "results",
-                cards: body.cards as MediaCard[],
-                candidates: Number(body.candidates ?? 0),
-                warnings: (body.warnings ?? []) as string[],
-            });
+            const results = await readResults(response);
+            setOutcome(results);
         } catch (error) {
             logger.error("[media-library] search failed:", error);
             setOutcome({

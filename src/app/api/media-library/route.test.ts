@@ -57,10 +57,21 @@ afterEach(() => {
  * injection point. Same shape as src/app/api/settings/env/route.test.ts.
  */
 describe("POST /api/media-library/import — the road, not the function (E26)", () => {
-    it("refuses a link-local signed URL and creates no file", async () => {
+    /**
+     * HTTPS on purpose, and the message is pinned to the HOST wording.
+     *
+     * The first version of this case used `http://169.254.169.254/...` — a URL
+     * that is wrong twice. `checkFetchTarget` tests the scheme BEFORE the host,
+     * so it refused on the scheme and never reached `isPrivateHost`, and the
+     * assertion `toMatch(/https|nội bộ/i)` went green on the word "https" from
+     * the SCHEME refusal. Deleting the private-host branch outright left this
+     * file entirely green — while E26 exists precisely to prove the route does
+     * not route around that branch. Only the host rule can refuse this URL.
+     */
+    it("refuses an https link-local signed URL, naming the HOST", async () => {
         globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
             if (String(input).includes("/v1/assets/")) {
-                return assetDetail("http://169.254.169.254/latest/meta-data/");
+                return assetDetail("https://169.254.169.254/latest/meta-data/");
             }
             throw new Error("the route must never fetch that URL");
         }) as unknown as typeof fetch;
@@ -70,7 +81,38 @@ describe("POST /api/media-library/import — the road, not the function (E26)", 
 
         expect(response.status).toBeGreaterThanOrEqual(400);
         const body = await response.json();
-        expect(String(body.message)).toMatch(/https|nội bộ/i);
+        // The host, verbatim — not an alternation that a scheme refusal also
+        // satisfies.
+        expect(String(body.message)).toContain("169.254.169.254");
+        expect(String(body.message)).toContain("nội bộ");
+        expect(saved.calls).toHaveLength(0);
+    });
+
+    /**
+     * The other private spellings the route must refuse, each reachable ONLY
+     * through the host rule because every one of them is https.
+     */
+    it.each([
+        [
+            "IPv4-mapped IPv6 loopback",
+            "https://[::ffff:127.0.0.1]/clip.mp4",
+            "::ffff:7f00:1",
+        ],
+        ["RFC1918", "https://10.0.0.5/clip.mp4", "10.0.0.5"],
+        ["CGNAT", "https://100.64.0.1/clip.mp4", "100.64.0.1"],
+    ])("refuses %s through the route", async (_label, url, hostInMessage) => {
+        globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
+            if (String(input).includes("/v1/assets/")) return assetDetail(url);
+            throw new Error("the route must never fetch that URL");
+        }) as unknown as typeof fetch;
+
+        const { POST } = await import("./import/route");
+        const response = await POST(importRequest());
+
+        expect(response.status).toBeGreaterThanOrEqual(400);
+        expect(String((await response.json()).message)).toContain(
+            hostInMessage,
+        );
         expect(saved.calls).toHaveLength(0);
     });
 
@@ -97,7 +139,8 @@ describe("POST /api/media-library/import — the road, not the function (E26)", 
         expect(saved.calls).toEqual(["mp4"]);
     });
 
-    it("refuses a plain http signed URL on a public host", async () => {
+    /** The scheme rule, isolated: a PUBLIC host, so only the scheme can refuse. */
+    it("refuses a plain http signed URL on a public host, naming the scheme", async () => {
         globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
             if (String(input).includes("/v1/assets/")) {
                 return assetDetail("http://cdn.example/clip.mp4");
@@ -109,6 +152,9 @@ describe("POST /api/media-library/import — the road, not the function (E26)", 
         const response = await POST(importRequest());
 
         expect(response.status).toBeGreaterThanOrEqual(400);
+        // Pinned too: this case must fail on the SCHEME, so the two refusal
+        // cases in this file prove two different rules rather than one twice.
+        expect(String((await response.json()).message)).toContain("https");
         expect(saved.calls).toHaveLength(0);
     });
 });

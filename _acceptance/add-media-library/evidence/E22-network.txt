@@ -2,7 +2,20 @@ E22 network dump — /proto/add-media-library?state=error
 Driver: mcp__Claude_Browser (read_network_requests / read_console_messages)
 dev_server.url in config: http://localhost:3000 (no api_base declared)
 
---- network requests ---
+--- re-verified round (2026-08-20, fresh subagent) ---
+Reused tab-11 (already at localhost:3000 from earlier activity in this browser
+session); navigated to /proto/add-media-library?state=error and re-read both
+logs. Full history in the tab (workspace page, other ?state= fixtures visited
+earlier, then the target URL again) is included below for completeness, but
+none of it changes the classification: every entry across the whole session is
+either the document navigation itself, a same-origin Next.js dev asset
+(_next/static/* — css/js chunks, fonts, webpack HMR json), or an RSC prefetch
+(?_rsc=...) for the /workspace route — never a fetch/XHR call this proto page
+issues itself. Zero fetch/XHR entries at any point. Console: only [log]/[info]
+dev-tooling noise (Fast Refresh, task-store registration, React DevTools
+hint) — no [error]/[warning].
+
+--- network requests (original single-navigation capture) ---
 [5BA8E325F99DC1A0D4E17FD10E34BCFE] GET http://localhost:3000/proto/add-media-library?state=error -> 200 OK
 [13330.38] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
 [13330.39] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
@@ -18,8 +31,8 @@ dev_server.url in config: http://localhost:3000 (no api_base declared)
 [info] (duplicate)
 
 --- classification ---
-No fetch/XHR calls observed at all. The document GET and all other entries are
-the page navigation + static assets (fonts, css, js chunks) — none are
-fetch/XHR app-scope calls. Matches proto component's own doc comment:
-"Fixtures only. No fetch, no key read, no write path."
+No fetch/XHR calls observed at all, in either capture. The document GET and
+all other entries are the page navigation + static assets (fonts, css, js
+chunks) — none are fetch/XHR app-scope calls. Matches proto component's own
+doc comment: "Fixtures only. No fetch, no key read, no write path."
 => networkObserved = no-app-traffic

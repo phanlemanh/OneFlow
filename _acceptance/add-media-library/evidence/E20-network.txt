@@ -1,3 +1,59 @@
+E20 network truth (RE-RUN 3, independent verifier subagent, 2026-08-20 ~10:45
+local — Claude_Browser tabId tab-11 (interactive, manual click) PLUS a
+second, separate one-off puppeteer-core script (own Chrome process, own
+page, http://localhost:3000/workspace) for a scripted/repeatable capture)
+
+Dev server: already running before this round started (pid 16613, confirmed
+via `lsof -nP -iTCP:3000 -sTCP:LISTEN`) — reused, not started or stopped by
+this verifier, consistent with RE-RUN 2's note.
+
+Interactive driver (Claude_Browser tab-11): clicked the bottom-toolbar
+library icon, then (mid-session) the tab briefly rendered a `data-proto-state
+="error"` prototype fallback page (readonly input, hardcoded
+MEDIA_LIBRARY_API_KEY error text, zero react-flow DOM) instead of the real
+canvas -- almost certainly a peer session's Next.js HMR full-reload or route
+change bleeding into this shared tab (see MEMORY: "Hai phiên một cây"). This
+frame was NOT used as evidence. Re-navigating to /workspace restored the
+real react-flow canvas; the add-node click was repeated there and confirmed
+via read_page (new node group with heading "Load from library" + Search
+button appeared, node count 3 -> 4 pre-existing-demo "Load from library"
+nodes) and via zoom screenshot (visible dot-grid canvas background, node
+title "Load from library", one small handle dot on the node's right edge).
+
+Scripted driver (separate puppeteer-core process, does not share state with
+tab-11): navigate /workspace -> networkidle2 -> click svg.lucide-library
+toolbar button -> node count 6 -> 7. DOM-level handle check on the new node:
+  handles: [{ class: "react-flow__handle react-flow__handle-right nodrag
+  nopan source connectable connectableend", posClass: "react-flow__handle-
+  right", source: true }], handleCount: 1, relLeft 547.2/552 (flush against
+  the node's right edge). headingText: "Load from library". Exactly ONE
+  handle, positioned right, role=source -- matches AC-12 step 2 literally.
+  Screenshot (clipped to the node + 60px padding) saved to
+  evidence/E20-step1.png (real canvas: visible dot-grid background,
+  overlapping the pre-existing "Split Video" demo node -- not a proto page).
+  consoleErrors: [], pageErrors: [], failedRequests (incl. any 5xx response):
+  [] for the whole navigate+click sequence.
+
+No search text was entered and Search was not clicked in either driver, so
+neither run fires the media-library backend fetch -- only client-side node
+instantiation is exercised, matching this eval's step scope (E20 only adds
+the node and asserts its render; the Search/backend call is covered by other
+evals, e.g. E9/E11/E16/E21).
+
+networkObserved verdict (this round): no-app-traffic for the scripted
+driver (zero XHR/fetch beyond the initial page load -- no search submitted,
+nothing to observe beyond "nothing failed"); the interactive driver's one
+proto-page detour produced no network errors either (it is a client-side
+render swap, not a failed request) and self-corrected on re-navigation. No
+4xx/5xx, no connection-error/timeout, in either driver. This is consistent
+with, and does not contradict, RE-RUN 2's independent "clean" verdict below
+(that round additionally observed real app-scope XHR traffic because its
+canvas already had pending example-asset fetches in flight; this round's
+narrower scripted driver simply issued no such calls).
+
+================================================================================
+--- Prior attempt (RE-RUN 2) kept for audit trail ---
+================================================================================
 E20 network truth (RE-RUN 2, this verifier round — Claude_Browser tabId tab-11 +
 a one-off puppeteer-core capture script, http://localhost:3000/workspace)
 

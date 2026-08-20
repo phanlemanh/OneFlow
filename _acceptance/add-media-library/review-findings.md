@@ -1,83 +1,62 @@
 ## Trong hợp đồng
 
-- **Body-parse catch in the REST client swallows the error and mislabels network truncation as BAD_RESPONSE**
-  file: `src/lib/media-library/client.server.ts`:65
+- **extensionFor() resolves Object.prototype members from the mime table, producing a non-string extension**
+  file: `src/lib/media-library/extension.ts`:46
   severity: medium
-  AC: AC-6
-  `try { body = await response.json(); } catch { parsed = false; body = {}; }` discards the error entirely — no logger call, unlike the fetch catch three lines above. `response.json()` rejects not only for malformed JSON but also for a connection reset mid-body and for the 15s `AbortSignal.timeout` firing after headers arrive. In those cases response.ok is true, so line 78 returns `BAD_RESPONSE` — "media-library trả về thân không phải JSON" / "The library answered in a shape this version does not accept" — which points the user at a contract/version problem when the truth was a dropped connection or a timeout. Distinguish an abort/network error from a syntax error (or at minimum log the cause) before choosing BAD_RESPONSE.
-  rationale: AC-6 đòi 8 ca lỗi của ranh giới này (gồm 'thân trả về không phải JSON' và 'đứt mạng') phải được node gọi đúng tên nguyên nhân; ở đây một lỗi đứt mạng/quá hạn giữa chừng bị gộp nhầm thành ca sai hình dạng hợp đồng, nên hai ca không còn phân biệt được đúng nguyên nhân như AC-6 yêu cầu.
+  AC: AC-11
+  Rung 2 does `if (MIME_TO_EXT[mime]) return MIME_TO_EXT[mime];` on a plain object literal, so the lookup walks the prototype chain with a value taken straight from the upstream `content-type` header. Verified in node:
+  content-type: constructor  -> returns the `Object` function
+  content-type: __proto__    -> returns `Object.prototype`
+(`toString`/`valueOf`/`hasOwnProperty` are non-enumerable-but-present functions that also return truthy in other engines/shapes; `constructor` and `__proto__` are truthy today.)
+
+The value is typed `string` but is not one. It flows to `saveFile(read.buffer, ext)` (import.server.ts:212) and into `${nanoid()}.${ext}` in the default storage driver, producing a persisted file named e.g. `aH8xK2m9qP.function Object() { [native code] }` — a real file whose fileKey then goes into `/api/uploads/<key>` unencoded, so the clip is unplayable and the URL is broken.
+
+This is also the one rung of the three that is not allow-listed: rung 1 gates on `ALLOWED_EXT`, rung 3 is a constant. Use `Object.hasOwn(MIME_TO_EXT, mime)`, a `Map`, or `Object.create(null)`.
+  rationale: AC-11 đòi đuôi file suy ra phải đúng để file_key phát được trên canvas; lỗi tra bảng khiến bậc suy đuôi trả về một giá trị không phải chuỗi đuôi hợp lệ, làm AC-11 thất bại.
   source: bugs
 
-- **Hình dạng 2 — E15 hứa round-trip qua kho file nhưng saveFile bị mock, sha256 đo trên đối số đưa cho mock**
-  file: `src/lib/media-library/import.server.test.ts`:82
+- **Search success path trusts the body: parse failure is mislabeled, missing `cards` crashes the render**
+  file: `src/components/workspace/nodes/add/add-media-library-node.tsx`:95
+  severity: low
+  AC: AC-6
+  Two problems on the 2xx branch of `search()`, both the trust gap that `readFailure()` was written to close on the failure branch:
+
+1. `const body = await response.json()` (line 95) sits inside the outer try whose catch (line 102) sets `{code: "NETWORK_ERROR"}` -> "Could not reach the library." A 200 whose body will not parse (dev-server / proxy interposition) is therefore reported as a remote-network problem — the same conflation the comment at lines 31-38 says was removed.
+
+2. `cards: body.cards as MediaCard[]` is an unchecked cast. `src/app/api/media-library/search/route.ts:72-73` forwards `result.data.cards` verbatim, and `NextResponse.json` drops `undefined` keys, so an upstream 200 that carries a valid `contracts_version` but no `cards` array yields `outcome.cards === undefined`. Line 226 then evaluates `outcome.cards.length > 0` during render and throws `TypeError: Cannot read properties of undefined`, taking the node (and, absent an error boundary, the canvas) down instead of surfacing BAD_RESPONSE. The version guard in `client.server.ts` exists precisely to avoid reading a body of unknown shape; the shape is then read anyway.
+  rationale: Một trong tám ca AC-6 là 'thân trả về không phải JSON'; ca này bị gán nhầm thành NETWORK_ERROR thay vì gọi đúng tên nguyên nhân, vi phạm trực tiếp yêu cầu phân loại của AC-6.
+  source: bugs
+
+- **Hình dạng 4 — assertion âm tính không ghim đúng thông điệp: ca SSRF ở route thật ra chỉ chạm nhánh scheme**
+  file: `src/app/api/media-library/route.test.ts`:73
   severity: high
-  AC: AC-9
-  evals.yaml E15 (dòng 162) hứa: "file_key sinh ra ĐỌC LẠI ĐƯỢC từ kho với sha256 TRÙNG sha256 của bytes máy chủ giả phát ra", và paths của E15 khai cả src/lib/file/file-utils.ts lẫn src/lib/file/storage.server.ts. Nhưng test dòng 14-19 mock nguyên module @/lib/file/file-utils (saveFile chỉ push {data, ext} vào mảng saved.calls và trả chuỗi `nanoid1.mp4`), rồi dòng 82-86 băm sha256 của saved.calls[0].data — tức băm chính buffer vừa đưa cho stub, không hề ghi rồi đọc lại bằng reader của kho. Không có writer/reader thật nào chạy: một saveFile hỏng (ghi thiếu byte, sai đường dẫn, không persist) vẫn xanh, và file_key trả về không bao giờ được phân giải ngược. Đây đúng là fixture/khẳng định không round-trip: đo đầu vào của bên ghi thay vì đo thứ bên đọc lấy ra được.
-  rationale: AC-9 đòi chứng minh file_key đọc lại được từ kho file với nội dung đúng bằng bytes đã tải; E15 là bằng chứng máy cho đúng AC này nhưng đo sha256 trên đầu vào đưa cho mock thay vì round-trip thật, nên AC-9 chưa thực sự được chứng minh.
+  AC: AC-10
+  Test `refuses a link-local signed URL and creates no file` (dòng 60-75) nạp `assetDetail("http://169.254.169.254/latest/meta-data/")` — URL vừa sai scheme vừa là host link-local. `checkFetchTarget` (url-safety.ts:95-100) kiểm scheme TRƯỚC host, nên với `http://` nó trả `reason: "scheme"` và `guardUrl` (import.server.ts:56-60) sinh câu "...không dùng https (http://)". Assertion duy nhất ghim thông điệp là `expect(String(body.message)).toMatch(/https|nội bộ/i)` — alternation này xanh nhờ chữ "https", nên nhánh `private-host` KHÔNG BAO GIỜ chạy trong file này. Ca thứ ba (`refuses a plain http signed URL`, dòng 100-113) cũng chỉ chạm nhánh scheme và không ghim thông điệp gì cả. Kết quả: cả hai ca từ chối ở call-site đều chứng minh cùng một guard; nếu xoá hẳn nhánh `isPrivateHost` khỏi `checkFetchTarget`, route.test.ts vẫn xanh toàn bộ — trong khi đây đúng là eval (E26) được sinh ra để chứng minh route không đi vòng qua guard host. Bản https + link-local có tồn tại nhưng ở tầng hàm (import.server.test.ts:126-135), tức là tầng mà E26 nói rõ là không đủ.
+  rationale: AC-10 minh thị đòi bằng chứng đo qua chính route (không qua gọi hàm trực tiếp) cho cả ca scheme lẫn ca host nội bộ; finding cho thấy nhánh host chỉ được chứng minh ở tầng hàm, đúng loại lỗ AC-10 nêu tên là không bịt được.
   source: measurement
 
-- **Hình dạng 5 — E19 tuyên ba vế (đối xứng bảng + validator + exporter fileKeys), suite chỉ có vế đầu**
-  file: `src/lib/workflow/media-library-wiring.test.ts`:29
-  severity: medium
-  AC: AC-12
-  evals.yaml E19 (dòng 198) hứa ba việc: (a) hai bản sao bảng khớp mọi khoá; (b) "cạnh addMediaLibraryNode->videoNode qua được validator"; (c) "exporter xuất ra node dữ liệu mang fileKeys". File test chỉ làm (a): so ADD_NODE_OUTPUT_TYPE với typeMap parse bằng regex từ source exporter.ts. `grep -rn addMediaLibraryNode src` cho thấy toàn cây không có test nào khác chạm chuỗi này — connection-validator.test.ts và compose-overlay-export.test.ts không nằm trong diff và không nhắc tới node mới. Vế (b) và (c) hoàn toàn không có assert nào, trong khi criterion AC-12 được đánh layer: backend-effect và ui-check E20 chỉ chụp node hiện trên canvas. Ngoài ra (a) đo VĂN BẢN NGUỒN của exporter (readFileSync + regex `getAddNodeOutputType[\s\S]*?typeMap...`) chứ không gọi hàm — vì getAddNodeOutputType là private (exporter.ts:492) — nên một exporter đúng bảng nhưng sai nhánh dùng bảng vẫn xanh.
-  rationale: Hai vế thiếu của E19 (cạnh qua validator, exporter xuất fileKeys) chính là nội dung AC-12 đòi hỏi; thiếu assert cho chúng nghĩa là AC-12 chưa được chứng minh đầy đủ.
-  source: measurement
-
-- **Hình dạng 1 — guard a11y đếm 16 URL/16 trang quét được, không đếm 16 TRẠNG THÁI vẽ ra**
-  file: `scripts/media-library/check-a11y-proto.sh`:39
-  severity: medium
-  AC: AC-15
-  Script dựng 16 URL từ mảng STATES (dòng 21-27), assert `${#URLS[@]} -ne 16` rồi sau khi quét assert `report.pages.length !== 16`. Cả hai chỉ đo chỉ dẫn (danh sách URL) và khả năng tới được trang, không đo trang đó vẽ trạng thái nào. AddMediaLibraryProto (src/components/proto/add-media-library-proto.tsx, nhánh `default:` cuối switch) trả về khung idle cho MỌI chuỗi state không khớp, và ProtoPage truyền thẳng `state ?? ""` xuống. Vì vậy nếu một case bị đổi tên (ví dụ "thin-shelf" -> "thinShelf") hay bị xoá, URL tương ứng vẫn 200, vẫn được axe quét, report.pages vẫn 16 và guard vẫn in "16/16 pages scanned" — trong khi thực tế chỉ quét trang idle nhiều lần. Chính lỗ hổng mà comment đầu file nói muốn bịt ("tới được 4/16 mà vẫn exit 0") vẫn mở dưới dạng khác: 16 lần chạm cùng một trang.
-  rationale: AC-15 đòi từng trong tám trạng thái node (ở cả hai nền) phải thật sự hiện ra và đạt sàn tiếp cận; guard chỉ đếm URL/trang tới được, nên một trạng thái đổi tên hay bị xoá vẫn báo '16/16' dù thực chất chỉ quét lặp một trạng thái mặc định.
-  source: measurement
-
-- **Hình dạng 5 — vòng lặp "tám mã lỗi" là trang trí: outcomeMessageKey không đọc `code`, và lớp thật có 10 mã**
-  file: `src/components/workspace/nodes/add/add-media-library-node.test.tsx`:77
+- **Hình dạng 1 — đo CHỈ DẪN (khoá i18n) thay vì ĐẦU RA (câu hiển thị)**
+  file: `src/components/workspace/nodes/add/add-media-library-node.test.tsx`:109
   severity: medium
   AC: AC-6
-  Test "never labels any of the eight failure codes as a thin shelf" (dòng 77-94) lặp 8 mã và assert `!== "thinShelf"`. Nhưng outcomeMessageKey (media-library-outcome.ts:46-61) switch trên `outcome.kind` và KHÔNG bao giờ đọc `outcome.code` — mọi outcome kind="failure" trả "error". Tám vòng lặp vì thế chạy đúng một đường code với một trường bị bỏ qua; không vòng nào có khả năng đỏ riêng. Thêm hai vấn đề: (1) `expect(codes).toHaveLength(8)` ở dòng 93 assert trên chính mảng literal của test — hằng đúng, không đo gì trong impl; (2) lớp "mã lỗi ranh giới" thật sự có 10 phần tử (FAILURE_KEYS, media-library-outcome.ts:94-105) và 11 trong MediaLibraryErrorCode (errors.ts:12-29); danh sách 8 bỏ sót VERSION_MISMATCH và LOCAL_FAILURE — đúng hai mã mà codeForStatus (dòng 78-87) sinh cho 409 và 500, tức hai mã node CHẮC CHẮN gặp.
-  rationale: AC-6 đòi mỗi trong tám ca lỗi có thông điệp phân biệt được và số assert bằng số ca; test này lặp 8 mã qua một hàm không hề đọc `code`, chạy đúng một đường code, và bỏ sót hai mã (VERSION_MISMATCH, LOCAL_FAILURE) mà node chắc chắn gặp — AC-6 chưa được chứng minh.
+  Lời hứa của AC-6/E7 là quan hệ giữa các CÂU trên màn hình ("mỗi mã lỗi có câu riêng", "kệ mỏng khác câu lỗi"). Phép đo lại dừng ở chuỗi khoá: `keys = failureCodes.map(failureMessageKey)` rồi `expect(new Set(keys).size).toBe(failureCodes.length)` (dòng 103-114) chỉ chứng minh 10 chuỗi `"failure.<CODE>"` khác nhau — không file message nào được nạp. Tương tự dòng 62-77 so `outcomeMessageKey(...)` trả "thinShelf" vs khác "thinShelf", tức so định danh chứ không so hai câu (E7 `expected` viết "so hai chuỗi"). Node thật render `t(failureMessageKey(outcome.code))` (add-media-library-node.tsx:268) và không test nào trong diff render `AddMediaLibraryNode` — nên nếu một `failure.<CODE>` vắng trong en/ja/ko/vi/zh.json, hoặc hai mã trỏ về cùng một câu dịch, toàn bộ assertion vẫn xanh còn màn hình hiện khoá thô. Repo đã có sẵn khuôn ngược lại (compose-overlay.test.tsx:35 nạp `@/i18n/messages/en.json` vào `NextIntlClientProvider`), diff này không dùng, và không có guard parity khoá i18n nào trong cửa sổ diff.
+  rationale: AC-6 đòi các thông điệp trên màn hình phân biệt được và gọi đúng tên nguyên nhân; phép đo chỉ so khoá i18n chứ không so câu hiển thị thật, nên không chứng minh được đúng điều AC-6 yêu cầu.
   source: measurement
 
-- **Hình dạng 1 — E27 tuyên guard "phân giải định danh", thực tế là grep chuỗi `downloadAndSave(`**
-  file: `scripts/media-library/check-no-dormant-fetch.sh`:21
+- **Hình dạng 1 — nửa nền tối của ma trận a11y được khẳng định bằng tham số URL, không bằng đầu ra**
+  file: `scripts/media-library/check-a11y-proto.sh`:58
   severity: medium
-  AC: AC-10
-  evals.yaml E27 (dòng 263) khẳng định "Guard đếm caller bằng cách phân giải định danh". Script chỉ chạy `grep -rn "downloadAndSave("` rồi lọc bỏ file định nghĩa, tên script và các dòng bắt đầu bằng //, /* hoặc *. Đó là đo sự có mặt của một chuỗi ký tự, không phải phân giải symbol: một caller nhập đổi tên (`import { downloadAndSave as dl }` rồi gọi `dl(url)`), gọi qua thuộc tính (`fileUtils.downloadAndSave (url)` có khoảng trắng), hay gọi trong file .mjs/.js (guard chỉ --include *.ts/*.tsx) đều đi lọt và guard vẫn in "callers: (none)". Bộ lọc comment cũng chỉ bỏ comment ở ĐẦU dòng, nên một lời gọi thật nằm sau `*` đầu dòng bị bỏ qua.
-  rationale: AC-10 tự gọi đây là 'tiêu chí về call-site' — downloadAndSave() không được có caller nào trong cây; guard grep chuỗi bỏ lọt import đổi tên, gọi qua thuộc tính, hay file .mjs/.js, nên bảo đảm 'không caller' của AC-10 chưa thực sự được chứng minh.
+  AC: AC-15
+  Guard tự khai (đầu file, dòng 4-16) rằng bản cũ hỏng vì "đếm URL dựng ra và trang scan trả về" chứ không đọc cái gì thực sự được vẽ, và sửa bằng cách đọc `data-proto-state`. Việc sửa đó chỉ phủ CHIỀU TRẠNG THÁI. Vòng lặp dòng 51-65 chạy hai lần cho mỗi state với `suffix` "" và "&theme=dark", nhưng cả hai lần đều so đúng một thứ: `[ "$got" != "$state" ]`. Không có gì đọc lại lớp `dark` mà `src/app/proto/[slug]/page.tsx:44` bọc quanh body. Nếu wrapper theme hỏng (đổi tên class, param bị bỏ), 9 URL "dark" trở thành 9 lần scan lại trang sáng, `RENDERED` vẫn đủ 18 phần tử và dòng in cuối vẫn tuyên "18/18 ... rendered the state they were asked for" — trong khi `expected` của E24 tuyên "CHÍN trạng thái x nền sáng/tối" và bài học được trích dẫn ngay trong eval (byo-key-onboarding: 11 vi phạm serious) chính là vi phạm tương phản ở nền tối.
+  rationale: AC-15 đòi mỗi trong tám trạng thái đạt sàn tiếp cận ở CẢ nền sáng lẫn nền tối; guard chỉ so tham số URL chứ không xác nhận lớp giao diện tối thật sự được áp, nên nửa yêu cầu nền tối của AC-15 chưa được chứng minh.
   source: measurement
 
-- **Hình dạng 1 — E3 tuyên "quét đồ thị import", thực tế grep một tiền tố alias**
-  file: `scripts/media-library/check-no-boot-dependency.sh`:15
+- **Hình dạng 2 — khung ui-check của AC-13 là hằng chuỗi viết tay trong proto, không phải đầu ra của đường lệch-phiên-bản**
+  file: `_acceptance/add-media-library/evals.yaml`:222
   severity: medium
-  AC: AC-2
-  evals.yaml E3 (dòng 52) hứa "quét đồ thị import" và còn nêu răng "một guard chỉ grep tên package sẽ xanh trên fixture đó". Nhưng guard chính là `grep -rln "@/lib/media-library/" src` lọc qua một regex allow-list. Nó chỉ bắt được import viết bằng alias `@/`: một import tương đối từ layout/provider (`import { searchVideos } from "../../lib/media-library/client.server"`) — đúng kiểu quan hệ boot-time mà bảo đảm #2 của ADR-0012 muốn cấm — không khớp chuỗi nào và guard exit 0. Ngoài ra allow-list `components/workspace/nodes/add/(add-)?media-` khớp theo tiền tố tên file nên bất kỳ file mới nào đặt tên bắt đầu bằng `media-` trong thư mục đó đều tự động được miễn, không cần khai.
-  rationale: AC-2 đòi máy chưa từng cấu hình media-library vẫn khởi động và hoạt động bình thường — không lỗi khởi động, không route hỏng; guard được cho là canh việc không có phụ thuộc boot-time nhưng chỉ grep alias `@/`, bỏ lọt import tương đối, nên bảo đảm boot-safety của AC-2 chưa được chứng minh đầy đủ.
-  source: measurement
-
-- **Hình dạng 5 — E17 tuyên ba guard, vế "quá hạn chờ bị huỷ" không có assert nào**
-  file: `_acceptance/add-media-library/evals.yaml`:180
-  severity: low
-  AC: AC-10
-  E17 expected liệt kê ba vế đo: từ chối http://, cắt/báo khi vượt trần kích thước, và "phản hồi treo quá hạn chờ bị huỷ". import.server.test.ts (cmd unit_aml_import) có test cho vế 1 (dòng 104-124), vế 2 (dòng 271-310 và readCapped dòng 321-371), nhưng không có bất kỳ test nào chạm timeout: không fake timer, không AbortSignal, không stream treo. Cơ chế tồn tại trong impl (import.server.ts:28 DOWNLOAD_TIMEOUT_MS, :89 AbortSignal.timeout) nhưng chưa bao giờ bị đo — đặt DOWNLOAD_TIMEOUT_MS thành 0 hoặc bỏ hẳn signal vẫn xanh toàn bộ suite.
-  rationale: AC-10 đòi một phản hồi vượt trần kích thước hoặc quá hạn chờ phải bị cắt thay vì nuốt hết bộ nhớ; nhánh quá-hạn-chờ của E17 (vốn ánh xạ tới AC-10) không có bất kỳ test nào chạm timeout, nên phần đó của AC-10 chưa được chứng minh.
-  source: measurement
-
-- **Hình dạng 5 — E18 tuyên đo cả bảng Content-Type của /api/uploads, test chỉ đo extensionFor**
-  file: `_acceptance/add-media-library/evals.yaml`:188
-  severity: low
-  AC: AC-11
-  E18 expected: "Và với key sinh ra, bảng Content-Type của /api/uploads phải trả kiểu phát được", và paths của E18 khai src/app/api/uploads/[...path]/route.ts. cmd của E18 là unit_aml_ext = `pnpm vitest run src/lib/media-library/extension.test.ts`, và file đó chỉ gọi extensionFor(url, contentType) — không import, không dựng request tới route uploads, không đọc bảng mime của nó. Quan hệ thật sự mang rủi ro (đuôi lưu trong kho -> Content-Type route phát ra, chính là lý do allow-list chặn .svg) vì thế không được đo ở đâu cả; một bảng mime lệch trong route uploads vẫn xanh.
-  rationale: AC-11 đòi đuôi file đúng đủ để /api/uploads/<key> trả Content-Type phát được trên canvas; E18 chỉ gọi extensionFor và không hề chạm route uploads hay bảng mime của nó, nên nửa sau của chuỗi nhân quả AC-11 mô tả chưa được đo.
-  source: measurement
-
-- **Hình dạng 5 — E12 tuyên "số assert bằng số trường", guard dùng một regex alternation và in số đếm cứng**
-  file: `scripts/media-library/check-no-domain-vocab.sh`:51
-  severity: low
-  AC: AC-7
-  evals.yaml E12 (dòng 136) hứa "MA TRẬN 8 TRƯỜNG ... (số assert bằng số trường)". Guard thực hiện bằng đúng hai lời gọi grep với alternation (dòng 36 và 42), nên không có phép đo riêng cho từng trường: gõ sai hoặc xoá một nhánh trong biến FIELDS/VOCAB không làm gì đỏ. Dòng 51 lại in "(8 fields checked, 18 literals checked)" — hai con số viết cứng trong chuỗi echo, không suy ra từ FIELDS/VOCAB — nên bản in bằng chứng vẫn khẳng định 8/18 kể cả khi danh sách đã ngắn đi. Thêm nữa phép kiểm union (dòng 42) chỉ khớp nháy kép trong khi phép kiểm từ vựng (dòng 36) khớp cả nháy đơn lẫn nháy kép.
-  rationale: AC-7 (bảo đảm #3, cấm hardcode ngữ vựng lĩnh vực) được guard này canh; guard chỉ chạy hai lời gọi grep alternation thay vì một phép đo riêng cho từng trường, và in cứng số đếm 8/18 không suy ra từ danh sách thật, nên bảo đảm 'không hardcode ngữ vựng' của AC-7 chưa được chứng minh chặt như tuyên bố.
+  AC: AC-13
+  E22 (nửa UI của AC-13, criterion mang tag cross-layer) mở `{url}/proto/add-media-library?state=error` và assert "màn hình lỗi gọi đúng tên nguyên nhân". Proto không có trạng thái lệch-phiên-bản nào: danh sách state trong check-a11y-proto.sh:30 là 9 tên và không có `version-mismatch`; nhánh `case "error"` (add-media-library-proto.tsx:202-208) render hằng `COPY.error` = "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY." — tức câu AUTH_REJECTED, viết cứng trong file proto (dòng 37), không đi qua `failureMessageKey` → `t()` như node thật (add-media-library-node.tsx:268). Khung được chụp vì thế không phải đầu ra round-trip của đường code mà AC-13 nói tới; nó vẫn xanh kể cả khi VERSION_MISMATCH không có câu dịch hoặc không bao giờ tới được màn hình. Đây đúng loại lỗi vòng trước đã sửa cho E16 ("step 2 trỏ state=results — màn hình TRƯỚC khi nạp"), còn sót ở E22 (và ở mức nhẹ hơn ở E11, nơi cả hai khung so sánh đều là hằng chuỗi của proto).
+  rationale: AC-13 mang tag cross-layer nên cần bằng chứng UI thật cho đường lệch-phiên-bản; khung ui-check dùng hằng chuỗi viết cứng trong proto, không đi qua đường code thật, nên nửa UI của AC-13 chưa được chứng minh.
   source: measurement
 
 
@@ -85,104 +64,121 @@
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **External REST responses are cast (`body as T`) with no shape validation — a malformed 200 crashes the canvas instead of producing a failure outcome**
-  Người dùng thấy gì: Nếu dịch vụ media-library từng trả về một phản hồi kỹ thuật là thành công nhưng dữ liệu bên trong bị hỏng hoặc thiếu, cả màn hình làm việc có thể bị sập thay vì hiện một thông báo lỗi bình thường.
-  file: `src/lib/media-library/client.server.ts`:129
-  severity: medium
-  `call<T>()` validates config, `contracts_version` and HTTP status, then returns `{ ok: true, data: body as T }` with zero shape checking. CLAUDE.md's "contract enforcement: compile-time only" rule is scoped to the ABI/plugin boundary (TS types from `pnpm gen:abi` + generated Pydantic models); this is a third-party REST boundary where the global rule "ALWAYS validate at system boundaries" applies, and the feature elsewhere is careful (`detail.data.urls?.original ?? ""` in import.server.ts:176). Concretely: a 200 with `contracts_version: "0.2.0"` but `cards: null` (or cards missing `renditions`) flows through search/route.ts:72 untouched, reaches the node as `body.cards as MediaCard[]` (add-media-library-node.tsx:98), and then `outcome.cards.length` / `card.renditions.thumb_url` (media-card-list.tsx:43) throws a TypeError **inside React render**, taking down the workspace rather than showing the BAD_RESPONSE state the taxonomy already defines. A narrow guard on the success payload (cards is an array; each card has `id`, `caption`, `renditions.thumb_url`) mapping to the existing `BAD_RESPONSE` code would close it without introducing a validator framework.
-  rationale: Không AC nào yêu cầu node chống chịu một 200 hợp lệ nhưng sai hình dạng payload; AC-6 chỉ định danh 8 ca lỗi HTTP/JSON/mạng, không phải 200 méo mó.
-  Đề xuất: known-limits
-  source: conventions
-
-- **Missing-config panel renders the server's hardcoded Vietnamese sentence to every locale; the `missingConfig` key added to all 5 message files is dead**
-  Người dùng thấy gì: Người dùng OneFlow bằng tiếng Anh, Nhật, Hàn hoặc Trung sẽ thấy lời giải thích thiếu-cấu-hình được viết bằng tiếng Việt thay vì ngôn ngữ họ đang dùng.
-  file: `src/components/workspace/nodes/add/add-media-library-node.tsx`:85
-  severity: medium
-  The node forwards the server's `failure.message` into `MediaLibraryConfigPanel`, which renders it verbatim (`media-library-config-panel.tsx:92`). That string is built in `config.server.ts:35` as `"Chưa gọi được media-library: thiếu …"`, so an en/ja/ko/zh user sees Vietnamese. This contradicts the feature's own stated rule — the comment at add-media-library-node.tsx:262-267 says "The server's own message is Vietnamese and stays where it belongs — the server log — instead of landing in front of an en/ja/ko/zh user" — and the failure path honours it via `failureMessageKey()` while the missing-config path does not. The diff adds a translated `addMediaLibrary.missingConfig` key to en/ja/ko/vi/zh, and `outcomeMessageKey()` returns `"missingConfig"`, but `t("missingConfig")` is never called anywhere in production code (only the proto supplies its own copy). Fix: render `t("missingConfig")` for the sentence and keep using `failure.missing` (already sent as data) for the field list.
-  rationale: AC-1 chỉ đòi thông điệp thiếu-cấu-hình chứa đúng tên biến còn thiếu, không đòi hỏi bản dịch theo ngôn ngữ hiển thị.
-  Đề xuất: known-limits
-  source: conventions
-
-- **New `.next-dev` dist dir is gitignored but not excluded in biome.json, so `pnpm lint:check` scans generated dev output**
-  Người dùng thấy gì: Người phát triển dùng chế độ chạy dev mới có thể thấy công cụ kiểm tra chất lượng mã báo lỗi trên các file được sinh tự động mà lẽ ra không cần kiểm tra, gây nhiễu hoặc chặn nhầm quy trình phát hành.
-  file: `biome.json`:12
-  severity: medium
-  `next.config.ts:31` introduces `distDir: process.env.NEXT_DIST_DIR || ".next"` and `.gitignore` adds `.next-dev/`, but `biome.json`'s `files.includes` only excludes `"!.next"`, `"!**/.next"`, `"!out"`, `"!build"` — none of which match `.next-dev`. Any developer following the new dev flow gets `pnpm lint:check` red with hundreds of violations in generated files, and CLAUDE.md's Commit/PR checklist makes `pnpm lint:check` mandatory; the branch's own evidence-report.md records exactly this failure (`.next-dev/server/_rsc_src_i18n_messages_zh_json.js format errors`). Compounding it, the next.config.ts comment is stale and contradicts the change it documents: it says "Point it at `build`, which .gitignore and biome.json already exclude — no new ignore entry, no config loosened", yet nothing points at `build`, a new `.gitignore` entry was added, and biome was not updated. Either add `"!.next-dev"` / `"!**/.next-dev"` to biome.json, or actually use `build` as the comment claims. Same class of issue affects `tsconfig.json`, whose `include` names `.next/types/**` and gets rewritten by Next when `NEXT_DIST_DIR` is set.
-  rationale: Đây là vấn đề cấu hình công cụ build/lint nội bộ, không nằm trong bất kỳ tiêu chí Given/When/Then nào của hợp đồng.
-  Đề xuất: known-limits
-  source: conventions
-
-- **A11y check script discards uncommitted `tsconfig.json` changes via `git checkout --` in an EXIT trap**
-  Người dùng thấy gì: Chạy script kiểm tra khả năng tiếp cận có thể âm thầm xoá mất các thay đổi chưa lưu của một người phát triển trong file cấu hình dự án, mà không hề có cảnh báo nào.
-  file: `scripts/media-library/check-a11y-proto.sh`:16
-  severity: medium
-  `restore_tsconfig() { git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true; }` is registered with `trap … EXIT`, so every run of the script — including a failed one, or one interrupted with Ctrl-C — hard-reverts `tsconfig.json` to HEAD. It does not distinguish Next's own rewrite (the case it's meant to undo) from a developer's uncommitted edit to that file, and there is no stash/backup, so real work is silently destroyed. No other script under `scripts/` in this repo mutates tracked files this way. Safer shapes: snapshot the file to a temp path before the scan and restore only from that snapshot, or check `git diff --quiet -- tsconfig.json` first and skip the restore when the file was already dirty on entry.
-  rationale: Đây là rủi ro của một script hỗ trợ phát triển, không phải hành vi sản phẩm mà AC-15 (hay AC nào khác) mô tả.
-  Đề xuất: known-limits
-  source: conventions
-
-- **Failure-code → HTTP status map is duplicated verbatim across the two new routes**
-  Người dùng thấy gì: Nếu sau này hai bảng mã lỗi liên quan bị cập nhật không đồng bộ, người dùng có thể thấy hai phản hồi lỗi khác nhau cho cùng một vấn đề, tuỳ vào việc họ đang tìm kiếm hay đang nạp một đoạn clip.
-  file: `src/app/api/media-library/import/route.ts`:7
-  severity: low
-  The identical 11-entry `const STATUS: Record<string, number>` block appears in both `src/app/api/media-library/import/route.ts:7-19` and `src/app/api/media-library/search/route.ts:12-24`, along with an identical catch-all `?? 502` and the same duplicated LOCAL_FAILURE catch block. The feature otherwise centralises its taxonomy carefully (`errors.ts` owns the codes, `media-library-outcome.ts` owns the status→code inverse for the client), so the one table that maps codes to statuses being copied is an outlier and drifts silently: adding a code to `MediaLibraryErrorCode` and updating only one route yields a different HTTP status for search vs import. Move it next to the taxonomy it belongs to (e.g. `statusFor(code)` exported from `errors.ts`) and have both routes call it.
-  rationale: Trùng lặp mã nguồn là vấn đề bảo trì, không có AC nào yêu cầu một nguồn sự thật duy nhất cho bảng ánh xạ này.
-  Đề xuất: known-limits
-  source: conventions
-
-- **Mid-download failure (incl. the 120s timeout) is reported as LOCAL_FAILURE, blaming the user's machine**
-  Người dùng thấy gì: Khi việc tải một đoạn clip thất bại hoặc quá thời gian chờ vì sự cố mạng, ứng dụng có thể báo nhầm rằng lỗi nằm ở máy của người dùng thay vì chỉ ra đúng là mạng hoặc dịch vụ nguồn.
-  file: `src/lib/media-library/import.server.ts`:159
-  severity: high
-  readCapped()'s streaming loop (`await reader.read()`) has no try/catch, and importAsset() has none either. Any error raised while the body is streaming — socket reset, upstream truncation, and critically the `AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS)` set in fetchGuarded — rejects out of importAsset instead of returning a MediaLibraryFailure. The only catch left is the one in src/app/api/media-library/import/route.ts:58, which by design classifies any throw as `LOCAL_FAILURE` 500 ("OneFlow không hoàn tất được việc này ở phía máy của bạn" / "check the app's log"). This is the exact misdirection errors.ts:23-29 says LOCAL_FAILURE exists to prevent, only inverted: a remote/network problem is reported as a local disk problem. It matters most for the primary timeout path — a 2-minute download timeout on a large clip fires during body streaming, essentially never during the initial fetch, so the guarded NETWORK_ERROR arm in fetchGuarded (line 91) is unreachable for the timeout it was configured for. Confirmed with a temporary vitest probe: with the asset detail served normally and the byte stream erroring after the first chunk, `importAsset("a")` rejects rather than resolving to `{ok:false, failure:{code:"NETWORK_ERROR"}}`. Fix: wrap the stream read (and ideally the whole importAsset body) and map a read/abort error to NETWORK_ERROR.
-  rationale: AC-6 (định danh nguyên nhân đúng) áp cho ranh giới gọi API media-library ở mục Tìm trong kho; AC-10 chỉ đòi cắt/báo khi vượt trần kích thước hoặc quá hạn chờ, không đòi định danh đúng nguyên nhân mạng khi đang tải bytes.
-  Đề xuất: known-limits
-  source: bugs
-
-- **missing-config state renders the server's Vietnamese sentence to every locale; the translated key is dead**
-  Người dùng thấy gì: Người dùng không nói tiếng Việt sẽ thấy thông điệp thiếu-cấu-hình trên bảng này được viết bằng tiếng Việt thay vì được dịch sang ngôn ngữ họ đã chọn.
+- **Missing-config panel renders the server's Vietnamese sentence, leaving the new `missingConfig` i18n key dead**
+  Người dùng thấy gì: Người dùng chọn giao diện tiếng Anh, Nhật, Hàn hay Trung nhưng khi thiếu cấu hình vẫn thấy một câu thông báo bằng tiếng Việt, không phải ngôn ngữ họ đang dùng.
   file: `src/components/workspace/nodes/add/media-library-config-panel.tsx`:92
   severity: medium
-  resolveConfig() (config.server.ts:35) builds a Vietnamese message, the route returns it verbatim, add-media-library-node.tsx:85 stores it as `outcome.message`, and the panel prints it raw at `<p className="text-sm text-foreground">{message}</p>`. So en/ja/ko/zh users see "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL và MEDIA_LIBRARY_API_KEY." This is the same defect the code explicitly fixed for the failure path — media-library-outcome.ts:107-118 says "The server's own message is Vietnamese and belongs in logs" and the node correctly uses `t(failureMessageKey(...))` for `kind:"failure"`. The translated replacement already exists: `Workspace.nodes.addMediaLibrary.missingConfig` is present in all five of en/vi/ja/ko/zh, and `outcomeMessageKey()` returns "missingConfig" for this state — but grep shows nothing ever calls `t("missingConfig")`; `messageKey` is only compared against "thinShelf" (add-media-library-node.tsx:249). Pass `t("missingConfig")` into the panel instead of `outcome.message`.
-  rationale: Cùng lý do với finding tương tự ở add-media-library-node.tsx: AC-1 không đòi bản dịch, chỉ đòi tên biến xuất hiện đúng.
-  Đề xuất: known-limits
-  source: bugs
+  The node passes the server-built failure text straight into the panel (add-media-library-node.tsx:85 `message: failure.message`) and the panel renders it verbatim (`<p>{message}</p>`). That text is hardcoded Vietnamese in config.server.ts:35 (`Chưa gọi được media-library: thiếu ...`), so en/ja/ko/zh users get a Vietnamese sentence inside an otherwise translated node.
 
-- **MISSING_CONFIG on the import path degrades to the generic error line and never opens the config panel**
-  Người dùng thấy gì: Nếu khoá thư viện của bạn bị mất hiệu lực hoặc bị xoá trong lúc bạn đang xem kết quả tìm kiếm, việc bấm nạp một đoạn clip có thể chỉ hiện dòng lỗi chung chung thay vì đưa bạn tới màn hình để sửa lại khoá.
-  file: `src/components/workspace/nodes/add/media-library-outcome.ts`:94
+This contradicts the convention the same PR states twice — media-library-outcome.ts:107-118 ("The server's own message is Vietnamese and belongs in logs ... The code is the machine-readable half and is what the UI keys off") and the comment at add-media-library-node.tsx:262-267 — which the failure branch does follow via `t(failureMessageKey(outcome.code))`.
+
+The translated key already exists: `Workspace.nodes.addMediaLibrary.missingConfig` was added to all five locale files (en.json:1062, ja.json:976, ko/vi/zh:1062) and is never read by production code — `outcomeMessageKey()` returns `"missingConfig"` (media-library-outcome.ts:56) but the component only ever compares against `"thinShelf"`. The only consumer is the proto (src/components/proto/add-media-library-proto.tsx:147). So the i18n entry is dead in five files while the untranslated string ships.
+  rationale: AC-1 chỉ đòi chuỗi missing-config nêu đúng tên biến còn thiếu, không đòi bản dịch theo ngôn ngữ giao diện — Vietnamese cứng vẫn thoả nội dung AC-1 yêu cầu.
+  Đề xuất: known-limits
+  source: conventions
+
+- **Upstream JSON shape is never validated before it reaches React render**
+  Người dùng thấy gì: Nếu kho dữ liệu trả về một phản hồi thành công nhưng thiếu thông tin mong đợi, màn hình tìm kiếm có thể bị treo hoặc trắng thay vì báo lỗi rõ ràng.
+  file: `src/lib/media-library/client.server.ts`:161
   severity: medium
-  FAILURE_KEYS omits "MISSING_CONFIG", so failureMessageKey("MISSING_CONFIG") falls through to the generic "error" key. importAsset -> getAsset -> call() can return MISSING_CONFIG (client.server.ts:26), and the import route maps it to 400 — but pick() in add-media-library-node.tsx:129-136 has no MISSING_CONFIG branch (unlike search() at line 78), so it sets `{kind:"failure", code:"MISSING_CONFIG"}`. Result: the user gets "The library call did not go through." with no config panel and no variable names, even though the server sent both the code and the `missing` array. Reachable whenever the stored keys change or are cleared between the search and the pick. Secondary: STATUS_TO_CODE maps 400 -> BAD_REQUEST, so when the import route's body cannot be parsed the same state is mislabelled again. Either add MISSING_CONFIG to FAILURE_KEYS or, better, route it to the config panel in pick() the way search() does.
-  rationale: AC-1 chỉ khai When là 'mở node và bấm tìm'; ca này xảy ra ở bước chọn thẻ/nạp (pick), một đường khác không nằm trong Given/When của AC-1.
-  Đề xuất: known-limits
-  source: bugs
+  `call()` validates transport, JSON-ness, `contracts_version` and status, then returns `body as T` with no check that the payload actually has the declared fields. The route destructures `const { cards, candidates, skipped, warnings } = result.data` (search/route.ts:72) and re-serialises them, and the node casts again: `cards: body.cards as MediaCard[]` (add-media-library-node.tsx:98).
 
-- **Config-panel save can still wipe every other stored BYO key: an unreadable env store reads as {}**
-  Người dùng thấy gì: Trong một trường hợp hiếm khi OneFlow không đọc được đúng cấu hình đã lưu, việc lưu khoá media-library từ màn hình này có thể âm thầm xoá mất mọi khoá và cài đặt khác bạn đã lưu trước đó.
-  file: `src/components/workspace/nodes/add/media-library-config-panel.tsx`:57
+Failure scenario: a 200 response carrying a correct `contracts_version: "0.2"` but no `cards` array (a partial write, a gateway that rewrote the body, a service that renamed the field within the same contract line) yields `cards: undefined`. Render then evaluates `outcome.cards.length > 0` (add-media-library-node.tsx:226) and throws a TypeError during render, taking the canvas subtree down. Same for a card missing `renditions` — media-card-list.tsx:44 reads `card.renditions.thumb_url` unguarded.
+
+The taxonomy already has the right answer for this (`BAD_RESPONSE`, errors.ts:36, mapped to 502 in both routes) but it is only ever produced when the body fails to *parse*, never when it parses into the wrong shape. Note CLAUDE.md's "contract enforcement: compile-time only, bad shapes crash naturally" is scoped to the ABI — an internal contract regenerated by `pnpm gen:abi`; this is an external BYO REST service whose shape TypeScript cannot check, and the module already validates version and status at the same boundary.
+  rationale: AC-6 chỉ liệt kê đúng tám ca hỏng (gồm thân không phải JSON), không bao gồm ca 200 JSON hợp lệ nhưng thiếu trường mong đợi.
+  Đề xuất: new-contract
+  source: conventions
+
+- **The three ADR-0012 invariant guards run nowhere after the acceptance round**
+  Người dùng thấy gì: Các bước kiểm tra an toàn nội bộ của tính năng này không tự động chạy lại khi có thay đổi khác trong tương lai, nên một thay đổi sau này có thể âm thầm phá vỡ các đảm bảo ranh giới mà không ai biết.
+  file: `scripts/media-library/check-no-boot-dependency.sh`:12
+  severity: medium
+  `check-no-boot-dependency.sh` (guarantee #2: no boot-time relationship with the service), `check-no-dormant-fetch.sh` (downloadAndSave must stay dead — the SSRF sink the whole url-safety module exists to avoid), `check-no-domain-vocab.sh` (guarantee #3) and `check-fixture-provenance.sh` are added with no `package.json` script and no `.github/workflows/ci.yml` step (both files are untouched by this diff; CI runs only `verify:plugins`, `lint:check`, `typecheck`, `build`, `pnpm test`, sdk pytest, `pre-merge-check.sh`).
+
+So they execute exactly once, from _acceptance/add-media-library/evals.yaml, and go dormant on merge. The invariants they protect are the ones most likely to be broken by an unrelated future PR — a layout importing `@/lib/media-library/*`, or the first caller of `downloadAndSave()`. Compare the wiring test the same PR did put under vitest (src/lib/workflow/media-library-wiring.test.ts), which will keep running.
+
+The allow-list in scripts/media-library/no-boot-dependency.mjs:26-38 is also a hand-maintained list of nine exact paths, so a rename inside the feature turns the guard red for a reason unrelated to the invariant — the failure mode CLAUDE.md already documents for `check-manifest-unmoved.sh`.
+  rationale: Không AC nào của hợp đồng yêu cầu các guard này phải được nối vào CI thường trực; đây là khoảng trống quy trình, không phải tiêu chí sản phẩm.
+  Đề xuất: known-limits
+  source: conventions
+
+- **`check-a11y-proto.sh` discards the developer's uncommitted tsconfig.json on every exit**
+  Người dùng thấy gì: Nếu một người đang phát triển tính năng khác chạy công cụ kiểm tra khả năng tiếp cận đúng lúc, các chỉnh sửa cấu hình họ chưa lưu có thể bị xoá mất mà không có cảnh báo.
+  file: `scripts/media-library/check-a11y-proto.sh`:25
+  severity: medium
+  `restore_tsconfig() { git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true; }` is installed as an EXIT trap, so the script unconditionally hard-reverts tsconfig.json to HEAD whenever it finishes — success, failure, or Ctrl-C.
+
+Failure scenario: a developer with an in-progress tsconfig.json edit (a new path alias, a compilerOption being tested) runs the a11y guard; the edit is silently destroyed with no diff, no backup and no message, and `git checkout --` leaves nothing in reflog to recover from.
+
+The stated problem is real (Next rewrites tsconfig `include` when `NEXT_DIST_DIR` is set), but the fix should be scoped to the mutation the script itself caused — snapshot the file before the run and restore that snapshot — rather than resolving to whatever HEAD happens to contain. No other script under scripts/ mutates tracked files this way.
+  rationale: Đây là lỗi công cụ phát triển nội bộ, không phải tiêu chí nào trong Criteria của hợp đồng.
+  Đề xuất: known-limits
+  source: conventions
+
+- **Both media-library routes carry a verbatim copy of the status map and catch block**
+  Người dùng thấy gì: Việc sửa lỗi hoặc thêm mã lỗi mới cho tính năng này dễ bị quên cập nhật ở một trong hai nơi giống nhau, khiến hai đường tìm kiếm và nạp asset xử lý lỗi khác nhau theo thời gian.
+  file: `src/app/api/media-library/search/route.ts`:12
   severity: low
-  The comment at lines 44-47 states the read is load-bearing because PUT /api/settings/env replaces the whole map, and the guard refuses to write "unless the read really produced a map". But loadEnvStore() (src/lib/settings/env-store.server.ts:41) catches every read/decode failure and returns `{}`, and GET answers 200 with `{env:{}}` — indistinguishable from a genuinely empty store. So on a corrupt or undecryptable settings blob (e.g. a cloud shell whose encode/decode key changed) `payload.env` is a valid empty object, the guard passes, `next` becomes just the two media-library keys, and the PUT deletes every other stored key. The guard as written only catches a missing/array `env` field, which the route never produces. Note this is the same read-then-replace shape as the pre-existing src/components/workspace/nodes/base/abi-node-shell.tsx:107-113, so it is not a regression — but the new code's own comment claims the hole is closed and it is not. A PATCH-style merge endpoint, or having GET distinguish 'unreadable' from 'empty', would close it.
-  rationale: AC-1 chỉ đòi người dùng tới được chỗ nhập hai khoá và tìm lại thành công; không AC nào đòi hỏi việc lưu phải bảo toàn các khoá khác đã lưu trước đó, và finding tự nhận đây không phải hồi quy so với mã đã có từ trước.
+  The 12-entry `STATUS` map (search/route.ts:12-24 and import/route.ts:7-19), the `LOCAL_FAILURE` catch block with its identical Vietnamese message, and the JSON-body guard are byte-identical across the two files; the explanatory doc comment is pasted twice as well. A third route, or a code added to MEDIA_LIBRARY_ERROR_CODES, has to be remembered in two places with nothing to notice the drift — the same class of duplication the PR itself guards against in src/lib/workflow/media-library-wiring.test.ts and designs around in media-library-outcome.ts:103-105 (FAILURE_KEYS derived from the taxonomy rather than copied). The map belongs next to the taxonomy in src/lib/media-library/errors.ts, ideally typed as `Record<MediaLibraryErrorCode, number>` so an added code fails to compile instead of falling through to the `?? 502` default.
+  rationale: Trùng lặp mã nguồn là mối lo bảo trì, không phải hành vi mà bất kỳ AC nào đo.
   Đề xuất: known-limits
+  source: conventions
+
+- **Mid-download network failures throw and get reported as LOCAL_FAILURE ("your own machine")**
+  Người dùng thấy gì: Khi kết nối mạng bị rớt giữa lúc đang tải một clip về, người dùng thấy thông báo sự cố trên máy của họ dù đây thực chất là lỗi mạng, gây hiểu nhầm khi họ tìm cách khắc phục.
+  file: `src/lib/media-library/import.server.ts`:206
+  severity: high
+  `readCapped()` streams the body with no try/catch, and `importAsset()` does not wrap it. The `AbortSignal.timeout(downloadTimeoutMs())` created in `fetchGuarded` stays attached to the response body, so a stalled CDN, a dropped socket, or the 120s deadline firing during the body read makes `reader.read()` reject and the exception escapes `importAsset` entirely. The only handler left is the catch-all in `src/app/api/media-library/import/route.ts:58`, which answers 500 `{code: "LOCAL_FAILURE"}` -> the node renders "OneFlow could not finish this on your own machine — check the app's log for the real cause." for what is purely a remote/transport failure.
+
+This is confirmed by the feature's own test: `src/lib/media-library/import-roundtrip.server.test.ts:172-176` accepts `"threw"` as a passing outcome ("Either shape counts as 'cut off'"), so the throw path is known and untyped.
+
+It also contradicts the sibling code path: `src/lib/media-library/client.server.ts:74-118` goes out of its way to distinguish an AbortError/TimeoutError during `response.json()` (-> NETWORK_ERROR, "Kết nối tới media-library đứt giữa chừng") from a real shape problem, with a long comment explaining why collapsing the two sends the user to the wrong fix. The byte-download path does the exact thing that comment forbids, one classification worse.
+
+Fix: wrap `readCapped` (or the `reader.read()` loop) and map AbortError/TimeoutError/TypeError to NETWORK_ERROR the way `call()` does.
+  rationale: AC-6 nằm ở mục Tìm trong kho và ma trận tám ca gắn với API tìm/lấy asset; lỗi mạng giữa lúc tải byte qua urls.original là một chặng khác (nạp bytes) mà không AC nào đặt yêu cầu phân loại riêng.
+  Đề xuất: new-contract
   source: bugs
 
-- **a11y guard's EXIT trap silently discards uncommitted edits to tsconfig.json**
-  Người dùng thấy gì: Chạy script kiểm tra khả năng tiếp cận có thể âm thầm xoá mất các thay đổi chưa lưu của một người phát triển trong file cấu hình dự án, mà không có cảnh báo nào.
-  file: `scripts/media-library/check-a11y-proto.sh`:16
+- **a11y guard dies silently instead of printing which state failed to render**
+  Người dùng thấy gì: Nếu công cụ kiểm tra khả năng tiếp cận gặp lỗi bất ngờ, nó dừng lại mà không in ra thông tin giải thích vì sao, khiến người kiểm tra khó biết trạng thái nào của node đang có vấn đề.
+  file: `scripts/media-library/check-a11y-proto.sh`:54
   severity: low
-  `restore_tsconfig() { git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true; }` is installed as an EXIT trap, so every run of this script hard-reverts tsconfig.json to HEAD regardless of why it exited — including a run where the developer had deliberate uncommitted edits in that file. The `2>/dev/null || true` means the discard is also unreportable. The stated goal (undo Next's rewrite of `include` when NEXT_DIST_DIR is set) can be met without destroying user state by snapshotting the file to a temp path before the scan and restoring only that snapshot.
-  rationale: Cùng lý do với finding trước về script này: rủi ro công cụ phát triển, không phải hành vi sản phẩm mà một AC mô tả.
+  The script runs under `set -euo pipefail`. When a page does not contain `data-proto-state` — a 500, a redirect, a dev-server error page — `grep -o` exits 1, pipefail propagates that through the pipeline, and the `got=$(...)` assignment fails, so `set -e` aborts the script immediately. Verified: `bash -c 'set -euo pipefail; got=$(echo hello | grep -o "nope" | head -1 | sed "s/x/y/"); echo reached'` prints nothing and exits 1.
+
+The consequence is that the `${got:-<none>}` branch on line 59 is unreachable and the intended diagnostic (`FAIL: <url> rendered state '<none>', asked for '<state>'`) never prints, nor does the summary on line 68 — the guard fails with zero output. That is the silent mode the header comment (lines 4-16) says this rewrite was meant to eliminate. Add `|| true` to the substitution (or `set +e` around it) so the comparison, not the pipeline status, decides.
+  rationale: AC-15 đo bản thân các trạng thái có đạt sàn tiếp cận hay không, không đòi công cụ đo phải in chẩn đoán khi tự nó lỗi.
   Đề xuất: known-limits
   source: bugs
 
-- **Hình dạng 5 — E28 tuyên "mỗi fixture, thừa hoặc thiếu trường đều đỏ", test chỉ soi một fixture và chỉ chiều thừa**
-  Người dùng thấy gì: Các kiểm tra tự động nhằm phát hiện lệch giữa dữ liệu thử của OneFlow và các trường dữ liệu thật của dịch vụ media-library chỉ soi được một phần nhỏ dữ liệu đó, nên một số kiểu lệch có thể không bị phát hiện cho tới khi nó gây ra lỗi thật cho người dùng.
+- **MISSING_CONFIG on the import path shows a generic error with no way to fix it**
+  Người dùng thấy gì: Nếu khoá cấu hình bị xoá đúng lúc người dùng đang chọn một clip để nạp, họ chỉ thấy một thông báo lỗi chung chung, không được hướng dẫn cần điền lại khoá nào.
+  file: `src/components/workspace/nodes/add/add-media-library-node.tsx`:130
+  severity: low
+  `search()` special-cases `failure.code === "MISSING_CONFIG"` and renders `MediaLibraryConfigPanel`. `pick()` does not — it always sets `{kind: "failure", code, message}`. `media-library-outcome.ts:103-105` deliberately excludes MISSING_CONFIG from `FAILURE_KEYS` ("it has its own outcome kind and its own panel, so it never resolves to a failure.* sentence"), so `failureMessageKey("MISSING_CONFIG")` falls back to `"error"` -> "The library call did not go through."
+
+The import route can genuinely return it: `importAsset` -> `getAsset` -> `call()` -> `resolveConfig()` re-reads the env store, and `src/app/api/media-library/import/route.ts:8` maps MISSING_CONFIG to 400 with that code in the body. So if the stored key is cleared (or the store read fails and `loadEnvStore` returns `{}` — it swallows all errors) between search and pick, the user gets a generic "did not go through" and no config panel, with the actionable variable names in `failure.missing` discarded.
+  rationale: AC-1 khoanh vùng rõ hành động 'mở node và bấm tìm'; ca MISSING_CONFIG xảy ra ở bước chọn thẻ/nạp không nằm trong phạm vi chữ của AC-1.
+  Đề xuất: new-contract
+  source: bugs
+
+- **Hình dạng 5 — tuyên quét LỚP fixture nhưng chỉ có điểm-case một chiều**
+  Người dùng thấy gì: Nếu dữ liệu mẫu dùng để kiểm thử bị thiếu trường so với hợp đồng thật của kho, phần kiểm tra tự động hiện tại khó phát hiện ra, làm giảm độ tin cậy của các phép thử trước khi phát hành.
   file: `src/lib/media-library/__fixtures__/provenance.test.ts`:22
   severity: medium
-  evals.yaml E28 (dòng 271) hứa: "tập TÊN TRƯỜNG của MỖI fixture khớp ĐÚNG bảng trường... thừa một trường hoặc thiếu một trường đều đỏ". Thực tế: (a) chỉ VIDEO_CARD được kiểm (dòng 22) — CARD_WITH_LICENSE, CARD_UNKNOWN_VOCAB, CARD_NULL_ENTITY không đi qua unknownFields, mà đó mới là các fixture mang license_label/scene_kind/energy, tức các trường dễ trôi nhất; (b) unknownFields chỉ tính phần THỪA (`Object.keys(card).filter(k => !CARD_FIELDS.includes(k))`) — không có phép so chiều ngược, nên xoá một tên khỏi CARD_FIELDS (ví dụ "license_label") không làm test nào đỏ; (c) check-fixture-provenance.sh chỉ grep header trên cards.ts, trong khi stub-server.ts — file mã hoá hình dạng envelope search (cards/context/candidates/skipped/warnings/contracts_version) — không có PROVENANCE/READ-ON và không bị guard nào chạm, dù E28 nói "mỗi file fixture của máy chủ giả".
-  rationale: E28 phục vụ mục 'Known limits' về việc fixture không trôi so với hợp đồng thật của library — đây là hạn chế đã khai trong hợp đồng, không phải một Criteria/AC được đánh số, nên một guard yếu hơn tuyên bố không làm AC nào thất bại.
+  E28 `expected` tuyên: "tập TÊN TRƯỜNG của MỖI fixture khớp ĐÚNG bảng trường chép từ hợp đồng — thừa một trường hoặc thiếu một trường đều đỏ". Phép đo thực tế là `expect(unknownFields(VIDEO_CARD)).toEqual([])` — (a) chỉ một fixture trong bốn (CARD_WITH_LICENSE / CARD_UNKNOWN_VOCAB / CARD_NULL_ENTITY không được duyệt, không có vòng lặp trên tập fixture), (b) `unknownFields` (dòng 6-7) chỉ lọc khoá LẠ, không có bất kỳ assert nào cho chiều THIẾU: VIDEO_CARD chỉ mang 8 trong 22 tên của `CARD_FIELDS` và vẫn xanh, nên nửa "thiếu một trường thì đỏ" chưa từng được đo. Thêm nữa `CARD_FIELDS` nằm ngay trong chính file fixture (cards.ts:15-38), nên phép so là fixture đối chiếu một danh sách chép tay cùng file — sửa fixture và sửa danh sách trong cùng một lần chạm vẫn xanh; và assert còn lại (dòng 15-18) chỉ grep chuỗi comment `PROVENANCE:`/`READ-ON:` mà không code nào đọc.
+  rationale: Không có AC nào trong Criteria yêu cầu quét đầy đủ tập trường của mọi fixture; đây là hạn chế của bộ eval E28 mà Known limits đã nói tới ở khía cạnh khác (không chạy zod thật của library), không phải một AC sản phẩm riêng.
   Đề xuất: known-limits
   source: measurement
 
+- **Hình dạng 5 — nửa đàn áp tuyên về LỚP "đuôi mà thang từ chối" nhưng đo một ca lành, bỏ ca quyết định**
+  Người dùng thấy gì: Nếu một tệp có đuôi mở rộng đáng ngờ lọt qua bộ lọc an toàn, phần kiểm tra tự động hiện nay chưa chắc sẽ bắt được, để lại nguy cơ nội dung độc hại bị phục vụ như dữ liệu chạy được thay vì tệp trơ vô hại.
+  file: `src/lib/media-library/extension-serving.server.test.ts`:86
+  severity: low
+  Test `does not serve active content for an extension the ladder refuses` (dòng 82-87) nêu đích danh rủi ro trong comment: `.svg` được phục vụ same-origin thành `image/svg+xml`, tức nội dung hoạt động. Nhưng assert phục vụ lại chạy trên `servedContentType("txt")` → "text/plain". Bảng MIME của route (src/app/api/uploads/[...path]/route.ts:16) thật sự trả `image/svg+xml` cho `.svg`, nên ca duy nhất chứng minh được mệnh đề "trả về thứ trơ" lại là ca không nguy hiểm; mệnh đề "một đuôi thang từ chối không được phục vụ như nội dung hoạt động" chưa được đo trên phần tử duy nhất khiến allow-list tồn tại. (Nửa chặn ở tầng thang — `extensionFor(...evil.svg) === "mp4"`, dòng 84 — vẫn đo tốt; chỗ hụt chỉ ở nửa route.)
+  rationale: Không AC nào trong Criteria đặt yêu cầu về việc route serve nội dung theo đuôi bị thang từ chối phải trơ; đây là một khoảng trống bảo mật chưa có tiêu chí, không phải AC thất bại.
+  Đề xuất: new-contract
+  source: measurement
 
-⚠ Cụm ngoài vùng phủ: 9/21 lỗi rơi vào file không bộ đo nào phủ (biome.json, scripts/media-library/check-a11y-proto.sh, scripts/media-library/check-no-dormant-fetch.sh, scripts/media-library/check-no-boot-dependency.sh, _acceptance/add-media-library/evals.yaml, scripts/media-library/check-no-domain-vocab.sh) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+
+⚠ Cụm ngoài vùng phủ: 5/16 lỗi rơi vào file không bộ đo nào phủ (scripts/media-library/check-no-boot-dependency.sh, scripts/media-library/check-a11y-proto.sh, _acceptance/add-media-library/evals.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

@@ -73,3 +73,45 @@ describe("extensionFor — rung 1 is allow-listed (E18)", () => {
         );
     });
 });
+
+/**
+ * Rung 2 read the mime table with a bare index, so a `content-type` the far
+ * side controls walked the PROTOTYPE CHAIN: `constructor` came back as the
+ * `Object` function and `__proto__` as `Object.prototype`. Both truthy, neither
+ * a string — and the value is annotated `string`, so nothing downstream
+ * doubted it. It ended up in `${nanoid()}.${ext}`.
+ *
+ * The assertion is on the TYPE and the allow-list, not just on inequality: a
+ * fix that returned some other non-string would still satisfy `!== "mp4"`.
+ */
+describe("a content-type from the far side cannot reach through the table", () => {
+    const PROTOTYPE_KEYS = [
+        "constructor",
+        "__proto__",
+        "toString",
+        "valueOf",
+        "hasOwnProperty",
+        "isPrototypeOf",
+    ];
+
+    for (const key of PROTOTYPE_KEYS) {
+        it(`falls back to the default for content-type: ${key}`, () => {
+            const ext = extensionFor("https://cdn.example/clip", key);
+            expect(typeof ext).toBe("string");
+            expect(ext).toBe("mp4");
+        });
+    }
+
+    /**
+     * SUPPRESSION: the rung must still WORK. A fix that answered "mp4" to every
+     * content-type would pass every row above and silently destroy rung 2.
+     */
+    it("still reads a real declared type off the table", () => {
+        expect(extensionFor("https://cdn.example/clip", "video/webm")).toBe(
+            "webm",
+        );
+        expect(
+            extensionFor("https://cdn.example/clip", "video/quicktime"),
+        ).toBe("mov");
+    });
+});
