@@ -62,23 +62,34 @@ export const WORKFLOW_TTS_NEEDS_NORMALIZE = "WORKFLOW_TTS_NEEDS_NORMALIZE";
 
 const NORMALIZE_SLOT = "normalize-text-vi";
 
-/** Walk `dependencies` transitively looking for one slot. */
-function hasUpstreamSlot(
-    nodeId: string,
-    slot: string,
-    nodes: ExecutableNode[],
-): boolean {
-    const byId = new Map(nodes.map((n) => [n.id, n]));
-    const seen = new Set<string>();
-    const stack = [...(byId.get(nodeId)?.dependencies ?? [])];
+/**
+ * Walk the graph upstream looking for one slot.
+ *
+ * Walks the RAW graph edges, not `executableNodes`. An earlier version
+ * walked `ExecutableNode.dependencies` and looked each id up among the
+ * executable nodes only — but `dependencies` holds direct graph predecessors of
+ * ANY kind, and an ABI node's output always lands in a data node first. So the
+ * canonical shape this feature produces, `normalize-text-vi → textNode → TTS`,
+ * hit a data node the lookup could not resolve and the walk gave up there,
+ * falsely rejecting the very chain the feature exists to enable. Data nodes are
+ * pass-through for this question: step over them, do not stop at them.
+ */
+function hasUpstreamSlot(nodeId: string, slot: string, edges: Edge[]): boolean {
+    const parents = new Map<string, string[]>();
+    for (const edge of edges) {
+        const list = parents.get(edge.target);
+        if (list) list.push(edge.source);
+        else parents.set(edge.target, [edge.source]);
+    }
+
+    const seen = new Set<string>([nodeId]);
+    const stack = [...(parents.get(nodeId) ?? [])];
     while (stack.length) {
         const id = stack.pop() as string;
         if (seen.has(id)) continue;
         seen.add(id);
-        const upstream = byId.get(id);
-        if (!upstream) continue;
-        if (upstream.feature === slot) return true;
-        stack.push(...upstream.dependencies);
+        if (getNodeSpec(id)?.reg.feature === slot) return true;
+        stack.push(...(parents.get(id) ?? []));
     }
     return false;
 }
@@ -338,9 +349,7 @@ export class WorkflowExporter {
         // whether the Director planned it or a person wired it by hand.
         const offenders = executableNodes
             .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
-            .filter(
-                (n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, executableNodes),
-            )
+            .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, this.edges))
             .map((n) => n.id);
         if (offenders.length > 0) {
             throw new Error(

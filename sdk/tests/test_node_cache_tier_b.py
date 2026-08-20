@@ -38,10 +38,11 @@ def test_tier_lists_are_disjoint_and_pinned():
     })
     # TIER_A_SLOTS pinned too (compose-overlay joined on 2026-08-02 --
     # deterministic CPU overlay, byte-identity evidence in the plugin repo's
-    # golden suite): same rule as the tier-B literal above, a silent
-    # addition or drop must go red here, not slide in unreviewed.
+    # golden suite; normalize-text-vi joined 2026-08-20 -- pure string function,
+    # evidence in tests/test_normalize_vi.py): same rule as the tier-B literal
+    # above, a silent addition or drop must go red here, not slide in unreviewed.
     assert TIER_A_SLOTS == frozenset({
-        "compose-overlay", "concat-videos", "extract-audio",
+        "compose-overlay", "normalize-text-vi", "concat-videos", "extract-audio",
         "remove-video-audio", "merge-video-audio", "get-first-frame",
         "get-last-frame", "split-video", "drop-video", "split-text",
         "combine-text", "arrange-group",

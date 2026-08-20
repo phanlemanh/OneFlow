@@ -125,6 +125,53 @@ describe("compliant", () => {
         expect(workflow.executableNodes).toHaveLength(3);
     });
 
+    it("allows the reader through a DATA node — the canonical canvas shape", () => {
+        // An ABI node's output always lands in a data node before reaching the
+        // next ABI node, so `normalize → textNode → TTS` is what the canvas
+        // actually produces. The first version of this guard walked
+        // `ExecutableNode.dependencies` and resolved ids against executable
+        // nodes only, so it stopped dead at the data node and rejected exactly
+        // this chain. Every other case in this file chains executable nodes
+        // directly — which is why they all passed while the real shape broke.
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "normalize-text-vi" },
+        ]);
+        nodes.push({
+            id: "mid",
+            type: "textNode",
+            position: { x: 400, y: 0 },
+            data: { texts: [] },
+        });
+        nodes.push({
+            id: "b",
+            type: "genTextNode",
+            position: { x: 600, y: 0 },
+            data: { pluginId: "test-plugin" },
+        });
+        registerAbiNode({
+            nodeId: "b",
+            feature: "text-gen-speech-preset" as never,
+            sourceSpec: NODE_TYPE_SOURCE_SPEC.genTextNode,
+        });
+        registered.push("b");
+        edges.push({
+            id: "e-a-mid",
+            source: "a",
+            sourceHandle: "out:text",
+            target: "mid",
+            targetHandle: "in:textNode",
+        });
+        edges.push({
+            id: "e-mid-b",
+            source: "mid",
+            sourceHandle: "out:textNode",
+            target: "b",
+            targetHandle: "in:text",
+        });
+
+        expect(() => exportWorkflow(nodes, edges, { name: "x" })).not.toThrow();
+    });
+
     it.each(MUSIC_SLOTS)("leaves the music slot %s alone", (slot) => {
         const { nodes, edges } = buildChain([
             { id: "a", feature: "gen-text" },
