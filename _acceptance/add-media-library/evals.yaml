@@ -76,8 +76,9 @@ evals:
     criterion: AC-3
     executor: ui-check
     steps:
+      - "Mở {url}/proto/add-media-library?state=searching → chụp _acceptance/add-media-library/evidence/E6-step0.png"
       - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E6-step1.png"
-      - "Assert: các thẻ hiện ra kèm ảnh thu nhỏ và caption, và có dòng nói bao nhiêu clip khớp"
+      - "Assert: khung đang-tìm nói rõ đang chờ và nút bị khoá; khung kết quả có thẻ kèm ảnh thu nhỏ, caption và dòng đếm — hai khung phải phân biệt được bằng mắt"
     expected: "thẻ hiện trên node kèm ảnh thu nhỏ, caption và dòng đếm số clip khớp; danh sách rỗng hoặc thiếu caption là FAIL"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
@@ -167,9 +168,9 @@ evals:
     executor: ui-check
     steps:
       - "Mở {url}/proto/add-media-library?state=importing → chụp _acceptance/add-media-library/evidence/E16-step1.png"
-      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E16-step2.png"
-      - "Assert: khung 1 nói rõ đang nạp về kho file và cho biết xong sẽ thành node video trên canvas, và thẻ đang nạp bị khoá"
-    expected: "trạng thái đang-nạp phân biệt được với đang-chọn và thẻ đang nạp không bấm lại được; E15 gánh nửa server chứng minh bytes thật sự về kho"
+      - "Mở {url}/proto/add-media-library?state=imported → chụp _acceptance/add-media-library/evidence/E16-step2.png"
+      - "Assert: khung 1 nói rõ đang nạp và thẻ đang nạp bị khoá; khung 2 là trạng thái SAU khi nạp — nói clip đã nằm trong kho file của người dùng và hiện node video mới, KHÔNG phải danh sách thẻ trước khi nạp"
+    expected: "trạng thái đang-nạp phân biệt được với đang-chọn, thẻ đang nạp không bấm lại được, VÀ khung 2 cho thấy chặng SAU khi nạp (clip đã ở kho file, node video mới) chứ không phải danh sách trước khi nạp. Round 2 FAIL đúng ở đây: step 2 trỏ state=results — màn hình TRƯỚC khi nạp — nên chặng mà tiêu chí này tồn tại để chứng minh chưa từng được chụp. E15 gánh nửa server chứng minh bytes thật sự về kho"
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
   - id: E17
@@ -285,5 +286,5 @@ evals:
     criterion: AC-15
     executor: judgment
     question: "Nhìn CHỈ bằng màn hình — không console, không log — đi qua năm chặng (chưa cấu hình → tìm → kệ mỏng / kết quả không xếp hạng → nạp → xong), một người ngồi cạnh có chỉ được người dùng đang ở đâu và đang tiến hay đang kẹt không? Và có chỗ nào node trình một kết quả SUY GIẢM (không xếp hạng ngữ nghĩa, kệ mỏng, lệch phiên bản) y hệt như một kết quả sạch không? Nêu đích danh chặng nào trả lời là không."
-    inputs: ["_acceptance/add-media-library/evidence/E2-step1.png", "_acceptance/add-media-library/evidence/E6-step1.png", "_acceptance/add-media-library/evidence/E9-step1.png", "_acceptance/add-media-library/evidence/E9-step2.png", "_acceptance/add-media-library/evidence/E11-step2.png", "_acceptance/add-media-library/evidence/E16-step1.png", "_acceptance/add-media-library/evidence/E16-step2.png", "_acceptance/add-media-library/evidence/E22-step1.png", "contract.md"]
+    inputs: ["_acceptance/add-media-library/evidence/E2-step1.png", "_acceptance/add-media-library/evidence/E6-step0.png", "_acceptance/add-media-library/evidence/E6-step1.png", "_acceptance/add-media-library/evidence/E9-step1.png", "_acceptance/add-media-library/evidence/E9-step2.png", "_acceptance/add-media-library/evidence/E11-step2.png", "_acceptance/add-media-library/evidence/E16-step1.png", "_acceptance/add-media-library/evidence/E16-step2.png", "_acceptance/add-media-library/evidence/E22-step1.png", "contract.md"]
     evidence_required: [judged_by, verdict, rationale]
