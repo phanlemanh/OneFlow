@@ -216,7 +216,7 @@ evals:
     executor: ui-check
     paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/"]
     steps:
-      - "Kiểm cổng 3000 TRƯỚC: nếu đã có tiến trình lạ nghe ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"
+      - "Kiểm cổng 3000 TRƯỚC bằng `lsof -nP -iTCP:3000 -sTCP:LISTEN` (KHÔNG dùng `lsof -ti:3000` — nó đếm cả kết nối ra-vào của tiến trình khác và báo bận trên một cổng đang trống): có tiến trình lạ NGHE ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"
       - "Khởi động dev server với thư mục build RIÊNG: NEXT_DIST_DIR=build pnpm dev. BẮT BUỘC — bộ kiểm của cùng vòng này có bước build ghi vào .next, và next build với next dev dùng chung thư mục đó với hai layout không tương thích: server mất chunk giữa chừng rồi trả 500 ở mọi route. Đã giết 9 lượt chụp của làn kia trước khi tìm ra"
       - "KHÔI PHỤC NGAY SAU KHI SERVER LÊN, trước khi làm gì khác: `git checkout -- tsconfig.json`. Next ghi lại file đó ĐÚNG MỘT LẦN lúc dev server khởi động với thư mục build khác (thêm <distDir>/types vào include, đổi thụt lề 4→2), KHÔNG ghi lại ở mỗi lượt biên dịch — đo được. Để nguyên thì `pnpm lint:check` trong bộ kiểm của CHÍNH vòng này đỏ, và vòng REJECT vì một lý do không dính gì tới tính năng. Dọn ở cuối là không đủ: bộ kiểm chạy trước lúc đó"
       - "KIỂM XUẤT XỨ, bắt buộc trước mọi lượt chụp: curl -s {url}/proto/normalize-text-vi phải chứa chuỗi 'Đọc số thành chữ'. Không thấy → DỪNG và báo là chụp nhầm cây hoặc trang hỏng, KHÔNG ghi là đỏ tiêu chí"
