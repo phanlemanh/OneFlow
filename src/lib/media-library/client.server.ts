@@ -59,9 +59,23 @@ async function call<T>(
     }
 
     let body: unknown;
+    let parsed = true;
     try {
         body = await response.json();
     } catch {
+        parsed = false;
+        body = {};
+    }
+
+    // A body that will not parse is only fatal on a SUCCESS response. On an
+    // error response the status is the information that matters, and losing it
+    // is worse than losing the body: infrastructure in front of the service —
+    // nginx, a CDN, an API gateway — answers 401/403/404/502 with an HTML page,
+    // never JSON. Returning BAD_RESPONSE there told the user "the library
+    // answered in a shape this version does not accept" when the truth was a
+    // rejected key, and pointed them at the wrong fix. Parsing before looking at
+    // the status is what made that unreachable.
+    if (!parsed && response.ok) {
         return {
             ok: false,
             failure: {

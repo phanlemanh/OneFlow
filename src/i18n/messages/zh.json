@@ -1073,7 +1073,8 @@
                     "VERSION_MISMATCH": "素材库更改了契约版本。已停止，不猜测数据结构。",
                     "BAD_RESPONSE": "素材库返回的结构本版本无法接受。",
                     "NETWORK_ERROR": "无法连接素材库。",
-                    "UPSTREAM_ERROR": "素材库返回错误。"
+                    "UPSTREAM_ERROR": "素材库返回错误。",
+                    "LOCAL_FAILURE": "OneFlow 在你本机这一侧没能完成此操作，具体原因请查看应用日志。"
                 },
                 "readFailed": "无法读取已保存的密钥，因此未做任何更改，请重试。",
                 "writeFailed": "无法保存密钥，未做任何更改。"

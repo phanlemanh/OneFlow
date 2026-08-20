@@ -186,6 +186,15 @@ cách bỏ ô.
   OneFlow chính là nhập code của nhau, trái bảo đảm #1. **Tiền đề Cổng 2, khai
   trước:** hoặc chạy một lượt smoke tay trên instance thật rồi mới ký, hoặc ký kèm
   đúng giới hạn này. Người ký chọn; máy không chọn hộ.
+- **Chốt an toàn địa chỉ phán trên host CHỮ VIẾT, không phán trên địa chỉ thật.**
+  (bổ sung sau dấu niêm Cổng 1 — vòng sửa S4-r1, xem `decisions.jsonl`)
+  `url-safety.ts` nhận diện đủ mọi cách VIẾT một địa chỉ nội bộ mà một URL có thể
+  mang (21 dòng trong bảng thử, gồm IPv6 ánh xạ ở cả hai dạng và dải CGNAT), nhưng
+  nó **không** phân giải DNS: một tên miền công khai trỏ về địa chỉ nội bộ
+  (`internal.example.com` → `10.0.0.5`) vẫn đi lọt mọi chặng. Phân giải rồi kiểm
+  cũng không đóng kín được — vẫn còn khe giữa lúc tra và lúc nối. Đóng thật thì
+  phải móc ở tầng socket, lớn hơn giai đoạn A; khai ra đây thay vì để vắng mặt
+  im lặng.
 - **Thẻ tìm kiếm hết hạn im lặng sau 15 phút.** `renditions.thumb_url` được ký với
   cùng TTL 900 giây nhưng response tìm kiếm **không** trả `expires_in_s`, nên bên
   đọc không có tín hiệu nào để biết. Giai đoạn A **không** làm mới thẻ tự động —

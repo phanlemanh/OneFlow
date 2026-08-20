@@ -9,6 +9,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
+# Next rewrites tsconfig.json's `include` to point at whichever dist dir is
+# live, so a run with NEXT_DIST_DIR leaves the tree dirty and `pnpm lint:check`
+# red for a reason that has nothing to do with the feature. Restore it on the
+# way out, however this script exits.
+restore_tsconfig() { git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true; }
+trap restore_tsconfig EXIT
+
 BASE="${BASE_URL:-http://localhost:3000}"
 REPORT="${REPORT_PATH:-/tmp/aml-a11y.json}"
 STATES=(missing-config idle searching results thin-shelf unranked importing error)

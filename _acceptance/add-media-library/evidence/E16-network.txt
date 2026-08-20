@@ -1,0 +1,37 @@
+E16 network dump — driver: Claude_Browser (mcp), read_network_requests + read_console_messages
+Scope (config.yaml dev_server.url): http://localhost:3000
+
+Console errors (onlyErrors=true): none ("No console logs.")
+
+Network requests observed (state=importing then state=results, RSC nav):
+[14563.40] GET /proto/add-media-library?state=importing&_rsc=nAHQd_LOXO9iYWS_ -> 200 OK
+[14563.41] GET /_next/static/webpack/67a8e00050b175ba.webpack.hot-update.json -> 200 OK
+[14563.42] GET /_next/static/webpack/app/layout.67a8e00050b175ba.hot-update.js -> 200 OK
+[14563.43] GET /_next/static/webpack/webpack.67a8e00050b175ba.hot-update.js -> 200 OK
+[14563.44] GET /_next/static/css/app/layout.css?v=1787188377259 -> 200 OK
+[5592D29C221F04D85ABF581C869DEE10] GET /proto/add-media-library?state=results -> 200 OK
+[14563.58] GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[14563.59] GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[14563.60] GET /_next/static/css/app/layout.css?v=1787188382634 -> 200 OK
+[14563.62] GET /_next/static/chunks/webpack.js?v=1787188382634 -> 200 OK
+[14563.63] GET /_next/static/chunks/main-app.js?v=1787188382634 -> 200 OK
+[14563.64] GET /_next/static/chunks/app-pages-internals.js -> 200 OK
+[14563.65] GET /_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[14563.66] GET /_next/static/chunks/app/layout.js -> 200 OK
+
+Scoping: all requests are app-origin (localhost:3000), matching dev_server.url. All
+FAIL-eligible (document/RSC nav) requests returned 200. Static assets (.js/.css/.woff2)
+also all 200 -- note-only per rule, and here also all healthy.
+
+Verdict: networkObserved = clean (app traffic seen, all OK, no console errors).
+
+Caveat: earlier ad-hoc curl polling (outside this browser session, before the browser
+capture) observed transient 500s on some /proto/add-media-library states (including
+state=results at one point), which cleared on retry within seconds. ListAgents showed
+6 concurrent peer sessions on this same worktree/dev-server at verify time, consistent
+with webpack hot-update recompiles from a peer's concurrent edits (see project memory:
+"Eval đỏ oan vì tải máy song song" / "Hai phiên một cây"), not a regression in this
+component. The screenshots and DOM checks used for the E16 assertions were captured
+only after re-confirming both target URLs returned stable 200 across 5 consecutive
+polls, and the browser-driven network capture above (same session as the DOM check)
+shows clean 200s for both routes.

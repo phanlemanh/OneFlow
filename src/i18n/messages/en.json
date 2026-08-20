@@ -1073,7 +1073,8 @@
                     "VERSION_MISMATCH": "The library changed its contract version. Stopped rather than guess at the data.",
                     "BAD_RESPONSE": "The library answered in a shape this version does not accept.",
                     "NETWORK_ERROR": "Could not reach the library.",
-                    "UPSTREAM_ERROR": "The library returned an error."
+                    "UPSTREAM_ERROR": "The library returned an error.",
+                    "LOCAL_FAILURE": "OneFlow could not finish this on your own machine — check the app's log for the real cause."
                 },
                 "readFailed": "Could not read the saved keys, so nothing was changed — try again.",
                 "writeFailed": "Could not save the keys. Nothing was changed."

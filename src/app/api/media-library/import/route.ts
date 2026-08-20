@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { importAsset } from "@/lib/media-library/import.server";
 
 export const runtime = "nodejs";
@@ -14,6 +15,7 @@ const STATUS: Record<string, number> = {
     BAD_RESPONSE: 502,
     NETWORK_ERROR: 502,
     UPSTREAM_ERROR: 502,
+    LOCAL_FAILURE: 500,
 };
 
 /**
@@ -21,6 +23,13 @@ const STATUS: Record<string, number> = {
  * `importAsset`, which carries the scheme/host/size guards; going straight to a
  * download helper from here would leave those guards written but unreached,
  * which is precisely what route.test.ts measures.
+ */
+/**
+ * A throw here is OneFlow's own side failing — the file store most often (disk
+ * full, permission denied). Without this catch it became a Next.js 500 whose
+ * body is an HTML page, the client's `response.json()` threw, and the node told
+ * the user "could not reach the library" — sending them to check a key and a URL
+ * that were never the problem.
  */
 export async function POST(request: Request) {
     let body: unknown;
@@ -43,7 +52,20 @@ export async function POST(request: Request) {
         );
     }
 
-    const result = await importAsset(assetId);
+    let result: Awaited<ReturnType<typeof importAsset>>;
+    try {
+        result = await importAsset(assetId);
+    } catch (error) {
+        logger.error("[media-library] import route failed:", error);
+        return NextResponse.json(
+            {
+                code: "LOCAL_FAILURE",
+                message:
+                    "OneFlow không hoàn tất được việc này ở phía máy của bạn.",
+            },
+            { status: 500 },
+        );
+    }
     if (!result.ok) {
         return NextResponse.json(result.failure, {
             status: STATUS[result.failure.code] ?? 502,

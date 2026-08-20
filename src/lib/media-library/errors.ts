@@ -19,7 +19,14 @@ export type MediaLibraryErrorCode =
     | "NOT_IMPLEMENTED"
     | "BAD_RESPONSE"
     | "NETWORK_ERROR"
-    | "VERSION_MISMATCH";
+    | "VERSION_MISMATCH"
+    /**
+     * OneFlow's own side failed — the file store, most likely. Separate from
+     * NETWORK_ERROR on purpose: a full disk reported as "could not reach the
+     * library" sends the user to check a key or a URL that were never the
+     * problem.
+     */
+    | "LOCAL_FAILURE";
 
 export interface MediaLibraryFailure {
     code: MediaLibraryErrorCode;

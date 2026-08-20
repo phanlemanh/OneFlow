@@ -13,6 +13,7 @@ import { BaseNodeShell } from "../base/base-node-shell";
 import { MediaCardList } from "./media-card-list";
 import { MediaLibraryConfigPanel } from "./media-library-config-panel";
 import {
+    codeForStatus,
     failureMessageKey,
     isUnranked,
     type Outcome,
@@ -27,6 +28,32 @@ import {
  * undefined` as a pure data node; introducing a tab name here would mean
  * editing that allow-list too, for no gain — this node does one thing.
  */
+/**
+ * Read a failing response WITHOUT trusting it to be JSON.
+ *
+ * The old shape called `response.json()` first, inside a try whose only handler
+ * said "could not reach the library" — so a Next.js HTML error page (which is
+ * what a server-side throw produces) was reported as a network problem with the
+ * remote service. The status is the part that always exists; the body is a bonus.
+ */
+async function readFailure(
+    response: Response,
+): Promise<{ code: string; message: string; missing: string[] }> {
+    const fallback = codeForStatus(response.status);
+    try {
+        const body = await response.json();
+        return {
+            code: typeof body.code === "string" ? body.code : fallback,
+            message: typeof body.message === "string" ? body.message : "",
+            missing: Array.isArray(body.missing)
+                ? (body.missing as string[])
+                : [],
+        };
+    } catch {
+        return { code: fallback, message: "", missing: [] };
+    }
+}
+
 const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.addMediaLibrary");
     const id = useNodeId();
@@ -45,26 +72,27 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ intent: query }),
             });
-            const body = await response.json();
             if (!response.ok) {
+                const failure = await readFailure(response);
                 setOutcome(
-                    body.code === "MISSING_CONFIG"
+                    failure.code === "MISSING_CONFIG"
                         ? {
                               kind: "missing-config",
                               // The server sends the names as DATA; the node
                               // renders one field per name and never parses
                               // them back out of the sentence.
-                              missing: (body.missing ?? []) as string[],
-                              message: String(body.message),
+                              missing: failure.missing,
+                              message: failure.message,
                           }
                         : {
                               kind: "failure",
-                              code: String(body.code),
-                              message: String(body.message),
+                              code: failure.code,
+                              message: failure.message,
                           },
                 );
                 return;
             }
+            const body = await response.json();
             setOutcome({
                 kind: "results",
                 cards: body.cards as MediaCard[],
@@ -98,15 +126,16 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ assetId: card.id }),
             });
-            const body = await response.json();
             if (!response.ok) {
+                const failure = await readFailure(response);
                 setOutcome({
                     kind: "failure",
-                    code: String(body.code),
-                    message: String(body.message),
+                    code: failure.code,
+                    message: failure.message,
                 });
                 return;
             }
+            const body = await response.json();
             if (id) {
                 // Same shape every add node uses: the asset becomes a modality
                 // node downstream, this node keeps nothing.

@@ -1073,7 +1073,8 @@
                     "VERSION_MISMATCH": "Kho đổi phiên bản giao kèo. Đã dừng, không đoán hình dạng dữ liệu.",
                     "BAD_RESPONSE": "Kho trả về hình dạng bản này không nhận.",
                     "NETWORK_ERROR": "Không gọi được tới kho.",
-                    "UPSTREAM_ERROR": "Kho trả lỗi."
+                    "UPSTREAM_ERROR": "Kho trả lỗi.",
+                    "LOCAL_FAILURE": "OneFlow không hoàn tất được việc này ở phía máy của bạn — xem log ứng dụng để biết nguyên nhân thật."
                 },
                 "readFailed": "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
                 "writeFailed": "Không lưu được khoá. Chưa có gì thay đổi."

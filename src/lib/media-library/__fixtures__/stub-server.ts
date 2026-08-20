@@ -32,6 +32,8 @@ export interface StubOptions {
     requireAuth?: boolean;
     /** Answer with a body that is not JSON, to exercise the parse-failure arm. */
     nonJsonBody?: boolean;
+    /** Status for that body — an error page from a proxy is the real-world case. */
+    nonJsonStatus?: number;
 }
 
 export interface StubHandle {
@@ -89,7 +91,9 @@ export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
                 return;
             }
             if (opts.nonJsonBody) {
-                res.writeHead(200, { "content-type": "text/html" });
+                res.writeHead(opts.nonJsonStatus ?? 200, {
+                    "content-type": "text/html",
+                });
                 res.end("<html>not json</html>");
                 return;
             }

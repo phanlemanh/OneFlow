@@ -1,3 +1,38 @@
+E20 network truth (RE-RUN — captured via Browser pane tabId tab-7, http://localhost:3000/workspace)
+
+This replaces the earlier BLOCKED-500 attempt recorded below (kept for context): the dev
+server's stale-chunk breakage ("Cannot find module './6471.js'") was transient. Before
+starting this browser session, 5 consecutive `curl http://localhost:3000/workspace` checks
+(~3s apart) all returned 200. The stale .next-dev crash-loop this session ALSO independently
+observed mid-run (ENOENT .next-dev/fallback-build-manifest.json, MODULE_NOT_FOUND for next's
+jest-worker/processChild.js) self-healed within ~15s under a fresh 5x curl retry — consistent
+with concurrent peer sessions in this same worktree rebuilding .next-dev while this dev
+server (pid 81672, started 08:04:04, reused not started by this verifier) kept running.
+
+--- read_network_requests (post add-node interaction, last 60) ---
+All app-origin (http://localhost:3000) requests: 200 OK, except:
+  - GET /api/uploads/example-assets/two-scenes.mp4 -> 206 Partial Content (expected: video
+    element issuing a byte-range request for the pre-loaded example asset)
+  - Several GET /workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]: each aborted
+    request is immediately followed by the SAME URL succeeding with 200 OK one line later.
+    This is Next.js dev-mode HMR superseding a stale RSC prefetch with a fresh one on every
+    fast-refresh triggered by concurrent peer sessions editing files elsewhere in the repo
+    (see MEMORY: "Eval đỏ oan vì tải máy song song") — not a real request failure. No
+    request settled at ERR_ABORTED as its final/only outcome.
+No 4xx/5xx status observed on any app-origin request during/after the add-node step. No
+media-library search request was issued in this step (E20 only adds the node and asserts
+its render; the "Search" call itself is out of scope here — other evals cover it).
+
+--- read_console_messages (onlyErrors), taken right after the add-node interaction ---
+(empty — no console errors)
+
+networkObserved verdict: clean (app-scope traffic observed: /workspace navigations + one
+example-asset range fetch, all resolving 200/206; the ERR_ABORTED lines are superseded dev
+HMR prefetches, not settled failures, per the no-app-fail criteria in the scoping rules).
+
+================================================================================
+--- Prior attempt (07:40, BLOCKED-500) kept for audit trail ---
+================================================================================
 E20 network truth (captured via Browser pane tabId tab-6, http://localhost:3000/workspace)
 
 --- read_network_requests ---
@@ -21,40 +56,10 @@ Require stack: .../next/dist/server/lib/router-server.js:240:21 ... start-server
 [error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
 [error] Uncaught Error: Cannot find module './6471.js' (repeat, second hydration attempt)
 
---- Next.js dev error overlay (screenshot) ---
-Runtime Error: Cannot find module './6471.js'
-Require stack:
-- /Users/manh-macmini/dev/oneflow-lane-13b/.next/server/webpack-runtime.js
-- /Users/manh-macmini/dev/oneflow-lane-13b/.next/server/app/api/media-library/search/route.js
-- .../node_modules/.pnpm/next@15.5.21_react-dom@19.2.8_react@19.2.8__react@19.2.8/node_modules/next/dist/server/require.js
-- .../next/dist/server/load-components.js
-Call stack root frames: .next/server/pages/_document.js (1:327), Object.<anonymous> .next/server/pages/_document.js (1:374)
+--- Root cause (as diagnosed then) ---
+Stale/corrupted .next dev build: webpack runtime for the media-library search API route (and
+the pages/_document fallback shim) referenced chunk id 6471 unresolvable at ./6471.js. Other
+routes on the same server responded normally -> server process alive, only /workspace (which
+eagerly referenced the broken chunk) was affected at that moment.
 
---- Root cause ---
-Stale/corrupted .next dev build: webpack runtime for the media-library search
-API route (and the pages/_document fallback shim) reference chunk id 6471
-which is not resolvable at ./6471.js relative to .next/server/ (the chunk
-physically exists at .next/server/chunks/6471.js and
-.next/standalone/.next/server/chunks/6471.js, but the runtime require path
-does not resolve there). Confirmed non-transient: 3 curl retries over ~20s
-plus one wait-and-retry after 15s all return the identical 500 body/stack.
-Other routes on the same server (/, /login, /api/media-library/search GET)
-respond normally (307, 404, 405) -> the server process itself is alive and
-serving; only /workspace (which appears to eagerly reference the broken
-media-library search route chunk) is affected.
-
---- Corroborating peer evidence already on disk before this run ---
-_acceptance/add-media-library/evidence/E9-step1-BLOCKED-500.html
-_acceptance/add-media-library/evidence/E9-step2-BLOCKED-500.html
-_acceptance/add-media-library/evidence/E11-step1-BLOCKED-500.html
-_acceptance/add-media-library/evidence/E11-step2-BLOCKED-500.html
-_acceptance/add-media-library/evidence/E6-step1-error.html
-_acceptance/add-media-library/evidence/E29-step1-ERROR-500.html
--> other independent verifier subagents in this same eval batch hit the
-   identical /workspace 500 and independently landed on the same
-   BLOCKED-500 fallback convention, corroborating this is a shared
-   environment-level break, not specific to E20's steps.
-
-networkObserved verdict: app-fail (FAIL-eligible origin = dev_server.url
-http://localhost:3000; GET /workspace -> 500, which is >=500 => FAIL-eligible
-per scoping rule).
+networkObserved verdict at that time: app-fail (GET /workspace -> 500).

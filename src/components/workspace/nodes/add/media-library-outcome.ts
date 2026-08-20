@@ -66,7 +66,31 @@ export function outcomeMessageKey(outcome: Outcome): OutcomeMessageKey {
  * alone. A 200 with that warning is not the same quality of answer as a clean
  * 200, and the node has to say so.
  */
-/** The nine failure codes the boundary can produce, as i18n sub-keys. */
+/**
+ * What a failing response means, read from the STATUS when the body cannot be
+ * parsed.
+ *
+ * The routes answer JSON, but anything in front of them — a dev-server error
+ * page, a proxy — answers HTML. Parsing first and treating a parse failure as
+ * "could not reach the library" turned a full disk into a network problem and
+ * sent the user to check a key that was fine.
+ */
+const STATUS_TO_CODE: Record<number, string> = {
+    400: "BAD_REQUEST",
+    401: "AUTH_REJECTED",
+    403: "MISSING_SCOPE",
+    404: "NOT_FOUND",
+    409: "VERSION_MISMATCH",
+    500: "LOCAL_FAILURE",
+    501: "NOT_IMPLEMENTED",
+    502: "UPSTREAM_ERROR",
+};
+
+export function codeForStatus(status: number): string {
+    return STATUS_TO_CODE[status] ?? "UPSTREAM_ERROR";
+}
+
+/** The failure codes the boundary can produce, as i18n sub-keys. */
 const FAILURE_KEYS = new Set([
     "AUTH_REJECTED",
     "MISSING_SCOPE",
@@ -77,6 +101,7 @@ const FAILURE_KEYS = new Set([
     "BAD_RESPONSE",
     "NETWORK_ERROR",
     "UPSTREAM_ERROR",
+    "LOCAL_FAILURE",
 ]);
 
 /**

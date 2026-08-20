@@ -292,3 +292,46 @@ describe("searchVideos — an absent contracts_version is a mismatch (E21)", () 
         expect(result.failure.code).toBe("UPSTREAM_ERROR");
     });
 });
+
+/**
+ * The high-severity finding from the review round: `call()` parsed the body
+ * before it looked at the status, so any error response that was not JSON lost
+ * its status entirely and surfaced as BAD_RESPONSE. That is the NORMAL shape for
+ * infrastructure in front of the service — an nginx or CDN 401/403/502 ships an
+ * HTML page — so a rejected key was reported as a protocol mismatch and the user
+ * was pointed at the wrong fix.
+ */
+describe("searchVideos — a non-JSON ERROR body keeps its status (E10)", () => {
+    it.each([
+        [401, "AUTH_REJECTED"],
+        [403, "MISSING_SCOPE"],
+        [404, "NOT_FOUND"],
+        [502, "UPSTREAM_ERROR"],
+    ])("HTML %i from a proxy classifies as %s", async (status, code) => {
+        stub = await startStub({ nonJsonBody: true, nonJsonStatus: status });
+        point(stub);
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe(code);
+    });
+
+    /**
+     * SUPPRESSION: a non-JSON body on a SUCCESS response is still BAD_RESPONSE —
+     * there the body IS the information and losing it is fatal. Without this
+     * half, "keep the status" could be implemented as "never report
+     * BAD_RESPONSE", which would hide a genuinely malformed 200.
+     */
+    it("still reports BAD_RESPONSE when a 200 body will not parse", async () => {
+        stub = await startStub({ nonJsonBody: true, nonJsonStatus: 200 });
+        point(stub);
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe("BAD_RESPONSE");
+    });
+});

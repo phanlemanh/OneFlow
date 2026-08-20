@@ -6,6 +6,10 @@ import { getAsset } from "@/lib/media-library/client.server";
 import { resolveConfig } from "@/lib/media-library/config.server";
 import type { MediaLibraryFailure } from "@/lib/media-library/errors";
 import { extensionFor } from "@/lib/media-library/extension";
+import {
+    checkFetchTarget,
+    isPrivateHost,
+} from "@/lib/media-library/url-safety";
 
 /**
  * Bytes cross the boundary ONLY over the signed URL (ADR-0012 guarantee #1),
@@ -29,55 +33,33 @@ export type ImportResult =
     | { ok: true; fileKey: string }
     | { ok: false; failure: MediaLibraryFailure };
 
-const PRIVATE_HOST =
-    /^(localhost$|127\.|0\.0\.0\.0$|169\.254\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1)/i;
-
-/**
- * `devLocalHost` is the host:port of the configured library when — and only
- * when — that library is itself a localhost dev instance. A bare "any localhost
- * is fine in development" exemption would let a library response point at ANY
- * port on the developer's machine and have OneFlow fetch it.
- */
-function guardUrl(
-    raw: string,
-    devLocalHost: string | null,
-): MediaLibraryFailure | null {
-    let url: URL;
-    try {
-        url = new URL(raw);
-    } catch {
-        return {
-            code: "BAD_RESPONSE",
-            message: "URL ký của media-library không hợp lệ.",
-        };
-    }
-
-    const exempt = devLocalHost !== null && url.host === devLocalHost;
-
-    if (url.protocol !== "https:" && !exempt) {
-        return {
-            code: "BAD_RESPONSE",
-            message: `Từ chối tải: URL ký không dùng https (${url.protocol}//).`,
-        };
-    }
-    if (PRIVATE_HOST.test(url.hostname) && !exempt) {
-        return {
-            code: "BAD_RESPONSE",
-            message: `Từ chối tải: URL ký trỏ tới host nội bộ (${url.hostname}).`,
-        };
-    }
-    return null;
-}
-
 /** The configured library's host:port, but only if it is a local dev instance. */
 function devLocalHostOf(baseUrl: string): string | null {
     if (process.env.NODE_ENV === "production") return null;
     try {
         const url = new URL(baseUrl);
-        return PRIVATE_HOST.test(url.hostname) ? url.host : null;
+        return isPrivateHost(url.hostname) ? url.host : null;
     } catch {
         return null;
     }
+}
+
+const REFUSAL: Record<string, (detail: string) => string> = {
+    malformed: () => "URL ký của media-library không hợp lệ.",
+    scheme: (d) => `Từ chối tải: URL ký không dùng https (${d}//).`,
+    "private-host": (d) => `Từ chối tải: URL ký trỏ tới host nội bộ (${d}).`,
+};
+
+function guardUrl(
+    raw: string,
+    devLocalHost: string | null,
+): MediaLibraryFailure | null {
+    const verdict = checkFetchTarget(raw, devLocalHost);
+    if (verdict.ok) return null;
+    return {
+        code: "BAD_RESPONSE",
+        message: REFUSAL[verdict.reason](verdict.detail),
+    };
 }
 
 /**

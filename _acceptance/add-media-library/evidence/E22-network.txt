@@ -1,0 +1,25 @@
+E22 network dump — /proto/add-media-library?state=error
+Driver: mcp__Claude_Browser (read_network_requests / read_console_messages)
+dev_server.url in config: http://localhost:3000 (no api_base declared)
+
+--- network requests ---
+[5BA8E325F99DC1A0D4E17FD10E34BCFE] GET http://localhost:3000/proto/add-media-library?state=error -> 200 OK
+[13330.38] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[13330.39] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[13330.40] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787188359323 -> 200 OK
+[13330.42] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787188359323 -> 200 OK
+[13330.43] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787188359323 -> 200 OK
+[13330.44] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[13330.45] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[13330.46] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+
+--- console messages ---
+[info] Download the React DevTools for a better development experience...
+[info] (duplicate)
+
+--- classification ---
+No fetch/XHR calls observed at all. The document GET and all other entries are
+the page navigation + static assets (fonts, css, js chunks) — none are
+fetch/XHR app-scope calls. Matches proto component's own doc comment:
+"Fixtures only. No fetch, no key read, no write path."
+=> networkObserved = no-app-traffic
