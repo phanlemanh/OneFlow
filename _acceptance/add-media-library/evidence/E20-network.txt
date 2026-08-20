@@ -1,171 +1,84 @@
-E20 network truth (RE-RUN 3, independent verifier subagent, 2026-08-20 ~10:45
-local — Claude_Browser tabId tab-11 (interactive, manual click) PLUS a
-second, separate one-off puppeteer-core script (own Chrome process, own
-page, http://localhost:3000/workspace) for a scripted/repeatable capture)
-
-Dev server: already running before this round started (pid 16613, confirmed
-via `lsof -nP -iTCP:3000 -sTCP:LISTEN`) — reused, not started or stopped by
-this verifier, consistent with RE-RUN 2's note.
-
-Interactive driver (Claude_Browser tab-11): clicked the bottom-toolbar
-library icon, then (mid-session) the tab briefly rendered a `data-proto-state
-="error"` prototype fallback page (readonly input, hardcoded
-MEDIA_LIBRARY_API_KEY error text, zero react-flow DOM) instead of the real
-canvas -- almost certainly a peer session's Next.js HMR full-reload or route
-change bleeding into this shared tab (see MEMORY: "Hai phiên một cây"). This
-frame was NOT used as evidence. Re-navigating to /workspace restored the
-real react-flow canvas; the add-node click was repeated there and confirmed
-via read_page (new node group with heading "Load from library" + Search
-button appeared, node count 3 -> 4 pre-existing-demo "Load from library"
-nodes) and via zoom screenshot (visible dot-grid canvas background, node
-title "Load from library", one small handle dot on the node's right edge).
-
-Scripted driver (separate puppeteer-core process, does not share state with
-tab-11): navigate /workspace -> networkidle2 -> click svg.lucide-library
-toolbar button -> node count 6 -> 7. DOM-level handle check on the new node:
-  handles: [{ class: "react-flow__handle react-flow__handle-right nodrag
-  nopan source connectable connectableend", posClass: "react-flow__handle-
-  right", source: true }], handleCount: 1, relLeft 547.2/552 (flush against
-  the node's right edge). headingText: "Load from library". Exactly ONE
-  handle, positioned right, role=source -- matches AC-12 step 2 literally.
-  Screenshot (clipped to the node + 60px padding) saved to
-  evidence/E20-step1.png (real canvas: visible dot-grid background,
-  overlapping the pre-existing "Split Video" demo node -- not a proto page).
-  consoleErrors: [], pageErrors: [], failedRequests (incl. any 5xx response):
-  [] for the whole navigate+click sequence.
-
-No search text was entered and Search was not clicked in either driver, so
-neither run fires the media-library backend fetch -- only client-side node
-instantiation is exercised, matching this eval's step scope (E20 only adds
-the node and asserts its render; the Search/backend call is covered by other
-evals, e.g. E9/E11/E16/E21).
-
-networkObserved verdict (this round): no-app-traffic for the scripted
-driver (zero XHR/fetch beyond the initial page load -- no search submitted,
-nothing to observe beyond "nothing failed"); the interactive driver's one
-proto-page detour produced no network errors either (it is a client-side
-render swap, not a failed request) and self-corrected on re-navigation. No
-4xx/5xx, no connection-error/timeout, in either driver. This is consistent
-with, and does not contradict, RE-RUN 2's independent "clean" verdict below
-(that round additionally observed real app-scope XHR traffic because its
-canvas already had pending example-asset fetches in flight; this round's
-narrower scripted driver simply issued no such calls).
-
-================================================================================
---- Prior attempt (RE-RUN 2) kept for audit trail ---
-================================================================================
-E20 network truth (RE-RUN 2, this verifier round — Claude_Browser tabId tab-11 +
-a one-off puppeteer-core capture script, http://localhost:3000/workspace)
-
-Dev server: already running for this exact worktree before this round started (pid 16613,
-cwd /Users/manh-macmini/dev/oneflow-lane-13b, confirmed via `lsof`/`ps`) — reused, not
-started or stopped by this verifier.
-
-Step: clicked the "Load from library" icon in the bottom add-node toolbar (the 8th
-IconButton in smart-island.tsx's addToolbar, svg.lucide-library, inside the rounded-2xl
-toolbar container) via two independent drivers:
-  1. Claude_Browser (interactive tab-11) — DOM check after click: node
-     2ef8a572-187f-4645-a694-6092c1a678f2, textSnippet "Load from librarySearch", exactly
-     one handle {id: out:videoNode, pos: right, sourceType: source}. No target handle.
-  2. A fresh puppeteer-core session (own Chrome process, own page) — nodeCountBefore=6,
-     nodeCountAfter=7, newNode {title: "Load from library", handles: [{id: out:videoNode,
-     pos: right, source: true, target: false}]}, consoleErrors=[], failedRequests=[].
-     Screenshot saved to evidence/E20-step1.png (1280x800 PNG, verified by opening it).
-
---- read_network_requests on tab-11 (post add-node interaction, last 60) ---
-All app-origin (http://localhost:3000) business calls (/api/plugins/registry,
-/example.json, /api/feature/list, /api/uploads/example-assets/two-scenes.mp4,
-/api/task/pending) -> 200/206 OK. No 4xx/5xx anywhere in the log.
-
-Also present: a burst of "/workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]" and one
-"/proto/add-media-library?state=results&_rsc=... [FAILED: net::ERR_ABORTED]", interleaved
-with a continuous webpack hot-update cascade (css ?v= timestamps climbing
-1787193061102..1787193266895, i.e. ~200s of back-to-back HMR recompiles). net::ERR_ABORTED
-here is a client-side cancellation (Next.js superseding an in-flight RSC prefetch with the
-next one on every fast-refresh), not a reachability/server failure — consistent with a peer
-session actively editing source files on this same shared dev server while this tab sat
-open (see MEMORY: "Hai phiên một cây" / "Eval đỏ oan vì tải máy song song"; this round's
-evidence dir already contained fresh E2/E4/E6/E9/E11/E16/E22/E29 PNGs written minutes
-earlier, confirming a concurrent peer verifier was running other evals of this same batch).
-No request in this set has a genuine connection-error/timeout/5xx as its settled outcome.
-
---- read_console_messages (onlyErrors) on tab-11, taken right after the add-node click ---
-(empty — "No console logs.")
-
---- puppeteer-core session (independent page/process) ---
-requestfailed listener: [] (empty)
-console "error" listener: [] (empty)
-
-networkObserved verdict (this round): clean — app-scope traffic observed across both
-drivers, no unexpected 4xx/5xx, no genuine unreachable/timeout; the ERR_ABORTED lines are
-superseded dev-HMR RSC prefetches from concurrent peer activity, not settled failures.
-Matches the RE-RUN 1 verdict below independently.
-
-================================================================================
---- Prior attempt (RE-RUN 1, ~08:19) kept for audit trail ---
-================================================================================
-E20 network truth (RE-RUN — captured via Browser pane tabId tab-7, http://localhost:3000/workspace)
-
-This replaces the earlier BLOCKED-500 attempt recorded below (kept for context): the dev
-server's stale-chunk breakage ("Cannot find module './6471.js'") was transient. Before
-starting this browser session, 5 consecutive `curl http://localhost:3000/workspace` checks
-(~3s apart) all returned 200. The stale .next-dev crash-loop this session ALSO independently
-observed mid-run (ENOENT .next-dev/fallback-build-manifest.json, MODULE_NOT_FOUND for next's
-jest-worker/processChild.js) self-healed within ~15s under a fresh 5x curl retry — consistent
-with concurrent peer sessions in this same worktree rebuilding .next-dev while this dev
-server (pid 81672, started 08:04:04, reused not started by this verifier) kept running.
-
---- read_network_requests (post add-node interaction, last 60) ---
-All app-origin (http://localhost:3000) requests: 200 OK, except:
-  - GET /api/uploads/example-assets/two-scenes.mp4 -> 206 Partial Content (expected: video
-    element issuing a byte-range request for the pre-loaded example asset)
-  - Several GET /workspace?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]: each aborted
-    request is immediately followed by the SAME URL succeeding with 200 OK one line later.
-    This is Next.js dev-mode HMR superseding a stale RSC prefetch with a fresh one on every
-    fast-refresh triggered by concurrent peer sessions editing files elsewhere in the repo
-    (see MEMORY: "Eval đỏ oan vì tải máy song song") — not a real request failure. No
-    request settled at ERR_ABORTED as its final/only outcome.
-No 4xx/5xx status observed on any app-origin request during/after the add-node step. No
-media-library search request was issued in this step (E20 only adds the node and asserts
-its render; the "Search" call itself is out of scope here — other evals cover it).
-
---- read_console_messages (onlyErrors), taken right after the add-node interaction ---
-(empty — no console errors)
-
-networkObserved verdict: clean (app-scope traffic observed: /workspace navigations + one
-example-asset range fetch, all resolving 200/206; the ERR_ABORTED lines are superseded dev
-HMR prefetches, not settled failures, per the no-app-fail criteria in the scoping rules).
-
-================================================================================
---- Prior attempt (07:40, BLOCKED-500) kept for audit trail ---
-================================================================================
-E20 network truth (captured via Browser pane tabId tab-6, http://localhost:3000/workspace)
-
---- read_network_requests ---
-[43025.13] GET http://localhost:3000/_next/static/development/_devMiddlewareManifest.json -> 200 OK
-[43025.14] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK
-[43025.17] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
-[43025.18] GET http://localhost:3000/__nextjs_font/geist-mono-latin.woff2 -> 200 OK
-[6E84F22C2A985409104E4B7D5F2653F2] GET http://localhost:3000/workspace [FAILED: net::ERR_ABORTED]
-[43025.19] GET http://localhost:3000/_next/static/webpack/5e91f54f097e83e5.webpack.hot-update.json -> 404 Not Found
-[01DDBE327BC03C74507BF8DBDA5CD1DD] GET http://localhost:3000/workspace -> 500 Internal Server Error
-[43025.21..25] GET fallback chunks (webpack.js, main.js, pages/_app.js, pages/_error.js, react-refresh.js) -> 200 OK
-[43025.32] GET http://localhost:3000/_next/static/development/_devMiddlewareManifest.json -> 200 OK
-[43025.33] POST http://localhost:3000/__nextjs_original-stack-frames -> 200 OK
-[43025.36] GET http://localhost:3000/__nextjs_font/geist-latin.woff2 -> 200 OK
-[43025.37] GET http://localhost:3000/__nextjs_font/geist-mono-latin.woff2 -> 200 OK
-
---- read_console_messages (onlyErrors) ---
-[error] Uncaught Error: Cannot find module './6471.js'
-Require stack: .../next/dist/server/lib/router-server.js:240:21 ... start-server.js, __NEXT_ERROR_CODE: E394
-[error] Failed to load resource: the server responded with a status of 404 (Not Found)
-[error] Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-[error] Uncaught Error: Cannot find module './6471.js' (repeat, second hydration attempt)
-
---- Root cause (as diagnosed then) ---
-Stale/corrupted .next dev build: webpack runtime for the media-library search API route (and
-the pages/_document fallback shim) referenced chunk id 6471 unresolvable at ./6471.js. Other
-routes on the same server responded normally -> server process alive, only /workspace (which
-eagerly referenced the broken chunk) was affected at that moment.
-
-networkObserved verdict at that time: app-fail (GET /workspace -> 500).
+=== E20 network dump (app-scope = http://localhost:3000) ===
+consoleErrors: []
+pageErrors: []
+failedRequests (status>=400 or requestfailed): []
+total responses observed: 25
+app-origin responses: 19
+[
+  {
+    "url": "http://localhost:3000/workspace",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/css/app/layout.css?v=1787199950015",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787199950015",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/webpack.js?v=1787199950015",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app/layout.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/main-app.js?v=1787199950015",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app/workspace/page.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/apple-touch-icon.png",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/apple-touch-icon.png",
+    "status": 304
+  },
+  {
+    "url": "http://localhost:3000/example.json",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/example.json",
+    "status": 304
+  },
+  {
+    "url": "http://localhost:3000/api/plugins/registry",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/feature/list",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/uploads/example-assets/two-scenes.mp4",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/uploads/example-assets/two-scenes.mp4",
+    "status": 206
+  },
+  {
+    "url": "http://localhost:3000/api/task/pending",
+    "status": 200
+  }
+]

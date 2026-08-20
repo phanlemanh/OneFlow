@@ -41,6 +41,13 @@ export interface StubOptions {
      * response, so a timeout can only fire while the stream is being read.
      */
     hangBytes?: boolean;
+    /**
+     * Promise a long JSON body, send a fragment, then destroy the socket. This
+     * is what a connection dropped mid-body looks like to undici: headers have
+     * already arrived, so `fetch` resolves and `response.json()` is the call
+     * that rejects — with a TypeError, not an AbortError.
+     */
+    truncateBody?: boolean;
 }
 
 export interface StubHandle {
@@ -101,6 +108,22 @@ export async function startStub(opts: StubOptions = {}): Promise<StubHandle> {
                     error: "unauthorized",
                     contracts_version: version,
                 });
+                return;
+            }
+            if (opts.truncateBody) {
+                // Chunked (NO content-length) and a real pause before the
+                // socket dies. Both details matter, and the first attempt got
+                // them wrong: promising a content-length and destroying
+                // immediately makes `fetch` ITSELF reject, so the failure never
+                // reaches the body parser at all and a test written against it
+                // passes through the network-error arm while proving nothing
+                // about parse classification. Measured with a probe rather than
+                // assumed. This shape gives: fetch resolves 200, then
+                // `response.json()` rejects with `TypeError: terminated`
+                // (cause UND_ERR_SOCKET) — the case the split exists for.
+                res.writeHead(200, { "content-type": "application/json" });
+                res.write('{"contracts_version":"0.2.0","cards":[');
+                setTimeout(() => res.socket?.destroy(), 120);
                 return;
             }
             if (opts.nonJsonBody) {

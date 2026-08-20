@@ -3,10 +3,10 @@
   "nodeCountAfter": 7,
   "clickResult": {
     "ok": true,
-    "count": 9,
+    "count": 1,
     "rect": {
-      "x": 548,
-      "y": 736,
+      "x": 628,
+      "y": 836,
       "w": 40,
       "h": 40
     }

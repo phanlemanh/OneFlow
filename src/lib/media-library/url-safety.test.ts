@@ -32,6 +32,12 @@ const PRIVATE = [
     ["IPv4-mapped IPv6, RFC1918", "https://[::ffff:10.0.0.5]/x"],
     ["localhost", "https://localhost/x"],
     ["localhost subdomain", "https://api.localhost/x"],
+    // The absolute-FQDN spellings. WHATWG keeps the root label's trailing dot
+    // on NAMES (it strips it from dotted-quad IPs), so `localhost.` reached the
+    // guard as a host that matched no branch at all and was allowed through.
+    ["localhost, absolute FQDN", "https://localhost./x"],
+    ["localhost subdomain, absolute FQDN", "https://api.localhost./x"],
+    ["localhost, several trailing dots", "https://localhost.../x"],
 ] as const;
 
 const PUBLIC = [
@@ -46,6 +52,9 @@ const PUBLIC = [
     ["just below RFC1918 172", "https://172.15.0.1/x"],
     ["just above RFC1918 172", "https://172.32.0.1/x"],
     ["not-localhost lookalike", "https://notlocalhost.example/x"],
+    // Stripping the trailing dot must not start refusing ordinary absolute
+    // FQDNs: a public name with a root label is still public.
+    ["public host, absolute FQDN", "https://cdn.example./clip.mp4"],
 ] as const;
 
 describe("isPrivateHost — every spelling a URL can carry", () => {
@@ -66,8 +75,8 @@ describe("isPrivateHost — every spelling a URL can carry", () => {
     }
 
     it("covers both directions, so neither list can quietly empty out", () => {
-        expect(PRIVATE.length).toBeGreaterThanOrEqual(21);
-        expect(PUBLIC.length).toBeGreaterThanOrEqual(8);
+        expect(PRIVATE.length).toBeGreaterThanOrEqual(24);
+        expect(PUBLIC.length).toBeGreaterThanOrEqual(9);
     });
 });
 

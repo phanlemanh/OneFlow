@@ -59,7 +59,14 @@ function isPrivateIpv6(host: string): boolean {
 }
 
 export function isPrivateHost(host: string): boolean {
-    const lower = host.toLowerCase();
+    // Strip the root label's trailing dot FIRST. `https://localhost./x` is a
+    // valid absolute FQDN and WHATWG normalisation keeps the dot, so the
+    // hostname arrives as `localhost.` and matched neither name branch — not
+    // dotted-quad, no brackets, so both IP tests declined it too, and the
+    // fetch went to loopback. The IPv4 spellings do NOT have this hole
+    // (`127.0.0.1.` normalises the dot away), which is exactly why the name
+    // branch was the one left open.
+    const lower = host.toLowerCase().replace(/\.+$/, "");
     if (lower === "localhost" || lower.endsWith(".localhost")) return true;
     return isPrivateIpv4(lower) || isPrivateIpv6(lower);
 }

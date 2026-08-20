@@ -77,9 +77,19 @@ async function call<T>(
     } catch (error) {
         parsed = false;
         body = {};
+        // TypeError belongs here and was missing: the comment above named it,
+        // the list did not. undici rejects `response.json()` with
+        // `TypeError: terminated` (cause ECONNRESET / UND_ERR_SOCKET) when the
+        // socket dies AFTER the headers arrived — the exact case this split
+        // exists for. Without it a dropped connection landed in the "shape" arm
+        // and told the user the library had answered in an unsupported shape,
+        // sending them to check a contract version over a network fault. The
+        // transport arm was only ever reachable through the timeout.
         const name = error instanceof Error ? error.name : "";
         parseFailure =
-            name === "AbortError" || name === "TimeoutError"
+            name === "AbortError" ||
+            name === "TimeoutError" ||
+            name === "TypeError"
                 ? "transport"
                 : "shape";
         // The fetch catch above logs; this one used to stay silent, which is

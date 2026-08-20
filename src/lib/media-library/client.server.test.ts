@@ -335,3 +335,44 @@ describe("searchVideos — a non-JSON ERROR body keeps its status (E10)", () => 
         expect(result.failure.code).toBe("BAD_RESPONSE");
     });
 });
+
+/**
+ * The connection-dropped-mid-body case, which nothing covered.
+ *
+ * `call()` splits a parse failure into "transport" and "shape" so a dead socket
+ * is not reported as a contract problem — but the list only held AbortError and
+ * TimeoutError, so the transport arm was reachable ONLY through the timeout. A
+ * real drop arrives as `TypeError: terminated` from undici and fell into the
+ * shape arm, telling the user the library had answered in an unsupported shape
+ * when the truth was the network.
+ */
+describe("a body that stops mid-stream is a network fault, not a bad shape", () => {
+    it("reports NETWORK_ERROR when the socket dies after the headers", async () => {
+        stub = await startStub({ truncateBody: true });
+        store.env = { MEDIA_LIBRARY_URL: stub.url, MEDIA_LIBRARY_API_KEY: "k" };
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe("NETWORK_ERROR");
+        // Pinned, so a future edit cannot satisfy this with the contract line.
+        expect(result.failure.message).not.toMatch(/hình dạng|shape/i);
+    });
+
+    /**
+     * SUPPRESSION: a body that is merely NOT JSON — a proxy's HTML page on a
+     * 200 — must still be BAD_RESPONSE. Widening the transport arm until it
+     * swallowed this would trade one misdirection for the opposite one.
+     */
+    it("still calls a non-JSON 200 body a bad shape", async () => {
+        stub = await startStub({ nonJsonBody: true, nonJsonStatus: 200 });
+        store.env = { MEDIA_LIBRARY_URL: stub.url, MEDIA_LIBRARY_API_KEY: "k" };
+
+        const result = await searchVideos("x");
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.failure.code).toBe("BAD_RESPONSE");
+    });
+});
