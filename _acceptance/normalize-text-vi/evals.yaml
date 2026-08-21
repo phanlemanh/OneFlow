@@ -72,7 +72,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_residual_pass
     paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
-    expected: "exit 0; cùng fixture ở dạng lành → success:true, đầu ra KHÔNG chứa ký tự 0-9 / ₫ / % / dấu gạch giữa hai số; VÀ luật QUAN HỆ: mọi ca corpus có dấu hiệu tiền ở đầu vào (₫, đ, VNĐ, VND) phải có từ chỉ tiền ở đầu ra — assert quan hệ vào↔ra trên từng ca, không phải assert vắng-mặt trên đầu ra. Chiều đỏ ghim: bỏ bước đổi ₫→đ ở tiền xử lý thì 1.999.000₫ ra 'một triệu chín trăm chín mươi chín nghìn' — không còn chữ số nên luật vắng-mặt vẫn xanh, chỉ luật quan hệ mới đỏ, và thông điệp phải nêu đúng ca đó"
+    expected: "exit 0; cùng fixture ở dạng lành → success:true, đầu ra KHÔNG chứa ký tự 0-9 / ₫ / % / dấu gạch giữa hai số; VÀ luật QUAN HỆ: mọi ca corpus có dấu hiệu tiền ở đầu vào (₫, đ, VNĐ, VND) phải có từ chỉ tiền ở đầu ra — assert quan hệ vào↔ra trên từng ca, không phải assert vắng-mặt trên đầu ra, VÀ mỏ neo dương độc lập: has_money phải True trên danh sách literal 5 cách viết tiền (predicate chết luôn-False từng rỗng-hoá cả vòng quan hệ lẫn luật runtime mà không test nào đỏ — S4-r2). Chiều đỏ ghim: bỏ bước đổi ₫→đ ở tiền xử lý thì 1.999.000₫ ra 'một triệu chín trăm chín mươi chín nghìn' — không còn chữ số nên luật vắng-mặt vẫn xanh, chỉ luật quan hệ mới đỏ, và thông điệp phải nêu đúng ca đó"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E7
@@ -88,7 +88,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_edges
     paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
-    expected: "exit 0; rỗng/chỉ khoảng trắng → success:false + error rõ (thư viện tự nó trả chuỗi rỗng không báo lỗi — đây là việc của vỏ ta, phải có ca chứng minh); văn bản thuần chữ ra y nguyên TRỪ dạng chữ (so byte với bản lower() của đầu vào, không so 'gần giống'); chuỗi ≥10.000 ký tự và emoji/URL/email không crash; HAI ASSERT QUAN HỆ bắt buộc: unicodedata.is_normalized('NFC', out) đúng trên TOÀN corpus, và normalize(NFD(x)) == normalize(NFC(x)) byte-identical với mọi ca corpus có dấu. Chiều đỏ: gỡ bước chuẩn hoá dạng ở tiền xử lý → assert đỏ nêu đúng chuỗi nào lệch dạng"
+    expected: "exit 0; rỗng/chỉ khoảng trắng → success:false + error rõ (thư viện tự nó trả chuỗi rỗng không báo lỗi — đây là việc của vỏ ta, phải có ca chứng minh); văn bản thuần chữ ra y nguyên TRỪ dạng chữ (so byte với bản lower() của đầu vào, không so 'gần giống'); chuỗi ≥10.000 ký tự và emoji/URL/email không crash; HAI ASSERT QUAN HỆ bắt buộc: unicodedata.is_normalized('NFC', out) đúng trên TOÀN corpus, và normalize(NFD(x)) == normalize(NFC(x)) byte-identical với mọi ca corpus có dấu, VÀ .ok + has_money cũng phải khớp giữa hai dạng — bản đầu chỉ so .text nên lỗ NFD của luật tiền vô hình (S4-r1). Chiều đỏ: gỡ bước chuẩn hoá dạng ở tiền xử lý → assert đỏ nêu đúng chuỗi nào lệch dạng"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9a
@@ -96,7 +96,7 @@ evals:
     executor: test
     cmd: config:executors.test.unit_normalize_node
     paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx", "src/lib/abi/node-feature-registry.ts", "src/components/workspace/types.tsx"]
-    expected: "exit 0; node mount, handles đúng ABI (in:text, out:text); sourceSpec là textBatch() nên fan-out một-lời-gọi-mỗi-chuỗi GIỐNG node TTS (so trực tiếp với spec của textGenSpeechPresetNode, không hardcode kỳ vọng)"
+    expected: "exit 0; node mount, handles đúng ABI (in:text, out:text); sourceSpec là textBatch() nên fan-out một-lời-gọi-mỗi-chuỗi GIỐNG node TTS (so trực tiếp với spec của textGenSpeechPresetNode, không hardcode kỳ vọng); test đăng ký đọc LẠI registry qua getAbiNodeRegistration chứ không assert hằng khai báo (xoá lời gọi register mà test vẫn xanh là lỗ đã vá — S4-r1)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9b
@@ -149,7 +149,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_tier_a_allowlist
     paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py", "config/tongflow.abi.json"]
-    expected: "exit 0; guard allowlist hai chiều vẫn xanh sau khi thêm slot — danh sách ghim khớp TIER_A_SLOTS và mọi slot trong đó tồn tại trong ABI"
+    expected: "exit 0; danh sách ghim khớp TIER_A_SLOTS VÀ quan hệ TIER_A_SLOTS ⊆ tập slot của ABI đo NGAY TRONG test mang tên _and_in_abi (trước đây quan hệ này sống ở node-id executor không chọn — slot ma cấy vào cả hằng lẫn literal vẫn xanh, S4-r2; chiều đỏ đã chứng minh: slot ma → đỏ nêu đúng tên)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12a
@@ -158,7 +158,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_normalize_conformance
     paths: ["sdk/tests/conformance/", "config/tongflow.abi.json", "sdk/tongflow/engine/"]
-    expected: "exit 0; fixture normalize-text-vi chạy qua đường engine-Python khớp đường canvas-TS: cùng số lời gọi, mỗi lời gọi nhận text scalar (không batch fan-out nhầm tầng)"
+    expected: "exit 0; fixture normalize-text-vi chạy qua đường engine-Python khớp đường canvas-TS: cùng số lời gọi, mỗi lời gọi nhận text scalar (không batch fan-out nhầm tầng). Known limit khai trong sổ (descope S4-r2): khối workflow của fixture là bản viết tay, exportWorkflow chưa được round-trip đối chiếu với fixture — mở lại khi sửa wire-format"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12b
@@ -199,7 +199,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.script.normalize_plugin_shell
     paths: ["sdk/tongflow/text/", "sdk/tongflow/slots.py", "scripts/plugins/run-normalize-plugin-tests.sh"]
-    expected: "exit 0; gọi slot method THẬT của vỏ plugin qua @node_slot với dict {'text': '<một dòng corpus>'} → success:true và text khớp ĐÚNG dòng corpus đó, so với hằng số corpus DÙNG CHUNG (không viết lại kỳ vọng tại chỗ); spy chứng minh hàm SDK được gọi ĐÚNG MỘT LẦN — chặn kịch bản vỏ tự cài lại logic hoặc vỏ trả thẳng input"
+    expected: "exit 0; gọi slot method THẬT của vỏ plugin qua @node_slot với dict {'text': '<một dòng corpus>'} → success:true và text khớp ĐÚNG dòng corpus đó, so với hằng số corpus DÙNG CHUNG (không viết lại kỳ vọng tại chỗ); spy chứng minh hàm SDK được gọi ĐÚNG MỘT LẦN — chặn kịch bản vỏ tự cài lại logic hoặc vỏ trả thẳng input; vietnormalizer pin DERIVE từ sdk/pyproject.toml khi cài môi trường vỏ (bare --with từng kéo bản mới nhất từ PyPI — S4-r2)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E17b
