@@ -34,7 +34,7 @@ thích sản phẩm thương mại AGPL-3.0). `soe-vinorm` bị loại vì cần
 đi ngược cả tính tất định lẫn local-first ([ADR-0011](../../docs/adr/0011-local-first-execution.md)).
 
 **Tiền đề của vòng verify** *(khai sau phản biện context sạch — F4)*: hai mệnh đề của AC-13
-nằm **ngoài cây mã** — bản 0.2.19 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
+nằm **ngoài cây mã** — bản 0.2.20 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
 **người** (publish cần TWINE credential; pin là một commit ở repo khác) và **không đảo ngược**
 (đã publish lên PyPI thì không rút lại được). Vì vậy: `E14a` (ngoại tuyến) chạy mọi vòng;
 `E14b` (trực tuyến) chỉ có nghĩa **sau khi owner đã ký cho phép publish**. Vòng S4 chạy trước
@@ -158,10 +158,10 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   locale (en/vi/ja/ko/zh) dưới namespace `normalizeTextVi.*`.
   Cùng tiêu chí này, **release train** *(gộp từ AC-14 cũ; tách đôi phép đo theo F4)*: nhánh
   **ngoại tuyến** — `sdk/pyproject.toml` và `sdk/tongflow/__init__.py` cùng phiên bản
-  **0.2.19** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
+  **0.2.20** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
   từ vị trí script chứ không từ cwd), `vietnormalizer==0.2.3` khai trong `dependencies` với
-  pin chính xác; nhánh **trực tuyến** — 0.2.19 đã publish lên PyPI, bản publish chứa
-  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.19`.
+  pin chính xác; nhánh **trực tuyến** — 0.2.20 đã publish lên PyPI, bản publish chứa
+  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.20`.
   *Trình tự cứng: publish SDK trước khi plugin pin — xem tiền đề ở mục Context.*
 - AC-14: (cross-layer) *(thêm sau phản biện context sạch — F1)* Given slot method THẬT của
   plugin `oneflow-api-normalize-text-vi` (không phải fake handler của test cache), When gọi
