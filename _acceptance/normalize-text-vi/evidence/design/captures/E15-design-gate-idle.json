@@ -1,7 +1,7 @@
 {
-  "run_id": "design-gate-fcaae12c9a",
+  "run_id": "design-gate-2f3638b293",
   "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
-  "verified_at": "2026-08-21T06:24:34.370Z",
+  "verified_at": "2026-08-21T07:21:59.026Z",
   "target": "_acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.html",
   "fail_on": [
     "P0"
@@ -14,6 +14,7 @@
   "hits": [
     "cramped-padding",
     "nested-cards",
+    "flat-type-hierarchy",
     "gradient-text"
   ],
   "findings": [
@@ -33,19 +34,7 @@
       "rule": "cramped-padding",
       "severity": "warning",
       "pTier": "P2",
-      "detail": "<div> \"react-flow\": children flush against border on all sides (no inset)"
-    },
-    {
-      "rule": "cramped-padding",
-      "severity": "warning",
-      "pTier": "P2",
-      "detail": "<div> \"react-flow__viewport\": children flush against border on all sides (no inset)"
-    },
-    {
-      "rule": "cramped-padding",
-      "severity": "warning",
-      "pTier": "P2",
-      "detail": "<div> \"react-flow__node\": children flush against border on all sides (no inset)"
+      "detail": "<div> \"react-flow\": children flush against border+bg on all sides (no inset)"
     },
     {
       "rule": "cramped-padding",
@@ -90,10 +79,10 @@
       "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
     },
     {
-      "rule": "cramped-padding",
+      "rule": "flat-type-hierarchy",
       "severity": "warning",
       "pTier": "P2",
-      "detail": "<div> \"react-flow__panel\": children flush against border on all sides (no inset)"
+      "detail": "Sizes: 10px, 16px, 18.7px (ratio 1.9:1)"
     },
     {
       "rule": "gradient-text",

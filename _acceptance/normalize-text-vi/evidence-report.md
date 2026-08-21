@@ -1,14 +1,14 @@
 ---
 schema_version: 2
 feature_slug: normalize-text-vi
-verdict: PENDING-JUDGMENT
+verdict: REJECT
 failed_evals: []
-reason:
+reason: 
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a60ccac04f11450d79eb8329587bac840289c628
-human_signoff:
+verified_commit: 9043ef6753ce72fdcd072b74b602af68c6f2f20b
+human_signoff: 
 ---
 
 # Evidence Report: normalize-text-vi
@@ -40,7 +40,17 @@ human_signoff:
 | E17a | AC-14 | script | PASS |
 | E17b | AC-14 | script | PASS |
 | E15 | AC-15 | ui-check | PASS |
-| E16 | AC-15 | judgment | UNCERTAIN |
+| E16 | AC-15 | judgment | FAIL |
+
+## Analyst
+
+carried tu round 2 — baseline khong do lai round nay
+
+Eval KHÔNG-PHÂN-BIỆT (pass trên cả HEAD lẫn baseline diffBase — cần viết lại để assert hành vi mới, hoặc xác nhận là regression-guard có chủ ý):
+
+- E1a — `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json`
+- E1b — `bash scripts/abi/check-python-gen-clean.sh`
+- E12b — `pnpm vitest run src/lib/abi/conformance.test.ts`
 
 ## Evidence
 
@@ -61,79 +71,80 @@ human_signoff:
   note: carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E2
-  run_id: minted-normalize-text-vi-E2-r3
+  run_id: minted-normalize-text-vi-E2-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_money
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:20:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.06s
 
 - eval: E3
-  run_id: minted-normalize-text-vi-E3-r3
+  run_id: minted-normalize-text-vi-E3-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_datetime
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.06s
 
 - eval: E4
-  run_id: minted-normalize-text-vi-E4-r3
+  run_id: minted-normalize-text-vi-E4-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_identifiers
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.04s
+    1 passed in 0.08s
 
 - eval: E5
-  run_id: minted-normalize-text-vi-E5-r3
+  run_id: minted-normalize-text-vi-E5-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_ambiguous
-  verified_at: 2026-08-21T07:45:00Z
-  output: |
-    1 passed in 0.04s
-
-- eval: E6a
-  run_id: minted-normalize-text-vi-E6a-r3
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
-  verified_at: 2026-08-21T07:45:00Z
-  output: |
-    1 passed in 0.04s
-
-- eval: E6b
-  run_id: minted-normalize-text-vi-E6b-r3
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
-  verified_at: 2026-08-21T07:45:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
-
-- eval: E7
-  run_id: minted-normalize-text-vi-E7-r3
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_idempotent
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:20:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
+- eval: E6a
+  run_id: minted-normalize-text-vi-E6a-r4
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
+  verified_at: 2026-08-21T14:20:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.05s
+
+- eval: E6b
+  run_id: minted-normalize-text-vi-E6b-r4
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
+  verified_at: 2026-08-21T14:20:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.05s
+
+- eval: E7
+  run_id: minted-normalize-text-vi-E7-r4
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_idempotent
+  verified_at: 2026-08-21T14:20:00Z
+  output: |
+    1 passed in 0.05s
+
 - eval: E8
-  run_id: minted-normalize-text-vi-E8-r3
+  run_id: minted-normalize-text-vi-E8-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_edges
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:20:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.07s
@@ -219,101 +230,96 @@ human_signoff:
   note: carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E14a
-  run_id: minted-normalize-text-vi-E14a-r3
+  run_id: minted-normalize-text-vi-E14a-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_sdk_train_local
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:25:00Z
   output: |
-    OK: SDK 0.2.21 (hai file khớp) · vietnormalizer==0.2.3 pin chính xác
+    OK: SDK 0.2.22 (hai file khớp) · vietnormalizer==0.2.3 pin chính xác
 
 - eval: E14b
-  run_id: minted-normalize-text-vi-E14b-r3
+  run_id: minted-normalize-text-vi-E14b-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_sdk_published
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:25:00Z
   output: |
     OK: artifact mang tongflow/text/, models mới và NORMALIZE_TEXT_VI
-    OK: vỏ plugin pin oneflow-sdk==0.2.21
-    OK: chuyến phát hành đồng bộ cho 0.2.21
+    OK: vỏ plugin pin oneflow-sdk==0.2.22
+    OK: chuyến phát hành đồng bộ cho 0.2.22
 
 - eval: E17a
-  run_id: minted-normalize-text-vi-E17a-r3
+  run_id: minted-normalize-text-vi-E17a-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:28:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.12s
+    3 passed in 0.19s
 
 - eval: E17b
-  run_id: minted-normalize-text-vi-E17b-r3
+  run_id: minted-normalize-text-vi-E17b-r4
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-21T07:45:00Z
+  verified_at: 2026-08-21T14:28:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.12s
+    3 passed in 0.19s
 
 - eval: E15
-  run_id: minted-normalize-text-vi-E15-r3
+  run_id: minted-normalize-text-vi-E15-r4
   exit_code: 0
   baseline: n-a
-  verifier: config:executors.ui-check.normalize_node_states
-  verified_at: 2026-08-21T07:45:00Z
+  verifier: ui-check:E15
+  verified_at: 2026-08-21T14:35:00Z
   screenshot: evidence/design/captures/state-1-idle.png
   observed: |
-    state-1-idle.png (opened with Read): dark-themed React Flow canvas, single node card titled "Đọc số thành chữ" (readable Vietnamese, not a raw i18n key) with an implementation-method dropdown labeled "Cách triển khai" showing value "api-normalize-text-vi", and an action button "Đọc thành chữ". No upstream node is present, matching the idle fixture (no wiring). Matches Expected for state=idle. Cross-checked the saved state-1-idle.html: contains data-proto-state="idle" and <html lang="vi">, confirming this frame is genuinely the idle state on the vi locale, not a silent idle-fallback for a bad state name.
+    Frame state-1-idle.png (opened via Read, image content inspected directly): shows ONLY the "Đọc số thành chữ" node standalone (no fixture source node attached) on a dark canvas. Node header reads "A· Đọc số thành chữ" with a hamburger menu icon. Body shows label "Cách triền khai" [sic, app copy] with a dropdown reading "api-normalize-text-vi". Below it a "Đọc thành chữ" button rendered in a muted/grayed style (visually disabled — consistent with idle = no wired input, action not runnable). Two small handle circles visible on the card's left and right mid-edges. All text is natural Vietnamese, no raw i18n dotted keys, no {{...}} placeholders. Matches Expected for idle state.
 
-    state-2-wired.png (opened with Read): same node card ("Đọc số thành chữ" / "Cách triển khai" / "api-normalize-text-vi" / "Đọc thành chữ") now positioned to the right, with a second light-colored stub node visible to its left representing the upstream text source, laid out as connected input feeding the normalize node — matching the wired fixture (an upstream text node feeding in:text). Matches Expected for state=wired. Cross-checked the saved state-2-wired.html: contains data-proto-state="wired" and <html lang="vi">.
-
-    Both frames are genuinely from this tree/round: HEAD was verified equal to invokedSha before any capture, and both HTML dumps carry lang="vi" (locale correctly forced) plus the exact expected data-proto-state value (no "unknown:" fallback).
+    Frame state-2-wired.png (opened via Read, image content inspected directly): shows the SAME "Đọc số thành chữ" node now connected via a curved edge to a second node (a plain white rounded box, a fixture text source) positioned to its left — the edge runs from the source node's output handle into the target node's left input handle. The "Đọc thành chữ" button now renders in solid white/enabled styling (visually active — consistent with wired = input connected, action runnable). Same handle circles visible at the target node's left/right edges. All text Vietnamese, readable, no raw keys. Matches Expected for wired state.
   network_observed: clean
   output: |
-    - _acceptance/normalize-text-vi/evidence/E15-network.txt
+    TEARDOWN (step 10, ran unconditionally at the end): killed both dev-server processes (`next dev` pid 8268, `pnpm dev` pid 7976) — `lsof -nP -iTCP:3000 -sTCP:LISTEN` after kill → no output (port free). `git checkout tsconfig.json` → `git status --short tsconfig.json` empty (clean). `rm -rf build` → directory confirmed absent. Final `git status --short` shows only the evidence-file diffs (the deliverable of this eval) — tsconfig.json and build/ leave no trace. PASS.
 
-    Verdict: exitCode=0, every assertion passed. Both frames are genuine captures of this exact tree (HEAD verified pre-flight), correct locale (lang="vi"), and correct data-proto-state ("idle" / "wired", not an unknown-name idle-fallback). P0 design gate green on both. Console clean of errors. Exactly two handles (in:text/out:text). Labels are real Vietnamese text, not raw i18n keys.
+    ALL ASSERTIONS PASSED. exitCode = 0.
 
-<!-- <<<JUDGMENT-BLOCK-TEMPLATE -->
 - eval: E16
-  judged_by: judge panel (domain-correctness, operational-feasibility, spec-alignment)
-  verdict: UNCERTAIN
-  rationale: |
-    Đề xuất panel: FAIL (2/3 lens — domain-correctness, operational-feasibility); spec-alignment còn UNCERTAIN nên khối này giữ UNCERTAIN, không tự chốt thành phía FAIL — đúng tinh thần criterion E16 (bất đồng thuận giữa các lens → người quyết ở Cổng 2, không phải máy tự chốt). Toàn bộ phiếu, đầy đủ không rút gọn:
-    - domain-correctness: FAIL — Shell/header, spacing, icon, và nhãn tiếng Việt đều đúng khuôn AbiNodeShell; nhưng quét pixel toàn bộ viền node (trái/phải/trên/dưới) ở cả state-1-idle.png và state-2-wired.png không phát hiện bất kỳ dấu hiệu handle in:text/out:text nào — vùng sát viền chỉ là màu nền canvas đồng nhất, và ở state-2 cũng không thấy đường edge (bezier path) nối vào node dù có khối trắng chồng lên phía trên. Đây là vi phạm rõ với đúng tiêu chí "hai handle in:text/out:text" mà AC-15 hỏi.
-    - operational-feasibility: FAIL — Header/icon/spacing/nhãn nút đều đúng khuôn AbiNodeShell và đọc được tiếng Việt ("Đọc số thành chữ", "Cách triển khai", "Đọc thành chữ"), nhưng phóng to 4x và quét pixel dọc toàn bộ viền trái/phải/trên/dưới của node ở cả hai ảnh chỉ thấy hình chữ nhật bo góc trơn với gradient bóng đổ — không có bất kỳ chấm handle nào tách biệt lộ ra để nhận diện in:text/out:text. Ở state-2 "wired", node input trắng phía trên chỉ đè chồng góc trên-trái của node, không có đường dây/bezier nào nối hai node hiện rõ trong ảnh — nên không thể xác nhận wire nhìn thấy được, một phần cấu thành của câu hỏi AC-15.
-    - spec-alignment: UNCERTAIN — Shell/header (thanh navy đậm, icon "A✓" bên trái tiêu đề, menu hamburger phải), spacing, và nhãn nút "Đọc thành chữ" đều đọc được rõ tiếng Việt và nhất quán giữa hai ảnh, không có gì phá vỡ ngôn ngữ thiết kế nhìn thấy được. Nhưng zoom pixel-level cả 4 cạnh (trái/phải) của node ở cả hai ảnh không thấy dấu chấm handle nào tại viền — tiêu chí "hai handle in:text/out:text" không thể xác nhận được từ hai ảnh tĩnh này; ở state-2-wired cũng không thấy đường nối (edge) rõ ràng giữa node nguồn (đè lên) và node này, nên không loại trừ khả năng handle bị ẩn/che chứ chưa chắc là thiếu.
-  required_evidence:
-    - "[domain-correctness] Crop độ phân giải cao (>=3x) đúng toạ độ handle mong đợi trên node (cạnh trái ~x=116, cạnh phải ~x=465, y giữa ~456 trong state-1-idle.png) cho thấy một chấm/hình tròn connector có màu tương phản với nền — nếu tồn tại, verdict đổi sang PASS."
-    - "[domain-correctness] Ảnh chụp node đang trong thao tác kéo-nối (hover trên handle hoặc đang tạo edge) cho thấy đường bezier path rõ ràng nối vào handle in:text của node — nếu chứng minh được edge thật (không phải node khác chỉ nằm đè lên), verdict đổi."
-    - "[operational-feasibility] Ảnh chụp canvas ở mức zoom trình duyệt cao hơn (150%+) khung sát cạnh trái và cạnh phải của node 'Đọc số thành chữ' đủ để thấy rõ có/không có chấm handle in:text và out:text tại đó — nếu thấy hai chấm handle rõ ràng, verdict đổi sang PASS cho vế handle."
-    - "[operational-feasibility] Ảnh chụp toàn cảnh (không crop) của state-2-wired cho thấy trọn đường bezier/wire nối từ handle output của node input text phía trên xuống handle input của node 'Đọc số thành chữ' — nếu đường dây hiện rõ nối hai node, vế 'wire nhìn thấy được' được giải quyết."
-    - "[spec-alignment] Một ảnh chụp node ở trạng thái hover/connect-mode (hoặc DevTools inspector) từ chính trang /proto/normalize-text-vi cho thấy rõ hai phần tử <Handle id=\"in:text\"> và <Handle id=\"out:text\"> (chấm tròn) tại viền trái/phải của node card — nếu ảnh này tồn tại và thấy hai handle, verdict đổi sang PASS; nếu thấy DOM không có Handle nào, verdict đổi sang FAIL."
-  human_override:
-<!-- JUDGMENT-BLOCK-TEMPLATE>>> -->
-
-## Analyst
-
-carried tu round 2 — baseline khong do lai round nay
-
-- E1a (`pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json`) — kiểm generator ABI-clean; xanh trên cả HEAD lẫn baseline khi đo ở round 2 (generator idempotent trên cây sạch). evals.yaml không đổi từ lần đo cuối nên round này không đo lại baseline.
-- E1b (`bash scripts/abi/check-python-gen-clean.sh`) — cùng lý do, kiểm generator Python-clean; non-discriminating từ round 2, không đo lại.
-- E12b (`pnpm vitest run src/lib/abi/conformance.test.ts`) — 13 test cũ trong suite conformance TS xanh trên cả hai phía ở round 2; phần mới cho normalize-text-vi nằm trong E9a/E9b/E12a, không nằm trong file này.
+  criterion: AC-15
+  judged_by: judge panel (fresh context) — lenses: domain-correctness, operational-feasibility, spec-alignment
+  panel_proposal: FAIL
+  votes:
+    - domain-correctness: FAIL — Shell/header (icon + tiêu đề "Đọc số thành chữ" + menu hamburger), spacing, và nhãn tiếng Việt ("Cách triển khai", "Đọc thành chữ") đều hợp khuôn AbiNodeShell và đọc được rõ ràng ở cả hai ảnh. Nhưng quét pixel dọc hai cạnh trái/phải của thẻ node trong state-1-idle.png (băng x=28-40 và x=382-390, suốt y=325-535) không thấy màu chấm handle nào khác biệt với nền/viền thẻ — hai handle in:text/out:text không hiện hình; và ở state-2-wired.png, node chỉ đè chồng lên thẻ trắng nguồn mà không có đường nối (edge) nào vẽ giữa hai điểm handle, đồng thời nút "Đọc thành chữ" bị cắt chữ ("chữ") do node tràn ra ngoài khung viewport — hai điều này phá ngôn ngữ thiết kế workspace nhìn thấy được ngay trên hai ảnh.
+      required_evidence:
+        - Một ảnh chụp state-1-idle (hoặc tương đương) zoom sát cạnh trái/phải thẻ node cho thấy một chấm/hình handle có màu khác biệt với nền (10,10,10)/viền thẻ (30,41,57)(50,60,77)(12,12,13) — hiện quét băng x=28-40 và x=382-390 suốt y=325-535 trong state-1-idle.png không thấy màu nào như vậy.
+        - Một ảnh chụp state-2-wired với canvas pan lại sao cho toàn bộ node (đủ cạnh phải + nhãn 'Đọc thành chữ' không bị viewport cắt) nằm trong khung hình, để xác nhận out:text handle và nhãn nút có render đúng khi không bị cắt.
+        - Một ảnh chụp (hoặc DOM/inspector snapshot) tại đúng điểm nối giữa thẻ trắng nguồn và node normalize-text-vi trong state wired cho thấy đường edge (bezier/line) thực sự được vẽ nối hai handle — ảnh hiện tại chỉ thấy hai thẻ đè chồng, không có đường nối nào.
+    - operational-feasibility: UNCERTAIN — Shell/header, spacing, icon và nhãn nút tiếng Việt trên node "Đọc số thành chữ" đều hợp khuôn AbiNodeShell và đọc được rõ ràng ở cả hai ảnh. Nhưng quét pixel toàn bộ hai ảnh không tìm thấy bất kỳ dấu hiệu handle nào (không có pixel màu khác biệt ở cạnh trái/phải card tại cả state-1 lẫn state-2), và ở state-2 "wired" cũng không có pixel nào thuộc một đường nối giữa node nguồn và node đích — không đủ căn cứ để kết luận hai handle in:text/out:text có hiển thị đúng hay không chỉ từ hai ảnh tĩnh này.
+      required_evidence:
+        - Một ảnh/DOM-inspector cho thấy handle in:text hiện rõ (điểm/marker có màu tương phản với nền canvas đen) tại cạnh trái card 'Đọc số thành chữ' — hiện quét pixel toàn ảnh state-1-idle.png và state-2-wired.png không tìm thấy pixel màu bão hoà nào tại vùng x:20-50 dọc suốt chiều cao card (y:337-526)
+        - Một ảnh/DOM-inspector cho thấy handle out:text hiện rõ tại cạnh phải card, cùng vị trí tương tự (x quanh 380-390) — hiện cũng không có pixel khác biệt nền tại đó
+        - Một capture state-2 (hoặc state khác) cho thấy đường nối (bezier/step edge) thực sự vẽ giữa node nguồn (khối trắng) và handle in:text của node này — hiện vùng giữa hai khối (x:325-390, y:415-470 của state-2-wired.png) chỉ toàn màu nền/card, không có stroke pixel nào của một edge
+    - spec-alignment: FAIL — Shell/header, spacing, icon và nhãn nút "Đọc thành chữ" đều hợp khuôn AbiNodeShell (header đậm màu navy có icon+tiêu đề+hamburger, dropdown "Cách triển khai", nút CTA có icon). Nhưng soi pixel-level cả hai ảnh (viền trái/phải node ở state-1-idle.png, viền trái node ở state-2-wired.png, phóng 6-10x) cho thấy KHÔNG có chấm handle nào nhô ra trên toàn bộ chiều cao viền trái lẫn phải — không có handle in:text/out:text nào hiển thị; state-2 "wired" cũng không có bất kỳ đường dây nối nào giữa node text nguồn (khối trắng) và node "Đọc số thành chữ" dù tên state là "wired". Đây là khoảng trống trực tiếp nhìn thấy trên chính hai ảnh được cấp, phá vỡ đúng tiêu chí "hai handle in:text/out:text" mà câu hỏi yêu cầu soi.
+      required_evidence:
+        - Crop phóng ≥6x dọc viền trái node trong state-1-idle.png (vùng x≈28-45, y≈335-522) cho thấy một chấm handle tròn (in:text) — hiện tại crop này chỉ ra viền bo góc liền mạch, không một điểm khác màu nào; nếu ảnh chụp lại/khu vực khác của cùng node cho thấy chấm handle ở đó thì kết luận đổi.
+        - Crop tương tự dọc viền phải node trong state-1-idle.png (x≈378-390, y≈335-522) cho thấy chấm handle out:text — hiện không có; cần một ảnh trong đó viền phải không bị crop sát mép khung hình 390px và có chấm handle hiển thị.
+        - Crop viền trái node trong state-2-wired.png (x≈280-300, y≈400-540, node đã nằm giữa khung hình, không bị crop) cho thấy chấm handle in:text hoặc một đường wire nối từ khối trắng phía trên sang node — hiện tại vùng này hoàn toàn trơn, không có handle lẫn dây nối dù state được đặt tên 'wired'.
+        - Một ảnh chụp state-2-wired.png phiên bản không bị cắt mép phải (toàn bộ card + nút 'Đọc thành chữ' nằm trọn trong khung) để xác nhận layout/nhãn nút không vỡ khi node nằm giữa canvas thay vì bị viewport cắt.
+  human_override: 
 
 ## Variance
 
-none — không có eval nào trong vòng này (kể cả các eval carry-forward) mang field runs > 1; toàn bộ deterministic.
+none — every multi-run eval is uniform
 
 ## Iterations
 
-Round 1: các lỗ đo được ghi nhận và vá trong S4-r1 — hố NFD của luật tiền trong E8 (chỉ so `.text` bỏ lọt `.ok`/`has_money` lệch dạng), nửa đọc của E9a (đăng ký node đo bằng hằng thay vì đọc lại registry), và E11b (quan hệ TIER_A_SLOTS ⊆ ABI đo ở executor không được chọn) — trả về implementation.
-Round 2: các lỗ còn lại từ S4-r2 được vá — quan hệ has_money có mỏ neo dương độc lập trong E6b, predicate không còn rỗng-hoá được; E11b có test riêng `_and_in_abi`; E13 đo cấu trúc README bằng awk đoạn-giữa-heading; E10a bỏ prose i18n sang đo tất định ở E13; E14b tự dựng cặp wheel giả lành/thiếu trong script; E17a pin vietnormalizer derive từ pyproject. 24 eval máy + E15 (ui-check) PASS; E16 (judgment so-sánh-đối-chứng) UNCERTAIN vì panel không được cấp capture của denoise-audio/remove-subtitle để so sánh — verdict tổng PENDING-JUDGMENT.
-Round 3 (vòng này): owner nâng phạm vi AC-5/AC-6b tại Cổng 2 (2026-08-21) — vá hai lỗi đọc owner nêu: khoảng có hậu tố đơn vị viết cách (5% - 10%) từng đọc thành "âm", và giá viết cách "500 đ" từng bị từ chối; đồng thời AC-15/E16 được thu hẹp bỏ vế so-sánh-đối-chứng (dời sang checklist Cổng 2 riêng của owner) nên E16 lần này chấm việc hai handle in:text/out:text có nhìn thấy được trên chính hai ảnh — panel vẫn chia phiếu (2 FAIL, 1 UNCERTAIN) vì quét pixel viền node không xác nhận được chấm handle nào; giữ UNCERTAIN chờ người quyết. 12 eval carry-forward không đổi (delta không chạm paths của chúng) + 13 eval máy đo lại đều PASS, E15 (ui-check) PASS; verdict tổng vẫn PENDING-JUDGMENT.
+Round 2: 25/26 eval PASS, E16 UNCERTAIN (panel không có ảnh đối chứng để soi handle/edge) — verdict PENDING-JUDGMENT, contract chuyển sang verified.
+Round 3 (Cổng 2, owner 2026-08-21): owner nâng phạm vi AC-5/AC-6 sau khi phát hiện khoảng có hậu tố đơn vị (5%-10%) và giá viết cách (1.000 đ-2.000 đ) mất chữ nối "đến" — 2/7 finding vá trong sdk/tongflow/text/normalize_vi.py; đồng thời thu hẹp vế "so với node transfer khác" ra khỏi AC-15/E16 sang checklist riêng của owner ở Cổng 2.
+Round 4 (round này): 25 eval máy PASS (13 chạy lại tại HEAD, 12 carry-forward từ round 2 vì delta không chạm paths của các eval đó; baseline round 2 không đo lại theo P2); nhưng review-findings phát hiện 3 lỗi TRONG HỢP ĐỒNG còn sống trên chính cây HEAD (AC-5: hậu tố tỷ/triệu/kg/người vẫn mất chữ "đến" dù đã vá %/đ; AC-6: giá viết hoa "Đ" mất hẳn chữ tiền; AC-8: dấu hai chấm dính chữ chặn cả câu prose không số) và panel đổi E16 từ UNCERTAIN sang FAIL (vẫn không thấy handle/edge trên ảnh capture mới, thêm nút bị cắt chữ) → verdict REJECT.
 
 ## Gate 2 checklist (human)
 

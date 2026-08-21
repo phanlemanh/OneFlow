@@ -1,22 +1,43 @@
 E15 network dump — normalize-text-vi proto route (idle + wired states)
-dev_server.url = http://localhost:3000 (scope per _acceptance/config.yaml)
-Captured via Claude_Browser read_network_requests during the idle-state page load.
+dev_server.url = http://localhost:3000 (scope per _acceptance/config.yaml); no dev_server.api_base declared.
+Captured via Claude_Browser read_network_requests / read_console_messages on fresh single navigations
+(tab-4), 2026-08-21, tree at HEAD=9043ef6753ce72fdcd072b74b602af68c6f2f20b.
 
-[48812.37] GET http://localhost:3000/api/plugins/registry -> 200 OK
-[48812.38] GET http://localhost:3000/_next/static/webpack/4040343ef9892a04.webpack.hot-update.json -> 200 OK
-[48812.39] GET http://localhost:3000/_next/static/webpack/webpack.4040343ef9892a04.hot-update.js -> 200 OK
-[028F946A49649FEA83F7379DA885C501] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
-[48812.41] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-[48812.42] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-[48812.43] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787293329673 -> 200 OK
-[48812.45] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787293329673 -> 200 OK
-[48812.46] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787293329673 -> 200 OK
-[48812.47] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-[48812.48] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-[48812.49] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-[48812.76] GET http://localhost:3000/api/plugins/registry -> 200 OK
+=== idle state: GET /proto/normalize-text-vi ===
+[36216.39] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[BC7C346485F28F96E51AE411E596C4D0] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
+[36216.41] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[36216.42] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[36216.43] GET http://localhost:3000/_next/static/css/app/layout.css?v=... -> 200 OK
+[36216.45] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=... -> 200 OK
+[36216.46] GET http://localhost:3000/_next/static/chunks/webpack.js?v=... -> 200 OK
+[36216.47] GET http://localhost:3000/_next/static/chunks/main-app.js?v=... -> 200 OK
+[36216.48] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[36216.49] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[36216.50] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[36216.78] GET http://localhost:3000/api/plugins/registry -> 200 OK
 
-Verdict: all requests app-origin (localhost:3000, matches dev_server.url), all 200 OK.
-No third-party traffic observed. No FAIL-eligible failures.
-console read_console_messages(onlyErrors=true) -> No console logs (no errors; two React Flow dev warnings only, see outputTail).
+=== wired state: GET /proto/normalize-text-vi?state=wired ===
+[FA5B379C14E58099AAD8A3BE0C465585] GET http://localhost:3000/proto/normalize-text-vi?state=wired -> 200 OK
+[36216.80] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[36216.81] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[36216.82] GET http://localhost:3000/_next/static/css/app/layout.css?v=... -> 200 OK
+[36216.84] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=... -> 200 OK
+[36216.85] GET http://localhost:3000/_next/static/chunks/webpack.js?v=... -> 200 OK
+[36216.86] GET http://localhost:3000/_next/static/chunks/main-app.js?v=... -> 200 OK
+[36216.87] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[36216.88] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[36216.89] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[36216.117] GET http://localhost:3000/api/plugins/registry -> 200 OK
+
+console read_console_messages(onlyErrors=true) on both states -> "No console logs." (zero errors).
+(Note: an EARLIER exploratory pass with rapid back-and-forth navigation + HMR rebuilds produced
+several same-origin GET /proto/normalize-text-vi?_rsc=... entries marked "200 OK [FAILED: net::ERR_ABORTED]" —
+these are Next.js RSC prefetch requests self-cancelled client-side by superseding navigations during
+dev-mode Fast Refresh, not server failures (status was 200 before the client aborted, no 4xx/5xx, no
+connection timeout). Re-run on a single clean navigation, captured above, shows zero aborted/failed
+requests. Treated as noise from my own testing method, not counted as FAIL-eligible.)
+
+Verdict: all requests app-origin (localhost:3000, matches dev_server.url), all 200 OK, zero console errors
+on the clean pass. No third-party traffic observed. No FAIL-eligible failures.
 networkObserved = clean
