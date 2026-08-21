@@ -294,3 +294,25 @@ mất mỏ neo `đ`. Nằm đúng giao của AC-5 ("kể cả có khoảng trắ
 nạp `@xyflow/react/dist/style.css`, nên handle và edge **có trong DOM nhưng vô hình trong
 ảnh** — đó là toàn bộ lý do `E16` trả UNCERTAIN/FAIL hai vòng liền. Đã vá bằng một dòng
 import ở component proto; bằng chứng trước/sau ở `evidence/gate2-e16/`.
+
+## Luật dừng vòng verify (khai TRƯỚC vòng 5, owner 2026-08-21)
+
+Bốn vòng đã chạy; hai vòng gần nhất đều **0 eval đỏ, 0 lệnh đỏ, 0 BLOCKED** — phần "mã có
+làm đúng thứ hồ sơ nói không" đã hội tụ. Cái chưa hội tụ là **lằn review**: mỗi vòng, người
+soát context-sạch trên gần-cùng-một-cây vẫn tìm ra ~2 ca đọc-biên mới, vì không gian đầu vào
+của một bộ đọc tiếng Việt là vô hạn thực tế. Đó là một bộ **sinh**, không phải một hàng đợi
+cạn dần — nên điều kiện dừng phải do người đặt, không thể chờ nó tự hết.
+
+**Luật cho vòng 5 và về sau:**
+
+- Finding chỉ ra **một mệnh đề AC đang bị vi phạm** → sửa trong vòng, như từ trước tới nay.
+- Finding chỉ ra **một ca đọc-biên MỚI chưa AC nào hứa** → **không** mở vòng mới: ghi vào
+  hợp đồng follow-up **"chống đọc sai êm ru"** (đã có sẵn hai mục từ vòng 3: URL nuốt câu ·
+  `_RANGE` ăn mọi `số-gạch-số`), owner quyết bằng triage tại Cổng 2.
+- Finding về **phép đo** (corpus tuyên lớp mà chỉ có điểm-case, test không đo thứ nó tên) →
+  sửa trong vòng: đây là loại lỗi làm mọi vòng sau mất giá trị.
+
+Lý do viết luật này ra: nếu không, mỗi vòng verify vừa là phép đo vừa là nguồn phạm vi mới,
+và vòng lặp không có đáy — đo được ở chính hồ sơ này: hợp đồng đã nhận 2 lần nâng phạm vi và
+6 amendment trong ba ngày, nên "finding trong hợp đồng" ở vòng sau một phần là hệ quả của
+chữ vừa viết ở vòng trước, chứ không phải sản phẩm tệ đi.

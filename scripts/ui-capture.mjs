@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 /* ui-capture.reference.mjs — REFERENCE implementation of `config:capture.ui`.
  *
@@ -118,9 +118,23 @@ try {
             () => document.documentElement.lang,
         );
         if (!seen.includes(require_)) {
+            // Remove any earlier frame sitting at this path. Refusing to WRITE
+            // is not enough when the target already exists: a later run that
+            // refuses would leave the previous, correct-looking frame in place,
+            // and any step that only checks "the artifact is there" would file
+            // a stale capture as this round's evidence.
+            const stale = [out, flag("--html", null)].filter(Boolean);
+            for (const path of stale) {
+                try {
+                    rmSync(path, { force: true });
+                } catch {
+                    /* nothing to remove */
+                }
+            }
             console.error(
                 `ui-capture: REFUSED — page does not contain ${JSON.stringify(require_)} ` +
-                    `(html lang=${htmlLang || "?"}). Nothing written.`,
+                    `(html lang=${htmlLang || "?"}). Nothing written; ` +
+                    `${stale.length} stale target(s) removed.`,
             );
             process.exitCode = 3;
             refused = true;
