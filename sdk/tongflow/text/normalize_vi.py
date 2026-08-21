@@ -30,6 +30,13 @@ _NORMALIZER = VietnameseNormalizer()
 # "19-08-2026" reads as "muoi chin den tam den hai nghin..." — measured.
 _DASH_DATE = re.compile(r"\b(\d{1,2})-(\d{1,2})-(\d{4})\b")
 
+# The library prefixes its OWN "ngày" when reading a full d/m/y date, so the
+# extremely common written form "ngày 19/8/2026" came back as "ngày ngày mười
+# chín..." — a voice says the word twice (measured, S4 round 2 finding). Drop
+# the written word and let the library re-add it. Full dates only: a bare d/m
+# reads WITHOUT the word (measured), so there the written "ngày" must stay.
+_DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4}\b)")
+
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
 # leaves the bare character in place ("muoi-muoi lam"), which a voice reads as
 # a pause or a minus sign.
@@ -39,10 +46,15 @@ _RANGE = re.compile(r"(?<=\d)\s*-\s*(?=\d)")
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
 # What must never survive into speech: digits, a currency sign, a percent sign,
-# or a hyphen still standing between two digits. It deliberately does NOT flag a
-# hyphen between letters — the library writes real Vietnamese compounds that way
-# ("ki-lo-met"), and flagging those rejects correct output.
-_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)")
+# a clock colon, or a hyphen still standing between two digits. The colon
+# joined after measuring "ngày 14:30" → "ngày mười bốn:ba mươi": the library
+# mis-parses the clock in that context and leaves the colon between WORDS, so
+# a digit-only rule stayed green on unreadable output. Every clean reading
+# drops its colon ("14:30" → "...giờ...phút"), so flagging it rejects nothing
+# correct. It deliberately does NOT flag a hyphen between letters — the
+# library writes real Vietnamese compounds that way ("ki-lo-met"), and
+# flagging those rejects correct output.
+_RESIDUAL = re.compile(r"[0-9₫%:]+|(?<=\d)-(?=\d)")
 
 # "Money is present" must be a precise test, not a substring search: the letter
 # "d" alone appears inside ordinary words ("do", "dep"), so `"d" in text` marks
@@ -110,6 +122,7 @@ def _pre(text: str) -> str:
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
+    out = _DAY_WORD_BEFORE_DATE.sub("", out)
     out = _RANGE.sub(" đến ", out)
     # Ranges are resolved first, so any dash still sitting in front of a number
     # is a minus sign. The library reads the digits but leaves the dash, and a

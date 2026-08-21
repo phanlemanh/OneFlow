@@ -94,32 +94,54 @@ DELIBERATELY_UNCOVERED_MONEY_CELLS: frozenset[tuple[str, str]] = frozenset(
 )
 
 _BIG_POSITION_WORDS = ("trăm", "nghìn", "triệu", "tỷ")
+_GROUP_WORDS = ("tỷ", "triệu", "nghìn")
+
+
+def _money_claim_holds(expected: str, variant: str, position: str) -> bool:
+    """(variant, position) holds iff the variant word sits INSIDE that
+    magnitude group of the reading — not merely somewhere in the string.
+
+    Substring co-presence was the previous check, and it green-lit claims
+    like ("mươi","triệu") on '1.999.000₫', whose triệu group is just "một"
+    (S4 round 2 finding). Groups are the word runs delimited by tỷ/triệu/
+    nghìn; trăm/chục are intra-group shapes, checked as "largest magnitude".
+    """
+    words = expected.split()
+    if position == "chục":
+        return variant in words and not any(w in words for w in _BIG_POSITION_WORDS)
+    if position == "trăm":
+        return (
+            variant in words
+            and "trăm" in words
+            and not any(w in words for w in _GROUP_WORDS)
+        )
+    if position not in words:
+        return False
+    p = words.index(position)
+    bigger = _GROUP_WORDS[: _GROUP_WORDS.index(position)]
+    start = 0
+    for i in range(p - 1, -1, -1):
+        if words[i] in bigger:
+            start = i + 1
+            break
+    return variant in words[start:p]
 
 
 def test_numbers_and_money_golden() -> None:
     assert len(CORPUS_MONEY) == MONEY_COUNT
 
-    # The claims must be about cases that exist, and each claim must be
-    # visible in that case's expected string — a dict entry nothing checks is
-    # how the self-agreeing matrix shipped.
+    # The claims must be about cases that exist, and each claim must hold in
+    # that case's expected string under GROUP semantics — a dict entry nothing
+    # checks is how the self-agreeing matrix shipped.
     expected_by_raw = dict(CORPUS_MONEY)
     orphans = set(MONEY_MATRIX_CELLS) - set(expected_by_raw)
     assert not orphans, f"Ô khai cho ca không còn trong corpus: {sorted(orphans)}"
     for raw, cells in MONEY_MATRIX_CELLS.items():
         for variant, position in cells:
-            assert variant in expected_by_raw[raw], (
-                f"{raw!r} khai ô ({variant}, {position}) nhưng expected "
-                f"không chứa {variant!r}"
+            assert _money_claim_holds(expected_by_raw[raw], variant, position), (
+                f"{raw!r} khai ô ({variant}, {position}) nhưng biến thể "
+                f"không nằm trong nhóm hàng đó của expected"
             )
-            if position == "chục":
-                assert not any(
-                    w in expected_by_raw[raw] for w in _BIG_POSITION_WORDS
-                ), f"{raw!r} khai ô chục nhưng expected có hàng lớn hơn"
-            else:
-                assert position in expected_by_raw[raw], (
-                    f"{raw!r} khai ô ({variant}, {position}) nhưng expected "
-                    f"không chứa {position!r}"
-                )
 
     covered = {cell for cells in MONEY_MATRIX_CELLS.values() for cell in cells}
     overlap = covered & DELIBERATELY_UNCOVERED_MONEY_CELLS
@@ -163,8 +185,20 @@ CORPUS_TIME: tuple[tuple[str, str], ...] = (
     ("8:05", "tám giờ năm phút"),
     ("08:30", "tám giờ ba mươi phút"),
     ("8-9/3", "tám đến chín tháng ba"),
+    # The written word "ngày" before a full date must NOT double up with the
+    # "ngày" the library injects — "ngày ngày" was shipping with ok=True on
+    # the feature's own canonical fixture string (S4 round 2 finding).
+    (
+        "Giá 1.999.000₫ ngày 19/8/2026",
+        "giá một triệu chín trăm chín mươi chín nghìn đồng "
+        "ngày mười chín tháng tám năm hai nghìn không trăm hai mươi sáu",
+    ),
+    (
+        "Ngày 19/8/2026 khai trương",
+        "ngày mười chín tháng tám năm hai nghìn không trăm hai mươi sáu khai trương",
+    ),
 )
-TIME_COUNT = 10
+TIME_COUNT = 12
 
 # Matrix: aspect × digit shape. Claims are hand-written; the aspect half of
 # every claim is machine-checked against the expected string via the marker
@@ -251,6 +285,38 @@ ID_POSITION_CELLS: dict[str, tuple[str, str, str]] = {
 }
 
 
+def _time_component(raw: str, aspect: str) -> str | None:
+    """Pull the digit run the aspect refers to OUT OF THE RAW string, so the
+    shape half of a claim is machine-checked too — it used to be hand-audited
+    only (S4 round 2 finding)."""
+    import re as _re
+
+    clock = _re.search(r"(\d{1,2}):(\d{2})", raw)
+    rng = _re.search(r"(\d{1,2})-(\d{1,2})/(\d{1,2})", raw)
+    date = _re.search(r"(\d{1,2})[/-](\d{1,2})(?:[/-](\d{4}))?", raw)
+    if aspect == "giờ":
+        return clock.group(1) if clock else None
+    if aspect == "phút":
+        return clock.group(2) if clock else None
+    if aspect == "khoảng":
+        return rng.group(1) if rng else None
+    if aspect == "tháng":
+        if rng:
+            return rng.group(3)
+        return date.group(2) if date else None
+    if aspect == "ngày":
+        return date.group(1) if date else None
+    if aspect == "năm":
+        return date.group(3) if date else None
+    return None
+
+
+def _shape_of(component: str) -> str:
+    if len(component) == 2 and component.startswith("0"):
+        return "0-đầu"
+    return {1: "1-chữ-số", 2: "2-chữ-số", 4: "4-chữ-số"}[len(component)]
+
+
 def test_datetime_golden() -> None:
     assert len(CORPUS_TIME) == TIME_COUNT
 
@@ -263,6 +329,15 @@ def test_datetime_golden() -> None:
             assert marker in expected_by_raw[raw], (
                 f"{raw!r} khai ô ({aspect}, {shape}) nhưng expected "
                 f"không chứa {marker!r}"
+            )
+            component = _time_component(raw, aspect)
+            assert component is not None, (
+                f"{raw!r} khai ô ({aspect}, {shape}) nhưng không trích được "
+                f"thành phần {aspect} từ raw"
+            )
+            assert _shape_of(component) == shape, (
+                f"{raw!r} khai hình dạng {shape} cho {aspect} nhưng thành phần "
+                f"thật là {component!r} ({_shape_of(component)})"
             )
 
     covered = {cell for cells in TIME_MATRIX_CELLS.values() for cell in cells}
@@ -289,7 +364,19 @@ def test_identifiers_units_abbrev_golden() -> None:
     raws = {raw for raw, _ in CORPUS_ID}
     orphans = set(ID_POSITION_CELLS) - raws
     assert not orphans, f"Ô khai cho ca không còn trong corpus: {sorted(orphans)}"
-    for raw, (fragment, _type, position) in ID_POSITION_CELLS.items():
+    for raw, (fragment, cell_type, position) in ID_POSITION_CELLS.items():
+        # The TYPE axis is machine-checked from the fragment's own shape — it
+        # used to be hand-declared only (S4 round 2 finding).
+        if fragment.isdigit():
+            derived_type = "điện thoại"
+        elif any(u in fragment for u in ("m2", "km/h", "kg")):
+            derived_type = "đơn vị"
+        else:
+            derived_type = "viết tắt"
+        assert derived_type == cell_type, (
+            f"{raw!r} khai loại {cell_type!r} nhưng mảnh {fragment!r} "
+            f"có hình dạng {derived_type!r}"
+        )
         if position == "đầu":
             assert raw.startswith(fragment), f"{raw!r} khai đầu câu nhưng không"
         elif position == "cuối":
@@ -393,6 +480,15 @@ def test_residual_tokens_fail_and_are_listed() -> None:
     assert set(got.residual) == {"90", "15"}
     for token in got.residual:
         assert token in (got.error or "")
+
+    # A surviving clock colon is unreadable too: "ngày 14:30" mis-parses in
+    # the pinned library and came back as "ngày mười bốn:ba mươi" with ok=True
+    # under the digit-only rule (S4 round 2 finding). Every clean reading
+    # drops its colon, so rejecting it costs nothing correct.
+    got = normalize_vi("ngày 14:30")
+    assert got.ok is False and ":" in got.residual, (
+        f"dấu hai chấm sống sót phải bị từ chối — {got!r}"
+    )
 
 
 def test_clean_input_has_no_digits_left() -> None:

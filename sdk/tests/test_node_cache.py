@@ -108,6 +108,22 @@ def test_tier_a_allowlist_pinned_and_in_abi():
     for deferred in ("transcribe", "transcribe-timestamp", "parse-document"):
         assert deferred not in TIER_A_SLOTS
 
+    # The "_and_in_abi" half of this test's own name. It used to live only in
+    # test_node_cache_tier_b.py — a node-id the E11b executor never selects —
+    # so E11b's evidence claimed an ABI-membership check this test did not
+    # perform: a bogus name added to both the constant and the literal above
+    # stayed green (S4 round 2 finding).
+    import json
+
+    from tongflow.engine.abi_schema import resolve_abi_path
+
+    abi = json.loads(resolve_abi_path(None).read_text(encoding="utf-8"))
+    abi_slots = {node["nodeSlot"] for node in abi["nodes"]}
+    ghosts = TIER_A_SLOTS - abi_slots
+    assert not ghosts, (
+        f"Slot trong TIER_A_SLOTS không tồn tại trong ABI: {sorted(ghosts)}"
+    )
+
 
 def test_abi_digest_tracks_file_contents(tmp_path):
     p = tmp_path / "abi.json"

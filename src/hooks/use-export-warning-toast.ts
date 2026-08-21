@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 import toast from "react-hot-toast";
 
 import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
@@ -21,16 +22,21 @@ export function useExportWarningToasts(): (
     executable: ExecutableWorkflow,
 ) => void {
     const tToast = useTranslations("Workspace.toast");
-    return (executable) => {
-        for (const warning of executable.warnings ?? []) {
-            if (warning.code === WORKFLOW_TTS_NEEDS_NORMALIZE) {
-                toast(
-                    tToast("ttsNeedsNormalize", {
-                        nodes: warning.nodeIds.join(", "),
-                    }),
-                    { icon: "⚠️", duration: WARNING_TOAST_DURATION_MS },
-                );
+    // Memoized so callers can list it in their own dependency arrays without
+    // re-creating memos every render (S4 round 2 finding).
+    return useCallback(
+        (executable) => {
+            for (const warning of executable.warnings ?? []) {
+                if (warning.code === WORKFLOW_TTS_NEEDS_NORMALIZE) {
+                    toast(
+                        tToast("ttsNeedsNormalize", {
+                            nodes: warning.nodeIds.join(", "),
+                        }),
+                        { icon: "⚠️", duration: WARNING_TOAST_DURATION_MS },
+                    );
+                }
             }
-        }
-    };
+        },
+        [tToast],
+    );
 }

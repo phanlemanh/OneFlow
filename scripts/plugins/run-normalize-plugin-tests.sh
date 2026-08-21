@@ -43,8 +43,16 @@ echo "plugin_commit_sha: $sha"
 # The SDK comes from THIS repo's source, not from PyPI: the shell under test must
 # be measured against the reader that ships in the same change, otherwise a green
 # run only proves the shell agrees with whatever version happens to be installed.
+# vietnormalizer carries the SAME pin the SDK declares — the SDK arrives via
+# PYTHONPATH, so pip never resolves sdk/pyproject.toml's own pin, and a bare
+# `--with vietnormalizer` pulled the latest from PyPI: the shell could be
+# measured against a different reader than the one shipping in this change,
+# exactly the drift the pin exists to rule out (S4 round 2 finding). Derived
+# from pyproject, not hard-coded, so a pin bump cannot silently fork the two.
+viet_pin="$(sed -n 's/.*"vietnormalizer==\([0-9.]*\)".*/\1/p' "$ROOT/sdk/pyproject.toml" | head -1)"
+[ -n "$viet_pin" ] || { echo "FAIL: không đọc được pin vietnormalizer từ sdk/pyproject.toml"; exit 1; }
 cd "$ROOT/sdk"
 PYTHONPATH="$ROOT/sdk" uv run --no-project \
     --with pytest --with tomli --with pydantic --with typing_extensions \
-    --with vietnormalizer \
+    --with "vietnormalizer==$viet_pin" \
     python -m pytest -q -p no:cacheprovider "$tree/tests" "$@"

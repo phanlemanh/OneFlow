@@ -454,6 +454,7 @@ export function useWorkflowExecution(
         setWorkflowName,
         setWorkflowDescription,
         handleExecute,
+        notifyExportWarnings,
         t,
     ]);
 
