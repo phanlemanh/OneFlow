@@ -35,29 +35,49 @@ CORPUS_MONEY: tuple[tuple[str, str], ...] = (
     # exactly why the unanchored "VND" replacement shipped (S4 round 1).
     ("Vé 500.000VND", "vé năm trăm nghìn đồng"),
     ("Giá 2 triệu VNĐ", "giá hai triệu đồng"),
+    # Fillers for matrix cells the first corpus left uncovered — surfaced when
+    # the coverage claims below became machine-checked (S4 round 1 finding).
+    ("35 người", "ba mươi lăm người"),
+    ("250 chỗ ngồi", "hai trăm năm mươi chỗ ngồi"),
+    ("25 triệu", "hai mươi lăm triệu"),
+    ("35 tỷ", "ba mươi lăm tỷ"),
 )
-MONEY_COUNT = 13
+MONEY_COUNT = 17
 
-# Which matrix cells each case is claimed to cover. Written by hand: deriving
-# this from the expected string would only make the matrix agree with itself.
+# Which matrix cells each case is claimed to cover: (variant, position) means
+# the variant word occurs inside that magnitude group of the reading. Written
+# by hand, but every claim is MACHINE-CHECKED against the case's expected
+# string in the test below — the first version of this dict was self-agreeing
+# ("3 tỷ 2" claimed ("mươi","tỷ") while its expected contains no "mươi" at
+# all), so coverage was reported for cells nothing exercised (S4 round 1).
 MONEY_MATRIX_CELLS: dict[str, tuple[tuple[str, str], ...]] = {
     "41 căn hộ": (("mốt", "chục"),),
     "21 tầng": (("mốt", "chục"),),
     "15 phút": (("lăm", "chục"),),
-    "105 m2": (("lẻ", "trăm"), ("linh", "trăm")),
-    "125.000 đồng": (("lăm", "nghìn"), ("mươi", "chục")),
-    "1.999.000₫": (("mươi", "triệu"), ("mươi", "trăm")),
+    "105 m2": (("lẻ", "trăm"),),
+    "125.000 đồng": (("lăm", "nghìn"), ("mươi", "nghìn")),
+    "1.999.000₫": (("mươi", "nghìn"),),
     "50.000đ": (("mươi", "nghìn"),),
-    "3 tỷ 2": (("mươi", "tỷ"),),
+    "35 người": (("mươi", "chục"), ("lăm", "chục")),
+    "250 chỗ ngồi": (("mươi", "trăm"),),
+    "25 triệu": (("mươi", "triệu"), ("lăm", "triệu")),
+    "35 tỷ": (("mươi", "tỷ"), ("lăm", "tỷ")),
 }
 
-# Cells that cannot exist in Vietnamese — "mốt" never lands on a bare hundred,
-# "linh"/"lẻ" only bridge a missing tens digit. Listed explicitly so the matrix
-# stays honest instead of quietly shrinking to whatever the corpus happens to
-# cover.
-KNOWN_EMPTY_MONEY_CELLS: frozenset[tuple[str, str]] = frozenset(
+# Cells the corpus DELIBERATELY does not cover, each for a stated reason —
+# either unreachable with the pinned library or descoped. Listed explicitly so
+# the matrix stays honest instead of quietly shrinking to whatever the corpus
+# happens to cover. NOT a claim of linguistic impossibility: the first version
+# claimed ("lăm","triệu") could not exist while "25 triệu" plainly produces it.
+#   - linh×*: the pinned library always reads the bridging zero as "lẻ"
+#     ("105" → "một trăm lẻ năm", measured), so "linh" is unreachable.
+#   - remaining lẻ/mốt/lăm cells: reachable in longer readings (e.g. "121" →
+#     "...hai mươi mốt" inside a trăm group) but descoped — the variant words
+#     themselves are each exercised elsewhere in the matrix.
+DELIBERATELY_UNCOVERED_MONEY_CELLS: frozenset[tuple[str, str]] = frozenset(
     {
         ("linh", "chục"),
+        ("linh", "trăm"),
         ("linh", "nghìn"),
         ("linh", "triệu"),
         ("linh", "tỷ"),
@@ -70,22 +90,46 @@ KNOWN_EMPTY_MONEY_CELLS: frozenset[tuple[str, str]] = frozenset(
         ("mốt", "triệu"),
         ("mốt", "tỷ"),
         ("lăm", "trăm"),
-        ("lăm", "triệu"),
-        ("lăm", "tỷ"),
     }
 )
+
+_BIG_POSITION_WORDS = ("trăm", "nghìn", "triệu", "tỷ")
 
 
 def test_numbers_and_money_golden() -> None:
     assert len(CORPUS_MONEY) == MONEY_COUNT
 
+    # The claims must be about cases that exist, and each claim must be
+    # visible in that case's expected string — a dict entry nothing checks is
+    # how the self-agreeing matrix shipped.
+    expected_by_raw = dict(CORPUS_MONEY)
+    orphans = set(MONEY_MATRIX_CELLS) - set(expected_by_raw)
+    assert not orphans, f"Ô khai cho ca không còn trong corpus: {sorted(orphans)}"
+    for raw, cells in MONEY_MATRIX_CELLS.items():
+        for variant, position in cells:
+            assert variant in expected_by_raw[raw], (
+                f"{raw!r} khai ô ({variant}, {position}) nhưng expected "
+                f"không chứa {variant!r}"
+            )
+            if position == "chục":
+                assert not any(
+                    w in expected_by_raw[raw] for w in _BIG_POSITION_WORDS
+                ), f"{raw!r} khai ô chục nhưng expected có hàng lớn hơn"
+            else:
+                assert position in expected_by_raw[raw], (
+                    f"{raw!r} khai ô ({variant}, {position}) nhưng expected "
+                    f"không chứa {position!r}"
+                )
+
     covered = {cell for cells in MONEY_MATRIX_CELLS.values() for cell in cells}
+    overlap = covered & DELIBERATELY_UNCOVERED_MONEY_CELLS
+    assert not overlap, f"Ô vừa được phủ vừa khai bỏ: {sorted(overlap)}"
     missing = [
         (variant, position)
         for variant in MONEY_VARIANTS
         for position in MONEY_POSITIONS
         if (variant, position) not in covered
-        and (variant, position) not in KNOWN_EMPTY_MONEY_CELLS
+        and (variant, position) not in DELIBERATELY_UNCOVERED_MONEY_CELLS
     ]
     assert not missing, f"Ô ma trận chưa có ca nào: {missing}"
 
@@ -110,8 +154,61 @@ CORPUS_TIME: tuple[tuple[str, str], ...] = (
     ),
     ("14:30", "mười bốn giờ ba mươi phút"),
     ("25-26/12", "hai mươi lăm đến hai mươi sáu tháng mười hai"),
+    # Matrix fillers (S4 round 1 finding: the declared matrix had no cells).
+    ("5/9/2026", "ngày năm tháng chín năm hai nghìn không trăm hai mươi sáu"),
+    ("05/09/2026", "ngày năm tháng chín năm hai nghìn không trăm hai mươi sáu"),
+    # A bare d/m without a year reads WITHOUT the word "ngày" — pinned as-is;
+    # it therefore claims no "ngày" cell below.
+    ("3/12", "ba tháng mười hai"),
+    ("8:05", "tám giờ năm phút"),
+    ("08:30", "tám giờ ba mươi phút"),
+    ("8-9/3", "tám đến chín tháng ba"),
 )
-TIME_COUNT = 4
+TIME_COUNT = 10
+
+# Matrix: aspect × digit shape. Claims are hand-written; the aspect half of
+# every claim is machine-checked against the expected string via the marker
+# words below, and the shape half is auditable from the raw at a glance. The
+# first version of this test declared the matrix only in the eval's prose and
+# measured none of it (S4 round 1 finding).
+TIME_ASPECTS = ("ngày", "tháng", "năm", "giờ", "phút", "khoảng")
+TIME_SHAPES = ("0-đầu", "1-chữ-số", "2-chữ-số", "4-chữ-số")
+TIME_ASPECT_MARKERS: dict[str, str] = {
+    "ngày": "ngày",
+    "tháng": "tháng",
+    "năm": "năm hai nghìn",
+    "giờ": "giờ",
+    "phút": "phút",
+    "khoảng": "đến",
+}
+TIME_MATRIX_CELLS: dict[str, tuple[tuple[str, str], ...]] = {
+    "19/8/2026": (("ngày", "2-chữ-số"), ("tháng", "1-chữ-số"), ("năm", "4-chữ-số")),
+    "19-08-2026": (("ngày", "2-chữ-số"), ("tháng", "0-đầu")),
+    "14:30": (("giờ", "2-chữ-số"), ("phút", "2-chữ-số")),
+    "25-26/12": (("khoảng", "2-chữ-số"), ("tháng", "2-chữ-số")),
+    "5/9/2026": (("ngày", "1-chữ-số"),),
+    "05/09/2026": (("ngày", "0-đầu"),),
+    "8:05": (("giờ", "1-chữ-số"), ("phút", "0-đầu")),
+    "08:30": (("giờ", "0-đầu"),),
+    "8-9/3": (("khoảng", "1-chữ-số"),),
+}
+# Deliberately uncovered, each with a reason: four-digit shapes only exist for
+# years; a year is only ever written with four digits in this product's copy;
+# minutes are conventionally two digits.
+DELIBERATELY_UNCOVERED_TIME_CELLS: frozenset[tuple[str, str]] = frozenset(
+    {
+        ("ngày", "4-chữ-số"),
+        ("tháng", "4-chữ-số"),
+        ("giờ", "4-chữ-số"),
+        ("phút", "4-chữ-số"),
+        ("phút", "1-chữ-số"),
+        ("khoảng", "4-chữ-số"),
+        ("khoảng", "0-đầu"),
+        ("năm", "0-đầu"),
+        ("năm", "1-chữ-số"),
+        ("năm", "2-chữ-số"),
+    }
+)
 
 CORPUS_ID: tuple[tuple[str, str], ...] = (
     ("0901234567", "không chín không một hai ba bốn năm sáu bảy"),
@@ -121,12 +218,65 @@ CORPUS_ID: tuple[tuple[str, str], ...] = (
     ("TP.Thủ Đức", "thành phố thủ đức"),
     ("Q.7", "quận bảy"),
     ("P.Bến Nghé", "phường bến nghé"),
+    # Sentence-position carriers: the eval's declared axis {đầu, giữa, cuối}
+    # had no case at all — every original case was a standalone fragment
+    # (S4 round 1 finding). One case per (type × position) cell.
+    ("0901234567 là số hỗ trợ", "không chín không một hai ba bốn năm sáu bảy là số hỗ trợ"),
+    ("Gọi 0901234567 để đặt chỗ", "gọi không chín không một hai ba bốn năm sáu bảy để đặt chỗ"),
+    ("Hotline là 0901234567", "hót lain là không chín không một hai ba bốn năm sáu bảy"),
+    ("85m2 là diện tích sàn", "tám mươi lăm mét vuông là diện tích sàn"),
+    ("Căn 85m2 có ban công", "căn tám mươi lăm mét vuông có ban công"),
+    ("Diện tích là 85m2", "diện tích là tám mươi lăm mét vuông"),
+    ("TP.HCM có mưa", "thành phố hồ chí minh có mưa"),
+    ("Về Q.7 lúc chiều", "về quận bảy lúc chiều"),
+    ("Chuyển hàng về TP.HCM", "chuyển hàng về thành phố hồ chí minh"),
 )
-ID_COUNT = 7
+ID_COUNT = 16
+
+# raw → (fragment, type, position). Position is machine-checked against the
+# RAW string: đầu ⇒ starts with the fragment, cuối ⇒ ends with it, giữa ⇒
+# contains it strictly inside.
+ID_TYPES = ("điện thoại", "đơn vị", "viết tắt")
+ID_POSITIONS = ("đầu", "giữa", "cuối")
+ID_POSITION_CELLS: dict[str, tuple[str, str, str]] = {
+    "0901234567 là số hỗ trợ": ("0901234567", "điện thoại", "đầu"),
+    "Gọi 0901234567 để đặt chỗ": ("0901234567", "điện thoại", "giữa"),
+    "Hotline là 0901234567": ("0901234567", "điện thoại", "cuối"),
+    "85m2 là diện tích sàn": ("85m2", "đơn vị", "đầu"),
+    "Căn 85m2 có ban công": ("85m2", "đơn vị", "giữa"),
+    "Diện tích là 85m2": ("85m2", "đơn vị", "cuối"),
+    "TP.HCM có mưa": ("TP.HCM", "viết tắt", "đầu"),
+    "Về Q.7 lúc chiều": ("Q.7", "viết tắt", "giữa"),
+    "Chuyển hàng về TP.HCM": ("TP.HCM", "viết tắt", "cuối"),
+}
 
 
 def test_datetime_golden() -> None:
     assert len(CORPUS_TIME) == TIME_COUNT
+
+    expected_by_raw = dict(CORPUS_TIME)
+    orphans = set(TIME_MATRIX_CELLS) - set(expected_by_raw)
+    assert not orphans, f"Ô khai cho ca không còn trong corpus: {sorted(orphans)}"
+    for raw, cells in TIME_MATRIX_CELLS.items():
+        for aspect, shape in cells:
+            marker = TIME_ASPECT_MARKERS[aspect]
+            assert marker in expected_by_raw[raw], (
+                f"{raw!r} khai ô ({aspect}, {shape}) nhưng expected "
+                f"không chứa {marker!r}"
+            )
+
+    covered = {cell for cells in TIME_MATRIX_CELLS.values() for cell in cells}
+    overlap = covered & DELIBERATELY_UNCOVERED_TIME_CELLS
+    assert not overlap, f"Ô vừa được phủ vừa khai bỏ: {sorted(overlap)}"
+    missing = [
+        (aspect, shape)
+        for aspect in TIME_ASPECTS
+        for shape in TIME_SHAPES
+        if (aspect, shape) not in covered
+        and (aspect, shape) not in DELIBERATELY_UNCOVERED_TIME_CELLS
+    ]
+    assert not missing, f"Ô ma trận chưa có ca nào: {missing}"
+
     for raw, expected in CORPUS_TIME:
         got = normalize_vi(raw)
         assert got.ok is True, f"{raw!r} → {got.error}"
@@ -135,6 +285,33 @@ def test_datetime_golden() -> None:
 
 def test_identifiers_units_abbrev_golden() -> None:
     assert len(CORPUS_ID) == ID_COUNT
+
+    raws = {raw for raw, _ in CORPUS_ID}
+    orphans = set(ID_POSITION_CELLS) - raws
+    assert not orphans, f"Ô khai cho ca không còn trong corpus: {sorted(orphans)}"
+    for raw, (fragment, _type, position) in ID_POSITION_CELLS.items():
+        if position == "đầu":
+            assert raw.startswith(fragment), f"{raw!r} khai đầu câu nhưng không"
+        elif position == "cuối":
+            assert raw.endswith(fragment), f"{raw!r} khai cuối câu nhưng không"
+        else:
+            inner = raw.find(fragment)
+            assert 0 < inner < len(raw) - len(fragment), (
+                f"{raw!r} khai giữa câu nhưng không"
+            )
+
+    covered = {
+        (cell_type, position)
+        for _fragment, cell_type, position in ID_POSITION_CELLS.values()
+    }
+    missing = [
+        (cell_type, position)
+        for cell_type in ID_TYPES
+        for position in ID_POSITIONS
+        if (cell_type, position) not in covered
+    ]
+    assert not missing, f"Ô loại×vị-trí chưa có ca nào: {missing}"
+
     for raw, expected in CORPUS_ID:
         got = normalize_vi(raw)
         assert got.ok is True, f"{raw!r} → {got.error}"
@@ -283,4 +460,14 @@ def test_edge_inputs() -> None:
         got = normalize_vi(raw)
         assert unicodedata.is_normalized("NFC", got.text), f"{raw!r} ra không phải NFC"
         decomposed = unicodedata.normalize("NFD", raw)
-        assert normalize_vi(decomposed).text == got.text, f"{raw!r} lệch giữa NFC và NFD"
+        got_nfd = normalize_vi(decomposed)
+        assert got_nfd.text == got.text, f"{raw!r} lệch giữa NFC và NFD"
+        # `.ok` must agree too, not just `.text`: had_money used to be computed
+        # on the RAW input while the money patterns are NFC literals, so NFD
+        # input skipped the money-loss rule — same text out, different verdict.
+        # A text-only comparison stayed green on exactly that hole (measured,
+        # S4 round 1 finding).
+        assert got_nfd.ok == got.ok, f"{raw!r}: ok lệch giữa NFC và NFD"
+        assert has_money(decomposed) == has_money(raw), (
+            f"{raw!r}: has_money lệch giữa NFC và NFD"
+        )

@@ -88,8 +88,14 @@ def has_money(text: str) -> bool:
     Public because the corpus asserts the money relation and must use the SAME
     rule: a test that re-implements it loosely repeats the very bug this
     replaced — `"đ" in text` marks "độ" and "đẹp" as prices.
+
+    Normalizes to NFC first: the `_MONEY` patterns are NFC literals, and this
+    runs on the RAW input (before `_pre`'s own NFC step). Without it, an NFD
+    string carrying a real price reports no money, and the relational
+    money-loss rule below is silently skipped for exactly the inputs macOS
+    tools like to produce — measured, S4 round 1 finding.
     """
-    return _MONEY.search(text) is not None
+    return _MONEY.search(unicodedata.normalize("NFC", text)) is not None
 
 
 def _pre(text: str) -> str:
