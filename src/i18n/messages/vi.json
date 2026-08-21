@@ -207,6 +207,7 @@
             "musicBrief": "Kế hoạch nhạc"
         },
         "toast": {
+            "ttsNeedsNormalize": "Node giọng đọc {nodes} chưa có node “Đọc số thành chữ” ở phía trên — số, giá và ngày có thể bị đọc sai. Thêm node đó vào giữa nguồn chữ và node giọng đọc.",
             "executing": "Đang thực thi...",
             "completed": "Hoàn thành",
             "cancelled": "Đã huỷ",

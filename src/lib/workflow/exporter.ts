@@ -26,6 +26,7 @@ import {
     type OutputRoute,
     type WorkflowInput,
     type WorkflowOutput,
+    type WorkflowWarning,
 } from "./executable-workflow";
 import { WorkflowParser } from "./parser";
 
@@ -57,10 +58,29 @@ export const MUSIC_SLOTS: readonly NodeSlot[] = [
     "separate-sound",
 ];
 
-/** Thrown by `export()` when a TTS node has no reader upstream (roadmap 1.3). */
+/**
+ * Warning code attached by `export()` when a TTS node has no reader upstream
+ * (roadmap 1.3). A WARNING, not a block: the reader node is not reachable from
+ * any picker today (only the Director places it), so blocking retroactively
+ * bricked every saved TTS workflow — owner decision 2026-08-20, ledger entry
+ * d-20260820T091500Z-9098, which also pins the condition for raising this back
+ * to a hard block. The human sentence lives in the i18n catalogs
+ * (`Workspace.toast.ttsNeedsNormalize`), never here.
+ */
 export const WORKFLOW_TTS_NEEDS_NORMALIZE = "WORKFLOW_TTS_NEEDS_NORMALIZE";
 
 const NORMALIZE_SLOT = "normalize-text-vi";
+
+/** Index edges by target once; `hasUpstreamSlot` runs once per TTS node. */
+function buildParentIndex(edges: Edge[]): Map<string, string[]> {
+    const parents = new Map<string, string[]>();
+    for (const edge of edges) {
+        const list = parents.get(edge.target);
+        if (list) list.push(edge.source);
+        else parents.set(edge.target, [edge.source]);
+    }
+    return parents;
+}
 
 /**
  * Walk the graph upstream looking for one slot.
@@ -73,22 +93,22 @@ const NORMALIZE_SLOT = "normalize-text-vi";
  * hit a data node the lookup could not resolve and the walk gave up there,
  * falsely rejecting the very chain the feature exists to enable. Data nodes are
  * pass-through for this question: step over them, do not stop at them.
+ *
+ * Only the registration's `feature` is consulted — resolving the full spec via
+ * `resolveSpec` answers a question this walk never asks.
  */
-function hasUpstreamSlot(nodeId: string, slot: string, edges: Edge[]): boolean {
-    const parents = new Map<string, string[]>();
-    for (const edge of edges) {
-        const list = parents.get(edge.target);
-        if (list) list.push(edge.source);
-        else parents.set(edge.target, [edge.source]);
-    }
-
+function hasUpstreamSlot(
+    nodeId: string,
+    slot: string,
+    parents: Map<string, string[]>,
+): boolean {
     const seen = new Set<string>([nodeId]);
     const stack = [...(parents.get(nodeId) ?? [])];
     while (stack.length) {
         const id = stack.pop() as string;
         if (seen.has(id)) continue;
         seen.add(id);
-        if (getNodeSpec(id)?.reg.feature === slot) return true;
+        if (getAbiNodeRegistration(id)?.feature === slot) return true;
         stack.push(...(parents.get(id) ?? []));
     }
     return false;
@@ -344,20 +364,23 @@ export class WorkflowExporter {
             )
             .map((edge) => ({ source: edge.source, target: edge.target }));
 
-        // Roadmap 1.3: reading numbers aloud is mandatory before any TTS node.
-        // Enforced here because this is the one gate every workflow passes,
-        // whether the Director planned it or a person wired it by hand.
+        // Roadmap 1.3: reading numbers aloud before any TTS node. Checked here
+        // because this is the one gate every workflow passes, whether the
+        // Director planned it or a person wired it by hand. Surfaced as a
+        // WARNING the callers render via i18n — see the constant's doc comment
+        // for why this is not a block today.
+        const parentIndex = buildParentIndex(this.edges);
         const offenders = executableNodes
             .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
-            .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, this.edges))
+            .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, parentIndex))
             .map((n) => n.id);
-        if (offenders.length > 0) {
-            throw new Error(
-                `${WORKFLOW_TTS_NEEDS_NORMALIZE}: node ${offenders.join(", ")} đọc chữ thành tiếng nhưng phía trên không có node "Đọc số thành chữ". Thêm node đó vào giữa nguồn chữ và node giọng đọc.`,
-            );
-        }
+        const warnings: WorkflowWarning[] =
+            offenders.length > 0
+                ? [{ code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: offenders }]
+                : [];
 
         return {
+            warnings,
             name: options.name ?? "Untitled Workflow",
             description: options.description,
             version: "1.0",

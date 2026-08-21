@@ -122,9 +122,13 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   `pluginId` top-level và `prompt` chỉ chứa business field — không `bindings`/`paramMappings`
   viết tay.
 - AC-10: (cross-layer) Given một workflow có node TTS mà **không** có `normalize-text-vi` nào
-  trên đường phụ thuộc thượng nguồn, When export, Then export **chặn** với thông điệp nêu
-  đúng node vi phạm và việc phải làm; Given workflow có `normalize-text-vi` đứng trước TTS
-  (kể cả cách hai node), Then export ra bình thường, không cảnh báo — lượt kiểm không đỏ oan;
+  trên đường phụ thuộc thượng nguồn, When export, Then export **thành công kèm cảnh báo**
+  máy-đọc-được (`warnings[]` mang code + đúng id node vi phạm) và UI hiện thông điệp i18n
+  nêu việc phải làm — không chặn. *(hạ mức từ chặn xuống cảnh báo theo quyết định owner
+  2026-08-20, supersedes entry Cổng 1 — xem `d-20260820T091500Z-9098`: node chưa vào được
+  picker nên mức chặn hồi tố làm hỏng mọi workflow TTS đã lưu; điều kiện nâng lại thành
+  chặn ghi trong entry.)* Given workflow có `normalize-text-vi` đứng trước TTS
+  (kể cả cách hai node), Then export ra bình thường, `warnings` rỗng — lượt kiểm không đỏ oan;
   Given một workflow **nhạc** (`gen-music`, `music-repaint`, `music-cover`, `music-lego`,
   `music-complete`, `separate-sound`) không có normalize thượng nguồn, Then export vẫn sạch —
   trường `text` của các slot đó là lời mô tả cho model, không phải chữ để đọc thành tiếng.

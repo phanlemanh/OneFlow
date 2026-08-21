@@ -45,11 +45,13 @@ import {
     updateWorkflow,
 } from "@/lib/api/workspace";
 import { logger } from "@/lib/logger";
+import type { ExecutableWorkflow } from "@/lib/workflow/executable-workflow";
 import {
     exportWorkflow,
     type ParsedWorkflowImport,
     parseWorkflowImportJson,
     WORKFLOW_IMPORT_NO_CANVAS,
+    WORKFLOW_TTS_NEEDS_NORMALIZE,
 } from "@/lib/workflow/exporter";
 
 function safeWorkflowFileName(name: string): string {
@@ -86,6 +88,24 @@ export function WorkflowTitleMenu() {
 
     const t = useTranslations("Workspace.menu");
     const tIndex = useTranslations("Index");
+    const tToast = useTranslations("Workspace.toast");
+
+    // Export-time policy warnings are machine-readable codes; the sentence the
+    // user reads is rendered HERE, through the catalogs, in their locale. The
+    // first version threw a Vietnamese literal from the exporter and every
+    // caller swallowed it into a generic "save failed" toast.
+    const notifyExportWarnings = (executable: ExecutableWorkflow) => {
+        for (const warning of executable.warnings ?? []) {
+            if (warning.code === WORKFLOW_TTS_NEEDS_NORMALIZE) {
+                toast(
+                    tToast("ttsNeedsNormalize", {
+                        nodes: warning.nodeIds.join(", "),
+                    }),
+                    { icon: "⚠️", duration: 6000 },
+                );
+            }
+        }
+    };
 
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [isSaveAsMode, setIsSaveAsMode] = useState(false);
@@ -142,6 +162,8 @@ export function WorkflowTitleMenu() {
                 description: tempDescription || "",
                 includeOriginalFlow: false,
             });
+
+            notifyExportWarnings(executable);
 
             const workflowData: Partial<SaveWorkflowRequest> = {
                 name: tempName,
@@ -220,6 +242,7 @@ export function WorkflowTitleMenu() {
                 description: workflowDescription || "",
                 includeOriginalFlow,
             });
+            notifyExportWarnings(executable);
             const text = JSON.stringify(executable, null, 2);
             const blob = new Blob([text], {
                 type: "application/json;charset=utf-8",

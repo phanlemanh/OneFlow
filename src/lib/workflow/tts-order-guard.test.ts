@@ -84,15 +84,21 @@ afterEach(() => {
 });
 
 describe("violation", () => {
-    it.each(TTS_SLOTS)("blocks %s when no reader sits upstream", (slot) => {
+    // A WARNING, not a throw: the reader node is unreachable from any picker
+    // today, so a hard block retroactively bricked every saved TTS workflow —
+    // owner decision 2026-08-20 (ledger d-20260820T091500Z-9098). The export
+    // must still SUCCEED, carrying a machine-readable warning the UI renders.
+    it.each(TTS_SLOTS)("warns on %s when no reader sits upstream", (slot) => {
         const { nodes, edges } = buildChain([
             { id: "a", feature: "gen-text" },
             { id: "b", feature: slot, deps: ["a"] },
         ]);
 
-        expect(() => exportWorkflow(nodes, edges, { name: "x" })).toThrow(
-            new RegExp(`${WORKFLOW_TTS_NEEDS_NORMALIZE}[\\s\\S]*\\bb\\b`),
-        );
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.executableNodes).toHaveLength(2);
+        expect(workflow.warnings).toEqual([
+            { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+        ]);
     });
 
     it("names every offending node, not just the first", () => {
@@ -102,9 +108,12 @@ describe("violation", () => {
             { id: "c", feature: "text-gen-speech-clone", deps: ["a"] },
         ]);
 
-        expect(() => exportWorkflow(nodes, edges, { name: "x" })).toThrow(
-            /\bb\b[\s\S]*\bc\b|\bc\b[\s\S]*\bb\b/,
-        );
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toHaveLength(1);
+        expect([...(workflow.warnings?.[0]?.nodeIds ?? [])].sort()).toEqual([
+            "b",
+            "c",
+        ]);
     });
 });
 
@@ -118,11 +127,12 @@ describe("compliant", () => {
 
         const workflow = exportWorkflow(nodes, edges, { name: "x" });
         // Proves the graph really reached the guard: a zero-node export would
-        // also "not throw", and would prove nothing at all.
+        // also carry no warnings, and would prove nothing at all.
         expect(workflow.executableNodes.map((n) => n.feature)).toContain(
             "normalize-text-vi",
         );
         expect(workflow.executableNodes).toHaveLength(3);
+        expect(workflow.warnings).toEqual([]);
     });
 
     it("allows the reader through a DATA node — the canonical canvas shape", () => {
@@ -169,7 +179,12 @@ describe("compliant", () => {
             targetHandle: "in:text",
         });
 
-        expect(() => exportWorkflow(nodes, edges, { name: "x" })).not.toThrow();
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.executableNodes.map((n) => n.feature).sort()).toEqual([
+            "normalize-text-vi",
+            "text-gen-speech-preset",
+        ]);
+        expect(workflow.warnings).toEqual([]);
     });
 
     it.each(MUSIC_SLOTS)("leaves the music slot %s alone", (slot) => {
@@ -180,6 +195,7 @@ describe("compliant", () => {
 
         const workflow = exportWorkflow(nodes, edges, { name: "x" });
         expect(workflow.executableNodes).toHaveLength(2);
+        expect(workflow.warnings).toEqual([]);
     });
 });
 

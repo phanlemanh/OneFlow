@@ -207,6 +207,7 @@
             "musicBrief": "Music Brief"
         },
         "toast": {
+            "ttsNeedsNormalize": "Speech node(s) {nodes} have no “Read numbers aloud” node upstream — numbers, prices and dates may be read incorrectly. Add that node between the text source and the speech node.",
             "executing": "Executing...",
             "completed": "Completed",
             "cancelled": "Cancelled",
