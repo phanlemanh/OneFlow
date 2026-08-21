@@ -1,19 +1,22 @@
-E15 network dump (round 3, fresh capture) — driver: mcp__Claude_Browser (Chrome DevTools Protocol)
-Scope per config.yaml: dev_server.url = http://localhost:3000 (design_pass.proto_route)
+E15 network dump — normalize-text-vi proto route (idle + wired states)
+dev_server.url = http://localhost:3000 (scope per _acceptance/config.yaml)
+Captured via Claude_Browser read_network_requests during the idle-state page load.
 
-App-origin (localhost:3000) requests observed during idle + wired navigation:
-- All document/JS/CSS/font/API requests: 200 OK.
-- Several `GET /proto/normalize-text-vi?_rsc=...` (React Server Component prefetch,
-  Next.js dev fast-refresh) show "200 OK [FAILED: net::ERR_ABORTED]" — this is the
-  browser client-side cancelling a *stale* RSC prefetch once a newer navigation/hot-update
-  supersedes it; the server response itself was 200 OK, nothing 4xx/5xx/timeout.
-- Six distinct webpack.*.hot-update.json/js bundles were emitted back-to-back during a
-  single page load with NO source edits made by this verifier session — this indicates
-  concurrent file-system activity from another session on the same shared repoRoot
-  (see outputTail: two peer sessions detected via ListAgents; tsconfig.json and
-  node_modules were independently observed to be mutated mid-session by something
-  other than this verifier). Not attributable to the normalize-text-vi feature itself.
-- No 4xx/5xx/connection-error/timeout requests to app origin observed.
-- No third-party requests observed on this proto route.
+[48812.37] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[48812.38] GET http://localhost:3000/_next/static/webpack/4040343ef9892a04.webpack.hot-update.json -> 200 OK
+[48812.39] GET http://localhost:3000/_next/static/webpack/webpack.4040343ef9892a04.hot-update.js -> 200 OK
+[028F946A49649FEA83F7379DA885C501] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
+[48812.41] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[48812.42] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[48812.43] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787293329673 -> 200 OK
+[48812.45] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787293329673 -> 200 OK
+[48812.46] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787293329673 -> 200 OK
+[48812.47] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[48812.48] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[48812.49] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[48812.76] GET http://localhost:3000/api/plugins/registry -> 200 OK
 
-Verdict: no FAIL-eligible failures. networkObserved = clean.
+Verdict: all requests app-origin (localhost:3000, matches dev_server.url), all 200 OK.
+No third-party traffic observed. No FAIL-eligible failures.
+console read_console_messages(onlyErrors=true) -> No console logs (no errors; two React Flow dev warnings only, see outputTail).
+networkObserved = clean

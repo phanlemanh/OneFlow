@@ -1,7 +1,7 @@
 {
-  "run_id": "design-gate-9822cfb5e9",
+  "run_id": "design-gate-fcaae12c9a",
   "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
-  "verified_at": "2026-08-21T05:42:34.348Z",
+  "verified_at": "2026-08-21T06:24:34.370Z",
   "target": "_acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.html",
   "fail_on": [
     "P0"
