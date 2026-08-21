@@ -232,7 +232,7 @@ evals:
   - id: E16
     criterion: AC-15
     executor: judgment
-    question: "So 2 capture với các node transfer sẵn có của workspace (denoise-audio, remove-subtitle — cùng khuôn AbiNodeShell): node normalize-text-vi có nhìn như người nhà không (shell, spacing, icon, nhãn nút)? Có gì phá ngôn ngữ thiết kế workspace? Riêng CHỮ của thông điệp lỗi không hỏi ở đây — nó do E6a đo tất định, không chấm bằng ảnh."
+    question: "Chỉ soi HAI ảnh được cấp (node normalize-text-vi trong canvas React Flow thật, state idle và wired): node có hợp khuôn AbiNodeShell không — shell/header, spacing, icon, nhãn nút đọc được bằng tiếng Việt, hai handle in:text/out:text? Có gì phá ngôn ngữ thiết kế workspace nhìn thấy được NGAY TRÊN hai ảnh này? KHÔNG hỏi vế so sánh với denoise-audio/remove-subtitle: trang proto /proto/[slug] chỉ dựng được node của feature này nên không ảnh đối chứng nào tồn tại — vế đó owner tự xác nhận ở Cổng 2 (amendment 2026-08-21; T3 vốn bắt buộc human_override mọi mục judgment). Riêng CHỮ của thông điệp lỗi không hỏi ở đây — nó do E6a đo tất định, không chấm bằng ảnh. Thiếu input nào thì nói THIẾU FILE, đừng suy đoán."
     inputs: ["evidence/design/captures/state-1-idle.png", "evidence/design/captures/state-2-wired.png"]
-    expected: "Panel đồng thuận node đạt ngôn ngữ thiết kế workspace trên hai state chụp được; UNCERTAIN → human quyết ở Cổng 2"
+    expected: "Panel đồng thuận hai capture cho thấy node hợp khuôn AbiNodeShell và không có gì phá ngôn ngữ thiết kế nhìn thấy được; UNCERTAIN → human quyết ở Cổng 2. THU HẸP (amendment 2026-08-21, Cổng 2 vòng 3): vế 'so với node transfer khác' của AC-15 KHÔNG thuộc eval này — nó nằm ở checklist Cổng 2 của owner, vì hai vòng đầu đều UNCERTAIN do panel không được cấp ảnh đối chứng chứ không do sản phẩm."
     evidence_required: [run_id, verifier, verified_at, output]

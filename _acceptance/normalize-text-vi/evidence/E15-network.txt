@@ -1,0 +1,19 @@
+E15 network dump (round 3, fresh capture) — driver: mcp__Claude_Browser (Chrome DevTools Protocol)
+Scope per config.yaml: dev_server.url = http://localhost:3000 (design_pass.proto_route)
+
+App-origin (localhost:3000) requests observed during idle + wired navigation:
+- All document/JS/CSS/font/API requests: 200 OK.
+- Several `GET /proto/normalize-text-vi?_rsc=...` (React Server Component prefetch,
+  Next.js dev fast-refresh) show "200 OK [FAILED: net::ERR_ABORTED]" — this is the
+  browser client-side cancelling a *stale* RSC prefetch once a newer navigation/hot-update
+  supersedes it; the server response itself was 200 OK, nothing 4xx/5xx/timeout.
+- Six distinct webpack.*.hot-update.json/js bundles were emitted back-to-back during a
+  single page load with NO source edits made by this verifier session — this indicates
+  concurrent file-system activity from another session on the same shared repoRoot
+  (see outputTail: two peer sessions detected via ListAgents; tsconfig.json and
+  node_modules were independently observed to be mutated mid-session by something
+  other than this verifier). Not attributable to the normalize-text-vi feature itself.
+- No 4xx/5xx/connection-error/timeout requests to app origin observed.
+- No third-party requests observed on this proto route.
+
+Verdict: no FAIL-eligible failures. networkObserved = clean.

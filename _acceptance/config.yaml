@@ -459,7 +459,14 @@ executors:
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
-    gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1)"
+    # --jsdom . is REQUIRED, not decoration: the gate resolves jsdom from its own
+    # install (the plugin cache), which has no node_modules, so DOM mode returns
+    # verdict BLOCKED / exit 3 without it. Measured 2026-08-21 on the
+    # normalize-text-vi round-3 captures — same HTML: BLOCKED bare, PASS with the
+    # flag. `.` is the repo root, where evals run and where jsdom is installed.
+    # Note for whoever reads a raw run: jsdom prints "Could not parse CSS
+    # stylesheet" on STDERR; capture stdout alone or the JSON will not parse.
+    gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1) --jsdom ."
     # ui_check is a browser-injected asset (runner loads it INTO the page) — PATH only, no `node` prefix.
     ui_check: "$(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-scan.js | sort -V | tail -1)"
     a11y: node scripts/a11y-scan.mjs

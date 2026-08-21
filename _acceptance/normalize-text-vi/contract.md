@@ -180,11 +180,21 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   unit-level vẫn xanh. Ở đây nó còn tệ hơn — E11a chạy fake plugin nên không chạm vỏ thật, và
   một vỏ viết `return NormalizeTextViOutput(success=True, text=input.text)` sẽ để cả 24 eval
   xanh trong khi TTS vẫn đọc sai giá.*
-- AC-15: (judgment) Given node `normalize-text-vi` trên canvas dev server, When soi capture
-  HTML + screenshot theo ngôn ngữ thiết kế workspace hiện có, Then node "nhìn như người nhà"
-  của các node transfer sẵn có (shell, spacing, trạng thái rỗng/đang chạy/lỗi), thông điệp
-  lỗi của AC-6 đọc được bằng tiếng người ("chưa đọc được: 3/4, ~") chứ không phải dump kỹ
-  thuật, và đạt sàn P0 design gate.
+- AC-15: (judgment) (amendment 2026-08-21, Cổng 2 vòng 3 — tách vế so sánh) Given node
+  `normalize-text-vi` trên canvas dev server, When soi capture HTML + screenshot theo ngôn
+  ngữ thiết kế workspace hiện có, Then node "nhìn như người nhà" của các node transfer sẵn
+  có (shell, spacing, trạng thái rỗng/đang chạy/lỗi), thông điệp lỗi của AC-6 đọc được bằng
+  tiếng người ("chưa đọc được: 3/4, ~") chứ không phải dump kỹ thuật, và đạt sàn P0 design
+  gate.
+  **Tách vế so sánh (amendment):** hai vòng verify đầu đều trả `E16` UNCERTAIN vì cùng một
+  lý do công cụ — câu hỏi bắt so với `denoise-audio` / `remove-subtitle` trong khi trang
+  proto `/proto/[slug]` chỉ dựng được node của chính feature này, nên panel không bao giờ
+  có ảnh đối chứng để so. Từ vòng 3: `E16` chỉ chấm phần **hai ảnh cho thấy** (node hợp
+  khuôn `AbiNodeShell`, không có gì phá ngôn ngữ thiết kế nhìn thấy ngay trên ảnh); vế
+  **so sánh với node transfer khác** chuyển sang checklist Cổng 2 của owner — T3 vốn bắt
+  buộc owner tự xác nhận mọi mục judgment và điền `human_override`, nên vế này về đúng tay
+  người chứ không mất. Phương án đã LOẠI: thêm hai node đối chứng vào trang proto (thêm mã
+  ở vòng cuối chỉ để nuôi một hội đồng, và phải chụp lại từ đầu).
 
 ## Coverage
 

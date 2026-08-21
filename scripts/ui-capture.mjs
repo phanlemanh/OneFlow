@@ -21,7 +21,14 @@ import { dirname } from "node:path";
  * The dependency lives in YOUR package.json, not in the plugin.
  *
  * Usage: node scripts/ui-capture.mjs <url> <out.png> [--wait <ms>] [--full] [--w <px>] [--h <px>]
+ *          [--lang <tag>] [--require <text>]
  * Set CHROME_PATH if Chrome/Chromium isn't at a default location.
+ *
+ * --lang / --require exist because a headless profile carries neither a
+ * NEXT_LOCALE cookie nor a matching Accept-Language, so this app renders its
+ * fallback locale and the frame still LOOKS valid — measured 2026-08-21: the
+ * same route that answers `lang="vi"` to curl came back `lang="en"` here. A
+ * capture tool that cannot refuse to write is a report, not a measurement.
  */
 import puppeteer from "puppeteer-core";
 
@@ -30,7 +37,7 @@ const flag = (n, d) => {
     const i = args.indexOf(n);
     return i >= 0 ? args[i + 1] : d;
 };
-const VAL_FLAGS = ["--wait", "--w", "--h", "--html"];
+const VAL_FLAGS = ["--wait", "--w", "--h", "--html", "--lang", "--require"];
 const pos = [];
 for (let i = 0; i < args.length; i++) {
     if (VAL_FLAGS.includes(args[i])) {
@@ -51,6 +58,8 @@ const waitMs = Number(flag("--wait", 600));
 const width = Number(flag("--w", 390)); // mobile-first default — adjust per persona
 const height = Number(flag("--h", 844));
 const fullPage = args.includes("--full");
+const lang = flag("--lang", null);
+const require_ = flag("--require", null);
 
 const CANDIDATES = [
     process.env.CHROME_PATH,
@@ -83,10 +92,45 @@ const browser = await puppeteer.launch({
 try {
     const page = await browser.newPage();
     await page.setViewport({ width, height });
+
+    // Locale has to be forced on BOTH channels before the first navigation:
+    // the app reads the NEXT_LOCALE cookie first and falls back to
+    // Accept-Language, and a fresh headless profile carries neither.
+    if (lang) {
+        await page.setExtraHTTPHeaders({ "Accept-Language": lang });
+        const { origin } = new URL(url);
+        const cookie = { name: "NEXT_LOCALE", value: lang, url: origin };
+        if (typeof browser.setCookie === "function")
+            await browser.setCookie(cookie);
+        else await page.setCookie(cookie);
+    }
+
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
     await new Promise((r) => setTimeout(r, waitMs));
-    await page.screenshot({ path: out, fullPage });
-    console.log(`saved ${out}`);
+
+    // Refuse to write rather than write a frame of the wrong page. A saved PNG
+    // is indistinguishable from a correct one once it reaches an evidence
+    // folder, so the check belongs here, before the file exists.
+    let refused = false;
+    if (require_) {
+        const seen = await page.evaluate(() => document.body.innerText);
+        const htmlLang = await page.evaluate(
+            () => document.documentElement.lang,
+        );
+        if (!seen.includes(require_)) {
+            console.error(
+                `ui-capture: REFUSED — page does not contain ${JSON.stringify(require_)} ` +
+                    `(html lang=${htmlLang || "?"}). Nothing written.`,
+            );
+            process.exitCode = 3;
+            refused = true;
+        }
+    }
+
+    if (!refused) {
+        await page.screenshot({ path: out, fullPage });
+        console.log(`saved ${out}`);
+    }
 
     // --html <path>: also dump the rendered DOM with every same-origin
     // stylesheet inlined.
@@ -97,7 +141,7 @@ try {
     // clean sheet it never actually measured — the exact shape of a green that
     // means nothing. Inlining the CSS text is what makes the measurement real.
     const htmlOut = flag("--html", null);
-    if (htmlOut) {
+    if (htmlOut && !refused) {
         const html = await page.evaluate(() => {
             const css = Array.from(document.styleSheets)
                 .map((sheet) => {
