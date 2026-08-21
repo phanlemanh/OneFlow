@@ -60,10 +60,25 @@ TIER_A_SLOTS = frozenset({
     # no seed to pin); byte-identity evidence lives in the plugin repo's
     # golden suite (AC-10).
     "compose-overlay",
-    # normalize-text-vi: a pure function over a string — no model call, no
-    # seed, no I/O. Byte-identity and idempotence evidence lives in
-    # tests/test_normalize_vi.py (AC-7).
-    "normalize-text-vi",
+    # normalize-text-vi is DELIBERATELY ABSENT — it was here, and was removed at
+    # Gate 2 round 5 (owner, 2026-08-21). It is deterministic (a pure function
+    # over a string), which is why it qualified; that is not the problem.
+    #
+    # The problem is the KEY, not the value. Every other slot on this list
+    # computes inside its own plugin repo, so `pluginRev` + `plugin_is_dirty()`
+    # track the code that produced the cached value. normalize-text-vi is the
+    # first Tier-A slot whose algorithm lives in the SDK itself
+    # (tongflow/text/normalize_vi.py + the pinned vietnormalizer), and the
+    # fingerprint carries only `sdk_major()` — measured: "0.2.19", "0.2.22",
+    # "0.2.23" and "0.2.24" all hash as "0.2". So four reader fixes shipped in
+    # one day would NOT have invalidated a single cached reading: a user who hit
+    # "Giá 500 Đ" before the fix keeps getting the wrong reading back, ok=True,
+    # nothing red. That is the silent-wrong-price shape Gate G1 exists to stop.
+    #
+    # sdk_major()'s major.minor truncation is a deliberate R6 bargain — correct
+    # for slots whose code lives in a plugin, wrong for a slot whose code lives
+    # here. Re-add ONLY once the reader identity (full SDK version, or a digest
+    # of tongflow/text/ plus the vietnormalizer pin) is part of the key.
     "concat-videos",
     "extract-audio",
     "remove-video-audio",

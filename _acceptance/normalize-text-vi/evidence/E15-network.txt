@@ -1,25 +1,36 @@
-E15 network truth — normalize-text-vi wired state
-Driver: mcp__Claude_Browser (browser tool with network/console read access)
-dev_server.url (config): http://localhost:3000
-Scope rule: FAIL-eligible = fetch/XHR to http://localhost:3000 (dev_server.url origin)
+E15 network truth dump — /proto/normalize-text-vi (idle state, live browser session)
+Origin: http://localhost:3000 (dev_server.url scope)
 
-Console errors (onlyErrors=true): "No console logs." — clean, zero errors.
+Console (all levels):
+- info: React DevTools download hint (framework noise)
+- warn: [React Flow]: parent container needs width/height (reactflow.dev/error#004) — non-fatal layout warning, not app-scope failure
+- log: task store handler registration/unregistration (expected instrumentation)
+Console (errors only): No console logs. (i.e. zero error-level entries)
 
-Network requests observed (all same-origin, app-scope):
-[43756.39] GET /api/plugins/registry -> 200 OK
-[..] GET /proto/normalize-text-vi?state=wired -> 200 OK
-[43756.41] GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-[43756.42] GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-[43756.43] GET /_next/static/css/app/layout.css -> 200 OK
-[43756.45] GET /_next/static/css/app/proto/[slug]/page.css -> 200 OK
-[43756.46] GET /_next/static/chunks/webpack.js -> 200 OK
-[43756.47] GET /_next/static/chunks/main-app.js -> 200 OK
-[43756.48] GET /_next/static/chunks/app-pages-internals.js -> 200 OK
-[43756.49] GET /_next/static/chunks/app/proto/[slug]/page.js -> 200 OK
-[43756.50] GET /_next/static/chunks/app/layout.js -> 200 OK
-(sequence repeats once due to a client-side reload after setting NEXT_LOCALE cookie)
+Network requests (all app-origin, all 200 OK):
+GET /api/plugins/registry → 200 OK
+GET /proto/normalize-text-vi → 200 OK
+GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 → 200 OK
+GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 → 200 OK
+GET /_next/static/css/app/layout.css → 200 OK
+GET /_next/static/css/app/proto/[slug]/page.css → 200 OK
+GET /_next/static/chunks/webpack.js → 200 OK
+GET /_next/static/chunks/main-app.js → 200 OK
+GET /_next/static/chunks/app-pages-internals.js → 200 OK
+GET /_next/static/chunks/app/proto/[slug]/page.js → 200 OK
+GET /_next/static/chunks/app/layout.js → 200 OK
+(repeated across cookie-set navigate + reload cycles)
 
-No failed requests (no connection-error/timeout/4xx/5xx) observed in the FAIL-eligible set.
-No third-party traffic observed.
+No third-party requests observed. No FAIL-eligible requests (no 4xx/5xx) in app-scope.
 
-Verdict: networkObserved = clean
+Wired-state navigation (?state=wired) also confirmed clean:
+- data-proto-state="wired", <html lang="vi">, handles=[out:textNode, in:text, out:text]
+- Transient note: one intermediate navigate showed two RSC prefetch entries logged as
+  "GET /proto/normalize-text-vi?_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]", occurring
+  interleaved with /_next/static/webpack/*.hot-update.js|json chunk fetches (Next dev-server
+  Fast Refresh mid-navigation, not a real request failure — the server still answered 200,
+  the browser client-cancelled the superseded prefetch). Re-verified with a clean full
+  navigate immediately after: zero errors, zero aborts, all requests 200 OK, no hot-update
+  chunks present. Treated as dev-mode HMR noise, not an app failure — not counted toward
+  networkObserved.
+networkObserved verdict: clean

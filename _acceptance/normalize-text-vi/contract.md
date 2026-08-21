@@ -164,11 +164,27 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   một slot TTS vào ABI mà quên khai vào guard phải làm phép đo đỏ kèm tên slot. *Hạng mục 1.4
   sắp thêm slot TTS ElevenLabs; danh sách trắng đóng băng im lặng biến "bắt buộc" thành
   "bắt buộc với bốn slot cũ".*
-- AC-11: (cross-layer) Given `normalize-text-vi` nằm trong `TIER_A_SLOTS` và một workflow
-  2-node (fake plugin tầng B → normalize-text-vi fake tầng A) chạy qua engine, When chạy lần
-  2 không đổi gì, Then full hit — 0 lời gọi plugin; When chỉ đổi chuỗi `text` vào, Then node
-  tầng B **không** chạy lại và `normalize-text-vi` chạy lại; và guard allowlist hai chiều
-  (pinned list + slot tồn tại trong ABI) vẫn xanh sau khi thêm slot.
+- AC-11: (cross-layer) (amendment 2026-08-21, Cổng 2 vòng 5 — **rút khỏi Tier A**) Given
+  `normalize-text-vi` **KHÔNG** nằm trong `TIER_A_SLOTS` và một workflow 2-node (fake plugin
+  tầng B → normalize-text-vi) chạy qua engine, When chạy lần 2 không đổi gì, Then node tầng B
+  **trúng cache** (0 lời gọi) còn reader chạy lại đúng một lần, và đầu ra không đổi; When chỉ
+  đổi chuỗi `text` vào, Then node tầng B vẫn **không** chạy lại; và guard allowlist ghim slot
+  ở trạng thái **vắng mặt** kèm điều kiện vào lại.
+  **Vì sao rút** *(đo được, không phải suy đoán)*: khoá cache Tier-A chỉ mang `sdk_major()`,
+  cắt còn MAJOR.MINOR — `0.2.19`, `0.2.22`, `0.2.23`, `0.2.24` đều băm thành `"0.2"`. Mọi
+  slot Tier-A khác tính toán bên trong repo plugin của nó nên `pluginRev` theo dõi được đúng
+  mã sinh ra giá trị; `normalize-text-vi` là slot Tier-A **đầu tiên** có thuật toán nằm trong
+  chính SDK. Hệ quả đo được: **bốn** bản vá reader ship trong một ngày (0.2.20 → 0.2.23)
+  không làm mất hiệu lực một mục cache nào — người dùng từng gặp `"Giá 500 Đ"` đọc sai sẽ
+  nhận lại đúng bản sai đó, `ok=True`, không đỏ ở đâu. Đúng lớp "sai số giá êm ru" mà Gate G1
+  tồn tại để chặn.
+  **Cái giá đã chọn:** reader chạy lại mỗi lượt. Chấp nhận được vì nó là hàm thuần CPU trên
+  một chuỗi — không gọi model, không I/O; phần đắt tiền (sinh nội dung tầng B) vẫn được cache
+  nguyên vẹn, và đó mới là thứ AC-11 thực sự bảo vệ. LOẠI phương án đưa danh tính reader vào
+  vân tay ở vòng này: nó chạm `fingerprint.py` — đường cache dùng chung — nên kéo theo
+  `cache-l2-store` / `cache-l3-tier-b` / `cache-l4-eviction` ký lại.
+  **Điều kiện vào lại Tier A:** vân tay mang được danh tính reader (SDK version đầy đủ, hoặc
+  digest của `tongflow/text/` cộng pin `vietnormalizer`). Ghim bằng test, không bằng văn xuôi.
 - AC-12: (cross-layer) Given fixture workflow chứa `normalize-text-vi` chạy qua **cả hai**
   đường canvas-TS và engine-Python (conformance suite L0), When so kết quả, Then hai runtime
   không lệch: cùng số lời gọi, cùng shape input tới plugin (scalar `text` mỗi lời gọi, không

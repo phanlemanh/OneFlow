@@ -140,7 +140,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_node_cache_normalize
     paths: ["sdk/tongflow/engine/", "sdk/tests/test_node_cache_normalize.py", "sdk/tests/test_node_cache.py"]
-    expected: "exit 0; workflow 2-node qua engine: chạy lần 2 không đổi gì → full hit, 0 lời gọi plugin; đổi chuỗi text vào → node tầng B KHÔNG chạy lại, normalize-text-vi chạy lại"
+    expected: "exit 0; workflow 2-node qua engine (amendment Cổng 2 vòng 5 — slot ĐÃ RÚT khỏi TIER_A_SLOTS): chạy lần 2 không đổi gì → node tầng B ĐẮT TIỀN trúng cache (0 lời gọi image-gen-text) còn reader chạy lại đúng 1 lần, và đầu ra hai lượt bằng nhau; đổi chuỗi text vào → node tầng B vẫn KHÔNG chạy lại. Lời hứa cũ '0 lời gọi plugin' chỉ đúng khi reader còn được cache, mà nó được cache dưới một khoá không phân biệt nổi reader 0.2.19 với 0.2.24 (sdk_major cắt còn MAJOR.MINOR — đo được: bốn bản vá reader trong một ngày không làm mất hiệu lực mục cache nào). Chiều đỏ: bỏ image-gen-text khỏi TIER_B_SLOTS → đỏ nêu ĐÚNG lời gọi tầng B không được phép xảy ra"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E11b
@@ -149,7 +149,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_tier_a_allowlist
     paths: ["sdk/tongflow/engine/node_cache.py", "sdk/tests/test_node_cache.py", "config/tongflow.abi.json"]
-    expected: "exit 0; danh sách ghim khớp TIER_A_SLOTS VÀ quan hệ TIER_A_SLOTS ⊆ tập slot của ABI đo NGAY TRONG test mang tên _and_in_abi (trước đây quan hệ này sống ở node-id executor không chọn — slot ma cấy vào cả hằng lẫn literal vẫn xanh, S4-r2; chiều đỏ đã chứng minh: slot ma → đỏ nêu đúng tên)"
+    expected: "exit 0; danh sách ghim khớp TIER_A_SLOTS — trong đó normalize-text-vi bị ghim ở trạng thái VẮNG MẶT kèm điều kiện vào lại (amendment Cổng 2 vòng 5), assert riêng chứ không gộp chung danh sách hoãn-vì-1.1-L1b vì lý do hoãn khác nhau — VÀ quan hệ TIER_A_SLOTS ⊆ tập slot của ABI đo NGAY TRONG test mang tên _and_in_abi (trước đây quan hệ này sống ở node-id executor không chọn — slot ma cấy vào cả hằng lẫn literal vẫn xanh, S4-r2; chiều đỏ đã chứng minh: slot ma → đỏ nêu đúng tên)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12a

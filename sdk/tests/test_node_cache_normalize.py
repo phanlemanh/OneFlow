@@ -101,17 +101,33 @@ def _run(workflow, tmp_path, *, tenant="local", workflow_id="wf-1",
     return result, calls
 
 
-def test_normalize_second_run_full_hit_zero_plugin_calls(tmp_path):
-    # AC-11 first half: re-run unchanged makes ZERO plugin calls — the tier-B
-    # upstream hits its workflow-scoped entry and the reader, deterministic and
-    # now tier A, hits its content-addressed one.
+def test_normalize_rerun_keeps_expensive_upstream_cached(tmp_path):
+    # AC-11 first half, AMENDED at Gate 2 round 5 (owner, 2026-08-21) when
+    # normalize-text-vi came OUT of TIER_A_SLOTS: the promise "re-run unchanged
+    # makes ZERO plugin calls" was true only while the reader was cached, and it
+    # was cached under a key that could not tell reader 0.2.19 from 0.2.24 (see
+    # node_cache.py). What the workflow still owes the user is the EXPENSIVE
+    # half: the generation upstream must not be re-paid. The reader itself is a
+    # pure CPU string function with no model call, so re-running it costs
+    # ~nothing — that is why removing it from the cache is affordable at all.
     wf = _normalize_workflow()
     r1, c1 = _run(wf, tmp_path)
     r2, c2 = _run(wf, tmp_path)
     assert r1["status"] == "success"
     assert r2["status"] == "success"
     assert len(c1) == 2  # both ran cold
-    assert len(c2) == 0  # both hit warm
+
+    gen_calls = [c for c in c2 if c["slot"] == "image-gen-text"]
+    read_calls = [c for c in c2 if c["slot"] == "normalize-text-vi"]
+    assert len(gen_calls) == 0, (
+        f"lượt hai phải TRÚNG cache ở node tầng B đắt tiền, nhận {gen_calls}"
+    )
+    assert len(read_calls) == 1, (
+        "reader chạy lại đúng một lần — đó là cái giá đã chọn khi rút slot khỏi "
+        f"Tier A; nhận {len(read_calls)} lời gọi"
+    )
+    # Chạy lại mà đầu ra đổi thì việc rút khỏi cache đã đổi cả KẾT QUẢ, không
+    # chỉ đổi số lời gọi — AC-7 (tất định) sẽ là chỗ vỡ, nên ghim ngay ở đây.
     assert r2["outputs"] == r1["outputs"]
 
 
@@ -123,7 +139,9 @@ def test_changing_text_reruns_only_normalize(tmp_path):
     r2, c2 = _run(_normalize_workflow(text="Giá 1.999.000₫"), tmp_path)
     assert r1["status"] == "success"
     assert r2["status"] == "success"
-    assert len(c2) == 0
+    # Cùng lý do như test trên: reader hết được cache nên nó chạy lại, còn node
+    # tầng B thì không được phép chạy lại.
+    assert [c for c in c2 if c["slot"] == "image-gen-text"] == []
 
     r3, c3 = _run(_normalize_workflow(text="Giá 2.499.000₫"), tmp_path)
     gen_calls = [c for c in c3 if c["slot"] == "image-gen-text"]
