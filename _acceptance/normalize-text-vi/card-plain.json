@@ -1,110 +1,56 @@
 {
- "feature_plain": "Node đọc số, giá tiền, ngày giờ và chữ viết tắt thành chữ tiếng Việt tròn vành, đứng trước mọi node giọng đọc để giọng không đọc sai giá hay sai ngày.",
- "decisions": [
-  {
-   "id": "E16",
-   "q": "Nhìn hai ảnh chụp, node mới có giống người nhà của xưởng không?",
-   "why": "Hội đồng máy không chắc về thẩm mỹ — khớp khuôn, cách dòng, biểu tượng là thứ chỉ mắt người quyết được."
-  }
- ],
- "analyst_plain": "",
- "scope_plain": "Chưa làm trong đợt này: ép thứ tự ở tầng mẫu dựng sẵn, ngôn ngữ khác tiếng Việt, sửa văn phong, giọng vùng miền — mỗi thứ là một việc riêng về sau.",
- "decisions_plain": [
-  {
-   "id": "d-20260819T143500Z-11204",
-   "p": "Bộ não đọc chữ đặt trong bộ công cụ dùng chung, plugin chỉ là lớp vỏ mỏng — đổi lại mọi nơi dùng chung một bộ não, sửa một chỗ là sửa hết."
-  },
-  {
-   "id": "d-20260819T143500Z-29517",
-   "p": "Chọn thư viện đọc số mở, nhẹ, không tải mô hình — KHÔNG dùng thư viện phổ biến hơn vì giấy phép của nó cấm dùng thương mại."
-  },
-  {
-   "id": "d-20260819T143500Z-30881",
-   "p": "Ba cách viết dễ hiểu nhầm (5/3, 1.500, 10-15) được chốt cứng một nghĩa: ngày tháng, hàng nghìn, khoảng từ-đến — đổi lại người dùng luôn đoán được máy sẽ đọc thế nào."
-  },
-  {
-   "id": "d-20260819T143500Z-8842",
-   "p": "Ban đầu chọn CHẶN hẳn việc lưu workflow giọng đọc thiếu node đọc số — đổi lại workflow cũ sẽ gãy; quyết định này về sau được chính chủ hạ xuống cảnh báo."
-  },
-  {
-   "id": "d-20260819T143500Z-17390",
-   "p": "Node nhận chữ từ node khác nối vào, KHÔNG gõ tay thẳng vào node — đổi lại cách chia việc giống hệt các node giọng đọc, nhưng phải nối thêm một node chữ phía trên."
-  },
-  {
-   "id": "d-20260819T143500Z-24106",
-   "p": "Kết quả đọc được lưu đệm ngay từ đợt này: cùng một câu không phải đọc lại lần hai — đổi lại phải giữ danh sách node-được-đệm khớp ở hai nơi."
-  },
-  {
-   "id": "d-20260819T143500Z-6673",
-   "p": "KHÔNG làm phiên soi thiết kế riêng trước Cổng 1 — node dùng nguyên khuôn vỏ chung của xưởng, không có giao diện riêng nào để soi."
-  },
-  {
-   "id": "d-20260819T143500Z-19255",
-   "p": "KHÔNG ép thứ tự ở tầng mẫu dựng sẵn trong đợt này — hôm nay chưa có mẫu nào tồn tại để ép; dời sang hạng mục sau."
-  },
-  {
-   "id": "d-20260819T143500Z-27044",
-   "p": "Hai lần bộ chặn máy hiểu nhầm chữ trong file là lệnh chạy nặng: lần đầu mượn khoá thật rồi trả ngay, lần sau đổi cách ghi file để khỏi qua bộ chặn — cả hai lần đều không lách luật."
-  },
-  {
-   "id": "d-20260819T150800Z-14472",
-   "p": "Tại Cổng 1 chủ sản phẩm giữ mức CHẶN cho luật đứng-trước-giọng-đọc — kèm điều kiện mở lại nếu người dùng kêu vì workflow cũ gãy; điều kiện đó về sau đã kích hoạt."
-  },
-  {
-   "id": "d-20260820T233000Z-20418",
-   "p": "Bộ ảnh chụp nghiệm thu thu từ bốn trạng thái xuống hai (chưa nối, đã nối) — hai trạng thái kia do tiến trình chạy thật điều khiển, không dựng được từ ngoài mà không giả lập; lời hứa về chữ của thông báo lỗi chuyển sang phép đo chạy bằng máy."
-  },
-  {
-   "id": "d-20260820T002500Z-31882",
-   "p": "Sửa một lỗi thật: bộ kiểm thứ-tự-trước-giọng-đọc từng chặn nhầm đúng kiểu nối phổ biến nhất (qua một node dữ liệu trung gian) — đã sửa cách dò và thêm ca kiểm đúng hình dạng thật."
-  },
-  {
-   "id": "d-20260820T002500Z-14903",
-   "p": "Danh sách node-được-đệm hoá ra ghim ở hai file chứ không một — đã cập nhật cả hai và ghi lại để lần sau khỏi vấp."
-  },
-  {
-   "id": "d-20260820T002500Z-27516",
-   "p": "Phát hiện bước chụp ảnh mô tả một thao tác không tồn tại (thêm node từ bộ chọn) — chuyển sang chụp qua một trang thử riêng dựng node thật trong khung vẽ thật."
-  },
-  {
-   "id": "d-20260820T002500Z-9044",
-   "p": "Phát hiện cần chủ sản phẩm biết: loại node này KHÔNG thêm được bằng tay trên khung vẽ — chỉ trợ lý tự đặt; điều này về sau thành căn cứ hạ mức chặn xuống cảnh báo."
-  },
-  {
-   "id": "d-20260820T005500Z-40217",
-   "p": "Tách thư mục dựng bản chạy thử khỏi thư mục dựng bản kiểm — trước đó hai việc giẫm nhau làm hỏng chín lượt chụp ảnh của làn bên cạnh."
-  },
-  {
-   "id": "d-20260820T091500Z-9098",
-   "p": "Chủ sản phẩm hạ luật đứng-trước-giọng-đọc từ CHẶN xuống CẢNH BÁO — vì node chưa tự thêm được bằng tay và mức chặn làm hỏng mọi workflow giọng đọc đã lưu; khi node vào được bộ chọn sẽ nâng lại thành chặn."
-  },
-  {
-   "id": "d-20260821T003000Z-25286",
-   "p": "Sau lần từ chối đầu tiên, sửa cả tám lỗi hội đồng tìm ra trước khi đo lại — trong đó hai lỗi nặng về chính cách đo: bảng phủ tự khai tự tin, nay mọi ô khai đều bị máy kiểm lại."
-  },
-  {
-   "id": "d-20260821T003100Z-12348",
-   "p": "Phép nhận diện giá tiền tự chuẩn hoá chữ trước khi so — trước đó câu gõ từ máy Mac có thể lách qua luật giữ-đơn-vị-tiền mà không ai thấy."
-  },
-  {
-   "id": "d-20260821T003600Z-15416",
-   "p": "Chủ sản phẩm ký phát hành bộ công cụ bản 0.2.19 lên kho công khai ngay thay vì chờ — để vòng đo kế tiếp kiểm được cả mắt xích phát hành."
-  },
-  {
-   "id": "d-20260821T014500Z-32665",
-   "p": "Một lượt đo hỏng vì máy chụp nhầm sang cây mã khác — thêm bước neo: đối chiếu dấu vân của cây trước mọi thao tác, nhầm là dừng ngay chứ không đoán."
-  },
-  {
-   "id": "d-20260821T020000Z-14522",
-   "p": "Hai lỗi đọc thật sửa sau khi 0.2.19 đã công khai, nên chủ sản phẩm ký phát hành tiếp bản 0.2.20 — bản công khai là bất biến, sửa tiếp thì lên số mới chứ không ghi đè."
-  },
-  {
-   "id": "d-20260821T031000Z-4955",
-   "p": "Sửa nốt sáu lỗi của lượt soát cuối — đáng kể nhất: luật chặn dấu hai chấm được thu hẹp để câu văn bình thường có dấu hai chấm không còn bị từ chối oan."
-  },
-  {
-   "id": "d-20260821T031100Z-9965",
-   "p": "KHÔNG làm phép đối chiếu vòng-tròn giữa bản xuất workflow và hồ sơ mẫu trong đợt này — rủi ro để lại có tên trong sổ, mở lại khi sửa định dạng xuất."
-  }
- ]
+  "feature_plain": "Đọc số, giá tiền và ngày tháng thành chữ tiếng Việt trước khi đưa cho giọng đọc tự động, để clip không phát ra sai giá hay sai ngày.",
+
+  "scope_plain": "Chưa làm trong đợt này: ép thứ tự ở tầng mẫu dựng sẵn, đọc ngôn ngữ khác ngoài tiếng Việt, sửa chính tả và văn phong, phần đọc thành tiếng, và giọng theo vùng miền.",
+
+  "analyst_plain": "",
+
+  "decisions": [
+    {
+      "id": "E16",
+      "q": "Node mới nhìn có giống các node khác trên bảng vẽ không?",
+      "why": "Máy chỉ chấm được hai ảnh của chính node này; đặt cạnh những node sẵn có để so là việc của mắt người. Ảnh khổ máy tính đã chụp sẵn, thấy rõ hai đầu nối và sợi dây nối vào."
+    }
+  ],
+
+  "decisions_plain": [
+    { "id": "d-20260819T143500Z-11204", "p": "Phần đọc-thành-chữ đặt trong bộ thư viện dùng chung, phần cắm vào sản phẩm chỉ là vỏ mỏng — đổi lại mỗi lần sửa cách đọc phải phát hành lại thư viện." },
+    { "id": "d-20260819T143500Z-29517", "p": "Chọn thư viện đọc tiếng Việt có giấy phép dùng được cho sản phẩm thương mại — đổi lại bỏ thư viện phổ biến nhất vì giấy phép cấm dùng thương mại." },
+    { "id": "d-20260819T143500Z-30881", "p": "Ba cách viết dễ nhầm được chốt cứng một cách đọc duy nhất — đổi lại có câu người viết muốn hiểu kiểu khác vẫn đọc theo chốt." },
+    { "id": "d-20260819T143500Z-8842", "p": "Xuất bản vẽ ra sẽ chặn nếu thiếu bước đọc-thành-chữ trước giọng đọc — đổi lại người dùng bị chặn giữa chừng thay vì chỉ được nhắc." },
+    { "id": "d-20260819T143500Z-17390", "p": "Node nhận danh sách chuỗi từ node trước chứ không cho gõ tay — đổi lại không thử nhanh được bằng cách gõ thẳng vào node." },
+    { "id": "d-20260819T143500Z-24106", "p": "Cho phép dùng lại kết quả đọc đã tính giữa các bản vẽ ngay trong đợt này — đổi lại phải chịu rủi ro kết quả cũ còn lưu (chính chỗ này về sau phải rút lại)." },
+    { "id": "d-20260819T143500Z-6673", "p": "KHÔNG làm vòng thiết kế giao diện riêng — node dùng nguyên khuôn chung nên không có gì mới để thiết kế." },
+    { "id": "d-20260819T143500Z-19255", "p": "KHÔNG ép thứ tự ở tầng mẫu dựng sẵn trong đợt này — hôm nay chưa có mẫu nào tồn tại để mà ép." },
+    { "id": "d-20260819T143500Z-27044", "p": "Đổi cách chạy hai lệnh bị công cụ nội bộ chặn nhầm — đổi lại tốn thêm một lượt xoay xở, không ảnh hưởng sản phẩm." },
+    { "id": "d-20260819T150800Z-14472", "p": "Người duyệt giữ mức chặn cứng khi thiếu bước đọc-thành-chữ — xác nhận lại phương án đã đề xuất, không hạ xuống mức nhắc." },
+
+    { "id": "d-20260820T233000Z-20418", "p": "Chỉ chụp hai trạng thái của node thay vì bốn — hai trạng thái kia không dựng được từ ngoài mà không giả lập, phần chữ báo lỗi chuyển sang đo bằng máy." },
+    { "id": "d-20260820T002500Z-31882", "p": "Sửa một lỗi thật ở bước dò ngược quan hệ giữa các node — trước đó bản vẽ đúng chuẩn vẫn có thể bị báo thiếu." },
+    { "id": "d-20260820T002500Z-14903", "p": "Danh sách cho phép dùng lại kết quả được ghim ở hai chỗ chứ không một — phải sửa cả hai, đổi lại khó thêm slot lén." },
+    { "id": "d-20260820T002500Z-27516", "p": "Bỏ một bước kiểm mô tả thao tác không tồn tại (thêm node từ bộ chọn) — thao tác đó thật sự không có trên sản phẩm." },
+    { "id": "d-20260820T002500Z-9044", "p": "Phát hiện người dùng không thể tự thêm node này lên bảng vẽ, nên mức chặn cứng sẽ dồn họ vào ngõ cụt — đưa lên người quyết lại." },
+    { "id": "d-20260820T005500Z-40217", "p": "Tách thư mục dựng bản chạy thử ra riêng — đổi lại chạm một file cấu hình chung, đã báo trước và có vết trong sổ." },
+    { "id": "d-20260820T091500Z-9098", "p": "Người duyệt hạ mức chặn xuống mức nhắc — bản vẽ cũ tiếp tục chạy được, đổi lại chữ 'bắt buộc' của lộ trình tạm thành 'khuyến cáo mạnh'." },
+    { "id": "d-20260821T003000Z-25286", "p": "Trả lại toàn bộ vòng kiểm đầu tiên và sửa cả tám lỗi trước khi đo lại — đổi lại bộ kiểm phình to hơn, phải bảo trì tay." },
+    { "id": "d-20260821T003100Z-12348", "p": "Chuỗi chép từ máy Mac có dấu kiểu khác nay không lách được luật giữ đơn vị tiền — vá một chỗ cho cả luật lẫn hàm dùng chung." },
+    { "id": "d-20260821T003600Z-15416", "p": "Người duyệt ký cho phát hành thư viện bản 0.2.19 — đổi lại bản đã công khai là bất biến, mọi sửa sau phải lên số mới." },
+    { "id": "d-20260821T014500Z-32665", "p": "Bắt lượt chụp phải xác nhận đúng cây mã trước khi làm gì — trước đó nó chụp nhầm cây rồi dừng oan." },
+    { "id": "d-20260821T020000Z-14522", "p": "Người duyệt ký phát hành bản 0.2.20 sau hai lỗi đọc vừa sửa — chuỗi phát hành giữ trung thực, đổi lại hai bản trong một ngày." },
+    { "id": "d-20260821T031000Z-4955", "p": "Thu hẹp luật về dấu hai chấm để văn xuôi bình thường không bị từ chối — đồng hồ bị đọc hỏng vẫn bị bắt." },
+    { "id": "d-20260821T031100Z-9965", "p": "KHÔNG làm phép đối chiếu hai chiều giữa bản xuất và hồ sơ dựng sẵn trong đợt này — rủi ro để lại có tên, mở sau." },
+    { "id": "d-20260821T033000Z-7617", "p": "Người duyệt cho sửa ngay hai lỗi đọc thật thay vì ghi vào phần hạn chế — đúng lớp lỗi 'không sai số giá' mà cổng chất lượng tồn tại để chặn." },
+    { "id": "d-20260821T040000Z-8497", "p": "Khoảng phần trăm và giá viết cách nay đọc đúng chữ 'đến' — trước đó đọc thành 'âm' hoặc mất hẳn chữ nối." },
+    { "id": "d-20260821T053500Z-31842", "p": "Thu hẹp câu hỏi chấm thiết kế về đúng thứ hai tấm ảnh cho thấy — phần so với node khác chuyển về cho người duyệt xác nhận." },
+    { "id": "d-20260821T070000Z-51203", "p": "Người duyệt cho sửa ngay lỗi khoảng giá viết cách; hai lỗi đọc còn lại ghi vào phần hạn chế và mở việc riêng." },
+    { "id": "d-20260821T070100Z-33871", "p": "Trang thử nghiệm nay nạp đủ bảng kiểu của thư viện bảng vẽ — đó là lý do thật khiến hai vòng trước không ai thấy đầu nối trên ảnh." },
+    { "id": "d-20260821T071500Z-60418", "p": "Người duyệt ký phát hành bản 0.2.22 — đổi lại thêm một bản nữa lên kho công khai trong cùng ngày." },
+    { "id": "d-20260821T081500Z-77412", "p": "Luật đọc khoảng nay bám vào con số thay vì vào danh sách đơn vị — nhờ vậy 'năm triệu đến mười triệu' hay 'năm ký đến mười ký' đều đọc đúng." },
+    { "id": "d-20260821T081600Z-19908", "p": "Khai thẳng phần còn lại chưa xử được của luật dấu hai chấm — chọn nghiêng về từ chối đọc thay vì đọc sai nội dung." },
+    { "id": "d-20260821T082500Z-90233", "p": "Người duyệt ký phát hành bản 0.2.23 — bản thứ tư trong ngày, mang cả ba lỗi vừa sửa." },
+    { "id": "d-20260821T090000Z-44107", "p": "Ghim chặt phiên bản thư viện đọc và khổ ảnh chụp cho mọi lượt kiểm — trước đó cả hai chạy theo mặc định của công cụ." },
+    { "id": "d-20260821T093000Z-11836", "p": "Vòng kiểm bị hạ tầng chặn nên KHÔNG ghi thành hồ sơ bằng chứng — ghi một phép đo chưa xảy ra là điều duy nhất không được làm." },
+    { "id": "d-20260821T093100Z-55021", "p": "Sửa hai phép đo tự che mắt mình — một cái không bao giờ báo đỏ được, một cái chỉ soi nửa không gian cần soi." },
+    { "id": "d-20260821T100000Z-70415", "p": "Rút node này khỏi danh sách dùng-lại-kết-quả — nếu giữ, bốn bản sửa cách đọc trong ngày sẽ không tới được người đã gặp lỗi." }
+  ]
 }
