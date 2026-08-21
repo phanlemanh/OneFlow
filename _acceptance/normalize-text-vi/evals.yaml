@@ -190,7 +190,7 @@ evals:
     executor: script
     cmd: config:executors.script.normalize_sdk_published
     paths: ["sdk/pyproject.toml", "scripts/abi/check-normalize-sdk-published.sh"]
-    expected: "exit 0; TRỰC TUYẾN, chỉ có nghĩa SAU khi owner ký cho phép publish (tiền đề khai ở Context): PyPI có bản 0.2.19; bản publish chứa NormalizeTextViInput/Output + NORMALIZE_TEXT_VI; repo plugin pin oneflow-sdk==0.2.19. Khai hạn giờ tường minh; đỏ trước mốc publish là đỏ HẠ TẦNG, không phải trượt nghiệm thu — trình ở Cổng 2 chứ không đốt round"
+    expected: "exit 0; TRỰC TUYẾN, chỉ có nghĩa SAU khi owner ký cho phép publish (tiền đề khai ở Context): PyPI có bản 0.2.19; guard TẢI artifact thật (ưu tiên wheel, fallback sdist) và soi bên trong — phải có tongflow/text/normalize_vi.py, models/normalize_text_vi.py, và NORMALIZE_TEXT_VI trong node_slots.py (phép kiểm cũ grep chuỗi version trên JSON PyPI không bao giờ đỏ được, đã thay ở vòng S4-r1; cặp hai chiều chạy trên wheel giả: bản thiếu file đỏ nêu đúng đường dẫn thiếu); repo plugin pin oneflow-sdk==0.2.19. Khai hạn giờ tường minh; đỏ trước mốc publish là đỏ HẠ TẦNG, không phải trượt nghiệm thu — trình ở Cổng 2 chứ không đốt round"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E17a
