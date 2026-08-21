@@ -28,10 +28,63 @@ echo "OK: PyPI có oneflow-sdk==$version"
 
 # The published artifact must actually carry the new types — a version number on
 # PyPI proves an upload happened, not that the upload contained this feature.
-if ! echo "$body" | grep -q '"version"'; then
-    echo "FAIL: PyPI trả về nội dung không đọc được"
+# So download the artifact and look inside it. (The first version of this check
+# grepped the PyPI JSON for the string '"version"', which that JSON always
+# contains — a branch that can never fail verifies nothing; S4 round 1 finding.)
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+pkg_url="$(echo "$body" | python3 -c '
+import json, sys
+urls = json.load(sys.stdin).get("urls", [])
+wheels = [u for u in urls if u.get("packagetype") == "bdist_wheel"]
+pick = (wheels or urls)
+print(pick[0]["url"] if pick else "")
+')"
+if [ -z "$pkg_url" ]; then
+    echo "FAIL: PyPI không liệt kê file artifact nào cho $version"
     exit 1
 fi
+curl -fsS --max-time "$TIMEOUT" -o "$tmp/pkg" "$pkg_url" || {
+    echo "FAIL: không tải được artifact $pkg_url"
+    exit 1
+}
+python3 - "$tmp/pkg" "$pkg_url" <<'PY' || exit 1
+import sys, tarfile, zipfile
+
+path, url = sys.argv[1], sys.argv[2]
+# Handles stay open for the whole (short-lived) process: a `with` block here
+# closed the archive before the deferred read ran — caught by this check's own
+# two-way pair before it ever shipped.
+if url.endswith(".whl"):
+    archive = zipfile.ZipFile(path)
+    names = archive.namelist()
+
+    def read(n: str) -> str:
+        return archive.read(n).decode("utf-8", "replace")
+else:
+    archive = tarfile.open(path, "r:*")
+    names = archive.getnames()
+
+    def read(n: str) -> str:
+        member = archive.extractfile(n)
+        assert member is not None
+        return member.read().decode("utf-8", "replace")
+
+def find(suffix):
+    hits = [n for n in names if n.endswith(suffix)]
+    if not hits:
+        print(f"FAIL: artifact không chứa {suffix}")
+        sys.exit(1)
+    return hits[0]
+
+find("tongflow/text/normalize_vi.py")
+find("tongflow/models/normalize_text_vi.py")
+slots = read(find("tongflow/node_slots.py"))
+if "NORMALIZE_TEXT_VI" not in slots:
+    print("FAIL: node_slots.py trong artifact không có NORMALIZE_TEXT_VI")
+    sys.exit(1)
+print("OK: artifact mang tongflow/text/, models mới và NORMALIZE_TEXT_VI")
+PY
 
 pin_file="$ROOT/plugins/$PLUGIN_ID/requirements.txt"
 if [ -f "$pin_file" ]; then
