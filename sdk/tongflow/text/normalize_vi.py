@@ -37,10 +37,23 @@ _DASH_DATE = re.compile(r"\b(\d{1,2})-(\d{1,2})-(\d{4})\b")
 # reads WITHOUT the word (measured), so there the written "ngày" must stay.
 _DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4}\b)")
 
+# The SPACED price form "500 đ". has_money deliberately counts it as money
+# ((?<=\d)\s*đ\b), but the pinned library only expands the GLUED form —
+# measured: "50.000đ" → "…nghìn đồng" while "500 đ" leaves the "đ" verbatim.
+# So without this rewrite every spaced-đ price failed the money-loss rule with
+# ok=False, for one of the most common ways Vietnamese prices are written
+# (S4 round 2 finding). Rewrite to the word the library understands.
+_SPACED_DONG = re.compile(r"(?<=\d)\s+đ\b")
+
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
 # leaves the bare character in place ("muoi-muoi lam"), which a voice reads as
-# a pause or a minus sign.
-_RANGE = re.compile(r"(?<=\d)\s*-\s*(?=\d)")
+# a pause or a minus sign. The left side also accepts a unit suffix (%, ₫, or
+# glued đ): "5%-10%" used to fall through to the MINUS rule below and read as
+# "năm phần trămâm mười phần trăm", and "1.000₫-2.000₫" silently lost the
+# range word — both with ok=True (measured, S4 round 2 finding). 'đ' in the
+# class is safe: Vietnamese syllables never END in đ, so a letter-compound
+# hyphen ("ki-lô-mét") cannot match, and the right side still requires a digit.
+_RANGE = re.compile(r"(?<=[\d%₫đ])\s*-\s*(?=\d)")
 
 # A dash in front of a number, once ranges are gone, is a minus sign.
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
@@ -125,6 +138,7 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
     out = _DAY_WORD_BEFORE_DATE.sub("", out)
+    out = _SPACED_DONG.sub(" đồng", out)
     out = _RANGE.sub(" đến ", out)
     # Ranges are resolved first, so any dash still sitting in front of a number
     # is a minus sign. The library reads the digits but leaves the dash, and a

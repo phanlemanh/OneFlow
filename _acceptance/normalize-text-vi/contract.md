@@ -5,7 +5,7 @@ slug: normalize-text-vi
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-19
 ---
@@ -34,7 +34,7 @@ thích sản phẩm thương mại AGPL-3.0). `soe-vinorm` bị loại vì cần
 đi ngược cả tính tất định lẫn local-first ([ADR-0011](../../docs/adr/0011-local-first-execution.md)).
 
 **Tiền đề của vòng verify** *(khai sau phản biện context sạch — F4)*: hai mệnh đề của AC-13
-nằm **ngoài cây mã** — bản 0.2.20 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
+nằm **ngoài cây mã** — bản 0.2.21 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
 **người** (publish cần TWINE credential; pin là một commit ở repo khác) và **không đảo ngược**
 (đã publish lên PyPI thì không rút lại được). Vì vậy: `E14a` (ngoại tuyến) chạy mọi vòng;
 `E14b` (trực tuyến) chỉ có nghĩa **sau khi owner đã ký cho phép publish**. Vòng S4 chạy trước
@@ -87,6 +87,10 @@ ta ép lại, không sửa corpus cho khớp thư viện.
 - AC-5: Given ba chuỗi mơ hồ `5/3`, `1.500`, `10-15`, When chuẩn hoá, Then đọc đúng chốt đã
   khai trong hợp đồng — **ngày tháng**, **nghìn**, **khoảng** (`10-15` → "mười **đến** mười
   lăm", không còn dấu gạch) — và chốt đó là hằng số tất định, không phụ thuộc ngữ cảnh câu.
+  Chốt **khoảng** áp cả khi hai đầu mang hậu tố đơn vị: `5%-10%` (kể cả có khoảng trắng
+  quanh dấu gạch) và `1.000₫-2.000₫` đọc "… **đến** …", không bao giờ thành "trừ"/"âm".
+  *(nâng phạm vi tại Cổng 2, owner 2026-08-21 — đo thật: `5%-10%` từng đọc "năm phần
+  trămâm mười phần trăm" với ok=True, đúng lớp lỗi "không sai số giá" của Gate G1.)*
   *Đo thật 19/08: hai chốt đầu thư viện đã làm đúng; chốt thứ ba nó để nguyên dấu gạch
   ("mười-mười lăm"), nên phần "đến" là việc của lớp tiền xử lý. Im lặng nhận mặc định của
   thư viện là nhận một hành vi không ai khai.*
@@ -94,7 +98,10 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   `%`, hoặc dấu gạch giữa hai số trong đầu ra), When chạy, Then `success:false` + `error`
   **liệt kê đúng các token còn sót**; Given chuỗi đọc hết, Then `success:true`, đầu ra **không
   chứa ký tự `0-9`**, và — luật **quan hệ**, không phải luật vắng mặt — đầu vào có dấu hiệu
-  tiền (`₫`, `đ`, `VNĐ`, `VND`) thì đầu ra **phải chứa từ chỉ tiền tương ứng**.
+  tiền (`₫`, `đ`, `VNĐ`, `VND`) thì đầu ra **phải chứa từ chỉ tiền tương ứng**. Dấu hiệu `đ`
+  tính cả dạng **có khoảng trắng** (`500 đ`) và dạng đó phải đọc được thành "… đồng" chứ
+  không bị từ chối. *(nâng phạm vi tại Cổng 2, owner 2026-08-21 — trước đó `has_money`
+  nhận dạng này là tiền nhưng không lớp nào đọc nó, nên mọi giá viết cách đều ok=False.)*
   *Bất biến máy kiểm được thay cho câu hỏi không kiểm hết được "thư viện đọc đúng không".
   Vế quan hệ là bắt buộc vì đo thật 19/08 cho thấy lỗi đắt nhất là **mất chữ**, không phải
   **sót số**: `1.999.000₫` ra "một triệu chín trăm chín mươi chín nghìn" — không còn chữ số
@@ -158,10 +165,10 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   locale (en/vi/ja/ko/zh) dưới namespace `normalizeTextVi.*`.
   Cùng tiêu chí này, **release train** *(gộp từ AC-14 cũ; tách đôi phép đo theo F4)*: nhánh
   **ngoại tuyến** — `sdk/pyproject.toml` và `sdk/tongflow/__init__.py` cùng phiên bản
-  **0.2.20** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
+  **0.2.21** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
   từ vị trí script chứ không từ cwd), `vietnormalizer==0.2.3` khai trong `dependencies` với
-  pin chính xác; nhánh **trực tuyến** — 0.2.20 đã publish lên PyPI, bản publish chứa
-  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.20`.
+  pin chính xác; nhánh **trực tuyến** — 0.2.21 đã publish lên PyPI, bản publish chứa
+  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.21`.
   *Trình tự cứng: publish SDK trước khi plugin pin — xem tiền đề ở mục Context.*
 - AC-14: (cross-layer) *(thêm sau phản biện context sạch — F1)* Given slot method THẬT của
   plugin `oneflow-api-normalize-text-vi` (không phải fake handler của test cache), When gọi

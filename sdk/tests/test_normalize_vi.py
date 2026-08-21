@@ -41,8 +41,14 @@ CORPUS_MONEY: tuple[tuple[str, str], ...] = (
     ("250 chỗ ngồi", "hai trăm năm mươi chỗ ngồi"),
     ("25 triệu", "hai mươi lăm triệu"),
     ("35 tỷ", "ba mươi lăm tỷ"),
+    # Gate-2 scope raise (owner, 2026-08-21): unit-suffixed ranges and the
+    # SPACED price form. "1.000₫-2.000₫" silently lost "đến" and "500 đ" was
+    # guaranteed ok=False — both measured, S4 round 2 findings.
+    ("từ 1.000₫-2.000₫", "từ một nghìn đồng đến hai nghìn đồng"),
+    ("50.000đ-70.000đ", "năm mươi nghìn đồng đến bảy mươi nghìn đồng"),
+    ("Giá 500 đ", "giá năm trăm đồng"),
 )
-MONEY_COUNT = 17
+MONEY_COUNT = 20
 
 # Which matrix cells each case is claimed to cover: (variant, position) means
 # the variant word occurs inside that magnitude group of the reading. Written
@@ -452,6 +458,11 @@ CORPUS_AMBIGUOUS: tuple[tuple[str, str], ...] = (
     ("5/3", "năm tháng ba"),
     ("1.500", "một nghìn năm trăm"),
     ("10-15", "mười đến mười lăm"),
+    # Gate-2 scope raise (owner, 2026-08-21): the range policy also holds when
+    # both ends carry a unit suffix. "5%-10%" used to read as MINUS — "năm
+    # phần trămâm mười phần trăm", glued, ok=True (S4 round 2 finding).
+    ("5%-10%", "năm phần trăm đến mười phần trăm"),
+    ("5% - 10%", "năm phần trăm đến mười phần trăm"),
 )
 
 AMBIGUOUS_CARRIERS = ("Khai trương {}", "Giá {} nhé anh", "{}")
@@ -459,7 +470,8 @@ AMBIGUOUS_CARRIERS = ("Khai trương {}", "Giá {} nhé anh", "{}")
 
 def test_ambiguous_policy_pinned() -> None:
     for raw, expected in CORPUS_AMBIGUOUS:
-        assert normalize_vi(raw).text == expected
+        got = normalize_vi(raw).text
+        assert got == expected, f"{raw!r}: mong {expected!r}, nhận {got!r}"
 
     # The contract calls these CONSTANTS, so the same fragment must read the
     # same way in every carrier sentence — that is the measurable half of
@@ -513,6 +525,9 @@ MONEY_POSITIVE_ANCHORS = (
     "125.000 đồng",
     "Vé 500.000VND",
     "Giá 2 triệu VNĐ",
+    # The SPACED form — has_money always claimed it; since the Gate-2 scope
+    # raise the pre-pass also reads it, so the claim finally has a green path.
+    "Giá 500 đ",
 )
 
 
