@@ -503,6 +503,36 @@ RANGE_MATRIX: dict[tuple[str, str], str] = {
     ("từ đầy đủ", "có khoảng trắng"): "5 triệu - 10 triệu",
 }
 
+# TRỤC CA ÂM — cái gì KHÔNG được thành khoảng. Thiếu trục này, RANGE_MATRIX ở
+# trên tuy phủ kín {kiểu đơn vị} × {khoảng cách} nhưng cả hai trục đều là trục
+# của ca DƯƠNG, nên nó mù hoàn toàn chiều "luật khoảng ăn nhầm cái gì" (S4 vòng
+# 5, hai reviewer độc lập cùng nêu).
+#
+# Các dòng dưới GHIM GIỚI HẠN ĐÃ BIẾT, không phải hành vi mong muốn: luật khoảng
+# hôm nay nổ trên MỌI `số-gạch-số`, nên ngày kiểu ISO, mã đơn và điện thoại viết
+# gạch đều bị đọc thành "đến" với ok=True. Đây là Known limit đã khai trong hợp
+# đồng và thuộc hợp đồng follow-up "chống đọc sai êm ru" (owner quyết ở Cổng 2
+# vòng 3), KHÔNG phải việc của vòng này. Ghim bằng test để giới hạn đó (a) nhìn
+# thấy được trong bộ đo chứ không chỉ trong văn xuôi, và (b) khi ai đó sửa luật
+# thì test này ĐỎ và buộc cập nhật hợp đồng, thay vì hành vi đổi âm thầm.
+CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "ngày kiểu ISO",
+        "ISO 2026-08-19",
+        "i ét o hai nghìn không trăm hai mươi sáu đến tám đến mười chín",
+    ),
+    (
+        "mã có gạch",
+        "Mã đơn 1234-5678 đã giao",
+        "mã đơn một nghìn hai trăm ba mươi tư đến năm nghìn sáu trăm bảy mươi tám đã giao",
+    ),
+    (
+        "điện thoại có gạch",
+        "Gọi 0912-345-678 để biết thêm",
+        "gọi chín trăm mười hai đến ba trăm bốn mươi lăm đến sáu trăm bảy mươi tám để biết thêm",
+    ),
+)
+
 # Ô cố ý bỏ, kèm lý do — không phải quên.
 DELIBERATELY_UNCOVERED_RANGE_CELLS: dict[tuple[str, str], str] = {
     ("không đơn vị", "có khoảng trắng"): (
@@ -548,6 +578,22 @@ def test_ambiguous_policy_pinned() -> None:
     assert len(RANGE_MATRIX) + len(DELIBERATELY_UNCOVERED_RANGE_CELLS) == len(
         RANGE_UNIT_KINDS
     ) * len(RANGE_SPACING), "ma trận khoảng không phủ hết tích Descartes"
+
+    # Trục ÂM. Đọc kỹ chú thích ở CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: ba dòng này
+    # ghim GIỚI HẠN, không ghim điều đúng. Test đỏ ở đây nghĩa là luật khoảng đã
+    # đổi — khi đó phải cập nhật mục Known limits của hợp đồng cùng lúc, chứ
+    # không sửa kỳ vọng cho khớp mã.
+    for kind, raw, today in CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.text == today, (
+            f"[{kind}] {raw!r}: giới hạn đã ghim đổi hành vi — mong {today!r}, "
+            f"nhận {got.text!r}. Nếu đây là bản SỬA luật khoảng thì cập nhật cả "
+            f"mục Known limits trong _acceptance/normalize-text-vi/contract.md."
+        )
+        assert got.ok is True, (
+            f"[{kind}] {raw!r}: giới hạn này im lặng (ok=True) — đó chính là "
+            f"lý do nó nguy hiểm và được ghim ở đây"
+        )
 
 
 # --------------------------------------------------------------------------
@@ -640,10 +686,21 @@ def test_clean_input_has_no_digits_left() -> None:
     # Uses the implementation's own money test on purpose. Re-deciding "is this
     # a price?" inside the test is how the first draft of this file repeated the
     # exact bug it was meant to catch: `"đ" in raw` calls "-7 độ" a price.
+    # NO `if result.ok` gate here. The runtime money-loss rule sets ok=False on
+    # exactly the failure this loop claims to catch, so gating on ok made the
+    # branch unreachable-red: lose the currency word and the loop SKIPS the case
+    # (measured S4 round 5 — the old shape stayed green against a stub that
+    # dropped "đồng"). The relation is asserted on the outcome, not guarded by
+    # it: a money case must read out AND must keep its currency word.
     for raw, _ in CORPUS_MONEY:
+        if not has_money(raw):
+            continue
         result = normalize_vi(raw)
-        if result.ok and has_money(raw):
-            assert "đồng" in result.text, f"{raw!r} mất đơn vị tiền"
+        assert result.ok, (
+            f"{raw!r}: ca corpus mang tiền phải đọc được, nhận ok=False "
+            f"residual={result.residual} error={result.error!r}"
+        )
+        assert "đồng" in result.text, f"{raw!r} mất đơn vị tiền: {result.text!r}"
 
 
 # --------------------------------------------------------------------------
