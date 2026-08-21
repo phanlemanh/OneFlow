@@ -25,7 +25,11 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import useFlow from "@/hooks/use-flow";
 import messages from "@/i18n/messages/en.json";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
-import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
+import {
+    getAbiNodeRegistration,
+    registerAbiNode,
+    unregisterAbiNode,
+} from "@/lib/abi/node-registry";
 
 import NormalizeTextViNode from "./normalize-text-vi";
 
@@ -181,8 +185,13 @@ describe("normalize-text-vi node", () => {
             feature: "normalize-text-vi",
             sourceSpec: NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
         });
-        expect(NODE_TYPE_SOURCE_SPEC.normalizeTextViNode).toHaveProperty(
-            "text",
+        // Read the REGISTRY back, not the static declaration the call was fed:
+        // asserting on NODE_TYPE_SOURCE_SPEC stayed green with the
+        // registerAbiNode call deleted outright (measured, S4 round 1 finding).
+        const registration = getAbiNodeRegistration(NODE_ID);
+        expect(registration?.feature).toBe("normalize-text-vi");
+        expect(registration?.sourceSpec).toEqual(
+            NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
         );
     });
 });

@@ -23,6 +23,7 @@ import {
     TaskStatus,
     WorkflowStatus,
 } from "@/constants/task-status";
+import { useExportWarningToasts } from "@/hooks/use-export-warning-toast";
 import useFlow from "@/hooks/use-flow";
 import { useTaskStore } from "@/hooks/use-task";
 import { saveFromTask } from "@/lib/api/material";
@@ -39,10 +40,7 @@ import {
     emitSSETaskMessage,
     TASK_CANCEL_REQUEST_EVENT,
 } from "@/lib/task/sse-events";
-import {
-    exportWorkflow,
-    WORKFLOW_TTS_NEEDS_NORMALIZE,
-} from "@/lib/workflow/exporter";
+import { exportWorkflow } from "@/lib/workflow/exporter";
 import type { WorkflowExecutor } from "@/lib/workflow/parser";
 import type { SSEMessage } from "@/types/sse";
 
@@ -88,6 +86,7 @@ export function useWorkflowExecution(
         t,
     } = args;
     const tToast = useTranslations("Workspace.toast");
+    const notifyExportWarnings = useExportWarningToasts();
 
     const setWorkflowExecutionStatus = useTaskStore(
         (state) => state.setWorkflowExecutionStatus,
@@ -419,19 +418,7 @@ export function useWorkflowExecution(
                 includeOriginalFlow: false,
             });
 
-            // Policy warnings are machine-readable codes; the sentence the
-            // user reads is rendered here in their locale, not thrown from
-            // the exporter (where every caller swallowed it).
-            for (const warning of executable.warnings ?? []) {
-                if (warning.code === WORKFLOW_TTS_NEEDS_NORMALIZE) {
-                    toast(
-                        tToast("ttsNeedsNormalize", {
-                            nodes: warning.nodeIds.join(", "),
-                        }),
-                        { icon: "⚠️", duration: 6000 },
-                    );
-                }
-            }
+            notifyExportWarnings(executable);
 
             const result = await saveWorkflow({
                 ...(workflowId ? { workflowId } : {}),
