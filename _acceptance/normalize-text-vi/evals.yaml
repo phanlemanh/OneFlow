@@ -113,7 +113,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.unit_tts_order_violation
     paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts"]
-    expected: "exit 0; workflow có node TTS mà thượng nguồn KHÔNG có normalize-text-vi → export ném lỗi, thông điệp NÊU ĐÚNG id node vi phạm và việc phải làm; kiểm cho cả 4 slot TTS (text-gen-speech-preset/clone/instruct, text-audio-gen-speech), không chỉ một"
+    expected: "exit 0; workflow có node TTS mà thượng nguồn KHÔNG có normalize-text-vi → export THÀNH CÔNG kèm warnings[] chứa {code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} NÊU ĐÚNG id node vi phạm — không ném lỗi (hạ mức theo quyết định owner 2026-08-20, sổ d-20260820T091500Z-9098 supersedes entry giữ-chặn Cổng 1; câu chữ cho người nằm ở i18n Workspace.toast.ttsNeedsNormalize đủ 5 locale, cả 3 call site render); kiểm cho cả 4 slot TTS (text-gen-speech-preset/clone/instruct, text-audio-gen-speech), không chỉ một, và ca nhiều node vi phạm phải nêu ĐỦ id"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10b
@@ -122,7 +122,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.unit_tts_order_compliant
     paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts"]
-    expected: "exit 0; workflow có normalize-text-vi trên đường phụ thuộc thượng nguồn của TTS (kể cả cách 2 node) → export ra bình thường, KHÔNG lỗi, KHÔNG cảnh báo; VÀ đối chứng âm: workflow nhạc (gen-music, music-repaint, music-cover, music-lego, music-complete, separate-sound) không có normalize thượng nguồn cũng export sạch — trường text của chúng là lời mô tả cho model. Nửa dương của cặp E10a — thiếu nó thì một guard luôn-ném cũng xanh"
+    expected: "exit 0; workflow có normalize-text-vi trên đường phụ thuộc thượng nguồn của TTS (kể cả cách 2 node) → export ra bình thường, warnings RỖNG (assert bằng toEqual([]), không phải chỉ không-ném); VÀ đối chứng âm: workflow nhạc (gen-music, music-repaint, music-cover, music-lego, music-complete, separate-sound) không có normalize thượng nguồn cũng export sạch warnings rỗng — trường text của chúng là lời mô tả cho model. Nửa dương của cặp E10a — thiếu nó thì một guard luôn-cảnh-báo cũng xanh"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10c
@@ -219,8 +219,8 @@ evals:
       - "Kiểm cổng 3000 TRƯỚC bằng `lsof -nP -iTCP:3000 -sTCP:LISTEN` (KHÔNG dùng `lsof -ti:3000` — nó đếm cả kết nối ra-vào của tiến trình khác và báo bận trên một cổng đang trống): có tiến trình lạ NGHE ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"
       - "Khởi động dev server với thư mục build RIÊNG: NEXT_DIST_DIR=build pnpm dev. BẮT BUỘC — bộ kiểm của cùng vòng này có bước build ghi vào .next, và next build với next dev dùng chung thư mục đó với hai layout không tương thích: server mất chunk giữa chừng rồi trả 500 ở mọi route. Đã giết 9 lượt chụp của làn kia trước khi tìm ra"
       - "KHÔI PHỤC NGAY SAU KHI SERVER LÊN, trước khi làm gì khác: `git checkout -- tsconfig.json`. Next ghi lại file đó ĐÚNG MỘT LẦN lúc dev server khởi động với thư mục build khác (thêm <distDir>/types vào include, đổi thụt lề 4→2), KHÔNG ghi lại ở mỗi lượt biên dịch — đo được. Để nguyên thì `pnpm lint:check` trong bộ kiểm của CHÍNH vòng này đỏ, và vòng REJECT vì một lý do không dính gì tới tính năng. Dọn ở cuối là không đủ: bộ kiểm chạy trước lúc đó"
-      - "KIỂM XUẤT XỨ, bắt buộc trước mọi lượt chụp: curl -s {url}/proto/normalize-text-vi phải chứa chuỗi 'Đọc số thành chữ'. Không thấy → DỪNG và báo là chụp nhầm cây hoặc trang hỏng, KHÔNG ghi là đỏ tiêu chí"
-      - "Mở {url}/proto/normalize-text-vi (node THẬT trong canvas React Flow thật, chỉ dữ liệu là fixture). TRƯỚC KHI LƯU: kiểm thuộc tính data-proto-state của trang phải đúng bằng 'idle'; thấy 'unknown:...' thì DỪNG, không lưu ảnh → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png"
+      - "KIỂM XUẤT XỨ, bắt buộc trước mọi lượt chụp: curl -s -H 'Accept-Language: vi' {url}/proto/normalize-text-vi phải chứa chuỗi 'Đọc số thành chữ'. Header locale BẮT BUỘC — app không có locale trung tính: thiếu cookie NEXT_LOCALE và thiếu Accept-Language khớp thì src/i18n/request.ts rơi về zh, chuỗi tiếng Việt không bao giờ hiện và vòng 5 đã dừng oan đúng chỗ này. Không thấy chuỗi → DỪNG và báo là chụp nhầm cây hoặc trang hỏng, KHÔNG ghi là đỏ tiêu chí"
+      - "Mở {url}/proto/normalize-text-vi (node THẬT trong canvas React Flow thật, chỉ dữ liệu là fixture). TRƯỚC TIÊN đặt cookie NEXT_LOCALE=vi cho origin rồi reload — trình duyệt chụp không hứa gửi Accept-Language: vi, và app rơi về zh khi thiếu cả hai (cùng lỗ với bước xuất xứ); kiểm <html lang='vi'>. TRƯỚC KHI LƯU: kiểm thuộc tính data-proto-state của trang phải đúng bằng 'idle'; thấy 'unknown:...' thì DỪNG, không lưu ảnh → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png"
       - "Mở {url}/proto/normalize-text-vi?state=wired. TRƯỚC KHI LƯU: data-proto-state phải đúng bằng 'wired' → chụp _acceptance/normalize-text-vi/evidence/design/captures/state-2-wired.png. Lý do bắt buộc kiểm: trang từng rơi về idle cho MỌI tên state lạ, nên gõ sai một chữ vẫn ra 200, vẫn qua sàn design, và ảnh idle vẫn được nộp dưới nhãn wired"
       - "Chạy sàn P0 design gate bằng lệnh config:executors.design.gate trên bản HTML vừa chụp và đính kết quả vào output"
       - "Assert: console không có lỗi; node hiện đúng hai handle in:text / out:text; nhãn nút đọc được bằng tiếng Việt, không phải khoá i18n thô"
