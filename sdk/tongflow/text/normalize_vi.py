@@ -55,6 +55,13 @@ _SPACED_DONG = re.compile(r"(?<=\d)\s+đ\b")
 # hyphen ("ki-lô-mét") cannot match, and the right side still requires a digit.
 _RANGE = re.compile(r"(?<=[\d%₫đ])\s*-\s*(?=\d)")
 
+# Same rule, one more anchor: a unit already spelled as a WORD. Python
+# look-behind is fixed-width, so alternatives of different lengths cannot join
+# the class above — this is a second pass, not a wider pattern. It exists
+# because "1.000 đồng - 2.000 đồng" ends in "g", which no character class over
+# unit SIGNS can reach (S4 round 3 finding).
+_RANGE_AFTER_WORD_UNIT = re.compile(r"(?<=đồng)\s*-\s*(?=\d)")
+
 # A dash in front of a number, once ranges are gone, is a minus sign.
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
@@ -138,8 +145,14 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
     out = _DAY_WORD_BEFORE_DATE.sub("", out)
-    out = _SPACED_DONG.sub(" đồng", out)
+    # ORDER IS LOAD-BEARING: the range rule runs BEFORE the spaced-đồng rewrite.
+    # Reversed (as it shipped in 0.2.21) the rewrite turns "1.000 đ" into
+    # "1.000 đồng" and destroys the very "đ" the range rule anchors on, so
+    # "1.000 đ-2.000 đ" came back as "một nghìn đồng hai nghìn đồng" — range
+    # word gone, ok=True, nothing red. Measured, S4 round 3 finding.
     out = _RANGE.sub(" đến ", out)
+    out = _RANGE_AFTER_WORD_UNIT.sub(" đến ", out)
+    out = _SPACED_DONG.sub(" đồng", out)
     # Ranges are resolved first, so any dash still sitting in front of a number
     # is a minus sign. The library reads the digits but leaves the dash, and a
     # voice says nothing at all for it ("-bay do" — measured).

@@ -241,3 +241,36 @@ code** vì license):
   tiếng là chuyện của hạng mục sau.
 - Đọc số theo giọng vùng miền — nếu cần thì là hằng số plugin, không phải trường ABI
   ([ABI hygiene](../../CLAUDE.md)).
+
+## Known limits (chốt ở Cổng 2 vòng 3, owner 2026-08-21)
+
+Ba lỗi đọc dưới đây là **thật, đo được**, và được owner chốt là **không sửa trong vòng
+này** — mở hợp đồng riêng. Chúng nằm ngoài chữ của AC-2…AC-8 nhưng cùng một lớp với chúng:
+*đọc sai nội dung mà vẫn `ok=True`*. Ghi ở đây để tính năng ship với rủi ro **có tên**, không
+phải rủi ro ngầm.
+
+- **Câu có URL bị nuốt, `ok=True` với chuỗi rỗng hoặc cụt.** Thư viện pin xoá thẳng URL và
+  lớp hậu kiểm chỉ soi *token còn sót* + *mất từ chỉ tiền*, nên xoá sạch nội dung thoả cả hai.
+  Đo: `normalize_vi('https://tongflow.com/gia')` → `ok=True, text=''`;
+  `'Xem tại https://tongflow.com/gia'` → `text='xem tại'`. Hậu quả: TTS đọc một câu rỗng
+  hoặc cụt trong khi cả workflow báo thành công. *Hướng đóng: luật quan hệ cùng hình dạng
+  với luật tiền — vào không rỗng thì ra không được rỗng.*
+- **`_RANGE` ăn mọi `số-gạch-số`, không chỉ khoảng giá.** `ISO 2026-08-19` →
+  "…hai mươi sáu **đến** tám **đến** mười chín"; `0901-234-567` → đọc thành ba số đếm **và
+  mất số 0 đầu** (cùng số viết liền thì đọc đúng từng chữ số). Cả hai `ok=True`, và hậu kiểm
+  không thể bắt vì chữ số đã biến mất thật.
+- **Corpus AC-4 tuyên quét lớp từ điển nhưng chỉ có điểm-case.** 6/11 mục
+  (`TPHCM`, `TP.HN`, `CMND`, `CCCD`, `BĐS`, `TT.`) và đơn vị `kg`, dạng `m²` không có ca nào
+  — xoá mục đó khỏi từ điển thì mọi test vẫn xanh, nên chiều đỏ mà `E4` tự khai chỉ đúng với
+  5/11 mục. *Đây là lỗ của phép đo, không phải của mã.*
+
+**Đã sửa ngay tại Cổng 2 vòng 3 (không để lại):** dải giá **viết cách** mất chữ "đến"
+(`1.000 đ-2.000 đ`, `1.000 ₫ - 2.000 ₫`, `1.000 đồng - 2.000 đồng` đều `ok=True`) — lỗi do
+chính bản vá nâng-phạm-vi ở Cổng 2 vòng 2 gây ra: `_SPACED_DONG` chạy trước `_RANGE` nên phá
+mất mỏ neo `đ`. Nằm đúng giao của AC-5 ("kể cả có khoảng trắng quanh dấu gạch") và AC-6
+("dấu hiệu `đ` tính cả dạng có khoảng trắng"), nên là **trong** hợp đồng.
+
+**Giới hạn của trang proto, không phải của node:** `/proto/[slug]` mount `ReactFlow` mà không
+nạp `@xyflow/react/dist/style.css`, nên handle và edge **có trong DOM nhưng vô hình trong
+ảnh** — đó là toàn bộ lý do `E16` trả UNCERTAIN/FAIL hai vòng liền. Đã vá bằng một dòng
+import ở component proto; bằng chứng trước/sau ở `evidence/gate2-e16/`.

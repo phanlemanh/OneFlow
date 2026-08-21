@@ -463,6 +463,17 @@ CORPUS_AMBIGUOUS: tuple[tuple[str, str], ...] = (
     # phần trămâm mười phần trăm", glued, ok=True (S4 round 2 finding).
     ("5%-10%", "năm phần trăm đến mười phần trăm"),
     ("5% - 10%", "năm phần trăm đến mười phần trăm"),
+    # S4 round 3 finding: the round-2 fix for spaced money ("500 đ") ran BEFORE
+    # the range rule, so it rewrote the very "đ" the range rule anchors on —
+    # and the range word vanished with ok=True. That is the same silent shape
+    # the scope raise existed to kill, one keystroke away: a space between the
+    # amount and its unit. Measured before the fix:
+    #   "1.000 đ-2.000 đ"      -> "một nghìn đồng hai nghìn đồng"
+    #   "1.000 ₫ - 2.000 ₫"    -> "một nghìn đồng hai nghìn đồng"
+    #   "1.000 đồng - 2.000 đồng" -> "một nghìn đồng hai nghìn đồng"
+    ("1.000 đ-2.000 đ", "một nghìn đồng đến hai nghìn đồng"),
+    ("1.000 ₫ - 2.000 ₫", "một nghìn đồng đến hai nghìn đồng"),
+    ("1.000 đồng - 2.000 đồng", "một nghìn đồng đến hai nghìn đồng"),
 )
 
 AMBIGUOUS_CARRIERS = ("Khai trương {}", "Giá {} nhé anh", "{}")

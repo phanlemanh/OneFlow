@@ -9,6 +9,15 @@ import {
     ReactFlowProvider,
 } from "@xyflow/react";
 
+// The real canvas pulls this in through workspace.tsx / types.tsx; this route
+// mounts ReactFlow directly and did not, so handles rendered as zero-size divs
+// and edges as unstroked paths. They were in the DOM the whole time — measured
+// on the S4 round-3 capture: both `in:text` / `out:text` handles and one
+// `react-flow__edge-path` present, none of them visible in the PNG. Two rounds
+// of E16 came back UNCERTAIN/FAIL on "no handles visible" because of this one
+// missing import, not because of the node.
+import "@xyflow/react/dist/style.css";
+
 import NormalizeTextViNode from "@/components/workspace/nodes/transfer/normalize-text-vi";
 
 /**

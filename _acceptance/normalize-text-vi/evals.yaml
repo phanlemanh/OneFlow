@@ -56,7 +56,7 @@ evals:
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_ambiguous
     paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
-    expected: "exit 0; 5/3 → 'năm tháng ba', 1.500 → 'một nghìn năm trăm', 10-15 → 'mười ĐẾN mười lăm' (không còn dấu gạch), VÀ chốt khoảng áp cả hai đầu mang hậu tố đơn vị: 5%-10% và 5% - 10% → '... đến ...' không bao giờ thành 'âm' (nâng phạm vi Cổng 2, owner 2026-08-21 — trước đó 5%-10% đọc 'năm phần trămâm mười phần trăm' với ok=True); đúng chốt hợp đồng và KHÔNG phụ thuộc ngữ cảnh câu (cùng chuỗi trong 3 câu khác nhau ra cùng kết quả). Chiều đỏ: đổi chốt trong code → assert đỏ nêu đúng ca mơ hồ nào lệch chốt (đã chứng minh: thu hẹp luật khoảng → đỏ nêu đúng ca 5%-10%)"
+    expected: "exit 0; 5/3 → 'năm tháng ba', 1.500 → 'một nghìn năm trăm', 10-15 → 'mười ĐẾN mười lăm' (không còn dấu gạch), VÀ chốt khoảng áp cả hai đầu mang hậu tố đơn vị: 5%-10% và 5% - 10% → '... đến ...' không bao giờ thành 'âm' (nâng phạm vi Cổng 2, owner 2026-08-21 — trước đó 5%-10% đọc 'năm phần trămâm mười phần trăm' với ok=True); VÀ dải giá VIẾT CÁCH cũng giữ chữ 'đến': 1.000 đ-2.000 đ · 1.000 ₫ - 2.000 ₫ · 1.000 đồng - 2.000 đồng (Cổng 2 vòng 3, owner 2026-08-21 — cả ba từng ra 'một nghìn đồng hai nghìn đồng', mất hẳn chữ nối, ok=True, do bản vá vòng trước chạy _SPACED_DONG trước _RANGE và phá mỏ neo 'đ'); đúng chốt hợp đồng và KHÔNG phụ thuộc ngữ cảnh câu (cùng chuỗi trong 3 câu khác nhau ra cùng kết quả). Chiều đỏ: đổi chốt trong code → assert đỏ nêu đúng ca mơ hồ nào lệch chốt (đã chứng minh hai lần: thu hẹp luật khoảng → đỏ nêu đúng ca 5%-10%; đảo lại thứ tự hai luật → đỏ nêu đúng ca 1.000 đ-2.000 đ)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6a
