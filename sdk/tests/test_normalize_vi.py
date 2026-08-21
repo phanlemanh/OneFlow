@@ -474,7 +474,43 @@ CORPUS_AMBIGUOUS: tuple[tuple[str, str], ...] = (
     ("1.000 đ-2.000 đ", "một nghìn đồng đến hai nghìn đồng"),
     ("1.000 ₫ - 2.000 ₫", "một nghìn đồng đến hai nghìn đồng"),
     ("1.000 đồng - 2.000 đồng", "một nghìn đồng đến hai nghìn đồng"),
+    # S4 round 4: the two rows above pinned exactly the two anchors the reader
+    # hardcoded, so the corpus could never catch the NEXT member of the class
+    # AC-5 promises. These are that next member — a unit written as an ordinary
+    # word. Measured before the fix, all four silently lost the range word with
+    # ok=True: "năm triệu mười triệu", "năm tỷ mười tỷ", …
+    ("5 triệu - 10 triệu", "năm triệu đến mười triệu"),
+    ("5 tỷ - 10 tỷ", "năm tỷ đến mười tỷ"),
+    ("5kg-10kg", "năm ki lô gam đến mười ki lô gam"),
+    ("5 người - 10 người", "năm người đến mười người"),
 )
+
+# The axis the corpus above is a full grid over: WHAT sits between the number
+# and the hyphen. Declared BEFORE the cases, the way CORPUS_MONEY/TIME/ID do —
+# the shape whose absence was the round-4 finding: a corpus of point-cases
+# cannot fail on the next member of the class its criterion names.
+RANGE_UNIT_KINDS = ("không đơn vị", "ký hiệu", "chữ viết tắt", "từ đầy đủ")
+RANGE_SPACING = ("dính", "có khoảng trắng")
+
+# (kind, spacing) -> a case in CORPUS_AMBIGUOUS above.
+RANGE_MATRIX: dict[tuple[str, str], str] = {
+    ("không đơn vị", "dính"): "10-15",
+    ("ký hiệu", "dính"): "5%-10%",
+    ("ký hiệu", "có khoảng trắng"): "5% - 10%",
+    ("chữ viết tắt", "dính"): "1.000 đ-2.000 đ",
+    ("chữ viết tắt", "có khoảng trắng"): "1.000 ₫ - 2.000 ₫",
+    ("từ đầy đủ", "dính"): "5kg-10kg",
+    ("từ đầy đủ", "có khoảng trắng"): "5 triệu - 10 triệu",
+}
+
+# Ô cố ý bỏ, kèm lý do — không phải quên.
+DELIBERATELY_UNCOVERED_RANGE_CELLS: dict[tuple[str, str], str] = {
+    ("không đơn vị", "có khoảng trắng"): (
+        "'10 - 15' viết cách không đơn vị trùng hình dạng với gạch đầu dòng và "
+        "dấu ngang câu; luật chỉ nhận khi hai đầu là số nên ca này ĐƯỢC phủ bởi "
+        "chính hàng 'dính' — thêm ca chỉ nhân đôi cùng một nhánh mã"
+    ),
+}
 
 AMBIGUOUS_CARRIERS = ("Khai trương {}", "Giá {} nhé anh", "{}")
 
@@ -493,6 +529,25 @@ def test_ambiguous_policy_pinned() -> None:
             for carrier in AMBIGUOUS_CARRIERS
         }
         assert counts == {1}, f"{raw!r} đọc khác nhau theo câu: {counts}"
+
+    # The grid itself, asserted the way the other three corpora assert theirs:
+    # every (kind × spacing) cell either holds a case or is named as knowingly
+    # uncovered. Deleting a row from CORPUS_AMBIGUOUS now fails HERE, by cell
+    # name, instead of quietly shrinking what AC-5 measures.
+    pinned = {case for case, _ in CORPUS_AMBIGUOUS}
+    missing = []
+    for kind in RANGE_UNIT_KINDS:
+        for spacing in RANGE_SPACING:
+            cell = (kind, spacing)
+            if cell in DELIBERATELY_UNCOVERED_RANGE_CELLS:
+                continue
+            case = RANGE_MATRIX.get(cell)
+            if case is None or case not in pinned:
+                missing.append(f"{kind}/{spacing}")
+    assert missing == [], f"ô ma trận khoảng không có ca nào: {missing}"
+    assert len(RANGE_MATRIX) + len(DELIBERATELY_UNCOVERED_RANGE_CELLS) == len(
+        RANGE_UNIT_KINDS
+    ) * len(RANGE_SPACING), "ma trận khoảng không phủ hết tích Descartes"
 
 
 # --------------------------------------------------------------------------
@@ -519,6 +574,17 @@ def test_residual_tokens_fail_and_are_listed() -> None:
     # the pinned library and came back as "ngày mười bốn:ba mươi" with ok=True
     # under the digit-only rule (S4 round 2 finding). Every clean reading
     # drops its colon, so rejecting it costs nothing correct.
+    # The OTHER side of the same rule, in the same test so neither can drift:
+    # prose whose colon simply lost its space is not a mangled clock. It has no
+    # number, price or date at all, so rejecting it blocks a TTS chain over a
+    # typo (measured S4 round 4: ok=False, residual=(':',)).
+    for prose in ("Ghi chú:Xem thêm", "Nội dung:Khai trương hôm nay"):
+        clean = normalize_vi(prose)
+        assert clean.ok is True, (
+            f"{prose!r} là văn xuôi không số — phải đọc được, nhận "
+            f"ok={clean.ok} residual={clean.residual}"
+        )
+
     got = normalize_vi("ngày 14:30")
     assert got.ok is False and ":" in got.residual, (
         f"dấu hai chấm sống sót phải bị từ chối — {got!r}"
@@ -539,12 +605,29 @@ MONEY_POSITIVE_ANCHORS = (
     # The SPACED form — has_money always claimed it; since the Gate-2 scope
     # raise the pre-pass also reads it, so the claim finally has a green path.
     "Giá 500 đ",
+    # UPPERCASE. All three layers missed it at once (S4 round 4): has_money said
+    # False, the pre-pass left the letter alone, the residual rule never flags a
+    # bare currency letter — so "Giá 500 Đ" came back ok=True reading "…năm trăm
+    # đ". ALL-CAPS price copy is ordinary in the sales/BĐS text this node exists
+    # for, and the sibling anchors (VNĐ/VND) always covered uppercase.
+    "Giá 500 Đ",
+    "GIÁ 1.999.000 Đ",
+    "Giá 125.000 ĐỒNG",
 )
 
 
 def test_clean_input_has_no_digits_left() -> None:
     for anchor in MONEY_POSITIVE_ANCHORS:
         assert has_money(anchor) is True, f"{anchor!r} phải là giá tiền"
+
+    # Uppercase must not just be DETECTED as money, it must READ OUT as money —
+    # has_money alone was true for "500.000VND" long before anything expanded it.
+    for raw in ("Giá 500 Đ", "GIÁ 1.999.000 Đ", "Giá 125.000 ĐỒNG"):
+        upper = normalize_vi(raw)
+        assert upper.ok is True and "đồng" in upper.text, (
+            f"{raw!r}: giá viết HOA phải đọc ra chữ tiền, nhận "
+            f"ok={upper.ok} text={upper.text!r}"
+        )
 
     got = normalize_vi(RESIDUAL_FIXTURE_CLEAN)
     assert got.ok is True

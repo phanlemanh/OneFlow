@@ -43,40 +43,48 @@ _DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4
 # So without this rewrite every spaced-đ price failed the money-loss rule with
 # ok=False, for one of the most common ways Vietnamese prices are written
 # (S4 round 2 finding). Rewrite to the word the library understands.
-_SPACED_DONG = re.compile(r"(?<=\d)\s+đ\b")
+_SPACED_DONG = re.compile(r"(?<=\d)\s+(?i:đ)\b")
 
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
 # leaves the bare character in place ("muoi-muoi lam"), which a voice reads as
-# a pause or a minus sign. The left side also accepts a unit suffix (%, ₫, or
-# glued đ): "5%-10%" used to fall through to the MINUS rule below and read as
-# "năm phần trămâm mười phần trăm", and "1.000₫-2.000₫" silently lost the
-# range word — both with ok=True (measured, S4 round 2 finding). 'đ' in the
-# class is safe: Vietnamese syllables never END in đ, so a letter-compound
-# hyphen ("ki-lô-mét") cannot match, and the right side still requires a digit.
-_RANGE = re.compile(r"(?<=[\d%₫đ])\s*-\s*(?=\d)")
-
-# Same rule, one more anchor: a unit already spelled as a WORD. Python
-# look-behind is fixed-width, so alternatives of different lengths cannot join
-# the class above — this is a second pass, not a wider pattern. It exists
-# because "1.000 đồng - 2.000 đồng" ends in "g", which no character class over
-# unit SIGNS can reach (S4 round 3 finding).
-_RANGE_AFTER_WORD_UNIT = re.compile(r"(?<=đồng)\s*-\s*(?=\d)")
+# a pause or a minus sign, and "5%-10%" fell through to the MINUS rule below
+# and read as "năm phần trămâm mười phần trăm" (measured, S4 round 2).
+#
+# Anchored on the NUMBER, with whatever unit token follows it carried along —
+# NOT on a list of known unit signs. Two rounds in a row the sign list was the
+# bug: "5%-10%" then "1.000 đ-2.000 đ" each had to be added by hand, and the
+# corpus grew by CASE while AC-5 promises a CLASS, so the next member stayed
+# silent. Measured before this rewrite, all with ok=True: "5 triệu - 10 triệu"
+# → "năm triệu mười triệu", "5 tỷ - 10 tỷ", "5kg-10kg", "5 người - 10 người"
+# (S4 round 4 finding). The unit group is any single letter-word, so a unit
+# spelled as a sign (%, ₫), an abbreviation (đ) or a full word (triệu, kg,
+# người) all take the same path; the right side still requires a digit, so a
+# letter compound ("ki-lô-mét") cannot match.
+_RANGE = re.compile(r"(?<=\d)(?P<unit>[ \t]*(?:%|₫|[^\W\d_][^\W_]{0,15})?)[ \t]*-[ \t]*(?=\d)")
 
 # A dash in front of a number, once ranges are gone, is a minus sign.
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
-# What must never survive into speech: digits, a currency sign, a percent
-# sign, a hyphen still standing between two digits, or a colon GLUED to what
-# follows it. The colon joined after measuring "ngày 14:30" → "ngày mười
-# bốn:ba mươi": the library mis-parses the clock in that context and leaves
-# the colon between WORDS. A first draft flagged EVERY colon — which also
-# rejected ordinary prose punctuation ("Lưu ý: khai trương"), where the
-# library keeps the colon legitimately (S4 round 2 finding). The two are
-# separable by spacing: punctuation is always followed by whitespace, a
-# mangled clock never is. It deliberately does NOT flag a hyphen between
-# letters — the library writes real Vietnamese compounds that way
-# ("ki-lo-met"), and flagging those rejects correct output.
-_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)|:(?=\S)")
+# What must never survive into speech: digits, a currency sign, a percent sign,
+# or a hyphen still standing between two digits. It deliberately does NOT flag a
+# hyphen between letters — the library writes real Vietnamese compounds that way
+# ("ki-lo-met"), and flagging those rejects correct output. The surviving-colon
+# rule used to live here as a shape test; it is relational now, just below.
+_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)")
+
+# The colon left over from a MANGLED CLOCK, decided relationally instead of by
+# shape. The shape test `:(?=\S)` could not tell "mười bốn:ba mươi" (a clock the
+# library mis-parsed) from "Ghi chú:Xem thêm" (a missing space after a colon in
+# ordinary prose) — both are a colon glued between words — so it failed whole
+# TTS chains over a typo in text carrying no number at all (S4 round 4 finding).
+# What separates them is not the OUTPUT alone but the pair: a clock puts DIGITS
+# on both sides of the colon going in, and when the library mis-parses it the
+# colon comes back sitting between two WORDS. Both halves are required.
+# Known imperfection, stated rather than hidden: an input that carries BOTH a
+# real clock and a glued prose colon ("Ghi chú:Xem thêm lúc 14:30") still trips
+# it. That errs toward refusing to speak, never toward speaking wrong content.
+_CLOCK_IN = re.compile(r"\d\s*:\s*\d")
+_COLON_BETWEEN_WORDS = re.compile(r"(?<=[^\W\d_]):(?=[^\W\d_])")
 
 # "Money is present" must be a precise test, not a substring search: the letter
 # "d" alone appears inside ordinary words ("do", "dep"), so `"d" in text` marks
@@ -89,8 +97,13 @@ _MONEY = re.compile(
     rf"₫"
     rf"|(?<!{LETTER})VNĐ(?!{LETTER})"
     rf"|(?<!{LETTER})VND(?!{LETTER})"
-    rf"|(?<=\d)\s*đ\b"
-    rf"|(?<=\d)\s*đồng\b"
+    # Case-insensitive on purpose, and only on these two: the sibling anchors
+    # above always covered uppercase (VNĐ/VND), while "Giá 500 Đ" reported no
+    # money at all — so the relational money-loss rule never ran and a bare "đ"
+    # reached the voice with ok=True (S4 round 4 finding). ALL-CAPS price copy
+    # is ordinary in the sales text this node exists for.
+    rf"|(?<=\d)\s*(?i:đ)\b"
+    rf"|(?<=\d)\s*(?i:đồng)\b"
 )
 
 # The library writes compound loanwords with hyphens ("ki-lo-met"), and reading
@@ -150,8 +163,7 @@ def _pre(text: str) -> str:
     # "1.000 đồng" and destroys the very "đ" the range rule anchors on, so
     # "1.000 đ-2.000 đ" came back as "một nghìn đồng hai nghìn đồng" — range
     # word gone, ok=True, nothing red. Measured, S4 round 3 finding.
-    out = _RANGE.sub(" đến ", out)
-    out = _RANGE_AFTER_WORD_UNIT.sub(" đến ", out)
+    out = _RANGE.sub(lambda m: f"{m.group('unit')} đến ", out)
     out = _SPACED_DONG.sub(" đồng", out)
     # Ranges are resolved first, so any dash still sitting in front of a number
     # is a minus sign. The library reads the digits but leaves the dash, and a
@@ -178,6 +190,8 @@ def normalize_vi(text: str) -> NormalizeResult:
     out = unicodedata.normalize("NFC", out)
 
     residual = tuple(dict.fromkeys(m.group(0) for m in _RESIDUAL.finditer(out)))
+    if _COLON_BETWEEN_WORDS.search(out) and _CLOCK_IN.search(text):
+        residual = residual + (":",)
     if residual:
         return NormalizeResult(
             ok=False,

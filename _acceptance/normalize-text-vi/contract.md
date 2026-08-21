@@ -34,7 +34,7 @@ thích sản phẩm thương mại AGPL-3.0). `soe-vinorm` bị loại vì cần
 đi ngược cả tính tất định lẫn local-first ([ADR-0011](../../docs/adr/0011-local-first-execution.md)).
 
 **Tiền đề của vòng verify** *(khai sau phản biện context sạch — F4)*: hai mệnh đề của AC-13
-nằm **ngoài cây mã** — bản 0.2.22 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
+nằm **ngoài cây mã** — bản 0.2.23 có trên PyPI, và repo plugin đã pin nó. Cả hai là hành động
 **người** (publish cần TWINE credential; pin là một commit ở repo khác) và **không đảo ngược**
 (đã publish lên PyPI thì không rút lại được). Vì vậy: `E14a` (ngoại tuyến) chạy mọi vòng;
 `E14b` (trực tuyến) chỉ có nghĩa **sau khi owner đã ký cho phép publish**. Vòng S4 chạy trước
@@ -91,6 +91,15 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   quanh dấu gạch) và `1.000₫-2.000₫` đọc "… **đến** …", không bao giờ thành "trừ"/"âm".
   *(nâng phạm vi tại Cổng 2, owner 2026-08-21 — đo thật: `5%-10%` từng đọc "năm phần
   trămâm mười phần trăm" với ok=True, đúng lớp lỗi "không sai số giá" của Gate G1.)*
+  **Lớp, không phải danh sách** *(amendment 2026-08-21, Cổng 2 vòng 4)*: "hậu tố đơn vị"
+  nghĩa là **mọi** cách viết đơn vị — ký hiệu (`%`, `₫`), viết tắt (`đ`) hay **từ đầy đủ**
+  (`triệu`, `tỷ`, `kg`, `người`) — và corpus đo bằng **ma trận {kiểu đơn vị} × {dính, có
+  khoảng trắng}** khai trước, mỗi ô có ca hoặc được kê là cố-ý-bỏ kèm lý do. Lý do siết
+  chữ: hai vòng liền bản vá chỉ thêm đúng phần tử vừa lộ (`5%-10%`, rồi `1.000 đ-2.000 đ`)
+  nên corpus lớn theo **ca** trong khi tiêu chí viết theo **lớp** — đo thật ở vòng 4:
+  `5 triệu - 10 triệu` → "năm triệu mười triệu", `5 tỷ - 10 tỷ`, `5kg-10kg`,
+  `5 người - 10 người`, tất cả mất chữ "đến" với `ok=True`. Luật nay neo vào **số**, không
+  vào danh sách đơn vị.
   *Đo thật 19/08: hai chốt đầu thư viện đã làm đúng; chốt thứ ba nó để nguyên dấu gạch
   ("mười-mười lăm"), nên phần "đến" là việc của lớp tiền xử lý. Im lặng nhận mặc định của
   thư viện là nhận một hành vi không ai khai.*
@@ -102,6 +111,11 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   tính cả dạng **có khoảng trắng** (`500 đ`) và dạng đó phải đọc được thành "… đồng" chứ
   không bị từ chối. *(nâng phạm vi tại Cổng 2, owner 2026-08-21 — trước đó `has_money`
   nhận dạng này là tiền nhưng không lớp nào đọc nó, nên mọi giá viết cách đều ok=False.)*
+  Dấu hiệu `đ`/`đồng` tính **cả chữ HOA** *(amendment 2026-08-21, Cổng 2 vòng 4)*: `Giá 500 Đ`
+  và `GIÁ 1.999.000 Đ/THÁNG` phải đọc ra chữ tiền. Đo thật ở vòng 4: ba lớp cùng trượt một
+  lúc — `has_money` trả False nên luật quan hệ không chạy, tiền xử lý không viết lại, hậu
+  kiểm không bắt chữ tiền trơ — nên `ok=True` với đầu ra "giá năm trăm đ". Hai mỏ neo anh em
+  (`VNĐ`/`VND`) vốn đã phủ chữ hoa từ đầu.
   *Bất biến máy kiểm được thay cho câu hỏi không kiểm hết được "thư viện đọc đúng không".
   Vế quan hệ là bắt buộc vì đo thật 19/08 cho thấy lỗi đắt nhất là **mất chữ**, không phải
   **sót số**: `1.999.000₫` ra "một triệu chín trăm chín mươi chín nghìn" — không còn chữ số
@@ -119,6 +133,12 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   thông tin âm thanh và thư viện hạ chữ thường toàn bộ (đo thật 19/08); không sửa chính tả,
   không đổi dấu câu; **đầu ra LUÔN ở dạng NFC** trên toàn corpus; và
   `normalize(NFD(x)) == normalize(NFC(x))` **byte-identical** với mọi ca corpus có dấu.
+  **Văn xuôi không số không bị từ chối vì dấu câu** *(amendment 2026-08-21, Cổng 2 vòng 4)*:
+  `Ghi chú:Xem thêm` — thiếu dấu cách sau dấu hai chấm, lỗi gõ thường gặp — phải `ok=True`.
+  Luật bắt dấu hai chấm sống sót nay là luật **quan hệ vào↔ra** (đầu vào có `số:số` VÀ đầu
+  ra còn dấu hai chấm dính giữa hai CHỮ), không còn là luật hình dạng trên riêng đầu ra:
+  bản hình-dạng không phân biệt được đồng hồ bị đọc hỏng với văn xuôi thiếu dấu cách, nên
+  nó chặn cả dây TTS trên câu không có lấy một chữ số.
   *Chốt dạng Unicode là nửa "không lỗi dấu" của Gate G1: chuỗi copy từ web/macOS hay ở dạng
   NFD, và nếu fixture cũng gõ trong cùng môi trường thì phép so-từng-ký-tự vẫn xanh trong khi
   TTS nhận chuỗi lẫn dạng — không phép đo nào đỏ nếu chỉ yêu cầu "không crash". Tiêu chí này
@@ -165,10 +185,10 @@ ta ép lại, không sửa corpus cho khớp thư viện.
   locale (en/vi/ja/ko/zh) dưới namespace `normalizeTextVi.*`.
   Cùng tiêu chí này, **release train** *(gộp từ AC-14 cũ; tách đôi phép đo theo F4)*: nhánh
   **ngoại tuyến** — `sdk/pyproject.toml` và `sdk/tongflow/__init__.py` cùng phiên bản
-  **0.2.22** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
+  **0.2.23** (số **derive** từ `pyproject.toml`, không ghi cứng trong script guard; ROOT suy
   từ vị trí script chứ không từ cwd), `vietnormalizer==0.2.3` khai trong `dependencies` với
-  pin chính xác; nhánh **trực tuyến** — 0.2.22 đã publish lên PyPI, bản publish chứa
-  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.22`.
+  pin chính xác; nhánh **trực tuyến** — 0.2.23 đã publish lên PyPI, bản publish chứa
+  `NormalizeTextViInput/Output` + `NORMALIZE_TEXT_VI`, repo plugin pin `oneflow-sdk==0.2.23`.
   *Trình tự cứng: publish SDK trước khi plugin pin — xem tiền đề ở mục Context.*
 - AC-14: (cross-layer) *(thêm sau phản biện context sạch — F1)* Given slot method THẬT của
   plugin `oneflow-api-normalize-text-vi` (không phải fake handler của test cache), When gọi
