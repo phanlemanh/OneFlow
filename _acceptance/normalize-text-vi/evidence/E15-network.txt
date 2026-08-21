@@ -1,41 +1,21 @@
-E15 network dump (Claude_Browser preview, sandboxed tab)
-==========================================================
-Session included: idle page load, cookie set + reload, wired page load, then a clean
-single-navigation re-check of idle and wired.
+E15 network dump — http://localhost:3000/proto/normalize-text-vi (with NEXT_LOCALE=vi cookie)
+Scope: dev_server.url = http://localhost:3000 (config.yaml:561)
 
-Full raw log (chronological, before final clear):
-[3B1DD52CA523EB20379368CA6C9CA5B4] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
-[53712.41] GET .../22a5144ee8d83bca-s.p.woff2 -> 200 OK
-[53712.42] GET .../7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-[53712.43] GET .../css/app/layout.css -> 200 OK
-[53712.45] GET .../css/app/proto/%5Bslug%5D/page.css -> 200 OK
-[53712.46-50] GET .../chunks/{webpack,main-app,app-pages-internals,app/proto/[slug]/page,app/layout}.js -> 200 OK
-[53712.78] GET http://localhost:3000/api/plugins/registry -> 200 OK
-[575ECC3AE2E13228D4712DB8042B6218] GET .../proto/normalize-text-vi (post cookie-set reload) -> 200 OK
-  (repeat of static asset fetches) -> all 200 OK
-[53712.117] GET .../api/plugins/registry -> 200 OK
-[7A3FD29FB1D22B7C78A4150A5C62F091] GET .../proto/normalize-text-vi?state=wired -> 200 OK
-  (repeat of static asset fetches) -> all 200 OK
-[53712.156] GET .../api/plugins/registry -> 200 OK
-[53712.157] GET .../proto/normalize-text-vi?state=wired&_rsc=... -> 200 OK [FAILED: net::ERR_ABORTED]
-  ^ NOTE: this is a same-origin RSC prefetch fetch superseded by an explicit
-    navigate() call issued immediately after a document.cookie + location.reload()
-    in the same verification session (self-inflicted overlap from the verifier's
-    own script, not a user-driven navigation). Re-verified below with a single
-    clean navigate(): the equivalent request does NOT appear / does NOT abort.
-[53712.158-162] webpack HMR hot-update fetches -> 200 OK (dev-mode artifacts, not app logic)
-[BFE34C5E76EDC8778459474573EA58CD] GET .../proto/normalize-text-vi (clean re-navigate) -> 200 OK
-  (repeat of static asset fetches) -> all 200 OK
-[53712.214] GET .../api/plugins/registry -> 200 OK
+Console messages: [info] React DevTools hint, [warn] React Flow "parent container needs a width and a height" (layout warning, not an error), [log] task-store handler registration/unregistration.
+onlyErrors=true → No console logs (zero error-level entries).
 
-Clean single-navigation re-check (post log clear, navigate to /proto/normalize-text-vi
-then to ?state=wired individually, no overlapping reload/navigate calls):
-  all requests -> 200 OK, zero FAILED entries.
+Network requests (all app-origin, all 200 OK):
+GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 → 200
+GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 → 200
+GET /_next/static/css/app/layout.css → 200
+GET /_next/static/css/app/proto/[slug]/page.css → 200
+GET /_next/static/chunks/webpack.js → 200
+GET /_next/static/chunks/main-app.js → 200
+GET /_next/static/chunks/app-pages-internals.js → 200
+GET /_next/static/chunks/app/proto/[slug]/page.js → 200
+GET /_next/static/chunks/app/layout.js → 200
+GET /api/plugins/registry → 200
+GET /proto/normalize-text-vi → 200
+(page reloaded 3x during interaction — pattern repeats identically each time, all 200)
 
-Console (both states, onlyErrors=true): "No console logs." (clean, both idle and wired).
-
-Scope: all requests are same-origin (http://localhost:3000), matching dev_server.url
-in _acceptance/config.yaml. No third-party requests observed. No FAIL-eligible
-request in the clean read; the single ERR_ABORTED in the raw log is attributable to
-the verifier's own overlapping reload()+navigate() calls, not to the app, and does
-not reproduce under a plain single navigation.
+networkObserved = clean (app-scope traffic seen, all OK; zero FAIL-eligible failures)
