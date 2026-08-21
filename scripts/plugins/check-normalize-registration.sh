@@ -39,17 +39,27 @@ bash "$ROOT/scripts/plugins/check-manifest-unmoved.sh" >/dev/null ||
 bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
     fail "check-manifest-guard-teeth.sh đỏ — guard manifest đã mất răng"
 
-# 2. All three READMEs list the plugin AND carry the new capability row.
-#    The row is an ADDITION under Transform -> Text: that section had exactly one
-#    row before this feature, so there was no empty box to tick.
+# 2. All three READMEs list the plugin AND carry the new capability-matrix
+#    entry. The matrix in these READMEs is a ✅/⬜ BULLET LIST under headings,
+#    not a markdown table; the entry is an ADDITION under Transform -> Text
+#    (that section had exactly one row before this feature). Measured
+#    STRUCTURALLY — a presence-anywhere grep also goes green when the phrase
+#    appears only in the plugin-list description (S4 round 2 finding): the
+#    marker must sit on a "- ✅" line INSIDE the Text section, i.e. between
+#    the section's heading and the next heading.
 check_doc() {
-    local file="$1" row_marker="$2"
+    local file="$1" heading="$2" row_marker="$3"
     grep -q "$PLUGIN_ID" "$ROOT/$file" || fail "$file không nhắc $PLUGIN_ID"
-    grep -q "$row_marker" "$ROOT/$file" || fail "$file thiếu hàng ma trận năng lực mới"
+    awk -v h="$heading" '
+        $0 == h { inside = 1; next }
+        inside && /^#/ { inside = 0 }
+        inside { print }
+    ' "$ROOT/$file" | grep -E "^- ✅" | grep -q "$row_marker" ||
+        fail "$file thiếu dòng ✅ chứa marker trong mục ma trận $heading"
 }
-check_doc "README.md" "Read numbers aloud (Vietnamese)"
-check_doc "docs/README_ZH.md" "数字转文字（越南语）"
-check_doc "docs/README_JA.md" "数字を読み上げ用に変換（ベトナム語）"
+check_doc "README.md" "#### Text" "Read numbers aloud (Vietnamese)"
+check_doc "docs/README_ZH.md" "#### 文本" "数字转文字（越南语）"
+check_doc "docs/README_JA.md" "#### テキスト" "数字を読み上げ用に変換（ベトナム語）"
 
 # 3. Five locales, both key buckets. A node whose title renders as the raw key
 #    is not shipped, it is broken in four languages.
@@ -62,7 +72,33 @@ for locale in en vi ja ko zh; do
           if (typeof v !== 'string' || !v.trim()) process.exit(1);
         " || fail "$locale.json thiếu Workspace.nodes.$bucket.normalizeTextVi"
     done
+    # The TTS-order warning copy (AC-10's human sentence). This claim used to
+    # live only in E10a's `expected` prose while no executor read the key —
+    # measured here now, next to its sibling keys (S4 round 2 finding).
+    node -e "
+      const d = require('$file');
+      const v = d?.Workspace?.toast?.ttsNeedsNormalize;
+      if (typeof v !== 'string' || !v.includes('{nodes}')) process.exit(1);
+    " || fail "$locale.json thiếu Workspace.toast.ttsNeedsNormalize (kèm chỗ trống {nodes})"
 done
+
+# 3b. The warning key must actually be RENDERED: one shared hook consumes it,
+#     and all three export surfaces call that hook. Static greps — an honest,
+#     declared floor: they prove the wiring exists, not pixels.
+grep -q "ttsNeedsNormalize" "$ROOT/src/hooks/use-export-warning-toast.ts" ||
+    fail "hook cảnh báo không đọc key ttsNeedsNormalize"
+for surface in \
+    "src/components/workspace/workflow-title-menu.tsx" \
+    "src/hooks/use-workflow-execution.ts"; do
+    grep -q "useExportWarningToasts" "$ROOT/$surface" ||
+        fail "$surface không dùng hook cảnh báo export"
+done
+notify_calls=$(cat \
+    "$ROOT/src/components/workspace/workflow-title-menu.tsx" \
+    "$ROOT/src/hooks/use-workflow-execution.ts" |
+    grep -c "notifyExportWarnings(executable)")
+[ "$notify_calls" = "3" ] ||
+    fail "phải có đúng 3 call site render cảnh báo export (thấy $notify_calls)"
 
 if [ "$fails" -gt 0 ]; then
     echo "FAIL: $fails chỗ chưa đồng bộ"

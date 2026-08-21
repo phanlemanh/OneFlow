@@ -45,16 +45,18 @@ _RANGE = re.compile(r"(?<=\d)\s*-\s*(?=\d)")
 # A dash in front of a number, once ranges are gone, is a minus sign.
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
-# What must never survive into speech: digits, a currency sign, a percent sign,
-# a clock colon, or a hyphen still standing between two digits. The colon
-# joined after measuring "ngày 14:30" → "ngày mười bốn:ba mươi": the library
-# mis-parses the clock in that context and leaves the colon between WORDS, so
-# a digit-only rule stayed green on unreadable output. Every clean reading
-# drops its colon ("14:30" → "...giờ...phút"), so flagging it rejects nothing
-# correct. It deliberately does NOT flag a hyphen between letters — the
-# library writes real Vietnamese compounds that way ("ki-lo-met"), and
-# flagging those rejects correct output.
-_RESIDUAL = re.compile(r"[0-9₫%:]+|(?<=\d)-(?=\d)")
+# What must never survive into speech: digits, a currency sign, a percent
+# sign, a hyphen still standing between two digits, or a colon GLUED to what
+# follows it. The colon joined after measuring "ngày 14:30" → "ngày mười
+# bốn:ba mươi": the library mis-parses the clock in that context and leaves
+# the colon between WORDS. A first draft flagged EVERY colon — which also
+# rejected ordinary prose punctuation ("Lưu ý: khai trương"), where the
+# library keeps the colon legitimately (S4 round 2 finding). The two are
+# separable by spacing: punctuation is always followed by whitespace, a
+# mangled clock never is. It deliberately does NOT flag a hyphen between
+# letters — the library writes real Vietnamese compounds that way
+# ("ki-lo-met"), and flagging those rejects correct output.
+_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)|:(?=\S)")
 
 # "Money is present" must be a precise test, not a substring search: the letter
 # "d" alone appears inside ordinary words ("do", "dep"), so `"d" in text` marks

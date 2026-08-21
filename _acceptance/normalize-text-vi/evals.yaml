@@ -113,7 +113,7 @@ evals:
     layer: backend-effect
     cmd: config:executors.test.unit_tts_order_violation
     paths: ["src/lib/workflow/exporter.ts", "src/lib/workflow/tts-order-guard.test.ts"]
-    expected: "exit 0; workflow có node TTS mà thượng nguồn KHÔNG có normalize-text-vi → export THÀNH CÔNG kèm warnings[] chứa {code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} NÊU ĐÚNG id node vi phạm — không ném lỗi (hạ mức theo quyết định owner 2026-08-20, sổ d-20260820T091500Z-9098 supersedes entry giữ-chặn Cổng 1; câu chữ cho người nằm ở i18n Workspace.toast.ttsNeedsNormalize đủ 5 locale, cả 3 call site render); kiểm cho cả 4 slot TTS (text-gen-speech-preset/clone/instruct, text-audio-gen-speech), không chỉ một, và ca nhiều node vi phạm phải nêu ĐỦ id"
+    expected: "exit 0; workflow có node TTS mà thượng nguồn KHÔNG có normalize-text-vi → export THÀNH CÔNG kèm warnings[] chứa {code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} NÊU ĐÚNG id node vi phạm — không ném lỗi (hạ mức theo quyết định owner 2026-08-20, sổ d-20260820T091500Z-9098 supersedes entry giữ-chặn Cổng 1); kiểm cho cả 4 slot TTS (text-gen-speech-preset/clone/instruct, text-audio-gen-speech), không chỉ một, và ca nhiều node vi phạm phải nêu ĐỦ id. Câu chữ i18n cho người KHÔNG đo ở eval này — nó là phép đo của E13 (mệnh đề từng nằm ở đây mà executor này không đọc key nào: đo bằng prose, đã dời — S4-r2)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10b
@@ -174,7 +174,7 @@ evals:
     executor: script
     cmd: config:executors.script.normalize_registration_synced
     paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-manifest-guard-teeth.sh", "scripts/plugins/check-normalize-registration.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md", "src/i18n/messages/"]
-    expected: "exit 0; manifest có entry origin THỨ TƯ oneflow-api-normalize-text-vi dưới phanlemanh; check-manifest-unmoved.sh đã cập nhật (36 chuỗi + 4 origin, id set có tên mới) và check-manifest-guard-teeth.sh vẫn đỏ trên cả 6 phép nhiễu KHÔNG cần sửa file đó; cả 3 README có plugin trong danh sách + một DÒNG MỚI dưới Transform → Text của ma trận năng lực (không phải lật ⬜→✅ hàng có sẵn — hôm nay mục đó chỉ có một hàng); i18n đủ 5 locale dưới normalizeTextVi.*"
+    expected: "exit 0; manifest có entry origin THỨ TƯ oneflow-api-normalize-text-vi dưới phanlemanh; check-manifest-unmoved.sh đã cập nhật (36 chuỗi + 4 origin, id set có tên mới) và check-manifest-guard-teeth.sh vẫn đỏ trên cả 6 phép nhiễu KHÔNG cần sửa file đó; cả 3 README có plugin trong danh sách + dòng ✅ mang marker nằm ĐÚNG TRONG mục Transform → Text của ma trận năng lực, đo CẤU TRÚC bằng awk đoạn-giữa-heading chứ không grep-anywhere (nửa đỏ: rút dòng ✅ khỏi mục trong khi marker vẫn còn ở danh sách plugin → đỏ nêu đúng file và mục — S4-r2); i18n đủ 5 locale dưới normalizeTextVi.* VÀ Workspace.toast.ttsNeedsNormalize (kèm chỗ trống {nodes}); dây render cảnh báo AC-10 đo bằng grep tĩnh KHAI SÀN tường minh: hook use-export-warning-toast đọc key, cả hai file bề mặt export dùng hook, đúng 3 call site gọi notifyExportWarnings — chứng minh dây nối tồn tại, không chứng minh pixel"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E14a
@@ -190,7 +190,7 @@ evals:
     executor: script
     cmd: config:executors.script.normalize_sdk_published
     paths: ["sdk/pyproject.toml", "scripts/abi/check-normalize-sdk-published.sh"]
-    expected: "exit 0; TRỰC TUYẾN, chỉ có nghĩa SAU khi owner ký cho phép publish (tiền đề khai ở Context): PyPI có bản 0.2.20; guard TẢI artifact thật (ưu tiên wheel, fallback sdist) và soi bên trong — phải có tongflow/text/normalize_vi.py, models/normalize_text_vi.py, và NORMALIZE_TEXT_VI trong node_slots.py (phép kiểm cũ grep chuỗi version trên JSON PyPI không bao giờ đỏ được, đã thay ở vòng S4-r1; cặp hai chiều chạy trên wheel giả: bản thiếu file đỏ nêu đúng đường dẫn thiếu); repo plugin pin oneflow-sdk==0.2.20. Khai hạn giờ tường minh; đỏ trước mốc publish là đỏ HẠ TẦNG, không phải trượt nghiệm thu — trình ở Cổng 2 chứ không đốt round"
+    expected: "exit 0; TRỰC TUYẾN, chỉ có nghĩa SAU khi owner ký cho phép publish (tiền đề khai ở Context): PyPI có bản 0.2.20; guard TẢI artifact thật (ưu tiên wheel, fallback sdist) và soi bên trong — phải có tongflow/text/normalize_vi.py, models/normalize_text_vi.py, và NORMALIZE_TEXT_VI trong node_slots.py (phép kiểm cũ grep chuỗi version trên JSON PyPI không bao giờ đỏ được, đã thay ở S4-r1); cặp hai chiều của probe TỰ CHẠY TRONG SCRIPT mỗi lần — dựng wheel giả lành + wheel giả thiếu file ngay trong mktemp, đòi probe xanh/đỏ tương ứng và nửa đỏ nêu đúng đường dẫn thiếu (bản đầu chỉ kể cặp này trong prose sau một lần chạy tay — đo bằng prose, đã nhúng vào executor — S4-r2); repo plugin pin oneflow-sdk==0.2.20. Khai hạn giờ tường minh; đỏ trước mốc publish là đỏ HẠ TẦNG, không phải trượt nghiệm thu — trình ở Cổng 2 chứ không đốt round"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E17a

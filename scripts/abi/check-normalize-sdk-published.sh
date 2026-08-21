@@ -33,22 +33,7 @@ echo "OK: PyPI có oneflow-sdk==$version"
 # contains — a branch that can never fail verifies nothing; S4 round 1 finding.)
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-pkg_url="$(echo "$body" | python3 -c '
-import json, sys
-urls = json.load(sys.stdin).get("urls", [])
-wheels = [u for u in urls if u.get("packagetype") == "bdist_wheel"]
-pick = (wheels or urls)
-print(pick[0]["url"] if pick else "")
-')"
-if [ -z "$pkg_url" ]; then
-    echo "FAIL: PyPI không liệt kê file artifact nào cho $version"
-    exit 1
-fi
-curl -fsS --max-time "$TIMEOUT" -o "$tmp/pkg" "$pkg_url" || {
-    echo "FAIL: không tải được artifact $pkg_url"
-    exit 1
-}
-python3 - "$tmp/pkg" "$pkg_url" <<'PY' || exit 1
+cat > "$tmp/probe.py" <<'PY'
 import sys, tarfile, zipfile
 
 path, url = sys.argv[1], sys.argv[2]
@@ -85,6 +70,46 @@ if "NORMALIZE_TEXT_VI" not in slots:
     sys.exit(1)
 print("OK: artifact mang tongflow/text/, models mới và NORMALIZE_TEXT_VI")
 PY
+
+# Two-way pair, EXECUTED every run — not narrated: build one healthy and one
+# gutted fake wheel and require the probe to pass/fail accordingly, with the
+# failure naming the missing path. The pair used to exist only as prose in the
+# eval's `expected` after a one-off manual run (S4 round 2 finding) — the very
+# pattern this script family mocks: prose is not executed.
+python3 - "$tmp" <<'PY' || { echo "FAIL: tự kiểm hai chiều của probe không dựng được fixture"; exit 1; }
+import sys, zipfile
+tmp = sys.argv[1]
+with zipfile.ZipFile(f"{tmp}/selftest-good.whl", "w") as z:
+    z.writestr("tongflow/text/normalize_vi.py", "x")
+    z.writestr("tongflow/models/normalize_text_vi.py", "x")
+    z.writestr("tongflow/node_slots.py", "NORMALIZE_TEXT_VI = 'normalize-text-vi'")
+with zipfile.ZipFile(f"{tmp}/selftest-bad.whl", "w") as z:
+    z.writestr("tongflow/node_slots.py", "GEN_TEXT = 'gen-text'")
+PY
+python3 "$tmp/probe.py" "$tmp/selftest-good.whl" "https://selftest/pkg.whl" >/dev/null ||
+    { echo "FAIL: probe đỏ trên wheel giả LÀNH — nửa xanh của cặp hai chiều gãy"; exit 1; }
+bad_out="$(python3 "$tmp/probe.py" "$tmp/selftest-bad.whl" "https://selftest/pkg.whl" 2>&1)" &&
+    { echo "FAIL: probe xanh trên wheel giả THIẾU FILE — nửa đỏ của cặp hai chiều gãy"; exit 1; }
+echo "$bad_out" | grep -q "tongflow/text/normalize_vi.py" ||
+    { echo "FAIL: nửa đỏ không nêu đúng đường dẫn thiếu: $bad_out"; exit 1; }
+echo "OK: cặp hai chiều của probe tự chạy xanh (đỏ nêu đúng đường dẫn thiếu)"
+
+pkg_url="$(echo "$body" | python3 -c '
+import json, sys
+urls = json.load(sys.stdin).get("urls", [])
+wheels = [u for u in urls if u.get("packagetype") == "bdist_wheel"]
+pick = (wheels or urls)
+print(pick[0]["url"] if pick else "")
+')"
+if [ -z "$pkg_url" ]; then
+    echo "FAIL: PyPI không liệt kê file artifact nào cho $version"
+    exit 1
+fi
+curl -fsS --max-time "$TIMEOUT" -o "$tmp/pkg" "$pkg_url" || {
+    echo "FAIL: không tải được artifact $pkg_url"
+    exit 1
+}
+python3 "$tmp/probe.py" "$tmp/pkg" "$pkg_url" || exit 1
 
 pin_file="$ROOT/plugins/$PLUGIN_ID/requirements.txt"
 if [ -f "$pin_file" ]; then

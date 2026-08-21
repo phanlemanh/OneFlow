@@ -197,8 +197,15 @@ CORPUS_TIME: tuple[tuple[str, str], ...] = (
         "Ngày 19/8/2026 khai trương",
         "ngày mười chín tháng tám năm hai nghìn không trăm hai mươi sáu khai trương",
     ),
+    # Both colon roles in ONE sentence: the punctuation colon (followed by a
+    # space) must survive, the clock must still read out — the first colon
+    # rule rejected every ':' including legitimate prose (S4 round 2 finding).
+    (
+        "Giờ chiếu: 14:30 hôm nay",
+        "giờ chiếu: mười bốn giờ ba mươi phút hôm nay",
+    ),
 )
-TIME_COUNT = 12
+TIME_COUNT = 13
 
 # Matrix: aspect × digit shape. Claims are hand-written; the aspect half of
 # every claim is machine-checked against the expected string via the marker
@@ -264,8 +271,12 @@ CORPUS_ID: tuple[tuple[str, str], ...] = (
     ("TP.HCM có mưa", "thành phố hồ chí minh có mưa"),
     ("Về Q.7 lúc chiều", "về quận bảy lúc chiều"),
     ("Chuyển hàng về TP.HCM", "chuyển hàng về thành phố hồ chí minh"),
+    # The positive half of the H. rule: "H.264 → not huyện" alone is a lone
+    # negative — deleting the dictionary entry outright kept every test green
+    # (S4 round 2 finding).
+    ("H.Bình Chánh", "huyện bình chánh"),
 )
-ID_COUNT = 16
+ID_COUNT = 17
 
 # raw → (fragment, type, position). Position is machine-checked against the
 # RAW string: đầu ⇒ starts with the fragment, cuối ⇒ ends with it, giữa ⇒
@@ -491,7 +502,24 @@ def test_residual_tokens_fail_and_are_listed() -> None:
     )
 
 
+# Positive anchors for the money predicate, one per spelling. Without them
+# every has_money assertion in this file is negative or symmetric, so a
+# predicate degraded to always-False silently empties BOTH the E6b relational
+# loop below AND the runtime money-loss rule that shares it (S4 round 2
+# finding).
+MONEY_POSITIVE_ANCHORS = (
+    "1.999.000₫",
+    "50.000đ",
+    "125.000 đồng",
+    "Vé 500.000VND",
+    "Giá 2 triệu VNĐ",
+)
+
+
 def test_clean_input_has_no_digits_left() -> None:
+    for anchor in MONEY_POSITIVE_ANCHORS:
+        assert has_money(anchor) is True, f"{anchor!r} phải là giá tiền"
+
     got = normalize_vi(RESIDUAL_FIXTURE_CLEAN)
     assert got.ok is True
     assert not any(ch.isdigit() for ch in got.text)
