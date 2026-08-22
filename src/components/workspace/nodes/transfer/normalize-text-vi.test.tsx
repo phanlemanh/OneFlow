@@ -27,7 +27,6 @@ import messages from "@/i18n/messages/en.json";
 import { NODE_TYPE_SOURCE_SPEC } from "@/lib/abi/node-feature-registry";
 import {
     getAbiNodeRegistration,
-    registerAbiNode,
     unregisterAbiNode,
 } from "@/lib/abi/node-registry";
 
@@ -179,19 +178,24 @@ describe("normalize-text-vi node", () => {
         );
     });
 
-    it("registers under the right ABI feature when mounted", () => {
-        registerAbiNode({
-            nodeId: NODE_ID,
-            feature: "normalize-text-vi",
-            sourceSpec: NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
+    it("registers under the right ABI feature when mounted", async () => {
+        // MOUNT the node and let the real write path run. The previous shape of
+        // this test called registerAbiNode() itself with hand-written arguments
+        // and then read them back, so it asserted only that the registry stores
+        // what you put in it — the production writer (registerAbiNode inside
+        // AbiNodeShell's useAbiExecution) was never executed, and deleting it
+        // left this green (measured, S4 round 5 finding). The registry is
+        // cleared in afterEach, so an empty read here means nothing wrote.
+        expect(getAbiNodeRegistration(NODE_ID)).toBeUndefined();
+
+        renderNode();
+
+        await waitFor(() => {
+            const registration = getAbiNodeRegistration(NODE_ID);
+            expect(registration?.feature).toBe("normalize-text-vi");
+            expect(registration?.sourceSpec).toEqual(
+                NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
+            );
         });
-        // Read the REGISTRY back, not the static declaration the call was fed:
-        // asserting on NODE_TYPE_SOURCE_SPEC stayed green with the
-        // registerAbiNode call deleted outright (measured, S4 round 1 finding).
-        const registration = getAbiNodeRegistration(NODE_ID);
-        expect(registration?.feature).toBe("normalize-text-vi");
-        expect(registration?.sourceSpec).toEqual(
-            NODE_TYPE_SOURCE_SPEC.normalizeTextViNode,
-        );
     });
 });
