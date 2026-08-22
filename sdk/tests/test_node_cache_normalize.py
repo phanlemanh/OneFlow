@@ -1,14 +1,23 @@
-"""normalize-text-vi Tier A cache membership — the re-price scenario (AC-11).
+"""normalize-text-vi and the node cache — the re-price scenario (AC-11).
 
-Two tests, pinned as node-ids in `_acceptance/config.yaml`: a warmed
-tier-B → normalize-text-vi workflow re-run unchanged makes ZERO plugin calls,
-and changing ONLY the reader's `text` input re-runs the reader while the
-tier-B generation upstream keeps its cache hit.
+The slot is DELIBERATELY NOT a Tier A member: commit 062f0d1 removed it from
+`TIER_A_SLOTS` because the cache key cannot tell one reader version from
+another, so a warmed entry would keep serving a reading a later fix had already
+corrected. This header used to describe the pre-amendment behaviour and called
+the slot a Tier A member — the one place pointing a future maintainer at the
+opposite conclusion from the one the body asserts (S4 round 6 finding).
+
+What the two tests below claim, pinned as node-ids in `_acceptance/config.yaml`:
+  - re-running an unchanged workflow re-runs THE READER, because it is no longer
+    cached, while the expensive tier-B generation upstream keeps its cache hit;
+  - the reader's output for an unchanged input stays byte-identical across those
+    re-runs, so leaving the cache changed the call count and not the RESULT —
+    AC-7 (determinism) is what would break otherwise.
 
 Fixture shape copied from `test_node_cache_overlay.py` — same two-layer
 arrangement, same recording invoker — because the claim being measured is the
-same one: a deterministic tier-A node re-runs on its own without dragging the
-expensive upstream with it.
+same one: a node re-running on its own must not drag the expensive layer with
+it.
 """
 
 from __future__ import annotations
@@ -126,8 +135,9 @@ def test_normalize_rerun_keeps_expensive_upstream_cached(tmp_path):
         "reader chạy lại đúng một lần — đó là cái giá đã chọn khi rút slot khỏi "
         f"Tier A; nhận {len(read_calls)} lời gọi"
     )
-    # Chạy lại mà đầu ra đổi thì việc rút khỏi cache đã đổi cả KẾT QUẢ, không
-    # chỉ đổi số lời gọi — AC-7 (tất định) sẽ là chỗ vỡ, nên ghim ngay ở đây.
+    # If a re-run changed the OUTPUT, dropping the slot from the cache changed
+    # the RESULT and not just the call count — AC-7 (determinism) would be what
+    # breaks, so it is pinned right here.
     assert r2["outputs"] == r1["outputs"]
 
 
@@ -139,8 +149,8 @@ def test_changing_text_reruns_only_normalize(tmp_path):
     r2, c2 = _run(_normalize_workflow(text="Giá 1.999.000₫"), tmp_path)
     assert r1["status"] == "success"
     assert r2["status"] == "success"
-    # Cùng lý do như test trên: reader hết được cache nên nó chạy lại, còn node
-    # tầng B thì không được phép chạy lại.
+    # Same reason as the test above: the reader is no longer cached so it runs
+    # again, while the tier-B node must not.
     assert [c for c in c2 if c["slot"] == "image-gen-text"] == []
 
     r3, c3 = _run(_normalize_workflow(text="Giá 2.499.000₫"), tmp_path)

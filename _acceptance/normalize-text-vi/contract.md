@@ -315,6 +315,24 @@ code** vì license):
   đếm vùng phủ, vì phép đó khớp chuỗi chính xác — nên chính file bộ đọc bị báo "ngoài vùng
   phủ". Nay viết dạng `.../**`.
 
+## Sửa đổi vòng 6 (2026-08-22)
+
+- **AC-6 — `Đ.` là Đường, không phải đồng.** Bản vá vòng 4 mở dấu tiền `đ` thành không phân
+  biệt hoa thường, và kéo theo mọi địa chỉ mang `Đ.`/`Đ` vào luật tiền: đo thật
+  `Số 5 Đ. Lê Lợi` → "số năm **đồng**. lê lợi" với `ok=True`. Hai lớp canh đều mù đúng theo
+  thiết kế — hậu kiểm không còn chữ số nào để bắt, luật quan hệ thì thấy đúng chữ "đồng" vừa
+  bị tiêm vào nên tự xác nhận mình. Vá ở **từ điển viết tắt địa chỉ** (nơi `Q.`, `P.`, `TP.`
+  đã sống) chứ không phải ở luật tiền, vì lớp đó chạy trước và tiêu thụ dạng địa chỉ trước
+  khi luật tiền kịp thấy. `has_money` cũng bỏ dạng địa chỉ trước khi soi.
+- **AC-7 — phép quét tất định phải phủ MỌI bộ đã khai.** `ALL_CORPUS` tự xưng "toàn bộ
+  corpus" nhưng chỉ gom 4 trong 11 bộ; mọi ma trận thêm ở vòng 4–6 nằm ngoài phép quét trong
+  khi tiêu đề vẫn tuyên phủ hết. Nay gom đủ, và có phép đo tự đỏ khi ai đó thêm bộ mới mà
+  không ghi danh.
+- **AC-16 — đo TỪNG khoá, không đếm ≥1.** Bản đầu của E18 khẳng định "không dòng nào dùng
+  dạng thay thẳng" cộng "có ít nhất một dòng dùng mỏ neo" — điểm-case khoác áo lớp. Nay đi
+  qua từng khoá executor nhắc engine, và báo số khoá đã soi để trường hợp tụt về 0 không đọc
+  thành thành công.
+
 ## Known limits (chốt ở Cổng 2 vòng 3, owner 2026-08-21)
 
 Ba lỗi đọc dưới đây là **thật, đo được**, và được owner chốt là **không sửa trong vòng

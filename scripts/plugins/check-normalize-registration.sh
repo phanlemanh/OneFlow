@@ -93,10 +93,15 @@ for surface in \
     grep -q "useExportWarningToasts" "$ROOT/$surface" ||
         fail "$surface không dùng hook cảnh báo export"
 done
+# `|| true` is load-bearing under `set -euo pipefail`: grep -c exits 1 when the
+# count is ZERO, which is precisely the regression this line exists to catch
+# (every call site deleted). Without it the substitution fails, set -e kills the
+# script at the assignment, and the guard dies WITHOUT printing its FAIL line —
+# non-zero exit, no reason (S4 round 6 finding).
 notify_calls=$(cat \
     "$ROOT/src/components/workspace/workflow-title-menu.tsx" \
     "$ROOT/src/hooks/use-workflow-execution.ts" |
-    grep -c "notifyExportWarnings(executable)")
+    grep -c "notifyExportWarnings(executable)" || true)
 [ "$notify_calls" = "3" ] ||
     fail "phải có đúng 3 call site render cảnh báo export (thấy $notify_calls)"
 

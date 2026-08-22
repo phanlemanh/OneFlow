@@ -55,10 +55,14 @@ __pycache__/
 /plugins/*
 !/plugins/.gitkeep
 
-# Claude Code local settings: only the repo-level plugin declaration is shared
-# (acceptance-gate-kit GUIDE 5.1); launch.json and worktrees/ stay local.
-.claude/*
-!.claude/settings.json
+# Claude Code local settings stay local. Sharing the repo-level plugin
+# declaration was tried on the normalize-text-vi branch and pulled back out
+# (owner, 2026-08-22): this is a public AGPL repo with an outside contributor
+# path, so committing it would make every clone declare a marketplace under one
+# maintainer's personal GitHub account, with nothing in CONTRIBUTING.md saying
+# what contributors were opting into. If it comes back, it comes back in its own
+# PR with that line written first.
+.claude/
 
 # Agent session scratch (working notes, reports). Untracked and never shipped —
 # listed here so a `git add -A` cannot sweep it into a commit.

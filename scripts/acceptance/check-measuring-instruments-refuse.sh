@@ -68,18 +68,32 @@ grep -q 'REFUSED' <<<"$out" \
 # ---------------------------------------------------------------- claim 2 ---
 # CLASS, not case. Thirteen executor keys derive the same pin; the finding
 # named one, and patching only that one is the exact mistake this feature made
-# twice already with the range-unit list. Any key that names the engine must
-# bind the derivation to a checked variable — an inline substitution yields the
-# empty string and `--with` swallows the argument after it.
-unguarded="$(grep -n "vietnormalizer" _acceptance/config.yaml \
-    | grep -v '^[0-9]*: *#' \
-    | grep -- "--with \$(" || true)"
-[ -n "$unguarded" ] && fail "còn khoá executor suy pin không có mỏ neo:
-$unguarded"
+# twice already with the range-unit list.
+#
+# The first version of this check asserted "no line uses the inline form" plus
+# "at least one line uses the guarded form" — a point case wearing a class
+# claim, since twelve keys could be unguarded in some OTHER spelling and it
+# would still pass (S4 round 6 finding). It now walks EVERY executor line that
+# names the engine and requires the guard on each one, and reports the count it
+# actually checked so a silent drop to zero lines cannot read as success.
+engine_lines="$(grep -n 'vietnormalizer' _acceptance/config.yaml \
+    | grep -vE '^[0-9]+: *#' \
+    | grep -E 'uv run|--with' || true)"
+checked=0
+while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    checked=$((checked + 1))
+    case "$line" in
+        *'${pin:?'*) ;;
+        *) fail "khoá executor suy pin KHÔNG có mỏ neo:
+$line" ;;
+    esac
+done <<<"$engine_lines"
 
-guarded_count="$(grep -c 'pin:?' _acceptance/config.yaml || true)"
-[ "$guarded_count" -ge 1 ] \
-    || fail "không khoá executor nào dùng mỏ neo \${pin:?…} — phép đo này mất đối tượng"
+[ "$checked" -ge 10 ] || fail \
+    "chỉ soi được $checked khoá executor nhắc engine — phép đo mất đối tượng,
+không phải cấu hình đã sạch (đo được 12 khoá ngày 22/08)"
+echo "  (đã soi $checked khoá executor, mỗi khoá phải có mỏ neo \${pin:?…})"
 
 # The derivation is read out of the real config, not retyped here: a copy would
 # keep passing on the day the shared key changes.

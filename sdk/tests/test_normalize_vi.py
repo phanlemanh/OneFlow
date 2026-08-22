@@ -332,10 +332,10 @@ def test_street_abbreviation_is_not_a_price() -> None:
 # nothing and ok=True — an order-of-magnitude-wrong price spoken as success
 # (S4 round 5 finding, owner raised scope 2026-08-22).
 #
-# Declared as a CLASS: {có chấm nghìn, không chấm} × {phần lẻ bằng 0, phần lẻ
-# khác 0, không có phần lẻ}. Chốt đọc: phần lẻ toàn số 0 bị BỎ (giá "3.000.000,00"
-# đọc là "ba triệu đồng", đúng cách người Việt đọc giá), phần lẻ khác 0 đọc
-# "phẩy <chữ số>".
+# Declared as a CLASS: {thousand dot, none} × {no fraction, all-zero fraction,
+# non-zero fraction}. Pinned reading: an all-zero fraction is DROPPED
+# ("3.000.000,00" reads "ba triệu đồng", the way a Vietnamese price is spoken);
+# a non-zero fraction reads "phẩy <digits>".
 # --------------------------------------------------------------------------
 
 GROUPING_KINDS = ("có chấm nghìn", "không chấm")
@@ -741,18 +741,20 @@ RANGE_MATRIX: dict[tuple[str, str], str] = {
     ("từ đầy đủ", "có khoảng trắng"): "5 triệu - 10 triệu",
 }
 
-# TRỤC CA ÂM — cái gì KHÔNG được thành khoảng. Thiếu trục này, RANGE_MATRIX ở
+# THE NEGATIVE AXIS — what must NOT become a range. Without it, RANGE_MATRIX
 # trên tuy phủ kín {kiểu đơn vị} × {khoảng cách} nhưng cả hai trục đều là trục
-# của ca DƯƠNG, nên nó mù hoàn toàn chiều "luật khoảng ăn nhầm cái gì" (S4 vòng
+# above only ever asserts POSITIVE cases, so it is completely blind to the
+# direction "what else does the range rule swallow" (S4 round
 # 5, hai reviewer độc lập cùng nêu).
 #
-# Các dòng dưới GHIM GIỚI HẠN ĐÃ BIẾT, không phải hành vi mong muốn: luật khoảng
-# hôm nay nổ trên MỌI `số-gạch-số`, nên ngày kiểu ISO, mã đơn và điện thoại viết
-# gạch đều bị đọc thành "đến" với ok=True. Đây là Known limit đã khai trong hợp
+# The rows below PIN A KNOWN LIMIT, not desired behaviour: today's range rule
+# fires on EVERY `digit-hyphen-digit`, so an ISO date, an order code and a
+# hyphenated phone number all read as "đến" with ok=True. This is a Known limit
 # đồng và thuộc hợp đồng follow-up "chống đọc sai êm ru" (owner quyết ở Cổng 2
-# vòng 3), KHÔNG phải việc của vòng này. Ghim bằng test để giới hạn đó (a) nhìn
-# thấy được trong bộ đo chứ không chỉ trong văn xuôi, và (b) khi ai đó sửa luật
-# thì test này ĐỎ và buộc cập nhật hợp đồng, thay vì hành vi đổi âm thầm.
+# round 3), NOT this round's work. Pinned by test so the limit is (a) visible
+# in the suite rather than only in prose, and (b) when someone fixes the rule
+# this test goes RED and forces the contract to be updated with it, instead of
+# the behaviour changing silently.
 CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
     (
         "ngày kiểu ISO",
@@ -771,7 +773,7 @@ CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
     ),
 )
 
-# Ô cố ý bỏ, kèm lý do — không phải quên.
+# Cells deliberately left uncovered, each with its reason — not forgotten.
 DELIBERATELY_UNCOVERED_RANGE_CELLS: dict[tuple[str, str], str] = {
     ("không đơn vị", "có khoảng trắng"): (
         "'10 - 15' viết cách không đơn vị trùng hình dạng với gạch đầu dòng và "
@@ -818,9 +820,9 @@ def test_ambiguous_policy_pinned() -> None:
     ) * len(RANGE_SPACING), "ma trận khoảng không phủ hết tích Descartes"
 
     # Trục ÂM. Đọc kỹ chú thích ở CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: ba dòng này
-    # ghim GIỚI HẠN, không ghim điều đúng. Test đỏ ở đây nghĩa là luật khoảng đã
-    # đổi — khi đó phải cập nhật mục Known limits của hợp đồng cùng lúc, chứ
-    # không sửa kỳ vọng cho khớp mã.
+    # pins a LIMIT, not a correct behaviour. A failure here means the range rule
+    # changed — update the contract's Known limits section at the same time,
+    # rather than editing the expectation to match the code.
     for kind, raw, today in CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT:
         got = normalize_vi(raw)
         assert got.text == today, (
@@ -945,7 +947,86 @@ def test_clean_input_has_no_digits_left() -> None:
 # AC-7 — determinism and idempotence over the WHOLE corpus.
 # --------------------------------------------------------------------------
 
-ALL_CORPUS = CORPUS_MONEY + CORPUS_TIME + CORPUS_ID + CORPUS_AMBIGUOUS
+def _raw_inputs(corpus: object) -> tuple[str, ...]:
+    """Every raw input a declared corpus carries, whatever its row shape.
+
+    The corpora in this file are written in four shapes — pairs, triples, a
+    matrix keyed by cell with a pair value, and a matrix keyed by cell with a
+    bare input. Reading them by shape here is what lets the sweep below take
+    ALL of them without each new matrix having to remember to enlist itself.
+    """
+    rows = corpus.values() if isinstance(corpus, dict) else corpus
+    out: list[str] = []
+    for row in rows:
+        if isinstance(row, str):
+            out.append(row)
+        elif isinstance(row, tuple) and row:
+            # (raw, expected) or (label, raw, expected)
+            out.append(row[0] if len(row) == 2 else row[1])
+    return tuple(out)
+
+
+# Named explicitly rather than discovered, so the sweep's contents are readable
+# — but test_determinism_sweep_covers_every_declared_corpus below FAILS if any
+# module-level corpus is missing from it. AC-7 says "the WHOLE corpus", and
+# before round 6 this tuple silently held four of the eleven declared bodies:
+# every matrix added in rounds 4-6 was outside the determinism sweep while the
+# heading still claimed to cover everything (S4 round 6 finding).
+_DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
+    ("CORPUS_MONEY", CORPUS_MONEY),
+    ("CORPUS_TIME", CORPUS_TIME),
+    ("CORPUS_ID", CORPUS_ID),
+    ("CORPUS_AMBIGUOUS", CORPUS_AMBIGUOUS),
+    ("MAGNITUDE_DONG_MATRIX", MAGNITUDE_DONG_MATRIX),
+    ("VN_AMOUNT_MATRIX", VN_AMOUNT_MATRIX),
+    ("VN_AMOUNT_NEGATIVE", VN_AMOUNT_NEGATIVE),
+    ("CORPUS_STREET", CORPUS_STREET),
+    ("CORPUS_STREET_NEGATIVE", CORPUS_STREET_NEGATIVE),
+    ("RANGE_MATRIX", RANGE_MATRIX),
+    ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
+)
+
+ALL_CORPUS = tuple(
+    (raw, "")
+    for _, corpus in _DECLARED_CORPORA
+    for raw in _raw_inputs(corpus)
+)
+
+
+def test_determinism_sweep_covers_every_declared_corpus() -> None:
+    """No declared corpus may sit outside the AC-7 sweep.
+
+    The class claim is "the WHOLE corpus"; this is what makes adding a matrix
+    without enlisting it a RED test instead of a silent shrinking of scope.
+    """
+    import sys
+
+    module = sys.modules[__name__]
+    enlisted = {name for name, _ in _DECLARED_CORPORA}
+    declared = {
+        name
+        for name in vars(module)
+        if (
+            name.startswith("CORPUS_")
+            or name.endswith("_MATRIX")
+            # ...and the negative bodies, which carry the "what must NOT change"
+            # half. Discovered by the same naming convention rather than listed,
+            # so a new one cannot be added without this test seeing it.
+            or name.endswith("_NEGATIVE")
+        )
+        and not name.startswith("DELIBERATELY_")
+    }
+    missing = sorted(declared - enlisted)
+    assert not missing, (
+        f"corpus khai ở module nhưng không vào phép quét tất định: {missing}"
+    )
+    stale = sorted(enlisted - declared)
+    assert not stale, f"phép quét nhắc corpus không còn tồn tại: {stale}"
+
+    swept = {raw for raw, _ in ALL_CORPUS}
+    for name, corpus in _DECLARED_CORPORA:
+        for raw in _raw_inputs(corpus):
+            assert raw in swept, f"{name}: ca {raw!r} không vào phép quét"
 
 
 def test_idempotent_and_byte_identical() -> None:
