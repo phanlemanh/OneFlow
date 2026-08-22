@@ -22,6 +22,7 @@ from .vi_dictionary import (
     CURRENCY_WORD,
     LETTER,
     PREFIX_PATTERNS,
+    STREET_PATTERN,
 )
 
 _NORMALIZER = VietnameseNormalizer()
@@ -50,11 +51,18 @@ _DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4
 # "Giá 5 tỷ đ" → "giá năm tỷ đ", ok=True, price unspoken). Kept as one shared
 # constant so the pre-pass, the money test and any later rule cannot drift
 # apart the way the unit LIST did for ranges in round 4.
-_MAGNITUDE = r"(?:nghìn|ngàn|triệu|tỷ|tỉ)"
+_MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ")
+_MAGNITUDE = "(?:" + "|".join(_MAGNITUDE_WORDS) + ")"
+# A lookbehind must be fixed-width, so the alternation is over whole lookbehind
+# groups rather than inside one. BUILT from the tuple above, not retyped: the
+# first version of this rule listed the five words a second time here, which is
+# precisely the drift the comment above claims is structurally impossible
+# (S4 round 6 finding — the reviewer read the claim and checked it).
+_MAGNITUDE_BEHIND = "|".join(f"(?<={w})" for w in _MAGNITUDE_WORDS)
 
 _SPACED_DONG = re.compile(
     rf"(?<=\d)\s+(?i:đ)\b"
-    rf"|(?i:(?<=nghìn)|(?<=ngàn)|(?<=triệu)|(?<=tỷ)|(?<=tỉ))\s*(?i:đ)\b"
+    rf"|(?i:{_MAGNITUDE_BEHIND})\s*(?i:đ)\b"
 )
 
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
@@ -186,8 +194,16 @@ def has_money(text: str) -> bool:
     string carrying a real price reports no money, and the relational
     money-loss rule below is silently skipped for exactly the inputs macOS
     tools like to produce — measured, S4 round 1 finding.
+
+    Address abbreviations are removed FIRST, for the same reason the pre-pass
+    consumes them before the currency rules: "Số 5 Đ. Lê Lợi" carries a digit
+    followed by "Đ" and matched the money test, so the relational money-loss
+    rule demanded a currency word from an address and rejected it (measured
+    while fixing S4 round 6 — the street rewrite alone fixed the OUTPUT but
+    left this test reading the raw string).
     """
-    return _MONEY.search(unicodedata.normalize("NFC", text)) is not None
+    nfc = unicodedata.normalize("NFC", text)
+    return _MONEY.search(STREET_PATTERN[0].sub(" ", nfc)) is not None
 
 
 def _pre(text: str) -> str:
@@ -199,6 +215,8 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     for pattern, dst in PREFIX_PATTERNS:
         out = pattern.sub(dst, out)
+    # Before the currency rules on purpose — see STREET_PATTERN's comment.
+    out = STREET_PATTERN[0].sub(STREET_PATTERN[1], out)
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
     # Before every digit rule below: lift the decimal part into a word the

@@ -66,6 +66,31 @@ _PREFIXES: tuple[tuple[str, str, str], ...] = (
     ("H.", "huyện ", _NEXT_UPPER),
 )
 
+# Đ. / Đ = Đường (street). Its siblings above expand a prefix GLUED to its
+# value ("Q.7"), but a street name is separated by a space ("Đ. Lê Lợi"), so it
+# needs a pattern that consumes that space instead of a lookahead.
+#
+# Placed with the address abbreviations, not as an exclusion inside the currency
+# rules, because this pass runs BEFORE them: consuming the address form is what
+# keeps it from reaching the money rewrite at all. Without it, the round-4
+# case-insensitive currency mark read every such address as a price — measured
+# on this branch, "Số 5 Đ. Lê Lợi" -> "số năm đồng. lê lợi" with ok=True, and
+# both guards stayed green because nothing numeric survived and the money-loss
+# relation found the "đồng" the rewrite had just injected (S4 round 6).
+#
+# The DOTTED form counts in either case, because "đ. Nguyễn Huệ" is ordinary
+# listing copy. The UNDOTTED form is accepted only capitalised: a lowercase "đ"
+# followed by a capitalised word is far more likely a price followed by a new
+# sentence ("Giá 500 đ Bao gồm VAT") than a street.
+#
+# Known imperfection, stated rather than hidden: ALL-CAPS price copy that puts a
+# capitalised word straight after the mark ("GIÁ 500 Đ MỘT THÁNG") reads as a
+# street. The slash form the contract pins ("Đ/THÁNG") is unaffected.
+STREET_PATTERN: tuple[re.Pattern[str], str] = (
+    re.compile(rf"(?<!{LETTER})(?:(?i:đ)\.|Đ)[ \t]+(?=[{_UPPER}])"),
+    "đường ",
+)
+
 PREFIX_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
     (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?={nxt})"), dst)
     for src, dst, nxt in _PREFIXES

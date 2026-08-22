@@ -200,6 +200,46 @@ MAGNITUDE_DONG_MATRIX: dict[tuple[str, str], tuple[str, str]] = {
 }
 
 
+def test_both_money_rules_read_the_same_magnitude_list() -> None:
+    """The two rules must not drift apart — the comment claims they cannot.
+
+    `_MAGNITUDE` says it exists so "the pre-pass, the money test and any later
+    rule cannot drift apart the way the unit LIST did for ranges in round 4".
+    A comment cannot enforce that; this does. The first version of the rule
+    re-listed the five words inline in `_SPACED_DONG`, so adding a word made
+    has_money() say True while the rewrite left the bare mark alone
+    (S4 round 6 finding).
+    """
+    from tongflow.text.normalize_vi import (
+        _MAGNITUDE,
+        _MAGNITUDE_BEHIND,
+        _MAGNITUDE_WORDS,
+        _MONEY,
+        _SPACED_DONG,
+    )
+
+    assert _MAGNITUDE_WORDS, "danh sách đơn vị lớn rỗng — phép đo mất đối tượng"
+    for word in _MAGNITUDE_WORDS:
+        assert f"(?<={word})" in _MAGNITUDE_BEHIND, (
+            f"{word!r} có trong hằng nhưng không vào mẫu tiền xử lý"
+        )
+        assert word in _MAGNITUDE, f"{word!r} không vào mẫu nhận diện tiền"
+        assert f"(?<={word})" in _SPACED_DONG.pattern, (
+            f"{word!r} không vào luật viết lại — nó sẽ được nhận là tiền "
+            f"nhưng không bao giờ được đọc thành chữ"
+        )
+        assert word in _MONEY.pattern, f"{word!r} không vào luật nhận diện tiền"
+
+    # ...and nothing was hand-added to either rule outside the shared list.
+    import re as _re
+
+    behind_in_rule = set(_re.findall(r"\(\?<=([^)]+)\)", _SPACED_DONG.pattern))
+    assert behind_in_rule <= set(_MAGNITUDE_WORDS) | {"\\d"}, (
+        f"luật viết lại có mỏ neo không đến từ hằng dùng chung: "
+        f"{sorted(behind_in_rule - set(_MAGNITUDE_WORDS) - {'\\d'})}"
+    )
+
+
 def test_currency_word_survives_magnitude_word() -> None:
     missing = [
         (word, spacing)
@@ -229,6 +269,58 @@ def test_currency_word_survives_magnitude_word() -> None:
         got = normalize_vi(raw)
         assert got.ok is True, f"{raw!r} → {got.error}"
         assert "đồng" in got.text, f"{raw!r} mất chữ tiền: {got.text!r}"
+
+
+# --------------------------------------------------------------------------
+# AC-6 — "Đ." is the standard Vietnamese abbreviation for Đường (street), and
+# the round-4 amendment that made the currency mark case-insensitive turned
+# every address carrying it into a price: "Số 5 Đ. Lê Lợi" read out as "số năm
+# đồng. lê lợi" with ok=True (S4 round 6 finding, measured on this branch).
+#
+# Both guards were blind BY DESIGN: nothing numeric survived for the residual
+# check, and the money-loss relation found the very "đồng" the rewrite had just
+# injected — it confirmed itself. Addresses are first-class input here: the
+# dictionary already expands Q., P., TP. for exactly this domain.
+#
+# Fixed where the sibling abbreviations live, not in the currency rules: the
+# prefix pass runs BEFORE them, so it consumes the address form first.
+# --------------------------------------------------------------------------
+
+CORPUS_STREET: tuple[tuple[str, str], ...] = (
+    ("Số 5 Đ. Lê Lợi", "số năm đường lê lợi"),
+    ("Nhà 12 Đ Trần Phú", "nhà mười hai đường trần phú"),
+    ("Hàng A2 đ. Nguyễn Huệ", "hàng a hai đường nguyễn huệ"),
+    ("Số 5 Đ. Lê Lợi, Q.1", "số năm đường lê lợi, quận một"),
+)
+
+# The price forms the street rule must NOT eat. Two of them are the very cases
+# the round-4 uppercase amendment was raised for, so this is also its regression
+# pin: narrowing "Đ" must never cost them.
+CORPUS_STREET_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Giá 500 Đ", "giá năm trăm đồng"),
+    ("Giá 5 tỷ đ", "giá năm tỷ đồng"),
+)
+
+
+def test_street_abbreviation_is_not_a_price() -> None:
+    for raw, expected in CORPUS_STREET:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+        # Stated separately: the defect was a currency word APPEARING, and an
+        # expected-string diff alone would not say which half went wrong.
+        assert "đồng" not in got.text, (
+            f"{raw!r} là địa chỉ nhưng đọc ra chữ tiền: {got.text!r}"
+        )
+        assert not has_money(raw), f"{raw!r} bị nhận là có tiền vào"
+
+    for raw, expected in CORPUS_STREET_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} (ca ÂM, luật đường không được ăn): "
+            f"mong {expected!r}, nhận {got.text!r}"
+        )
 
 
 # --------------------------------------------------------------------------
