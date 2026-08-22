@@ -19,7 +19,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 tmp="$(mktemp -d)"
-port=8${RANDOM:0:3}
+# Port chosen by the OS, not by slicing $RANDOM. The first version built one as
+# `8${RANDOM:0:3}`, which yields a PRIVILEGED port whenever $RANDOM is short
+# (RANDOM=7 → port 87) and collides freely when ~45 verification agents run at
+# once. It failed that way in round 8 — "could not start the static server" —
+# so the measurement went red for a reason that has nothing to do with what it
+# measures. A measurement that can fail for unrelated reasons reports noise as
+# a finding.
+port="$(python3 -c "import socket
+s = socket.socket()
+s.bind((\"127.0.0.1\", 0))
+print(s.getsockname()[1])
+s.close()")"
 server_pid=""
 cleanup() {
     if [ -n "$server_pid" ]; then

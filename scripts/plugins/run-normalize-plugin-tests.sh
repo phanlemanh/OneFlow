@@ -59,5 +59,5 @@ viet_pin="$(reader_pin)" || exit 1
 cd "$ROOT/sdk"
 PYTHONPATH="$ROOT/sdk" uv run --no-project \
     --with pytest --with tomli --with pydantic --with typing_extensions \
-    --with "vietnormalizer==$viet_pin" \
+    --with "$viet_pin" \
     python -m pytest -q -p no:cacheprovider "$tree/tests" "$@"

@@ -12,7 +12,11 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PLUGIN_ID="oneflow-api-normalize-text-vi"
 TIMEOUT="${NORMALIZE_PYPI_TIMEOUT:-20}"
 
-version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$ROOT/sdk/pyproject.toml" | head -1)"
+# Read by the ONE library that owns it (scripts/lib/sdk-version.sh), which
+# validates the shape and prints its own diagnostic; a local sed here reported
+# only "could not read a version" for a differently formatted line.
+. "$ROOT/scripts/lib/sdk-version.sh"
+version="$(sdk_version)"
 [ -n "$version" ] || { echo "FAIL: could not read a version from sdk/pyproject.toml"; exit 1; }
 
 url="https://pypi.org/pypi/oneflow-sdk/$version/json"

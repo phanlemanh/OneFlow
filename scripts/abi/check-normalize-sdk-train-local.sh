@@ -32,18 +32,26 @@ fi
 
 # The pin must be exact. `>=` or `~=` would let a patch release change how a
 # number reads, which is the one thing this slot promises cannot happen.
+# One law, one file — see scripts/lib/sdk-version.sh.
+. "$ROOT/scripts/lib/sdk-version.sh"
+
 # Matched by SHAPE, never by literal version: this file's own header says both
 # numbers are derived and "a guard that hardcodes '0.2.19' goes green forever
 # after the next bump" — but the dependency check hardcoded 0.2.3 and so went
 # RED on the next legitimate bump instead, reporting "thiếu pin chính xác"
 # about a pin that was exact (S4 round 5 finding). What the criterion asserts
 # is the `==` form, so that is what is matched.
-if ! grep -qE '"vietnormalizer==[0-9]+(\.[0-9]+)+"' "$pyproject"; then
+# Asked of the ONE library that owns the derivation, not re-matched here. This
+# check kept its own tight regex while the library was deliberately widened to
+# tolerate whitespace around `==` — and E18 actively ASSERTS the spaced form
+# still derives. So a formatter normalising the line would leave E18 green and
+# this guard red, complaining "no exact pin" about a pin that is exact: the
+# same dialect drift the consolidation removed, moved into an assertion
+# (S4 round 8 finding).
+if ! reader_pin >/dev/null 2>&1; then
     echo "FAIL: no exact vietnormalizer==X.Y.Z pin in dependencies"
     grep -n 'vietnormalizer' "$pyproject" || echo "  (không thấy dòng vietnormalizer nào)"
     exit 1
 fi
 
-# Same one law as the version above — see scripts/lib/sdk-version.sh.
-. "$ROOT/scripts/lib/sdk-version.sh"
 echo "OK: SDK $py_version (both files agree) · $(reader_pin) pinned exactly"

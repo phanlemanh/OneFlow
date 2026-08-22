@@ -1,65 +1,20 @@
-=== E15 network truth dump ===
-dev_server.url (scope) = http://localhost:3000
+E15 network dump — captured via Claude_Browser MCP on http://localhost:3000/proto/normalize-text-vi
+dev_server.url scope: http://localhost:3000
 
---- state: idle (http://localhost:3000/proto/normalize-text-vi), cookie NEXT_LOCALE=vi ---
-GET http://localhost:3000/api/plugins/registry -> 200 OK
-GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
-GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/css/app/layout.css?v=1787406867361 -> 200 OK
-GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787406867361 -> 200 OK
-GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787406867361 -> 200 OK
-GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787406867361 -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-GET http://localhost:3000/api/plugins/registry -> 200 OK
+Console messages (all levels):
+[info] Download the React DevTools for a better development experience
+[warn] [React Flow]: The parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+[log] [useNodeTaskUpdate] Registering task update handler for node: proto-normalize
+[log] [Task Store] Registered handler for node proto-normalize, total handlers: 1
+[log] [useNodeTaskUpdate] Unregistering task update handler for node: proto-normalize
+[log] [Task Store] Unregistered handler for node proto-normalize, remaining handlers: 0
+[log] [useNodeTaskUpdate] Registering task update handler for node: proto-normalize
+[log] [Task Store] Registered handler for node proto-normalize, total handlers: 1
 
-All requests are app-origin (matches dev_server.url), no third-party traffic, no static-asset
-failures, no FAIL-eligible request >= 4xx. Console: "No console logs." (no errors).
+Console errors (onlyErrors=true): none
 
-Verdict: networkObserved = clean
+Network requests:
+[10900.39] GET http://localhost:3000/api/plugins/registry -> 200 OK
 
---- state: wired (http://localhost:3000/proto/normalize-text-vi?state=wired), cookie NEXT_LOCALE=vi ---
-GET http://localhost:3000/api/plugins/registry -> 200 OK
-GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
-GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/css/app/layout.css -> 200 OK
-GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css -> 200 OK
-GET http://localhost:3000/_next/static/chunks/webpack.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/main-app.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-GET http://localhost:3000/api/plugins/registry -> 200 OK
-GET http://localhost:3000/proto/normalize-text-vi?_rsc=bEKaCk_haC-59Ljq -> 200 OK [FAILED: net::ERR_ABORTED]  <-- see note below
-GET http://localhost:3000/_next/static/webpack/451572616bcbc016.webpack.hot-update.json -> 200 OK
-GET http://localhost:3000/_next/static/webpack/app/layout.451572616bcbc016.hot-update.js -> 200 OK
-GET http://localhost:3000/_next/static/webpack/webpack.451572616bcbc016.hot-update.js -> 200 OK
-GET http://localhost:3000/_next/static/css/app/layout.css -> 200 OK
-GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css -> 200 OK
-GET http://localhost:3000/proto/normalize-text-vi?state=wired -> 200 OK
-GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-GET http://localhost:3000/_next/static/css/app/layout.css -> 200 OK
-GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css -> 200 OK
-GET http://localhost:3000/_next/static/chunks/webpack.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/main-app.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-GET http://localhost:3000/api/plugins/registry -> 200 OK
-
-NOTE on the one [FAILED: net::ERR_ABORTED] entry above: this is an RSC prefetch
-(`?_rsc=...`) for the idle page, self-inflicted by the verifier's own tooling —
-it was in flight when the verifier issued a full-page `navigate()` to the
-`?state=wired` URL, which cancels any pending fetch from the previous page by
-normal browser behavior. The HTTP layer reports 200 OK; ERR_ABORTED is a
-client-side cancellation, not a server error, timeout, or >=500 status. Not
-counted as FAIL-eligible.
-
-Console (both states): "No console logs." (no errors, no warnings surfaced by
-read_console_messages onlyErrors=true).
-
-Verdict: networkObserved = clean
+Scoping verdict: 1 FAIL-eligible request (same-origin as dev_server.url), status 200 OK.
+networkObserved = clean
