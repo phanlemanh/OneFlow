@@ -31,7 +31,7 @@ evals:
     criterion: AC-2
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_money
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py", "sdk/pyproject.toml"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py", "sdk/pyproject.toml"]
     expected: "exit 0; MA TRẬN TOÀN PHẦN khai trước trong file test — trục biến thể {linh, lẻ, mốt, lăm, mươi-vs-mười} × trục vị trí {chục sau 20..90, trăm, nghìn, triệu, tỷ}, mỗi ô ≥1 ca (41 → bốn mươi MỐT, 125.000 → một trăm hai mươi LĂM nghìn, 105 → một trăm LINH năm); assert len(CORPUS_MONEY) == literal; expected là literal viết tay trong file test, KHÔNG dán từ output thư viện. Chiều đỏ: xoá một ô ma trận → assert đỏ nêu ĐÚNG TÊN Ô thiếu, không chỉ exit code"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -39,7 +39,7 @@ evals:
     criterion: AC-3
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_datetime
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; ma trận toàn phần {ngày, tháng, năm, giờ, phút, khoảng} × {có số 0 đứng đầu, không có, hai chữ số, bốn chữ số} khai trước trong file test, mỗi ô ≥1 ca — 19/8/2026, 19-08-2026, 14:30, 25-26/12; trật tự đọc ngày-tháng-năm; assert len(CORPUS_TIME) == literal. Chiều đỏ như E2 (ô trống → đỏ kèm tên ô)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -47,7 +47,7 @@ evals:
     criterion: AC-4
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_identifiers
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; ma trận toàn phần {điện thoại, đơn vị đo, viết tắt hành chính} × {đứng đầu câu, giữa câu, cuối câu} khai trước, mỗi ô ≥1 ca; 0901234567 đọc TỪNG CHỮ SỐ (không thành số lượng); m², km/h, kg bung đúng; TP.HCM → 'thành phố hồ chí minh', Q.7 → 'quận bảy', P.Bến Nghé → 'phường bến nghé' theo từ điển ngành trong kho, và KHÔNG còn dấu chấm viết tắt nào sót trong đầu ra; assert len(CORPUS_ID) == literal. Chiều đỏ: bỏ một mục từ điển → assert đỏ nêu đúng viết tắt không bung"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -55,7 +55,7 @@ evals:
     criterion: AC-5
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_ambiguous
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; 5/3 → 'năm tháng ba', 1.500 → 'một nghìn năm trăm', 10-15 → 'mười ĐẾN mười lăm' (không còn dấu gạch), VÀ chốt khoảng áp cả hai đầu mang hậu tố đơn vị: 5%-10% và 5% - 10% → '... đến ...' không bao giờ thành 'âm' (nâng phạm vi Cổng 2, owner 2026-08-21 — trước đó 5%-10% đọc 'năm phần trămâm mười phần trăm' với ok=True); VÀ dải giá VIẾT CÁCH cũng giữ chữ 'đến': 1.000 đ-2.000 đ · 1.000 ₫ - 2.000 ₫ · 1.000 đồng - 2.000 đồng (Cổng 2 vòng 3, owner 2026-08-21 — cả ba từng ra 'một nghìn đồng hai nghìn đồng', mất hẳn chữ nối, ok=True, do bản vá vòng trước chạy _SPACED_DONG trước _RANGE và phá mỏ neo 'đ'); VÀ đo theo LỚP chứ không theo ca (amendment Cổng 2 vòng 4): ma trận {không đơn vị, ký hiệu, chữ viết tắt, từ đầy đủ} × {dính, có khoảng trắng} khai TRƯỚC trong file test, mỗi ô có ca hoặc nằm trong DELIBERATELY_UNCOVERED_RANGE_CELLS kèm lý do, và assert nêu ĐÚNG TÊN Ô còn trống — 5 triệu - 10 triệu · 5 tỷ - 10 tỷ · 5kg-10kg · 5 người - 10 người đều từng mất chữ 'đến' với ok=True vì luật cũ neo vào DANH SÁCH đơn vị; luật nay neo vào SỐ; đúng chốt hợp đồng và KHÔNG phụ thuộc ngữ cảnh câu (cùng chuỗi trong 3 câu khác nhau ra cùng kết quả). Chiều đỏ: đổi chốt trong code → assert đỏ nêu đúng ca mơ hồ nào lệch chốt (đã chứng minh hai lần: thu hẹp luật khoảng → đỏ nêu đúng ca 5%-10%; đảo lại thứ tự hai luật → đỏ nêu đúng ca 1.000 đ-2.000 đ)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -63,7 +63,7 @@ evals:
     criterion: AC-6
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_residual_fail
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; chuỗi có token không đọc được → success:false và error LIỆT KÊ ĐÚNG các token còn sót (so danh sách, không so chuỗi con). Đây là nửa ÂM của cặp hai chiều — nửa dương là E6b trên cùng fixture"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -71,7 +71,7 @@ evals:
     criterion: AC-6
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_residual_pass
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; cùng fixture ở dạng lành → success:true, đầu ra KHÔNG chứa ký tự 0-9 / ₫ / % / dấu gạch giữa hai số; VÀ luật QUAN HỆ: mọi ca corpus có dấu hiệu tiền ở đầu vào (₫, đ, VNĐ, VND) phải có từ chỉ tiền ở đầu ra — assert quan hệ vào↔ra trên từng ca, không phải assert vắng-mặt trên đầu ra, VÀ mỏ neo dương độc lập: has_money phải True trên danh sách literal 6 cách viết tiền — kể cả dạng '500 đ' có khoảng trắng, dạng này phải ĐỌC ĐƯỢC thành '... đồng' chứ không bị từ chối, VÀ kể cả chữ HOA — 'Giá 500 Đ', 'GIÁ 1.999.000 Đ', 'Giá 125.000 ĐỒNG' đều phải ok=True và đọc ra chữ tiền (amendment Cổng 2 vòng 4: ba lớp cùng trượt nên 'Giá 500 Đ' ra 'giá năm trăm đ' với ok=True) (nâng phạm vi Cổng 2, owner 2026-08-21) (predicate chết luôn-False từng rỗng-hoá cả vòng quan hệ lẫn luật runtime mà không test nào đỏ — S4-r2). Chiều đỏ ghim: bỏ bước đổi ₫→đ ở tiền xử lý thì 1.999.000₫ ra 'một triệu chín trăm chín mươi chín nghìn' — không còn chữ số nên luật vắng-mặt vẫn xanh, chỉ luật quan hệ mới đỏ, và thông điệp phải nêu đúng ca đó"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -79,7 +79,7 @@ evals:
     criterion: AC-7
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_idempotent
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; chạy 2 lần byte-identical; normalize(normalize(x)) == normalize(x) trên TOÀN corpus (không chỉ vài mẫu). Chiều đỏ: chèn một quy tắc phụ thuộc trạng thái → assert đỏ nêu chuỗi nào không idempotent"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -87,7 +87,7 @@ evals:
     criterion: AC-8
     executor: test
     cmd: config:executors.test.sdk_pytest_normalize_edges
-    paths: ["sdk/tongflow/text/", "sdk/tests/test_normalize_vi.py"]
+    paths: ["sdk/tongflow/text/**", "sdk/tests/test_normalize_vi.py"]
     expected: "exit 0; rỗng/chỉ khoảng trắng → success:false + error rõ (thư viện tự nó trả chuỗi rỗng không báo lỗi — đây là việc của vỏ ta, phải có ca chứng minh); văn bản thuần chữ ra y nguyên TRỪ dạng chữ (so byte với bản lower() của đầu vào, không so 'gần giống'); chuỗi ≥10.000 ký tự và emoji/URL/email không crash; VÀ văn xuôi không số không bị từ chối vì dấu câu — 'Ghi chú:Xem thêm' phải ok=True trong khi 'ngày 14:30' vẫn ok=False, đo CẢ HAI trong một test (amendment Cổng 2 vòng 4: luật dấu hai chấm chuyển từ hình dạng sang quan hệ vào↔ra); HAI ASSERT QUAN HỆ bắt buộc: unicodedata.is_normalized('NFC', out) đúng trên TOÀN corpus, và normalize(NFD(x)) == normalize(NFC(x)) byte-identical với mọi ca corpus có dấu, VÀ .ok + has_money cũng phải khớp giữa hai dạng — bản đầu chỉ so .text nên lỗ NFD của luật tiền vô hình (S4-r1). Chiều đỏ: gỡ bước chuẩn hoá dạng ở tiền xử lý → assert đỏ nêu đúng chuỗi nào lệch dạng"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -139,7 +139,7 @@ evals:
     executor: test
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_node_cache_normalize
-    paths: ["sdk/tongflow/engine/", "sdk/tests/test_node_cache_normalize.py", "sdk/tests/test_node_cache.py"]
+    paths: ["sdk/tongflow/engine/**", "sdk/tests/test_node_cache_normalize.py", "sdk/tests/test_node_cache.py"]
     expected: "exit 0; workflow 2-node qua engine (amendment Cổng 2 vòng 5 — slot ĐÃ RÚT khỏi TIER_A_SLOTS): chạy lần 2 không đổi gì → node tầng B ĐẮT TIỀN trúng cache (0 lời gọi image-gen-text) còn reader chạy lại đúng 1 lần, và đầu ra hai lượt bằng nhau; đổi chuỗi text vào → node tầng B vẫn KHÔNG chạy lại. Lời hứa cũ '0 lời gọi plugin' chỉ đúng khi reader còn được cache, mà nó được cache dưới một khoá không phân biệt nổi reader 0.2.19 với 0.2.24 (sdk_major cắt còn MAJOR.MINOR — đo được: bốn bản vá reader trong một ngày không làm mất hiệu lực mục cache nào). Chiều đỏ: bỏ image-gen-text khỏi TIER_B_SLOTS → đỏ nêu ĐÚNG lời gọi tầng B không được phép xảy ra"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -157,7 +157,7 @@ evals:
     executor: test
     layer: backend-effect
     cmd: config:executors.test.sdk_pytest_normalize_conformance
-    paths: ["sdk/tests/conformance/", "config/tongflow.abi.json", "sdk/tongflow/engine/"]
+    paths: ["sdk/tests/conformance/**", "config/tongflow.abi.json", "sdk/tongflow/engine/**"]
     expected: "exit 0; fixture normalize-text-vi chạy qua đường engine-Python khớp đường canvas-TS: cùng số lời gọi, mỗi lời gọi nhận text scalar (không batch fan-out nhầm tầng). Known limit khai trong sổ (descope S4-r2): khối workflow của fixture là bản viết tay, exportWorkflow chưa được round-trip đối chiếu với fixture — mở lại khi sửa wire-format"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -173,8 +173,16 @@ evals:
     criterion: AC-13
     executor: script
     cmd: config:executors.script.normalize_registration_synced
-    paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-manifest-guard-teeth.sh", "scripts/plugins/check-normalize-registration.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md", "src/i18n/messages/"]
+    paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh", "scripts/plugins/check-manifest-guard-teeth.sh", "scripts/plugins/check-normalize-registration.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md", "src/i18n/messages/**"]
     expected: "exit 0; manifest có entry origin THỨ TƯ oneflow-api-normalize-text-vi dưới phanlemanh; check-manifest-unmoved.sh đã cập nhật (36 chuỗi + 4 origin, id set có tên mới) và check-manifest-guard-teeth.sh vẫn đỏ trên cả 6 phép nhiễu KHÔNG cần sửa file đó; cả 3 README có plugin trong danh sách + dòng ✅ mang marker nằm ĐÚNG TRONG mục Transform → Text của ma trận năng lực, đo CẤU TRÚC bằng awk đoạn-giữa-heading chứ không grep-anywhere (nửa đỏ: rút dòng ✅ khỏi mục trong khi marker vẫn còn ở danh sách plugin → đỏ nêu đúng file và mục — S4-r2); i18n đủ 5 locale dưới normalizeTextVi.* VÀ Workspace.toast.ttsNeedsNormalize (kèm chỗ trống {nodes}); dây render cảnh báo AC-10 đo bằng grep tĩnh KHAI SÀN tường minh: hook use-export-warning-toast đọc key, cả hai file bề mặt export dùng hook, đúng 3 call site gọi notifyExportWarnings — chứng minh dây nối tồn tại, không chứng minh pixel"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-16
+    executor: script
+    cmd: config:executors.script.measuring_instruments_refuse
+    paths: ["scripts/ui-capture.mjs", "_acceptance/config.yaml", "scripts/acceptance/check-measuring-instruments-refuse.sh"]
+    expected: "exit 0; (a) lượt chụp GHI khi trang đúng lang, TỪ CHỐI và XOÁ khung cũ khi trang trả về lang khác --lang dù chuỗi --require vẫn có mặt; (b) KHÔNG khoá executor nào còn suy pin bằng thay-thẳng `--with $(...)` — đo cả LỚP 13 khoá, không riêng khoá vừa lộ; (c) phép suy pin có mỏ neo ${pin:?} thất bại với MỘT dòng nhắc chữ 'pin' khi gỡ dòng pin, và thành công trên cây thật. Ba chiều đỏ đã đo 22/08: gỡ phép ép lang → 'KHÔNG bị từ chối'; bỏ xoá khung cũ → 'ảnh cũ còn nguyên'; trả một khoá về dạng thay thẳng → nêu đúng số dòng vi phạm"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E14a
@@ -198,7 +206,7 @@ evals:
     executor: script
     layer: backend-effect
     cmd: config:executors.script.normalize_plugin_shell
-    paths: ["sdk/tongflow/text/", "sdk/tongflow/slots.py", "scripts/plugins/run-normalize-plugin-tests.sh"]
+    paths: ["sdk/tongflow/text/**", "sdk/tongflow/slots.py", "scripts/plugins/run-normalize-plugin-tests.sh"]
     expected: "exit 0; gọi slot method THẬT của vỏ plugin qua @node_slot với dict {'text': '<một dòng corpus>'} → success:true và text khớp ĐÚNG dòng corpus đó, so với hằng số corpus DÙNG CHUNG (không viết lại kỳ vọng tại chỗ); spy chứng minh hàm SDK được gọi ĐÚNG MỘT LẦN — chặn kịch bản vỏ tự cài lại logic hoặc vỏ trả thẳng input; vietnormalizer pin DERIVE từ sdk/pyproject.toml khi cài môi trường vỏ (bare --with từng kéo bản mới nhất từ PyPI — S4-r2)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -207,14 +215,14 @@ evals:
     executor: script
     layer: backend-effect
     cmd: config:executors.script.normalize_plugin_shell
-    paths: ["sdk/tongflow/text/", "scripts/plugins/run-normalize-plugin-tests.sh"]
+    paths: ["sdk/tongflow/text/**", "scripts/plugins/run-normalize-plugin-tests.sh"]
     expected: "exit 0; CHUNG một lệnh guard với E17a — cả bộ test của vỏ chạy một lượt và guard in plugin_commit_sha để bằng chứng trích được đúng cây đã chạy. Nội dung nửa âm: monkeypatch hàm SDK ném → vỏ trả success:false + error GHIM THÔNG ĐIỆP, không để lộ traceback; và chuỗi đọc-không-hết đi qua vỏ vẫn ra success:false kèm token còn sót"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E15
     criterion: AC-15
     executor: ui-check
-    paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/"]
+    paths: ["src/components/workspace/nodes/transfer/normalize-text-vi.tsx", "src/i18n/messages/**"]
     steps:
       - "NEO CÂY TRƯỚC MỌI BƯỚC: cây được giao là repoRoot của bộ tham số (KHÔNG phải cwd phiên hay worktree nào của harness) — cd vào repoRoot rồi kiểm `git rev-parse HEAD` đúng bằng invokedSha của vòng; lệch → DỪNG và báo, không đoán. Lý do phải neo bằng phép đo: một vòng trước agent chụp coi worktree phiên của mình là cây thật, thấy repoRoot 'lạ' bèn tắt dev server ĐÚNG rồi quay về cây KHÔNG có feature, gặp 404 và dừng oan — cwd mặc định của phiên không phải bằng chứng về cây được giao, sha mới là"
       - "Kiểm cổng 3000 TRƯỚC bằng `lsof -nP -iTCP:3000 -sTCP:LISTEN` (KHÔNG dùng `lsof -ti:3000` — nó đếm cả kết nối ra-vào của tiến trình khác và báo bận trên một cổng đang trống): có tiến trình lạ NGHE ở đó thì DỪNG và báo — làn khác của pilot dùng chung cổng này, và ảnh chụp nhầm cây trông y hệt ảnh thật"

@@ -32,10 +32,17 @@ fi
 
 # The pin must be exact. `>=` or `~=` would let a patch release change how a
 # number reads, which is the one thing this slot promises cannot happen.
-if ! grep -q '"vietnormalizer==0\.2\.3"' "$pyproject"; then
-    echo "FAIL: thiếu pin chính xác vietnormalizer==0.2.3 trong dependencies"
+# Matched by SHAPE, never by literal version: this file's own header says both
+# numbers are derived and "a guard that hardcodes '0.2.19' goes green forever
+# after the next bump" — but the dependency check hardcoded 0.2.3 and so went
+# RED on the next legitimate bump instead, reporting "thiếu pin chính xác"
+# about a pin that was exact (S4 round 5 finding). What the criterion asserts
+# is the `==` form, so that is what is matched.
+if ! grep -qE '"vietnormalizer==[0-9]+(\.[0-9]+)+"' "$pyproject"; then
+    echo "FAIL: thiếu pin chính xác dạng vietnormalizer==X.Y.Z trong dependencies"
     grep -n 'vietnormalizer' "$pyproject" || echo "  (không thấy dòng vietnormalizer nào)"
     exit 1
 fi
 
-echo "OK: SDK $py_version (hai file khớp) · vietnormalizer==0.2.3 pin chính xác"
+reader_pin=$(grep -oE 'vietnormalizer==[0-9]+(\.[0-9]+)+' "$pyproject" | head -1)
+echo "OK: SDK $py_version (hai file khớp) · $reader_pin pin chính xác"

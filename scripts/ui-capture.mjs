@@ -112,12 +112,25 @@ try {
     // is indistinguishable from a correct one once it reaches an evidence
     // folder, so the check belongs here, before the file exists.
     let refused = false;
-    if (require_) {
-        const seen = await page.evaluate(() => document.body.innerText);
+    if (require_ || lang) {
+        const seen = require_
+            ? await page.evaluate(() => document.body.innerText)
+            : "";
         const htmlLang = await page.evaluate(
             () => document.documentElement.lang,
         );
-        if (!seen.includes(require_)) {
+        // Two independent reasons to refuse, checked together because they fail
+        // together. The text check alone let a wrong-locale frame through
+        // whenever --require happened to name a locale-independent string (a
+        // product name, a number, a brand token): the lang was READ, put in the
+        // error message, and never actually asserted (S4 round 5 finding).
+        // A capture tool that cannot refuse to write is a report, not a
+        // measurement — and that holds for the locale exactly as for the text.
+        const missingText = require_ ? !seen.includes(require_) : false;
+        const wrongLang = lang
+            ? (htmlLang || "").toLowerCase() !== lang.toLowerCase()
+            : false;
+        if (missingText || wrongLang) {
             // Remove any earlier frame sitting at this path. Refusing to WRITE
             // is not enough when the target already exists: a later run that
             // refuses would leave the previous, correct-looking frame in place,
@@ -131,9 +144,18 @@ try {
                     /* nothing to remove */
                 }
             }
+            const why = [
+                missingText
+                    ? `page does not contain ${JSON.stringify(require_)}`
+                    : null,
+                wrongLang
+                    ? `html lang=${JSON.stringify(htmlLang || "")} but --lang ${JSON.stringify(lang)}`
+                    : null,
+            ]
+                .filter(Boolean)
+                .join("; ");
             console.error(
-                `ui-capture: REFUSED — page does not contain ${JSON.stringify(require_)} ` +
-                    `(html lang=${htmlLang || "?"}). Nothing written; ` +
+                `ui-capture: REFUSED — ${why}. Nothing written; ` +
                     `${stale.length} stale target(s) removed.`,
             );
             process.exitCode = 3;

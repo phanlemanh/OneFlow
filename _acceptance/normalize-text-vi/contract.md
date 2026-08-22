@@ -278,6 +278,43 @@ code** vì license):
 - Đọc số theo giọng vùng miền — nếu cần thì là hằng số plugin, không phải trường ABI
   ([ABI hygiene](../../CLAUDE.md)).
 
+- AC-16: (cross-layer) *(nâng phạm vi tại Cổng 2 vòng 5, owner 2026-08-22)* Given hai
+  **dụng cụ đo** của chính hồ sơ này — lượt chụp màn hình và phép suy phiên bản engine
+  dùng chung cho mọi executor — When chúng không đo được thứ chúng nói đang đo, Then
+  chúng **từ chối**, chứ không cho ra kết quả trông sạch. Cụ thể: lượt chụp ghi ảnh khi
+  trang đúng ngôn ngữ đã yêu cầu, và **từ chối ghi + xoá khung cũ** khi trang trả về ngôn
+  ngữ khác, kể cả khi chuỗi `--require` vẫn có mặt (tên sản phẩm không phụ thuộc ngôn ngữ);
+  **không** khoá executor nào còn suy pin bằng thay-thẳng, vì dạng đó cho ra chuỗi rỗng và
+  `--with` nuốt tham số kế tiếp, làm mọi tính năng khác đỏ oan bằng một lỗi không chỉ về
+  đâu. Đo theo **lớp 13 khoá**, không theo khoá vừa lộ.
+  *Lý do nâng phạm vi thay vì ghi Known limits: mọi lỗi đắt nhất của tính năng này đều
+  cùng hình dạng — một dụng cụ cho ra kết quả trông sạch trong khi không đo gì. Khung
+  chụp sai locale, thư viện không ghim, assert bị chặn bởi chính verdict nó đo, ma trận
+  chỉ có trục dương, khoá cache không phân biệt nổi phiên bản reader. Cả năm đều do người
+  đọc mã tìm ra, vì không chỗ nào đỏ. AC này là chỗ đỏ đó.*
+
+## Sửa đổi vòng 5 (2026-08-22)
+
+- **AC-6 — chữ tiền sau TỪ ĐƠN VỊ LỚN.** Dấu hiệu tiền tính cả dạng `<số> <đơn vị lớn> đ`
+  (`5 tỷ đ`, `500 triệu đ`). Đo thật vòng 5: cả ba lớp cùng trượt vì đều neo vào **chữ số**
+  ngay bên trái chữ `đ`, nên `ok=True` với đầu ra "giá năm tỷ đ" — mất hẳn chữ tiền. Nay
+  neo vào một hằng số dùng chung `{nghìn, ngàn, triệu, tỷ, tỉ}`, đo bằng ma trận
+  {đơn vị} × {dính, có khoảng trắng}.
+- **AC-5 — số viết chuẩn Việt Nam có phần thập phân.** `3.000.000,00 đ` từng đọc thành
+  "ba triệu" **sai bậc** ("ba.không.không" với dấu chấm nghìn, "ba trăm triệu" khi bỏ chấm)
+  — `ok=True` cả hai đường vì không còn chữ số nào sót lại. Chốt đọc: phần lẻ **toàn số 0
+  thì bỏ** (`3.000.000,00 đ` → "ba triệu đồng"), phần lẻ khác 0 đọc "phẩy <chữ số>"; chỉ
+  nhận **một hoặc hai** chữ số thập phân, vì ba chữ số lẫn với dấu ngăn nghìn kiểu Anh.
+  Đo bằng ma trận {có chấm nghìn, không chấm} × {không phần lẻ, phần lẻ 0, phần lẻ khác 0}
+  kèm ba ca ÂM (chuỗi phiên bản, ngày, giá nghìn trơn) mà luật không được ăn.
+- **AC-9 — phép đo đăng ký đi qua đường mount thật.** Phép đo cũ tự gọi hàm đăng ký với
+  tham số tự viết rồi đọc lại chính nó, nên chỉ chứng minh sổ đăng ký lưu được thứ mình
+  vừa nhét vào; xoá lệnh ghi ở đường sản xuất mà nó vẫn xanh. Nay nó mount node thật và
+  chờ sổ đăng ký được điền — đã chứng minh đỏ khi vô hiệu lệnh ghi.
+- **Vùng phủ:** bốn `paths` viết kiểu thư mục (`sdk/tongflow/text/` …) vô hình với phép
+  đếm vùng phủ, vì phép đó khớp chuỗi chính xác — nên chính file bộ đọc bị báo "ngoài vùng
+  phủ". Nay viết dạng `.../**`.
+
 ## Known limits (chốt ở Cổng 2 vòng 3, owner 2026-08-21)
 
 Ba lỗi đọc dưới đây là **thật, đo được**, và được owner chốt là **không sửa trong vòng
