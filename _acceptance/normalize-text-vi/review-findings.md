@@ -1,58 +1,77 @@
-# Review Findings: normalize-text-vi (round 5)
+# Review Findings: normalize-text-vi (round 6)
 
 ## Trong hợp đồng
 
-- **Bare "đ" after a magnitude word reaches the voice with ok=True (money rules never fire)**
-  file: `sdk/tongflow/text/normalize_vi.py:46`
-  severity: high
-  AC: AC-6
-  detail: Both `_SPACED_DONG` (line 46, `(?<=\d)\s+(?i:đ)\b`) and `_MONEY` (line 96, `(?<=\d)\s*(?i:đ)\b`) anchor the currency abbreviation on a DIGIT immediately to its left. The extremely common sales form `<số> <đơn vị lớn> đ` ("5 tỷ đ", "500 triệu đ", "500 nghìn đ") puts a word between the digit and the "đ", so: (a) the pre-pass does not rewrite it to "đồng", (b) `has_money()` returns False, so the relational money-loss rule at line 206 never runs, and (c) `_RESIDUAL` (line 73) only flags `[0-9₫%]` and digit-hyphen-digit, so a bare letter "đ" is not residual. Result: ok=True with the currency unit unspoken. This is the same class Gate 2 round 2/3 already raised scope for (spaced-đ prices), just with a magnitude word in between, and it is not listed under contract.md "Known limits".
+### Tuyên quét LỚP nhưng chỉ có điểm-case — ALL_CORPUS bỏ sót hai ma trận mới nhất (AC-7/AC-8)
+- file: `sdk/tests/test_normalize_vi.py:856`
+- severity: medium
+- source: measurement
+- AC: AC-8
 
-    Measured (uv, vietnormalizer==0.2.3, this branch):
-      'Giá 5 tỷ đ'        -> money_in=False ok=True  out='giá năm tỷ đ'        residual=()
-      'Giá 500 triệu đ'   -> money_in=False ok=True  out='giá năm trăm triệu đ' residual=()
-      'Căn hộ 2 tỷ đ, view sông' -> ok=True out='căn hộ hai tỷ đ, viu sông'
+`ALL_CORPUS = CORPUS_MONEY + CORPUS_TIME + CORPUS_ID + CORPUS_AMBIGUOUS` là toàn bộ đầu vào của hai phép quét lớp: `test_idempotent_and_byte_identical` (dòng 859-864) và vòng NFC/NFD + `has_money` parity trong `test_edge_inputs` (dòng 895-909). Nhưng ba tập ca mới thêm ở Cổng 2 KHÔNG nằm trong ALL_CORPUS: `MAGNITUDE_DONG_MATRIX` (dòng 189, 'Giá 5 tỷ đ' … 10 ô), `VN_AMOUNT_MATRIX` + `VN_AMOUNT_NEGATIVE` (dòng 252, 281, 'Giá 3.000.000,00 đ' …), và các mỏ neo CHỮ HOA trong `MONEY_POSITIVE_ANCHORS` (dòng 805-807, 'Giá 500 Đ', 'GIÁ 1.999.000 Đ', 'Giá 125.000 ĐỒNG'). Comment tiêu đề của khối lại tuyên là "determinism and idempotence over the WHOLE corpus" và eval E7/E8 tuyên "trên TOÀN corpus"/"với mọi ca corpus có dấu". Đây đúng là chỗ nguy hiểm nhất về Unicode: 'đ'/'Đ'/'₫' là ký tự có dấu, luật tiền là literal NFC, và assert `got_nfd.ok == got.ok` + `has_money(NFD) == has_money(NFC)` (dòng 906-908) — chính hai assert sinh ra để bịt lỗ NFD của luật tiền — không bao giờ chạm tới nhóm ca tiền viết HOA và nhóm '<số> <đơn vị lớn> đ' vừa mới sinh ra. Kịch bản hỏng: gõ NFD (Đ = D + U+0300…) làm luật uppercase-đồng trượt, `has_money` trả False cho 'Giá 500 Đ' ở dạng NFD trong khi NFC vẫn True → phép đo vẫn xanh vì ca đó không có trong ALL_CORPUS. Tương tự, một luật mới không idempotent trên 'Giá 3.000.000,00 đ' (đọc lần hai ra khác) cũng không có assert nào bắt.
 
-    Fix direction: anchor the currency rules on "digit-or-magnitude-word + đ", or make the money test a relation on the input token "đ" independent of what precedes it.
-  failure_scenario: Real-estate copy "Căn hộ 2 tỷ đ, view sông" goes into normalize-text-vi -> returns success=True, text='căn hộ hai tỷ đ, viu sông' -> TTS speaks the price with no currency unit (or spells the letter), and every guard downstream stays green.
-  source: bugs
-  rationale: AC-6 quy định luật quan hệ không điều kiện vị trí: đầu vào có dấu hiệu tiền "đ" thì đầu ra phải chứa từ chỉ tiền tương ứng, và chuỗi đo được ("Giá 5 tỷ đ" vẫn còn ký tự "đ" trong đầu vào) vi phạm đúng luật này khi đầu ra không có "đồng".
+Rationale: AC-8 hứa "normalize(NFD(x)) == normalize(NFC(x)) byte-identical với MỌI ca corpus có dấu", nhưng ALL_CORPUS dùng cho phép quét này bỏ sót các ma trận tiền tệ/chữ HOA mới thêm — đúng chữ của AC-8 đang không được giữ trên toàn corpus như đã hứa.
 
-- **Hình dạng 2 — fixture đăng ký VIẾT TAY đúng khuôn bên đọc; không có round-trip mount→registry**
-  file: `src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx:182`
-  severity: high
-  AC: AC-9
-  detail: Test tên là "registers under the right ABI feature when mounted" nhưng KHÔNG mount node: nó tự gọi `registerAbiNode({nodeId, feature: "normalize-text-vi", sourceSpec: NODE_TYPE_SOURCE_SPEC.normalizeTextViNode})` (dòng 183-187) rồi đọc lại `getAbiNodeRegistration(NODE_ID)` (dòng 191-195). Bên GHI thật là `use-abi-execution.ts:152` (registerAbiNode chạy lúc AbiNodeShell mount) — đường đó không hề bị chạy trong assert này; cái được so là chính payload mà test vừa tự viết ra theo đúng khuôn bên đọc. Vòng vá S4-r1 chỉ đóng nửa ĐỌC ("đọc lại registry chứ không assert hằng khai báo"), nửa GHI vẫn hở. Đo được ngay: xoá lời gọi registerAbiNode trong src/hooks/use-abi-execution.ts thì cả ba test trong file này, cả normalize-text-vi-export.test.ts và cả tts-order-guard.test.ts vẫn xanh — vì cả ba file đều tự đăng ký bằng tay (normalize-text-vi-export.test.ts:64-70, tts-order-guard.test.ts:58-64). Đúng chế độ hỏng mà chính comment đầu tts-order-guard.test.ts (dòng 7-11) cảnh báo: registry rỗng ⇒ exporter phát 0 executable node ⇒ file workflow rỗng trông vẫn hợp lệ. Round-trip khả thi và rẻ: `renderNode()` ở dòng 108-144 đã mount node thật (afterEach đã unregister NODE_ID), chỉ cần assert registry SAU render thay vì sau lời gọi tay. Chưa được khai ở Known limits của contract.md lẫn decisions.jsonl (decision d-20260821T031100Z-9965 chỉ descope round-trip của conformance fixture AC-12, không phải chỗ này).
-  failure_scenario: (không cung cấp riêng — xem detail: xoá registerAbiNode trong use-abi-execution.ts, cả ba test suite liên quan vẫn xanh, nghĩa là một registry rỗng thực tế sẽ khiến exporter phát workflow 0 node mà không test nào đỏ.)
-  source: measurement
-  rationale: AC-9 đòi "When render node và export, Then handles đúng..."; test hiện tại không thực sự mount node nên không đo được đúng mệnh đề này, và mục "Luật dừng vòng verify" của chính hợp đồng xếp loại "finding về phép đo (test không đo thứ nó tên)" vào diện phải sửa trong vòng, không phải mở hồ sơ follow-up.
+### Tuyên quét LỚP 13 khoá nhưng phép đo chỉ là điểm-case ≥1 + một cách viết duy nhất
+- file: `scripts/acceptance/check-measuring-instruments-refuse.sh:74`
+- severity: medium
+- source: measurement
+- AC: AC-16
+
+E18 khai `expected` là "(b) KHÔNG khoá executor nào còn suy pin bằng thay-thẳng `--with $(...)` — đo cả LỚP 13 khoá, không riêng khoá vừa lộ". Phép đo thực tế gồm hai nửa và cả hai đều không phủ lớp: (1) nửa âm dòng 74-78 grep literal `--with \$(` — đã kiểm chứng: dòng viết dạng có ngoặc kép `--with \"$(grep -oE 'vietnormalizer==…' pyproject.toml | head -1)\"` (cách viết tự nhiên nhất, và cũng là cách các khoá hiện tại đang viết chỉ khác ở chỗ có `${pin:?}`) KHÔNG khớp mẫu vì có dấu `\"` chen giữa `--with ` và `$(`; (2) nửa dương dòng 80-82 chỉ đòi `grep -c 'pin:?' >= 1` — một mỏ neo duy nhất còn sống là đủ xanh cho một lời hứa về 13 khoá. Kịch bản hỏng cụ thể: sửa 12/13 khoá về dạng `--with \"$(grep … )\"` (mất `${pin:?}`), giữ nguyên 1 khoá có mỏ neo → `unguarded` rỗng, `guarded_count`=1 → script in OK, trong khi 12 khoá đã quay lại đúng hình dạng mà E18 sinh ra để cấm (pin không tìm thấy ⇒ chuỗi rỗng ⇒ `--with` nuốt tham số `python` kế tiếp). Phép đo lớp đúng phải đếm số khoá suy pin và đòi mọi khoá đó đều mang mỏ neo.
+
+Rationale: AC-16 hứa đo "theo LỚP 13 khoá, không theo khoá vừa lộ" cho phép kiểm chặn suy-pin-bằng-thay-thẳng; phép đo hiện tại chỉ bắt đúng một cách viết và chỉ cần ≥1 mỏ neo sống sót, đúng hình dạng điểm-case mà AC-16 nói là không đủ.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Release-train guard hardcodes the vietnormalizer version its own header forbids hardcoding**
-  Người dùng thấy gì: Một script kiểm tra tự động phục vụ việc phát hành có thể báo lỗi sai và chặn bản phát hành hợp lệ vào lần tới khi số phiên bản thư viện đọc được cập nhật đúng quy trình, dù thực chất không có gì sai.
-  file: `scripts/abi/check-normalize-sdk-train-local.sh`
-  severity: low
-  Đề xuất: known-limits
-
-- **Shared sdk_pytest executor fails obscurely if the pin line ever moves**
-  Người dùng thấy gì: Một cấu hình chạy kiểm thử dùng chung cho nhiều tính năng khác nhau có thể âm thầm hỏng theo cách khó hiểu nếu định dạng khai báo phiên bản thư viện thay đổi, khiến việc kiểm thử của các tính năng không liên quan cũng báo lỗi oan.
-  file: `_acceptance/config.yaml`
-  severity: low
-  Đề xuất: known-limits
-
-- **Amounts with both thousand dots and a decimal comma come back mangled, ok=True**
-  Người dùng thấy gì: Một số dạng giá tiền viết theo chuẩn Việt Nam (có cả dấu chấm ngăn cách hàng nghìn lẫn dấu phẩy thập phân) có thể bị đọc thành một dãy chữ số sai hoàn toàn, trong khi hệ thống vẫn báo là đọc thành công.
+- **Địa chỉ "Đ." (Đường) bị đọc thành "đồng" — đọc sai êm ru, ok=True**
+  Người dùng thấy gì: Địa chỉ viết tắt kiểu 'Đ. Lê Lợi' (nghĩa là 'Đường') có thể bị đọc nhầm thành có chứa số tiền, khiến giọng đọc phát ra thông tin sai trong khi hệ thống vẫn báo là đọc thành công, không có cảnh báo nào cho người dùng.
   file: `sdk/tongflow/text/normalize_vi.py`
   severity: high
   Đề xuất: known-limits
 
-- **ui-capture computes the document lang but never enforces it**
-  Người dùng thấy gì: Ảnh chụp và bằng chứng thu thập để người duyệt xem xét thiết kế có thể âm thầm hiển thị sai phiên bản ngôn ngữ của giao diện mà không có cảnh báo nào, khiến người duyệt đánh giá nhầm dựa trên hình ảnh không đúng.
-  file: `scripts/ui-capture.mjs`
+- **_MAGNITUDE claims to be the single shared magnitude list, but _SPACED_DONG re-lists it inline**
+  Người dùng thấy gì: Nếu sau này có người thêm một đơn vị tiền mới vào danh sách chính mà quên cập nhật chỗ tương ứng, hệ thống có thể từ chối đọc một số giá hợp lệ thay vì đọc đúng — nhưng đây là rủi ro cho lần sửa sau, chưa xảy ra ở phiên bản hiện tại.
+  file: `sdk/tongflow/text/normalize_vi.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **_SPACED_DONG chép tay lại danh sách magnitude thay vì dùng _MAGNITUDE — bất biến mà chính comment tuyên bố là sai**
+  Người dùng thấy gì: Nếu sau này có người thêm một đơn vị tiền mới vào danh sách chính mà quên cập nhật chỗ tương ứng, hệ thống có thể từ chối đọc một số giá hợp lệ (báo lỗi) thay vì đọc đúng — an toàn nhưng gây khó chịu, và chưa xảy ra ở phiên bản hiện tại.
+  file: `sdk/tongflow/text/normalize_vi.py`
   severity: low
   Đề xuất: known-limits
 
-⚠ Cụm ngoài vùng phủ: 4/6 lỗi rơi vào file không bộ đo nào phủ (_acceptance/config.yaml, sdk/tongflow/text/normalize_vi.py, scripts/ui-capture.mjs) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+- **Vietnamese code comments in SDK tests violate the English-only rule**
+  Người dùng thấy gì: Một số ghi chú giải thích trong mã kiểm thử được viết bằng tiếng Việt thay vì tiếng Anh theo quy ước dự án; điều này không ảnh hưởng gì tới người dùng cuối cùng của tính năng.
+  file: `sdk/tests/test_normalize_vi.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Guard đăng ký thoát im lặng (không in FAIL) khi đếm call site về 0**
+  Người dùng thấy gì: Nếu công cụ kiểm tra tự động nội bộ gặp một số trường hợp bất thường, nó có thể dừng đột ngột mà không hiện rõ lý do, khiến người xem kết quả khó phân biệt đây là lỗi thật hay trục trặc hạ tầng — đây là vấn đề về công cụ kiểm tra nội bộ, không ảnh hưởng tới người dùng cuối của tính năng.
+  file: `scripts/plugins/check-normalize-registration.sh`
+  severity: low
+  Đề xuất: known-limits
+
+- **test_node_cache_normalize.py module docstring contradicts what the file now asserts**
+  Người dùng thấy gì: Một dòng mô tả ở đầu file kiểm thử nội bộ vẫn nói tính năng có bộ nhớ đệm thông minh dù thực tế đã đổi hành vi; đây chỉ là tài liệu dành cho lập trình viên, không ảnh hưởng tới người dùng.
+  file: `sdk/tests/test_node_cache_normalize.py`
+  severity: low
+  Đề xuất: known-limits
+
+- **Fixture viết tay đúng khuôn bên đọc — không round-trip từ writer (exportWorkflow)**
+  Người dùng thấy gì: Phép kiểm đối chiếu hai hệ thống dùng dữ liệu mẫu viết tay thay vì dữ liệu do chính công cụ xuất workflow tạo ra, nên chưa chứng minh được rằng giao diện thật khi lưu và xuất workflow luôn đúng định dạng mong đợi.
+  file: `sdk/tests/conformance/fixtures/normalize-text-vi.json`
+  severity: low
+  Đề xuất: known-limits
+
+- **.claude/settings.json committed with a personal plugin marketplace, unrelated to the feature**
+  Người dùng thấy gì: Bản vá này kèm theo một thay đổi cấu hình công cụ nội bộ không liên quan tới tính năng đọc chữ tiếng Việt, khiến mọi người tải lại mã nguồn tự động nhận một cấu hình cá nhân của một thành viên mà không ai được thông báo trước.
+  file: `.gitignore`
+  severity: low
+  Đề xuất: new-contract
+
+Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).

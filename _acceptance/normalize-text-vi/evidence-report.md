@@ -1,18 +1,16 @@
 ---
 schema_version: 2
 feature_slug: normalize-text-vi
-verdict: REJECT
+verdict: PENDING-JUDGMENT
 failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8d3ac86bfcaaa163210d76951de69878dbc5c3bd
+verified_commit: dcd74265f617ac1af3b08036be3cde101a9744c0
 human_signoff:
 ---
 
 # Evidence Report: normalize-text-vi
-
-⚠ REJECT không phải vì lệnh máy đỏ: 25 eval máy + E16 (panel judgment) đều PASS trong vòng này (round 5). REJECT vì review-findings.md phát hiện 2 finding **Trong hợp đồng** mức severity high (AC-6, AC-9) — cả hai đều là dạng "phép đo không đo đúng thứ nó tên", mà mục "Luật dừng vòng verify" của chính hợp đồng xếp loại này vào diện phải sửa NGAY trong vòng, không phải mở hồ sơ follow-up. Xem `review-findings.md` mục "## Trong hợp đồng" để biết chi tiết hai finding.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -38,286 +36,296 @@ human_signoff:
 | E13 | AC-13 | script | PASS |
 | E14a | AC-13 | script | PASS |
 | E14b | AC-13 | script | PASS |
-| E15 | AC-15 | ui-check | PASS |
-| E16 | AC-15 | judgment | PASS |
 | E17a | AC-14 | script | PASS |
 | E17b | AC-14 | script | PASS |
+| E15 | AC-15 | ui-check | PASS |
+| E16 | AC-15 | judgment | PASS (đề xuất panel — chờ human_override) |
+| E18 | AC-16 | script | PASS |
 
 ## Evidence
 
 - eval: E1a
   run_id: minted-normalize-text-vi-E1a-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.script.gen_abi_clean
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E1b
   run_id: minted-normalize-text-vi-E1b-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.script.abi_python_gen_clean
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E2
-  run_id: minted-normalize-text-vi-E2-r5
+  run_id: minted-normalize-text-vi-E2-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_money
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
-    .                                                                        [100%]
     1 passed in 0.05s
 
 - eval: E3
-  run_id: minted-normalize-text-vi-E3-r5
+  run_id: minted-normalize-text-vi-E3-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_datetime
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
+    .                                                                        [100%]
     1 passed in 0.04s
 
 - eval: E4
-  run_id: minted-normalize-text-vi-E4-r5
+  run_id: minted-normalize-text-vi-E4-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_identifiers
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
-    .                                                                        [100%]
     1 passed in 0.04s
 
 - eval: E5
-  run_id: minted-normalize-text-vi-E5-r5
+  run_id: minted-normalize-text-vi-E5-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_ambiguous
-  verified_at: 2026-08-21T14:41:53Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.07s
-
-- eval: E6a
-  run_id: minted-normalize-text-vi-E6a-r5
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
-  verified_at: 2026-08-21T14:41:53Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.12s
-
-- eval: E6b
-  run_id: minted-normalize-text-vi-E6b-r5
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
+- eval: E6a
+  run_id: minted-normalize-text-vi-E6a-r6
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
+  verified_at: 2026-08-22T04:00:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.06s
+
+- eval: E6b
+  run_id: minted-normalize-text-vi-E6b-r6
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
+  verified_at: 2026-08-22T04:00:00Z
+  output: |
+    Pin found: vietnormalizer==0.2.3
+    .                                                                        [100%]
+    1 passed in 0.04s
+
 - eval: E7
-  run_id: minted-normalize-text-vi-E7-r5
+  run_id: minted-normalize-text-vi-E7-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_idempotent
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
 - eval: E8
-  run_id: minted-normalize-text-vi-E8-r5
+  run_id: minted-normalize-text-vi-E8-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_edges
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.07s
 
 - eval: E9a
-  run_id: minted-normalize-text-vi-E9a-r2
+  run_id: minted-normalize-text-vi-E9a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_normalize_node
-  verified_at: 2026-08-21T03:12:00Z
-  carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  verified_at: 2026-08-22T04:00:00Z
+  output: |
+    Tests  3 passed (3)
+    Start at  18:09:02
+    Duration  1.55s (transform 381ms, setup 0ms, import 814ms, tests 139ms, environment 503ms)
 
 - eval: E9b
   run_id: minted-normalize-text-vi-E9b-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.test.unit_normalize_export
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E10a
   run_id: minted-normalize-text-vi-E10a-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.test.unit_tts_order_violation
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E10b
   run_id: minted-normalize-text-vi-E10b-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.test.unit_tts_order_compliant
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E10c
   run_id: minted-normalize-text-vi-E10c-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.test.unit_tts_family_matches_abi
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E11a
-  run_id: minted-normalize-text-vi-E11a-r5
+  run_id: minted-normalize-text-vi-E11a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_node_cache_normalize
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     ..                                                                       [100%]
-    2 passed in 0.22s
+    2 passed in 0.18s
 
 - eval: E11b
-  run_id: minted-normalize-text-vi-E11b-r5
+  run_id: minted-normalize-text-vi-E11b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_tier_a_allowlist
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.03s
+    1 passed in 0.02s
 
 - eval: E12a
-  run_id: minted-normalize-text-vi-E12a-r5
+  run_id: minted-normalize-text-vi-E12a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_conformance
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     .                                                                        [100%]
-    1 passed, 7 deselected in 0.17s
+    1 passed, 7 deselected in 0.22s
 
 - eval: E12b
   run_id: minted-normalize-text-vi-E12b-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.test.unit_conformance
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E13
   run_id: minted-normalize-text-vi-E13-r2
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.script.normalize_registration_synced
   verified_at: 2026-08-21T03:12:00Z
   carried_from_round: 2
-  note: carry-forward tu round 2 — delta khong cham paths cua eval
+  output: |
+    carry-forward tu round 2 — delta khong cham paths cua eval
 
 - eval: E14a
-  run_id: minted-normalize-text-vi-E14a-r5
+  run_id: minted-normalize-text-vi-E14a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_sdk_train_local
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     OK: SDK 0.2.23 (hai file khớp) · vietnormalizer==0.2.3 pin chính xác
+    EXIT_CODE:0
 
 - eval: E14b
-  run_id: minted-normalize-text-vi-E14b-r5
+  run_id: minted-normalize-text-vi-E14b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_sdk_published
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     OK: artifact mang tongflow/text/, models mới và NORMALIZE_TEXT_VI
     OK: vỏ plugin pin oneflow-sdk==0.2.23
     OK: chuyến phát hành đồng bộ cho 0.2.23
 
-- eval: E15
-  run_id: minted-normalize-text-vi-E15-r5
-  exit_code: 0
-  baseline: n-a
-  verifier: scripts/ui-capture.mjs
-  verified_at: 2026-08-21T14:55:00Z
-  screenshot: /Users/manh-macmini/dev/oneflow/_acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png
-  observed: |
-    state-1-idle.png (1280x900, opened by Read): single node card "Đọc số thành chữ" trên canvas React Flow nền đen, hàng chọn plugin "Cách triển khai / api-normalize-text-vi", nút "Đọc thành chữ" có icon đũa phép. Hai handle tròn rỗng ở cạnh trái/phải card (khớp DOM data-handleid=[in:text, out:text] đọc từ trang sống) — không có dây vào, khớp trạng thái idle/chưa nối. Toàn bộ chữ là tiếng Việt thật, không thấy i18n key thô (kiểu "node.xxx.label") ở bất kỳ đâu. Khớp Expected cho state 1.
-    state-2-wired.png (1280x900, opened by Read): cùng node card, giờ có dây cong đi vào handle trái in:text từ node fixture thượng nguồn bên trái hiện chữ mờ "Giá 1.999.000đ ngày 19/8/2026". Handle out:text bên phải của chính node vẫn chưa nối. Nội dung card giống hệt idle (tiêu đề, chọn plugin, nút), xác nhận dây nối là khác biệt duy nhất — khớp Expected cho state 2/"wired". Không thấy hiện tượng bóp viewport mobile (canvas desktop rộng 1280 đầy đủ, handle và dây rõ ràng) — đúng lỗi hai vòng UNCERTAIN trước đó từng gặp.
-  network_observed: clean
-
-<!-- <<<JUDGMENT-BLOCK-TEMPLATE -->
-- eval: E16
-  judged_by: judge panel (fresh context) — lens domain-correctness, operational-feasibility, spec-alignment
-  verdict: PASS
-  votes:
-    - domain-correctness: PASS — Cả hai ảnh cho thấy node normalize-text-vi đúng khuôn AbiNodeShell: header có icon "A✓" + tiêu đề đậm "Đọc số thành chữ" + menu hamburger phải, panel "Cách triển khai" với dropdown "api-normalize-text-vi" có icon avatar, nút hành động "✨ Đọc thành chữ" — nhãn tiếng Việt đọc được rõ, dấu hiển thị đúng (Đọc, chữ, triển khai). Hai handle (trái/phải, cùng cao độ, một nối một chưa nối ở ảnh wired) khớp mẫu 1 input/1 output; spacing giữa header-panel-nút và trạng thái nút muted(idle)/active(wired) nhất quán, không thấy chữ tràn, chồng lấn hay icon lệch phá ngôn ngữ thiết kế trên hai ảnh này.
-    - operational-feasibility: PASS — Trên cả hai ảnh, node normalize-text-vi hợp khuôn AbiNodeShell: header đúng bố cục icon + tiêu đề + menu hamburger, thân card có panel "Cách triển khai" với dropdown chọn plugin, footer là nút hành động "Đọc thành chữ" có icon; spacing giữa các khối đều đặn, nhãn tiếng Việt (kể cả dấu) hiển thị rõ, không vỡ chữ. Hai handle tròn xuất hiện đối xứng hai bên node ở cùng một vị trí dọc trong cả state idle và state wired (dây nối chạm đúng handle trái khi wired) — khớp mô tả in:text/out:text, không có gì trên chính node này phá ngôn ngữ thiết kế workspace nhìn thấy được.
-    - spec-alignment: PASS — Cả hai ảnh cho thấy node đúng khuôn AbiNodeShell: header tối có icon "A✓" + tiêu đề "Đọc số thành chữ" tiếng Việt rõ dấu, menu hamburger góc phải, thân card chứa nhãn "Cách triển khai" + dropdown "api-normalize-text-vi", nút hành động "Đọc thành chữ" có icon, bo góc và khoảng cách nhất quán giữa hai state. Hai handle tròn (trái/phải) xuất hiện ở cùng độ cao tại cả hai ảnh, và ở state-2 handle trái nhận đúng một cạnh nối tới node nguồn — không có gì lệch khỏi ngôn ngữ thiết kế nhìn thấy trên hai ảnh này.
-  rationale: Cả ba lens đồng thuận PASS dựa trên hai capture của E15 (idle + wired) — node hợp khuôn AbiNodeShell, handle/nhãn khớp ABI, không thấy gì phá ngôn ngữ thiết kế nhìn thấy được trên hai ảnh này. Vế "so với node transfer khác" của AC-15 đã được thu hẹp ra khỏi eval này (amendment 2026-08-21, Cổng 2 vòng 3) — không được chấm ở đây.
-  required_evidence:
-    - (đề xuất PASS — panel không nêu bằng-chứng-thiếu)
-  human_override:
-<!-- JUDGMENT-BLOCK-TEMPLATE>>> -->
-
 - eval: E17a
-  run_id: minted-normalize-text-vi-E17a-r5
+  run_id: minted-normalize-text-vi-E17a-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.10s
+    3 passed in 0.13s
 
 - eval: E17b
-  run_id: minted-normalize-text-vi-E17b-r5
+  run_id: minted-normalize-text-vi-E17b-r6
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-21T14:41:53Z
+  verified_at: 2026-08-22T04:00:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.10s
+    3 passed in 0.13s
+
+- eval: E15
+  run_id: dcd74265f617ac1af3b08036be3cde101a9744c0
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.measuring_instruments_refuse
+  verified_at: 2026-08-22T04:00:00Z
+  screenshot: _acceptance/normalize-text-vi/evidence/design/captures/state-1-idle.png
+  observed: |
+    state-1-idle.png (1280x900, dark canvas): single React Flow node card titled "Đọc số thành chữ" (spell-check icon), a "Cách triển khai" select showing "api-normalize-text-vi", and a "Đọc thành chữ" button (dimmed/disabled look, consistent with idle/unwired state). Exactly two small handle circles visible, one on the card's left edge and one on the right edge, at the same vertical position — matching in:text (left) / out:text (right). No raw i18n keys visible; all labels are real Vietnamese. state-2-wired.png (1280x900): same normalize card plus an upstream source node reading "Giá 1.999.000đ ngày 19/8/2026" connected by a curved wire into the card's left (in:text) handle; the "Đọc thành chữ" button now renders in an active/enabled (light) style; a third handle circle sits on the source node's right edge (its out:textNode), and the card itself still shows exactly two handles (in:text, out:text). Both frames are desktop-framed (1280x900), not the 390x844 mobile default the wf-label calls out as a past failure mode. Live-DOM cross-check in the browser (same URL, cookie NEXT_LOCALE=vi) confirmed document.documentElement.lang === "vi", data-proto-state === "wired" on ?state=wired, and the proto-normalize node's data-handleid set is exactly ["in:text","out:text"] (a third handle, out:textNode, belongs to the separate upstream fixture "src" node, not the node under test). Console errors: none (onlyErrors filter returned "No console logs."); only a benign React Flow sizing warning and app debug logs were present at warn/info/log level. E15-network.txt captured 12 requests, all to the app origin (localhost:3000), all 200 OK, no third-party or failed calls.
+  network_observed: clean
+
+- eval: E16
+  judged_by: judge panel (fresh context, 3 lens: domain-correctness, operational-feasibility, spec-alignment)
+  verdict: PASS (đề xuất panel)
+  rationale: Cả ba lens đồng thuận PASS trên phạm vi đã thu hẹp (vế "so với node transfer khác" của AC-15 đã dời sang checklist Cổng 2 của owner theo amendment 2026-08-21, không thuộc eval này nữa). Đề xuất chỉ có giá trị tham khảo — vẫn cần human_override ở Gate 2 trước khi verdict tổng thể chuyển PASS.
+  votes:
+    - domain-correctness: PASS — Cả hai ảnh cho thấy node đúng khuôn AbiNodeShell: header tối có icon (chữ A + dấu tick) + tiêu đề "Đọc số thành chữ" + icon hamburger, thân card chứa nhãn "Cách triển khai" và dropdown chọn plugin (icon A + "api-normalize-text-vi" + chevron), nút hành động full-width "Đọc thành chữ" có icon đũa phép, toàn bộ nhãn tiếng Việt có dấu hiển thị rõ ràng không vỡ font. Ở state-2-wired thấy đủ hai handle (chấm tròn trái = in:text nối dây cong từ node nguồn, chấm tròn phải = out:text) đúng vị trí hai bên node, spacing/bo góc/màu nền nhất quán với ngôn ngữ thiết kế workspace nhìn thấy trên chính hai ảnh này.
+    - operational-feasibility: PASS — Cả hai ảnh cho thấy node theo đúng khuôn AbiNodeShell: header có icon "A✓" + tiêu đề "Đọc số thành chữ" tiếng Việt rõ nghĩa, icon hamburger góc phải, khối "Cách triển khai" với dropdown chọn plugin, nút hành động "Đọc thành chữ" có icon + nhãn tiếng Việt rõ ràng, và hai handle (chấm tròn trái/phải) hiện diện ở cả hai state khớp vị trí in/out. Spacing, bo góc, độ tương phản chữ/nền nhất quán giữa state idle và wired, không có phần tử nào bị vỡ layout, tràn khung hay che khuất nhãn trên chính hai ảnh này.
+    - spec-alignment: PASS — Cả hai ảnh cho thấy node theo đúng khuôn AbiNodeShell: header có icon + tiêu đề "Đọc số thành chữ" + icon menu hamburger, thân card có ô chọn "Cách triển khai" dạng dropdown (badge A + tên plugin), nút hành động full-width có icon + nhãn "Đọc thành chữ" — chữ tiếng Việt đủ dấu, đọc được, không tràn khung. Hai handle tròn xuất hiện đối xứng ở mép trái/phải node, cùng vị trí dọc ở cả hai state (idle: cả hai rỗng; wired: handle trái nối vào node nguồn qua edge, handle phải vẫn rỗng) — đúng mô hình một in/một out. Nút chuyển từ xám mờ (idle, chưa có input) sang sáng/rõ (wired) là một affordance trạng thái hợp lý, không phải lỗi vỡ khuôn. Không thấy gì phá ngôn ngữ thiết kế (bo góc, khoảng cách, phân lớp card-trong-card) trên chính hai ảnh này.
+  human_override:
+
+- eval: E18
+  run_id: minted-normalize-text-vi-E18-r6
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.measuring_instruments_refuse
+  verified_at: 2026-08-22T04:00:00Z
+  output: |
+    OK: lượt chụp từ chối sai ngôn ngữ và xoá khung cũ · executor dùng chung báo lỗi pin đọc được
 
 ## Analyst
 
 carried tu round 2 — baseline khong do lai round nay
 
-E1a, E1b, E12b — carried non-discriminating tu round 2 (green trên cả HEAD lẫn diffBase khi đo lần cuối): E1a (`pnpm gen:abi && git diff --exit-code ...`) và E1b (`bash scripts/abi/check-python-gen-clean.sh`) so khớp file generated với ABI đã commit — hai lệnh này xanh bất kể có normalize-text-vi hay không vì chúng đo tính đồng bộ chung của toàn bộ generator, không riêng feature này. E12b (`pnpm vitest run src/lib/abi/conformance.test.ts`) là nửa TS của conformance suite, cũng xanh trên cả hai vì suite chạy fixture của mọi feature cùng lúc. Cả ba là regression-guard có chủ ý (đo tính toàn vẹn generator/suite), không cần viết lại — giữ nguyên nhận định từ round 2.
+- E1a — xanh trên cả HEAD lẫn diffBase (gen:abi + git diff --exit-code là guard đứng yên, không phụ thuộc thay đổi của feature này); giữ nguyên vì đây là regression-guard cho đường sinh mã ABI, không phải phép đo hành vi mới.
+- E1b — cùng lý do: chạy lại gen_models.py/gen_node_slots.py rồi diff sạch là bất biến đúng cả trước và sau feature; guard hạ tầng, không discriminating.
+- E12b — nửa TS của conformance suite xanh cả hai phía vì fixture conformance là input cố định cho executor — bản thân assertion đối chiếu số lời gọi không đổi theo sự có/không của feature riêng lẻ này trên baseline đã có sẵn khung conformance.
 
 ## Variance
 
-none — every multi-run eval is uniform (không có eval nào mang field runs > 1 trong vòng này)
+none — every multi-run eval is uniform
 
 ## Iterations
 
-Round 3: Gate 2 owner mở rộng phạm vi AC-5 cho khoảng có hậu tố đơn vị (5%-10%, 5kg-10kg,...) — vá bản chốt luật khoảng, quay lại đo.
-Round 4: Gate 2 owner mở rộng phạm vi AC-5 cho giá viết cách (1.000 đ-2.000 đ, 1.000 ₫ - 2.000 ₫,...) — vá thứ tự _SPACED_DONG/_RANGE, quay lại đo.
-Round 5: 25 eval máy + E16 (panel judgment) đều PASS, nhưng review-findings phát hiện 2 finding Trong hợp đồng mức high (AC-6: "đ" đứng sau từ chỉ số lớn không kích hoạt luật tiền; AC-9: fixture test tự đăng ký registry viết tay, không round-trip qua mount thật) — cả hai là "phép đo không đo đúng thứ nó tên" theo Luật dừng vòng verify của hợp đồng, nên verdict REJECT, quay lại implementation để vá trong vòng.
+Round 4: S4-r2 — sửa 6/7 finding bắn hai (luật colon thu hẹp, mỏ neo dương, phép đo tự chạy); 1 finding còn lại dời sang known-limits, contract sang verified.
+Round 5: 25 eval máy PASS + E16 (judgment) chờ người — panel UNCERTAIN vì thiếu ảnh đối chứng ở hai vòng đầu; verdict PENDING-JUDGMENT.
+Round 6 (hiện tại): owner nâng phạm vi Cổng 2 cho E5 (khoảng có hậu tố đơn vị %, giá viết cách) — hai lỗi đọc owner nêu đã vá; toàn bộ 20 eval máy của round này xanh lại, 6 eval carry-forward giữ nguyên từ round 2, E16 panel đề xuất PASS trên phạm vi đã thu hẹp (vế so-sánh dời sang checklist Cổng 2) — verdict vẫn PENDING-JUDGMENT chờ human_override.
 
 ## Gate 2 checklist (human)
 
