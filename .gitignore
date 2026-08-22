@@ -55,7 +55,10 @@ __pycache__/
 /plugins/*
 !/plugins/.gitkeep
 
-.claude/
+# Claude Code local settings: only the repo-level plugin declaration is shared
+# (acceptance-gate-kit GUIDE 5.1); launch.json and worktrees/ stay local.
+.claude/*
+!.claude/settings.json
 
 # Agent session scratch (working notes, reports). Untracked and never shipped —
 # listed here so a `git add -A` cannot sweep it into a commit.
