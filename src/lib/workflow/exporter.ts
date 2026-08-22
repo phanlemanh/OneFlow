@@ -48,6 +48,54 @@ export const TTS_SLOTS: readonly NodeSlot[] = [
     "text-audio-gen-speech",
 ];
 
+/**
+ * The speech slots whose ABI input declares a `language` field. Only these can
+ * tell us what language a voice-over targets; `text-audio-gen-speech` declares
+ * none, so a workflow using it is always "unknown".
+ *
+ * Kept in step with the ABI by a two-way test, same as TTS_SLOTS above.
+ */
+export const LANGUAGE_AWARE_TTS_SLOTS: readonly NodeSlot[] = [
+    "text-gen-speech-preset",
+    "text-gen-speech-clone",
+    "text-gen-speech-instruct",
+];
+
+/**
+ * True when the node declares a language that is NOT Vietnamese.
+ *
+ * The reader this warning asks for reads VIETNAMESE numbers, so telling an
+ * English or Japanese voice-over workflow to insert it is noise the user cannot
+ * dismiss — it fires on save, save-and-execute and export alike (S4 round 7).
+ *
+ * Deliberately phrased as "declared as something else", not "declared as
+ * Vietnamese": `language` is optional, and most Vietnamese workflows never touch
+ * the picker. Reading an unset value as "not Vietnamese" would silently drop the
+ * protection for exactly the users it exists for, so unknown keeps the warning.
+ */
+function declaresNonVietnameseVoice(node: ExecutableNode): boolean {
+    if (!LANGUAGE_AWARE_TTS_SLOTS.includes(node.feature as NodeSlot)) {
+        return false;
+    }
+    const binding = node.bindings?.language;
+    const bound =
+        binding && (binding.kind === "config" || binding.kind === "static")
+            ? binding.value
+            : undefined;
+    const raw = bound ?? node.rawConfig?.language;
+    if (typeof raw !== "string" || raw.trim() === "") return false;
+
+    const value = raw.trim().toLowerCase();
+    // "vi", "vi-VN", "vi_VN", "vietnamese" — matched by prefix so a regional
+    // tag cannot slip past, and `!` is never inferred from an unknown code.
+    return !(
+        value === "vi" ||
+        value.startsWith("vi-") ||
+        value.startsWith("vi_") ||
+        value.startsWith("viet")
+    );
+}
+
 /** Text-in, audio-out slots that are NOT speech — the negative control. */
 export const MUSIC_SLOTS: readonly NodeSlot[] = [
     "gen-music",
@@ -372,6 +420,7 @@ export class WorkflowExporter {
         const parentIndex = buildParentIndex(this.edges);
         const offenders = executableNodes
             .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
+            .filter((n) => !declaresNonVietnameseVoice(n))
             .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, parentIndex))
             .map((n) => n.id);
         const warnings: WorkflowWarning[] =

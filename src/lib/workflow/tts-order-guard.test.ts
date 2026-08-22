@@ -22,12 +22,19 @@ import { registerAbiNode, unregisterAbiNode } from "@/lib/abi/node-registry";
 
 import {
     exportWorkflow,
+    LANGUAGE_AWARE_TTS_SLOTS,
     MUSIC_SLOTS,
     TTS_SLOTS,
     WORKFLOW_TTS_NEEDS_NORMALIZE,
 } from "./exporter";
 
-type Spec = { id: string; feature: string; deps?: string[] };
+type Spec = {
+    id: string;
+    feature: string;
+    deps?: string[];
+    /** Canvas config for the node, e.g. the TTS `language` picker. */
+    data?: Record<string, unknown>;
+};
 
 const registered: string[] = [];
 
@@ -53,7 +60,7 @@ function buildChain(specs: Spec[]): { nodes: Node[]; edges: Edge[] } {
             id: spec.id,
             type: "genTextNode",
             position: { x: 200 * (index + 1), y: 0 },
-            data: { pluginId: "test-plugin" },
+            data: { pluginId: "test-plugin", ...spec.data },
         });
         registerAbiNode({
             nodeId: spec.id,
@@ -81,6 +88,93 @@ function buildChain(specs: Spec[]): { nodes: Node[]; edges: Edge[] } {
 
 afterEach(() => {
     while (registered.length) unregisterAbiNode(registered.pop() as string);
+});
+
+// The warning is Vietnamese-specific: the slot it asks for reads VIETNAMESE
+// numbers. Until round 7 it fired on every TTS node in every workflow, so a
+// user building an English, Chinese, Japanese or Korean voice-over was told —
+// on save, on save-and-execute and on export, with no way to dismiss it — to
+// insert a Vietnamese number reader (S4 round 7 finding).
+//
+// Narrowed to "not declared as some OTHER language" rather than "declared as
+// Vietnamese": `language` is optional on three of the four slots and absent
+// from `text-audio-gen-speech` entirely, so an unset value means UNKNOWN, and
+// the warning must survive not knowing. Suppressing it on unknown would quietly
+// drop the protection for the majority of Vietnamese workflows, which never
+// touch the picker.
+describe("language scope", () => {
+    it.each([
+        ["en", "English"],
+        ["en-US", "English (US)"],
+        ["zh", "Chinese"],
+        ["ja", "Japanese"],
+        ["ko", "Korean"],
+    ])("stays silent when the voice is declared %s", (language) => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            {
+                id: "b",
+                feature: "text-gen-speech-preset",
+                deps: ["a"],
+                data: { language },
+            },
+        ]);
+
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toEqual([]);
+    });
+
+    it.each(["vi", "vi-VN", "Vietnamese", "VI"])(
+        "still warns when the voice is declared %s",
+        (language) => {
+            const { nodes, edges } = buildChain([
+                { id: "a", feature: "gen-text" },
+                {
+                    id: "b",
+                    feature: "text-gen-speech-preset",
+                    deps: ["a"],
+                    data: { language },
+                },
+            ]);
+
+            const workflow = exportWorkflow(nodes, edges, { name: "x" });
+            expect(workflow.warnings).toEqual([
+                { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+            ]);
+        },
+    );
+
+    it("still warns when the language is not declared at all", () => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            { id: "b", feature: "text-gen-speech-preset", deps: ["a"] },
+        ]);
+
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toEqual([
+            { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+        ]);
+    });
+
+    it("still warns on the slot that has no language field at all", () => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            {
+                id: "b",
+                feature: "text-audio-gen-speech",
+                deps: ["a"],
+                data: { language: "en" },
+            },
+        ]);
+
+        // `text-audio-gen-speech` declares no `language` input, so a value
+        // sitting in canvas data is not a declaration the ABI recognises —
+        // treat it as unknown and keep warning.
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toEqual([
+            { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+        ]);
+    });
 });
 
 describe("violation", () => {
@@ -221,6 +315,26 @@ describe("two-way", () => {
             .map(([slot]) => slot);
 
         expect([...TTS_SLOTS].sort()).toEqual(derived.sort());
+    });
+
+    it("keeps the language-aware speech list in step with the ABI", () => {
+        // The narrowing above is only safe if this list is exactly the speech
+        // slots that actually declare `language`. Hand-maintained, it would rot
+        // the day a slot gains or loses the field — and the failure would be
+        // silent in the SAFE-looking direction for a gained field (a declared
+        // English voice would keep being warned at) and in the UNSAFE direction
+        // for a lost one.
+        const derived = TTS_SLOTS.filter((slot) => {
+            const node = ABI_NODES[slot as keyof typeof ABI_NODES];
+            const inputs =
+                (node.inputs as { properties?: Record<string, unknown> })
+                    .properties ?? {};
+            return "language" in inputs;
+        });
+
+        expect([...LANGUAGE_AWARE_TTS_SLOTS].sort()).toEqual(
+            [...derived].sort(),
+        );
     });
 
     it("registers the reader itself as an ABI node type", () => {

@@ -333,7 +333,31 @@ code** vì license):
   qua từng khoá executor nhắc engine, và báo số khoá đã soi để trường hợp tụt về 0 không đọc
   thành thành công.
 
-## Known limits (chốt ở Cổng 2 vòng 3, owner 2026-08-21)
+## Sửa đổi vòng 7 (2026-08-22)
+
+- **AC-6 — mã ISO tiền không phân biệt hoa thường.** `VND`/`VNĐ` là hai mỏ neo cuối còn
+  phân biệt hoa thường, nên với chữ thường **luật quan hệ tắt hẳn** (`has_money` trả False).
+  Đo thật: ba trong bốn cách viết vẫn đọc đúng — nhưng chỉ nhờ thư viện tình cờ xử được, không
+  nhờ mỏ neo nào; ca thứ tư `Giá 2 triệu vnđ` → "giá hai triệu **vnđ**" với `ok=True`. Hạng
+  của lỗi là **hàng rào bị vô hiệu trên cả một lớp**, không phải "vài ca sai".
+- **AC-10 — cảnh báo thu hẹp về luồng tiếng Việt** *(owner 2026-08-22)*. Cảnh báo "thiếu bước
+  đọc-thành-chữ trước giọng đọc" trước đây bắn cho **mọi** node giọng đọc ở **mọi** ngôn ngữ,
+  trên cả ba bề mặt và không tắt được — nên người dựng luồng tiếng Anh/Trung/Nhật/Hàn bị bảo
+  chèn một node đọc số **tiếng Việt**. Nay im lặng khi node giọng đọc **khai** một ngôn ngữ
+  khác. Phát biểu là "khai ngôn ngữ khác", **không** phải "khai tiếng Việt": trường `language`
+  là tuỳ chọn và phần lớn luồng tiếng Việt không đụng tới nó, nên đọc "chưa khai" thành
+  "không phải tiếng Việt" sẽ âm thầm bỏ bảo vệ đúng nhóm người cần nó. Không cần đổi ABI: ba
+  trong bốn slot đã có sẵn `language`; slot thứ tư không có nên luôn tính là chưa rõ.
+
+## Known limits
+- **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
+  hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —
+  sai ngay từ lần đầu và **vi phạm AC-7** (idempotent). Phạm vi đo được: đúng token đó;
+  `VNDS` không sao. Phép đo thương hiệu cũ chỉ khẳng định "không có chữ đồng" nên nó xanh suốt
+  trong khi tên riêng bị băm. Khai bằng `IDEMPOTENCE_EXCLUDED` có tên + lý do, kèm một phép đo
+  **tự đỏ nếu giới hạn này lành** mà hợp đồng chưa cập nhật. Vá đúng cần cơ chế giữ chỗ quanh
+  lời gọi thư viện — là tính năng riêng, thuộc hợp đồng **"chống đọc sai êm ru"**.
+ (chốt ở Cổng 2 vòng 3, owner 2026-08-21)
 
 Ba lỗi đọc dưới đây là **thật, đo được**, và được owner chốt là **không sửa trong vòng
 này** — mở hợp đồng riêng. Chúng nằm ngoài chữ của AC-2…AC-8 nhưng cùng một lớp với chúng:
