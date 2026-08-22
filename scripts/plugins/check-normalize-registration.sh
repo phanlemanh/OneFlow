@@ -27,7 +27,7 @@ node -e "
   const e = m.plugins.find((p) => typeof p === 'object' && p !== null && p.id === '$PLUGIN_ID');
   if (!e) { console.error('FAIL: manifest thiếu entry $PLUGIN_ID'); process.exit(1); }
   if (e.origin !== '$ORIGIN') { console.error('FAIL: origin sai: ' + e.origin); process.exit(1); }
-" || fail "manifest chưa đăng ký $PLUGIN_ID dưới $ORIGIN"
+" || fail "manifest does not register $PLUGIN_ID under $ORIGIN"
 
 # 1b. The two manifest guards, RUN — not merely named.
 #     The eval's `expected` used to claim the re-cut guard was updated and that
@@ -35,9 +35,9 @@ node -e "
 #     by hand once and then asserted in prose forever after. Prose is not
 #     executed. Run them.
 bash "$ROOT/scripts/plugins/check-manifest-unmoved.sh" >/dev/null ||
-    fail "check-manifest-unmoved.sh đỏ — mốc manifest chưa cắt lại đúng"
+    fail "check-manifest-unmoved.sh is red — the manifest snapshot was not re-cut"
 bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
-    fail "check-manifest-guard-teeth.sh đỏ — guard manifest đã mất răng"
+    fail "check-manifest-guard-teeth.sh is red — the manifest guard has lost its teeth"
 
 # 2. All three READMEs list the plugin AND carry the new capability-matrix
 #    entry. The matrix in these READMEs is a ✅/⬜ BULLET LIST under headings,
@@ -49,13 +49,13 @@ bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
 #    the section's heading and the next heading.
 check_doc() {
     local file="$1" heading="$2" row_marker="$3"
-    grep -q "$PLUGIN_ID" "$ROOT/$file" || fail "$file không nhắc $PLUGIN_ID"
+    grep -q "$PLUGIN_ID" "$ROOT/$file" || fail "$file does not mention $PLUGIN_ID"
     awk -v h="$heading" '
         $0 == h { inside = 1; next }
         inside && /^#/ { inside = 0 }
         inside { print }
     ' "$ROOT/$file" | grep -E "^- ✅" | grep -q "$row_marker" ||
-        fail "$file thiếu dòng ✅ chứa marker trong mục ma trận $heading"
+        fail "$file has no ✅ row carrying the marker inside capability-matrix section $heading"
 }
 check_doc "README.md" "#### Text" "Read numbers aloud (Vietnamese)"
 check_doc "docs/README_ZH.md" "#### 文本" "数字转文字（越南语）"
@@ -70,7 +70,7 @@ for locale in en vi ja ko zh; do
           const d = require('$file');
           const v = d?.Workspace?.nodes?.['$bucket']?.normalizeTextVi;
           if (typeof v !== 'string' || !v.trim()) process.exit(1);
-        " || fail "$locale.json thiếu Workspace.nodes.$bucket.normalizeTextVi"
+        " || fail "$locale.json is missing Workspace.nodes.$bucket.normalizeTextVi"
     done
     # The TTS-order warning copy (AC-10's human sentence). This claim used to
     # live only in E10a's `expected` prose while no executor read the key —
@@ -79,19 +79,19 @@ for locale in en vi ja ko zh; do
       const d = require('$file');
       const v = d?.Workspace?.toast?.ttsNeedsNormalize;
       if (typeof v !== 'string' || !v.includes('{nodes}')) process.exit(1);
-    " || fail "$locale.json thiếu Workspace.toast.ttsNeedsNormalize (kèm chỗ trống {nodes})"
+    " || fail "$locale.json is missing Workspace.toast.ttsNeedsNormalize (with the {nodes} placeholder)"
 done
 
 # 3b. The warning key must actually be RENDERED: one shared hook consumes it,
 #     and all three export surfaces call that hook. Static greps — an honest,
 #     declared floor: they prove the wiring exists, not pixels.
 grep -q "ttsNeedsNormalize" "$ROOT/src/hooks/use-export-warning-toast.ts" ||
-    fail "hook cảnh báo không đọc key ttsNeedsNormalize"
+    fail "the export-warning hook does not read the ttsNeedsNormalize key"
 for surface in \
     "src/components/workspace/workflow-title-menu.tsx" \
     "src/hooks/use-workflow-execution.ts"; do
     grep -q "useExportWarningToasts" "$ROOT/$surface" ||
-        fail "$surface không dùng hook cảnh báo export"
+        fail "$surface does not use the export-warning hook"
 done
 # `|| true` is load-bearing under `set -euo pipefail`: grep -c exits 1 when the
 # count is ZERO, which is precisely the regression this line exists to catch
@@ -103,10 +103,10 @@ notify_calls=$(cat \
     "$ROOT/src/hooks/use-workflow-execution.ts" |
     grep -c "notifyExportWarnings(executable)" || true)
 [ "$notify_calls" = "3" ] ||
-    fail "phải có đúng 3 call site render cảnh báo export (thấy $notify_calls)"
+    fail "expected exactly 3 export-warning render call sites (found $notify_calls)"
 
 if [ "$fails" -gt 0 ]; then
-    echo "FAIL: $fails chỗ chưa đồng bộ"
+    echo "FAIL: $fails place(s) out of sync"
     exit 1
 fi
-echo "OK: manifest + 3 README (danh sách & hàng ma trận) + 5 locale đều đồng bộ"
+echo "OK: manifest + 3 READMEs (plugin list & matrix row) + 5 locales all in sync"

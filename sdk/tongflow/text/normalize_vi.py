@@ -145,8 +145,11 @@ _COLON_BETWEEN_WORDS = re.compile(r"(?<=[^\W\d_]):(?=[^\W\d_])")
 # relational rule rejects a perfectly clean sentence.
 _MONEY = re.compile(
     rf"₫"
-    rf"|(?<!{LETTER})VNĐ(?!{LETTER})"
-    rf"|(?<!{LETTER})VND(?!{LETTER})"
+    # Case-insensitive, matching CURRENCY_SIGN_PATTERNS: these two anchors were
+    # the last case-SENSITIVE money marks left, so lowercase price copy turned
+    # the relational guard off entirely (S4 round 7).
+    rf"|(?<!{LETTER})(?i:VNĐ)(?!{LETTER})"
+    rf"|(?<!{LETTER})(?i:VND)(?!{LETTER})"
     # Case-insensitive on purpose, and only on these two: the sibling anchors
     # above always covered uppercase (VNĐ/VND), while "Giá 500 Đ" reported no
     # money at all — so the relational money-loss rule never ran and a bare "đ"

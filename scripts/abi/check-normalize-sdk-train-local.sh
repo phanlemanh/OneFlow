@@ -21,12 +21,12 @@ py_version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$pyproject" | head -1)"
 init_version="$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' "$init" | head -1)"
 
 if [ -z "$py_version" ] || [ -z "$init_version" ]; then
-    echo "FAIL: không đọc được phiên bản (pyproject='$py_version', __init__='$init_version')"
+    echo "FAIL: could not read a version (pyproject='$py_version', __init__='$init_version')"
     exit 1
 fi
 
 if [ "$py_version" != "$init_version" ]; then
-    echo "FAIL: hai phiên bản lệch nhau — pyproject.toml=$py_version, __init__.py=$init_version"
+    echo "FAIL: the two versions disagree — pyproject.toml=$py_version, __init__.py=$init_version"
     exit 1
 fi
 
@@ -39,10 +39,11 @@ fi
 # about a pin that was exact (S4 round 5 finding). What the criterion asserts
 # is the `==` form, so that is what is matched.
 if ! grep -qE '"vietnormalizer==[0-9]+(\.[0-9]+)+"' "$pyproject"; then
-    echo "FAIL: thiếu pin chính xác dạng vietnormalizer==X.Y.Z trong dependencies"
+    echo "FAIL: no exact vietnormalizer==X.Y.Z pin in dependencies"
     grep -n 'vietnormalizer' "$pyproject" || echo "  (không thấy dòng vietnormalizer nào)"
     exit 1
 fi
 
-reader_pin=$(grep -oE 'vietnormalizer==[0-9]+(\.[0-9]+)+' "$pyproject" | head -1)
-echo "OK: SDK $py_version (hai file khớp) · $reader_pin pin chính xác"
+# Same one law as the version above — see scripts/lib/sdk-version.sh.
+. "$ROOT/scripts/lib/sdk-version.sh"
+echo "OK: SDK $py_version (both files agree) · $(reader_pin) pinned exactly"

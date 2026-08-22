@@ -60,3 +60,32 @@ sdk_spec() {
     v=$(sdk_version) || return $?
     printf 'oneflow-sdk==%s\n' "$v"
 }
+
+# The reading ENGINE's requirement specifier, derived from the same file for the
+# same reason. normalize-text-vi pins vietnormalizer exactly, because a patch
+# release there changes how a number is spoken.
+#
+# Added 2026-08-22 after a review found the derivation re-implemented in three
+# scripts and twelve config keys, in two incompatible regex dialects — a pin
+# written `vietnormalizer == 0.2.3` matched in one and not the other. This
+# file's own header calls that "the failure family this repo already paid for";
+# the second copy had simply been written anyway (S4 round 7 finding).
+reader_pin() {
+    local root
+    root="${SDK_VERSION_ROOT:-$_SDK_VERSION_DEFAULT_ROOT}"
+    [ -n "$root" ] || { echo "sdk-version: no repo root resolved at source time" >&2; return 2; }
+    local toml="$root/sdk/pyproject.toml"
+    [ -f "$toml" ] || { echo "sdk-version: no such file: $toml" >&2; return 2; }
+
+    # Tolerant of the whitespace a formatter may introduce around `==`, then
+    # re-emitted in the canonical form. Matching only the tight spelling is how
+    # one dialect went silently blind while its sibling still matched.
+    local v
+    v=$(grep -oE '"vietnormalizer[[:space:]]*==[[:space:]]*[0-9]+(\.[0-9]+)+"' "$toml" \
+        | head -1 | tr -d '" ' | sed 's/vietnormalizer==//')
+    case "$v" in
+        [0-9]*.[0-9]*) ;;
+        *) echo "sdk-version: could not parse a vietnormalizer pin out of $toml (got '$v')" >&2; return 2 ;;
+    esac
+    printf 'vietnormalizer==%s\n' "$v"
+}

@@ -302,6 +302,59 @@ CORPUS_STREET_NEGATIVE: tuple[tuple[str, str], ...] = (
 )
 
 
+# The ISO-code spellings are case-insensitive like their sibling "đ".
+#
+# Round 4 made the bare mark case-insensitive because "ALL-CAPS price copy is
+# ordinary in the sales text this node exists for"; VNĐ/VND kept case-SENSITIVE
+# anchors, so lowercase copy turned the money relation off entirely. Measured on
+# this branch: has_money() was False for every lowercase spelling, which means
+# the relational money-loss guard never ran for any of them — two of the four
+# still read correctly, but only because the pinned library happened to expand
+# them. "Giá 2 triệu vnđ" did not: it reached the voice as "giá hai triệu vnđ"
+# with ok=True (S4 round 7 finding, corrected — the finding listed four broken
+# cases, two of which were already fine; what was actually broken was the GUARD
+# being blind, and one reading with it).
+CORPUS_MONEY_LOWERCASE_ISO: tuple[tuple[str, str], ...] = (
+    ("Giá 2 triệu vnđ", "giá hai triệu đồng"),
+    ("Giá 500.000 vnd", "giá năm trăm nghìn đồng"),
+    ("Vé 500.000Vnd", "vé năm trăm nghìn đồng"),
+    ("Giá 1.999.000 Vnđ", "giá một triệu chín trăm chín mươi chín nghìn đồng"),
+)
+
+# The brand token that must not be read as money: an unanchored replacement
+# turned "VNDirect" into "đồngirect" in round 1, and lowering the case must not
+# re-open that — in EITHER case now that the anchors ignore case.
+#
+# The expected strings PIN A KNOWN LIMIT, not desired output: the pinned library
+# mangles the brand token to "ndi re" on its own, and it did so before this
+# change too (measured on the committed tree while writing this). The existing
+# brand test only asserts that "đồng" is absent, which stays green through that
+# mangling — so this is the first place the real reading is visible. If a
+# library bump fixes it, this test goes RED and the Known limits section must be
+# updated with it, rather than the expectation being edited to match.
+CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Mua qua VNDirect", "mua qua ndi re"),
+    ("mua qua vndirect", "mua qua ndi re"),
+)
+
+
+def test_iso_currency_codes_are_case_insensitive() -> None:
+    for raw, expected in CORPUS_MONEY_LOWERCASE_ISO:
+        assert has_money(raw), (
+            f"{raw!r}: luật quan hệ tắt — mọi cách đọc sai sau đó đều đi qua êm ru"
+        )
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+    for raw, expected in CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} (ca ÂM, tên thương hiệu): mong {expected!r}, nhận {got.text!r}"
+        )
+
+
 def test_street_abbreviation_is_not_a_price() -> None:
     for raw, expected in CORPUS_STREET:
         got = normalize_vi(raw)
@@ -984,6 +1037,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_STREET_NEGATIVE", CORPUS_STREET_NEGATIVE),
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
+    ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
+    ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
 )
 
 ALL_CORPUS = tuple(
@@ -991,6 +1046,22 @@ ALL_CORPUS = tuple(
     for _, corpus in _DECLARED_CORPORA
     for raw in _raw_inputs(corpus)
 )
+
+
+def test_idempotence_exclusions_are_still_broken() -> None:
+    """An exclusion that has quietly healed is a lie in the file.
+
+    Without this, the day a library bump fixes the brand token, the mapping
+    above keeps claiming a limit that no longer exists and the sweep keeps
+    skipping an input it could now cover.
+    """
+    for raw, reason in IDEMPOTENCE_EXCLUDED.items():
+        once = normalize_vi(raw).text
+        twice = normalize_vi(once).text
+        assert once != twice, (
+            f"{raw!r} nay ĐÃ idempotent ({once!r}) — gỡ khỏi IDEMPOTENCE_EXCLUDED "
+            f"và cập nhật Known limits. Lý do đang khai: {reason}"
+        )
 
 
 def test_determinism_sweep_covers_every_declared_corpus() -> None:
@@ -1029,8 +1100,27 @@ def test_determinism_sweep_covers_every_declared_corpus() -> None:
             assert raw in swept, f"{name}: ca {raw!r} không vào phép quét"
 
 
+# Inputs the AC-7 sweep skips, each with the reason spelled out. Written as a
+# named mapping rather than left out of the corpus, so the exception is visible
+# to a reader of this file and to the coverage checks above.
+#
+# The pinned library mangles the mixed-case brand token "VNDirect" into
+# "ndi re" on the first pass and "di re" on the second, so the reading is
+# already wrong before idempotence is even in question. That is the SAME
+# silent-wrong-reading class the feature exists to stop, but for a shape no AC
+# promises today (the existing brand test only asserts no currency word is
+# injected). Surfaced 2026-08-22 by enlisting the brand rows in the sweep;
+# awaiting owner triage at Gate 2 — see contract.md Known limits.
+IDEMPOTENCE_EXCLUDED: dict[str, str] = {
+    "Mua qua VNDirect": "thư viện băm token thương hiệu, chưa AC nào hứa (S4 vòng 7)",
+    "mua qua vndirect": "cùng token, dạng chữ thường",
+}
+
+
 def test_idempotent_and_byte_identical() -> None:
     for raw, _ in ALL_CORPUS:
+        if raw in IDEMPOTENCE_EXCLUDED:
+            continue
         once = normalize_vi(raw)
         assert normalize_vi(raw).text == once.text, f"{raw!r} không tất định"
         twice = normalize_vi(once.text)

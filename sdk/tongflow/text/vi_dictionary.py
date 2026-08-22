@@ -105,8 +105,16 @@ _CURRENCY_SIGNS: tuple[tuple[str, str], ...] = (
     ("VND", "đồng"),
 )
 
+# Case-insensitive for the same reason the bare "đ" mark is: price copy is
+# written in whatever case the seller typed. Keeping these two anchors
+# case-SENSITIVE while the sibling mark was opened up in round 4 left lowercase
+# copy with the money relation switched off entirely — has_money() False, so the
+# money-loss guard never ran and "Giá 2 triệu vnđ" reached the voice with the
+# unit unspoken (S4 round 7). The ₫ sign has no case, so the flag is harmless
+# for it. The LETTER anchors still carry the whole load against "VNDirect" —
+# and now against "vndirect" too.
 CURRENCY_SIGN_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
-    (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?!{LETTER})"), dst)
+    (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?!{LETTER})", re.IGNORECASE), dst)
     for src, dst in _CURRENCY_SIGNS
 )
 

@@ -13,7 +13,7 @@ PLUGIN_ID="oneflow-api-normalize-text-vi"
 TIMEOUT="${NORMALIZE_PYPI_TIMEOUT:-20}"
 
 version="$(sed -n 's/^version = "\(.*\)"$/\1/p' "$ROOT/sdk/pyproject.toml" | head -1)"
-[ -n "$version" ] || { echo "FAIL: không đọc được phiên bản từ sdk/pyproject.toml"; exit 1; }
+[ -n "$version" ] || { echo "FAIL: could not read a version from sdk/pyproject.toml"; exit 1; }
 
 url="https://pypi.org/pypi/oneflow-sdk/$version/json"
 if ! body="$(curl -fsS --max-time "$TIMEOUT" "$url" 2>/dev/null)"; then
@@ -24,7 +24,7 @@ if ! body="$(curl -fsS --max-time "$TIMEOUT" "$url" 2>/dev/null)"; then
     exit 1
 fi
 
-echo "OK: PyPI có oneflow-sdk==$version"
+echo "OK: PyPI has oneflow-sdk==$version"
 
 # The published artifact must actually carry the new types — a version number on
 # PyPI proves an upload happened, not that the upload contained this feature.
@@ -76,7 +76,7 @@ PY
 # failure naming the missing path. The pair used to exist only as prose in the
 # eval's `expected` after a one-off manual run (S4 round 2 finding) — the very
 # pattern this script family mocks: prose is not executed.
-python3 - "$tmp" <<'PY' || { echo "FAIL: tự kiểm hai chiều của probe không dựng được fixture"; exit 1; }
+python3 - "$tmp" <<'PY' || { echo "FAIL: the probe self-check could not build its fixtures"; exit 1; }
 import sys, zipfile
 tmp = sys.argv[1]
 with zipfile.ZipFile(f"{tmp}/selftest-good.whl", "w") as z:
@@ -87,12 +87,12 @@ with zipfile.ZipFile(f"{tmp}/selftest-bad.whl", "w") as z:
     z.writestr("tongflow/node_slots.py", "GEN_TEXT = 'gen-text'")
 PY
 python3 "$tmp/probe.py" "$tmp/selftest-good.whl" "https://selftest/pkg.whl" >/dev/null ||
-    { echo "FAIL: probe đỏ trên wheel giả LÀNH — nửa xanh của cặp hai chiều gãy"; exit 1; }
+    { echo "FAIL: probe went red on the HEALTHY fake wheel — the green half of the pair is broken"; exit 1; }
 bad_out="$(python3 "$tmp/probe.py" "$tmp/selftest-bad.whl" "https://selftest/pkg.whl" 2>&1)" &&
-    { echo "FAIL: probe xanh trên wheel giả THIẾU FILE — nửa đỏ của cặp hai chiều gãy"; exit 1; }
+    { echo "FAIL: probe stayed green on the MISSING-FILE fake wheel — the red half of the pair is broken"; exit 1; }
 echo "$bad_out" | grep -q "tongflow/text/normalize_vi.py" ||
-    { echo "FAIL: nửa đỏ không nêu đúng đường dẫn thiếu: $bad_out"; exit 1; }
-echo "OK: cặp hai chiều của probe tự chạy xanh (đỏ nêu đúng đường dẫn thiếu)"
+    { echo "FAIL: the red half does not name the missing path: $bad_out"; exit 1; }
+echo "OK: the probe passes its own two-way self-check (red names the missing path)"
 
 pkg_url="$(echo "$body" | python3 -c '
 import json, sys
@@ -102,11 +102,11 @@ pick = (wheels or urls)
 print(pick[0]["url"] if pick else "")
 ')"
 if [ -z "$pkg_url" ]; then
-    echo "FAIL: PyPI không liệt kê file artifact nào cho $version"
+    echo "FAIL: PyPI lists no artifact files for $version"
     exit 1
 fi
 curl -fsS --max-time "$TIMEOUT" -o "$tmp/pkg" "$pkg_url" || {
-    echo "FAIL: không tải được artifact $pkg_url"
+    echo "FAIL: could not download artifact $pkg_url"
     exit 1
 }
 python3 "$tmp/probe.py" "$tmp/pkg" "$pkg_url" || exit 1
@@ -114,15 +114,15 @@ python3 "$tmp/probe.py" "$tmp/pkg" "$pkg_url" || exit 1
 pin_file="$ROOT/plugins/$PLUGIN_ID/requirements.txt"
 if [ -f "$pin_file" ]; then
     if grep -q "oneflow-sdk==$version" "$pin_file"; then
-        echo "OK: vỏ plugin pin oneflow-sdk==$version"
+        echo "OK: the plugin shell pins oneflow-sdk==$version"
     else
-        echo "FAIL: vỏ plugin pin sai phiên bản:"
+        echo "FAIL: the plugin shell pins the wrong version:"
         grep -n "oneflow-sdk" "$pin_file" || echo "  (không thấy dòng pin nào)"
         exit 1
     fi
 else
-    echo "FAIL: chưa có cây plugin để kiểm pin ($pin_file)"
+    echo "FAIL: no plugin tree to check the pin against ($pin_file)"
     exit 1
 fi
 
-echo "OK: chuyến phát hành đồng bộ cho $version"
+echo "OK: the release train is in sync for $version"

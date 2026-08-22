@@ -45,7 +45,7 @@ for _ in $(seq 1 30); do
     curl -sf "http://localhost:$port/vi.html" >/dev/null 2>&1 && break
     sleep 0.2
 done
-curl -sf "http://localhost:$port/vi.html" >/dev/null 2>&1 || fail "không dựng được máy chủ tĩnh cho phép đo"
+curl -sf "http://localhost:$port/vi.html" >/dev/null 2>&1 || fail "could not start the static server this measurement needs"
 
 shot="$tmp/shot.png"
 capture() {
@@ -55,15 +55,15 @@ capture() {
 
 rm -f "$shot"
 capture vi.html >/dev/null
-[ -f "$shot" ] || fail "trang đúng ngôn ngữ mà lượt chụp không ghi ảnh — phép đo tự chặn mình"
+[ -f "$shot" ] || fail "the capture refused a page in the REQUESTED locale — the measurement blocks itself"
 
 # The stale frame from the good run is deliberately left in place: refusing to
 # write is not enough if the previous frame survives to be filed as evidence.
 out="$(capture en.html)"
 grep -q 'REFUSED' <<<"$out" \
-    || fail "trang sai ngôn ngữ (lang=en, --lang vi) KHÔNG bị từ chối: $out"
+    || fail "a wrong-locale page (lang=en, --lang vi) was NOT refused: $out"
 [ -f "$shot" ] \
-    && fail "đã từ chối nhưng ảnh cũ còn nguyên — lượt sau sẽ nộp nó làm bằng chứng"
+    && fail "refused, but the stale frame survived — a later run would file it as evidence"
 
 # ---------------------------------------------------------------- claim 2 ---
 # CLASS, not case. Thirteen executor keys derive the same pin; the finding
@@ -85,58 +85,47 @@ while IFS= read -r line; do
     checked=$((checked + 1))
     case "$line" in
         *'${pin:?'*) ;;
-        *) fail "khoá executor suy pin KHÔNG có mỏ neo:
+        *) fail "executor key derives the pin with NO guard:
 $line" ;;
     esac
 done <<<"$engine_lines"
 
 [ "$checked" -ge 10 ] || fail \
-    "chỉ soi được $checked khoá executor nhắc engine — phép đo mất đối tượng,
-không phải cấu hình đã sạch (đo được 12 khoá ngày 22/08)"
-echo "  (đã soi $checked khoá executor, mỗi khoá phải có mỏ neo \${pin:?…})"
+    "only $checked executor keys naming the engine were found — the measurement lost
+its subject; this is not a clean config (12 keys measured on 2026-08-22)"
+echo "  (checked $checked executor keys; each must carry the \${pin:?…} guard)"
 
-# The derivation is read out of the real config, not retyped here: a copy would
-# keep passing on the day the shared key changes.
-derivation="$(node -e '
-const fs = require("fs");
-const line = fs.readFileSync("_acceptance/config.yaml", "utf8")
-    .split("\n").find(l => l.trimStart().startsWith("sdk_pytest:"));
-if (!line) { console.error("khong thay khoa sdk_pytest trong _acceptance/config.yaml"); process.exit(1) }
-// A YAML double-quoted scalar processes its own backslash escapes, so the
-// raw line holds "\\." where the command holds "\.". Slicing the quotes off
-// without undoing that leaves an ERE that matches a literal backslash and
-// the pin resolves empty — the script would then fail on the real tree and
-// blame the config (measured while writing this).
-const cmd = line.slice(line.indexOf(":") + 1).trim()
-    .replace(/^"|"$/g, "")
-    .replace(/\\(.)/g, (_, c) => c);
-// Bounded by the literal markers, not by counting brackets: the pin
-// derivation contains its own parentheses (a regex character class group),
-// so a lazy match on ")" cuts the command in half and produces a broken
-// shell line that fails for the wrong reason.
-const open = cmd.indexOf("pin=$(");
-const close = cmd.indexOf(") && PYTHONPATH");
-const g = cmd.match(/\$\{pin:\?[^}]*\}/);
-if (open < 0 || close < 0 || !g) { console.error("khoa sdk_pytest khong con suy pin ra bien co kiem tra: " + cmd); process.exit(1) }
-const derive = cmd.slice(open, close + 1);
-process.stdout.write(derive + " ; : \"" + g[0] + "\"");
-')"
+# The derivation is exercised through the ONE file that owns it, using the
+# SDK_VERSION_ROOT override that scripts/lib/sdk-version.sh documents for
+# exactly this: point it at a perturbed COPY and watch the derived value follow,
+# without ever dirtying the real tree.
+. "$ROOT/scripts/lib/sdk-version.sh"
 
-mkdir -p "$tmp/nopin"
-grep -v 'vietnormalizer' sdk/pyproject.toml > "$tmp/nopin/pyproject.toml"
+mkdir -p "$tmp/root/sdk"
+grep -v 'vietnormalizer' sdk/pyproject.toml > "$tmp/root/sdk/pyproject.toml"
 set +e
-msg="$( cd "$tmp/nopin" && bash -c "$derivation" 2>&1 )"
+msg="$(SDK_VERSION_ROOT="$tmp/root" reader_pin 2>&1)"
 code=$?
 set -e
-[ "$code" -eq 0 ] && fail "gỡ hẳn dòng pin mà phép suy vẫn thành công — --with sẽ nuốt tham số kế tiếp"
+[ "$code" -eq 0 ] && fail "the derivation succeeded with the pin line removed — --with would swallow the next argument"
 grep -qi 'pin' <<<"$msg" \
-    || fail "báo lỗi không nhắc tới pin nên người đọc không lần ra nguyên nhân: $msg"
+    || fail "the error does not mention the pin, so a reader cannot trace the cause: $msg"
 
-# ...and it must still succeed on the real tree.
-set +e
-( cd sdk && bash -c "$derivation" ) >/dev/null 2>&1
-ok=$?
-set -e
-[ "$ok" -eq 0 ] || fail "phép suy pin thất bại trên cây thật — phép đo này sẽ chặn oan mọi tính năng"
+# ...and it must still succeed on the real tree, in the canonical form.
+real="$(reader_pin)" || fail "the pin derivation failed on the real tree — this measurement would block every feature"
+case "$real" in
+    vietnormalizer==[0-9]*.[0-9]*) ;;
+    *) fail "the derivation returned an unexpected shape: $real" ;;
+esac
 
-echo "OK: lượt chụp từ chối sai ngôn ngữ và xoá khung cũ · executor dùng chung báo lỗi pin đọc được"
+# Tolerance the tight dialect did not have: a formatter putting spaces around
+# `==` must not make the pin invisible (that was the drift between the two
+# copies this consolidated).
+mkdir -p "$tmp/spaced/sdk"
+sed 's/"vietnormalizer==/"vietnormalizer == /' sdk/pyproject.toml > "$tmp/spaced/sdk/pyproject.toml"
+spaced="$(SDK_VERSION_ROOT="$tmp/spaced" reader_pin)" \
+    || fail "spaces around == blinded the derivation — the dialect drift this consolidation removed"
+[ "$spaced" = "$real" ] \
+    || fail "the spaced pin derived a different value: $spaced vs $real"
+
+echo "OK: capture refuses a wrong locale and clears the stale frame · shared executor reports a legible pin error"

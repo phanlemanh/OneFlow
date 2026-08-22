@@ -29,7 +29,12 @@ from tongflow.engine import runner as runner_mod
 
 
 def _normalize_workflow(text: str = "Giá 1.999.000₫") -> dict:
-    """`image-gen-text` (tier B) → `normalize-text-vi` (tier A).
+    """`image-gen-text` (tier B) → `normalize-text-vi` (NOT cached).
+
+    The reader is deliberately outside `TIER_A_SLOTS` — see the module header.
+    This line said "(tier A)" until round 7, the same stale label the header had
+    already been corrected for, one scope down and in the function the tests
+    actually call.
 
     The upstream is `image-gen-text` rather than the more obvious `gen-text`:
     `gen-text` sits in DESCOPED_GENERATIVE_SLOTS and is deliberately NOT cached,

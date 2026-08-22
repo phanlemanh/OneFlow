@@ -31,7 +31,7 @@ else
     tmp="$(mktemp -d)"
     trap 'rm -rf "$tmp"' EXIT
     git clone --depth 1 "$ORIGIN/$PLUGIN_ID.git" "$tmp/$PLUGIN_ID" >/dev/null 2>&1 || {
-        echo "FAIL: không clone được $ORIGIN/$PLUGIN_ID.git"
+        echo "FAIL: could not clone $ORIGIN/$PLUGIN_ID.git"
         exit 1
     }
     tree="$tmp/$PLUGIN_ID"
@@ -49,8 +49,13 @@ echo "plugin_commit_sha: $sha"
 # measured against a different reader than the one shipping in this change,
 # exactly the drift the pin exists to rule out (S4 round 2 finding). Derived
 # from pyproject, not hard-coded, so a pin bump cannot silently fork the two.
-viet_pin="$(sed -n 's/.*"vietnormalizer==\([0-9.]*\)".*/\1/p' "$ROOT/sdk/pyproject.toml" | head -1)"
-[ -n "$viet_pin" ] || { echo "FAIL: không đọc được pin vietnormalizer từ sdk/pyproject.toml"; exit 1; }
+# Derived by the ONE file that knows how, not by a local sed: this script and
+# check-normalize-sdk-train-local.sh used two different regex dialects for the
+# same fact, so a pin written with spaces around `==` matched in one and not the
+# other (S4 round 7 finding). scripts/lib/sdk-version.sh already carries that
+# law for the SDK version itself.
+. "$ROOT/scripts/lib/sdk-version.sh"
+viet_pin="$(reader_pin)" || exit 1
 cd "$ROOT/sdk"
 PYTHONPATH="$ROOT/sdk" uv run --no-project \
     --with pytest --with tomli --with pydantic --with typing_extensions \
