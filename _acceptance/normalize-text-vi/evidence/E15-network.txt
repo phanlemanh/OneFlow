@@ -1,21 +1,66 @@
-E15 network dump — http://localhost:3000/proto/normalize-text-vi (with NEXT_LOCALE=vi cookie)
-Scope: dev_server.url = http://localhost:3000 (config.yaml:561)
+# E15 network truth dump — raw, unfiltered
+# dev_server.url = http://localhost:3000 (from _acceptance/config.yaml); no api_base declared.
+# All observed requests are same-origin (localhost:3000) -> in FAIL-eligible scope.
 
-Console messages: [info] React DevTools hint, [warn] React Flow "parent container needs a width and a height" (layout warning, not an error), [log] task-store handler registration/unregistration.
-onlyErrors=true → No console logs (zero error-level entries).
+[73078.49] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787384568173 -> 200 OK
+[73078.50] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[73078.51] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[73078.52] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[73078.80] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[73078.81] GET http://localhost:3000/proto/normalize-text-vi?_rsc=bEKaCk_haC-59Ljq -> 200 OK [FAILED: net::ERR_ABORTED]
+[73078.82] GET http://localhost:3000/_next/static/webpack/d93dc30a14ed6283.webpack.hot-update.json -> 200 OK
+[73078.83] GET http://localhost:3000/_next/static/webpack/app/layout.d93dc30a14ed6283.hot-update.js -> 200 OK
+[73078.84] GET http://localhost:3000/_next/static/webpack/webpack.d93dc30a14ed6283.hot-update.js -> 200 OK
+[73078.85] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787384588881 -> 200 OK
+[73078.86] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787384588881 -> 200 OK
+[AD22B82EEA4EF288F1038F0C9BFE4E8A] GET http://localhost:3000/proto/normalize-text-vi?state=wired -> 200 OK
+[73078.101] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[73078.102] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[73078.103] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787384593321 -> 200 OK
+[73078.105] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787384593321 -> 200 OK
+[73078.106] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787384593321 -> 200 OK
+[73078.107] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787384593321 -> 200 OK
+[73078.108] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[73078.109] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[73078.110] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[73078.138] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[73078.139] GET http://localhost:3000/proto/normalize-text-vi?state=wired&_rsc=6gHWkmYAZ4ZvhWVz -> 200 OK [FAILED: net::ERR_ABORTED]
+[73078.140] GET http://localhost:3000/_next/static/webpack/372513028ea866a7.webpack.hot-update.json -> 200 OK
+[73078.141] GET http://localhost:3000/_next/static/webpack/app/layout.372513028ea866a7.hot-update.js -> 200 OK
+[73078.142] GET http://localhost:3000/_next/static/webpack/webpack.372513028ea866a7.hot-update.js -> 200 OK
+[73078.143] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787384606866 -> 200 OK
+[73078.144] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787384606866 -> 200 OK
+[87176670198BD309FC43918E2143EC03] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
+[73078.159] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[73078.160] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[73078.161] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787384664268 -> 200 OK
+[73078.163] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787384664268 -> 200 OK
+[73078.164] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787384664268 -> 200 OK
+[73078.165] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787384664268 -> 200 OK
+[73078.166] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[73078.167] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[73078.168] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[73078.196] GET http://localhost:3000/api/plugins/registry -> 200 OK
+[E294291488257B4A2822E0DA54268DFD] GET http://localhost:3000/proto/normalize-text-vi -> 200 OK
+[73078.198] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+[73078.199] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+[73078.200] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787384694293 -> 200 OK
+[73078.202] GET http://localhost:3000/_next/static/css/app/proto/%5Bslug%5D/page.css?v=1787384694293 -> 200 OK
+[73078.203] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787384694293 -> 200 OK
+[73078.204] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787384694293 -> 200 OK
+[73078.205] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
+[73078.206] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
+[73078.207] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
+[73078.235] GET http://localhost:3000/api/plugins/registry -> 200 OK
 
-Network requests (all app-origin, all 200 OK):
-GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 → 200
-GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 → 200
-GET /_next/static/css/app/layout.css → 200
-GET /_next/static/css/app/proto/[slug]/page.css → 200
-GET /_next/static/chunks/webpack.js → 200
-GET /_next/static/chunks/main-app.js → 200
-GET /_next/static/chunks/app-pages-internals.js → 200
-GET /_next/static/chunks/app/proto/[slug]/page.js → 200
-GET /_next/static/chunks/app/layout.js → 200
-GET /api/plugins/registry → 200
-GET /proto/normalize-text-vi → 200
-(page reloaded 3x during interaction — pattern repeats identically each time, all 200)
-
-networkObserved = clean (app-scope traffic seen, all OK; zero FAIL-eligible failures)
+# Classification note:
+# Two entries above show net::ERR_ABORTED with status 200 OK — both are RSC
+# prefetch requests (?_rsc=...) that were in-flight when the driver issued a
+# second navigate() before the first prefetch settled (self-inflicted by the
+# verifier's back-to-back navigate() calls during multi-state inspection, not
+# by the app or a real user session). A follow-up isolated single-navigation
+# check (navigate -> wait 2s -> read_network_requests, last block above) shows
+# zero ERR_ABORTED and zero non-2xx across all same-origin requests. Treating
+# the ERR_ABORTED pair as test-harness navigation artifact, not an app
+# failure, consistent with the "noise under rapid driver-side navigation"
+# lesson (parallel to eval-noise-under-parallel-load in project memory).
