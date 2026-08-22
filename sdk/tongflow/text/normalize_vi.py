@@ -43,7 +43,19 @@ _DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4
 # So without this rewrite every spaced-đ price failed the money-loss rule with
 # ok=False, for one of the most common ways Vietnamese prices are written
 # (S4 round 2 finding). Rewrite to the word the library understands.
-_SPACED_DONG = re.compile(r"(?<=\d)\s+(?i:đ)\b")
+# The magnitude words a price may carry between its digits and its currency
+# mark. "5 tỷ đ" is ordinary sales copy, and every money rule below used to
+# anchor on a digit IMMEDIATELY left of the "đ", so one word in between made
+# all three layers miss at once (S4 round 5 finding, measured on this branch:
+# "Giá 5 tỷ đ" → "giá năm tỷ đ", ok=True, price unspoken). Kept as one shared
+# constant so the pre-pass, the money test and any later rule cannot drift
+# apart the way the unit LIST did for ranges in round 4.
+_MAGNITUDE = r"(?:nghìn|ngàn|triệu|tỷ|tỉ)"
+
+_SPACED_DONG = re.compile(
+    rf"(?<=\d)\s+(?i:đ)\b"
+    rf"|(?i:(?<=nghìn)|(?<=ngàn)|(?<=triệu)|(?<=tỷ)|(?<=tỉ))\s*(?i:đ)\b"
+)
 
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
 # leaves the bare character in place ("muoi-muoi lam"), which a voice reads as
@@ -63,6 +75,36 @@ _SPACED_DONG = re.compile(r"(?<=\d)\s+(?i:đ)\b")
 _RANGE = re.compile(r"(?<=\d)(?P<unit>[ \t]*(?:%|₫|[^\W\d_][^\W_]{0,15})?)[ \t]*-[ \t]*(?=\d)")
 
 # A dash in front of a number, once ranges are gone, is a minus sign.
+# Amounts written the standard Vietnamese way. The pinned library reads the
+# THOUSAND DOT correctly on its own ("1.999.000 ₫" → "một triệu chín trăm chín
+# mươi chín nghìn đồng"); what it cannot read is the DECIMAL COMMA, and it
+# fails silently in two different directions, neither leaving a digit behind
+# for the post-check:
+#   "3.000.000,00 đ" -> "ba.không.không đồng"   (words around a literal dot)
+#   "3000000,00 đ"   -> "ba trăm triệu đồng"    (right shape, wrong SCALE)
+# The second is the dangerous one — a confident, order-of-magnitude-wrong price
+# spoken as success. Measured S4 round 5; owner raised scope 2026-08-22 rather
+# than filing it as a known limit, because invoice copy is written this way and
+# the failure direction is "speaks a wrong number", not "refuses to speak".
+#
+# Lifting the decimal part out into the word the library DOES read ("phẩy") is
+# enough on its own; a companion rule stripping the thousand dots was written
+# first and then deleted, because removing it left every matrix cell green —
+# a rule no case can turn red is the exact shape of defect this feature keeps
+# shipping (measured while proving the red direction, same day).
+#
+# One or two decimal places only. Three would be ambiguous with the ENGLISH
+# thousand separator ("1,000"), which this rule must not silently re-scale.
+_DECIMAL_COMMA = re.compile(r"(?<=\d),(\d{1,2})(?!\d)")
+
+
+def _decimal_tail(match: re.Match[str]) -> str:
+    # An all-zero fraction is not spoken in a Vietnamese price: "3.000.000,00 đ"
+    # is read "ba triệu đồng", never "ba triệu phẩy không đồng".
+    digits = match.group(1)
+    return "" if set(digits) == {"0"} else f" phẩy {digits}"
+
+
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
 # What must never survive into speech: digits, a currency sign, a percent sign,
@@ -103,6 +145,9 @@ _MONEY = re.compile(
     # reached the voice with ok=True (S4 round 4 finding). ALL-CAPS price copy
     # is ordinary in the sales text this node exists for.
     rf"|(?<=\d)\s*(?i:đ)\b"
+    # ...and the same mark standing after a magnitude word ("5 tỷ đ"), which
+    # is a price by every reader's eye but had no digit to its left.
+    rf"|(?i:{_MAGNITUDE})\s*(?i:đ)\b"
     rf"|(?<=\d)\s*(?i:đồng)\b"
 )
 
@@ -156,6 +201,10 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
+    # Before every digit rule below: lift the decimal part into a word the
+    # library can read. Runs early so the range and minus rules downstream see
+    # plain digits either side of any dash.
+    out = _DECIMAL_COMMA.sub(_decimal_tail, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
     out = _DAY_WORD_BEFORE_DATE.sub("", out)
     # ORDER IS LOAD-BEARING: the range rule runs BEFORE the spaced-đồng rewrite.

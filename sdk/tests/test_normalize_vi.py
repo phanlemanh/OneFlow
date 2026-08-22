@@ -167,6 +167,152 @@ def test_numbers_and_money_golden() -> None:
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
 
 
+
+
+# --------------------------------------------------------------------------
+# AC-6 — the currency word must survive a MAGNITUDE WORD between the digit and
+# the "đ". Both money rules anchored on a digit immediately left of the "đ", so
+# the ordinary sales form "<số> <đơn vị lớn> đ" put a word in between and all
+# three layers missed at once: the pre-pass did not rewrite it, has_money() said
+# False so the relational rule never ran, and a bare letter is not residual —
+# ok=True with the price unspoken (S4 round 5 finding, measured on this branch:
+# "Giá 5 tỷ đ" → "giá năm tỷ đ").
+#
+# Declared as a CLASS, not a case list: {đơn vị lớn} × {dính, có khoảng trắng}.
+# The round-4 lesson was that patching only the member that just leaked keeps
+# the corpus growing by case while the criterion is written by class.
+# --------------------------------------------------------------------------
+
+MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ")
+DONG_SPACING = ("dính", "có khoảng trắng")
+
+MAGNITUDE_DONG_MATRIX: dict[tuple[str, str], tuple[str, str]] = {
+    ("nghìn", "có khoảng trắng"): ("Giá 5 nghìn đ", "giá năm nghìn đồng"),
+    ("ngàn", "có khoảng trắng"): ("Giá 5 ngàn đ", "giá năm ngàn đồng"),
+    ("triệu", "có khoảng trắng"): ("Giá 500 triệu đ", "giá năm trăm triệu đồng"),
+    ("tỷ", "có khoảng trắng"): ("Giá 5 tỷ đ", "giá năm tỷ đồng"),
+    ("tỉ", "có khoảng trắng"): ("Giá 5 tỉ đ", "giá năm tỉ đồng"),
+    ("nghìn", "dính"): ("Giá 5 nghìnđ", "giá năm nghìn đồng"),
+    ("ngàn", "dính"): ("Giá 5 ngànđ", "giá năm ngàn đồng"),
+    ("triệu", "dính"): ("Giá 500 triệuđ", "giá năm trăm triệu đồng"),
+    ("tỷ", "dính"): ("Giá 5 tỷđ", "giá năm tỷ đồng"),
+    ("tỉ", "dính"): ("Giá 5 tỉđ", "giá năm tỉ đồng"),
+}
+
+
+def test_currency_word_survives_magnitude_word() -> None:
+    missing = [
+        (word, spacing)
+        for word in MAGNITUDE_WORDS
+        for spacing in DONG_SPACING
+        if (word, spacing) not in MAGNITUDE_DONG_MATRIX
+    ]
+    assert not missing, f"Ô ma trận chưa có ca nào: {missing}"
+
+    for (word, spacing), (raw, expected) in MAGNITUDE_DONG_MATRIX.items():
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} ({word}, {spacing}) → {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} ({word}, {spacing}): mong {expected!r}, nhận {got.text!r}"
+        )
+        # The point of the criterion, stated separately so a wrong expected
+        # string cannot hide a MISSING currency word behind a diff.
+        assert "đồng" in got.text, (
+            f"{raw!r} ({word}, {spacing}) mất chữ tiền: {got.text!r}"
+        )
+
+    # Uppercase carries too — the sibling anchors already did (AC-6 amendment).
+    for raw, expected in (
+        ("Giá 5 TỶ Đ", "giá năm tỷ đồng"),
+        ("GIÁ 500 TRIỆU Đ", "giá năm trăm triệu đồng"),
+    ):
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert "đồng" in got.text, f"{raw!r} mất chữ tiền: {got.text!r}"
+
+
+# --------------------------------------------------------------------------
+# AC-5 — amounts written the standard Vietnamese way, with a thousand dot
+# and/or a decimal comma. The pinned library mis-parses both: with dots it
+# emits words around a literal "." ("giá ba.không.không đồng" for three
+# million), and without dots it mis-scales the decimal form ("3000000,00" →
+# "ba trăm triệu"). Neither leaves a digit behind, so the post-check saw
+# nothing and ok=True — an order-of-magnitude-wrong price spoken as success
+# (S4 round 5 finding, owner raised scope 2026-08-22).
+#
+# Declared as a CLASS: {có chấm nghìn, không chấm} × {phần lẻ bằng 0, phần lẻ
+# khác 0, không có phần lẻ}. Chốt đọc: phần lẻ toàn số 0 bị BỎ (giá "3.000.000,00"
+# đọc là "ba triệu đồng", đúng cách người Việt đọc giá), phần lẻ khác 0 đọc
+# "phẩy <chữ số>".
+# --------------------------------------------------------------------------
+
+GROUPING_KINDS = ("có chấm nghìn", "không chấm")
+FRACTION_KINDS = ("không có phần lẻ", "phần lẻ bằng 0", "phần lẻ khác 0")
+
+VN_AMOUNT_MATRIX: dict[tuple[str, str], tuple[str, str]] = {
+    ("có chấm nghìn", "không có phần lẻ"): (
+        "Giá 1.999.000 ₫",
+        "giá một triệu chín trăm chín mươi chín nghìn đồng",
+    ),
+    ("có chấm nghìn", "phần lẻ bằng 0"): (
+        "Giá 3.000.000,00 đ",
+        "giá ba triệu đồng",
+    ),
+    ("có chấm nghìn", "phần lẻ khác 0"): (
+        "Giá 1.999.000,50 đ",
+        "giá một triệu chín trăm chín mươi chín nghìn phẩy năm mươi đồng",
+    ),
+    ("không chấm", "không có phần lẻ"): (
+        "Giá 1999000 đ",
+        "giá một triệu chín trăm chín mươi chín nghìn đồng",
+    ),
+    ("không chấm", "phần lẻ bằng 0"): (
+        "Giá 3000000,00 đ",
+        "giá ba triệu đồng",
+    ),
+    ("không chấm", "phần lẻ khác 0"): (
+        "Giá 12345,67 đ",
+        "giá mười hai nghìn ba trăm bốn mươi lăm phẩy sáu mươi bảy đồng",
+    ),
+}
+
+# Shapes that use the same characters but are NOT grouped amounts — pinned so a
+# future widening of the rule cannot quietly eat them.
+VN_AMOUNT_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("phiên bản 0.2.3", "phiên bản không.hai.ba"),
+    ("Ngày 5/3/2025", "ngày năm tháng ba năm hai nghìn không trăm hai mươi lăm"),
+    ("Giá 1.500 đ", "giá một nghìn năm trăm đồng"),
+)
+
+
+def test_vietnamese_grouped_amounts_read_at_the_right_scale() -> None:
+    missing = [
+        (grouping, fraction)
+        for grouping in GROUPING_KINDS
+        for fraction in FRACTION_KINDS
+        if (grouping, fraction) not in VN_AMOUNT_MATRIX
+    ]
+    assert not missing, f"Ô ma trận chưa có ca nào: {missing}"
+
+    for (grouping, fraction), (raw, expected) in VN_AMOUNT_MATRIX.items():
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} ({grouping}, {fraction}) → {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} ({grouping}, {fraction}): mong {expected!r}, nhận {got.text!r}"
+        )
+        # A stray separator between two spelled-out groups is the shape that
+        # made the wrong reading pass — assert it directly, not via the diff.
+        assert "." not in got.text, (
+            f"{raw!r} còn dấu chấm trong đầu ra: {got.text!r}"
+        )
+
+    for raw, expected in VN_AMOUNT_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} (ca ÂM, luật không được ăn): mong {expected!r}, nhận {got.text!r}"
+        )
+
 # --------------------------------------------------------------------------
 # AC-3 / AC-4 — time, identifiers, units, administrative abbreviations.
 # --------------------------------------------------------------------------
