@@ -363,6 +363,26 @@ code** vì license):
   và lý do loại trừ được ghim bằng hai khẳng định về danh mục giọng, nên nếu ai thêm giọng
   tiếng Việt thì phép đo đỏ và buộc xem lại — thay vì lý do mục nát êm ru trong một comment.*
 
+## Sửa đổi vòng 9 (2026-08-25) — GỠ việc thu hẹp cảnh báo
+
+- **AC-10 trở lại KHÔNG điều kiện.** Hai lần thu hẹp (vòng 7, vòng 8) đều **thất bại theo
+  chiều mở** trên chính luồng chúng phải bảo vệ, và cả hai lần bộ kiểm vẫn xanh. Nguyên nhân
+  gốc, đo được ở vòng 9: **sản phẩm không có chỗ nào để người dùng khai tiếng Việt.** Danh mục
+  `LanguageSelect` có 11 mục — Auto, Chinese, English, Japanese, Korean, German, French,
+  Russian, Portuguese, Spanish, Italian — **không có tiếng Việt**; danh mục giọng preset chỉ
+  Trung/Anh/Nhật/Hàn. Mặc định plugin là `"Auto"` cho clone và `"Chinese"` cho preset/instruct.
+  `"Auto"` nghĩa là *tự dò ngôn ngữ của văn bản* — đúng ca tiếng Việt — nhưng mọi luật lọc đọc
+  nó thành "đã khai ngôn ngữ khác" rồi im lặng.
+  *Không tồn tại tín hiệu để thu hẹp cho đúng, nên luật thu hẹp bị gỡ hẳn. Ồn ào vì cảnh báo
+  cho luồng không phải tiếng Việt là cái giá RẺ HƠN: nó nhìn thấy được, còn một cảnh báo bị
+  tắt thì không.*
+- **Điều kiện mở lại:** danh mục có mục tiếng Việt **và** phép đo lấy giá trị từ **danh mục
+  sản phẩm** thay vì từ chuỗi viết tay. Cả hai vế đã ghim bằng phép đo: thêm mục tiếng Việt là
+  test đỏ, dựng lại luật thu hẹp là 44 ô đỏ (11 ngôn ngữ × 4 slot).
+  *Bài học ghi thành cơ chế, không ghi thành lời nhắc: `LANGUAGES` nay được export để bộ kiểm
+  rút giá trị từ đúng thứ người dùng bấm. Cả hai lần hỏng trước đều xanh vì phép đo tự gõ
+  chuỗi ngôn ngữ và chưa lần nào dùng `"Auto"`.*
+
 ## Known limits
 - **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
   hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —

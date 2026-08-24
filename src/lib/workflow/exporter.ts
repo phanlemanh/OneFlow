@@ -49,65 +49,30 @@ export const TTS_SLOTS: readonly NodeSlot[] = [
 ];
 
 /**
- * Speech slots where `language` is a value the USER declared, and therefore
- * evidence about what the voice-over targets.
+ * The TTS-order warning is UNCONDITIONAL, and two attempts to scope it by
+ * language were reverted (S4 rounds 7-9). Recording why, because the third
+ * attempt would otherwise be written the same way:
  *
- * Declaring the field in the ABI is not enough. `text-gen-speech-preset` also
- * declares it, but fills it on first mount from the chosen preset speaker —
- * default "Chinese" — so every preset node on a real canvas carries a
- * non-Vietnamese language the user never chose. Narrowing on that switched the
- * warning off for the whole slot (S4 round 8). The speaker catalog offers no
- * Vietnamese voice at all, so even a deliberately picked speaker says nothing
- * about the language of the TEXT being read.
+ * The product has NO place for a user to say "this voice is Vietnamese".
+ * `LanguageSelect` offers Auto, Chinese, English, Japanese, Korean, German,
+ * French, Russian, Portuguese, Spanish, Italian — no Vietnamese entry — and the
+ * preset speaker catalog is Chinese/English/Japanese/Korean only. The plugin
+ * defaults are "Auto" for clone and "Chinese" for preset/instruct, so on every
+ * slot the value present by default is one a language filter reads as "some
+ * other language".
  *
- * Kept in step with the ABI by a two-way test, which derives the ABI half and
- * subtracts SPEAKER_DERIVED_LANGUAGE_SLOTS — so a slot gaining or losing the
- * field cannot drift past, and the exclusion has to stay justified.
+ * "Auto" is the sharpest case: it means "detect the language of the text",
+ * which is exactly the Vietnamese workflow the warning exists for, and a filter
+ * suppresses on it. Both attempts therefore failed OPEN on their target — the
+ * first for the whole preset slot, the second for clone and instruct — and both
+ * suites stayed green because the tests supplied language values by hand
+ * instead of using the ones the product actually produces.
+ *
+ * Re-scope only after a Vietnamese option exists in the picker AND the tests
+ * draw their values from the shipped catalogs rather than from literals. Until
+ * then the noise of warning on non-Vietnamese workflows is the cheaper error:
+ * it is visible, whereas a suppressed warning is not.
  */
-export const SPEAKER_DERIVED_LANGUAGE_SLOTS: readonly NodeSlot[] = [
-    "text-gen-speech-preset",
-];
-
-export const LANGUAGE_AWARE_TTS_SLOTS: readonly NodeSlot[] = [
-    "text-gen-speech-clone",
-    "text-gen-speech-instruct",
-];
-
-/**
- * True when the node declares a language that is NOT Vietnamese.
- *
- * The reader this warning asks for reads VIETNAMESE numbers, so telling an
- * English or Japanese voice-over workflow to insert it is noise the user cannot
- * dismiss — it fires on save, save-and-execute and export alike (S4 round 7).
- *
- * Deliberately phrased as "declared as something else", not "declared as
- * Vietnamese": `language` is optional, and most Vietnamese workflows never touch
- * the picker. Reading an unset value as "not Vietnamese" would silently drop the
- * protection for exactly the users it exists for, so unknown keeps the warning.
- */
-function declaresNonVietnameseVoice(node: ExecutableNode): boolean {
-    if (!LANGUAGE_AWARE_TTS_SLOTS.includes(node.feature as NodeSlot)) {
-        return false;
-    }
-    const binding = node.bindings?.language;
-    const bound =
-        binding && (binding.kind === "config" || binding.kind === "static")
-            ? binding.value
-            : undefined;
-    const raw = bound ?? node.rawConfig?.language;
-    if (typeof raw !== "string" || raw.trim() === "") return false;
-
-    const value = raw.trim().toLowerCase();
-    // "vi", "vi-VN", "vi_VN", "vietnamese" — matched by prefix so a regional
-    // tag cannot slip past, and `!` is never inferred from an unknown code.
-    return !(
-        value === "vi" ||
-        value.startsWith("vi-") ||
-        value.startsWith("vi_") ||
-        value.startsWith("viet")
-    );
-}
-
 /** Text-in, audio-out slots that are NOT speech — the negative control. */
 export const MUSIC_SLOTS: readonly NodeSlot[] = [
     "gen-music",
@@ -432,7 +397,6 @@ export class WorkflowExporter {
         const parentIndex = buildParentIndex(this.edges);
         const offenders = executableNodes
             .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
-            .filter((n) => !declaresNonVietnameseVoice(n))
             .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, parentIndex))
             .map((n) => n.id);
         const warnings: WorkflowWarning[] =

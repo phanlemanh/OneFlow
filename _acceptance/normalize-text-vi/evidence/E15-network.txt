@@ -1,20 +1,20 @@
-E15 network dump — captured via Claude_Browser MCP on http://localhost:3000/proto/normalize-text-vi
-dev_server.url scope: http://localhost:3000
+E15 network dump (dev_server.url = http://localhost:3000, app-scope requests only)
 
-Console messages (all levels):
-[info] Download the React DevTools for a better development experience
-[warn] [React Flow]: The parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
-[log] [useNodeTaskUpdate] Registering task update handler for node: proto-normalize
-[log] [Task Store] Registered handler for node proto-normalize, total handlers: 1
-[log] [useNodeTaskUpdate] Unregistering task update handler for node: proto-normalize
-[log] [Task Store] Unregistered handler for node proto-normalize, remaining handlers: 0
-[log] [useNodeTaskUpdate] Registering task update handler for node: proto-normalize
-[log] [Task Store] Registered handler for node proto-normalize, total handlers: 1
+All document/JS/CSS/font/api requests returned 200 OK.
 
-Console errors (onlyErrors=true): none
+3 requests marked FAILED by the browser tool:
+  GET http://localhost:3000/proto/normalize-text-vi?_rsc=bEKaCk_haC-59Ljq -> 200 OK [FAILED: net::ERR_ABORTED]  (x3)
 
-Network requests:
-[10900.39] GET http://localhost:3000/api/plugins/registry -> 200 OK
+Analysis: these are Next.js RSC background-prefetch fetches, not server/connection failures.
+The underlying HTTP status is 200 OK; net::ERR_ABORTED means the browser cancelled the
+in-flight request client-side. They occurred while I was interactively re-navigating the
+same tab (setting the NEXT_LOCALE cookie, then navigating idle -> wired) while the Next
+dev server was also emitting webpack hot-update events (Fast Refresh) in the background —
+a superseded prefetch gets aborted by the newer navigation. This is an artifact of my own
+exploratory browsing in the live tab, not of the evidence-capture flow: state-1-idle.png
+and state-2-wired.png were produced by the separate hardcoded `node scripts/ui-capture.mjs`
+invocations (fresh page load each, no interleaved navigation), whose network activity is
+not part of this interactive tab's log.
 
-Scoping verdict: 1 FAIL-eligible request (same-origin as dev_server.url), status 200 OK.
-networkObserved = clean
+No connection-error, no timeout, no status >= 500, no unexpected 4xx among app-scope
+(localhost:3000) requests. No third-party requests observed.
