@@ -13,6 +13,7 @@
 import type { Edge, Node } from "@xyflow/react";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { DEFAULT_QWEN_SPEAKER, QWEN_SPEAKERS } from "@/constants/qwen-speakers";
 import { ABI_NODES } from "@/generated/abi";
 import {
     NODE_TYPE_SOURCE_SPEC,
@@ -24,6 +25,7 @@ import {
     exportWorkflow,
     LANGUAGE_AWARE_TTS_SLOTS,
     MUSIC_SLOTS,
+    SPEAKER_DERIVED_LANGUAGE_SLOTS,
     TTS_SLOTS,
     WORKFLOW_TTS_NEEDS_NORMALIZE,
 } from "./exporter";
@@ -110,11 +112,14 @@ describe("language scope", () => {
         ["ja", "Japanese"],
         ["ko", "Korean"],
     ])("stays silent when the voice is declared %s", (language) => {
+        // `text-gen-speech-clone`, not the preset slot: on clone the language is
+        // typed by the user, so it is evidence. On preset it is filled from the
+        // speaker on mount — see SPEAKER_DERIVED_LANGUAGE_SLOTS.
         const { nodes, edges } = buildChain([
             { id: "a", feature: "gen-text" },
             {
                 id: "b",
-                feature: "text-gen-speech-preset",
+                feature: "text-gen-speech-clone",
                 deps: ["a"],
                 data: { language },
             },
@@ -131,7 +136,7 @@ describe("language scope", () => {
                 { id: "a", feature: "gen-text" },
                 {
                     id: "b",
-                    feature: "text-gen-speech-preset",
+                    feature: "text-gen-speech-clone",
                     deps: ["a"],
                     data: { language },
                 },
@@ -144,10 +149,55 @@ describe("language scope", () => {
         },
     );
 
+    // The mount-time default, which is what every preset node on a real canvas
+    // actually carries. `text-gen-speech-preset` writes
+    // `language = DEFAULT_QWEN_SPEAKER.language` on first mount, and that
+    // default is "Chinese" — so narrowing on a declared language switched the
+    // warning OFF for the whole slot, with the user never having chosen
+    // anything (S4 round 8 finding; the round-7 narrowing was signed on an ABI
+    // reading that never checked what value actually flows in).
+    it("still warns on a preset node carrying its mount-time default", () => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            {
+                id: "b",
+                feature: "text-gen-speech-preset",
+                deps: ["a"],
+                data: { language: DEFAULT_QWEN_SPEAKER.language },
+            },
+        ]);
+
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toEqual([
+            { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+        ]);
+    });
+
+    // ...and the same for a speaker the user DID pick, because on this slot the
+    // language is derived from the speaker rather than typed: the picker offers
+    // no Vietnamese voice at all, so "declared Chinese" carries no information
+    // about whether the text being read is Vietnamese.
+    it("still warns on a preset node whose speaker language was picked", () => {
+        const { nodes, edges } = buildChain([
+            { id: "a", feature: "gen-text" },
+            {
+                id: "b",
+                feature: "text-gen-speech-preset",
+                deps: ["a"],
+                data: { speaker: "Ryan", language: "English" },
+            },
+        ]);
+
+        const workflow = exportWorkflow(nodes, edges, { name: "x" });
+        expect(workflow.warnings).toEqual([
+            { code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: ["b"] },
+        ]);
+    });
+
     it("still warns when the language is not declared at all", () => {
         const { nodes, edges } = buildChain([
             { id: "a", feature: "gen-text" },
-            { id: "b", feature: "text-gen-speech-preset", deps: ["a"] },
+            { id: "b", feature: "text-gen-speech-clone", deps: ["a"] },
         ]);
 
         const workflow = exportWorkflow(nodes, edges, { name: "x" });
@@ -324,7 +374,7 @@ describe("two-way", () => {
         // silent in the SAFE-looking direction for a gained field (a declared
         // English voice would keep being warned at) and in the UNSAFE direction
         // for a lost one.
-        const derived = TTS_SLOTS.filter((slot) => {
+        const declaresLanguage = TTS_SLOTS.filter((slot) => {
             const node = ABI_NODES[slot as keyof typeof ABI_NODES];
             const inputs =
                 (node.inputs as { properties?: Record<string, unknown> })
@@ -332,9 +382,33 @@ describe("two-way", () => {
             return "language" in inputs;
         });
 
+        // Declaring the field is necessary but NOT sufficient: a slot that
+        // fills it from a preset speaker is excluded, because the value is not
+        // the user's answer to "what language is this".
+        const derived = declaresLanguage.filter(
+            (slot) => !SPEAKER_DERIVED_LANGUAGE_SLOTS.includes(slot),
+        );
+
         expect([...LANGUAGE_AWARE_TTS_SLOTS].sort()).toEqual(
             [...derived].sort(),
         );
+        // An exclusion naming a slot that does NOT declare the field would be
+        // dead weight hiding a real gap.
+        for (const slot of SPEAKER_DERIVED_LANGUAGE_SLOTS) {
+            expect(declaresLanguage).toContain(slot);
+        }
+    });
+
+    it("keeps the reason for excluding the preset slot measurable", () => {
+        // The exclusion rests on two facts about the preset speaker catalog,
+        // both of which could change without anyone touching the exporter.
+        // Written as assertions so the day either changes this goes red and the
+        // narrowing gets revisited — instead of the reason quietly rotting
+        // inside a comment.
+        expect(QWEN_SPEAKERS.some((sp) => /viet/i.test(sp.language))).toBe(
+            false,
+        );
+        expect(/viet/i.test(DEFAULT_QWEN_SPEAKER.language)).toBe(false);
     });
 
     it("registers the reader itself as an ABI node type", () => {

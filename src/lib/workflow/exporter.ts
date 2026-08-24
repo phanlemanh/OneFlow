@@ -49,14 +49,26 @@ export const TTS_SLOTS: readonly NodeSlot[] = [
 ];
 
 /**
- * The speech slots whose ABI input declares a `language` field. Only these can
- * tell us what language a voice-over targets; `text-audio-gen-speech` declares
- * none, so a workflow using it is always "unknown".
+ * Speech slots where `language` is a value the USER declared, and therefore
+ * evidence about what the voice-over targets.
  *
- * Kept in step with the ABI by a two-way test, same as TTS_SLOTS above.
+ * Declaring the field in the ABI is not enough. `text-gen-speech-preset` also
+ * declares it, but fills it on first mount from the chosen preset speaker —
+ * default "Chinese" — so every preset node on a real canvas carries a
+ * non-Vietnamese language the user never chose. Narrowing on that switched the
+ * warning off for the whole slot (S4 round 8). The speaker catalog offers no
+ * Vietnamese voice at all, so even a deliberately picked speaker says nothing
+ * about the language of the TEXT being read.
+ *
+ * Kept in step with the ABI by a two-way test, which derives the ABI half and
+ * subtracts SPEAKER_DERIVED_LANGUAGE_SLOTS — so a slot gaining or losing the
+ * field cannot drift past, and the exclusion has to stay justified.
  */
-export const LANGUAGE_AWARE_TTS_SLOTS: readonly NodeSlot[] = [
+export const SPEAKER_DERIVED_LANGUAGE_SLOTS: readonly NodeSlot[] = [
     "text-gen-speech-preset",
+];
+
+export const LANGUAGE_AWARE_TTS_SLOTS: readonly NodeSlot[] = [
     "text-gen-speech-clone",
     "text-gen-speech-instruct",
 ];

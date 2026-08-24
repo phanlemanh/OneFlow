@@ -349,6 +349,20 @@ code** vì license):
   "không phải tiếng Việt" sẽ âm thầm bỏ bảo vệ đúng nhóm người cần nó. Không cần đổi ABI: ba
   trong bốn slot đã có sẵn `language`; slot thứ tư không có nên luôn tính là chưa rõ.
 
+## Sửa đổi vòng 8 (2026-08-22)
+
+- **AC-10 — sửa lại việc thu hẹp của vòng 7.** Bản thu hẹp trước tắt cảnh báo cho **mọi**
+  node `text-gen-speech-preset`, vì node đó tự ghi `language` lúc mount từ giọng mặc định
+  ("Chinese"), và danh mục giọng **không có giọng tiếng Việt nào**. Người dùng chưa hề chọn
+  gì. Nay chỉ những slot mà `language` là **khai báo của người dùng** (`clone`, `instruct`)
+  mới được thu hẹp; slot preset nằm trong `SPEAKER_DERIVED_LANGUAGE_SLOTS` và **luôn cảnh
+  báo**. Khai trong ABI là điều kiện cần, không phải điều kiện đủ.
+  *Ghi rõ vì sao lọt: chữ ký vòng 7 dựa trên báo cáo của máy rằng "3/4 slot đã có trường
+  `language`" — đúng về ABI, nhưng chưa ai kiểm **giá trị thực tế chạy vào đó**. Phép đo lúc
+  ấy luôn tự đặt `language`, chưa lần nào đi qua đường mount. Nay có ca đo chạy đúng đường đó,
+  và lý do loại trừ được ghim bằng hai khẳng định về danh mục giọng, nên nếu ai thêm giọng
+  tiếng Việt thì phép đo đỏ và buộc xem lại — thay vì lý do mục nát êm ru trong một comment.*
+
 ## Known limits
 - **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
   hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —
