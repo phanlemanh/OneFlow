@@ -77,34 +77,79 @@ grep -q 'REFUSED' <<<"$out" \
     && fail "refused, but the stale frame survived — a later run would file it as evidence"
 
 # ---------------------------------------------------------------- claim 2 ---
-# CLASS, not case. Thirteen executor keys derive the same pin; the finding
-# named one, and patching only that one is the exact mistake this feature made
-# twice already with the range-unit list.
+# CLASS, not case — and the class must be selected by a property of the
+# SUBJECT, never by the property being measured.
 #
-# The first version of this check asserted "no line uses the inline form" plus
-# "at least one line uses the guarded form" — a point case wearing a class
-# claim, since twelve keys could be unguarded in some OTHER spelling and it
-# would still pass (S4 round 6 finding). It now walks EVERY executor line that
-# names the engine and requires the guard on each one, and reports the count it
-# actually checked so a silent drop to zero lines cannot read as success.
-engine_lines="$(grep -n 'vietnormalizer' _acceptance/config.yaml \
-    | grep -vE '^[0-9]+: *#' \
-    | grep -E 'uv run|--with' || true)"
+# Three shapes of this check, two of them unsound:
+#   v1 "no line uses the inline form" + "at least one uses the guard" — a point
+#      case wearing a class claim (S4 round 6).
+#   v2 every line matching `grep vietnormalizer`. After the derivation moved
+#      into scripts/lib/sdk-version.sh, the only occurrence of that word on an
+#      executor line is INSIDE the guard message this check looks for — so a key
+#      that loses its guard also loses the word, is never selected, and is never
+#      flagged. The check could not go red on the regression it claims to catch
+#      (S4 round 11); the old red-direction proof passed only because that
+#      particular break happened to put the word back.
+#   v3 every `sdk_pytest*` key — sound selector, wrong set: 61 keys match and 49
+#      of them never install the engine.
+#
+# What actually defines the class: the key runs a test that NEEDS the reading
+# engine. Read off the TEST FILE, which cannot be changed by editing the guard.
+needs_engine_lines=""
+while IFS= read -r line; do
+    [ -z "$line" ] && continue
+    # Files AND directories: `tests/conformance` is a real target and matching
+    # only `*.py` dropped it into the "whole suite" branch below, flagging a key
+    # that never touches the reader (caught while making this selector sound).
+    paths="$(printf '%s' "$line" | grep -oE 'tests/[A-Za-z0-9_/]+(\.py)?' || true)"
+    if [ -z "$paths" ]; then
+        # No explicit target = runs the whole SDK suite, which includes the reader.
+        needs_engine_lines="$needs_engine_lines$line
+"
+        continue
+    fi
+    # `-k <expr>` narrows a directory target to a subset. Without reading it, a
+    # key that runs `tests/conformance -k compose_overlay` looks like it needs
+    # the reader merely because a SIBLING file in that directory does.
+    kexpr="$(printf '%s' "$line" | grep -oE '\-k [A-Za-z0-9_]+' | sed 's/^-k //' || true)"
+    if [ -n "$kexpr" ]; then
+        case "$kexpr" in
+            *normalize*) ;;
+            *) continue ;;
+        esac
+    fi
+    for f in $paths; do
+        # IMPORTS the reader — not merely mentions it. Measured 2026-08-25:
+        # only tests/test_normalize_vi.py imports the module. A conformance
+        # FIXTURE named normalize-text-vi.json and a TIER_A assertion naming the
+        # slot as a string both mention it without needing the engine, and
+        # matching on the name pulled two unrelated features' keys in.
+        if [ -e "sdk/$f" ] && grep -rq 'tongflow\.text\.normalize_vi' "sdk/$f"; then
+            needs_engine_lines="$needs_engine_lines$line
+"
+            break
+        fi
+    done
+done <<<"$(grep -nE '^[[:space:]]+sdk_pytest[a-z_]*:' _acceptance/config.yaml || true)"
+
 checked=0
 while IFS= read -r line; do
     [ -z "$line" ] && continue
     checked=$((checked + 1))
     case "$line" in
         *'${pin:?'*) ;;
-        *) fail "executor key derives the pin with NO guard:
+        *) fail "executor key runs a test that needs the reading engine but derives the pin with NO guard:
 $line" ;;
     esac
-done <<<"$engine_lines"
+done <<<"$needs_engine_lines"
 
-[ "$checked" -ge 10 ] || fail \
-    "only $checked executor keys naming the engine were found — the measurement lost
-its subject; this is not a clean config (12 keys measured on 2026-08-22)"
-echo "  (checked $checked executor keys; each must carry the \${pin:?…} guard)"
+# Floor = the count measured when this selector was made sound. Its job is to
+# catch the selector going BLIND, not to pin an exact number: extra guards on
+# keys that do not need the engine are harmless and do not fail this check.
+[ "$checked" -ge 9 ] || fail \
+    "only $checked executor keys were found to need the reading engine — the
+measurement lost its subject; this is not a clean config (9 measured 2026-08-25)"
+echo "  (checked $checked executor keys whose tests need the engine; each must carry the \${pin:?…} guard)"
 
 # The derivation is exercised through the ONE file that owns it, using the
 # SDK_VERSION_ROOT override that scripts/lib/sdk-version.sh documents for

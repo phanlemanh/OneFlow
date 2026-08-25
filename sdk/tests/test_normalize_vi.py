@@ -286,11 +286,31 @@ def test_currency_word_survives_magnitude_word() -> None:
 # prefix pass runs BEFORE them, so it consumes the address form first.
 # --------------------------------------------------------------------------
 
+# Only the DOTTED form is unambiguous. "Đ." is never a currency mark, so it can
+# be expanded with confidence.
 CORPUS_STREET: tuple[tuple[str, str], ...] = (
     ("Số 5 Đ. Lê Lợi", "số năm đường lê lợi"),
-    ("Nhà 12 Đ Trần Phú", "nhà mười hai đường trần phú"),
     ("Hàng A2 đ. Nguyễn Huệ", "hàng a hai đường nguyễn huệ"),
     ("Số 5 Đ. Lê Lợi, Q.1", "số năm đường lê lợi, quận một"),
+)
+
+# The UNDOTTED form is genuinely ambiguous and must REFUSE.
+#
+# "Nhà 12 Đ Trần Phú" (a street) and "Chỉ 500 Đ Thôi" (a price) are identical in
+# shape: number, space, Đ, space, capitalised word. Nothing short of a lexicon
+# separates them. The round-6 rule guessed "street" for both, so a price read
+# out as a street name — "Giá 1.999.000 Đ Bao gồm VAT" became "…nghìn ĐƯỜNG bao
+# gồm…" with ok=True, and has_money() went False so the money-loss relation
+# never ran either (S4 round 11 finding; the rule's own comment had declared the
+# imperfection as ALL-CAPS copy only).
+#
+# Refusing is the declared trade: a blocked sentence is visible to the user, a
+# price read as a street is not. This is the follow-up contract's principle
+# applied to a case the original contract already owns.
+CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
+    "Giá 1.999.000 Đ Bao gồm VAT",
+    "Chỉ 500 Đ Thôi",
+    "Nhà 12 Đ Trần Phú",
 )
 
 # The price forms the street rule must NOT eat. Two of them are the very cases
@@ -353,6 +373,19 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         assert got.text == expected, (
             f"{raw!r} (ca ÂM, tên thương hiệu): mong {expected!r}, nhận {got.text!r}"
         )
+
+
+def test_ambiguous_undotted_d_refuses_rather_than_guessing() -> None:
+    for raw in CORPUS_AMBIGUOUS_D:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: dạng nhập nhằng phải TỪ CHỐI, nhận ok=True -> {got.text!r}"
+        )
+        assert "Đ" in got.residual or "đ" in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu token gây nhập nhằng: {got.residual}"
+        )
+        # ...and it must never have guessed either reading before refusing.
+        assert "đường" not in got.text, f"{raw!r} đoán thành đường: {got.text!r}"
 
 
 def test_street_abbreviation_is_not_a_price() -> None:
@@ -1039,6 +1072,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
+    ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),
 )
 
 ALL_CORPUS = tuple(

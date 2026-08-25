@@ -383,6 +383,31 @@ code** vì license):
   rút giá trị từ đúng thứ người dùng bấm. Cả hai lần hỏng trước đều xanh vì phép đo tự gõ
   chuỗi ngôn ngữ và chưa lần nào dùng `"Auto"`.*
 
+## Sửa đổi vòng 11 (2026-08-25)
+
+- **AC-6 — `Đ` trần trước từ viết hoa nay TỪ CHỐI, không đoán.** Luật `STREET_PATTERN` thêm ở
+  vòng 6 nhận cả dạng **không dấu chấm**, nên `Giá 1.999.000 Đ Bao gồm VAT` đọc thành
+  "…nghìn **đường** bao gồm…" với `ok=True`, và `has_money` trả False nên luật quan hệ mất-chữ-tiền
+  **tắt luôn**. Đo thật; hồi quy do chính bản vá vòng 6, mà comment lúc đó chỉ khai giới hạn cho
+  chữ VIẾT HOA TOÀN BỘ.
+  *Đo được rằng hai ca **không tách được bằng hình dạng**: `Nhà 12 Đ Trần Phú` (địa chỉ) và
+  `Chỉ 500 Đ Thôi` (giá) giống hệt nhau — số, khoảng trắng, `Đ`, khoảng trắng, từ viết hoa.
+  Nên: dạng **có dấu chấm** (`Đ.`/`đ.`) vẫn đọc "đường" vì `Đ.` không bao giờ là dấu tiền; dạng
+  **trần** thành `residual` và `ok=False`. Đây là nguyên tắc của hợp đồng follow-up áp cho một ca
+  hợp đồng gốc đã sở hữu: giữa từ chối và đọc sai, chọn từ chối — câu bị chặn thì người dùng thấy,
+  giá đọc thành tên đường thì không.*
+  **Đánh đổi khai rõ:** `Nhà 12 Đ Trần Phú` trước đây đọc đúng thành "đường", nay bị từ chối.
+
+- **AC-16 — phép đo không được chọn chủ thể bằng thứ nó đang đo.** `E18` tuyên soi cả lớp khoá
+  executor, nhưng chọn chủ thể bằng `grep 'vietnormalizer'` — mà sau khi gộp nguồn về
+  `scripts/lib/sdk-version.sh`, từ đó **chỉ còn nằm trong chính thông điệp mỏ neo** nó đi kiểm.
+  Khoá nào mất mỏ neo cũng mất luôn từ khoá nên không bị soi: phép đo **không thể đỏ** trên đúng
+  hồi quy nó tuyên bắt. Chiều đỏ cũ "qua" chỉ vì cách phá tình cờ để lại từ đó.
+  *Nay chọn theo **bài kiểm có import bộ đọc thật** — tính chất của chủ thể, không đổi được bằng
+  cách sửa mỏ neo. Quá trình làm cho bộ chọn đúng lộ ra ba lần chọn sai liên tiếp: theo tên khoá
+  (61 khoá, thừa 49), theo tên file bỏ sót thư mục, theo tên slot kéo nhầm hai tính năng khác.
+  Số thật là **9 khoá**, không phải 12 như từng tuyên — "12" chưa bao giờ đúng lớp.*
+
 ## Known limits
 - **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
   hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —

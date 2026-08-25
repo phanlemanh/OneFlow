@@ -87,8 +87,21 @@ _PREFIXES: tuple[tuple[str, str, str], ...] = (
 # capitalised word straight after the mark ("GIÁ 500 Đ MỘT THÁNG") reads as a
 # street. The slash form the contract pins ("Đ/THÁNG") is unaffected.
 STREET_PATTERN: tuple[re.Pattern[str], str] = (
-    re.compile(rf"(?<!{LETTER})(?:(?i:đ)\.|Đ)[ \t]+(?=[{_UPPER}])"),
+    re.compile(rf"(?<!{LETTER})(?i:đ)\.[ \t]+(?=[{_UPPER}])"),
     "đường ",
+)
+
+# The UNDOTTED form is NOT here on purpose. "<số> Đ <TênHoa>" is shape-identical
+# for a street ("Nhà 12 Đ Trần Phú") and a price ("Chỉ 500 Đ Thôi"), and the
+# round-6 rule guessed street for both — so a price was read out as a street
+# name with ok=True, while has_money() went False and switched off the very
+# relation that exists to catch a dropped currency unit (S4 round 11).
+#
+# Detected here, refused in normalize_vi: between refusing and reading wrong,
+# refuse. A blocked sentence is visible to the user; a price spoken as a street
+# is not.
+AMBIGUOUS_D_PATTERN: re.Pattern[str] = re.compile(
+    rf"(?<=\d)[ \t]+Đ[ \t]+(?=[{_UPPER}])"
 )
 
 PREFIX_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(

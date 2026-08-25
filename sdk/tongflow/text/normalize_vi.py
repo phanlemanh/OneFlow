@@ -21,6 +21,7 @@ from .vi_dictionary import (
     CURRENCY_SIGN_PATTERNS,
     CURRENCY_WORD,
     LETTER,
+    AMBIGUOUS_D_PATTERN,
     PREFIX_PATTERNS,
     STREET_PATTERN,
 )
@@ -262,6 +263,11 @@ def normalize_vi(text: str) -> NormalizeResult:
     residual = tuple(dict.fromkeys(m.group(0) for m in _RESIDUAL.finditer(out)))
     if _COLON_BETWEEN_WORDS.search(out) and _CLOCK_IN.search(text):
         residual = residual + (":",)
+    # Relational, like the clock-colon rule above: decided on the INPUT, because
+    # the output is lower-cased and the capital that makes "<số> Đ <TênHoa>"
+    # ambiguous is gone by then.
+    if AMBIGUOUS_D_PATTERN.search(unicodedata.normalize("NFC", text)):
+        residual = residual + ("Đ",)
     if residual:
         return NormalizeResult(
             ok=False,
