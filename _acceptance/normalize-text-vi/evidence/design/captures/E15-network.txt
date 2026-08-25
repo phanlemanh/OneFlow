@@ -1,0 +1,26 @@
+E15 network evidence (via mcp__Claude_Browser, live browser check supplementing pinned capture)
+Scope: dev_server origin = http://localhost:3000
+
+=== state idle: /proto/normalize-text-vi (with NEXT_LOCALE=vi cookie) ===
+Console errors: none ("No console logs." from read_console_messages onlyErrors=true)
+Network requests (all app-origin, all 200 OK):
+GET /api/plugins/registry -> 200 OK
+GET /proto/normalize-text-vi -> 200 OK
+GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
+GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
+GET /_next/static/css/app/layout.css -> 200 OK
+GET /_next/static/css/app/proto/[slug]/page.css -> 200 OK
+GET /_next/static/chunks/webpack.js -> 200 OK
+GET /_next/static/chunks/main-app.js -> 200 OK
+GET /_next/static/chunks/app-pages-internals.js -> 200 OK
+GET /_next/static/chunks/app/proto/[slug]/page.js -> 200 OK
+GET /_next/static/chunks/app/layout.js -> 200 OK
+GET /api/plugins/registry -> 200 OK (refetch)
+
+=== state wired: /proto/normalize-text-vi?state=wired (with NEXT_LOCALE=vi cookie) ===
+Console errors: none ("No console logs." from read_console_messages onlyErrors=true)
+document.documentElement.lang = "vi"
+data-proto-state = "wired"
+
+Verdict: no FAIL-eligible request found (no connection errors / no 4xx / no 5xx on app origin); no third-party requests observed.
+networkObserved = clean
