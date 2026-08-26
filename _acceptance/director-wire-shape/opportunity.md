@@ -57,7 +57,52 @@ multi-user/collaboration hoặc few-shot pool chia sẻ.
 | 1 | Trả planJson qua wire không phá hợp đồng 7 mã lỗi hiện có của route | Client cũ vỡ khi parse response | Đọc `route.test.ts` + thử response mở rộng với client hiện tại (trường thêm, không trường đổi) | Chưa thử |
 | 2 | `director_events` ghi 2 pha (server generated + client vá outcome) đủ bắt outcome thật — client đóng tab thì row generated mồ côi vẫn đếm được | Số liệu accept-rate sai lệch không phát hiện | Đếm row mồ côi sau 1 tuần dùng thật; ngưỡng chấp nhận <10% | Chưa thử |
 | 3 | Migration 2 bảng + 1 cột sống trên db người dùng cũ | Vỡ db đang dùng | Phép thử migrator-thật theo tiền lệ `metering-schema.test.ts:15-25`; bảng mới export qua barrel `src/db/schema.ts` | Chưa thử |
-| 4 | Token một canvas 20 node serialize + K plan replay nằm trong ngưỡng chi phí/latency chấp nhận | Trần per-field phải siết lại, trí nhớ canvas (director-v2 #1) đắt hơn dự tính | Serialize đồ thị 20 node thật + đếm token (kế thừa giả định #1 của director-v2, nay đo trên trần ĐÚNG: `MAX_PROMPT_LENGTH`, không phải `MAX_TOKENS`) | Chưa thử |
+| 4 | Token một canvas 20 node serialize + K plan replay nằm trong ngưỡng chi phí/latency chấp nhận | Trần per-field phải siết lại, trí nhớ canvas (director-v2 #1) đắt hơn dự tính | Serialize đồ thị 20 node thật + đếm token. **Số liệu nền đã có 26/08:** độ trễ hiện tại p50 16,9s / p95 75,1s / max 99,7s KHI CHƯA có canvas — nên ngân sách latency còn lại rất mỏng. Trần thật đang chặn là `MAX_PROMPT_LENGTH=2000` (`route.ts:6`), không phải `MAX_TOKENS` | Chưa thử (đã có số liệu nền) |
+
+## Kết quả đo (26/08/2026)
+
+Hai phép thử đã chạy TRƯỚC khi viết code, đúng nguyên tắc "không xây gì trước khi đo".
+
+**EVAL-0 — baseline Director v1** ([báo cáo](evidence/baseline-2026-08-26.md) ·
+[số thô](evidence/baseline-2026-08-26.json) · [golden set](golden/golden-set.json)):
+26/30 thành công (86,7%); p50/p95 độ trễ 16,9s/75,1s; phình node median 4×;
+T1 (đơn giản nhất) chỉ 62,5% còn T2 100%.
+
+**EVAL-3 — schema qua các hãng** ([báo cáo](evidence/eval3-schema-acceptance-2026-08-26.md)):
+qua AI Gateway, `DirectorPlanSchema` được **cả 4 hãng chấp nhận** (gemini, anthropic, openai,
+deepseek) và trả plan hợp lệ — **với đúng một điều kiện**, xem mục dưới.
+
+### ĐIỀU KIỆN TIÊN QUYẾT MỚI PHÁT HIỆN — chặn B05
+
+`src/lib/director/dsl.ts:46` dùng `z.discriminatedUnion("kind", …)`, emit `oneOf`.
+**OpenAI từ chối `oneOf` qua mọi đường** (*"'oneOf' is not permitted"*). `z.union` thường
+emit `anyOf` — bốn hãng đều nhận. Phép thử cô lập: cùng model, cùng prompt, chỉ khác kiểu
+union → `oneOf` 400, `anyOf` 200 kèm plan hợp lệ.
+
+Chi phí sửa gần bằng 0: một chỗ dùng duy nhất, không test nào tham chiếu
+`discriminatedUnion`, `Extract<DirectorStep,{kind:…}>` giữ nguyên. Và đường Anthropic hiện
+tại (`zodOutputFormat`) VỐN ĐÃ emit `anyOf` — nên `discriminatedUnion` chưa bao giờ mang lợi
+ích grammar, nó là mìn chờ đổi transport.
+
+**Bản sửa này phải đi CÙNG gói đổi transport, không tách.**
+
+### Hai hệ quả cho thiết kế eval
+
+1. **Ngưỡng EVAL-1 không đủ.** *"≥80% compile 0-issue"* chỉ hỏi *plan biên dịch được không*.
+   Director đạt 86,7% trong khi phình node median 4× và T4 (cố tình vượt năng lực) đạt 100%
+   nhờ **thay thế im lặng** — đúng cú pháp, sai ý định. Thêm chiều đo: tỉ lệ node so với
+   trường `expect` của golden set (đã có, không cần người chấm).
+2. **Tỉ lệ lượt-1 chưa đo được từ ngoài** — endpoint và log đều chỉ cho kết quả cuối.
+   Đây là bằng chứng đo được cho việc gói này (cột `attempts`) phải đi trước.
+
+### Bài học đo, ghi để không lặp
+
+Bản EVAL-3 đầu kết luận *"gateway không chuẩn hoá schema"* và đề xuất chuyển sang provider
+package — **SAI**. Lúc đó tài khoản gateway ở free tier: `anthropic` trả 403, `google`/
+`deepseek` trả `RateLimitError`, chỉ `openai` đo được, mà OpenAI tình cờ là hãng DUY NHẤT
+từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một mẫu.
+
+**Lỗi truy cập và lỗi giới hạn tốc độ không phải bằng chứng về hành vi của thứ đang đo.**
 
 ## Ngưỡng chết / ngưỡng UAT
 

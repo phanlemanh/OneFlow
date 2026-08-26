@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "createdAt": "2026-08-26",
+  "niche": "quang cao / ban hang truc tiep (seller), co nhanh bat dong san",
+  "language": "vi",
+  "purpose": "Baseline EVAL-0 cho Director v1 truoc khi doi transport (B05) va truoc lan D. Moi lan do lai PHAI khop frozen-config.json, vi vocabulary la ham cua registry luc chay.",
+  "tiers": {
+    "T1": "1-3 buoc — mot nang luc don",
+    "T2": "4-8 buoc — chuoi nhieu nang luc",
+    "T3": "9+ buoc — hinh dang skill #1 (footage -> kho clip)",
+    "T4": "co tinh vuot nang luc da cai — do ty le MISSING_PLUGIN trung thuc"
+  },
+  "prompts": [
+    {"id":"T1-01","tier":"T1","prompt":"Viet 3 caption ngan quang cao mot can ho 2 phong ngu o Thu Duc, giong than thien, moi cai duoi 30 chu.","expect":["gen-text"]},
+    {"id":"T1-02","tier":"T1","prompt":"Doi doan nay thanh chu de doc cho may doc: \"Gia chi tu 2,4 ty, tra truoc 15%, ban giao quy 3/2027\".","expect":["normalize-text-vi"]},
+    {"id":"T1-03","tier":"T1","prompt":"Tao mot anh minh hoa phong khach can ho hien dai, tong am, co anh nang chieu qua cua so.","expect":["image-gen"]},
+    {"id":"T1-04","tier":"T1","prompt":"Tach rieng phan tieng ra khoi video quay nha khach gui.","expect":["extract-audio"]},
+    {"id":"T1-05","tier":"T1","prompt":"Cat video tour can ho thanh tung canh rieng.","expect":["split-video"]},
+    {"id":"T1-06","tier":"T1","prompt":"Lay khung hinh dau tien cua video lam anh bia.","expect":["get-first-frame"]},
+    {"id":"T1-07","tier":"T1","prompt":"Go tieng goc khoi doan video livestream nay.","expect":["remove-video-audio"]},
+    {"id":"T1-08","tier":"T1","prompt":"Chuyen loi thoai trong file ghi am buoi tu van thanh van ban.","expect":["transcribe"]},
+
+    {"id":"T2-01","tier":"T2","prompt":"Tu mo ta san pham nay, viet kich ban 20 giay roi doc thanh giong nu mien Nam.","expect":["gen-text","normalize-text-vi","text-gen-speech-preset"]},
+    {"id":"T2-02","tier":"T2","prompt":"Viet loi quang cao cho khoa hoc tieng Anh tre em, chuan hoa so va gia, roi tao giong doc truyen cam.","expect":["gen-text","normalize-text-vi","text-gen-speech-instruct"]},
+    {"id":"T2-03","tier":"T2","prompt":"Nghe file ghi am nay, tom tat y chinh khach hang quan tam, roi viet lai thanh 5 gach dau dong.","expect":["transcribe","gen-text"]},
+    {"id":"T2-04","tier":"T2","prompt":"Tao anh san pham ly giu nhiet mau xanh reu, roi dan gia 390.000d va logo len goc phai duoi.","expect":["image-gen","compose-overlay"]},
+    {"id":"T2-05","tier":"T2","prompt":"Ghep hai video tour tang 1 va tang 2 thanh mot, roi long nhac nen tu file am thanh toi gui.","expect":["concat-videos","merge-video-audio"]},
+    {"id":"T2-06","tier":"T2","prompt":"Mo ta giup toi anh can ho nay co gi noi bat, roi viet mot caption ban hang dua tren mo ta do.","expect":["image-describe","gen-text"]},
+    {"id":"T2-07","tier":"T2","prompt":"Chia bai viet dai ve du an nay thanh tung doan ngan, moi doan viet lai cho de doc hon.","expect":["split-text","gen-text","combine-text"]},
+    {"id":"T2-08","tier":"T2","prompt":"Doc file PDF bang gia roi viet 3 phuong an tra gop de khach de hieu.","expect":["parse-document","gen-text"]},
+    {"id":"T2-09","tier":"T2","prompt":"Lay anh bia tu video, chinh sang hon mot chut, roi dan dong chu \"Mo ban dot 2\" len tren.","expect":["get-first-frame","image-edit","compose-overlay"]},
+    {"id":"T2-10","tier":"T2","prompt":"Gop anh can ho va anh logo cong ty thanh mot anh quang cao duy nhat.","expect":["image-fusion"]},
+    {"id":"T2-11","tier":"T2","prompt":"Tu video livestream ban hang, tach tieng ra roi chep lai thanh van ban de toi luu.","expect":["extract-audio","transcribe"]},
+    {"id":"T2-12","tier":"T2","prompt":"Viet 5 tieu de quang cao cho cua hang banh ngot, roi gop tat ca thanh mot danh sach goi y.","expect":["gen-text","combine-text"]},
+
+    {"id":"T3-01","tier":"T3","prompt":"Tu video tour can ho toi upload: cat thanh tung canh, bo canh rung hoac toi, chep loi thoai co moc thoi gian, dan phu de va khung gia 2,4 ty len, roi xuat ban doc 9:16.","expect":["split-video","drop-video","transcribe-timestamp","compose-overlay"]},
+    {"id":"T3-02","tier":"T3","prompt":"Tu buoi livestream 30 phut: tach tieng, chep lai loi, chon nhung doan noi ve gia va khuyen mai, cat dung nhung doan do, dan phu de, ghep lai thanh mot clip ngan.","expect":["extract-audio","transcribe-timestamp","split-video","compose-overlay","concat-videos"]},
+    {"id":"T3-03","tier":"T3","prompt":"Lam mot clip gioi thieu du an: viet kich ban tu mo ta, chuan hoa so lieu, tao giong doc, tao 3 anh minh hoa, dan chu len tung anh, roi ghep tat ca thanh video co tieng.","expect":["gen-text","normalize-text-vi","text-gen-speech-preset","image-gen","compose-overlay","concat-videos","merge-video-audio"]},
+    {"id":"T3-04","tier":"T3","prompt":"Tu file ghi am tu van khach hang, chep lai co moc gio, tom tat cac cau hoi khach hay hoi nhat, viet thanh kich ban FAQ, roi tao giong doc cho tung cau tra loi.","expect":["transcribe-timestamp","gen-text","split-text","text-gen-speech-preset"]},
+    {"id":"T3-05","tier":"T3","prompt":"Tu video quay nha bang dien thoai: cat canh, bo canh mo, lay khung dau moi canh lam anh, dan gia va dia chi len tung anh, gop thanh mot bo anh quang cao.","expect":["split-video","drop-video","get-first-frame","compose-overlay","arrange-group"]},
+    {"id":"T3-06","tier":"T3","prompt":"Doc bang gia PDF, viet kich ban ban hang 30 giay, chuan hoa gia va ngay ban giao, tao giong doc nu, tao anh nen can ho, dan gia len anh, ghep thanh video co loi doc.","expect":["parse-document","gen-text","normalize-text-vi","text-gen-speech-preset","image-gen","compose-overlay","merge-video-audio"]},
+
+    {"id":"T4-01","tier":"T4","prompt":"Tao mot video 10 giay tu dong ve can ho tu mo ta van ban nay.","expect":["text-gen-video"],"note":"slot chua cai — ky vong MISSING_PLUGIN"},
+    {"id":"T4-02","tier":"T4","prompt":"Lam video nguoi dai dien noi lip-sync theo doan ghi am nay.","expect":["audio-video-lip-sync"],"note":"slot chua cai — ky vong MISSING_PLUGIN"},
+    {"id":"T4-03","tier":"T4","prompt":"Sang tac mot doan nhac nen vui tuoi 15 giay cho clip quang cao.","expect":["gen-music"],"note":"slot chua cai — ky vong MISSING_PLUGIN"},
+    {"id":"T4-04","tier":"T4","prompt":"Nang do phan giai video tour len 4K cho net hon.","expect":["video-upscale"],"note":"slot chua cai — ky vong MISSING_PLUGIN"}
+  ]
+}
