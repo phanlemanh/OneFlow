@@ -66,6 +66,25 @@ thật thứ hai, lĩnh vực là dữ liệu chứ không phải code. Hệ qu�
 hiện thực (uỷ quyền), và node nạp-từ-kho là hạng mục làm được trước G0. Sơ đồ ranh giới:
 [oneflow-media-library-boundary.html](assets/oneflow-media-library-boundary.html).
 
+## Làn D — Director trường kỳ ([ADR-0013](adr/0013-director-truong-ky.md), 26/08)
+
+Khảo sát 26/08 ([research-director-truong-ky-2026-08.md](strategy/research-director-truong-ky-2026-08.md),
+[research-mo-hoa-2026-08.md](strategy/research-mo-hoa-2026-08.md)) vật chất hoá "agent là
+giao diện" thành nền trạng thái bốn tầng + học derived-first. **Xen kẽ như làn local-first,
+không nối đuôi, không đánh lại số cũ**; mỗi mục D chỉ chen khi không chặn đường tới hạn G0/G1.
+
+| | Hạng mục | Trạng thái |
+|---|---|---|
+| D0 | Wire-shape một gói ([`director-wire-shape`](../_acceptance/director-wire-shape/opportunity.md)): wire trả `{planJson, runId, dslVersion}` + bảng `director_events` + body versioned. Chạy TRƯỚC director-transport-open — dữ liệu accept tích luỹ từ ngày ship | 🔜 discovery, Cổng 0 chưa ký |
+| D1 | Smart defaults (thay registry-order tại `vocabulary.server.ts:19`, winner ∈ plugin đang cài) + `estimateMs` trên node + đo 2 giả định "Chưa thử" của director-v2 | 🔴 chờ D0 |
+| D2 | Trí nhớ canvas + vá đồ thị = [`director-v2`](../_acceptance/director-v2/opportunity.md) hạng mục 1→2 (Cổng 0 riêng); vá chỉ đi khi `directorStepId` xong VÀ giả định #2 sống | 🔴 chờ D1 |
+| D3 | Phụ lục ADR-0002 (manifest skill: semver bất biến, description khi-nào-dùng, requires, estimate hook, side-effect) — ký TRƯỚC dòng code đầu của 1.5; kèm phép thử cache-key ~30 phút (Manh đồng ý 26/08) | 🔴 chặn 1.5 |
+| D4 | Bảng `memories` UI CRUD + few-shot cá nhân (gate 3 lớp) + auto-run opt-in — YAGNI-gated, chỉ sau 1.7 và khi events đủ dày | 🔴 chưa bắt đầu |
+
+Làn B (mở hoá — dọn pháp lý B01, provenance plugin B02, transport B05, pin SHA B07, hợp nhất
+URL engine B08) ghi ở [research-mo-hoa-2026-08.md](strategy/research-mo-hoa-2026-08.md) §3;
+B01/B02 là việc trước-mọi-tag, chưa vào sổ hạng mục vì là T1 + quyết định sản phẩm.
+
 ## Phase 0 — Nền độc lập & số liệu gốc (T1–T4)
 
 | # | Hạng mục | DoD | Trạng thái |
