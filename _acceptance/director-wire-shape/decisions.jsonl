@@ -1,0 +1,14 @@
+{"at": "2026-08-26T15:59:02Z", "decision": "runId TIEM vao generateWorkflow thay vi sinh ben trong — giu core thuan, 12 test giu tinh tat dinh; cung mau compilePlan nhan idFn"}
+{"at": "2026-08-26T15:59:02Z", "decision": "attempts bao ra tu vong lap thay vi suy tu do tre — vong lap la noi DUY NHAT biet con so; uoc luong theo do tre sai gap 4 lan (33,3% doan vs 8,1% do that)"}
+{"at": "2026-08-26T15:59:02Z", "decision": "Ghi event o PHIA SERVER truoc khi biet ket qua, khong cho client bao — tab dong giua chung se mang row di mat, ma nguoi bo cuoc la tin hieu dang gia nhat"}
+{"at": "2026-08-26T15:59:02Z", "decision": "recordGenerated KHONG BAO GIO nem — mot row mat la lo hong do luong; mot HTTP 500 la hoi quy san pham nguoi dung thay"}
+{"at": "2026-08-26T15:59:02Z", "decision": "State machine outcome mot chieu, single-shot — /api/director/feedback la duong ghi khong xac thuc vao pool ma ca nhan hoa doc tu do; thieu luat nay thi moi con so la do ke goi chon"}
+{"at": "2026-08-26T15:59:02Z", "decision": "Luat state machine tach ra module THUAN, khong dinh server-only — bat bien phai test duoc khong can database"}
+{"at": "2026-08-26T15:59:02Z", "decision": "Tran body theo TUNG truong, khong mot ngan sach chung — ba truong hong vi ba ly do khong lien quan; 'body too large' khong noi cho goi biet sua gi"}
+{"at": "2026-08-26T15:59:02Z", "decision": "DirectorSuccess.runId khai OPTIONAL — phan hoi tu server truoc goi nay van apply sach thay vi truot type guard"}
+{"at": "2026-08-26T15:59:02Z", "decision": "reportOutcome fire-and-forget, keepalive, khong await — phep do khong duoc phep chen do tre vao giua cu nhap chuot va luc canvas doi"}
+{"at": "2026-08-26T15:59:02Z", "decision": "Nhanh discarded di qua onOpenChange chu khong rieng nut Cancel — Escape va bam ra ngoai cung la bo cuoc"}
+{"at": "2026-08-26T15:59:02Z", "decision": "Tach E14 thanh E14a (script) + E14b (UI) SAU KHI chay that — ty le mo coi ve nguyen tac khong do duoc bang script; mot nguong khong dat duoc bang dung cu da khai la nguong vo nghia"}
+{"at": "2026-08-26T15:59:02Z", "decision": "E14a hoi PHAN TANG THEM cua so row thay vi tong — so la append-only, khong reset giua cac lan chay"}
+{"at": "2026-08-26T15:59:02Z", "decision": "run-baseline.mjs KIEM cau hinh ghim va thoat ma 2 khi lech — canh bao trong tai lieu khong ngan duoc gi; lan chay dau cho 30/30 gia vi plugins/ rong"}
+{"at": "2026-08-26T15:59:02Z", "decision": "E14b hoan sang vong verify Cong 2 (quyet dinh owner) — no doi nguoi bam tay qua ba nhanh trong UI, khong tu dong hoa duoc"}
