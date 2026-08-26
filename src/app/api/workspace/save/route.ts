@@ -17,8 +17,20 @@ export async function POST(request: NextRequest) {
             description?: string;
             flow: { nodes: Node[]; edges: Edge[] };
             executable?: Record<string, unknown>;
+            directorRunId?: string;
         };
-        const { workflowId, name, description, flow, executable } = body;
+        const {
+            workflowId,
+            name,
+            description,
+            flow,
+            executable,
+            // Provenance, optional: present when this graph was staged from a
+            // Director run. NULL for a hand-built graph — the two must stay
+            // distinguishable, which is what makes "which plan produced a
+            // favourited output" answerable (director-wire-shape AC-7).
+            directorRunId,
+        } = body;
 
         if (!name || typeof name !== "string") {
             return NextResponse.json(
@@ -77,6 +89,10 @@ export async function POST(request: NextRequest) {
                     description: description || null,
                     flow: JSON.stringify(flow),
                     executable: executable ? JSON.stringify(executable) : null,
+                    directorRunId:
+                        typeof directorRunId === "string"
+                            ? directorRunId
+                            : null,
                 })
                 .returning({ id: workflows.id });
 

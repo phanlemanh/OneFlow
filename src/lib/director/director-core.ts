@@ -22,12 +22,32 @@ export type DirectorResult =
           description: string;
           nodes: Node[];
           edges: Edge[];
+          /** The accepted plan, verbatim. Before director-wire-shape this was
+           *  dropped here and never reached the client, which is what made
+           *  turn replay, graph patching and per-user few-shot impossible:
+           *  compilation is lossy (literals land on manual handles with no
+           *  edge, `data.ids` is a node-id list, `fileKeys` is an empty
+           *  placeholder), so the graph cannot be decompiled back into a plan.
+           *  Additive: the four fields above keep their name and shape, so a
+           *  client that does not know these three is unaffected (AC-2). */
+          planJson: string;
+          /** Correlates this run with its `director_events` row. */
+          runId: string;
+          /** Which DSL the plan speaks. Stored from the first row so a later
+           *  DSL bump can filter its own history instead of guessing. */
+          dslVersion: number;
+          /** Model round-trips consumed (1..MAX_ATTEMPTS). */
+          attempts: number;
       }
     | {
           ok: false;
           code: DirectorErrorCode;
           message: string;
           details?: CompileIssue[];
+          /** Present when the run reached the model at all; absent for a
+           *  failure raised before the first round-trip (missing key, bad
+           *  prompt). NULL-vs-0 discipline: absent means "never ran". */
+          attempts?: number;
       };
 
 /** One turn of the conversation sent to the model. The sequence must always
@@ -79,9 +99,13 @@ function isOnlyMissingPlugin(issues: CompileIssue[]): boolean {
     );
 }
 
-function failureFromIssues(issues: CompileIssue[]): DirectorResult {
+function failureFromIssues(
+    issues: CompileIssue[],
+    attempts?: number,
+): DirectorResult {
     return {
         ok: false,
+        attempts,
         code: isOnlyMissingPlugin(issues) ? "MISSING_PLUGIN" : "PLAN_INVALID",
         message: issues
             .slice(0, MESSAGE_ISSUE_LIMIT)
@@ -129,12 +153,22 @@ export async function generateWorkflow(
     prompt: string,
     generatePlan: PlanGenerator,
     slotDefaultPlugin: Partial<Record<string, string>>,
+    /** Injected rather than generated here so this module stays pure and
+     *  deterministic under test — the same reason `compilePlan` takes `idFn`
+     *  through `CompileOptions` instead of calling `randomUUID` itself. */
+    runId: string,
 ): Promise<DirectorResult> {
     const turns: DirectorTurn[] = [{ role: "user", text: prompt }];
     let lastIssues: CompileIssue[] = [];
+    /** Model round-trips actually consumed. Nothing outside this loop can
+     *  observe it: the endpoint returns only the final outcome and the warn
+     *  log fires once, after both attempts. Reporting it is the point of
+     *  director-wire-shape. */
+    let attemptsUsed = 0;
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
         const isLastAttempt = attempt === MAX_ATTEMPTS - 1;
+        attemptsUsed = attempt + 1;
 
         let plan: DirectorPlan;
         try {
@@ -179,6 +213,10 @@ export async function generateWorkflow(
                 description: plan.description,
                 nodes,
                 edges,
+                planJson: JSON.stringify(plan),
+                runId,
+                dslVersion: plan.dslVersion,
+                attempts: attemptsUsed,
             };
         }
         lastIssues = issues;
@@ -201,5 +239,5 @@ export async function generateWorkflow(
             appendUserTurn(turns, issuesFeedback(issues));
         }
     }
-    return failureFromIssues(lastIssues);
+    return failureFromIssues(lastIssues, attemptsUsed);
 }

@@ -1,4 +1,5 @@
 export {
+    directorEvents,
     materials,
     tasks,
     workflows,

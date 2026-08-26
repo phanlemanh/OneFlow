@@ -1,9 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { runDirector } from "@/lib/director/director.server";
 import type { DirectorErrorCode } from "@/lib/director/director-core";
-
-/** Route-level cap on prompt length (spec §9's UI-facing limit). */
-const MAX_PROMPT_LENGTH = 2000;
+import { recordGenerated } from "@/lib/director/events/director-events.server";
+import { parseDirectorBody } from "@/lib/director/request-body";
 
 /**
  * HTTP status per Director error code (spec §9). Typed as a `Record` over
@@ -52,21 +51,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return invalidPrompt("Request body must be valid JSON");
     }
 
-    const prompt = (body as { prompt?: unknown } | null)?.prompt;
-    if (typeof prompt !== "string") {
-        return invalidPrompt("prompt is required and must be a string");
-    }
-    if (prompt.length > MAX_PROMPT_LENGTH) {
-        return invalidPrompt(
-            `prompt must be at most ${MAX_PROMPT_LENGTH} characters`,
-        );
-    }
+    const parsed = parseDirectorBody(body);
+    if (!parsed.ok) return invalidPrompt(parsed.error.message);
+    const { prompt, canvas, options } = parsed.value;
 
     const result = await runDirector(prompt);
 
+    // Recorded here rather than by the client: a tab that closes mid-request
+    // would otherwise take the row with it, and a user who gives up halfway is
+    // exactly the signal worth having. Failure cases are recorded too — a run
+    // that never produced a plan is a data point, not a non-event.
+    await recordGenerated({
+        runId: result.ok ? result.runId : crypto.randomUUID(),
+        promptText: prompt,
+        dslVersion: result.ok ? result.dslVersion : 0,
+        planJson: result.ok ? result.planJson : undefined,
+        attempts: result.attempts,
+        errorCode: result.ok ? undefined : result.code,
+        canvasWasEmpty: canvas ? (canvas.nodes?.length ?? 0) === 0 : undefined,
+        usedMemory: options?.useMemory,
+    });
+
     if (result.ok) {
-        const { name, description, nodes, edges } = result;
-        return NextResponse.json({ name, description, nodes, edges });
+        const { name, description, nodes, edges, planJson, runId, dslVersion } =
+            result;
+        // Additive: the first four fields keep their name and shape, so a
+        // client that does not know the last three is unaffected (AC-2).
+        return NextResponse.json({
+            name,
+            description,
+            nodes,
+            edges,
+            planJson,
+            runId,
+            dslVersion,
+        });
     }
 
     return NextResponse.json(

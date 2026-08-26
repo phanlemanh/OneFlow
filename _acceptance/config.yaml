@@ -13,6 +13,18 @@ executors:
     # Sequential on purpose: next build rewrites .next/types while tsc reads them —
     # parallel suite runs race (lesson: artifact-platform radar-m1 S4-r1).
     build_typecheck: "pnpm build && pnpm typecheck"
+
+    # ---- director-wire-shape (goi D0 cua ADR-0013) ----
+    # Vitest chay theo FILE, khong theo ten test: mot test bi doi ten van chay,
+    # mot file bi xoa thi lenh do va nguoi doc thay ngay.
+    dws_error_envelope: "npx vitest run src/app/api/director/route.test.ts"
+    dws_event_written_server_side: "npx vitest run src/app/api/director/wire-shape.test.ts -t 'AC-4'"
+    dws_feedback_state_machine: "npx vitest run src/lib/director/events/director-events.test.ts"
+    dws_events_schema_shape: "npx vitest run src/db/director-events-schema.test.ts"
+    dws_workflow_run_provenance: "npx vitest run src/app/api/workspace/save/provenance.test.ts"
+    dws_body_backward_compatible: "npx vitest run src/lib/director/request-body.test.ts -t 'AC-8'"
+    dws_body_per_field_caps: "npx vitest run src/lib/director/request-body.test.ts -t 'AC-9'"
+    dws_migrator_on_old_db: "npx vitest run src/db/migrate-old-db.test.ts"
     lint: "pnpm lint:check"
     unit: "pnpm test"
     # Run through uv rather than the ambient python3. On macOS the ambient
@@ -210,6 +222,13 @@ executors:
     sdk_pytest_diag_import_floor: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_block_matrix_covers_the_ten_keywords tests/test_scan_scope.py::test_non_scope_block_collects_import tests/test_scan_scope.py::test_nested_blocks_collect_import tests/test_scan_scope.py::test_prior_behaviour_module_level_and_try tests/test_scan_scope.py::test_function_local_import_is_not_collected tests/test_scan_scope.py::test_class_body_import_is_not_collected
   script:
     verify_plugins: "pnpm verify:plugins"
+
+    # ---- director-wire-shape (goi D0 cua ADR-0013) ----
+    dws_wire_returns_plan: "bash scripts/acceptance/dws-wire-returns-plan.sh"
+    dws_old_client_unaffected: "bash scripts/acceptance/dws-old-client-unaffected.sh"
+    dws_expect_count_unchanged: "bash scripts/acceptance/dws-expect-count.sh"
+    dws_barrel_export: "bash scripts/acceptance/dws-barrel-export.sh"
+    dws_no_prompt_in_prod_log: "bash scripts/acceptance/dws-no-prompt-in-prod-log.sh"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
     gen_abi_clean: "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
     # measure-harness: end-to-end CLI runs over the fixtures committed with the

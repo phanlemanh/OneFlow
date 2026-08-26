@@ -6,6 +6,10 @@ import {
 } from "./director-core";
 import type { DirectorPlan } from "./dsl";
 
+/** Injected run id — generateWorkflow takes it rather than minting one, so
+ * these tests stay deterministic (same reason compilePlan takes idFn). */
+const TEST_RUN_ID = "run-test-0001";
+
 const DEMO_PLUGINS = {
     "image-gen": "tongflow-modal-z-image",
 };
@@ -68,6 +72,7 @@ describe("generateWorkflow", () => {
             "draw a red bicycle",
             async () => GOOD_PLAN,
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result.ok).toBe(true);
         if (result.ok) {
@@ -89,6 +94,7 @@ describe("generateWorkflow", () => {
                 return calls.length === 1 ? BAD_PLAN : GOOD_PLAN;
             },
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result.ok).toBe(true);
         expect(calls).toHaveLength(2);
@@ -103,6 +109,7 @@ describe("generateWorkflow", () => {
             "draw a red bicycle",
             async () => BAD_PLAN,
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({ ok: false, code: "PLAN_INVALID" });
     });
@@ -112,6 +119,7 @@ describe("generateWorkflow", () => {
             "draw a red bicycle",
             async () => GOOD_PLAN,
             {}, // nothing installed
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
     });
@@ -130,6 +138,7 @@ describe("generateWorkflow", () => {
                 return GOOD_PLAN;
             },
             {}, // nothing installed — every issue is MISSING_PLUGIN, both times
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
         expect(calls).toBe(2);
@@ -147,6 +156,7 @@ describe("generateWorkflow", () => {
                 return calls.length === 1 ? MISSING_PLUGIN_PLAN : GOOD_PLAN;
             },
             DEMO_PLUGINS, // only "image-gen" is installed
+            TEST_RUN_ID,
         );
         expect(result.ok).toBe(true);
         expect(calls).toHaveLength(2);
@@ -165,6 +175,7 @@ describe("generateWorkflow", () => {
                 );
             },
             {}, // nothing installed — first attempt is purely MISSING_PLUGIN
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({ ok: false, code: "MISSING_PLUGIN" });
         if (!result.ok) {
@@ -187,6 +198,7 @@ describe("generateWorkflow", () => {
                 return calls.length === 1 ? BAD_PLAN : GOOD_PLAN;
             },
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(calls).toHaveLength(2);
 
@@ -218,6 +230,7 @@ describe("generateWorkflow", () => {
                 );
             },
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({ ok: false, code: "PLAN_INVALID" });
         if (!result.ok) {
@@ -245,6 +258,7 @@ describe("generateWorkflow — plan-validation throws (Important 2)", () => {
                 return GOOD_PLAN;
             },
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result.ok).toBe(true);
         expect(calls).toHaveLength(2);
@@ -264,6 +278,7 @@ describe("generateWorkflow — plan-validation throws (Important 2)", () => {
                 throw new PlanValidationError("plan has 61 steps, max is 60");
             },
             DEMO_PLUGINS,
+            TEST_RUN_ID,
         );
         expect(result).toMatchObject({
             ok: false,
@@ -281,6 +296,7 @@ describe("generateWorkflow — plan-validation throws (Important 2)", () => {
                     throw new FakeTransportError("401 unauthorized");
                 },
                 DEMO_PLUGINS,
+                TEST_RUN_ID,
             ),
         ).rejects.toThrow("401 unauthorized");
     });
