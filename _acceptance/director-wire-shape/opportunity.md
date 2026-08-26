@@ -106,15 +106,23 @@ từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một 
 
 ## Ngưỡng chết / ngưỡng UAT
 
-- Câu hỏi phép đo trả lời: sau gói này, mỗi lượt Director có để lại đủ dấu vết để tính
-  3 thước đo của director-v2 (tỷ lệ sửa-tiếp*, sai số ước tính thời gian, tín hiệu hối hận)
-  mà KHÔNG đổi hành vi người dùng thấy?
-  (*trước khi tính năng vá ship, thước đo #1 dán nhãn "tỷ lệ replace-trên-canvas-có-sẵn" — baseline.)
-- Kết quả nào là SỐNG: client cũ chạy nguyên trạng; `pnpm test` xanh; migrator-thật pass;
-  event ghi đủ 5 kind; row mồ côi <10%.
-- Kết quả nào là CHẾT: buộc phải đổi trường response đang có (không chỉ thêm), hoặc
-  migration không sống trên db cũ.
-- Timebox: …
+*(ĐỀ XUẤT 26/08 — chờ owner ký; căn cứ là số đo EVAL-0/EVAL-3 ở mục trên.)*
+
+- **Câu hỏi phép đo trả lời:** sau gói này, mỗi lượt Director có để lại đủ dấu vết để tính
+  3 thước đo của `director-v2` mà KHÔNG đổi hành vi người dùng thấy?
+- **SỐNG** — tất cả phải đúng:
+  1. Client hiện tại chạy nguyên trạng, không sửa một dòng phía client.
+  2. `pnpm test` xanh; số expect bị sửa **bằng 0** (gói này chỉ THÊM, không đổi hành vi cũ).
+  3. Phép thử migrator-thật pass trên bản sao db người dùng cũ (tiền lệ `metering-schema.test.ts`).
+  4. Chạy lại golden set 30 prompt: ghi đủ **30 row** `kind=generated`; tỉ lệ row mồ côi
+     (không được vá outcome) **< 10%**.
+  5. Tỉ lệ thành công **không tụt dưới 86,7%** — mốc EVAL-0 trên cùng `frozen-config.json`.
+- **CHẾT** — bất kỳ điều nào:
+  1. Buộc phải ĐỔI (không phải thêm) một trường response đang có → phá hợp đồng client.
+  2. Migration không sống trên db cũ.
+  3. Ghi event làm độ trễ p95 tăng quá **10%** so với mốc 75,1s.
+- **Timebox:** 5 ngày làm việc kể từ khi ký. Quá hạn mà chưa qua được SỐNG → dừng, trình lại
+  Cổng 0 với phạm vi hẹp hơn (chỉ hạng mục 1 + 2, bỏ body versioned).
 
 ## Kết quả prototype
 
@@ -130,9 +138,44 @@ từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một 
 
 ## Cổng 0
 
-- **decision = …** Căn cứ: …
-- **disposition = …** Căn cứ: …
-- **Ngưỡng UAT chốt cùng lúc ký:** …
+*(ĐỀ XUẤT 26/08 do agent soạn — owner điền `decided_by` / `decided_at` trong frontmatter khi ký.)*
+
+- **decision = GO.** Căn cứ, theo thứ tự sức nặng:
+  1. **Mất dữ liệu đang diễn ra.** Ba nhánh outcome của UI (`director-prompt.tsx:73,277-291`)
+     không ghi gì. Mỗi ngày chưa có `director_events` là một ngày tín hiệu accept/reject mất
+     vĩnh viễn — không thu hồi được. Đây là lý do duy nhất khiến gói này KHÔNG hoãn được.
+  2. **Đã có mốc để chứng minh không hồi quy.** EVAL-0 cho 26/30 (86,7%) trên cấu hình ghim.
+     Trước 26/08 không tồn tại con số nào.
+  3. **Rủi ro kỹ thuật lớn nhất đã được kiểm và đã tan.** EVAL-3: schema đi lọt cả 4 hãng qua
+     gateway. Blocker duy nhất (`oneOf`) đã tìm ra và có bản sửa xác minh bằng lời gọi thật.
+  4. **Chặn đường mọi hạng mục của `director-v2`.** Plan accepted hiện không rời server
+     (`director-core.ts:176-183`), nên trí nhớ canvas, vá đồ thị và few-shot cá nhân đều
+     bất khả thi tới khi wire shape đổi.
+  5. **Chi phí retrofit tăng theo thời gian.** Đổi hợp đồng HTTP sau khi
+     `director-transport-open` ship là breaking change cho mọi client.
+
+- **disposition = giữ, KHÔNG thải bỏ.** Căn cứ: sáu script trong `golden/` không phải
+  prototype dùng một lần. `run-baseline.mjs` là bộ đo tái lập cho mọi lần đổi Director về sau;
+  `schema-diff.mjs` chạy offline nên vào CI được; bốn script EVAL-3 là bằng chứng sống cho
+  quyết định gateway. Chúng thuộc về hồ sơ, không thuộc về thùng rác.
+  *(Ngoại lệ: `eval3-schema-acceptance.mjs` đo qua `/v1/chat/completions` — SAI đường, giữ lại
+  chỉ để ghi nhận sai lầm phương pháp, không dùng làm bằng chứng.)*
+
+- **Ngưỡng UAT chốt cùng lúc ký:** người vận hành gõ 5 prompt tiếng Việt bất kỳ trong panel
+  Director, mỗi lượt nhận đúng kết quả như trước khi đổi (không có gì mới hiện ra trên UI),
+  và sau đó `SELECT count(*) FROM director_events` trả về ≥ 5. Nghĩa là: **người dùng không
+  thấy gì thay đổi, nhưng máy đã bắt đầu nhớ.**
+
+### Phạm vi tier — T3, không xin hạ
+
+Gói chạm `src/app/api/director/route.ts` và `src/db/**`, cả hai nằm trong `t3_paths`
+(`_acceptance/config.yaml`). Chuỗi cổng đầy đủ: Cổng 1 → Cổng 1.5 (duyệt plan) → S4 verify
+đa-agent → Cổng 2. Ước lượng lịch thực tế cho 1 maintainer: **1–2 tuần**, không phải "2 ngày code".
+
+### Điều kiện đi kèm, không tách khỏi gói này
+
+Bản sửa `dsl.ts:46` (`discriminatedUnion` → `union`) phải nằm TRONG gói đổi transport. Tách ra
+là để lại một mìn: nhánh nào đổi transport trước mà chưa có bản sửa sẽ đỏ trên OpenAI.
 
 ## Thước đo thành công → ứng viên criterion
 
