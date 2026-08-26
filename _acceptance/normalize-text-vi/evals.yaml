@@ -234,6 +234,11 @@ evals:
       - "Chạy sàn P0 design gate bằng lệnh config:executors.design.gate trên bản HTML vừa chụp và đính kết quả vào output"
       - "Assert: console không có lỗi; node hiện đúng hai handle in:text / out:text; nhãn nút đọc được bằng tiếng Việt, không phải khoá i18n thô"
       - "DỌN, bắt buộc — chạy DÙ CÁC BƯỚC TRÊN THÀNH CÔNG HAY THẤT BẠI, và trước khi kết thúc dù kết thúc kiểu gì: tắt dev server, `git checkout tsconfig.json`, `rm -rf build`. Next ghi đè tsconfig mỗi lần khởi động với thư mục build khác — nó đổi cả NỘI DUNG (include trỏ build/types thay vì .next/types), không chỉ định dạng. Không dọn thì `pnpm lint:check` của chính vòng này đỏ trên một cây vốn sạch, và cây để lại bẩn cho vòng sau"
+    # Khoá cấu hình LÁ, không phải nhánh: bộ soi bằng chứng giải `config:<khoá>`
+    # ra một giá trị, nên `config:capture` (một nhánh có khoá con) không giải
+    # được và làm hồ sơ PASS bị cổng từ chối — bộ dựng tham số đã tự bịa giá trị
+    # mặc định đó vì ô này chưa khai `ref` (đo được 2026-08-26).
+    ref: config:capture.ui
     expected: "hai ảnh tồn tại và là ảnh của CÂY NÀY (đã kiểm xuất xứ); sàn P0 design gate xanh; console sạch. THU HẸP so với bản Cổng 1 (4 state): 'đang-chạy' và 'lỗi-còn-sót-token' do exec.loading và trạng thái task lái nên không đặt được từ ngoài mà không giả lập store hoặc sửa shell dùng chung — lời hứa về CHỮ của thông điệp lỗi chuyển sang phép đo tất định E6a. Trình ở Cổng 2."
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
