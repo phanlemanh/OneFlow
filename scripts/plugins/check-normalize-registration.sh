@@ -53,6 +53,9 @@ bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
 #    appears only in the plugin-list description (S4 round 2 finding): the
 #    marker must sit on a "- ✅" line INSIDE the Text section, i.e. between
 #    the section's heading and the next heading.
+tmp_section="$(mktemp)"
+trap 'rm -f "$tmp_section"' EXIT
+
 check_doc() {
     local file="$1" heading="$2" row_marker="$3"
     ! grep -q "$PLUGIN_ID" "$ROOT/$file" ||
@@ -61,8 +64,25 @@ check_doc() {
         $0 == h { inside = 1; next }
         inside && /^#/ { inside = 0 }
         inside { print }
-    ' "$ROOT/$file" | grep -E "^- ⬜" | grep -q "$row_marker" ||
-        fail "$file has no ⬜ row carrying the marker inside capability-matrix section $heading — the capability is not available while no official plugin ships it"
+    ' "$ROOT/$file" > "$tmp_section"
+
+    local n_all n_blank
+    # -F on the marker: it contains "(Vietnamese)", and in an ERE those
+    # parentheses are a GROUP — the pattern then matches "Vietnamese" without
+    # them and never finds the real line. Measured while writing this check.
+    n_all="$(grep -E "^- [✅⬜]" "$tmp_section" | grep -Fc "$row_marker" || true)"
+    n_blank="$(grep -E "^- ⬜" "$tmp_section" | grep -Fc "$row_marker" || true)"
+
+    # EXACTLY ONE row, and it must be ⬜.
+    #
+    # Counting only "is there a ⬜ row" was a hole: a file carrying BOTH a ⬜ and
+    # a ✅ row for the same capability passed, because the ⬜ was found and the
+    # ✅ never looked for. That is not hypothetical — resolving the merge with
+    # b01/open-source-rebrand by "keeping both sides" produces exactly that
+    # shape, and the matrix would then claim the capability is available and
+    # unavailable at once (peer session aisuite-60 spotted this, 2026-08-26).
+    [ "$n_all" = "1" ] || fail "$file has $n_all rows for \"$row_marker\" in section $heading — expected exactly 1"
+    [ "$n_blank" = "1" ] || fail "$file marks \"$row_marker\" as available (✅) in section $heading — no official plugin ships it"
 }
 check_doc "README.md" "#### Text" "Read numbers aloud (Vietnamese)"
 check_doc "docs/README_ZH.md" "#### 文本" "数字转文字（越南语）"
