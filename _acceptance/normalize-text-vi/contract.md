@@ -427,6 +427,20 @@ code** vì license):
   thì có.
 
 ## Known limits
+- **Ngày viết kiểu Mỹ hoặc ngày không tồn tại** (`ngày 12/25/2026`, `ngày 32/8/2026`) đọc sai và
+  **mất một thành phần của ngày**, vẫn `ok=True`. Chữ "ngày" bị xoá trước mọi token khớp hình
+  dạng ngày, dựa vào giả định thư viện sẽ thêm lại — chỉ đúng khi nó parse được. Ngày Việt hợp
+  lệ vẫn đọc đúng. *(owner triage 2026-08-26 → hợp đồng follow-up AC-9)*
+- **Dấu gạch chéo còn sót không bị tính là chưa-đọc-được**: `Giá 50.000 đ/kg` → "…đồng**/kg**",
+  `Lãi 5%/năm` → "…phần trăm**/năm**", `ok=True`. Đây cũng là cơ chế khiến mục trên im lặng —
+  thứ thư viện bỏ lại là `/`, không phải chữ số, nên hậu kiểm mù. *(→ follow-up AC-10)*
+- **Cảnh báo thiếu bước đọc-thành-chữ có thể tắt nhầm** ở đồ thị mà node giọng đọc nhận cả
+  audio lẫn text: phép dò tổ tiên không xét cổng vào, nên reader nằm trên nhánh audio cũng dập
+  cảnh báo cho nhánh text. *(owner triage 2026-08-26)*
+- **Thông điệp của ba script canh còn tiếng Việt** trong khi các script anh em đều tiếng Anh —
+  chỉ hiện cho lập trình viên khi chạy kiểm nội bộ, không lên sản phẩm. *(→ PR dọn dẹp)*
+- **Bài kiểm đối chiếu giao diện ↔ máy chủ dùng dữ liệu mẫu viết tay**, không rút từ luồng xuất
+  thật; nếu cách luồng thật gửi dữ liệu đổi, bài kiểm này vẫn xanh. *(owner triage 2026-08-26)*
 - **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
   hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —
   sai ngay từ lần đầu và **vi phạm AC-7** (idempotent). Phạm vi đo được: đúng token đó;

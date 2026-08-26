@@ -274,7 +274,7 @@ human_signoff:
   verdict: PASS
   rationale: Ca ba lens deu PASS. domain-correctness: ca hai anh dung khuon AbiNodeShell, header co icon + tieu de "Doc so thanh chu" + hamburger, than card co dropdown "Cach trien khai" chon "api-normalize-text-vi", nut hanh dong "Doc thanh chu" co icon dua phep, dung hai handle tron o giua canh trai/phai khop in:text/out:text, canh noi o state-2 cam dung vao handle trai, tieng Viet co dau hien thi dung khong vo chu. operational-feasibility: bo cuc padding/spacing deu voi cac shell khac trong workspace, khong yeu to nao pha vo ngon ngu thiet ke quan sat duoc. spec-alignment: khong thay chi tiet nao pha vo spacing/bo goc/tong mau/kieu chu giua hai trang thai.
   required_evidence: []
-  human_override:
+  human_override: Manh 2026-08-26 — PASS. Đã tự xem hai ảnh khổ 1280x900 và bản phóng to 8x ở cạnh node (evidence/gate2-e16/), đặt cạnh các node sẵn có trên bảng vẽ: cùng ngôn ngữ thiết kế, hai đầu nối đúng chỗ, dây cắm đúng đầu nối trái. Vế so sánh với node khác — phần máy không chấm được — do người duyệt xác nhận.
 
 - eval: E17a
   run_id: minted-normalize-text-vi-E17a-r14
