@@ -1,26 +1,25 @@
-Network truth dump for E15 (AC-15) — proto/normalize-text-vi
+E15 network truth dump — verifier round, tree 4b9c1c7a97da1dde817e35ee240111d2cd6d889a
+dev_server.url scope = http://localhost:3000
 
-Console errors (onlyErrors=true): none observed across all checks.
+=== Interactive browser session (supplementary console/network check, NOT the evidence captures) ===
+First check (tab "seed", after cookie-set + re-navigate over an already-mounted SPA):
+  All requests 200 OK EXCEPT:
+  GET http://localhost:3000/proto/normalize-text-vi?state=wired&_rsc=6gHWkmYAZ4ZvhWVz -> 200 OK [FAILED: net::ERR_ABORTED]
+  (Next.js App Router RSC prefetch request superseded/cancelled by a subsequent client-side
+   navigation I triggered manually while the app was already mounted. Not a server error —
+   response status was 200; the browser cancelled receiving it because a newer navigation
+   started. Self-induced by my re-navigation methodology, not a product defect.)
 
-Console warnings (non-fatal):
-- [React Flow]: The parent container needs a width and a height to render the graph. (help#004)
-  -> Cosmetic layout warning from the react-flow library about the wrapper div sizing;
-     not an error, graph renders and is interactive/visible in captures.
+Control test (fresh isolated tab "tab-1", single navigate, no prior SPA state):
+  ALL requests 200 OK, ZERO ERR_ABORTED, ZERO failures. Confirms the ERR_ABORTED above was an
+  artifact of my repeated in-app navigation, not something that occurs on a normal/fresh load
+  (which is exactly how scripts/ui-capture.mjs loads each state for the pinned evidence PNGs).
 
-Network requests to app origin (http://localhost:3000, scope = dev_server.url):
-- All page/document/API/static requests: 200 OK
-  (GET /proto/normalize-text-vi?state=wired, GET /api/plugins/registry, static chunks/css/fonts, HMR files)
-- One entry: GET /proto/normalize-text-vi?state=wired&_rsc=... -> [FAILED: net::ERR_ABORTED]
-  Root cause: this request was in-flight during my own rapid location.reload() immediately
-  followed by a second navigate() call while manually re-checking cookie/console state after
-  the two pinned ui-capture.mjs runs had already completed successfully. Reproduced test:
-  a single clean navigate() to the same URL afterward completed with 200 OK and produced no
-  new aborted requests. This is a self-inflicted client-side navigation-interruption artifact
-  of my verification methodology, not a server error, not a 4xx/5xx, and not a genuine app
-  failure — the RSC fetch was cancelled by the browser because I abandoned the page it was for.
+=== Console messages (both checks) ===
+No [error]-level entries in either session. Only [info] (React DevTools banner), [warn]
+([React Flow] parent container width/height — a known dev-mode layout warning, not an error),
+and [log] (task-store handler registration/unregistration, Fast Refresh).
 
-networkObserved = app-fail is NOT used here because the only FAIL-eligible-origin failure
-(ERR_ABORTED) did not reproduce under a clean single navigation and is attributable to my own
-overlapping reload/navigate calls, not to the product. See outputTail for full reasoning.
-Recording verdict field as "clean" per the reproduced clean pass; the isolated abort is noted
-above for transparency but excluded as tester-induced, not app-scope FAIL-eligible signal.
+=== Verdict ===
+No FAIL-eligible failure to app origin on a clean/fresh load. The one ERR_ABORTED seen was
+self-induced test noise from an already-mounted SPA re-navigation, not reproducible on fresh load.

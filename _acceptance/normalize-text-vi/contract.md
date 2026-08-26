@@ -450,6 +450,18 @@ code** vì license):
   **Đổi lại:** node vẫn chạy được qua Director trên máy đã cài plugin; hồ sơ không còn tuyên
   nó là plugin chính thức.
 
+## Sửa đổi vòng 17 (2026-08-26)
+
+- **AC-5 — dãy số ngăn bằng dấu phẩy không phải số thập phân.** Luật phẩy thập phân viết ở
+  vòng 4 (cho giá `1.999.000,50`) bắn trên **mọi** cặp `số,số`, nên một liệt kê bình thường
+  thành chuỗi thập phân với `ok=True`. Đo thật: `Chọn đáp án 1,2,3` → "một **phẩy** hai **phẩy**
+  ba"; `Ngày 1,2 tháng 3` → "ngày một phẩy **ngày** hai tháng ba". Không chữ số, dấu tiền hay
+  token nhập nhằng nào sót nên **mọi lớp canh im lặng**.
+  *Nay bắt cả **chuỗi** (`\d+(,\d+){2,}`) trước khi luật thập phân kịp thấy — chặn theo bên
+  phải một dấu phẩy là không đủ, dấu cuối của `1,2,3` vẫn lọt ("một, hai **phẩy** ba").*
+  **Giới hạn khai rõ:** một dấu phẩy đơn (`Bước 1,2`) vẫn đọc là thập phân — nó thật sự nhập
+  nhằng, và nghiêng về thập phân giữ nguyên mọi cách đọc giá, thứ slot này sinh ra để phục vụ.
+
 ## Known limits
 - **Ô E17a/E17b đo trên cây plugin CỤC BỘ, không phải bản đã xuất bản.** Kho công khai chưa
   tồn tại nên phép đo không trỏ được tới bản sửa đổi nào — chính nó khai

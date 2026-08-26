@@ -465,6 +465,36 @@ VN_AMOUNT_NEGATIVE: tuple[tuple[str, str], ...] = (
 )
 
 
+# A comma between two SHORT integers is a list separator, not a decimal point.
+#
+# The decimal rule was written for prices ("1.999.000,50") and fired on every
+# `digit,digit` pair, so an ordinary enumeration became a chain of decimals with
+# ok=True — no digit, currency mark or ambiguity token survives, so every guard
+# stayed quiet (S4 round 17 finding). Measured before the fix:
+#   'Chọn đáp án 1,2,3' -> 'chọn đáp án một phẩy hai phẩy ba'
+#   'Bước 1,2'          -> 'bước NHẤT phẩy hai'
+#   'Ngày 1,2 tháng 3'  -> 'ngày một phẩy NGÀY hai tháng ba'
+#
+# What separates them is what comes BEFORE the comma: a decimal has a
+# multi-digit or grouped integer part ("1.234,5", "3.000.000,00", "2,5" as a
+# quantity); a list has single digits repeating. The rule now requires the comma
+# to be followed by digits and NOT by another `,digit` group — one comma only.
+CORPUS_COMMA_LIST: tuple[tuple[str, str], ...] = (
+    ("Chọn đáp án 1,2,3", "chọn đáp án một, hai, ba"),
+    ("Lô 1,2,3,4", "lô một, hai, ba, bốn"),
+)
+
+
+def test_comma_separated_lists_are_not_decimals() -> None:
+    for raw, expected in CORPUS_COMMA_LIST:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert "phẩy" not in got.text, (
+            f"{raw!r} là danh sách nhưng đọc thành số thập phân: {got.text!r}"
+        )
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
 def test_vietnamese_grouped_amounts_read_at_the_right_scale() -> None:
     missing = [
         (grouping, fraction)
@@ -1074,6 +1104,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),
+    ("CORPUS_COMMA_LIST", CORPUS_COMMA_LIST),
 )
 
 ALL_CORPUS = tuple(

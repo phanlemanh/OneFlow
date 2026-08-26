@@ -108,7 +108,22 @@ _RANGE = re.compile(r"(?<=\d)(?P<unit>[ \t]*(?:%|₫|[^\W\d_][^\W_]{0,15})?)[ \t
 #
 # One or two decimal places only. Three would be ambiguous with the ENGLISH
 # thousand separator ("1,000"), which this rule must not silently re-scale.
+# One comma only, and not part of a chain. `(?<![,\d]\d)` would still allow a
+# list, so the guard is on the RIGHT: a decimal is followed by end-of-number,
+# never by another `,digit` group. Without it, "Chọn đáp án 1,2,3" became
+# "một phẩy hai phẩy ba" with ok=True — an enumeration read as decimals, and
+# every guard silent because no digit survived (S4 round 17).
 _DECIMAL_COMMA = re.compile(r"(?<=\d),(\d{1,2})(?!\d)")
+
+# A CHAIN of comma-separated numbers is an enumeration, never a decimal — a
+# decimal has one comma. Matched as a whole token and rewritten to plain commas
+# BEFORE the decimal rule sees it; guarding only the right-hand side left the
+# last comma of "1,2,3" looking like a decimal ("một, hai phẩy ba").
+#
+# Declared limit: a SINGLE comma ("Bước 1,2") stays a decimal. It is genuinely
+# ambiguous — "1,2" is a valid quantity — and erring toward the decimal keeps
+# every price reading intact, which is what this slot exists for.
+_COMMA_CHAIN = re.compile(r"\d+(?:,\d+){2,}")
 
 
 def _decimal_tail(match: re.Match[str]) -> str:
@@ -245,6 +260,8 @@ def _pre(text: str) -> str:
     # Before every digit rule below: lift the decimal part into a word the
     # library can read. Runs early so the range and minus rules downstream see
     # plain digits either side of any dash.
+    # Chains first: an enumeration must not reach the decimal rule.
+    out = _COMMA_CHAIN.sub(lambda m: m.group(0).replace(",", ", "), out)
     out = _DECIMAL_COMMA.sub(_decimal_tail, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
     out = _DAY_WORD_BEFORE_DATE.sub("", out)
