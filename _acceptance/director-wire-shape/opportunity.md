@@ -4,12 +4,12 @@ slug: director-wire-shape
 feature: Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0 của ADR-0013)
 owner: Manh
 stage: discovery
-decision:
-decided_by:
-decided_at:
+decision: GO
+decided_by: phanlemanh@gmail.com
+decided_at: 2026-08-26T11:55:08Z
 prototype:
-  base_commit:
-  disposition:
+  base_commit: 4c12a51
+  disposition: keep
 ---
 
 ## Vấn đề & ai gặp
@@ -106,7 +106,7 @@ từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một 
 
 ## Ngưỡng chết / ngưỡng UAT
 
-*(ĐỀ XUẤT 26/08 — chờ owner ký; căn cứ là số đo EVAL-0/EVAL-3 ở mục trên.)*
+*(ĐÃ KÝ 2026-08-26 bởi phanlemanh@gmail.com; căn cứ là số đo EVAL-0/EVAL-3 ở mục trên.)*
 
 - **Câu hỏi phép đo trả lời:** sau gói này, mỗi lượt Director có để lại đủ dấu vết để tính
   3 thước đo của `director-v2` mà KHÔNG đổi hành vi người dùng thấy?
@@ -121,7 +121,7 @@ từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một 
   1. Buộc phải ĐỔI (không phải thêm) một trường response đang có → phá hợp đồng client.
   2. Migration không sống trên db cũ.
   3. Ghi event làm độ trễ p95 tăng quá **10%** so với mốc 75,1s.
-- **Timebox:** 5 ngày làm việc kể từ khi ký. Quá hạn mà chưa qua được SỐNG → dừng, trình lại
+- **Timebox:** 10 ngày làm việc kể từ khi ký. Quá hạn mà chưa qua được SỐNG → dừng, trình lại
   Cổng 0 với phạm vi hẹp hơn (chỉ hạng mục 1 + 2, bỏ body versioned).
 
 ## Kết quả prototype
@@ -138,7 +138,8 @@ từ chối `oneOf`. Một điểm dữ liệu sống sót trông giống một 
 
 ## Cổng 0
 
-*(ĐỀ XUẤT 26/08 do agent soạn — owner điền `decided_by` / `decided_at` trong frontmatter khi ký.)*
+*(Agent soạn 26/08; **owner ký 2026-08-26** — xem `decision` / `decided_by` trong frontmatter.
+Owner sửa một điểm trước khi ký: timebox 5 → 10 ngày.)*
 
 - **decision = GO.** Căn cứ, theo thứ tự sức nặng:
   1. **Mất dữ liệu đang diễn ra.** Ba nhánh outcome của UI (`director-prompt.tsx:73,277-291`)
