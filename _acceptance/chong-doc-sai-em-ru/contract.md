@@ -81,6 +81,27 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   nó đi kiểm. Khoá nào mất mỏ neo cũng mất luôn từ khoá, nên không bị soi. Phép chứng minh đỏ
   cũ "qua" chỉ vì cách phá tình cờ để lại từ đó.*
 
+- AC-9: (sdk) Given chuỗi có chữ **"ngày"** đứng trước một token **hình dạng** ngày mà thư viện
+  **không parse được** — `ngày 12/25/2026` (kiểu Mỹ), `ngày 32/8/2026` (ngày không tồn tại) —
+  When chuẩn hoá, Then hoặc đọc đúng, hoặc `success:false`; **không** được im lặng nuốt chữ
+  "ngày" và nuốt luôn một thành phần của ngày.
+  *Đo thật trên `feat/normalize-text-vi` (2026-08-26), tất cả `ok=True`:*
+  `ngày 12/25/2026` → "mười hai **tháng hai**/hai nghìn không trăm hai mươi sáu" — mất chữ
+  "ngày", **mất hẳn số 25**, đọc thành **tháng 2**, và còn nguyên dấu `/`.
+  `ngày 32/8/2026` → "ba mươi hai**/**tháng tám năm…".
+  *Nguyên nhân: luật xoá chữ "ngày" chạy vô điều kiện trên mọi token khớp hình dạng
+  `d{1,2}[/-]d{1,2}[/-]d{4}`, dựa vào giả định thư viện sẽ tự thêm lại — giả định chỉ đúng khi
+  thư viện parse được. Ngày Việt hợp lệ (`ngày 19/8/2026`) vẫn đọc đúng.*
+
+- AC-10: (sdk) Given đầu ra còn **dấu gạch chéo** mà thư viện không đọc thành chữ, When hậu
+  kiểm, Then tính là token chưa đọc được.
+  *Đo thật: `Giá 50.000 đ/kg` → "giá năm mươi nghìn đồng**/kg**", `Lãi 5%/năm` → "lãi năm phần
+  trăm**/năm**", đều `ok=True`, `residual` rỗng. `đ/kg` và `%/năm` là cách viết giá và lãi suất
+  phổ biến nhất trong đúng loại nội dung slot này phục vụ. Đáng chú ý: `100km/h` thư viện đọc
+  đúng thành "ki lô mét trên giờ", nên đây là lỗ hổng theo ca chứ không phải toàn bộ.*
+  *Đây cũng là cơ chế khiến AC-9 im lặng: khi thư viện parse hụt, thứ nó bỏ lại là `/`, không
+  phải chữ số, nên lớp hậu kiểm — vốn chỉ soi `[0-9₫%]` — hoàn toàn mù.*
+
 ## Coverage — bộ tiêu chí phủ những trục nào
 
 - **Trục ký tự**: gạch kiểu chữ (AC-1) · dấu phân cách trong URL/đường dẫn (AC-2)

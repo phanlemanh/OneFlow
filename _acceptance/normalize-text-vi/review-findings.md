@@ -1,38 +1,51 @@
+# Review Findings: normalize-text-vi (round 14)
+
 ## Trong hợp đồng
 
-- **Mirror of the same rule: an address with a lowercase street name is read as money, ok=True**
-  file: `sdk/tongflow/text/vi_dictionary.py:90`
-  severity: medium
-  AC: AC-6
-  detail: STREET_PATTERN requires `[_UPPER]` after the space, so an address whose street name is not capitalised never reaches the street branch and falls through to `_SPACED_DONG` / `_MONEY` instead. Measured:
-
-    'Số 5 đ. lê lợi'  -> has_money=True, ok=True, 'số năm ĐỒNG. lê lợi'
-    'Số 5 Đ. lê lợi'  -> has_money=True, ok=True, 'số năm ĐỒNG. lê lợi'
-
-  This is precisely the S4-round-6 defect STREET_PATTERN was written to fix ("Số 5 Đ. Lê Lợi read out as 'số năm đồng. lê lợi' with ok=True"), still live for any input where the street name is lowercase — common in user-typed listing copy. The money-loss relation cannot catch it because it confirms itself against the 'đồng' the rewrite just injected, exactly as the comment at test_normalize_vi.py:280 describes. CORPUS_STREET (test_normalize_vi.py:291) only contains capitalised street names, so nothing goes red.
-  rationale: Sửa đổi vòng 6 của AC-6 cam kết nguyên tắc chung "Đ. là Đường, không phải đồng" để sửa đúng lỗi "Số 5 Đ. Lê Lợi đọc thành đồng"; ca đo được ở đây là cùng một lỗi, chỉ khác tên đường viết thường, nên nguyên tắc đó vẫn chưa được giữ đủ.
-  source: bugs
+(không có)
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **New node has no picker affordance, so the TTS-order warning it exists for is unactionable**
-  Người dùng thấy gì: Khi lưu workflow có giọng đọc mà thiếu bước đọc số/giá thành chữ, hệ thống báo cảnh báo bảo người dùng tự thêm node đó — nhưng bấm nút thêm node ở đúng chỗ lại không thấy tùy chọn này, nên không có cách tự sửa cảnh báo ngay trên giao diện.
-  file: `src/hooks/use-node-actions.tsx:599`
-  severity: high
+- **SDK trả lỗi bằng tiếng Việt — phá vỡ quy ước i18n mà chính PR này vừa dựng**
+  Người dùng thấy gì: Khi việc đọc số/giá thất bại, người dùng đang dùng giao diện tiếng Anh, Nhật, Hàn hoặc Trung vẫn thấy thông báo lỗi bằng tiếng Việt thay vì bằng ngôn ngữ họ chọn.
+  file: `sdk/tongflow/text/normalize_vi.py:269`
+  severity: medium
   Đề xuất: new-contract
 
-- **STREET_PATTERN rewrites a sentence-final currency mark into "đường" — price silently unspoken, ok=True**
-  Người dùng thấy gì: Một câu giá kết thúc bằng 'đ.' ngay trước câu tiếp theo (ví dụ 'Giá 500 đ. Bao gồm VAT') có thể bị đọc thành tên đường 'đường' thay vì số tiền, nên giọng đọc ra sai nội dung giá trong khi hệ thống vẫn báo thành công.
-  file: `sdk/tongflow/text/vi_dictionary.py:89`
+- **Ba guard mới còn thông điệp tiếng Việt trong khi mọi guard khác dưới scripts/ đều tiếng Anh**
+  Người dùng thấy gì: Không ảnh hưởng người dùng cuối — đây là thông điệp hiển thị cho lập trình viên khi chạy kiểm tra nội bộ, không xuất hiện trên sản phẩm.
+  file: `scripts/abi/check-normalize-sdk-published.sh:24`
+  severity: low
+  Đề xuất: known-limits
+
+- **hasUpstreamSlot bỏ qua handle nên node reader nối vào input KHÔNG-phải-text vẫn dập được cảnh báo**
+  Người dùng thấy gì: Trong một số luồng có cả nhánh âm thanh và nhánh chữ cùng nối vào một node tạo giọng nói, hệ thống có thể không cảnh báo dù văn bản thật sự chưa được đọc thành chữ trước khi tạo giọng — người dùng mất đi lời nhắc thêm bước đọc số.
+  file: `src/lib/workflow/exporter.ts:125`
+  severity: low
+  Đề xuất: known-limits
+
+- **Xoá chữ "ngày" trước MỌI chuỗi dạng d/m/yyyy — thư viện không trả lại khi không parse được, ok=True**
+  Người dùng thấy gì: Với ngày viết kiểu Mỹ (ví dụ 12/25/2026) hoặc ngày không hợp lệ, node có thể đọc sai hoặc làm mất số ngày, rồi vẫn tự báo thành công — người dùng nghe giọng đọc sai ngày mà không có cảnh báo nào.
+  file: `sdk/tongflow/text/normalize_vi.py:38`
   severity: high
   Đề xuất: known-limits
 
-- **Shape 5 — tuyên quét LỚP (từ điển viết tắt) nhưng chỉ có điểm-case, không ma trận viết-trước**
-  Người dùng thấy gì: Từ điển viết tắt địa danh/hành chính chỉ được kiểm bằng vài ví dụ chọn sẵn chứ chưa kiểm hết toàn bộ danh sách viết tắt hỗ trợ, nên nếu sau này ai đó vô tình làm mất một viết tắt khác trong từ điển, hệ thống vẫn báo mọi kiểm tra đều qua trong khi viết tắt đó không còn được đọc đúng thành lời.
-  file: `sdk/tests/test_normalize_vi.py:584`
+- **`_RESIDUAL` không tính dấu "/" — token thư viện bỏ lại lọt thẳng vào TTS mà không cờ nào đỏ**
+  Người dùng thấy gì: Các cách viết giá hoặc lãi suất phổ biến như 'đ/kg' hay '%/năm' có thể còn sót dấu gạch chéo và đơn vị chưa được đọc thành lời, nhưng hệ thống vẫn báo thành công nên không ai được nhắc để sửa.
+  file: `sdk/tongflow/text/normalize_vi.py:140`
   severity: medium
   Đề xuất: known-limits
+
+- **Fixture VIẾT TAY đúng khuôn bên đọc (không round-trip writer→reader)**
+  Người dùng thấy gì: Bài kiểm tra đối chiếu giữa giao diện và máy chủ chạy nền dùng dữ liệu mẫu viết tay thay vì dữ liệu thật sinh ra từ luồng thật, nên nếu cách luồng thật gửi dữ liệu thay đổi, bài kiểm tra này vẫn báo xanh mà không phát hiện ra sai lệch.
+  file: `sdk/tests/conformance/fixtures/normalize-text-vi.json:33`
+  severity: medium
+  Đề xuất: known-limits
+
+## Chưa adversarial-verify (refuter chết)
+
+(không có)
 
 Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).
