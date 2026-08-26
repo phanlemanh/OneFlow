@@ -66,43 +66,12 @@ _PREFIXES: tuple[tuple[str, str, str], ...] = (
     ("H.", "huyện ", _NEXT_UPPER),
 )
 
-# Đ. / Đ = Đường (street). Its siblings above expand a prefix GLUED to its
-# value ("Q.7"), but a street name is separated by a space ("Đ. Lê Lợi"), so it
-# needs a pattern that consumes that space instead of a lookahead.
-#
-# Placed with the address abbreviations, not as an exclusion inside the currency
-# rules, because this pass runs BEFORE them: consuming the address form is what
-# keeps it from reaching the money rewrite at all. Without it, the round-4
-# case-insensitive currency mark read every such address as a price — measured
-# on this branch, "Số 5 Đ. Lê Lợi" -> "số năm đồng. lê lợi" with ok=True, and
-# both guards stayed green because nothing numeric survived and the money-loss
-# relation found the "đồng" the rewrite had just injected (S4 round 6).
-#
-# The DOTTED form counts in either case, because "đ. Nguyễn Huệ" is ordinary
-# listing copy. The UNDOTTED form is accepted only capitalised: a lowercase "đ"
-# followed by a capitalised word is far more likely a price followed by a new
-# sentence ("Giá 500 đ Bao gồm VAT") than a street.
-#
-# Known imperfection, stated rather than hidden: ALL-CAPS price copy that puts a
-# capitalised word straight after the mark ("GIÁ 500 Đ MỘT THÁNG") reads as a
-# street. The slash form the contract pins ("Đ/THÁNG") is unaffected.
-STREET_PATTERN: tuple[re.Pattern[str], str] = (
-    re.compile(rf"(?<!{LETTER})(?i:đ)\.[ \t]+(?=[{_UPPER}])"),
-    "đường ",
-)
-
-# The UNDOTTED form is NOT here on purpose. "<số> Đ <TênHoa>" is shape-identical
-# for a street ("Nhà 12 Đ Trần Phú") and a price ("Chỉ 500 Đ Thôi"), and the
-# round-6 rule guessed street for both — so a price was read out as a street
-# name with ok=True, while has_money() went False and switched off the very
-# relation that exists to catch a dropped currency unit (S4 round 11).
-#
-# Detected here, refused in normalize_vi: between refusing and reading wrong,
-# refuse. A blocked sentence is visible to the user; a price spoken as a street
-# is not.
-AMBIGUOUS_D_PATTERN: re.Pattern[str] = re.compile(
-    rf"(?<=\d)[ \t]+Đ[ \t]+(?=[{_UPPER}])"
-)
+# There is deliberately NO street rule here. "Đ." looks like the sibling
+# prefixes above (Q., P., TP.) but is not like them: those are followed by a
+# value that cannot be anything else, while "<số> đ. <Từ>" is the shape of a
+# price ending a sentence AND of an address. Three rules tried to tell them
+# apart and each read something wrong (S4 rounds 6, 11, 13). The reader now
+# refuses the whole family instead — see _AMBIGUOUS_D in normalize_vi.py.
 
 PREFIX_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = tuple(
     (re.compile(rf"(?<!{LETTER}){re.escape(src)}(?={nxt})"), dst)

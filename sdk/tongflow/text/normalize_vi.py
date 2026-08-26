@@ -21,9 +21,7 @@ from .vi_dictionary import (
     CURRENCY_SIGN_PATTERNS,
     CURRENCY_WORD,
     LETTER,
-    AMBIGUOUS_D_PATTERN,
     PREFIX_PATTERNS,
-    STREET_PATTERN,
 )
 
 _NORMALIZER = VietnameseNormalizer()
@@ -113,6 +111,24 @@ def _decimal_tail(match: re.Match[str]) -> str:
     digits = match.group(1)
     return "" if set(digits) == {"0"} else f" phẩy {digits}"
 
+
+# "<số hoặc đơn vị lớn> đ[.] <từ>" is REFUSED, not guessed.
+#
+# Vietnamese writes a price and an address with the same characters:
+#   "Giá 500 đ. Bao gồm VAT"   — currency mark, then a sentence period
+#   "Số 5 Đ. Lê Lợi"           — abbreviation for Đường, then a street name
+# Only meaning separates them. Three rules tried a signal and each shipped a
+# wrong reading: letter case (round 6), the dot (round 11), a capital after the
+# dot (round 13) — measured, all with ok=True, and every guard blind because the
+# rewrite either removed the digits or injected the very word the money-loss
+# relation looks for.
+#
+# What is NOT ambiguous, and still reads: the mark at end of string, before a
+# comma or a slash, or spelled out in full ("ĐỒNG", "VNĐ"). Nothing can follow
+# it there that would make it an address.
+_AMBIGUOUS_D = re.compile(
+    rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND}))[ \t]*(?i:đ)\.?[ \t]+(?=[^\W\d_])"
+)
 
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
@@ -206,8 +222,7 @@ def has_money(text: str) -> bool:
     while fixing S4 round 6 — the street rewrite alone fixed the OUTPUT but
     left this test reading the raw string).
     """
-    nfc = unicodedata.normalize("NFC", text)
-    return _MONEY.search(STREET_PATTERN[0].sub(" ", nfc)) is not None
+    return _MONEY.search(unicodedata.normalize("NFC", text)) is not None
 
 
 def _pre(text: str) -> str:
@@ -219,8 +234,6 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     for pattern, dst in PREFIX_PATTERNS:
         out = pattern.sub(dst, out)
-    # Before the currency rules on purpose — see STREET_PATTERN's comment.
-    out = STREET_PATTERN[0].sub(STREET_PATTERN[1], out)
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
     # Before every digit rule below: lift the decimal part into a word the
@@ -266,8 +279,8 @@ def normalize_vi(text: str) -> NormalizeResult:
     # Relational, like the clock-colon rule above: decided on the INPUT, because
     # the output is lower-cased and the capital that makes "<số> Đ <TênHoa>"
     # ambiguous is gone by then.
-    if AMBIGUOUS_D_PATTERN.search(unicodedata.normalize("NFC", text)):
-        residual = residual + ("Đ",)
+    if _AMBIGUOUS_D.search(unicodedata.normalize("NFC", text)):
+        residual = residual + ("đ",)
     if residual:
         return NormalizeResult(
             ok=False,

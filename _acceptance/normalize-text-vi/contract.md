@@ -408,6 +408,24 @@ code** vì license):
   (61 khoá, thừa 49), theo tên file bỏ sót thư mục, theo tên slot kéo nhầm hai tính năng khác.
   Số thật là **9 khoá**, không phải 12 như từng tuyên — "12" chưa bao giờ đúng lớp.*
 
+## Sửa đổi vòng 13 (2026-08-26) — GỠ HẲN luật đường
+
+- **AC-6 — cả họ `<số|đơn vị lớn> đ[.] <từ>` nay TỪ CHỐI, không đoán.** Ba luật liên tiếp thử
+  tách "giá" khỏi "địa chỉ", mỗi luật dựa trên một tín hiệu hoá ra không tồn tại: **chữ hoa**
+  (vòng 6), **dấu chấm** (vòng 11), **chữ hoa sau dấu chấm** (vòng 13). Dấu chấm là bài học sắc
+  nhất — nó là **dấu kết câu** cũng thường như dấu viết tắt.
+  *Đo thật ở vòng 13, đều `ok=True`: `Giá 500 đ. Bao gồm VAT` → "giá năm trăm **đường** bao
+  gồm…", `Tổng cộng 1.999.000 đ. Thanh toán khi nhận hàng` → "…nghìn **đường** thanh toán…";
+  và chiều ngược lại `Số 5 đ. lê lợi` (tên đường viết thường) → "số năm **đồng**. lê lợi".*
+  Tiếng Việt dùng **đúng cùng một hình dạng** cho giá và cho địa chỉ; chỉ **nghĩa** mới tách
+  được. Nên bộ đọc từ chối cả họ.
+- **Vẫn đọc bình thường** khi không có gì phía sau làm dấu tiền nhập nhằng: kết chuỗi
+  (`Giá 500 Đ`), trước dấu phẩy (`2 tỷ đ, view sông`), trước dấu gạch chéo (`Đ/THÁNG`), hoặc
+  viết đủ chữ (`125.000 ĐỒNG`, `2 triệu vnđ`).
+- **Đánh đổi khai rõ:** `Số 5 Đ. Lê Lợi` trước đọc đúng thành "đường", nay bị từ chối. Đó là
+  giá đã khai để không còn ca nào đọc sai. Địa chỉ không phải đầu vào chính của slot này; giá
+  thì có.
+
 ## Known limits
 - **Tên thương hiệu chữ La-tinh viết hoa lẫn bị băm** *(owner 2026-08-22: khai giới hạn, mở
   hợp đồng sau)*. Thư viện đọc `VNDirect` thành "ndi re", rồi đọc lại lần nữa thành "di re" —

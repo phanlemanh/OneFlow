@@ -288,35 +288,37 @@ def test_currency_word_survives_magnitude_word() -> None:
 
 # Only the DOTTED form is unambiguous. "Đ." is never a currency mark, so it can
 # be expanded with confidence.
-CORPUS_STREET: tuple[tuple[str, str], ...] = (
-    ("Số 5 Đ. Lê Lợi", "số năm đường lê lợi"),
-    ("Hàng A2 đ. Nguyễn Huệ", "hàng a hai đường nguyễn huệ"),
-    ("Số 5 Đ. Lê Lợi, Q.1", "số năm đường lê lợi, quận một"),
-)
-
-# The UNDOTTED form is genuinely ambiguous and must REFUSE.
+# There is NO street rule any more, and no test asserts one.
 #
-# "Nhà 12 Đ Trần Phú" (a street) and "Chỉ 500 Đ Thôi" (a price) are identical in
-# shape: number, space, Đ, space, capitalised word. Nothing short of a lexicon
-# separates them. The round-6 rule guessed "street" for both, so a price read
-# out as a street name — "Giá 1.999.000 Đ Bao gồm VAT" became "…nghìn ĐƯỜNG bao
-# gồm…" with ok=True, and has_money() went False so the money-loss relation
-# never ran either (S4 round 11 finding; the rule's own comment had declared the
-# imperfection as ALL-CAPS copy only).
+# Three attempts to tell "<số> đ <từ>" apart each failed on a signal that turned
+# out not to exist: letter case (round 6), the dot (round 11), a capital after
+# the dot (round 13). The dot was the sharpest lesson — it is a SENTENCE period
+# as often as an abbreviation mark, so "Giá 500 đ. Bao gồm VAT" read out as
+# "giá năm trăm ĐƯỜNG bao gồm…" with ok=True, while "Số 5 đ. lê lợi" (lowercase
+# street name) fell through to the money rule and read "đồng".
 #
-# Refusing is the declared trade: a blocked sentence is visible to the user, a
-# price read as a street is not. This is the follow-up contract's principle
-# applied to a case the original contract already owns.
+# Vietnamese uses this exact shape for both a price and an address; only MEANING
+# separates them. So the reader refuses the whole family. A refused sentence is
+# visible to the user; a price spoken as a street name is not.
 CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
+    # giá mà luật đường từng đọc thành địa chỉ
+    "Giá 500 đ. Bao gồm VAT",
+    "Tổng cộng 1.999.000 đ. Thanh toán khi nhận hàng",
+    "Giá 2 triệu đ. Liên hệ ngay",
     "Giá 1.999.000 Đ Bao gồm VAT",
     "Chỉ 500 Đ Thôi",
+    # địa chỉ mà luật tiền từng đọc thành giá
+    "Số 5 đ. lê lợi",
     "Nhà 12 Đ Trần Phú",
+    # ...và ca mà luật cũ ĐỌC ĐÚNG. Mất nó là cái giá đã khai để không bao giờ
+    # đọc sai hai nhóm trên.
+    "Số 5 Đ. Lê Lợi",
 )
 
 # The price forms the street rule must NOT eat. Two of them are the very cases
 # the round-4 uppercase amendment was raised for, so this is also its regression
 # pin: narrowing "Đ" must never cost them.
-CORPUS_STREET_NEGATIVE: tuple[tuple[str, str], ...] = (
+CORPUS_MONEY_MARK_UNAMBIGUOUS: tuple[tuple[str, str], ...] = (
     ("Giá 500 Đ", "giá năm trăm đồng"),
     ("Giá 5 tỷ đ", "giá năm tỷ đồng"),
 )
@@ -388,25 +390,17 @@ def test_ambiguous_undotted_d_refuses_rather_than_guessing() -> None:
         assert "đường" not in got.text, f"{raw!r} đoán thành đường: {got.text!r}"
 
 
-def test_street_abbreviation_is_not_a_price() -> None:
-    for raw, expected in CORPUS_STREET:
+def test_unambiguous_money_marks_still_read() -> None:
+    """Dấu tiền chỉ đọc khi KHÔNG có gì phía sau làm nó nhập nhằng.
+
+    Kết chuỗi, dấu phẩy, dấu gạch chéo, hoặc chữ "đồng" đầy đủ — không ca nào
+    trong số này có thể là một địa chỉ.
+    """
+    for raw, expected in CORPUS_MONEY_MARK_UNAMBIGUOUS:
         got = normalize_vi(raw)
         assert got.ok is True, f"{raw!r} → {got.error}"
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
-        # Stated separately: the defect was a currency word APPEARING, and an
-        # expected-string diff alone would not say which half went wrong.
-        assert "đồng" not in got.text, (
-            f"{raw!r} là địa chỉ nhưng đọc ra chữ tiền: {got.text!r}"
-        )
-        assert not has_money(raw), f"{raw!r} bị nhận là có tiền vào"
-
-    for raw, expected in CORPUS_STREET_NEGATIVE:
-        got = normalize_vi(raw)
-        assert got.ok is True, f"{raw!r} → {got.error}"
-        assert got.text == expected, (
-            f"{raw!r} (ca ÂM, luật đường không được ăn): "
-            f"mong {expected!r}, nhận {got.text!r}"
-        )
+        assert "đường" not in got.text, f"{raw!r} bị đọc thành đường: {got.text!r}"
 
 
 # --------------------------------------------------------------------------
@@ -1066,8 +1060,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("MAGNITUDE_DONG_MATRIX", MAGNITUDE_DONG_MATRIX),
     ("VN_AMOUNT_MATRIX", VN_AMOUNT_MATRIX),
     ("VN_AMOUNT_NEGATIVE", VN_AMOUNT_NEGATIVE),
-    ("CORPUS_STREET", CORPUS_STREET),
-    ("CORPUS_STREET_NEGATIVE", CORPUS_STREET_NEGATIVE),
+    ("CORPUS_MONEY_MARK_UNAMBIGUOUS", CORPUS_MONEY_MARK_UNAMBIGUOUS),
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
