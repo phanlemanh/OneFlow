@@ -50,7 +50,13 @@ _DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4
 # "Giá 5 tỷ đ" → "giá năm tỷ đ", ok=True, price unspoken). Kept as one shared
 # constant so the pre-pass, the money test and any later rule cannot drift
 # apart the way the unit LIST did for ranges in round 4.
-_MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ")
+# "trăm" và "chục" added 2026-08-26. Their absence made all three layers miss
+# together — the pre-pass did not rewrite "5 trăm đ", has_money() returned False
+# so the money-loss relation never ran, and the ambiguity rule did not match
+# either, so a bare currency letter reached the voice with ok=True. Same defect
+# class this constant was introduced to close in round 5, one element along
+# (S4 round 15 finding).
+_MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ", "trăm", "chục")
 _MAGNITUDE = "(?:" + "|".join(_MAGNITUDE_WORDS) + ")"
 # A lookbehind must be fixed-width, so the alternation is over whole lookbehind
 # groups rather than inside one. BUILT from the tuple above, not retyped: the

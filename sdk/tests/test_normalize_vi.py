@@ -183,7 +183,11 @@ def test_numbers_and_money_golden() -> None:
 # the corpus growing by case while the criterion is written by class.
 # --------------------------------------------------------------------------
 
-MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ")
+# "trăm" và "chục" thêm 2026-08-26: chúng vắng mặt nên cả ba lớp cùng trượt —
+# `Giá 5 trăm đ` ra "giá năm trăm đ" với ok=True và has_money=False, tức ký hiệu
+# tiền đi thẳng tới giọng đọc dưới dạng chữ cái trơ. Đúng lớp lỗi mà chính hằng
+# dùng chung này ra đời để đóng ở vòng 5, chỉ khác phần tử.
+MAGNITUDE_WORDS = ("nghìn", "ngàn", "triệu", "tỷ", "tỉ", "trăm", "chục")
 DONG_SPACING = ("dính", "có khoảng trắng")
 
 MAGNITUDE_DONG_MATRIX: dict[tuple[str, str], tuple[str, str]] = {
@@ -197,6 +201,10 @@ MAGNITUDE_DONG_MATRIX: dict[tuple[str, str], tuple[str, str]] = {
     ("triệu", "dính"): ("Giá 500 triệuđ", "giá năm trăm triệu đồng"),
     ("tỷ", "dính"): ("Giá 5 tỷđ", "giá năm tỷ đồng"),
     ("tỉ", "dính"): ("Giá 5 tỉđ", "giá năm tỉ đồng"),
+    ("trăm", "có khoảng trắng"): ("Giá 5 trăm đ", "giá năm trăm đồng"),
+    ("chục", "có khoảng trắng"): ("Giá 2 chục đ", "giá hai chục đồng"),
+    ("trăm", "dính"): ("Giá 5 trămđ", "giá năm trăm đồng"),
+    ("chục", "dính"): ("Giá 2 chụcđ", "giá hai chục đồng"),
 }
 
 

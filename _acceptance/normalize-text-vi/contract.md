@@ -426,6 +426,14 @@ code** vì license):
   giá đã khai để không còn ca nào đọc sai. Địa chỉ không phải đầu vào chính của slot này; giá
   thì có.
 
+## Sửa đổi vòng 15 (2026-08-26)
+
+- **AC-6 — tập đơn vị lớn thiếu "trăm" và "chục".** Hai từ rất thông dụng vắng mặt khỏi hằng
+  dùng chung, nên **cả ba lớp cùng trượt**: tiền xử lý không viết lại, `has_money` trả False
+  nên luật quan hệ không chạy, và luật nhập nhằng cũng không khớp. Đo thật: `Giá 5 trăm đ` →
+  "giá năm trăm **đ**" với `ok=True`, tức ký hiệu tiền đi thẳng tới giọng đọc dưới dạng chữ cái
+  trơ. Đúng lớp lỗi mà chính hằng này ra đời để đóng ở vòng 5, chỉ khác phần tử.
+
 ## Known limits
 - **Ngày viết kiểu Mỹ hoặc ngày không tồn tại** (`ngày 12/25/2026`, `ngày 32/8/2026`) đọc sai và
   **mất một thành phần của ngày**, vẫn `ok=True`. Chữ "ngày" bị xoá trước mọi token khớp hình
