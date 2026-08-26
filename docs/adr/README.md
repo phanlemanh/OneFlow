@@ -20,4 +20,3 @@ Nguồn bằng chứng chính: [biên bản hội đồng 07/2026](../strategy/c
 | [0010](0010-mainstream-infra-and-models.md) | Ưu tiên hạ tầng & model phổ biến; Modal là lựa chọn, không phải nền tảng (sửa đổi ADR-0005) | 2026-07-27 |
 | [0011](0011-local-first-execution.md) | Máy của người dùng là nền thực thi mặc định; managed cloud là tier (**thay thế** nửa managed-mặc-định của ADR-0005) | 2026-08-05 |
 | [0012](0012-media-library-boundary.md) | Media-library là nền kho + tri thức chung (đa lĩnh vực); OneFlow là khách qua hợp đồng REST với tám bảo đảm ranh giới | 2026-08-19 |
-| [0013](0013-director-truong-ky.md) | Director trường kỳ: nền trạng thái bốn tầng, memory hai chủ quyền (Director giữ hành vi/sở thích, media-library giữ thực thể), học derived-first, mười lằn ranh đỏ | 2026-08-26 |
