@@ -1,19 +1,29 @@
 name: Desktop Release
 
-# DISARMED 2026-08-26 (B01, ADR-0013 / research-mo-hoa-2026-08.md §3).
+# DISARMED 2026-08-26 — the tag trigger is removed ON PURPOSE. Read before
+# restoring it.
 #
-# This workflow used to trigger on `tags: v*`. It builds a Pake (Tauri) shell
-# around https://app.tongflow.com and publishes installers named `TongFlow-*`.
-# docker-publish.yml ALSO triggers only on `v*`, so a single tag would publish
-# this fork's Docker image AND, in the same push, release third-party-branded
-# installers pointing at upstream's cloud (with the user's OAuth flowing there).
+# This workflow builds a Pake (Tauri) shell around https://app.tongflow.com and
+# publishes installers named `TongFlow-*`. That is upstream's hosted studio and
+# upstream's brand: users who install these sign in to tong-io's service, with
+# their OAuth going there, not to anything this fork runs.
 #
-# The tag trigger is removed until the desktop app is detached from
-# app.tongflow.com (roadmap item 0.1d / S5, blocked on the cloud-URL decision).
-# Until then this is manual-only, and manual runs are a dry run: installers land
-# in Actions artifacts, no GitHub Release is created.
+# It used to trigger on `tags: v*`. So does docker-publish.yml, which is the ONLY
+# way this fork publishes its container image. The two were therefore welded
+# together: publishing a Docker image required pushing a `v*` tag, and that same
+# tag also cut third-party-branded desktop installers pointing at upstream. There
+# was no way to do one without the other.
 #
-# Do NOT restore the `tags: v*` trigger before that item lands.
+# Removing the tag trigger breaks that weld. Docker publishing keeps working;
+# desktop installers are simply not produced by this fork any more. Manual runs
+# stay available and are a dry run — every release-creating step below is gated on
+# `startsWith(github.ref, 'refs/tags/')`, which is false for workflow_dispatch on a
+# branch, so installers land in Actions artifacts and no GitHub Release is touched.
+#
+# RESTORE ONLY AFTER the desktop app stops being a shell for app.tongflow.com.
+# Until then, restoring the trigger re-welds Docker publishing to shipping another
+# organisation's branded installer. See the Release checklist in CLAUDE.md, which
+# is kept in sync with this file.
 on:
     workflow_dispatch:
 

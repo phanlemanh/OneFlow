@@ -90,7 +90,7 @@ Run before every commit; CI ([`.github/workflows/ci.yml`](.github/workflows/ci.y
 
 ## Release checklist
 
-Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **desktop app**. Release the SDK first whenever plugins depend on new types.
+Two independently-versioned artifacts: the **PyPI `oneflow-sdk` package** (import name stays `tongflow` — see [ADR-0008](docs/adr/0008-naming-and-distribution.md)) and the **desktop app**. Release the SDK first whenever plugins depend on new types.
 
 **SDK → PyPI** (publishing convention also in [`sdk/README.md`](sdk/README.md)):
 
@@ -101,9 +101,21 @@ Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **des
 
 **Desktop app + GitHub release:**
 
-The desktop app is a Pake (Tauri) cloud shell for `https://app.tongflow.com` — see [`desktop/README.md`](desktop/README.md). Its version comes from the tag (`--app-version`); there is no desktop package.json.
+> **Not currently released.** [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml)
+> no longer triggers on `tags: v*` — tagging does **not** produce desktop installers.
+> The workflow builds a Pake (Tauri) shell around `https://app.tongflow.com`, which is
+> upstream's hosted studio: anyone installing those builds signs in to tong-io's
+> service. Making the desktop app a real local app is roadmap item **S5**; the trigger
+> stays off until then. The disarm comment at the top of that file is the authority —
+> keep this section in sync with it.
 
+- [ ] Tagging `vX.Y.Z` still publishes the **Docker image** via
+      [`docker-publish.yml`](.github/workflows/docker-publish.yml) (`ghcr.io/<owner>/<repo>`).
+      That is the only thing a tag ships today.
 - [ ] Update [`CHANGELOG.md`](CHANGELOG.md) (Keep a Changelog format) and the app version in [`package.json`](package.json) if it's cut.
-- [ ] Tag the release (`git tag vX.Y.Z`); [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml) builds `OneFlow-mac-universal.dmg` and `OneFlow-win-x64.msi` into a draft GitHub Release and flips it public. Dry-run first via workflow_dispatch (artifacts only, no release) and manually verify OAuth sign-in (especially Google) in the built shell.
-- [ ] Add the CHANGELOG entry as the release notes.
+- [ ] Cut the GitHub Release by hand and paste the CHANGELOG entry as the release notes.
+- [ ] To smoke-test the desktop shell anyway, run the workflow via `workflow_dispatch`:
+      installers land in Actions artifacts and no Release is touched. Note the artifacts
+      are still named `TongFlow-*.dmg` / `.msi` — the workflow has not been rebranded,
+      because it is slated to be replaced rather than renamed (S5).
 - [ ] Note: root `package.json` stays `"private": true` — it is the app, not an npm library; never `npm publish` it.
