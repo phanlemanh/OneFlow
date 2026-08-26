@@ -1,4 +1,4 @@
-# Self-host TongFlow web with Docker Compose.
+# Self-host OneFlow web with Docker Compose.
 #   docker compose up -d   →   http://localhost:3000
 #
 # Uses the prebuilt GHCR image by default. To build locally instead, comment out
@@ -8,14 +8,14 @@
 # (persisted to /data/settings.json). Pass them here via a .env file or shell env.
 
 services:
-  tongflow:
-    image: ghcr.io/tong-io/tongflow:latest
+  oneflow:
+    image: ghcr.io/phanlemanh/oneflow:latest
     # build: .
     ports:
       - "3000:3000"
     volumes:
-      - tongflow-data:/data
-      - tongflow-plugins:/plugins
+      - oneflow-data:/data
+      - oneflow-plugins:/plugins
     environment:
       MODAL_TOKEN_ID: ${MODAL_TOKEN_ID:-}
       MODAL_TOKEN_SECRET: ${MODAL_TOKEN_SECRET:-}
@@ -25,5 +25,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  tongflow-data:
-  tongflow-plugins:
+  oneflow-data:
+  oneflow-plugins:
