@@ -90,7 +90,7 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 #### テキスト
 
 - ✅ **生成 / 書き換え**: プロンプトに基づいて文章を作成または編集。
-- ✅ **数字を読み上げ用に変換（ベトナム語）**: 数字・価格・日付・略語をベトナム語の話し言葉に — 音声合成の前に必須。
+- ⬜ **数字を読み上げ用に変換（ベトナム語）**: 数字・価格・日付・略語をベトナム語の話し言葉に — 音声合成の前に必須。
 
 #### 画像
 
@@ -182,7 +182,6 @@ Google または WeChat でサインインすれば、すぐに創作を始め�
 
 - [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — トランスコード、ミキシング、メディア処理パイプライン
 - [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — ショット境界の検出、クリップ分割用
-- [oneflow-api-normalize-text-vi](https://github.com/phanlemanh/oneflow-api-normalize-text-vi) — 音声合成の前にベトナム語の数字・価格・日付を読み上げ用に変換
 
 ### GPU/CPU プラグイン
 

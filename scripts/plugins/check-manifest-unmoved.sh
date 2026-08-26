@@ -7,7 +7,11 @@
 # local-cpu-plugins AC-14/AC-15) records ADR-0011's first two moves: ffmpeg and
 # pyscenedetect left the upstream org for local plugins under phanlemanh.
 #
-# The invariant is now: 36 plain strings under the default org + exactly THREE
+# FOURTH edition (2026-08-26): normalize-text-vi was registered as a fourth
+# origin entry and then WITHDRAWN in the same feature, because the repository it
+# named — phanlemanh/oneflow-api-normalize-text-vi — does not exist publicly, so
+# the plugin could not be installed anywhere but the machine that wrote it.
+# The invariant is again: 36 plain strings under the default org + exactly THREE
 # origin entries, all under phanlemanh.
 #
 # This is a SNAPSHOT of three PRs, not a standing law. Registering a plugin, or
@@ -30,11 +34,10 @@ const EXPECTED_IDS = [
   "oneflow-modal-compose-overlay",
   "oneflow-api-ffmpeg",
   "oneflow-api-pyscenedetect",
-  "oneflow-api-normalize-text-vi",
 ];
 if (m.org !== "https://github.com/tong-io") fail(`default org is ${m.org}`);
 if (strings.length !== 36) fail(`expected 36 plain string entries, got ${strings.length}`);
-if (objects.length !== 4) fail(`expected exactly 4 origin entries, got ${objects.length}`);
+if (objects.length !== 3) fail(`expected exactly 3 origin entries, got ${objects.length}`);
 const ids = objects.map((o) => o.id).sort();
 const want = [...EXPECTED_IDS].sort();
 if (JSON.stringify(ids) !== JSON.stringify(want))
@@ -42,5 +45,5 @@ if (JSON.stringify(ids) !== JSON.stringify(want))
 for (const o of objects) {
   if (o.origin !== ORIGIN) fail(`unexpected origin on ${o.id}: ${o.origin}`);
 }
-console.log("OK: 36 plain strings under default org + 4 origin entries (" + ids.join(", ") + ")");
+console.log("OK: 36 plain strings under default org + 3 origin entries (" + ids.join(", ") + ")");
 '

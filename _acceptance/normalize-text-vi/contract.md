@@ -434,7 +434,27 @@ code** vì license):
   "giá năm trăm **đ**" với `ok=True`, tức ký hiệu tiền đi thẳng tới giọng đọc dưới dạng chữ cái
   trơ. Đúng lớp lỗi mà chính hằng này ra đời để đóng ở vòng 5, chỉ khác phần tử.
 
+## Sửa đổi vòng 15b (2026-08-26) — RÚT plugin khỏi danh sách chính thức
+
+- **AC-13 đảo chiều: plugin phải VẮNG mặt trong manifest.** Kho mà `origin` trỏ tới —
+  `github.com/phanlemanh/oneflow-api-normalize-text-vi` — **không tồn tại công khai**; ba kho
+  anh em đều phân giải được, riêng kho này 404. Nghĩa là plugin **không cài được ở bất kỳ máy
+  nào khác**, và link trong ba README là link chết.
+  *Điều đáng sợ hơn: hai guard của chính tính năng này vẫn XANH, vì trên máy phát triển có một
+  thư mục `plugins/` cục bộ không theo dõi git — và guard đó tự khai bằng chứng chống lại mình
+  bằng dòng `plugin_commit_sha: local-tree-not-a-repo`, tức bằng chứng không trỏ tới bản sửa
+  đổi nào. Mười lăm vòng với 27 ô đều xanh không phát hiện được, vì bộ đo hỏi "mã có làm đúng
+  thứ hồ sơ nói không" chứ không hỏi "thứ này có tồn tại ngoài máy tôi không".*
+  Guard nay **ghim trạng thái đã rút**: đăng ký lại mà chưa xuất bản kho thì đỏ. Ô năng lực
+  trong ba README hạ từ ✅ xuống ⬜ — năng lực chưa có mặt khi chưa plugin chính thức nào mang nó.
+  **Đổi lại:** node vẫn chạy được qua Director trên máy đã cài plugin; hồ sơ không còn tuyên
+  nó là plugin chính thức.
+
 ## Known limits
+- **Ô E17a/E17b đo trên cây plugin CỤC BỘ, không phải bản đã xuất bản.** Kho công khai chưa
+  tồn tại nên phép đo không trỏ được tới bản sửa đổi nào — chính nó khai
+  `plugin_commit_sha: local-tree-not-a-repo`. Bằng chứng này **không tái lập được** ở máy khác.
+  *(mở lại khi kho được xuất bản — hợp đồng follow-up)*
 - **Ngày viết kiểu Mỹ hoặc ngày không tồn tại** (`ngày 12/25/2026`, `ngày 32/8/2026`) đọc sai và
   **mất một thành phần của ngày**, vẫn `ok=True`. Chữ "ngày" bị xoá trước mọi token khớp hình
   dạng ngày, dựa vào giả định thư viện sẽ thêm lại — chỉ đúng khi nó parse được. Ngày Việt hợp

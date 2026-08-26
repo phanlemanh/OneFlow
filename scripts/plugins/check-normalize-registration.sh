@@ -20,14 +20,20 @@ fail() {
     fails=$((fails + 1))
 }
 
-# 1. Manifest entry, with the right origin.
+# 1. The plugin must be ABSENT from the manifest.
+#
+#    It was registered on 2026-08-20 and WITHDRAWN on 2026-08-26: the origin it
+#    named — $ORIGIN/$PLUGIN_ID — does not exist publicly (its three siblings
+#    resolve; this one 404s), so the plugin could not be installed on any
+#    machine but the one that wrote it, and the README links were dead. This
+#    guard now pins the withdrawal, so re-registering without publishing the
+#    repository turns it red instead of shipping a dead link again.
 node -e "
   const fs = require('fs');
   const m = JSON.parse(fs.readFileSync('$ROOT/config/official-plugins.json', 'utf8'));
-  const e = m.plugins.find((p) => typeof p === 'object' && p !== null && p.id === '$PLUGIN_ID');
-  if (!e) { console.error('FAIL: manifest thiếu entry $PLUGIN_ID'); process.exit(1); }
-  if (e.origin !== '$ORIGIN') { console.error('FAIL: origin sai: ' + e.origin); process.exit(1); }
-" || fail "manifest does not register $PLUGIN_ID under $ORIGIN"
+  const e = m.plugins.find((p) => (typeof p === 'object' && p !== null ? p.id : p) === '$PLUGIN_ID');
+  if (e) { console.error('FAIL: manifest still registers $PLUGIN_ID — its repository does not exist publicly'); process.exit(1); }
+" || fail "manifest still registers $PLUGIN_ID (repository does not exist publicly)"
 
 # 1b. The two manifest guards, RUN — not merely named.
 #     The eval's `expected` used to claim the re-cut guard was updated and that
@@ -49,13 +55,14 @@ bash "$ROOT/scripts/plugins/check-manifest-guard-teeth.sh" >/dev/null ||
 #    the section's heading and the next heading.
 check_doc() {
     local file="$1" heading="$2" row_marker="$3"
-    grep -q "$PLUGIN_ID" "$ROOT/$file" || fail "$file does not mention $PLUGIN_ID"
+    ! grep -q "$PLUGIN_ID" "$ROOT/$file" ||
+        fail "$file still links $PLUGIN_ID — that repository does not exist publicly"
     awk -v h="$heading" '
         $0 == h { inside = 1; next }
         inside && /^#/ { inside = 0 }
         inside { print }
-    ' "$ROOT/$file" | grep -E "^- ✅" | grep -q "$row_marker" ||
-        fail "$file has no ✅ row carrying the marker inside capability-matrix section $heading"
+    ' "$ROOT/$file" | grep -E "^- ⬜" | grep -q "$row_marker" ||
+        fail "$file has no ⬜ row carrying the marker inside capability-matrix section $heading — the capability is not available while no official plugin ships it"
 }
 check_doc "README.md" "#### Text" "Read numbers aloud (Vietnamese)"
 check_doc "docs/README_ZH.md" "#### 文本" "数字转文字（越南语）"
