@@ -76,7 +76,7 @@ plugins and add credentials.
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
-- ⬜ **Read numbers aloud (Vietnamese)**: turn numbers, prices, dates and abbreviations into spoken Vietnamese — required before text-to-speech.
+- ✅ **Read numbers aloud (Vietnamese)**: turn numbers, prices, dates and abbreviations into spoken Vietnamese — required before text-to-speech.
 
 #### Image
 
