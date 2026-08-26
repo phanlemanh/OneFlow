@@ -6,7 +6,7 @@
     {
       "id": "E16",
       "q": "Node mới nhìn có giống các node khác trên bảng vẽ không?",
-      "why": "Máy chỉ chấm được hai ảnh của chính node này; đặt cạnh những node sẵn có để so là việc của mắt người. Ảnh khổ máy tính đã chụp sẵn, thấy rõ hai đầu nối và sợi dây nối vào."
+      "why": "Máy chấm được hai ảnh của chính node này và cả ba góc soi đều thuận. Việc còn lại chỉ mắt người làm được: đặt nó cạnh những node sẵn có để so. Ảnh khổ máy tính và bản phóng to cạnh node đã dựng sẵn."
     }
   ],
   "decisions_plain": [
@@ -169,6 +169,134 @@
     {
       "id": "d-20260821T143500Z-38104",
       "p": "Gỡ khoá xếp hàng giữa hai làn chạy song song — đo được là chính nó chặn vòng kiểm của mình, đổi lại hai làn có thể giẫm chân nhau."
+    },
+    {
+      "id": "d-20260822T080000Z-51190",
+      "p": "Giá viết có dấu phẩy thập phân từng bị đọc sai bậc — ba triệu thành 'ba không không' — nay đọc đúng; người duyệt cho sửa ngay thay vì để lại, vì đây là đọc SAI số chứ không phải từ chối đọc."
+    },
+    {
+      "id": "d-20260822T080100Z-33028",
+      "p": "Bổ sung tiêu chí bắt chính hai dụng cụ đo phải tự từ chối khi đo hỏng — đổi lại phạm vi rộng thêm và phải duyệt lại từ đầu."
+    },
+    {
+      "id": "d-20260822T081500Z-77451",
+      "p": "Gỡ một luật vừa viết vì chứng minh cho thấy không ca nào bắt được nó — chẩn đoán ban đầu sai, thư viện vốn đọc dấu chấm nghìn đúng."
+    },
+    {
+      "id": "d-20260822T082500Z-19664",
+      "p": "Vá cả 13 chỗ suy phiên bản thư viện đọc thay vì một chỗ vừa lộ — và bắt thêm một chỗ ghim cứng số phiên bản nằm ngay trong câu báo thành công."
+    },
+    {
+      "id": "d-20260822T083000Z-40772",
+      "p": "Sửa một phép đếm báo nhầm: nó tưởng file bộ đọc nằm ngoài vùng kiểm, trong khi thật ra có kiểm."
+    },
+    {
+      "id": "d-20260822T100000Z-62018",
+      "p": "Địa chỉ có chữ 'Đ.' từng bị đọc thành 'đồng' — hồi quy do chính bản vá trước; người duyệt cho sửa ngay."
+    },
+    {
+      "id": "d-20260822T100100Z-88342",
+      "p": "Gỡ tệp cấu hình công cụ cá nhân khỏi nhánh — kho mã nguồn mở có người ngoài đóng góp, không để mọi bản tải về tự khai kho phần mềm dưới một tài khoản riêng."
+    },
+    {
+      "id": "d-20260822T101500Z-27735",
+      "p": "Sửa ba phép đo của chính máy vì chúng tuyên quét cả lớp nhưng chỉ có vài ca lẻ — đổi lại phép đo tự bắt được khi ai đó thêm ca mới mà quên ghi danh."
+    },
+    {
+      "id": "d-20260822T102000Z-15903",
+      "p": "Dịch chú thích trong bộ kiểm sang tiếng Anh theo luật của kho — thông điệp báo lỗi giữ nguyên vì đó là chữ cho người đọc, không phải chú thích."
+    },
+    {
+      "id": "d-20260822T140000Z-70991",
+      "p": "Một lượt kiểm bị hạ tầng chặn nên KHÔNG ghi thành hồ sơ — vòng không trọn thì không phải phép đo."
+    },
+    {
+      "id": "d-20260822T141000Z-30256",
+      "p": "Mã tiền viết thường (vnd, vnđ) nay cũng được nhận là tiền — trước đó hàng rào canh mất-chữ-tiền tắt hẳn với chữ thường, nên có đọc đúng cũng chỉ là may."
+    },
+    {
+      "id": "d-20260822T142000Z-58813",
+      "p": "Gom phép suy phiên bản thư viện đọc về đúng một chỗ — trước đó ba script và mười hai cấu hình mỗi nơi tự suy một kiểu."
+    },
+    {
+      "id": "d-20260822T143000Z-46170",
+      "p": "Dịch thông điệp báo lỗi của năm script canh sang tiếng Anh cho khớp các script anh em."
+    },
+    {
+      "id": "d-20260822T144000Z-92034",
+      "p": "Phát hiện thư viện băm nát tên thương hiệu chữ La-tinh và đọc mỗi lần một khác — khai thành giới hạn có tên, kèm phép đo tự báo nếu về sau nó tự lành."
+    },
+    {
+      "id": "d-20260823T090000Z-14882",
+      "p": "Sửa lại luật thu hẹp cảnh báo: một loại node giọng đọc tự điền ngôn ngữ lúc dựng nên cảnh báo bị tắt cho toàn bộ loại đó mà người dùng chưa hề chọn gì."
+    },
+    {
+      "id": "d-20260823T090100Z-55317",
+      "p": "Nhận lỗi trình dữ kiện thiếu cho người duyệt ký — máy chỉ kiểm bản khai mà không kiểm giá trị chạy thật; bài học ghi thành phép đo, không ghi thành lời nhắc."
+    },
+    {
+      "id": "d-20260823T091500Z-70264",
+      "p": "ĐÓNG BĂNG mã cho tới khi có một vòng chấm trọn — vì hồ sơ đã hết hạn hai lần do mã tiếp tục đổi trong lúc chờ."
+    },
+    {
+      "id": "d-20260825T100000Z-61208",
+      "p": "Gỡ hẳn luật thu hẹp cảnh báo — sản phẩm không có chỗ nào cho người dùng khai luồng là tiếng Việt, nên mọi cách thu hẹp đều im lặng đúng lúc cần cảnh báo nhất."
+    },
+    {
+      "id": "d-20260825T100100Z-38845",
+      "p": "Ba lần liên tiếp máy thu hẹp một luật dựa trên một ô khai mà chưa kiểm ô đó thật sự nhận những giá trị nào — nay bộ kiểm rút giá trị từ đúng danh mục người dùng bấm."
+    },
+    {
+      "id": "d-20260825T100200Z-77310",
+      "p": "Bộ công cụ nghiệm thu lên phiên bản mới giữa chừng, mang thêm luật 'bị công cụ giết không tính là hỏng' — nên kết quả các vòng sau đo bằng máy đo khác vòng trước."
+    },
+    {
+      "id": "d-20260825T130000Z-90144",
+      "p": "Chứng minh bằng đo rằng chia nhỏ lượt chạy KHÔNG giúp gì — tỷ lệ qua giữ nguyên, nên nút thắt nằm ở từng lời gọi chứ không ở khối lượng."
+    },
+    {
+      "id": "d-20260825T130100Z-25518",
+      "p": "Cho phép ghi lại những ô ĐÃ đo được của một lượt bị chặn giữa chừng — nhờ vậy phép đo tích luỹ thay vì mất trắng mỗi lần."
+    },
+    {
+      "id": "d-20260825T150000Z-44821",
+      "p": "Cách làm tích luỹ chạy được: quá nửa số ô đã có bằng chứng, phần còn thiếu giảm dần thay vì bắt đầu lại."
+    },
+    {
+      "id": "d-20260825T163000Z-51772",
+      "p": "Viết một hợp đồng riêng gom mọi rủi ro để lại, với nguyên tắc một câu: giữa từ chối đọc và đọc sai, luôn chọn từ chối."
+    },
+    {
+      "id": "d-20260825T163100Z-20904",
+      "p": "Soạn hợp đồng riêng làm lộ ra hai lỗi của chính đợt này — đưa lên người quyết thay vì tự sửa, vì sửa nghĩa là phá đóng băng."
+    },
+    {
+      "id": "d-20260825T180000Z-33967",
+      "p": "Người duyệt cho sửa cả hai: dạng viết dễ nhầm nay bị từ chối thay vì đoán, và một phép đo thôi tự chọn đối tượng theo đúng thứ nó đang đo."
+    },
+    {
+      "id": "d-20260825T180100Z-71225",
+      "p": "Ba lần chọn sai đối tượng đo liên tiếp mới ra được cách chọn đúng — và con số 'mười hai khoá' từng tuyên hoá ra chưa bao giờ đúng, số thật là chín."
+    },
+    {
+      "id": "d-20260826T090000Z-64180",
+      "p": "Vòng chấm đầu tiên chạy trọn sau tám lần bị hạ tầng chặn — mọi ô đều có kết quả, không ô nào đỏ."
+    },
+    {
+      "id": "d-20260826T090100Z-11947",
+      "p": "Nhận sai một khẳng định đã viết vào hợp đồng: dấu chấm sau chữ 'đ' cũng thường là dấu KẾT CÂU chứ không chỉ là dấu viết tắt."
+    },
+    {
+      "id": "d-20260826T110000Z-88301",
+      "p": "Gỡ hẳn luật đọc tên đường — ba lần tìm dấu hiệu phân biệt giá với địa chỉ đều thất bại vì tiếng Việt viết hai thứ đó giống hệt nhau; nay từ chối cả họ."
+    },
+    {
+      "id": "d-20260826T140000Z-29615",
+      "p": "Vòng chấm thứ hai cũng chạy trọn và sạch — mặt máy đã thoả bộ tiêu chí như đang viết."
+    },
+    {
+      "id": "d-20260826T140100Z-73390",
+      "p": "Hai lỗi đọc sai mới tìm được đưa sang hợp đồng sau thay vì sửa ngay — chúng không phải hồi quy do đợt này gây ra, và luật dừng của người duyệt xếp ca mới vào hợp đồng sau."
     }
   ]
 }
