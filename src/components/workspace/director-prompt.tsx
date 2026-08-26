@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { showErrorToast } from "@/components/ui/error-toast";
 import { useFlow } from "@/hooks/use-flow";
 import type { DirectorErrorCode } from "@/lib/director/director-core";
+import { reportOutcome } from "@/lib/director/report-outcome";
 import { logger } from "@/lib/logger";
 import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
 
@@ -46,6 +47,9 @@ interface DirectorSuccess {
     description: string;
     nodes: unknown[];
     edges: unknown[];
+    /** Present since director-wire-shape; optional so a response from an older
+     *  server still applies cleanly instead of failing the type guard. */
+    runId?: string;
 }
 
 interface DirectorErrorBody {
@@ -165,9 +169,15 @@ export default function DirectorPrompt() {
 
                 setStatus("ready");
                 if (useFlow.getState().nodes.length > 0) {
+                    // Staged, not decided: the confirm dialog below resolves
+                    // this into `replaced` or `discarded`.
                     setPending(json);
+                    reportOutcome(json.runId, "staged");
                 } else {
+                    // Empty canvas takes the plan with no dialog — the user
+                    // accepted it by asking for it.
                     apply(json);
+                    reportOutcome(json.runId, "accepted");
                 }
             } catch {
                 // Fetch itself rejects (AbortError) for both a user cancel
@@ -269,7 +279,14 @@ export default function DirectorPrompt() {
             <AlertDialog
                 open={pending !== null}
                 onOpenChange={(v) => {
-                    if (!v) setPending(null);
+                    if (!v) {
+                        // Dismissed without confirming — Escape, the Cancel
+                        // button, or a click outside all land here. A user who
+                        // walks away from a staged plan is a signal, not a
+                        // non-event.
+                        reportOutcome(pending?.runId, "discarded");
+                        setPending(null);
+                    }
                 }}
             >
                 <AlertDialogContent>
@@ -285,7 +302,10 @@ export default function DirectorPrompt() {
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => {
-                                if (pending) apply(pending);
+                                if (pending) {
+                                    apply(pending);
+                                    reportOutcome(pending.runId, "replaced");
+                                }
                             }}
                         >
                             {t("replaceConfirm")}
