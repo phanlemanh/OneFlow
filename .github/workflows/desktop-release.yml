@@ -1,20 +1,16 @@
 name: Desktop Release
 
-# DISARMED 2026-08-26 (B01, ADR-0013 / research-mo-hoa-2026-08.md §3).
-#
-# This workflow used to trigger on `tags: v*`. It builds a Pake (Tauri) shell
-# around https://app.tongflow.com and publishes installers named `TongFlow-*`.
-# docker-publish.yml ALSO triggers only on `v*`, so a single tag would publish
-# this fork's Docker image AND, in the same push, release third-party-branded
-# installers pointing at upstream's cloud (with the user's OAuth flowing there).
-#
-# The tag trigger is removed until the desktop app is detached from
-# app.tongflow.com (roadmap item 0.1d / S5, blocked on the cloud-URL decision).
-# Until then this is manual-only, and manual runs are a dry run: installers land
-# in Actions artifacts, no GitHub Release is created.
-#
-# Do NOT restore the `tags: v*` trigger before that item lands.
+# Cut a release by pushing a tag, e.g.:
+#   git tag v0.2.0 && git push origin v0.2.0
+# The desktop app is a Pake (Tauri) shell that loads https://app.tongflow.com —
+# see desktop/README.md. Jobs upload the installers to a DRAFT GitHub Release
+# which the final job flips public (required under "Immutable releases", which
+# rejects asset uploads to an already-public release).
+# workflow_dispatch is a dry run: installers land in Actions artifacts, no release.
 on:
+    push:
+        tags:
+            - "v*"
     workflow_dispatch:
 
 concurrency:

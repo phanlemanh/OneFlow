@@ -7,6 +7,8 @@
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
     <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
     <a href="https://pypi.org/project/tongflow/"><img src="https://img.shields.io/pypi/v/tongflow?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
+    <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-参加-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
+    <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="最新リリース" /></a>
   </p>
   <p>
     <video src="https://github.com/user-attachments/assets/407a7e7b-2d44-4c90-8016-33d0a9f5e7d5"></video>
@@ -18,21 +20,42 @@
 
 > **フォークについて：** OneFlow は [TongFlow](https://github.com/tong-io/tongflow)（著作権 tong-io、AGPL-3.0 ライセンス）の個人／社内フォークです。本フォークは独立して改変・維持されており、tong-io とは関係なく、その承認も受けていません。詳細は [`NOTICE.md`](../NOTICE.md) を参照してください。
 
+## Demo デモ
+
+| ワークフローのスクリーンショット | 出力結果 |
+| :--: | :--: |
+| **基本** — テキストを入力（追加）し、画像を生成（変換）、さらに1枚に融合（結合）。<br/><img src="https://file.tongflow.com/public/demos/basic.png" width="620" alt="ワークフロー" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="200" alt="結果" /> |
+| **中級** — （テーマ追加 → 台本生成 → 音声生成） + （人物の説明 → 画像生成） → リップシンク動画を生成 = デジタルヒューマンのナレーション。<br/><img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="620" alt="ワークフロー" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="200"></video> |
+| **上級** — 歌詞生成 + 楽曲生成 + 人物生成 + シーン生成 + 絵コンテ生成 → MV生成<br/><img src="https://file.tongflow.com/public/demos/mv.png" width="620" alt="ワークフロー" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="200"></video> |
+
+OneFlowで生成AIを活用し、創造力を解き放とう！
+
 ## クイックスタート
 
-OneFlow はあなた自身のマシンで動きます — セルフホストし、自分の API キーを使います。開始方法は 2 つ：
+OneFlow **デスクトップ版**は、クラウドスタジオ **[app.tongflow.com](https://app.tongflow.com)** を直接読み込む軽量（約 10 MB）のシェルアプリです——インストールしてサインインすれば、すぐに創作を始められます。クラウドスタジオはブラウザから直接開くこともできます。
 
-- **[Docker で起動](#docker-で起動)** — コマンド 1 つ、Node/Python のセットアップ不要。
-- **[ソースコードから起動](#ソースコードから起動)** — 開発用。
+### Step 1 — デスクトップ版をインストール
 
-その後、[セルフホストのセットアップ（プラグインと認証情報）](#セルフホストのセットアッププラグインと認証情報)
-に従ってプラグインと認証情報を設定してください。
+対応プラットフォームのインストーラーをダウンロードし、インストールして起動します。
 
-> **デスクトップ版について。** この fork はデスクトップ用インストーラーを**配布していません**。
-> 上流の [Releases](https://github.com/tong-io/tongflow/releases/latest) にある
-> `TongFlow-*.dmg` / `.msi` は上流のホスト型スタジオ `app.tongflow.com` のシェルで、
-> サインイン先は tong-io のサービスです。OneFlow のローカル版デスクトップアプリは
-> 計画中の項目（ロードマップ S5）です。それまではセルフホストがサポートされる方法です。
+- **macOS（Universal — Apple Silicon / Intel 共通）：** [TongFlow-mac-universal.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-universal.dmg)
+- **Windows：** [TongFlow-win-x64.msi](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-x64.msi)
+
+すべてのバージョンは [Releases](https://github.com/tong-io/tongflow/releases/latest) ページを参照してください。
+
+> **macOS をお使いの方へ：** インストーラーはまだ Apple の公証（notarization）を受けていないため、初回起動時に Gatekeeper にブロックされます（「"TongFlow"は壊れているため開けません」と表示されます）。アプリを「アプリケーション」フォルダに移動した後、ターミナルで以下のコマンドを一度実行すると正常に開けます：
+>
+> ```bash
+> xattr -cr /Applications/TongFlow.app
+> ```
+>
+> インストーラーは必ずこのページから直接ダウンロードしてください——WeChat などのチャットアプリ経由で転送されたファイルは、リネームや隔離フラグの再付与が行われる場合があります。
+
+### Step 2 — サインインして創作を開始
+
+Google または WeChat でサインインすれば、すぐに創作を始められます——プラグインと実行はクラウド側で管理されます。
+
+> **完全ローカル・アカウント不要の OneFlow をお望みですか？** セルフホストをご利用ください——[ソースコードから起動](#ソースコードから起動)または [Docker で起動](#docker-で起動)を参照し、[セルフホストのセットアップ](#セルフホストのセットアッププラグインと認証情報)に従って設定してください。（v0.1.13 以前のデスクトップ版は完全なローカルランタイムを同梱していました。それらのインストーラーは [Releases](https://github.com/tong-io/tongflow/releases) ページに残っています。）
 
 ## コアコンセプト
 
@@ -211,8 +234,8 @@ pnpm start:prod        # 一度ビルドしてから http://localhost:3000 で�
 
 ```bash
 docker run -d -p 3000:3000 \
-  -v oneflow-data:/data -v oneflow-plugins:/plugins \
-  ghcr.io/phanlemanh/oneflow:latest
+  -v tongflow-data:/data -v tongflow-plugins:/plugins \
+  ghcr.io/tong-io/tongflow:latest
 ```
 
 その後 **`http://localhost:3000`** を開きます。または Compose で（本リポジトリの [`docker-compose.yml`](../docker-compose.yml) をクローンします）：
@@ -263,11 +286,20 @@ docker compose up -d
 
 ## コミュニティ
 
-質問・アイデア・不具合報告は本リポジトリの
-**[GitHub Discussions](https://github.com/phanlemanh/OneFlow/discussions)** と **[Issues](https://github.com/phanlemanh/OneFlow/issues)** へお願いします。
+**[Discord](https://discord.gg/K7V8az94Zf)** に参加するか、下記の**WeChatグループ**のQRコードをスキャンしてください。
 
-この fork はチャットコミュニティを運営していません。上流 TongFlow がリンクしている
-Discord と WeChat グループは tong-io のものであり、本プロジェクトは対応しません。
+<div>
+  <img src="assets/qr.png" alt="WeChatグループQRコード" width="180" />
+</div>
+
+## ビジネス協業
+
+ビジネス協業については business@tongflow.com までお問い合わせください。
+
+- **オープンソースモデルのオーナー**：あなたのモデルを統合し、ユーザーにスムーズな体験を提供できます。
+- **エンタープライズユーザー**：ローカルGPUへのデプロイ、カスタムノードやプラグインの構築などを支援できます。
+- **プラットフォーム / ルーター**：あなたのAPIを接続できます。
+- **VC**：[tongflow.com](https://tongflow.com) のクラウドAIスタジオでの協業をぜひご相談ください。
 
 ## オープンソース
 
@@ -287,6 +319,15 @@ tong-io にあります——非 AGPL 条件で TongFlow が必要な場合は�
 上流の `COMMERCIAL-LICENSE.md` と `CLA.md` は本フォークには含まれません。コントリビューションは
 AGPL-3.0 そのもの（inbound = outbound）で受け付けており、CLA はありません。
 
-上記のライセンスはリポジトリ全体をカバーします。`sdk/` ディレクトリは本フォークによって
-変更され、`oneflow-sdk` として PyPI に公開されています（インポート名は `tongflow` のまま）。
+上記のライセンスはリポジトリ全体（PyPI に公開される `tongflow` パッケージを含む `sdk/` ディレクトリ）をカバーします。
 フォークの帰属表示と変更告知は [NOTICE.md](../NOTICE.md) をご覧ください。
+
+## Star 履歴
+
+<a href="https://www.star-history.com/?repos=tong-io%2Ftongflow&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&legend=top-left" />
+ </picture>
+</a>

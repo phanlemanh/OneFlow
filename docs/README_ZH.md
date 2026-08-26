@@ -7,6 +7,8 @@
     <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
     <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
     <a href="https://pypi.org/project/tongflow/"><img src="https://img.shields.io/pypi/v/tongflow?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
+    <a href="https://discord.gg/K7V8az94Zf"><img src="https://img.shields.io/badge/Discord-加入-5865F2?logo=discord&logoColor=white" alt="Discord" /></a>
+    <a href="https://github.com/tong-io/tongflow/releases"><img src="https://img.shields.io/github/v/release/tong-io/tongflow?logo=github" alt="最新版本" /></a>
   </p>
   <p>
     <video src="https://github.com/user-attachments/assets/407a7e7b-2d44-4c90-8016-33d0a9f5e7d5"></video>
@@ -18,20 +20,42 @@
 
 > **Fork 声明：** OneFlow 是 [TongFlow](https://github.com/tong-io/tongflow)（版权归 tong-io 所有，AGPL-3.0 许可）的个人/内部 fork。本 fork 独立修改和维护，与 tong-io 无关，未获其背书。详见 [`NOTICE.md`](../NOTICE.md)。
 
+## Demo 示例
+
+| 工作流截图 | 输出结果 |
+| :--: | :--: |
+| **基本** — 输入文本（添加），生成图像（转换），再融合成一张（组合）。<br/><img src="https://file.tongflow.com/public/demos/basic.png" width="620" alt="工作流" /> | <img src="https://file.tongflow.com/public/demos/basic_result.png" width="200" alt="结果" /> |
+| **中级** — （添加主题 → 生成文案 → 生成语音） + （人物描述 → 生成图像） → 生成对口型视频 = 数字人口播。<br/><img src="https://file.tongflow.com/public/demos/digitalhuman.png" width="620" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/a803394d-0ccf-4023-9b06-5c1581345758" width="200"></video> |
+| **高级** — 生成歌词 + 生成歌曲 + 生成人物 + 生成场景 + 生成分镜 → 生成MV<br/><img src="https://file.tongflow.com/public/demos/mv.png" width="620" alt="工作流" /> | <video src="https://github.com/user-attachments/assets/2bc71e3c-3ed6-48b2-81e7-82ad5976d801" width="200"></video> |
+
+用OneFlow借助生成式AI释放想创意！
+
 ## 快速开始
 
-OneFlow 在你自己的机器上运行——自托管并使用你自己的 API Key。两种启动方式：
+OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载云端工作室 **[app.tongflow.com](https://app.tongflow.com)** ——安装、登录，即可开始创作。云端工作室也可以直接在浏览器里打开。
 
-- **[用 Docker 启动](#用-docker-启动)** — 一条命令，无需 Node/Python 环境。
-- **[从源代码启动](#从源代码启动)** — 用于开发。
+### Step 1 — 安装桌面版
 
-然后按 [自托管配置（插件与凭据）](#自托管配置插件与凭据) 安装插件并填写凭据。
+下载对应平台的安装包，安装并打开。
 
-> **关于桌面版。** 本 fork **不**发布桌面安装包。上游
-> [Releases](https://github.com/tong-io/tongflow/releases/latest) 页面上的
-> `TongFlow-*.dmg` / `.msi` 是上游托管服务 `app.tongflow.com` 的外壳，登录的是
-> tong-io 的服务，与本 fork 无关。OneFlow 的本地桌面应用是计划项（路线图 S5）；
-> 在此之前，自托管是受支持的方式。
+- **macOS（Universal — Apple Silicon 和 Intel 通用）：** [TongFlow-mac-universal.dmg](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-mac-universal.dmg)
+- **Windows：** [TongFlow-win-x64.msi](https://github.com/tong-io/tongflow/releases/latest/download/TongFlow-win-x64.msi)
+
+全部版本见 [Releases](https://github.com/tong-io/tongflow/releases/latest) 页面。
+
+> **macOS 用户注意：** 安装包暂未经过 Apple 公证，首次打开会被 Gatekeeper 拦截（提示"TongFlow 已损坏，无法打开"）。把 app 拖入「应用程序」后，在终端执行一次以下命令即可正常打开：
+>
+> ```bash
+> xattr -cr /Applications/TongFlow.app
+> ```
+>
+> 请直接从本页面下载安装包——通过微信等聊天工具转发的安装包可能被改名或重新打上隔离标记。
+
+### Step 2 — 登录并开始创作
+
+用 Google 或微信登录即可开始创作——插件与执行都由云端托管。
+
+> **想要完全本地、无需账号的 OneFlow？** 请使用自托管——参见[从源代码启动](#从源代码启动)或[用 Docker 启动](#用-docker-启动)，然后按照[自托管配置](#自托管配置插件与凭据)完成设置。（v0.1.13 及之前的桌面版内置了完整本地运行时，安装包仍保留在 [Releases](https://github.com/tong-io/tongflow/releases) 页面。）
 
 ## 核心概念
 
@@ -210,8 +234,8 @@ GHCR 上已发布自托管镜像——无需配置 Node/Python/pnpm：
 
 ```bash
 docker run -d -p 3000:3000 \
-  -v oneflow-data:/data -v oneflow-plugins:/plugins \
-  ghcr.io/phanlemanh/oneflow:latest
+  -v tongflow-data:/data -v tongflow-plugins:/plugins \
+  ghcr.io/tong-io/tongflow:latest
 ```
 
 然后打开 **`http://localhost:3000`**。或者用 Compose（会克隆本仓库的 [`docker-compose.yml`](../docker-compose.yml)）：
@@ -262,11 +286,20 @@ docker compose up -d
 
 ## 社区
 
-问题、想法和缺陷报告请前往本仓库的
-**[GitHub Discussions](https://github.com/phanlemanh/OneFlow/discussions)** 与 **[Issues](https://github.com/phanlemanh/OneFlow/issues)**。
+加入 **[Discord](https://discord.gg/K7V8az94Zf)** 或扫描下方**微信群**二维码。
 
-本 fork 不运营聊天社区。上游 TongFlow 链接的 Discord 与微信群属于 tong-io，
-本项目不提供支持。
+<div>
+  <img src="assets/qr.png" alt="微信群二维码" width="180" />
+</div>
+
+## 商务合作
+
+商务合作请联系 business@tongflow.com。
+
+- **开源模型 owner**：我可以集成你的模型，让用户流畅体验。
+- **企业用户**：我可以协助在本地 GPU 上部署、构建定制节点和插件等。
+- **平台 / 路由**：我可以接入你的 API。
+- **VCs**：欢迎探讨在 [tongflow.com](https://tongflow.com) 云端 AI 工作室上的合作。
 
 ## 开源
 
@@ -285,6 +318,15 @@ AGPL 第 13 条:如果你将修改后的 OneFlow 作为网络服务运行,必须
 上游的 `COMMERCIAL-LICENSE.md` 与 `CLA.md` 文件不属于本分叉;贡献代码按 AGPL-3.0
 本身接受(inbound = outbound),无需签署 CLA。
 
-以上授权覆盖整个仓库,包括 `sdk/` 目录——该目录由本分叉修改,并以 `oneflow-sdk`
-之名发布到 PyPI(导入包名仍为 `tongflow`)。
+以上授权覆盖整个仓库,包括 `sdk/` 目录(发布到 PyPI 的 `tongflow` 包)。
 分叉的署名与修改声明见 [NOTICE.md](../NOTICE.md)。
+
+## Star 历史
+
+<a href="https://www.star-history.com/?repos=tong-io%2Ftongflow&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=tong-io/tongflow&type=date&legend=top-left" />
+ </picture>
+</a>
