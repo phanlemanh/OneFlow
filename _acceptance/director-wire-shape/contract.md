@@ -118,10 +118,30 @@ nếu chỉ client ghi thì mọi lượt người dùng bỏ giữa chừng bi�
 từ chối qua mọi đường trong khi `anyOf` được cả 4 hãng nhận. Bản sửa không thuộc gói này về
 mặt chức năng, nhưng tách ra là để lại mìn cho `director-transport-open`.
 
-**Vì sao chỉ MỘT eval chạy tay:** mọi executor đã khai trong `_acceptance/config.yaml` đều là
+**Vì sao chỉ hai eval chạy tay:** mọi executor đã khai trong `_acceptance/config.yaml` đều là
 lệnh tất định, không khoá API, không bước network. Golden set 30 prompt cần cả hai. Khai 8 eval
 dưới dạng judgment sẽ bắt người kiểm 8 lần cho cùng một phép đo. Quyết định của owner 26/08:
-**một** golden-set eval chạy tay (E14), phần còn lại là eval máy.
+**một** golden-set eval chạy tay, phần còn lại là eval máy.
 
-**Bằng chứng của E14 là ảnh chụp một lần, không tái chạy được trong CI.** Ghi rõ ở đây để
+**Sửa 26/08 sau khi chạy thật** ([bằng chứng](evidence/e14-2026-08-26.md)): E14 gốc gộp ba câu,
+nhưng câu về **tỉ lệ row mồ côi** *về nguyên tắc* không đo được bằng script —
+`run-baseline.mjs` gọi thẳng `/api/director`, còn `/api/director/feedback` chỉ được UI gọi.
+Script luôn cho 100% mồ côi dù hiện thực đúng hay sai. Một ngưỡng không thể đạt bằng dụng cụ
+đã khai là ngưỡng **vô nghĩa**, không phải ngưỡng nghiêm khắc. Tách thành:
+
+- **E14a** (script) — tỉ lệ thành công so mốc 86,7%, và mỗi lượt gọi sinh đúng một row.
+- **E14b** (người, trong UI) — đi qua cả ba nhánh quyết định rồi kiểm tỉ lệ mồ côi.
+
+**Bằng chứng của cả hai là ảnh chụp một lần, không tái chạy được trong CI.** Ghi rõ ở đây để
 Cổng 2 không đòi điều bất khả.
+
+**Một sửa nữa cùng lượt:** câu "`count(*)` == 30" của E14 gốc sai khuôn — sổ là append-only,
+không reset giữa các lần chạy, nên tổng luôn lớn hơn 30 ở lần chạy thứ hai. E14a hỏi **phần
+tăng thêm** thay vì tổng.
+
+**Và một lỗ hổng của chính bộ đo, đã vá:** lần chạy E14 đầu tiên cho 30/30 (100%) — hiện vật,
+vì worktree mới có `plugins/` rỗng nên vocabulary rỗng và mọi plan chỉ còn step `text`, luôn
+compile. Hợp đồng này đã cảnh báo đúng điều đó ở mục Context, và phép đo vẫn lọt: bộ đo *in*
+cấu hình ghim mà không *kiểm* nó. `run-baseline.mjs` nay đối chiếu `plugins/` với
+`frozen-config.json` và thoát mã 2 khi lệch. Cảnh báo trong tài liệu không ngăn được gì;
+chỉ guard chạy được mới ngăn.

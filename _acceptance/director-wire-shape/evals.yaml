@@ -123,17 +123,40 @@ evals:
     expected: "exit 0; moi loi goi ghi promptText ra log deu di qua logger.debug (no-op ngoai development). SUPPRESSION half: chen mot logger.info(prompt) gia phai lam eval nay DO"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
-  # ---------- E14 — DUY NHAT chay tay ----------
-  - id: E14
+  # ---------- E14a / E14b — hai phep do, hai dung cu ----------
+  #
+  # Tach 26/08 SAU KHI chay E14 lan dau (evidence/e14-2026-08-26.md). Ban goc gop
+  # ba cau vao mot eval, nhung cau (3) — ty le row mo coi — VE NGUYEN TAC khong
+  # do duoc bang script: run-baseline.mjs goi thang /api/director, con
+  # /api/director/feedback chi duoc goi tu UI (bon nhanh trong director-prompt.tsx).
+  # Script luon cho 100% mo coi du hien thuc dung hay sai. Mot nguong khong the
+  # dat bang dung cu da khai la mot nguong vo nghia, khong phai mot nguong nghiem khac.
+  - id: E14a
     criterion: AC-4
     executor: judgment
     question: >-
-      Chay `node _acceptance/director-wire-shape/golden/run-baseline.mjs` tren cau hinh khop
-      `golden/frozen-config.json`, roi tra loi ba cau bang so:
+      Chay `node _acceptance/director-wire-shape/golden/run-baseline.mjs` tren cau
+      hinh khop `golden/frozen-config.json` (bo do TU DUNG voi ma 2 neu lech — xem
+      ghi chu duoi), roi tra loi bang so:
       (1) ty le thanh cong co >= 86,7% khong — moc EVAL-0 ngay 26/08?
-      (2) `SELECT count(*) FROM director_events WHERE kind='generated'` co == 30 khong?
-      (3) ty le row mo coi (co 'generated', khong duoc va outcome) co < 10% khong?
-      Neu cau (1) truot: goi nay lam Director TE DI, dung ban ve "chi them, khong doi hanh vi".
-      Neu cau (2) truot: co luot khong ghi duoc — chinh la lo hong goi nay ton tai de vá.
-    expected: "Ca ba cau deu CO. Bang chung la anh chup mot lan (output bo do + ket qua truy van), KHONG tai chay duoc trong CI vi can khoa API va dev server — da ghi ro trong contract muc Notes"
+      (2) so row `director_events` TANG THEM co bang dung so luot goi khong?
+      Cau (2) hoi PHAN TANG THEM chu khong phai tong: so la append-only, khong reset
+      giua cac lan chay. Ban goc hoi "== 30" va do la sai khuon.
+      Neu cau (1) truot: goi nay lam Director TE DI, dung ban ve "chi them, khong doi
+      hanh vi" — dieu goi nay khong duoc phep lam.
+    expected: "Ca hai cau CO. Bang chung la anh chup mot lan (output bo do + ket qua truy van), KHONG tai chay duoc trong CI vi can khoa API va dev server. Bo do doi chieu plugins/ voi frozen-config.json va thoat ma 2 khi lech — mot lan chay tren cau hinh khac la mot phep do ve mot Director khac (bai hoc 26/08: worktree rong cho 30/30 vi vocabulary rong nen moi plan chi con step text)"
+    evidence_required: [verifier, verified_at, output, notes]
+
+  - id: E14b
+    criterion: AC-5
+    executor: judgment
+    question: >-
+      TRONG GIAO DIEN, khong dung script: mo panel Director, go 5 prompt tieng Viet
+      bat ky, va di qua CA BA nhanh quyet dinh — mot lan tren canvas RONG (ap dung
+      ngay), mot lan tren canvas CO NODE roi BAM XAC NHAN, mot lan tren canvas co
+      node roi HUY (Escape hoac bam ra ngoai). Sau do truy van:
+      `SELECT kind, count(*) FROM director_events GROUP BY kind`.
+      Ty le row con o `generated` (chua duoc va outcome) co < 10% khong?
+      Va co xuat hien du ca `accepted`, `replaced`, `discarded` khong?
+    expected: "Ty le mo coi < 10%, va ba kind outcome deu co mat. Day la nua ma script KHONG do duoc: chi UI goi /api/director/feedback. Neu mot kind vang mat thi mot nhanh quyet dinh khong duoc noi day — nhanh `discarded` la de sot nhat vi no di qua onOpenChange chu khong qua rieng nut Cancel"
     evidence_required: [verifier, verified_at, output, notes]
