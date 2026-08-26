@@ -9,7 +9,7 @@
  * DUNG: node run-baseline.mjs [--base http://localhost:3000] [--dry] [--limit N]
  *   --dry  : khong goi API, chi kiem golden set + in ke hoach (MIEN PHI)
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -82,6 +82,44 @@ const pct = (n, d) => (d ? `${((n / d) * 100).toFixed(1)}%` : "-");
 function percentile(sorted, f) {
   if (!sorted.length) return null;
   return sorted[Math.min(Math.max(Math.ceil(f * sorted.length), 1), sorted.length) - 1];
+}
+
+/**
+ * The frozen config is not decoration. Director's vocabulary is a FUNCTION of
+ * the plugin registry at run time, so a run against a different plugin set
+ * measures a different Director. With an empty `plugins/` the model can only
+ * emit `text` steps, every plan compiles, and the suite reports 100% — a
+ * number that looks like an improvement and is an artefact.
+ *
+ * Learned the hard way on 2026-08-26: this harness printed the frozen config
+ * without checking it, and a run in a fresh worktree scored 30/30.
+ */
+function verifyFrozenConfig() {
+  const root = join(HERE, "..", "..", "..");
+  let actual = [];
+  try {
+    actual = readdirSync(join(root, "plugins"), { withFileTypes: true })
+      .filter((d) => d.isDirectory() && !d.name.startsWith("."))
+      .map((d) => d.name)
+      .sort();
+  } catch { /* no plugins dir at all */ }
+  const expected = Object.keys(frozen.installedPlugins).sort();
+  const missing = expected.filter((p) => !actual.includes(p));
+  const extra = actual.filter((p) => !expected.includes(p));
+  return { actual, expected, missing, extra, ok: missing.length === 0 && extra.length === 0 };
+}
+
+const frozenCheck = verifyFrozenConfig();
+if (!frozenCheck.ok) {
+  console.error("\nCAU HINH PLUGIN KHONG KHOP frozen-config.json — phep do VO NGHIA:");
+  console.error(`  ky vong ${frozenCheck.expected.length} plugin: ${frozenCheck.expected.join(", ") || "(khong co)"}`);
+  console.error(`  thuc te ${frozenCheck.actual.length} plugin: ${frozenCheck.actual.join(", ") || "(khong co)"}`);
+  if (frozenCheck.missing.length) console.error(`  THIEU:  ${frozenCheck.missing.join(", ")}`);
+  if (frozenCheck.extra.length) console.error(`  THUA:   ${frozenCheck.extra.join(", ")}`);
+  console.error("  Vocabulary la ham cua registry luc chay: it plugin hon => Director chi sinh duoc");
+  console.error("  step `text`, moi plan compile, va suite bao 100%. Do la HIEN VAT, khong phai cai thien.");
+  console.error("  Dat lai plugins/ cho khop, hoac ghi lai frozen-config.json neu day la cau hinh moi.\n");
+  process.exit(2);
 }
 
 const bad = preflight();
