@@ -1,0 +1,91 @@
+{
+  "failOn": [
+    "critical",
+    "serious"
+  ],
+  "pages": [
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=missing",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=missing&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=installing",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=installing&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=provisioning",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=provisioning&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=ready",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=ready&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=blocked",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=blocked&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=result",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=result&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=needs-key",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=needs-key&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-verifying",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-verifying&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-invalid",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-invalid&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-verified",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3199/proto/byo-key-onboarding?state=key-verified&theme=dark",
+      "violations": []
+    }
+  ],
+  "totals": {},
+  "blocking": 0,
+  "verdict": "PASS"
+}

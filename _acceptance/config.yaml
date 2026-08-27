@@ -158,6 +158,22 @@ executors:
     unit_venv_lite_fallback_kept: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'no requirements'"
     # The pre-2026-08-07 shared venv lived AT the path that is now the root of
     # per-plugin venvs, so its corpse would be enumerated as if it were a plugin.
+    # byo-key-onboarding Gate 1 (2026-08-07): every file below lands during
+    # implementation. One key per criterion — criteria sharing one exit code make a
+    # never-implemented case look identical to a passing one (standing rule).
+    unit_first_run_readiness: "pnpm vitest run src/hooks/use-first-run-readiness.test.ts"
+    unit_example_requirements: "pnpm vitest run src/lib/onboarding/example-requirements.test.ts"
+    unit_failure_actions: "pnpm vitest run src/lib/onboarding/failure-actions.test.ts"
+    unit_provisioning_events: "pnpm vitest run src/lib/plugin-executor/provisioning-events.test.ts"
+    # BKO_E22 gates the heavyweight end-to-end run (network clones + venv
+    # provisioning) — same pattern as the E7/E8 install harness: the eval sets
+    # the flag, the plain unit suite sees it skipped.
+    unit_example_run_produces_new_asset: "BKO_E22=1 pnpm vitest run src/lib/onboarding/example-run.test.ts"
+    # Both halves of AC-10 in one command: the unit file drives verifyKey's
+    # own logic, the route file proves the REAL save path calls it (nothing
+    # injected but the network itself) — a spy on an injected prober cannot
+    # see the road to the function.
+    unit_key_verified_on_save: "pnpm vitest run src/lib/onboarding/key-verify.test.ts src/app/api/settings/env/route.test.ts"
     unit_venv_legacy_migration: "pnpm vitest run src/lib/plugins/plugin-python-env.test.ts -t 'legacy'"
     sdk_pytest_scope_with_deploy: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_deploy_with_image_imports_registers_slot
     sdk_pytest_scope_with_scan: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_scan_with_image_imports_registers_and_is_quiet
@@ -336,6 +352,28 @@ executors:
     lcp_manifest_counts: "bash scripts/plugins/check-manifest-unmoved.sh"
     lcp_manifest_guard_teeth: "bash scripts/plugins/check-manifest-guard-teeth.sh"
     lcp_docs_synced: "bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh"
+    # byo-key-onboarding Gate 1 (2026-08-07): guard scripts land during implementation.
+    bko_example_needs_no_keys: "bash scripts/onboarding/check-example-needs-no-keys.sh"
+    bko_one_action_installs_all: "bash scripts/onboarding/check-one-action-installs-all.sh"
+    bko_no_restart_after_install: "bash scripts/onboarding/check-no-restart-after-install.sh"
+    bko_no_telemetry_sinks: "bash scripts/onboarding/check-no-telemetry-sinks.sh"
+    # Self-contained E19: boots its own dev server on port 3199 (override with
+    # BKO_A11Y_PORT), scans 20 proto pages with axe-core in real Chrome, tears
+    # down. The bare executors.design.a11y is the generic scanner and takes no
+    # URLs, so an eval pointing at it directly would exit 2 (bad usage).
+    bko_a11y_proto: "bash scripts/onboarding/check-a11y-proto.sh"
+    # Ba bề mặt t3 nhánh thật sự chạm. Hai cái dưới KHÔNG có trong kế hoạch
+    # duyệt ở Cổng 1.5 (Task 5 mang theo settings/env, Task 3 thêm hẳn route
+    # install-missing) — khai ra đây để chúng hiện ở Cổng 2 thay vì lọt im.
+    # --require giữ nguyên một đường: cửa sổ diff rỗng thì mọi lời khai
+    # "không chạm gì cấm" đều đúng một cách vô nghĩa.
+    # Globs are SINGLE-QUOTED so the shell hands them to t3-scan verbatim.
+    # Unquoted, bash (globstar off) expanded `src/lib/plugin-executor/**` to
+    # the directory's top-level entries before the script ever ran: --allow
+    # became one literal FILE, provisioning-events.ts and runners/generic.ts
+    # fell outside it, and E18 failed on the very path it was written to
+    # allow (S4 round 1).
+    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow 'src/lib/plugin-executor/**' --allow 'src/app/api/settings/env/**' --allow 'src/app/api/plugins/install-missing/**' --require 'src/lib/plugin-executor/**'"
     lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
     # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
     # stale evidence), which is narrower and answerable; check-gate-residual's
@@ -390,6 +428,7 @@ executors:
     gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1)"
     # ui_check is a browser-injected asset (runner loads it INTO the page) — PATH only, no `node` prefix.
     ui_check: "$(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-scan.js | sort -V | tail -1)"
+    a11y: node scripts/a11y-scan.mjs
 
 risk_tiers:
   # Docs/branding/config-only changes — acceptance gate skipped entirely.
@@ -481,3 +520,6 @@ dev_server:
 #     ui: "node scripts/ui-capture.mjs"
 capture:
   ui: pnpm ui:capture
+design_pass:
+  proto_route: http://localhost:3000/proto/{slug}
+  dev_cmd: pnpm dev

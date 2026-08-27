@@ -1,0 +1,21 @@
+=== E10 fresh verification run — app-scope requests captured during the Run click ===
+(captured inline by the automation script scripts/_e10-run.mjs; the dev server used was
+http://localhost:3001, a verifier-owned instance — config.yaml's canonical
+http://localhost:3000 was returning 500 Internal Server Error at verification time due to
+a concurrent sibling dev-server process rebuilding the same .next directory. localhost:3001
+died shortly after this run completed (another concurrent session's server, not one this
+verifier started/stopped), which is why a supplementary full-asset network dump could not
+be taken afterward against it.)
+
+200	GET	http://localhost:3001/api/plugins/registry
+200	GET	http://localhost:3001/api/plugins/registry
+200	POST	http://localhost:3001/api/task/create
+
+No failed (FAILED/4xx/5xx) requests observed among app-scope (localhost:3001) traffic
+during the walk: workspace load -> video upload -> Start Slice click -> provisioning
+milestones -> install-requirements completed.
+
+Full page-load network trace (separate earlier interactive session, localhost:3001,
+before/around the run) also showed only expected 200/206/307/404(static-asset) entries;
+see E10-fresh-run-log.json for the complete client-side SSE event trace correlated to
+on-screen frames.

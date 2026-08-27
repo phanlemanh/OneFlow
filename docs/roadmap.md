@@ -5,8 +5,9 @@
 > chi phí kỹ thuật; không đo bằng chỉ số thị trường.
 >
 > Phân vai: file này = *sẽ đi đâu*; [STATUS.md](../STATUS.md) = *đang ở đâu*;
-> [feature-index.md](feature-index.md) = *làm được gì*. Cập nhật file này **mỗi lần qua gate**,
-> không cập nhật theo tuần. Số liệu gate đọc từ hạ tầng đo lường
+> [feature-index.md](feature-index.md) = *làm được gì*. Cập nhật file này **mỗi lần qua gate
+> VÀ mỗi lần một ADR được chấp nhận** — vế sau thêm 19/08, vì cả hai lần đảo chiều (ADR-0011,
+> ADR-0012) đều rơi giữa hai gate và luật cũ để chúng lọt khe. Không cập nhật theo tuần. Số liệu gate đọc từ hạ tầng đo lường
 > (`_acceptance/measure-harness/`). Quyết định nền tảng: [docs/adr/](adr/).
 >
 > Luật cập nhật trên đang được trang bị răng: guard `scripts/roadmap/check-roadmap-fresh.sh`
@@ -43,15 +44,27 @@ mục 1 (xem bên dưới) cùng một làn việc mới xen kẽ giữa các h�
 |---|---|---|
 | S1 | ADR-0011 | ✅ 05/08 |
 | S2 | `oneflow-api-ffmpeg` + `oneflow-api-pyscenedetect` thay 2 plugin Modal `gpu=NONE`; venv riêng mỗi plugin | ✅ ký 07/08 (`local-cpu-plugins`) |
-| S3 | Đường transcribe không-Modal | 🔴 chưa bắt đầu — nằm trên **hai** đường tới hạn (skill #1 *và* phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có lý do chen trước 1.4 |
-| S4 | UX BYO key cho người dùng đầu tiên | 🔜 đang chạy (`byo-key-onboarding`) — **tiền đề để đo được điều kiện đảo chiều của ADR-0011** |
+| S3 | Đường transcribe không-Modal | 🔜 **đã chen trước 1.4** (chốt 19/08) — nằm trên **hai** đường tới hạn (skill #1 *và* phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); xếp sau 1.3b trong hàng thực thi Phase 1 |
+| S4 | UX BYO key cho người dùng đầu tiên | ✅ **ký 19/08** (`byo-key-onboarding`, T3, merge PR #68) — điều kiện đảo chiều của ADR-0011 **từ nay đo được**; phiên nghiệm thu với người dùng đại diện thành việc của làn A |
 | S5 | Desktop app thành app local thật (hôm nay là vỏ Pake trỏ `app.tongflow.com`) | 🔴 chưa bắt đầu — liên đới hạng mục 0.1 "desktop chưa tách" |
-| S6 | `docling` / `crawl4ai` / `scrapling` + 26 plugin GPU còn lại sang đường API | 🔴 chưa bắt đầu — tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md)) |
+| S6 | 26 plugin GPU còn lại sang đường API — tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md)). *Thu hẹp 19/08:* bộ ba crawl `docling`/`crawl4ai`/`scrapling` **rút khỏi S6** — chúng chồng vai ingest của media-library ([ADR-0012](adr/0012-media-library-boundary.md)); số phận là quyết định **hai repo**, chưa chốt | 🔴 chưa bắt đầu |
 
 ⚠️ **ADR-0011 đảo một rủi ro critical của hội đồng mà chưa có bằng chứng thị trường mới.** Nó tự
 ghi điều kiện đảo chiều: *≥1/3 người dùng đại diện không tự nhập được key ở onboarding → managed
-quay lại làm mặc định*. Điều kiện đó **chưa đo được ngày nào** vì cần S4 trước — nên tới khi S4
-ký, ADR-0011 nằm ở trạng thái đảo-chiều-không-bằng-chứng, và Phase 2 phải đọc kèm cảnh báo này.
+quay lại làm mặc định*. **S4 ký 19/08 gỡ chốt chặn phép đo**: trước đó người dùng còn chưa tới
+nổi bước nhập key. Điều kiện nay ĐO ĐƯỢC nhưng **chưa đo** — phiên nghiệm thu với người dùng
+đại diện là việc của làn A (người vận hành); tới khi có số, ADR-0011 vẫn ở trạng thái
+đảo-chiều-chưa-có-bằng-chứng và Phase 2 phải đọc kèm cảnh báo này.
+
+## Nền kho + tri thức — media-library ([ADR-0012](adr/0012-media-library-boundary.md))
+
+Từ 19/08, kho footage + đồ thị thực thể + provenance/nhãn AI của hệ sống ở **media-library**
+(service headless độc lập, repo riêng, đa lĩnh vực theo quy hoạch — BĐS trước, tài chính/bảo
+hiểm sau). OneFlow là **khách qua hợp đồng REST + API key** với tám bảo đảm ranh giới ghi
+trong ADR — không nhúng code, không phụ thuộc cứng (local-first giữ nguyên), không nguồn sự
+thật thứ hai, lĩnh vực là dữ liệu chứ không phải code. Hệ quả lên lộ trình: 1.7 đổi cách
+hiện thực (uỷ quyền), và node nạp-từ-kho là hạng mục làm được trước G0. Sơ đồ ranh giới:
+[oneflow-media-library-boundary.html](assets/oneflow-media-library-boundary.html).
 
 ## Phase 0 — Nền độc lập & số liệu gốc (T1–T4)
 
@@ -68,6 +81,11 @@ repo, đánh đổi ghi trong ADR) · COGS/render trong khung mô hình 3 tier �
 **chốt ngách** (bộ thực thể KG v0).
 *Trượt WER → wedge chuyển sang phụ đề có bước sửa tay (đổi thiết kế skill, không đổi lộ trình).*
 
+**Hạn danh nghĩa của G0 dời T4 → T5 (ghi 19/08).** Trượt không phải vì đo trượt mà vì cả bốn
+điều kiện còn lại đều **chờ người vận hành** — nguyên tắc "trượt gate là dừng sửa" viết cho gate
+đo trượt, không áp cho gate chờ người; làn B không dừng. Hành động tuần này: điều kiện ⓪ (ký
+ngưỡng số — ~30 phút, không cần dữ liệu, đứng trước các điều kiện kia về logic).
+
 **Còn lại để qua G0 (cập nhật 05/08):** bốn điều kiện, cả bốn cần người vận hành —
 ⓪ **ký ngưỡng số** ([g0-runbook §0](measure/g0-runbook.md) — đứng trước các chặn kia về logic:
 chốt vạch sau khi thấy số liệu là mất tính khách quan của gate) · ① clip thực địa + bản chép
@@ -81,18 +99,23 @@ nhắc ship nó. Kết quả trả lời luôn câu "giữ hay bỏ Modal khỏi
 
 ## Phase 1 — Năng lực P0 (T5–T10)
 
-1. ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
-2. ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
-3. 🔜 **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Hạng mục kế tiếp — không phụ thuộc G0; đường guard đã an toàn sau gói CI-a.*
-4. **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
-5. **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch".
-6. **Skill #1 "Footage → kho clip"**: split-video → transcribe-timestamp → drop-video → tách/thay hoặc denoise audio → overlay phụ đề + khung giá → xuất 9:16. (Livestream hay tour nhà là tham số.)
-7. **KG v0 + provenance wire shape** ([ADR-0004](adr/0004-universe-kg-three-entities.md)): bảng entities 3 loại + anchor; `FieldBinding kind:"entity"` phát hành đồng bộ TS + `bindings.py`; `tasks.entity_refs`.
+Danh sách theo **thứ tự thực thi** (đánh số cố định — 1.3b và S3 chen theo quyết định 19/08,
+không đánh lại số cũ):
 
-> **Làn local-first xen kẽ ở đây, không nối đuôi.** S3 (transcribe không-Modal) và S4 (UX BYO
-> key) đều có lý do chen lên trước mục 4: S3 vì nó nằm trên đường đo WER của G0, S4 vì không có
-> nó thì điều kiện đảo chiều của [ADR-0011](adr/0011-local-first-execution.md) không đo được.
-> Thứ tự cuối cùng giữa 1.4 / S3 / S4 **chưa quyết** — ghi ở đây để không phải suy lại từ đầu.
+- **1.1** ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
+- **1.2** ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
+- **1.3** 🔜 **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Hạng mục kế tiếp — không phụ thuộc G0; đường guard đã an toàn sau gói CI-a.*
+- **1.3b** **Node nạp-từ-kho** — giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md): search → chọn thẻ → URL ký → `file_key`. Add node không ABI-driven nên không đụng ABI/SDK; key qua kho khoá BYO; làm được trước G0. Mở khoá input cho skill #1.
+- **S3** **Transcribe không-Modal** — *chen trước 1.4, chốt 19/08*: nằm trên **hai** đường tới hạn cùng lúc (chuỗi skill #1 và phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có nó thì ngày corpus về là đo được ngay. Trong chuỗi skill #1, transcribe cũng đứng trước TTS.
+- **1.4** **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
+- **1.5** **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch".
+- **1.6** **Skill #1 "Footage → kho clip"** — *viết lại theo ADR-0012, "kho clip" nay LÀ media-library*: input từ node nạp-từ-kho (1.3b) hoặc upload → split-video → transcribe-timestamp → drop-video → tách/thay hoặc denoise audio → overlay phụ đề + khung giá → xuất 9:16 → **ingest ngược về library** (`provenance: generated` + nhãn AI, chữ ký `provider:oneflow`) + telemetry lượt dùng. Giai đoạn B của ADR-0012 nhập vào hạng mục này, không tách riêng. (Livestream hay tour nhà là tham số.)
+- **1.7** **KG v0 + provenance wire shape** ([ADR-0004](adr/0004-universe-kg-three-entities.md), hiện thực theo [ADR-0012](adr/0012-media-library-boundary.md)): **uỷ quyền media-library** — `tasks.entity_refs` trỏ `entity_id` của library, `FieldBinding kind:"entity"` resolve qua API; giới hạn 3 loại thực thể giữ nguyên như bộ lọc tiêu thụ, không xây bảng entities riêng.
+
+> **Làn local-first xen kẽ ở đây, không nối đuôi.** Câu hỏi thứ tự 1.4 / S3 / S4 mở từ 07/08
+> **đã đóng 19/08**: S3 chen trước 1.4 (lý do ghi tại dòng S3 ở trên); S4 (UX BYO key) **đã ký
+> cùng ngày** — điều kiện đảo chiều của [ADR-0011](adr/0011-local-first-execution.md) từ nay
+> đo được.
 
 **Gate G1:** 50 clip liên tiếp không lỗi dấu / không sai số giá trên overlay · demo "đổi giá →
 chỉ re-run overlay+merge" chứng minh bằng telemetry · skill #1 chạy headless qua engine cho kết
@@ -100,23 +123,23 @@ quả giống canvas (conformance pass).
 
 ## Phase 2 — Năng lực cloud & vòng dữ liệu (T11–T16)
 
-1. **Managed shared mode — nay là *tier*, không phải mặc định** ([ADR-0011](adr/0011-local-first-execution.md) thay thế nửa managed-mặc-định của [ADR-0005](adr/0005-managed-cloud-default.md)): flag gỡ cache-dir per-scope trong plugin-executor; Modal workspace gộp + secret server-side. **Cơ chế giữ nguyên, vai trò đổi** — đây là đường dành cho người không tự nhập key, không còn là đường đi mặc định của sản phẩm. Ưu tiên của nó phụ thuộc số đo của điều kiện đảo chiều ADR-0011 (cần S4 trước); ADR-0005 chưa được hiện thực dòng nào nên việc đảo chiều không tốn gì.
+1. **Managed shared mode — nay là *tier*, không phải mặc định** ([ADR-0011](adr/0011-local-first-execution.md) thay thế nửa managed-mặc-định của [ADR-0005](adr/0005-managed-cloud-default.md)): flag gỡ cache-dir per-scope trong plugin-executor; Modal workspace gộp + secret server-side. **Cơ chế giữ nguyên, vai trò đổi** — đây là đường dành cho người không tự nhập key, không còn là đường đi mặc định của sản phẩm. Ưu tiên của nó phụ thuộc số đo của điều kiện đảo chiều ADR-0011 (S4 đã ký 19/08 — chỉ còn chờ phiên đo); ADR-0005 chưa được hiện thực dòng nào nên việc đảo chiều không tốn gì.
 2. **Metadata sang Postgres** + schema org/membership/workspace ngay từ đầu.
 3. **Độ bền thực thi:** retry/timeout/resume cho run; sống sót server restart; hàng đợi thay subprocess-per-run.
 4. **Metering → gating:** quota theo workspace; đếm "lượt sinh mới" tách khỏi "lượt sửa" (cơ chế là sản phẩm; bảng giá ngoài phạm vi).
 5. **Telemetry opt-in:** 2 chỉ số lõi — % render là partial; chi phí/asset hoàn thành.
-6. **Metrics loop v1:** import CSV TikTok/Meta Ads → join provenance (`entity_refs`) → bảng xếp hạng biến thể.
+6. **Metrics loop v1:** import CSV TikTok/Meta Ads → join theo `entity_refs` (= `entity_id` của media-library, [ADR-0012](adr/0012-media-library-boundary.md)) → bảng xếp hạng biến thể. Lượt-dùng-asset đọc từ telemetry của library, chi phí đọc từ metering của OneFlow — **không xây bộ đếm thứ hai**.
 
 **Gate G2:** run 100 node sống sót restart · ≥25% render trong dogfood là partial · COGS đo qua
 metering khớp dự toán G0 ±20% · CSV map đúng ≥95% biến thể.
 
 ## Phase 3 — Ma trận, judge & R&D chặng 2 (T17–T24)
 
-1. **Skill #2 "Nguồn → ma trận"**: crawl → entity → khoá chủ thể (matting/fusion) → fan-out biến thể × format × khung giá trong orchestrator (fan-out sống ở orchestrator, không nhét vào engine).
+1. **Skill #2 "Kho → ma trận"** (*đổi tên từ "Nguồn → ma trận", 19/08*): fan-out biến thể × format × khung giá trong orchestrator, tiêu thụ search/coverage của media-library; khoá chủ thể (matting/fusion) phía OneFlow. Nửa "crawl → entity" cũ là đúng nghiệp vụ ingest của library ([ADR-0012](adr/0012-media-library-boundary.md) bảo đảm #4) — việc nạp nguồn về kho thuộc phía library. (Fan-out sống ở orchestrator, không nhét vào engine.)
 2. **Slot `media-judge`** structured-output ([ADR-0003](adr/0003-media-judge-ranker-first.md)) + bộ 200 mẫu gắn nhãn đo FPR; judge vào skill ma trận ở vai **ranker**.
 3. **Batch semantics thống nhất:** đưa `x-expand-each`/batch về orchestrator, xoá drift hai runtime còn lại.
 4. **OF-CB-1** (benchmark consistency 5 arm, ~$1.000): chạy nền T17–T21 → verdict go/no-go cho thiết kế Character/Location (chặng 2).
-5. **Kiểm tra thiết kế "sẵn sàng pháp lý"** ([ADR-0006](adr/0006-defer-vn-compliance.md)): xác nhận overlay render được nhãn AI bằng một tham số và provenance đủ truy vết — 2 bài kiểm tra thiết kế, không phải tính năng.
+5. **Kiểm tra thiết kế "sẵn sàng pháp lý"** ([ADR-0006](adr/0006-defer-vn-compliance.md)): còn **một** bài kiểm phía OneFlow — overlay render được nhãn AI bằng một tham số. Nửa truy-vết-provenance đã là trường dữ liệu phía media-library (ingest ngược mang `provenance: generated` theo [ADR-0012](adr/0012-media-library-boundary.md) bảo đảm #5), không phải bài kiểm phía này nữa.
 
 **Gate G3:** ma trận 20 biến thể end-to-end < 60 phút với COGS trong khung · judge FPR đo được,
 < 15% ở vai ranker (mục tiêu < 5% để lên auto-gate) · OF-CB-1 có verdict go/no-go chặng 2.
@@ -137,9 +160,9 @@ ngoài phạm vi tài liệu).
 > chưa ai phân loại. Đây là chỗ duy nhất trong repo trả lời được câu "hạng mục này ở đâu trên
 > lộ trình".
 
-Nguồn: `_acceptance/*/contract.md` với `status: signed-off`. **20 hạng mục** trên `main`
-@ `244cb0b` (19/08) — lưu ý [STATUS.md](../STATUS.md) còn ghi con số cũ **17** (chốt 17/08,
-trước ba hồ sơ ký 18/08).
+Nguồn: `_acceptance/*/contract.md` với `status: signed-off`. **21 hạng mục** trên `main`
+@ `621a30d` (19/08, sau `byo-key-onboarding`) — lưu ý [STATUS.md](../STATUS.md) còn ghi con số
+cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 
 <!-- roadmap-ledger:start -->
 
@@ -157,6 +180,7 @@ trước ba hồ sơ ký 18/08).
 | `cache-l4-eviction` | T3 | 31/07 | **1.1** — lát L4, LRU + purge. *Trục 1.1 đóng* |
 | `compose-overlay` | T3 | 02/08 | **1.2** — slot overlay text/giá/logo/safe-zone |
 | `local-cpu-plugins` | T2 | 06/08 | **S2** — làn local-first ([ADR-0011](adr/0011-local-first-execution.md)) |
+| `byo-key-onboarding` | T3 | 19/08 | **S4** — làn local-first: UX BYO key lượt chạy đầu; mở khoá phép đo điều kiện đảo chiều ADR-0011 |
 | `dependency-refresh-2026-07` | T2 | 26/07 | *ngoài lộ trình* — bảo trì phụ thuộc |
 | `ci-actions-bump` | T2 | 26/07 | *ngoài lộ trình* — hạ tầng CI |
 | `stale-scope-by-paths` | T2 | 28/07 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu |
@@ -168,6 +192,6 @@ trước ba hồ sơ ký 18/08).
 
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này:** 12/20 hạng mục đã ký là năng lực sản phẩm, 8/20 là hạ tầng quy
+**Đọc được gì từ tỉ lệ này:** 13/21 hạng mục đã ký là năng lực sản phẩm, 8/21 là hạ tầng quy
 trình và CI. Con số thứ hai không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.

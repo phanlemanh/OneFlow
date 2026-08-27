@@ -1,0 +1,51 @@
+E2 network truth — re-verified 2026-08-19 (independent verifier, isolated instance)
+
+Scope note: dev_server.url in _acceptance/config.yaml is http://localhost:3000, but
+that port already had ANOTHER session's dev server bound and returning 500 for every
+route (broken/shared) at verification time. Per the rule "port đang có server sẵn thì
+dùng chung và KHÔNG tắt", I did not touch it. Instead I started my OWN isolated dev
+server (TONGFLOW_DATA_DIR + TONGFLOW_PLUGINS_DIR pointed at a scratch dir so this run's
+plugin installs never touch the shared plugins/ tree used by other concurrent
+verifiers) on PORT=3211, and treat that origin as the in-scope app origin for this run.
+
+App-scope requests observed against http://localhost:3211 (my isolated instance) during
+and around the E2 flow (page loads, plugin registry, example.json, uploads, task
+polling):
+  GET /api/plugins/registry            200 OK (x3)
+  GET /example.json                    200 OK (x3)
+  GET /api/feature/list                200 OK (x3)
+  GET /api/uploads/example-assets/two-scenes.mp4   200 OK / 206 Partial Content
+  GET /api/task/pending                200 OK (x3)
+  GET /workspace (+ RSC variants)      200 OK (a few show net::ERR_ABORTED from HMR
+                                        superseding an in-flight RSC fetch during dev
+                                        fast-refresh churn — not app failures)
+  GET /plugins/oneflow-local-pyscenedetect.svg   404 Not Found  (static icon asset)
+  GET /plugins/oneflow-local-ffmpeg.svg          404 Not Found  (static icon asset)
+
+No 4xx/5xx on any app API endpoint (registry, feature/list, uploads, task/pending) for
+localhost:3211. The two 404s are static plugin-icon SVGs — per scoping rules a static
+asset failure is note-only, not fail-eligible.
+
+Console: one React hydration-mismatch warning (radix id mismatch, cosmetic, unrelated
+to AC-2) plus the 404s above surfacing as console errors. No key/settings/password
+related console output at any point.
+
+Out-of-scope traffic seen in the same shared browser pane (other tabs/other concurrent
+verifier sessions, NOT this eval's target):
+  localhost:3000  — persistent 500 on every route (a different, already-running dev
+                    server from another session; left untouched per the "shared port,
+                    don't stop it" rule; not this eval's origin)
+  localhost:3001  — also showing 500s on /api/plugins/registry, /api/feature/list,
+                    /api/uploads/..., /api/task/pending — belongs to a different
+                    concurrent verifier's own dev server, unrelated origin, out of
+                    scope for this eval
+
+dialogSightings across the full driven flow (step1 → click install → poll every 1s
+through the whole install phase → step ready → click Run → poll every 1s through the
+whole run phase → completion): [] — zero. Checked for document.querySelector('[role
+="dialog"]'), input[type="password"], and body text matching /api key|apikey|enter.*key
+|settings.*key/i at every poll tick. No key prompt, key form, or settings dialog ever
+appeared.
+
+networkObserved: clean (app-scope traffic present on the tested origin, all OK apart
+from two note-only static-asset 404s)

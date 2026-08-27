@@ -1,0 +1,227 @@
+schema_version: 1
+feature_slug: byo-key-onboarding
+
+# T3. Two criteria are tagged (cross-layer) — AC-7 (executor emits real provisioning
+# milestones that reach the client) and AC-10 (a saved key is verified against what it
+# unlocks). Each therefore carries BOTH a `layer: backend-effect` eval proving the server
+# half on its own nonce AND a ui-check asserting a server-derived marker; a ui-check alone
+# is never sufficient for a cross-layer criterion.
+#
+# `paths` declared on every machine eval so a later round can carry forward what the diff
+# did not touch. Suite commands always re-run regardless.
+
+evals:
+  # ---------- A. Reach a result before paying anything ----------
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.bko_example_needs_no_keys
+    paths: ["public/example.json", "src/lib/onboarding/**", "config/official-plugins.json"]
+    expected: "exit 0; the example resolves to a LITERAL list of plugin ids of length >= 2 (printed, not merely counted), and every one of them declares NO env var with required:true. The length floor is load-bearing: a parser returning an empty set would satisfy 'every plugin needs no key' vacuously. SUPPRESSION half: re-run against the pre-2026-08-07 Modal example must go RED"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: ui-check
+    steps:
+      - "Start dev server per config dev_server.start; clear the workspace's persisted state so this is a genuine first run"
+      - "Open {url}/workspace → capture _acceptance/byo-key-onboarding/evidence/E2-step1.png (example loaded, strip visible)"
+      - "Press the strip's single action → capture _acceptance/byo-key-onboarding/evidence/E2-step2.png (installing)"
+      - "Wait for ready, press Run on the first node → capture _acceptance/byo-key-onboarding/evidence/E2-step3.png (running)"
+      - "Wait for the output asset to appear → capture _acceptance/byo-key-onboarding/evidence/E2-step4.png"
+      - "Assert: NO key prompt, key form or settings dialog appeared at any point in the sequence"
+    expected: "an output asset is visible on the canvas and no key was ever requested; frames show strip → installing → running → result. The frame must show an asset the run PRODUCED — if what is on screen could be the bundled sample from public/example-assets/, that is not evidence and the eval FAILS (E22 carries the server half)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E22
+    criterion: AC-2
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_example_run_produces_new_asset
+    paths: ["src/lib/onboarding/**", "public/example.json", "public/example-assets/**"]
+    expected: "exit 0; running the bundled example under its own nonce ends with task status COMPLETED and an output asset whose content hash DIFFERS from every file in public/example-assets/. SUPPRESSION half — the load-bearing one: a run that fails must NOT leave an asset that hashes equal to the bundled input, because the bundled sample is a plausible-looking decoy for exactly this criterion"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_first_run_readiness
+    paths: ["src/hooks/use-first-run-readiness.ts", "src/lib/onboarding/**"]
+    expected: "exit 0; readiness reports ready (strip suppressed) once the example has completed a run, and the suppression survives a reload. SUPPRESSION half: a workspace that has NOT completed a run still reports preparing — 'never nag' must not become 'never help'"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E4
+    criterion: AC-13
+    executor: ui-check
+    steps:
+      - "Open {url}/workspace on a first run with the strip visible → capture _acceptance/byo-key-onboarding/evidence/E4-step1.png"
+      - "Without touching the strip, drag a node, open the node picker, and add a node → capture _acceptance/byo-key-onboarding/evidence/E4-step2.png"
+      - "Assert no modal overlay, no disabled canvas, no focus trap"
+    expected: "the canvas is fully interactive while the strip is showing; frames show a node added with the strip still present"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- B. The four walls become visible ----------
+  - id: E5
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_example_requirements
+    paths: ["src/lib/onboarding/example-requirements.ts", "public/example.json"]
+    expected: "exit 0; the workflow parses to the EXACT literal id set (asserted element by element, count >= 2), at load time and without executing anything. SUPPRESSION half: a workflow whose plugins are all installed yields an EMPTY missing set — detection must not report phantoms. Asserting only a count would let a parser returning the wrong two ids pass"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-4
+    executor: ui-check
+    steps:
+      - "Open {url}/workspace with no plugins installed → capture _acceptance/byo-key-onboarding/evidence/E6-step1.png BEFORE pressing anything"
+      - "Assert the missing plugins are named in the strip in that first frame"
+    expected: "the first painted frame already names what is missing — detection at load, not at run"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E7
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.bko_one_action_installs_all
+    paths: ["src/components/workspace/first-run-strip.tsx", "src/lib/onboarding/**"]
+    expected: "exit 0; from an empty plugins dir, the single strip action results in EVERY plugin the example needs being installed. SUPPRESSION half: with one plugin already present the action installs only the remainder, never re-clones what is there"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E21
+    criterion: AC-5
+    executor: ui-check
+    steps:
+      - "Start dev server with an EMPTY plugins dir so every plugin the example needs is missing"
+      - "Open {url}/workspace → capture _acceptance/byo-key-onboarding/evidence/E21-step1.png (strip names >= 2 missing plugins)"
+      - "Press the strip's action EXACTLY ONCE — do not press again → capture _acceptance/byo-key-onboarding/evidence/E21-step2.png"
+      - "Wait for ready, then list the installed plugins via the plugin manager → capture _acceptance/byo-key-onboarding/evidence/E21-step3.png"
+      - "Assert every id named in step 1 appears installed in step 3"
+    expected: "one press installs the whole set; the relation between the single action and the full list is what is measured. E7 proves an install-all function works — this proves the button is wired to it"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E8
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.bko_no_restart_after_install
+    paths: ["src/lib/plugins/plugins-registry.server.ts", "src/lib/plugins/plugins-install.server.ts"]
+    expected: "exit 0; install a plugin then query the registry IN THE SAME PROCESS — the plugin is registered without a restart. This pins an advantage OneFlow has over ComfyUI (which requires restart+refresh); it is a regression guard, so it is expected to be green on the baseline too"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-7
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_provisioning_events
+    paths: ["src/lib/plugin-executor/**", "src/lib/plugins/plugin-python-env.server.ts"]
+    expected: "exit 0; provisioning a throwaway plugin under its own nonce emits the milestones in order (create venv → install SDK → install requirements), each AFTER the work it names actually completed. SUPPRESSION half: a plugin whose venv already exists emits NO create-venv milestone — a milestone must never be a decoration fired on a code path that did nothing"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E10
+    criterion: AC-7
+    executor: ui-check
+    steps:
+      - "Start dev server; remove any existing venv for the example's plugin so provisioning really runs"
+      - "Open {url}/workspace, complete install, press Run → capture _acceptance/byo-key-onboarding/evidence/E10-step1.png"
+      - "Capture a frame at each milestone change → _acceptance/byo-key-onboarding/evidence/E10-step2.png, E10-step3.png"
+      - "Assert each milestone label shown matches a milestone the server emitted (server-derived marker, not a client-side timer)"
+    expected: "milestone labels on screen are the ones the executor emitted, in order; a client-side timer or fake sequence FAILS this eval"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E11
+    criterion: AC-8
+    executor: ui-check
+    steps:
+      - "During a real provisioning wait, capture _acceptance/byo-key-onboarding/evidence/E11-step1.png at the start and evidence/E11-step2.png at least 60s later"
+      - "Assert the last reached milestone and its label are still on screen in the later frame"
+    expected: "after a minute of waiting the screen still says which step is in progress; a bare spinner or an empty node FAILS"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- C. The key step itself ----------
+  - id: E12
+    criterion: AC-9
+    executor: ui-check
+    steps:
+      - "With the example working, add or switch a node to a plugin whose manifest declares a required env key that is blank in the env store → capture _acceptance/byo-key-onboarding/evidence/E12-step1.png"
+      - "Press Run so it fails for a missing key → capture _acceptance/byo-key-onboarding/evidence/E12-step2.png (node shows the needs-key state)"
+      - "Enter the key from the node itself → capture _acceptance/byo-key-onboarding/evidence/E12-step3.png"
+      - "Assert the settings dialog was never opened during this sequence"
+      - "Each of the three frames MUST be a real PNG of the live screen, captured with the browser's own screenshot, and step2 and step3 must differ visibly. `pnpm ui:capture` re-navigates and therefore cannot photograph an interactive moment; a DOM dump is not a frame. E20's panel judges the key wall from these two images alone, so identical or missing PNGs make that judgment unanswerable regardless of whether the product works (S4 round 3: E12 passed on HTML dumps while E20 failed on round-2 leftovers)"
+    expected: "the key is entered at the node; frames show failure → needs-key state → inline form, with no settings dialog"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E13
+    criterion: AC-10
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_key_verified_on_save
+    paths: ["src/lib/onboarding/**", "src/lib/settings/**"]
+    expected: "exit 0; saving a key performs a real outbound verification against the thing it unlocks — asserted with a spy that the call HAPPENED, not merely that a boolean came back. The decisive fixture is a key that is WELL-FORMED but rejected by the provider: it must be reported as not working. A shape/regex check in the UI would pass a naive version of this eval and is precisely the failure being guarded"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E14
+    criterion: AC-10
+    executor: ui-check
+    steps:
+      - "Enter a deliberately wrong key at the node and save → capture _acceptance/byo-key-onboarding/evidence/E14-step1.png"
+      - "Assert the UI states it does not work, citing a server-derived result rather than an optimistic toast"
+      - "Enter the correct key and save → capture _acceptance/byo-key-onboarding/evidence/E14-step2.png asserting the confirmed state"
+    expected: "a well-formed but rejected key is reported as not working at save time, citing the verification result; a correct key is confirmed. Being told nothing until a later Run FAILS. A key rejected only for its SHAPE does not exercise this eval — the fixture must be shape-valid"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E15
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.unit_failure_actions
+    paths: ["src/lib/onboarding/failure-actions.ts", "src/components/workspace/task-failure-toaster.tsx"]
+    expected: "exit 0; missing-plugin errors map to the filtered plugin manager and missing-key errors map to the key form. SUPPRESSION half: an unrecognised error maps to NO action and keeps today's plain message — inventing a plausible-looking button for an error we did not understand sends the user somewhere useless"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- D. Constraints ----------
+  - id: E16
+    criterion: AC-12
+    executor: ui-check
+    steps:
+      - "Walk the entire funnel with the browser network log recording"
+      - "Dump all requests to _acceptance/byo-key-onboarding/evidence/E16-network.txt and capture _acceptance/byo-key-onboarding/evidence/E16-step1.png at the end"
+      - "Assert no request body or query carries onboarding step, funnel position, timing or any behavioural record — to the app origin or anywhere else"
+    expected: "POSITIVE CONTROL FIRST: the log must show the walk actually happened — a non-zero count of legitimate app requests (plugin install, settings, task) — otherwise an aborted walk yields an empty log and a vacuous green. Only then: zero behavioural/telemetry payloads anywhere"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E17
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.bko_no_telemetry_sinks
+    paths: ["src/**", "package.json"]
+    expected: "exit 0; scan covers transport shapes, not just package names — navigator.sendBeacon, fetch/XHR to non-app origins, and analytics SDK imports. TEETH: the guard is re-run against a fixture containing a sendBeacon call and MUST exit non-zero naming the offending path; a scan that only greps package names would pass that fixture and is the gap being closed"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.bko_tier_boundary
+    # Deliberately the FORBIDDEN set itself: scoping this to config.yaml would let a
+    # later round add files under sdk/** and carry this eval forward green.
+    paths: ["config/tongflow.abi.json", "src/generated/abi/**", "sdk/**", "src/db/**", "src/lib/plugin-executor/**"]
+    expected: "exit 0; diff window is merge-base(origin/main, HEAD)..HEAD and the guard first asserts that window is NON-EMPTY (an empty window would make every absence claim vacuous). Within it: src/lib/plugin-executor/** IS touched (the one t3 path this feature is declared T3 for) and ZERO files under config/tongflow.abi.json, src/generated/abi/**, sdk/** or src/db/**"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- Design lane (CT1 — web UI surface) ----------
+  - id: E19
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.bko_a11y_proto
+    paths: ["src/components/workspace/first-run-strip.tsx", "src/components/workspace/node-key-prompt.tsx", "src/components/proto/**", "src/app/globals.css"]
+    expected: "exit 0 across all ten onboarding states x light+dark (20 pages); zero axe-core violations at impact critical or serious, contrast included. REBOUND 2026-08-07 from the kit's jsdom design gate, which reported PASS on this repo while emitting 'Could not parse CSS stylesheet' x19 — the stylesheet uses oklch()/color-mix()/:is(), so no colour resolved and no contrast was ever computed. axe-core runs INSIDE Chrome and reads the same computed styles the eye does; it found 11 serious violations the jsdom gate had passed. The scan exits 3 rather than 0 when it reaches no page, so an unreachable dev server cannot read as clean. SCOPE, stated plainly: it scans the real feature components rendered in the /proto harness, not the shipped workspace canvas"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- Judgment ----------
+  - id: E20
+    criterion: AC-15
+    executor: judgment
+    question: "Walking the five walls (no plugin → install → provisioning wait → first result → key) with only the screen visible — no console, no logs, no devtools — can an observer sitting beside a user point at where that user is and say whether they are moving or stuck? Name any wall where the answer is no."
+    # Paths are relative to this workspace directory and resolved to absolute
+    # when the round is dispatched. E11-step2 dropped: AC-8 is a known limit the
+    # owner accepted (see contract "Known limits"), and naming a file that is not
+    # produced costs the panel a lens. E12-step2/step3 are the key wall; E14-step1
+    # is the rejected-key state.
+    inputs: ["evidence/E2-step1.png", "evidence/E2-step2.png", "evidence/E2-step3.png", "evidence/E2-step4.png", "evidence/E6-step1.png", "evidence/E10-step2.png", "evidence/E12-step2.png", "evidence/E12-step3.png", "evidence/E14-step1.png", "contract.md"]
+    evidence_required: [judged_by, verdict, rationale]

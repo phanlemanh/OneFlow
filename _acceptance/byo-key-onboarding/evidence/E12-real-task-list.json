@@ -1,0 +1,662 @@
+{
+    "tasks": [
+        {
+            "id": "Jo0v4qami6T4iwaZll5HA",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/Jo0v4qami6T4iwaZll5HA/zrBTqg6-A-yJrf2EtX_ny.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/Jo0v4qami6T4iwaZll5HA/o6c21QNXOupEQ1ZvvAznv.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 236,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-28T00:37:05.000Z",
+            "updatedAt": "2026-08-19T02:32:40.000Z"
+        },
+        {
+            "id": "1bmzNUX1DA7FOyh9Aq_C1",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/1bmzNUX1DA7FOyh9Aq_C1/hPx0JUr3Q8OiuEOTGuKrQ.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/1bmzNUX1DA7FOyh9Aq_C1/7syxCK40xr282qisv4ZG2.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 32274,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-26T21:32:20.000Z",
+            "updatedAt": "2026-08-19T02:31:35.000Z"
+        },
+        {
+            "id": "9SCgAPKPvll0BTOEjzbf6",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/9SCgAPKPvll0BTOEjzbf6/X1oArLz3amE5WJeo_-d4W.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/9SCgAPKPvll0BTOEjzbf6/aM9poutql-F6DyiyHxdc7.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 232,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-25T22:57:31.000Z",
+            "updatedAt": "2026-08-19T02:29:55.000Z"
+        },
+        {
+            "id": "XTG1D11AVhmgWGl5Xa9Ip",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/XTG1D11AVhmgWGl5Xa9Ip/4br0TcGhpXoURWs6bhOm5.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/XTG1D11AVhmgWGl5Xa9Ip/H18FfqbOHCHc4hvFL7fZi.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 21190,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-25T16:50:08.000Z",
+            "updatedAt": "2026-08-19T02:29:41.000Z"
+        },
+        {
+            "id": "fqPbO-wDjZJdYDEdZSsqp",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/fqPbO-wDjZJdYDEdZSsqp/ZxsyVJIpWR6Jeg7biq1v9.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/fqPbO-wDjZJdYDEdZSsqp/D8077H7i820p9uajNX0FM.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 32158,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-23T06:57:23.000Z",
+            "updatedAt": "2026-08-19T02:26:23.000Z"
+        },
+        {
+            "id": "dIonAEKnmbSt8EY6CRInp",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "tongflow-modal-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"downloading weights failed (exit 1): \u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Token missing. Could not authenticate client. If you have token credentials, \u2502\\n\u2502 see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     \u2502\\n\u2502 user, register an account at modal.com, then run `modal token new`.          \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\"}",
+            "durationMs": 325,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-23T06:05:51.000Z",
+            "updatedAt": "2026-08-19T02:25:57.000Z"
+        },
+        {
+            "id": "QjOyfiwUGFTJIFDraX9cM",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/QjOyfiwUGFTJIFDraX9cM/irWGdEhhX1HrcndpqFfhF.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/QjOyfiwUGFTJIFDraX9cM/AENXGOmCAM2Ub_r9vme-4.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 233,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-22T06:24:58.000Z",
+            "updatedAt": "2026-08-19T02:24:23.000Z"
+        },
+        {
+            "id": "q9Ont9zbbdZBrjzSIEFTD",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "tongflow-modal-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"downloading weights failed (exit 1): \u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Token missing. Could not authenticate client. If you have token credentials, \u2502\\n\u2502 see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     \u2502\\n\u2502 user, register an account at modal.com, then run `modal token new`.          \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\"}",
+            "durationMs": 539,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-21T20:13:30.000Z",
+            "updatedAt": "2026-08-19T02:24:09.000Z"
+        },
+        {
+            "id": "JZYM1CEjaDGSUt71WXcnP",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/JZYM1CEjaDGSUt71WXcnP/JmT50bcSxxyWKnF4SejAi.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/JZYM1CEjaDGSUt71WXcnP/fqM1RCjvdoHblJcumMlTm.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 23290,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-21T16:14:33.000Z",
+            "updatedAt": "2026-08-19T02:23:56.000Z"
+        },
+        {
+            "id": "5-tL0TIG1q9mzHm5o1dIX",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "tongflow-modal-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"downloading weights failed (exit 1): \u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Token missing. Could not authenticate client. If you have token credentials, \u2502\\n\u2502 see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     \u2502\\n\u2502 user, register an account at modal.com, then run `modal token new`.          \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\"}",
+            "durationMs": 403,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-19T08:39:29.000Z",
+            "updatedAt": "2026-08-19T02:20:12.000Z"
+        },
+        {
+            "id": "F21lsnXGnx5F2BHa5P5Hs",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/F21lsnXGnx5F2BHa5P5Hs/co2A4O2TpEnC8qHwyS5mh.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/F21lsnXGnx5F2BHa5P5Hs/9AkOPDPKrC0Xw-dp-xCRa.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 22572,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-18T15:01:01.000Z",
+            "updatedAt": "2026-08-19T02:19:31.000Z"
+        },
+        {
+            "id": "JPlFKGS7O8mIYu5UrCALY",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "tongflow-modal-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"downloading weights failed (exit 1): \u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Token missing. Could not authenticate client. If you have token credentials, \u2502\\n\u2502 see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     \u2502\\n\u2502 user, register an account at modal.com, then run `modal token new`.          \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\"}",
+            "durationMs": 505,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-18T13:56:40.000Z",
+            "updatedAt": "2026-08-19T02:19:05.000Z"
+        },
+        {
+            "id": "VOLBZsq7tZ_6xcbm-UQnP",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "tongflow-modal-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"downloading weights failed (exit 1): \u256d\u2500 Error \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\\n\u2502 Token missing. Could not authenticate client. If you have token credentials, \u2502\\n\u2502 see modal.com/docs/sdk/py/latest/config for setup help. If you are a new     \u2502\\n\u2502 user, register an account at modal.com, then run `modal token new`.          \u2502\\n\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\"}",
+            "durationMs": 14123,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-17T22:48:23.000Z",
+            "updatedAt": "2026-08-19T02:18:24.000Z"
+        },
+        {
+            "id": "4pdmgz3Op4uELIXxj99oH",
+            "workflowId": null,
+            "nodeId": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
+            "feature": "concat-videos",
+            "pluginId": "oneflow-api-ffmpeg",
+            "model": null,
+            "prompt": {
+                "videos": [
+                    "tasks/M0FIA8gszP5Fn_UAMzpTp/_Ht21cc8qG1ATPEiP0quk.mp4",
+                    "tasks/M0FIA8gszP5Fn_UAMzpTp/bI9a3Zhmyrw5QeHgXXW0k.mp4"
+                ]
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"Plugin failed (exit=1). Traceback (most recent call last):\\n  File \\\"/Users/manh-macmini/dev/oneflow/plugins/oneflow-api-ffmpeg/entry.py\\\", line 29, in <module>\\n    from moviepy import VideoFileClip, concatenate_videoclips\\n  File \\\"/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/moviepy/__init__.py\\\", line 16, in <module>\\n  File \\\"/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/moviepy/video/fx/__init__.py\\\", line 14, in <module>\\n  File \\\"/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/moviepy/video/fx/Freeze.py\\\", line 5, in <module>\\n  File \\\"/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/moviepy/video/compositing/CompositeVideoClip.py\\\", line 6, in <module>\\n  File \\\"/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/PIL/Image.py\\\", line 90, in <module>\\nImportError: dlopen(/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/PIL/_imaging.cpython-312-darwin.so, 0x0002): Library not loaded: @loader_path/.dylibs/libopenjp2.2.5.3.dylib\\n  Referenced from: <B9298C3A-1465-38D4-8AC0-672B456065F7> /Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/PIL/_imaging.cpython-312-darwin.so\\n  Reason: tried: '/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/PIL/.dylibs/libopenjp2.2.5.3.dylib' (code signature in <6994E1D8-B3E5-38D6-AEF0-721586B2D5CE> '/Users/manh-macmini/dev/oneflow/data/.tongflow/plugin-venv/oneflow-api-ffmpeg/lib/python3.12/site-packages/PIL/.dylibs/libopenjp2.2.5.3.dylib' not valid for use in process: library load disallowed by system policy)\"}",
+            "durationMs": 7924,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-16T19:06:59.000Z",
+            "updatedAt": "2026-08-19T02:16:38.000Z"
+        },
+        {
+            "id": "M0FIA8gszP5Fn_UAMzpTp",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "example-assets/two-scenes.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/M0FIA8gszP5Fn_UAMzpTp/_Ht21cc8qG1ATPEiP0quk.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/M0FIA8gszP5Fn_UAMzpTp/bI9a3Zhmyrw5QeHgXXW0k.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 21790,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058601-02-15T23:21:27.000Z",
+            "updatedAt": "2026-08-19T02:15:41.000Z"
+        },
+        {
+            "id": "QGEQ9mXzXk0j9TPN3zgDJ",
+            "workflowId": null,
+            "nodeId": "3674f5c0-818d-460f-825a-3d2ca7e7a4a2",
+            "feature": "concat-videos",
+            "pluginId": "oneflow-api-ffmpeg",
+            "model": null,
+            "prompt": {
+                "videos": [
+                    "tasks/-COqSOWbqyxA9j1Qfc-v0/yj0d2MdmMo_3AdQnwidRA.mp4",
+                    "tasks/-COqSOWbqyxA9j1Qfc-v0/X178jrBtZf2kEZEza_RWP.mp4"
+                ]
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video": {
+                    "file_key": "tasks/QGEQ9mXzXk0j9TPN3zgDJ/XLcW4NsGsFHu3UNugFHOI.mp4",
+                    "mime": "video/mp4",
+                    "filename": "8ee1953af96b4c5f841d1b0f2cec94fc.mp4"
+                }
+            },
+            "error": null,
+            "durationMs": 9581,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058600-12-19T11:50:57.000Z",
+            "updatedAt": "2026-08-19T00:51:16.000Z"
+        },
+        {
+            "id": "-COqSOWbqyxA9j1Qfc-v0",
+            "workflowId": null,
+            "nodeId": "2a0ab3e5-147a-49a3-a692-b89fb9f6e879",
+            "feature": "split-video",
+            "pluginId": "oneflow-api-pyscenedetect",
+            "model": null,
+            "prompt": {
+                "video": "Frl_smalnrvBRT3pfo6eh.mp4",
+                "threshold": 20
+            },
+            "status": "completed",
+            "progress": 0,
+            "result": {
+                "success": true,
+                "error": null,
+                "video_parts": [
+                    {
+                        "file_key": "tasks/-COqSOWbqyxA9j1Qfc-v0/yj0d2MdmMo_3AdQnwidRA.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-001.mp4"
+                    },
+                    {
+                        "file_key": "tasks/-COqSOWbqyxA9j1Qfc-v0/X178jrBtZf2kEZEza_RWP.mp4",
+                        "mime": "video/mp4",
+                        "filename": "input-Scene-002.mp4"
+                    }
+                ]
+            },
+            "error": null,
+            "durationMs": 25216,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058600-12-17T19:54:02.000Z",
+            "updatedAt": "2026-08-19T00:49:08.000Z"
+        },
+        {
+            "id": "b3XRSWkhrhYkmnPXWUmpB",
+            "workflowId": null,
+            "nodeId": "ov1",
+            "feature": "compose-overlay",
+            "pluginId": "oneflow-api-e22-r5-stub",
+            "model": null,
+            "prompt": {
+                "media": "s9qsuIaZ6u6iU3ETbdY6i.png",
+                "ops": [
+                    {
+                        "type": "text",
+                        "x": 0.5,
+                        "y": 0.12,
+                        "anchor": "top-center",
+                        "text": "E22 round-5 capture",
+                        "size": 0.05,
+                        "color": "#FFFFFF",
+                        "align": "center",
+                        "max_width": 0.8
+                    }
+                ]
+            },
+            "status": "processing",
+            "progress": 0,
+            "result": null,
+            "error": null,
+            "durationMs": null,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058557-12-20T17:52:24.000Z",
+            "updatedAt": "2026-08-03T07:57:43.000Z"
+        },
+        {
+            "id": "LYqj0uQmgk0gj4BUMyoZN",
+            "workflowId": null,
+            "nodeId": "e22n-s6-co",
+            "feature": "compose-overlay",
+            "pluginId": "oneflow-api-e22-capture-stub",
+            "model": null,
+            "prompt": {
+                "media": "PYXUW__XM7p8thWPfi9Tn.png",
+                "ops": [
+                    {
+                        "type": "text",
+                        "x": 0.5,
+                        "y": 0.12,
+                        "anchor": "top-center",
+                        "text": "Sale 50%",
+                        "size": 0.05,
+                        "color": "#FFFFFF",
+                        "align": "center",
+                        "max_width": 0.8
+                    }
+                ]
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"E22 capture stub \u2014 not a real render\"}",
+            "durationMs": 40369,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058557-09-14T00:27:01.000Z",
+            "updatedAt": "2026-08-03T05:37:39.000Z"
+        },
+        {
+            "id": "lB8fz0acY6dHDnZQG8gWx",
+            "workflowId": null,
+            "nodeId": "e22-s6-co",
+            "feature": "compose-overlay",
+            "pluginId": "oneflow-api-e22-capture-stub",
+            "model": null,
+            "prompt": {
+                "media": "PYXUW__XM7p8thWPfi9Tn.png",
+                "ops": [
+                    {
+                        "type": "text",
+                        "x": 0.5,
+                        "y": 0.12,
+                        "anchor": "top-center",
+                        "text": "Sale 50%",
+                        "size": 0.05,
+                        "color": "#FFFFFF",
+                        "align": "center",
+                        "max_width": 0.8
+                    }
+                ]
+            },
+            "status": "failed",
+            "progress": 0,
+            "result": null,
+            "error": "{\"message\":\"E22 capture stub \u2014 not a real render\"}",
+            "durationMs": 40319,
+            "costUsd": null,
+            "gpuType": null,
+            "cacheCallsTotal": null,
+            "cacheCallsCached": null,
+            "createdAt": "+058557-09-11T20:20:06.000Z",
+            "updatedAt": "2026-08-03T05:34:32.000Z"
+        }
+    ]
+}

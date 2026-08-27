@@ -1048,6 +1048,20 @@
                 "editOp": "Edit op",
                 "removeOp": "Remove op"
             }
+        },
+        "firstRun": {
+            "missingTitle": "Need {count} tools to run this example",
+            "missingTitleWithSize": "Need {count} tools (~{mb} MB) to run this example",
+            "prepare": "Get the tools",
+            "installing": "Downloading tools… ({done}/{total})",
+            "milestoneCreatingVenv": "Setting up environment",
+            "milestoneInstallingSdk": "Installing SDK",
+            "milestoneInstallingRequirements": "Installing libraries",
+            "elapsed": "{sec}s elapsed. Later runs start instantly.",
+            "ready": "Done. Press Run on the first node to try it.",
+            "blocked": "Couldn't get things ready",
+            "blockedReasonDownload": "Couldn't download the tools — check your connection.",
+            "retry": "Retry"
         }
     },
     "Upload": {

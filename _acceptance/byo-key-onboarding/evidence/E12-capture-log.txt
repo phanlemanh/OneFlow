@@ -1,0 +1,13 @@
+example loaded (Split Video visible): true
+[assert] settings dialog open after initial load: false 
+[assert] Split Video implementation switched to non-local PySceneDetect: true
+saved /Users/manh-macmini/dev/oneflow/evidence/E12-step1.png
+[assert] settings dialog open after step1: false 
+clicked Start Slice
+[assert] needs-key state rendered on node: true
+saved /Users/manh-macmini/dev/oneflow/evidence/E12-step2.png
+[assert] settings dialog open after step2 (needs-key): false 
+saved /Users/manh-macmini/dev/oneflow/evidence/E12-step3.png
+[assert] settings dialog open after step3 (key entered): false 
+[assert] settings dialog NEVER opened during sequence: true
+saved /Users/manh-macmini/dev/oneflow/evidence/E12-network.txt
