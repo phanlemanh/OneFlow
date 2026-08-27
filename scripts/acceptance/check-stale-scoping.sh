@@ -131,18 +131,25 @@ case_partial() {
   # builds the union from the one eval that declared twice while the other
   # eval's implicit whole-tree scope vanishes. A copy-paste duplicate is
   # enough to reach it, so it is not an exotic shape.
-  # ISOLATION: the report goes in its OWN commit and --base is taken AFTER it
-  # (mk_committed_report_fixture, the shape case_out_of_scope uses), so this
-  # feature's _acceptance/ is NOT in the PR diff and the cross-check never
-  # runs. Without that, the cross-check refuses the scope on its own and the
-  # case passes whether or not the completeness test works — the assertion
-  # would be measuring the wrong guard.
+  # ISOLATION, rebuilt for the STALE-DIFF-SCOPE-GUARD fork. The old shape kept
+  # `_acceptance/fx/` out of the PR diff so the cross-check could not refuse
+  # the scope on its own and mask the completeness test. Since the fork that
+  # same shape also skips the staleness block entirely, so it now masks
+  # everything. Isolation is achieved from the other side instead: the slug IS
+  # in the diff, and the drift is placed INSIDE the union the duplicate
+  # declares so the cross-check PASSES — leaving the completeness test as the
+  # only thing that can still refuse the scope.
+  #
+  # Which assertion carries the signal changed with it. A granted scope would
+  # cover src/covered/** too, so the file stales either way and the
+  # `evidence is stale` assertion no longer discriminates; the discriminating
+  # one is the `narrow staleness scope applied` assertion, which appears only
+  # if the completeness test wrongly reads this partial declaration as
+  # complete. Kept both: the second is still a regression guard on the
+  # fallback itself.
   d2="$(new_case_tmpdir)"
   base2="$(mk_committed_report_fixture "$d2" fx dup)"
-  # Outside BOTH globs the duplicate declares (src/covered/**, src/uncovered/**),
-  # so a granted narrow scope would suppress it and a whole-tree fallback
-  # would not.
-  ( cd "$d2" && mkdir -p src/elsewhere && echo drift > src/elsewhere/new.txt && git add -A && git commit -q -m drift )
+  ( cd "$d2" && echo drift > src/covered/new.txt && pr_touches_artifacts "$d2" fx && git add -A && git commit -q -m drift )
   out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
   printf '%s\n' "$out2" | grep -q 'narrow staleness scope applied' \
     && fail partial "duplicate-key partial declaration was granted narrow scope: $out2"
@@ -153,10 +160,11 @@ case_partial() {
   # eval-key column sits in an unrelated mapping BELOW the evals list. Totals
   # balance, and attributing a paths line to the "nearest `- id:` above"
   # without checking it is still INSIDE that eval hands the stray key to E2 —
-  # the union then gains a glob no eval declared. Same isolation as above.
+  # the union then gains a glob no eval declared. Same rebuilt isolation as
+  # above: slug in the diff, drift inside the union so the cross-check passes.
   d3="$(new_case_tmpdir)"
   base3="$(mk_committed_report_fixture "$d3" fx stray)"
-  ( cd "$d3" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  ( cd "$d3" && echo drift > src/covered/new.txt && pr_touches_artifacts "$d3" fx && git add -A && git commit -q -m drift )
   out3="$(bash "$GATE" "$d3" --base "$base3" 2>&1)"
   printf '%s\n' "$out3" | grep -q 'narrow staleness scope applied' \
     && fail partial "stray out-of-block paths key was folded into a granted scope: $out3"
@@ -197,12 +205,19 @@ case_in_scope() {
   # Non-ASCII path inside the declared union: `git diff --name-only` quotes
   # and octal-escapes a non-ASCII path by default (core.quotePath), so it
   # arrives as a literal string like "caf\303\251.txt" that can never match a
-  # plain-ASCII glob. Isolated from the cross-check (report committed in its
-  # own commit, base taken AFTER it, same shape case_out_of_scope uses) so
-  # only stale_files()'s own quotePath handling is under test here.
+  # plain-ASCII glob.
+  #
+  # The PR carries the feature's artifacts (pr_touches_artifacts) because the
+  # STALE-DIFF-SCOPE-GUARD fork examines staleness only for a feature inside
+  # the PR diff; without them the gate prints `OK [fx]` having looked at
+  # nothing and this assertion measures silence. The old shape here committed
+  # the report separately to dodge the cross-check, which the fork has welded
+  # to the same switch. Dodging is no longer possible, so instead the
+  # cross-check is made to PASS rather than be skipped: mode `all` declares
+  # src/covered/**, and the PR's only gated file is inside it.
   d2="$(new_case_tmpdir)"
   base2="$(mk_committed_report_fixture "$d2" fx all)"
-  ( cd "$d2" && printf 'x' > "src/covered/café.txt" && git add -A && git commit -q -m "non-ascii file in scope" )
+  ( cd "$d2" && printf 'x' > "src/covered/café.txt" && pr_touches_artifacts "$d2" fx && git add -A && git commit -q -m "non-ascii file in scope" )
   out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
   printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail in-scope "non-ASCII in-union path did NOT stale the feature (quoted-path dropped from narrow scope): $out2"
@@ -220,16 +235,30 @@ case_in_scope() {
   # which is "never stale" wearing a narrow-scope hat.
   d3="$(new_case_tmpdir)"
   base3="$(mk_subdir_fixture "$d3" fx 'pkg/src/covered/**')"
-  ( cd "$d3" && echo drift > pkg/src/covered/new.txt && git add -A && git commit -q -m drift )
+  ( cd "$d3" && echo drift > pkg/src/covered/new.txt && pr_touches_artifacts "$d3/pkg" fx && git add -A && git commit -q -m drift )
   out3="$(bash "$GATE" "$d3/pkg" --base "$base3" 2>&1)"
   printf '%s\n' "$out3" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail in-scope "subdir root, top-level-spelled paths: in-union change did NOT stale the feature: $out3"
 
   d4="$(new_case_tmpdir)"
   base4="$(mk_subdir_fixture "$d4" fx 'src/covered/**')"
-  ( cd "$d4" && echo drift > pkg/src/covered/new.txt && git add -A && git commit -q -m drift )
+  ( cd "$d4" && echo drift > pkg/src/covered/new.txt && pr_touches_artifacts "$d4/pkg" fx && git add -A && git commit -q -m drift )
   out4="$(bash "$GATE" "$d4/pkg" --base "$base4" 2>&1)"
-  printf '%s\n' "$out4" | grep -q 'NOTE \[fx\]: declared eval paths match no gated file' \
+  # The protective property is unchanged — a $ROOT-relative spelling must never
+  # be granted a scope that silently filters everything out — but since the
+  # STALE-DIFF-SCOPE-GUARD fork it is a DIFFERENT guard that catches it, so the
+  # assertion is on the outcome rather than on one message.
+  #
+  # Reachability, measured: for the staleness block to run at all the slug must
+  # be in the PR diff, which also switches the cross-check on; for the
+  # cross-check to pass, the declared union must cover a non-empty gated
+  # coverage set, i.e. it must match at least one tracked file — which is
+  # exactly what the `match no gated file` refusal requires to be false. The
+  # two conditions cannot hold at once, so that specific refusal is no longer
+  # reachable from any fixture. Here the namespace mismatch surfaces as the
+  # cross-check's `do not cover` refusal instead. Both refuse the scope and
+  # fall back to whole-tree, which is the behaviour this case exists to pin.
+  printf '%s\n' "$out4" | grep -qE 'NOTE \[fx\]: declared eval paths (match no gated file|do not cover)' \
     || fail in-scope "subdir root, \$ROOT-relative paths: match-nothing declaration was NOT refused: $out4"
   printf '%s\n' "$out4" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail in-scope "subdir root, \$ROOT-relative paths: refused scope did NOT fall back to whole-tree staleness: $out4"
@@ -285,17 +314,40 @@ case_suppression() {
 }
 
 case_announce() {
-  # E15 / AC-14: the only path that WEAKENS the gate had no output at all;
-  # mk_committed_report_fixture dodges Task 6's cross-check. Undeclared (below) must still stay silent, or AC-3 breaks.
+  # E15 / AC-14: a granted narrow scope is the only path that WEAKENS the gate,
+  # and it used to have no output at all. Undeclared (below) must still stay
+  # silent, or AC-3 breaks.
+  #
+  # Rebuilt for the STALE-DIFF-SCOPE-GUARD fork. The old shape kept
+  # `_acceptance/fx/` out of the PR diff to dodge Task 6's cross-check; the
+  # fork made that same shape skip the staleness block outright, so the gate
+  # printed `OK [fx]: PASS` and this case asserted against silence. A granted
+  # scope now requires BOTH halves at once: the slug in the diff (or nothing is
+  # examined) and the cross-check passing (or the scope is refused). That is
+  # exactly case_two_bases' shape, so it is reused here — the out-of-scope
+  # change lands BEFORE the base, where it is inside the feature's staleness
+  # range but outside the PR's coverage set, which is what leaves the
+  # announcement something to report as suppressed.
   d="$(new_case_tmpdir)"; d2="$(new_case_tmpdir)"
-  base="$(mk_committed_report_fixture "$d" fx narrow)"
-  ( cd "$d" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift ); out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  mk_fixture "$d" fx narrow
+  vc="$(git -C "$d" rev-parse HEAD)"
+  write_report "$d" fx "$vc"
+  ( cd "$d" && git add -A && git commit -q -m report )
+  ( cd "$d" && echo old > src/uncovered/unrelated.txt && git add -A && git commit -q -m "unrelated merge" )
+  base="$(git -C "$d" rev-parse HEAD)"
+  ( cd "$d" && echo new > src/covered/pr.txt && pr_touches_artifacts "$d" fx && git add -A && git commit -q -m pr )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
   printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' || fail announce "no announcement for a granted narrow scope: $out"
   printf '%s\n' "$out" | grep -q 'suppressed' || fail announce "announcement does not say the narrowing suppressed a whole-tree change: $out"
+  # Undeclared half: the slug is in the diff here too, so the staleness block
+  # genuinely runs and the silence below is a measured silence rather than the
+  # fork's. Without it this assertion passes on every input, AC-3 included.
   base2="$(mk_committed_report_fixture "$d2" fx none)"
-  ( cd "$d2" && echo drift > src/uncovered/new.txt && git add -A && git commit -q -m drift )
+  ( cd "$d2" && echo drift > src/uncovered/new.txt && pr_touches_artifacts "$d2" fx && git add -A && git commit -q -m drift )
   out2="$(bash "$GATE" "$d2" --base "$base2" 2>&1)"
   printf '%s\n' "$out2" | grep -q 'narrow staleness scope applied' && fail announce "undeclared feature produced an announcement: $out2"
+  printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail announce "undeclared feature was not staled by a gated change — the staleness block did not run, so the silence above proves nothing: $out2"
   pass announce
 }
 
