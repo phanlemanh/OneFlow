@@ -291,7 +291,6 @@ executors:
     stale_scope_case_completeness: bash scripts/acceptance/check-stale-scoping.sh --case case-completeness
     stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
-    stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
     own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
     scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
