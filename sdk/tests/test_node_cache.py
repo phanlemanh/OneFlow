@@ -91,11 +91,17 @@ def test_shared_asset_stores_one_blob(tmp_path):
     assert len(_blob_files(tmp_path)) == 1
 
 
-def test_allowlist_holds_exactly_the_twelve_mechanical_slots():
+def test_tier_a_allowlist_pinned_and_in_abi():
     # Guard on the constant itself: the deferred three must NOT be in it until
     # 1.1-L1b lands, and a new slot must not be added silently.
     # compose-overlay joined 2026-08-02: deterministic CPU overlay
     # compositing, byte-identity evidence in the plugin repo's golden suite.
+    # normalize-text-vi joined 2026-08-20 and was REMOVED 2026-08-21 (owner,
+    # Gate 2 round 5): it is deterministic, but the cache KEY carries only
+    # sdk_major(), and "0.2.19"/"0.2.23"/"0.2.24" all hash as "0.2" — so a fix
+    # to the reader (which lives in the SDK, not in a plugin repo) would serve
+    # the old wrong reading forever. Pinned as ABSENT here so re-adding it
+    # cannot happen silently; the re-add condition is in node_cache.py.
     assert TIER_A_SLOTS == frozenset({
         "compose-overlay",
         "concat-videos", "extract-audio", "remove-video-audio",
@@ -105,6 +111,32 @@ def test_allowlist_holds_exactly_the_twelve_mechanical_slots():
     })
     for deferred in ("transcribe", "transcribe-timestamp", "parse-document"):
         assert deferred not in TIER_A_SLOTS
+
+    # Named separately from the three above because the REASON differs: those
+    # wait on 1.1-L1b, this one waits on the fingerprint carrying the reader's
+    # identity. A single "not in" list would flatten two different re-add
+    # conditions into one.
+    assert "normalize-text-vi" not in TIER_A_SLOTS, (
+        "normalize-text-vi chỉ được vào lại Tier A khi vân tay cache mang được "
+        "danh tính reader (SDK version đầy đủ, hoặc digest của tongflow/text/ "
+        "cộng pin vietnormalizer) — xem lý do đo được trong node_cache.py"
+    )
+
+    # The "_and_in_abi" half of this test's own name. It used to live only in
+    # test_node_cache_tier_b.py — a node-id the E11b executor never selects —
+    # so E11b's evidence claimed an ABI-membership check this test did not
+    # perform: a bogus name added to both the constant and the literal above
+    # stayed green (S4 round 2 finding).
+    import json
+
+    from tongflow.engine.abi_schema import resolve_abi_path
+
+    abi = json.loads(resolve_abi_path(None).read_text(encoding="utf-8"))
+    abi_slots = {node["nodeSlot"] for node in abi["nodes"]}
+    ghosts = TIER_A_SLOTS - abi_slots
+    assert not ghosts, (
+        f"Slot trong TIER_A_SLOTS không tồn tại trong ABI: {sorted(ghosts)}"
+    )
 
 
 def test_abi_digest_tracks_file_contents(tmp_path):

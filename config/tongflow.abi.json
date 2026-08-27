@@ -139,6 +139,36 @@
             }
         },
         {
+            "nodeSlot": "normalize-text-vi",
+            "inputs": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            },
+            "outputs": {
+                "type": "object",
+                "required": ["success"],
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        {
             "nodeSlot": "split-text",
             "inputs": {
                 "type": "object",

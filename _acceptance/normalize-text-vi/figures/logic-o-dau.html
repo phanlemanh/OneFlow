@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logic chuẩn hoá sống ở đâu — và thư viện nào</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f7f7f8;
+      --color-ink:     #1a0033;
+      --color-muted:   #4f4a63;
+      --color-soft:    #66607a;
+      --color-accent:  #e100e1;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Lora', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 0.5rem;
+    }
+    .sub {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      color: var(--color-muted);
+      max-width: 62ch;
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Điểm quyết định · Cổng 1 · normalize-text-vi</p>
+    <h1>Logic chuẩn hoá sống ở đâu — và thư viện nào</h1>
+    <p class="sub">Cùng một chuỗi ba lớp. Khác nhau nằm ở chỗ corpus vàng chạy: trong chính kho này, hay sau một lượt clone qua mạng.</p>
+
+    <svg viewBox="0 0 1000 832" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0068cc"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ============ EYEBROW CHUỖI ============ -->
+      <text x="32" y="112" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHUỖI BA LỚP — GIỐNG NHAU Ở CẢ HAI PHƯƠNG ÁN</text>
+
+      <!-- ============ VÙNG (vẽ trước) ============ -->
+      <rect x="32" y="272" width="456" height="192" rx="8" fill="rgba(225,0,225,0.05)" stroke="#e100e1" stroke-width="1.4"/>
+      <rect x="512" y="272" width="456" height="192" rx="8" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+
+      <!-- ============ CẠNH (vẽ trước khối) ============ -->
+      <line x1="160" y1="168" x2="184" y2="168" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="376" y1="168" x2="400" y2="168" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="592" y1="168" x2="616" y2="168" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="792" y1="168" x2="816" y2="168" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- ngoặc gom cả chuỗi rồi rẽ về hai nơi đặt -->
+      <path d="M 32,224 V 232 H 968 V 224" fill="none" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <line x1="260" y1="232" x2="260" y2="272" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="740" y1="232" x2="740" y2="272" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- vòng khép kín trong kho (phương án B) -->
+      <path d="M 360,380 H 392 Q 400,380 400,388 V 432 Q 400,440 392,440 H 216 Q 208,440 208,432 V 418" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <rect x="408" y="392" width="64" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="412" y="404" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">KHÉP KÍN</text>
+      <rect x="408" y="408" width="68" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="412" y="420" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">TRONG KHO</text>
+
+      <!-- đường ra ngoài kho (phương án A) -->
+      <path d="M 688,416 V 492" fill="none" stroke="#4f4a63" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+      <rect x="696" y="440" width="64" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="700" y="452" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CẦN MẠNG</text>
+
+      <!-- ============ CHUỖI BA LỚP ============ -->
+      <rect x="32" y="128" width="128" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="32" y="128" width="128" height="80" rx="6" fill="rgba(79,74,99,0.10)" stroke="#66607a" stroke-width="1"/>
+      <text x="96" y="166" fill="#1a0033" font-size="11" font-family="'Geist Mono', monospace" text-anchor="middle">input.text</text>
+      <text x="96" y="184" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">chuỗi vào</text>
+
+      <rect x="184" y="128" width="192" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="184" y="128" width="192" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="196" y="140" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="0.8"/>
+      <text x="222" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LỚP 1</text>
+      <text x="196" y="178" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tiền xử lý OneFlow</text>
+      <text x="196" y="196" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">từ điển ngành: TP.HCM · m²</text>
+
+      <rect x="400" y="128" width="192" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="400" y="128" width="192" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="412" y="140" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="0.8"/>
+      <text x="438" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LỚP 2</text>
+      <text x="412" y="178" fill="#1a0033" font-size="11" font-family="'Geist Mono', monospace">vietnormalizer 0.2.3</text>
+      <text x="412" y="196" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">pinned · MIT · zero-dep</text>
+
+      <rect x="616" y="128" width="176" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="616" y="128" width="176" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="628" y="140" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="0.8"/>
+      <text x="654" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LỚP 3</text>
+      <text x="628" y="178" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Hậu kiểm OneFlow</text>
+      <text x="628" y="196" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">không-còn-chữ-số</text>
+
+      <rect x="816" y="128" width="152" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="816" y="128" width="152" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="828" y="140" width="36" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="0.8"/>
+      <text x="846" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">RA</text>
+      <text x="828" y="172" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">{success, text}</text>
+      <text x="828" y="186" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">hoặc</text>
+      <text x="828" y="200" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">{success:false, error}</text>
+
+      <!-- ============ PHƯƠNG ÁN B — ĐÃ CHỌN ============ -->
+      <rect x="48" y="264" width="184" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="56" y="276" fill="#b300b3" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PHƯƠNG ÁN B · ĐÃ CHỌN</text>
+      <text x="56" y="308" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Logic sống trong SDK của chính kho</text>
+      <text x="56" y="326" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">sdk/tongflow/text/ · plugin là vỏ ~20 dòng</text>
+
+      <rect x="56" y="344" width="304" height="72" rx="6" fill="#f7f7f8"/>
+      <rect x="56" y="344" width="304" height="72" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="68" y="356" width="88" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="0.8"/>
+      <text x="112" y="368" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CORPUS VÀNG</text>
+      <text x="68" y="394" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Chạy trong suite sdk_pytest</text>
+      <text x="68" y="410" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">mỗi vòng verify · không cần mạng</text>
+
+      <!-- ============ PHƯƠNG ÁN A — LOẠI ============ -->
+      <rect x="528" y="264" width="160" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="536" y="276" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PHƯƠNG ÁN A · LOẠI</text>
+      <text x="536" y="308" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Logic sống ở repo plugin riêng</text>
+      <text x="536" y="326" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">khuôn compose-overlay</text>
+
+      <rect x="536" y="344" width="304" height="72" rx="6" fill="#f7f7f8"/>
+      <rect x="536" y="344" width="304" height="72" rx="6" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="548" y="356" width="88" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="592" y="368" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CORPUS VÀNG</text>
+      <text x="548" y="394" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Chạy qua guard clone-and-pytest</text>
+      <text x="548" y="410" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">mỗi vòng verify tốn một lượt clone</text>
+
+      <rect x="560" y="496" width="408" height="40" rx="6" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="576" y="520" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Ra ngoài kho — corpus vô hình với CI của kho này</text>
+
+      <!-- ============ CHÚ THÍCH BIÊN TẬP ============ -->
+      <text x="32" y="500" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">Cùng một chuỗi. Cái khác là chỗ corpus vàng chạy —</text>
+      <text x="32" y="522" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">và chỗ đó quyết định mỗi vòng verify có cần mạng không.</text>
+
+      <!-- ============ BỐN ỨNG VIÊN ============ -->
+      <line x1="32" y1="560" x2="968" y2="560" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="32" y="580" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">BỐN ỨNG VIÊN THƯ VIỆN — MỘT QUA ĐƯỢC</text>
+
+      <rect x="32" y="596" width="216" height="72" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <rect x="44" y="608" width="52" height="16" rx="2" fill="none" stroke="rgba(225,0,225,0.55)" stroke-width="0.8"/>
+      <text x="70" y="620" fill="#b300b3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CHỌN</text>
+      <text x="44" y="646" fill="#1a0033" font-size="11" font-family="'Geist Mono', monospace">vietnormalizer 0.2.3</text>
+      <text x="44" y="662" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">MIT · zero-dep · không tải model</text>
+
+      <rect x="272" y="596" width="216" height="72" rx="6" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="284" y="608" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="310" y="620" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOẠI</text>
+      <text x="284" y="646" fill="#66607a" font-size="11" font-family="'Geist Mono', monospace">vinorm 2.0.7</text>
+      <text x="284" y="662" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">license non-commercial (AILAB)</text>
+
+      <rect x="512" y="596" width="216" height="72" rx="6" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="524" y="608" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="550" y="620" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOẠI</text>
+      <text x="524" y="646" fill="#66607a" font-size="11" font-family="'Geist Mono', monospace">soe-vinorm 0.3.2</text>
+      <text x="524" y="662" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">cần tải trọng số HuggingFace</text>
+
+      <rect x="752" y="596" width="216" height="72" rx="6" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="764" y="608" width="52" height="16" rx="2" fill="none" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="790" y="620" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LOẠI</text>
+      <text x="764" y="646" fill="#66607a" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tự viết luật</text>
+      <text x="764" y="662" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">~400 dòng luật tự nuôi</text>
+
+      <!-- ============ CHÚ GIẢI ============ -->
+      <line x1="32" y1="700" x2="968" y2="700" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="32" y="720" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+      <rect x="140" y="712" width="12" height="10" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.2"/>
+      <text x="160" y="720" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Nhánh đã chọn</text>
+
+      <rect x="280" y="712" width="12" height="10" rx="2" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="300" y="720" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Bước trong chuỗi</text>
+
+      <line x1="440" y1="717" x2="464" y2="717" stroke="#4f4a63" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="472" y="720" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">Ra ngoài kho — cần mạng</text>
+
+      <!-- ============ CHÂN HÌNH ============ -->
+      <text x="32" y="752" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">AC-2 corpus vàng số/tiền khớp từng ký tự · AC-7 chạy 2 lần byte-identical + idempotence — cả hai đo được vì corpus nằm trong sdk/tests/.</text>
+      <text x="32" y="772" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">AC-6 còn chữ số trong đầu ra → success:false + liệt kê đúng token còn sót; đọc hết → đầu ra không chứa ký tự 0-9 (lớp hậu kiểm).</text>
+      <text x="32" y="792" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">AC-13 vietnormalizer==0.2.3 khai là dependency của SDK với pin chính xác; SDK 0.2.19 publish trước khi repo plugin pin.</text>
+      <text x="32" y="812" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">Nguồn: docs/superpowers/specs/2026-08-19-normalize-text-vi-design.md §3 · _acceptance/normalize-text-vi/contract.md.</text>
+    </svg>
+  </div>
+</body>
+</html>

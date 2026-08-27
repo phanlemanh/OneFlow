@@ -97,6 +97,7 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
+- ⬜ **Read numbers aloud (Vietnamese)**: turn numbers, prices, dates and abbreviations into spoken Vietnamese — required before text-to-speech.
 
 #### Image
 

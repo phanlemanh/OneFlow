@@ -26,8 +26,118 @@ import {
     type OutputRoute,
     type WorkflowInput,
     type WorkflowOutput,
+    type WorkflowWarning,
 } from "./executable-workflow";
 import { WorkflowParser } from "./parser";
+
+/**
+ * Slots that turn written text into speech.
+ *
+ * An explicit allowlist, not a rule — both plausible rules are wrong on today's
+ * ABI. "text in, audio out" also matches the six music slots below, whose
+ * `text` describes the music to a model rather than words to be spoken; and
+ * "the name contains speech" matches `speech-text-gen-video` /
+ * `speech-video-gen-video`, which CONSUME speech. `tts-order-guard.test.ts`
+ * keeps this list in step with the ABI in BOTH directions, so a slot added by
+ * roadmap 1.4 cannot slip past the guard silently.
+ */
+export const TTS_SLOTS: readonly NodeSlot[] = [
+    "text-gen-speech-preset",
+    "text-gen-speech-clone",
+    "text-gen-speech-instruct",
+    "text-audio-gen-speech",
+];
+
+/**
+ * The TTS-order warning is UNCONDITIONAL, and two attempts to scope it by
+ * language were reverted (S4 rounds 7-9). Recording why, because the third
+ * attempt would otherwise be written the same way:
+ *
+ * The product has NO place for a user to say "this voice is Vietnamese".
+ * `LanguageSelect` offers Auto, Chinese, English, Japanese, Korean, German,
+ * French, Russian, Portuguese, Spanish, Italian — no Vietnamese entry — and the
+ * preset speaker catalog is Chinese/English/Japanese/Korean only. The plugin
+ * defaults are "Auto" for clone and "Chinese" for preset/instruct, so on every
+ * slot the value present by default is one a language filter reads as "some
+ * other language".
+ *
+ * "Auto" is the sharpest case: it means "detect the language of the text",
+ * which is exactly the Vietnamese workflow the warning exists for, and a filter
+ * suppresses on it. Both attempts therefore failed OPEN on their target — the
+ * first for the whole preset slot, the second for clone and instruct — and both
+ * suites stayed green because the tests supplied language values by hand
+ * instead of using the ones the product actually produces.
+ *
+ * Re-scope only after a Vietnamese option exists in the picker AND the tests
+ * draw their values from the shipped catalogs rather than from literals. Until
+ * then the noise of warning on non-Vietnamese workflows is the cheaper error:
+ * it is visible, whereas a suppressed warning is not.
+ */
+/** Text-in, audio-out slots that are NOT speech — the negative control. */
+export const MUSIC_SLOTS: readonly NodeSlot[] = [
+    "gen-music",
+    "music-repaint",
+    "music-cover",
+    "music-lego",
+    "music-complete",
+    "separate-sound",
+];
+
+/**
+ * Warning code attached by `export()` when a TTS node has no reader upstream
+ * (roadmap 1.3). A WARNING, not a block: the reader node is not reachable from
+ * any picker today (only the Director places it), so blocking retroactively
+ * bricked every saved TTS workflow — owner decision 2026-08-20, ledger entry
+ * d-20260820T091500Z-9098, which also pins the condition for raising this back
+ * to a hard block. The human sentence lives in the i18n catalogs
+ * (`Workspace.toast.ttsNeedsNormalize`), never here.
+ */
+export const WORKFLOW_TTS_NEEDS_NORMALIZE = "WORKFLOW_TTS_NEEDS_NORMALIZE";
+
+const NORMALIZE_SLOT = "normalize-text-vi";
+
+/** Index edges by target once; `hasUpstreamSlot` runs once per TTS node. */
+function buildParentIndex(edges: Edge[]): Map<string, string[]> {
+    const parents = new Map<string, string[]>();
+    for (const edge of edges) {
+        const list = parents.get(edge.target);
+        if (list) list.push(edge.source);
+        else parents.set(edge.target, [edge.source]);
+    }
+    return parents;
+}
+
+/**
+ * Walk the graph upstream looking for one slot.
+ *
+ * Walks the RAW graph edges, not `executableNodes`. An earlier version
+ * walked `ExecutableNode.dependencies` and looked each id up among the
+ * executable nodes only — but `dependencies` holds direct graph predecessors of
+ * ANY kind, and an ABI node's output always lands in a data node first. So the
+ * canonical shape this feature produces, `normalize-text-vi → textNode → TTS`,
+ * hit a data node the lookup could not resolve and the walk gave up there,
+ * falsely rejecting the very chain the feature exists to enable. Data nodes are
+ * pass-through for this question: step over them, do not stop at them.
+ *
+ * Only the registration's `feature` is consulted — resolving the full spec via
+ * `resolveSpec` answers a question this walk never asks.
+ */
+function hasUpstreamSlot(
+    nodeId: string,
+    slot: string,
+    parents: Map<string, string[]>,
+): boolean {
+    const seen = new Set<string>([nodeId]);
+    const stack = [...(parents.get(nodeId) ?? [])];
+    while (stack.length) {
+        const id = stack.pop() as string;
+        if (seen.has(id)) continue;
+        seen.add(id);
+        if (getAbiNodeRegistration(id)?.feature === slot) return true;
+        stack.push(...(parents.get(id) ?? []));
+    }
+    return false;
+}
 
 /**
  * Resolve a node's ABI spec from the mount registry. Returns the registration +
@@ -279,7 +389,23 @@ export class WorkflowExporter {
             )
             .map((edge) => ({ source: edge.source, target: edge.target }));
 
+        // Roadmap 1.3: reading numbers aloud before any TTS node. Checked here
+        // because this is the one gate every workflow passes, whether the
+        // Director planned it or a person wired it by hand. Surfaced as a
+        // WARNING the callers render via i18n — see the constant's doc comment
+        // for why this is not a block today.
+        const parentIndex = buildParentIndex(this.edges);
+        const offenders = executableNodes
+            .filter((n) => TTS_SLOTS.includes(n.feature as NodeSlot))
+            .filter((n) => !hasUpstreamSlot(n.id, NORMALIZE_SLOT, parentIndex))
+            .map((n) => n.id);
+        const warnings: WorkflowWarning[] =
+            offenders.length > 0
+                ? [{ code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds: offenders }]
+                : [];
+
         return {
+            warnings,
             name: options.name ?? "Untitled Workflow",
             description: options.description,
             version: "1.0",
