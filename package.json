@@ -35,6 +35,8 @@
         "abi:generate": "node scripts/generate-tongflow-abi.mjs",
         "test": "vitest run",
         "verify:plugins": "tsx scripts/verify-plugins-scan.ts",
+        "roadmap:check": "bash scripts/roadmap/check-roadmap-fresh.sh",
+        "roadmap:teeth": "bash scripts/roadmap/check-roadmap-guard-teeth.sh",
         "ui:capture": "node scripts/ui-capture.mjs",
         "hooks:install": "git config core.hooksPath .githooks",
         "sdk:publish": "bash scripts/publish-tongflow-pypi.sh"

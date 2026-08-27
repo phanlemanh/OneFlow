@@ -189,9 +189,10 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `pnpm-build-approvals` | T2 | 18/08 | *ngoài lộ trình* — hạ tầng chuỗi công cụ verify |
 | `scan-with-block-imports` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
 | `scan-scope-diagnostics` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
+| `roadmap-drift-guard` | T2 | 27/08 | *ngoài lộ trình* — răng cho luật cập nhật của chính file này |
 
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này:** 13/21 hạng mục đã ký là năng lực sản phẩm, 8/21 là hạ tầng quy
+**Đọc được gì từ tỉ lệ này:** 13/22 hạng mục đã ký là năng lực sản phẩm, 9/22 là hạ tầng quy
 trình và CI. Con số thứ hai không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.
