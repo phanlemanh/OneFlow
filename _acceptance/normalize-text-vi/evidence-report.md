@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: b5b3797815203deec771382fdd66215200952b91
+verified_commit: 365aef8667048d5ac986d6983081b8d0a356164a
 human_signoff: Phan Le Manh 2026-08-27
 ---
 
@@ -301,3 +301,7 @@ không có eval runs>1 round này — mọi eval trong round 21 là deterministi
 Round 19: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại (baseline không đo lại — carried từ round 16); 16 eval carry-forward giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng; E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2. Suite bổ trợ xanh toàn bộ.
 Round 20: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại (baseline không đo lại — carried từ round 16); 16 eval carry-forward (E1a, E1b, E9a, E9b, E10a, E10b, E10c, E11a, E11b, E12a, E12b, E13, E14a, E14b, E15, E18) giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng — riêng verifier của E15 được sửa lại đúng `config:capture.ui` theo evals.yaml (round 19 từng chép nhầm ref của E18); E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2 (hợp đồng T3, override bắt buộc trên mọi mục judgment bất kể phiếu). Suite bổ trợ (pnpm build, pnpm typecheck, pnpm lint:check, pnpm test, sdk pytest full, pnpm verify:plugins, pnpm gen:abi + git diff) xanh toàn bộ.
 Round 21: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại sau khi mở rộng ma trận "Đ nhập nhằng" nấc hai (E6a/E6b: dấu tiền đứng trước SỐ hoặc DẤU PHẨY cũng bị từ chối như tên đường "Đ. 3/2"/"Đ. 30/4"/"Đ. 2/9", trong khi giá thật ở vị trí không nhập nhằng — "Giá 500 đ" cuối chuỗi, "Tổng 2.000 đ." cuối chuỗi, dấu gạch chéo, "ĐỒNG" đầy đủ — vẫn đọc được) và bổ sung ca địa chỉ bằng số vào corpus idempotent E7 (baseline không đo lại — carried từ round 16); 16 eval carry-forward (E1a, E1b, E9a, E9b, E10a, E10b, E10c, E11a, E11b, E12a, E12b, E13, E14a, E14b, E15, E18) giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng; E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2 (hợp đồng T3, override bắt buộc trên mọi mục judgment bất kể phiếu). Suite bổ trợ (pnpm build, pnpm typecheck, pnpm lint:check, pnpm test, sdk pytest full, pnpm verify:plugins, pnpm gen:abi + git diff) xanh toàn bộ.
+
+### Re-pin lần 1 — 2026-08-27, do merge main mang theo dọn dẹp gate-tooling (stale-golden) và tách hồ sơ nháp khỏi PR
+run_id: repin-normalize-text-vi-20260827-a
+sha: 365aef8667048d5ac986d6983081b8d0a356164a · suites: 6 lệnh exit 0
