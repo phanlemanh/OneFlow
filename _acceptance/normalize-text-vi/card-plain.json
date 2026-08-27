@@ -2,7 +2,13 @@
   "feature_plain": "Đọc số, giá tiền và ngày tháng thành chữ tiếng Việt trước khi đưa cho giọng đọc tự động, để clip không phát ra sai giá hay sai ngày.",
   "scope_plain": "Chưa làm trong đợt này: ép thứ tự ở tầng mẫu dựng sẵn, đọc ngôn ngữ khác ngoài tiếng Việt, sửa chính tả và văn phong, phần đọc thành tiếng, và giọng theo vùng miền.",
   "analyst_plain": "",
-  "decisions": [],
+  "decisions": [
+    {
+      "id": "E16",
+      "q": "Node mới nhìn có giống các node khác trên bảng vẽ không?",
+      "why": "Máy chấm được hai ảnh của chính node này và cả ba góc soi đều thuận. Việc còn lại chỉ mắt người làm được: đặt nó cạnh những node sẵn có để so. Ảnh khổ máy tính và bản phóng to cạnh node đã dựng sẵn trong trang bằng chứng."
+    }
+  ],
   "decisions_plain": [
     {
       "id": "d-20260819T143500Z-11204",
@@ -335,6 +341,18 @@
     {
       "id": "d-20260827T003100Z-90284",
       "p": "Sửa lỗi máy tự gây trên nhánh khác: ba tài liệu bị lật trạng thái thay vì xoá hẳn dòng, làm hai nhánh đụng nhau — xoá hẳn rồi thì hợp nhất sạch."
+    },
+    {
+      "id": "d-20260827T050606Z-58120",
+      "p": "Anh trả lại Cổng 2 thay vì ký: bằng chứng khi đó chụp trước hai bản sửa code, nên tờ giấy mô tả một bản sản phẩm không còn tồn tại."
+    },
+    {
+      "id": "d-20260827T071533Z-71204",
+      "p": "Luật từ chối dạng nhập nhằng và hai luật đọc tiền nay dùng chung một định nghĩa 'khoảng cách' — trước đó chúng hiểu khác nhau nên xuống dòng hoặc khoảng trắng cứng đều lọt lưới, địa chỉ đọc thành giá."
+    },
+    {
+      "id": "d-20260827T083547Z-88431",
+      "p": "Chọn nói ít đi thay vì nói sai: máy khai sẵn những cách viết dấu phẩy nó đọc được và TỪ CHỐI phần còn lại; đổi lại vài câu trước đây đọc được (nhờ may) nay bị từ chối."
     }
   ]
 }
