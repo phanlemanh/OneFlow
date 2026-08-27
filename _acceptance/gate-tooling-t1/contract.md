@@ -5,7 +5,7 @@ slug: gate-tooling-t1
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: approved
+status: verified
 approved_by: Manh
 approved_at: 2026-08-27
 ---
@@ -42,7 +42,7 @@ entry `d-20260805T190000Z-31447`; phiên chẩn đoán 2026-08-27.
 - AC-2: Given một feature khai đủ `paths`, có `_acceptance/<slug>/` NẰM NGOÀI diff PR, và mọi file trong tập staleness của nó đều nằm ngoài union đã khai, When cổng chạy, Then cổng in `narrow staleness scope applied` và KHÔNG báo feature đó stale. *Khôi phục AC-2 của `stale-scope-by-paths`; trước khi thu hẹp fork thì không fixture nào dựng được ca này.*
 - AC-3: Given một feature KHÔNG khai `paths` và có `_acceptance/<slug>/` nằm ngoài diff PR, When cổng chạy, Then nó KHÔNG bị báo stale. *Nửa SUPPRESSION: đây là lý do fork tồn tại (chống chặn-mọi-PR-vì-lịch-sử). Sửa để AC-2 sống lại mà làm hỏng vế này là đổi một khuyết tật lấy một khuyết tật.*
 - AC-4: Given một feature khai đủ `paths` ngoài diff PR mà có file TRONG union đổi sau `verified_commit`, When cổng chạy, Then nó VẪN bị báo stale. *Nửa should-fire của AC-2; thiếu nó thì "thu hẹp fork" có thể thoái hoá thành "không bao giờ stale" mà mọi tiêu chí khác vẫn xanh.*
-- AC-5: Given `scripts/acceptance/check-stale-scoping.sh` tại HEAD, When chạy lần lượt đủ 14 `--case` trên cây sạch, Then cả 14 đều exit 0. *Mốc đầu phiên là 9/14; con số này là thứ duy nhất chứng minh việc dựng lại fixture không đổi màu bằng cách nới khẳng định.*
+- AC-5: Given `scripts/acceptance/check-stale-scoping.sh` tại HEAD, When chạy lần lượt MỌI `--case` mà chính guard khai trong `KNOWN_CASES` trên cây sạch, Then tất cả đều exit 0. *Mốc đầu phiên là 9 xanh / 5 đỏ trên 14; con số xanh-hết là thứ duy nhất chứng minh việc dựng lại fixture không đổi màu bằng cách nới khẳng định. Không ghim một con số cứng: xem Amendment.*
 - AC-6: Given một fixture khai ZERO `paths` cùng một thay đổi gated, When cổng chạy, Then nó báo `VIOLATION [fx]: evidence is stale`. *Item 0.8(a): AC-3 mệnh đề (a) của `stale-scope-by-paths` mất eval máy từ 05/08; nửa `undeclared` của `case_announce` trước đây xanh RỖNG vì khối bị bỏ qua.*
 - AC-7: Given HEAD, When quét cây, Then `scripts/acceptance/check-stale-golden.sh`, fixture `baseline-gate-output.txt`, và key `stale_scoping_golden` đều VẮNG MẶT. *Item 0.8(b), đã merge ở PR #76 — giữ làm guard hồi quy để ba mảnh đó không bò lại qua một lần vendor kit.*
 - AC-8: Given fork `STALE-DIFF-SCOPE-GUARD` trong `scripts/pre-merge-check.sh`, When điều kiện bỏ qua của nó bị đổi trên một BẢN COPY tạm, Then ít nhất một case của `check-stale-scoping.sh` chuyển đỏ. *Fork nằm trong file được `t1_skip_globs` miễn, nên đổi ngữ nghĩa cổng ở đó lọt rà soát; răng này là thứ duy nhất bắt được. Bản copy, không phải cây làm việc.*
@@ -70,6 +70,26 @@ dùng preset test-matrix: preset mô tả feature sản phẩm, còn đây là m
 - **Đổi ngữ nghĩa `stale_files` sang đo theo range của PR** (`BASE...HEAD`) thay vì `verified_commit...HEAD`. Nó xoá được wave re-verify nhưng phá luật nền "bằng chứng chứng nhận cây tại `verified_commit`".
 - **Tách `scripts/acceptance/fixtures.sh`** (đang 831 dòng, vượt cap 800 của CLAUDE.md — đã vượt từ trước ở mức 805). Refactor riêng; gộp vào đây là trộn hai loại rủi ro.
 - **Đụng `_acceptance/normalize-text-vi/`** — nhánh đó đang giữa Cổng 2.
+
+## Amendment — 2026-08-27, sau vòng verify 1
+
+**AC-5 bỏ con số cứng "14".** Bản duyệt ở Cổng 1 viết "đủ 14 `--case`". Con số đó
+đúng lúc duyệt và đã cũ ngay trong lượt thi công của chính hồ sơ này: AC-3, AC-4 và
+AC-6 mỗi cái sinh một case mới (`fork-undeclared`, `fork-declared-in-union`,
+`undeclared`), nên cây có 17. Vòng verify context sạch bắt được chỗ lệch này.
+
+Sửa là bỏ con số, không phải đổi 14 thành 17 — vì ghim một con số ở đây tái lập đúng
+lỗi mà E6 sinh ra để tránh: một danh sách (hay một con số) chép sang chỗ thứ hai sẽ
+mục, và case thêm về sau sẽ không được ai đếm. E6 đọc `KNOWN_CASES` từ chính guard;
+AC-5 nay nói cùng một ngôn ngữ.
+
+**Nội dung khẳng định KHÔNG đổi** — vẫn là "mọi case đều xanh" — nên
+`evidence-report.md` của vòng 1 (viết trước sửa đổi này) vẫn chấm đúng thứ AC-5 hỏi;
+E6 xanh với 17/17 và lớp chống rỗng của nó xác nhận `config.yaml` khai cùng 17.
+
+Ba case thêm là của chính hồ sơ này, không phải dấu hiệu guard khác thế hệ — vòng
+verify có nêu khả năng đó như một điều cần người soi, và đây là câu trả lời: đã đối
+chiếu `KNOWN_CASES` ở commit `14b872d` với danh sách trước đó.
 
 ## Notes
 
