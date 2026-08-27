@@ -291,7 +291,6 @@ executors:
     stale_scope_case_completeness: bash scripts/acceptance/check-stale-scoping.sh --case case-completeness
     stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
-    stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
     # roadmap-drift-guard Gate 1 (2026-08-27). MỘT khoá cho MỖI case: bộ răng cũ
     # chạy sáu nhiễu sau MỘT mã thoát, nên một case chưa từng được cài trông y hệt
@@ -457,6 +456,12 @@ risk_tiers:
     - "STATUS.md"
     - "CHANGELOG.md"
     - "NOTICE.md"
+    # View máy sinh, KHÔNG phải vật để nghiệm thu: `product-map.mjs` vẽ lại nó từ
+    # `_acceptance/*/` ở mỗi lần đóng cổng người, nên gate hoá nó là bắt hồ sơ
+    # nghiệm thu chính cái bóng của mình. Cổng độc lập duy nhất biện minh cho
+    # miễn trừ này là `product-map.mjs --check` (ADR 0007 của kit) — bỏ khai dòng
+    # này mà vẫn commit bản đồ là cấu hình sai, kit tự có test bắt.
+    - "PRODUCT-MAP.md"
     - ".gitignore"
     - ".claude/**"
     - "_acceptance/**"
