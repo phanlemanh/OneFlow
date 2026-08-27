@@ -5,7 +5,7 @@ slug: normalize-text-vi
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-19
 ---
@@ -463,6 +463,16 @@ code** vì license):
   nhằng, và nghiêng về thập phân giữ nguyên mọi cách đọc giá, thứ slot này sinh ra để phục vụ.
 
 ## Known limits
+- **THU PHẠM VI nấc hai — dấu tiền đứng trước SỐ hoặc DẤU PHẨY** *(owner trả lại Cổng 2 và
+  chỉ đạo nới, 2026-08-27)*. Tên đường ở Việt Nam thường LÀ SỐ (Đường 3/2, Đường 30/4,
+  Đường 2/9), nên luật từ chối chỉ-bắn-khi-sau-là-CHỮ để lọt cả họ: `Số 25 Đ. 3/2, Q.10`
+  đọc ra "số hai mươi lăm **đồng**. ba tháng hai, quận mười" với `ok=True`, residual rỗng.
+  Nay từ chối luôn khi sau dấu tiền là số hoặc dấu phẩy.
+  **Giá phải trả, đã đo:** không ca nào trong 126 chuỗi của mọi corpus đã khai đổi trạng
+  thái, nhưng một cách viết giá thật rơi vào diện từ chối — `Giá 500 đ, bao gồm VAT`.
+  **Vẫn CÒN là giới hạn:** dấu tiền ở CUỐI CHUỖI vẫn đọc thành tiền, nên `Số nhà 25 Đ.`
+  còn đọc sai. Từ chối ở vị trí đó sẽ kéo theo `Giá 500 đ` — cách viết giá phổ biến nhất,
+  đúng thứ slot này sinh ra để đọc.
 - **THU PHẠM VI dấu phẩy** *(owner chọn đường "thu phạm vi" 2026-08-27, sau khi vòng 18 lại
   sinh đúng lớp lỗi của vòng 17)*. Reader nay khai một BẢNG các dạng dấu phẩy nó đọc được, và
   **TỪ CHỐI** hai dạng còn lại thay vì đoán: dãy mà mọi nhóm đều đúng ba chữ số

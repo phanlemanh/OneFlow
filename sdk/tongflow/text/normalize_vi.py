@@ -203,7 +203,22 @@ _AMBIGUOUS_D = re.compile(
     # `\b` after the mark is what makes the zero-width gap safe: without it,
     # "đồng" would match here (đ + no dot + no gap + a letter) and every price
     # would be refused. With it, "đ" glued to a letter is not a match at all.
-    rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND})){_SEP}*(?i:đ)\b\.?{_SEP}*(?=[^\W\d_])"
+    #
+    # The lookahead covers a LETTER, a DIGIT or a COMMA. Digits belong here
+    # because Vietnamese street names are frequently numbers — Đường 3/2,
+    # Đường 30/4, Đường 2/9 are major streets in HCMC, Cần Thơ and Đà Nẵng — and
+    # the earlier letter-only lookahead let them through as prices: measured on
+    # this branch, "Số 25 Đ. 3/2, Q.10" read "số hai mươi lăm đồng. ba tháng
+    # hai, quận mười" with ok=True and an empty residual (S4 round 19, owner
+    # widened the refusal 2026-08-27). A comma belongs for the same reason:
+    # "Số 25 Đ, Q.1". Measured cost of the widening: none of the 126 strings in
+    # the declared corpora changes verdict, and one genuine price spelling —
+    # "Giá 500 đ, bao gồm VAT" — is now refused, declared in Known limits.
+    #
+    # END OF STRING is deliberately still read, so "Số nhà 25 Đ." stays a known
+    # limit: refusing there would take "Giá 500 đ" with it, which is the single
+    # commonest price spelling this slot exists to read.
+    rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND})){_SEP}*(?i:đ)\b\.?{_SEP}*(?=[^\W_]|,)"
 )
 
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")

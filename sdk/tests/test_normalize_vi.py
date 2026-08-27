@@ -331,6 +331,17 @@ CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
     "Số 5 Đ.\xa0Lê Lợi",
     "Số 5 Đ.Lê Lợi",
     "Nhà 12 Đ\xa0Trần Phú",
+    # Vietnamese street names are often NUMBERS (Đường 3/2, Đường 30/4, Đường
+    # 2/9 are major streets in HCMC, Cần Thơ, Đà Nẵng), and an address can be
+    # followed by a comma. The letter-only lookahead read all four of these as
+    # prices with ok=True and an empty residual — "Số 25 Đ. 3/2, Q.10" came out
+    # "số hai mươi lăm đồng. ba tháng hai, quận mười" (S4 round 19; owner
+    # widened the refusal 2026-08-27). RED direction of the digit/comma
+    # lookahead.
+    "Số 25 Đ. 3/2, Q.10",
+    "Nhà 12 Đ. 30/4",
+    "Địa chỉ 5 Đ. 2/9 Đà Nẵng",
+    "Số 25 Đ, Q.1",
 )
 
 # The price forms the street rule must NOT eat. Two of them are the very cases
@@ -339,6 +350,11 @@ CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
 CORPUS_MONEY_MARK_UNAMBIGUOUS: tuple[tuple[str, str], ...] = (
     ("Giá 500 Đ", "giá năm trăm đồng"),
     ("Giá 5 tỷ đ", "giá năm tỷ đồng"),
+    # Positive anchors for the 2026-08-27 widening: end of string and a slash
+    # are still read. Refusing at end of string would take the commonest price
+    # spelling of all with it, so that position stays out of the refusal.
+    ("Giá 500 đ", "giá năm trăm đồng"),
+    ("Tổng 2.000 đ.", "tổng hai nghìn đồng."),
 )
 
 
