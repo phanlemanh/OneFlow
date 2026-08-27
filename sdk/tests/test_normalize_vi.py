@@ -10,7 +10,14 @@ from __future__ import annotations
 
 import unicodedata
 
-from tongflow.text.normalize_vi import has_money, normalize_vi
+from tongflow.text.normalize_vi import (
+    ERROR_EMPTY_INPUT,
+    ERROR_MONEY_UNIT_LOST,
+    ERROR_RESIDUAL_TOKENS,
+    NORMALIZE_ERROR_CODES,
+    has_money,
+    normalize_vi,
+)
 from tongflow.text.vi_dictionary import _ABBREVIATIONS, _PREFIXES
 
 # --------------------------------------------------------------------------
@@ -542,6 +549,69 @@ def test_url_is_refused_by_name() -> None:
         assert url in got.residual, (
             f"{raw!r}: từ chối nhưng không nêu địa chỉ: {got.residual}"
         )
+
+
+def test_error_codes_are_closed_and_every_one_is_reachable() -> None:
+    """Two-way: nothing produced is undeclared, nothing declared is dead.
+
+    The set is what a user-facing message is rendered FROM (AC-6), so a code
+    that no path produces would be a translation key nobody can ever see, and a
+    code produced but undeclared would reach the UI with no sentence attached.
+    """
+    produced: dict[str, str] = {}
+    for raw, _ in ALL_CORPUS:
+        got = normalize_vi(raw)
+        if got.code:
+            produced.setdefault(got.code, raw)
+    for raw in ("", "   "):
+        got = normalize_vi(raw)
+        if got.code:
+            produced.setdefault(got.code, raw)
+
+    undeclared = sorted(set(produced) - NORMALIZE_ERROR_CODES)
+    assert undeclared == [], (
+        f"mã lỗi sinh ra nhưng không khai trong NORMALIZE_ERROR_CODES: {undeclared}"
+    )
+    assert {ERROR_EMPTY_INPUT, ERROR_RESIDUAL_TOKENS} <= set(produced), (
+        "hai mã này phải đạt tới bằng đầu vào THẬT trong corpus, không phải bằng "
+        f"phép nhiễu — hiện đạt tới: {sorted(produced)}"
+    )
+
+    # MONEY_UNIT_LOST is a BACKSTOP, and saying so out loud is the point: the
+    # currency pre-pass always injects the word, so no natural input reaches it.
+    # A guard nobody has ever seen fire is indistinguishable from a dead one, so
+    # it is proven here by removing the pre-pass it backs up.
+    # `import tongflow.text.normalize_vi as module` binds the FUNCTION, not the
+    # module: the package re-exports normalize_vi under the same name, so the
+    # attribute lookup wins. Reach the module object through sys.modules.
+    import sys
+
+    module = sys.modules["tongflow.text.normalize_vi"]
+
+    saved = module.CURRENCY_SIGN_PATTERNS
+    module.CURRENCY_SIGN_PATTERNS = ()
+    try:
+        hurt = normalize_vi("Tổng 1.999.000₫")
+    finally:
+        module.CURRENCY_SIGN_PATTERNS = saved
+    assert hurt.code == ERROR_MONEY_UNIT_LOST, (
+        "gỡ bước tiền xử lý ký hiệu tiền mà lưới chặn mất-đơn-vị-tiền KHÔNG bắn "
+        f"— nó đã chết: nhận code={hurt.code!r}, ok={hurt.ok}"
+    )
+
+    dead = sorted(NORMALIZE_ERROR_CODES - set(produced) - {ERROR_MONEY_UNIT_LOST})
+    assert dead == [], f"mã khai nhưng không đường nào sinh ra: {dead}"
+
+
+def test_every_refusal_carries_a_code() -> None:
+    """A refusal with no code cannot be shown to a non-Vietnamese user."""
+    for raw, _ in ALL_CORPUS:
+        got = normalize_vi(raw)
+        if got.ok is False:
+            assert got.code in NORMALIZE_ERROR_CODES, (
+                f"{raw!r}: bị từ chối nhưng không mang mã máy đọc được "
+                f"(code={got.code!r}) — câu lỗi sẽ không dịch được"
+            )
 
 
 # THE TYPOGRAPHIC-DASH MATRIX — 3 dash characters × 3 roles, declared before the

@@ -403,6 +403,24 @@ class NormalizeResult:
     text: str
     residual: tuple[str, ...]
     error: str | None = None
+    # STABLE, machine-readable reason. `error` is a Vietnamese sentence and is
+    # for logs; anything a user reads is rendered from this code plus `residual`
+    # in the i18n catalogues, the way the exporter's warning already is. Before
+    # this, the Vietnamese sentence went straight to the canvas for every
+    # locale (AC-6).
+    code: str | None = None
+
+
+# The closed set of refusal reasons. Declared here so the test can check the
+# relation BOTH ways — every declared code reachable, every produced code
+# declared — instead of grepping the source for string literals.
+ERROR_EMPTY_INPUT = "EMPTY_INPUT"
+ERROR_RESIDUAL_TOKENS = "RESIDUAL_TOKENS"
+ERROR_MONEY_UNIT_LOST = "MONEY_UNIT_LOST"
+
+NORMALIZE_ERROR_CODES: frozenset[str] = frozenset(
+    {ERROR_EMPTY_INPUT, ERROR_RESIDUAL_TOKENS, ERROR_MONEY_UNIT_LOST}
+)
 
 
 def has_money(text: str) -> bool:
@@ -477,6 +495,7 @@ def normalize_vi(text: str) -> NormalizeResult:
             text="",
             residual=(),
             error="Chuỗi vào rỗng — không có gì để đọc",
+            code=ERROR_EMPTY_INPUT,
         )
 
     had_money = has_money(text)
@@ -511,6 +530,7 @@ def normalize_vi(text: str) -> NormalizeResult:
             text=out,
             residual=residual,
             error="Chưa đọc được: " + ", ".join(residual),
+            code=ERROR_RESIDUAL_TOKENS,
         )
 
     # Relational rule, not an absence rule. Money in must mean money word out:
@@ -525,6 +545,7 @@ def normalize_vi(text: str) -> NormalizeResult:
                 "Mất đơn vị tiền: chuỗi vào có ký hiệu tiền, "
                 "chuỗi ra không có chữ 'đồng'"
             ),
+            code=ERROR_MONEY_UNIT_LOST,
         )
 
     return NormalizeResult(ok=True, text=out, residual=(), error=None)
