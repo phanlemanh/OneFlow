@@ -246,7 +246,7 @@
       gate đo được; trượt gate là dừng sửa, không lao tiếp.
     </p>
     <p class="stamp">
-      Trạng thái đọc ngày <b>19/08/2026</b> (sau PR #68 — S4 ship) · nguồn <b>docs/roadmap.md</b> @ <b>main</b>
+      Trạng thái đọc ngày <b>27/08/2026</b> (sau PR #77 — 1.3 ký; PR #74 — guard lên <code>main</code>) · nguồn <b>docs/roadmap.md</b> @ <b>main</b>
       · đối chiếu máy bằng <b>pnpm roadmap:check</b>
     </p>
   </header>
@@ -254,14 +254,14 @@
   <section aria-label="Tổng quan">
     <div class="tiles">
       <div class="tile is-accent">
-        <div class="n">21</div>
+        <div class="n">23</div>
         <div class="k">hạng mục đã ký</div>
-        <div class="d">13 năng lực sản phẩm · 8 hạ tầng quy trình</div>
+        <div class="d">14 năng lực sản phẩm · 9 hạ tầng quy trình</div>
       </div>
       <div class="tile">
-        <div class="n">2/9</div>
+        <div class="n">3/9</div>
         <div class="k">Phase 1 đã đóng</div>
-        <div class="d">Trục cache 1.1 và overlay 1.2 — hai hạng mục "không được cắt"</div>
+        <div class="d">Trục cache 1.1, overlay 1.2, đọc số 1.3 — hai hạng mục đầu là "không được cắt"</div>
       </div>
       <div class="tile">
         <div class="n">4</div>
@@ -318,8 +318,8 @@
           <ul class="items">
             <li><span class="ref">1.1</span><span class="what">Cache + partial re-render trong engine<em>L0 conformance → L1 → L2 → L3 → L4, đóng trọn 01/08</em></span><span class="pill s-done">xong</span></li>
             <li><span class="ref">1.2</span><span class="what">Slot compose-overlay — text, khung giá, logo, safe-zone<em>Ký 03/08, merge 05/08 · 16 AC / 27 eval, 12 vòng verify</em></span><span class="pill s-done">xong</span></li>
-            <li><span class="ref">1.3</span><span class="what">Slot normalize-text-vi tất định — số, giá, ngày → chữ<em>Bắt buộc đứng trước TTS trong mọi template</em></span><span class="pill s-live">kế tiếp</span></li>
-            <li><span class="ref">1.3b</span><span class="what">Node nạp-từ-kho — ADR-0012 giai đoạn A<em>Không ABI, key qua kho khoá BYO; mở khoá input skill #1</em></span><span class="pill s-queued">hàng đợi</span></li>
+            <li><span class="ref">1.3</span><span class="what">Slot normalize-text-vi tất định — số, giá, ngày → chữ<em>Ký 27/08 · slot + SDK + node đã lên main; plugin thực thi CHƯA đăng ký nên bấm chạy báo lỗi</em></span><span class="pill s-done">xong</span></li>
+            <li><span class="ref">1.3b</span><span class="what">Node nạp-từ-kho — ADR-0012 giai đoạn A<em>Không ABI, key qua kho khoá BYO; mở khoá input skill #1</em></span><span class="pill s-live">kế tiếp</span></li>
             <li><span class="ref">S3</span><span class="what">Transcribe không-Modal — chen trước 1.4, chốt 19/08<em>Trên hai đường tới hạn: skill #1 và phép đo WER của G0</em></span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">1.4</span><span class="what">Plugin TTS ElevenLabs tiếng Việt</span><span class="pill s-queued">hàng đợi</span></li>
             <li><span class="ref">1.5</span><span class="what">Skill system v1 — template + orchestrator TS<em>Phần scaffold không phụ thuộc quyết định ngách</em></span><span class="pill s-queued">hàng đợi</span></li>
@@ -509,13 +509,16 @@
     Phân vai ba tài liệu: <code>docs/roadmap.md</code> = sẽ đi đâu ·
     <code>STATUS.md</code> = đang ở đâu · <code>docs/feature-index.md</code> = làm được gì.
     Trang này vẽ lại tài liệu thứ nhất và không thay nó.
-    Luật "cập nhật mỗi lần qua gate" được canh bằng guard <code>scripts/roadmap/</code>
-    (<code>pnpm roadmap:check</code> / <code>roadmap:teeth</code>) — đi PR riêng qua acceptance gate,
-    vì miễn trừ T1 của gate tooling khai theo đường chính xác: gate áp lên chính nó.
+    Luật "cập nhật mỗi lần qua gate" nay được canh bằng máy: guard <code>scripts/roadmap/</code>
+    (<code>pnpm roadmap:check</code> / <code>roadmap:teeth</code>) đã lên <code>main</code> 27/08 qua
+    PR #74, sau năm vòng nghiệm thu. Nó chạy theo yêu cầu, <b>chưa nối vào CI</b> — nối là PR
+    riêng, vì <code>check-action-pins.sh</code> đếm số site pin <code>actions/checkout</code>
+    nên thêm một job CI làm đỏ một guard không liên quan.
     <br><br>
     Lưu ý một điểm lệch đã biết: <code>STATUS.md</code> còn ghi <b>17</b> hạng mục đã ký
-    (chốt 17/08), trong khi <code>main</code> đã có <b>21</b> — ba hồ sơ 18/08 và
-    <code>byo-key-onboarding</code> 19/08 chưa được cộng vào.
+    (chốt 17/08), trong khi <code>main</code> đã có <b>23</b>. Guard chỉ đối chiếu sổ cái của
+    <i>trang này</i> với <code>_acceptance/</code>; con số trong <code>STATUS.md</code> nằm
+    ngoài tầm nó.
   </footer>
 
 </div>
