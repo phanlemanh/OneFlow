@@ -270,6 +270,36 @@ _DASH_FOLD = re.compile(f"[{_TYPOGRAPHIC_DASHES}]")
 # Declared limit that stays: "1234-5678" (two groups, no leading zero) is
 # genuinely indistinguishable from the range "1234 đến 5678". Refusing it would
 # take "5-10" with it — the shape this rule exists to read.
+# A BRAND TOKEN is Latin letters with an uppercase INSIDE it — the signal that
+# separates "VNDirect" and "iPhone" from an ordinary capitalised Vietnamese word
+# ("Hotline", "Thanh") and from an all-caps abbreviation ("VAT", "VNDS"), both of
+# which the library reads correctly. Measured: exactly 1 of the 170 strings in
+# the declared corpora carries one, and it is the token already pinned as a
+# limit — "Mua qua VNDirect" came back "mua qua ndi re", then "di re" on a second
+# pass, breaking the idempotence promise (AC-4).
+#
+# Masking it away from the library was tried first and is WORSE: a digit-bearing
+# placeholder gets read as a number, and a private-use code point is deleted
+# outright, so the brand vanished from the sentence (both measured 2026-08-27).
+#
+# What separates a mangling from a legitimate transliteration is measurable, and
+# it is the promise the parent contract already makes: reading a reading must
+# change nothing. "iPhone" -> "ai phôn" -> "ai phôn" is stable and stays.
+# "VNDirect" -> "ndi re" -> "di re" is not, and a token that reads differently
+# every pass is not being read at all — so it is refused BY NAME.
+_LATIN_TOKEN = re.compile(r"\b[A-Za-z]{3,}\b")
+
+
+def _is_brand_token(token: str) -> bool:
+    return any(c.isupper() for c in token[1:]) and any(c.islower() for c in token)
+
+
+# A URL is not speech. Left to the library it does not merely read badly — it
+# DISAPPEARS: measured, "Xem tại https://oneflow.vn/gia nhé" came back
+# "xem tại nhé" with ok=True, i.e. a sentence quietly missing its subject (AC-2).
+_URL = re.compile(r"(?i)\b(?:https?://|ftp://|www\.)\S+")
+
+
 _DASH_RUN = re.compile(r"\d+(?:-\d+)+")
 
 
@@ -465,6 +495,16 @@ def normalize_vi(text: str) -> NormalizeResult:
     # from the output, so the shape that made it ambiguous is unreadable there.
     residual = residual + _unreadable_comma_runs(unicodedata.normalize("NFC", text))
     residual = residual + _unreadable_dash_runs(_DASH_FOLD.sub("-", unicodedata.normalize("NFC", text)))
+    residual = residual + tuple(dict.fromkeys(_URL.findall(unicodedata.normalize("NFC", text))))
+    # Brand tokens only: re-reading the output must change nothing. Costs a
+    # second pass, and only for the rare input that carries such a token.
+    brands = [t for t in _LATIN_TOKEN.findall(text) if _is_brand_token(t)]
+    if brands:
+        again = unicodedata.normalize(
+            "NFC", _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(_pre(out)))
+        )
+        if again != out:
+            residual = residual + tuple(dict.fromkeys(brands))
     if residual:
         return NormalizeResult(
             ok=False,

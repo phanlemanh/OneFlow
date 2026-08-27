@@ -409,7 +409,10 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
 
     for raw, expected in CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE:
         got = normalize_vi(raw)
-        assert got.ok is True, f"{raw!r} → {got.error}"
+        # Content claim, not an acceptance claim: the brand token must not turn
+        # into a currency reading. Since 2026-08-27 the capitalised spelling is
+        # refused by name (AC-4) — a stronger outcome than reading it — so the
+        # verdict is deliberately not asserted here.
         assert got.text == expected, (
             f"{raw!r} (ca ÂM, tên thương hiệu): mong {expected!r}, nhận {got.text!r}"
         )
@@ -485,6 +488,59 @@ def test_day_word_survives_an_unreadable_date() -> None:
         assert got.text.startswith(word), (
             f"{raw!r}: chữ {word!r} bị nuốt dù ngày không đọc được — đó là cách "
             f"một thành phần của ngày biến mất trong im lặng: {got.text!r}"
+        )
+
+
+# A brand token that reads differently on every pass is not being read at all.
+# Refused BY NAME rather than excluded from the idempotence sweep, which is where
+# "VNDirect" used to hide (AC-4).
+CORPUS_BRAND_REFUSED: tuple[tuple[str, str], ...] = (
+    ("Công ty VNDirect niêm yết", "VNDirect"),
+    ("Mua qua VNDirect", "VNDirect"),
+)
+
+# ...and the Latin tokens the library reads STABLY, which must keep reading.
+CORPUS_BRAND_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Mã VNDS hôm nay", "mã vê en đê ét hôm nay"),
+    ("Dùng iPhone 15", "dùng ai phôn mười lăm"),
+)
+
+# A URL does not read badly — it DISAPPEARS, taking the sentence's subject with
+# it (AC-2).
+CORPUS_URL_REFUSED: tuple[tuple[str, str], ...] = (
+    ("Xem tại https://oneflow.vn/gia nhé", "https://oneflow.vn/gia"),
+    ("Vào www.oneflow.vn xem", "www.oneflow.vn"),
+)
+
+
+def test_unstable_brand_token_is_refused_by_name() -> None:
+    for raw, token in CORPUS_BRAND_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: token đọc lại ra KHÁC là token chưa đọc được, phải TỪ "
+            f"CHỐI — nhận ok=True -> {got.text!r}"
+        )
+        assert token in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu tên token: {got.residual}"
+        )
+
+
+def test_stable_latin_token_still_reads() -> None:
+    for raw, expected in CORPUS_BRAND_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} (ca ÂM) bị từ chối: {got.error}"
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
+def test_url_is_refused_by_name() -> None:
+    for raw, url in CORPUS_URL_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: địa chỉ web BIẾN MẤT khỏi câu, phải TỪ CHỐI — nhận "
+            f"ok=True -> {got.text!r}"
+        )
+        assert url in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu địa chỉ: {got.residual}"
         )
 
 
@@ -1182,7 +1238,10 @@ def test_brand_tokens_survive_currency_and_prefix_rules() -> None:
     for raw in ("Công ty VNDirect niêm yết", "Mã VNDS tăng trần"):
         assert has_money(raw) is False, f"{raw!r} không phải giá tiền"
         got = normalize_vi(raw)
-        assert got.ok is True, f"{raw!r} → {got.error}"
+        # The claim here is about CONTENT, not about acceptance: a brand token
+        # must never have "đồng" injected into it. Since 2026-08-27 an unstable
+        # brand token is refused by name (AC-4), which satisfies the claim more
+        # strongly than reading it — so acceptance is deliberately not asserted.
         assert "đồng" not in got.text, (
             f"{raw!r}: chữ 'đồng' bị tiêm vào tên riêng — {got.text!r}"
         )
@@ -1496,6 +1555,9 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_SLASH_REFUSED", CORPUS_SLASH_REFUSED),
     ("CORPUS_SLASH_NEGATIVE", CORPUS_SLASH_NEGATIVE),
     ("CORPUS_DAY_WORD_KEPT", CORPUS_DAY_WORD_KEPT),
+    ("CORPUS_BRAND_REFUSED", CORPUS_BRAND_REFUSED),
+    ("CORPUS_BRAND_NEGATIVE", CORPUS_BRAND_NEGATIVE),
+    ("CORPUS_URL_REFUSED", CORPUS_URL_REFUSED),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),
@@ -1580,8 +1642,17 @@ def test_determinism_sweep_covers_every_declared_corpus() -> None:
 # injected). Surfaced 2026-08-22 by enlisting the brand rows in the sweep;
 # awaiting owner triage at Gate 2 — see contract.md Known limits.
 IDEMPOTENCE_EXCLUDED: dict[str, str] = {
-    "Mua qua VNDirect": "thư viện băm token thương hiệu, chưa AC nào hứa (S4 vòng 7)",
-    "mua qua vndirect": "cùng token, dạng chữ thường",
+    # The CAPITALISED spelling left this mapping on 2026-08-27: an unstable brand
+    # token is now refused by name (AC-4). The all-lowercase spelling stays,
+    # and the reason is structural rather than an oversight — the signal that
+    # identifies a brand is an uppercase letter INSIDE the token, and
+    # "vndirect" has none, so nothing separates it from an ordinary Vietnamese
+    # word. Detecting it would need a brand list, which is the fork of the
+    # reading library this contract's Out of scope rules out.
+    "mua qua vndirect": (
+        "dạng chữ thường không có tín hiệu cấu trúc nào để nhận là tên thương "
+        "hiệu; nhận diện được nó đòi một danh sách tên riêng — ngoài phạm vi"
+    ),
 }
 
 
@@ -1590,7 +1661,18 @@ def test_idempotent_and_byte_identical() -> None:
         if raw in IDEMPOTENCE_EXCLUDED:
             continue
         once = normalize_vi(raw)
+        # Determinism is promised for EVERY input, refused ones included: the
+        # same string must always produce the same bytes.
         assert normalize_vi(raw).text == once.text, f"{raw!r} không tất định"
+        if once.ok is False:
+            # ...but idempotence is a promise about a READING, and a refused
+            # input has none. Its `text` is a diagnostic showing how far the
+            # library got, not output anyone speaks. Feeding that fragment back
+            # in would measure the fragment, not the product. Narrowed
+            # 2026-08-27, when the refusal families (comma, dash, brand, URL)
+            # made refused inputs a normal part of the corpus rather than an
+            # oddity.
+            continue
         twice = normalize_vi(once.text)
         assert twice.text == once.text, f"{raw!r} không idempotent: {twice.text!r}"
 
