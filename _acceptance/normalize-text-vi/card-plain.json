@@ -2,13 +2,7 @@
   "feature_plain": "Đọc số, giá tiền và ngày tháng thành chữ tiếng Việt trước khi đưa cho giọng đọc tự động, để clip không phát ra sai giá hay sai ngày.",
   "scope_plain": "Chưa làm trong đợt này: ép thứ tự ở tầng mẫu dựng sẵn, đọc ngôn ngữ khác ngoài tiếng Việt, sửa chính tả và văn phong, phần đọc thành tiếng, và giọng theo vùng miền.",
   "analyst_plain": "",
-  "decisions": [
-    {
-      "id": "E16",
-      "q": "Node mới nhìn có giống các node khác trên bảng vẽ không?",
-      "why": "Máy chấm được hai ảnh của chính node này và cả ba góc soi đều thuận. Việc còn lại chỉ mắt người làm được: đặt nó cạnh những node sẵn có để so. Ảnh khổ máy tính và bản phóng to cạnh node đã dựng sẵn."
-    }
-  ],
+  "decisions": [],
   "decisions_plain": [
     {
       "id": "d-20260819T143500Z-11204",
@@ -297,6 +291,50 @@
     {
       "id": "d-20260826T140100Z-73390",
       "p": "Hai lỗi đọc sai mới tìm được đưa sang hợp đồng sau thay vì sửa ngay — chúng không phải hồi quy do đợt này gây ra, và luật dừng của người duyệt xếp ca mới vào hợp đồng sau."
+    },
+    {
+      "id": "d-20260826T160000Z-40118",
+      "p": "Anh tự xem ảnh node mới đặt cạnh node sẵn có và xác nhận nó nhìn cùng một nhà — phần chỉ mắt người phán được nay đã có chữ ký."
+    },
+    {
+      "id": "d-20260826T160100Z-95772",
+      "p": "Sáu lỗi ngoài phạm vi được xử theo hai ngả: lỗi báo lỗi bằng tiếng Việt cho người dùng ngôn ngữ khác tách thành việc riêng, năm lỗi còn lại ghi vào phần hạn chế đã biết rồi vẫn phát hành."
+    },
+    {
+      "id": "d-20260826T170000Z-58044",
+      "p": "Chữ ký Cổng 2 bị hoàn lại ngay sau khi ghi vì một ô kiểm khai nguồn không có thật — đổi lại nay thiếu nguồn thì máy dừng hẳn thay vì tự bịa giá trị mặc định."
+    },
+    {
+      "id": "d-20260826T190000Z-70255",
+      "p": "Cổng bị chặn vì ba lỗi phát hành: plugin không cài được ở máy khác, bản thư viện lỗi thời làm hỏng chuyến phát hành của tính năng khác, và câu giá kiểu \"5 trăm đ\" vẫn đọc sai mà máy vẫn báo thành công."
+    },
+    {
+      "id": "d-20260826T200000Z-13486",
+      "p": "Thêm hai chữ \"trăm\" và \"chục\" vào danh sách đơn vị lớn — thiếu đúng hai từ này làm cả ba lớp đọc tiền cùng trượt."
+    },
+    {
+      "id": "d-20260826T210000Z-19053",
+      "p": "Rút plugin khỏi danh sách chính thức vì kho tải về không tồn tại công khai — đổi lại người dùng chưa cài được nó từ danh sách, và ô năng lực trong ba tài liệu trở về trạng thái chưa có."
+    },
+    {
+      "id": "d-20260826T220000Z-84461",
+      "p": "Nâng bản thư viện dùng chung ở ba kho plugin đã đăng ký để chuyến phát hành của tính năng khác xanh trở lại — lệnh mặc định chỉ xem trước, phải gõ thêm mới đẩy thật."
+    },
+    {
+      "id": "d-20260826T220100Z-52907",
+      "p": "Ghi nhận máy chủ phát tệp trả nội dung cũ vài phút sau khi đẩy — kiểm bằng bản tải thật thay vì đọc trang đó, để không báo nhầm là đẩy hỏng."
+    },
+    {
+      "id": "d-20260826T233000Z-66102",
+      "p": "Sửa hồi quy do chính luật đọc số thập phân gây ra: dãy số ngăn bằng phẩy như \"1,2,3\" bị đọc thành một số thập phân mà vẫn báo thành công."
+    },
+    {
+      "id": "d-20260827T003000Z-47719",
+      "p": "Vá lỗ trong bộ kiểm bảng năng lực: một tài liệu vừa nói có vừa nói không cho cùng một năng lực vẫn qua được — nay bắt buộc đúng một dòng và phải là dòng chưa có."
+    },
+    {
+      "id": "d-20260827T003100Z-90284",
+      "p": "Sửa lỗi máy tự gây trên nhánh khác: ba tài liệu bị lật trạng thái thay vì xoá hẳn dòng, làm hai nhánh đụng nhau — xoá hẳn rồi thì hợp nhất sạch."
     }
   ]
 }
