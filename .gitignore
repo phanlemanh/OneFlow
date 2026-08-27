@@ -55,14 +55,10 @@ __pycache__/
 /plugins/*
 !/plugins/.gitkeep
 
-# Claude Code local settings stay local. Sharing the repo-level plugin
-# declaration was tried on the normalize-text-vi branch and pulled back out
-# (owner, 2026-08-22): this is a public AGPL repo with an outside contributor
-# path, so committing it would make every clone declare a marketplace under one
-# maintainer's personal GitHub account, with nothing in CONTRIBUTING.md saying
-# what contributors were opting into. If it comes back, it comes back in its own
-# PR with that line written first.
-.claude/
+# Ignore agent scratch under .claude/, but TRACK the repo-level plugin declaration
+# so a teammate opening the repo is prompted to install the right kit plugins.
+.claude/*
+!.claude/settings.json
 
 # Agent session scratch (working notes, reports). Untracked and never shipped —
 # listed here so a `git add -A` cannot sweep it into a commit.
