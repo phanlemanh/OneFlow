@@ -1,14 +1,14 @@
 ---
 schema_version: 2
 feature_slug: normalize-text-vi
-verdict: BLOCKED
+verdict: REJECT
 failed_evals: []
-reason: "pnpm build && pnpm typecheck vượt quá giới hạn 600 giây (10 phút) của Bash tool; tiến trình PID 77818 vẫn còn chạy sau hơn 30 phút, không có thêm log nào kể từ khi lệnh bắt đầu lúc 12:58PM. Bước gen-abi có vẻ bị treo: dòng log cuối cùng ghi nhận là '$ pnpm gen:abi' rồi '$ tsx scripts/gen-abi-types.ts', sau đó không còn dòng log nào — có thể là treo hoặc chạy rất lâu mà không xuất log. Bash tool đã dừng lệnh vì hết hạn mức thời gian, không phải do code sai; cần chạy lại với timeout dài hơn hoặc điều tra vì sao gen-abi-types.ts không log."
+reason: 
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 2ac82ea36919ee3384b3ece6e62b50f464e9280b
-human_signoff:
+verified_commit: 560b4acf5171706c043607c1dabb3e359f014061
+human_signoff: 
 ---
 
 # Evidence Report: normalize-text-vi
@@ -35,267 +35,335 @@ human_signoff:
 | E12a | AC-12 | test | PASS |
 | E12b | AC-12 | test | PASS |
 | E13 | AC-13 | script | PASS |
+| E18 | AC-16 | script | PASS |
 | E14a | AC-13 | script | PASS |
 | E14b | AC-13 | script | PASS |
-| E15 | AC-15 | ui-check | PASS |
-| E16 | AC-15 | judgment | PASS |
 | E17a | AC-14 | script | PASS |
 | E17b | AC-14 | script | PASS |
-| E18 | AC-16 | script | PASS |
+| E15 | AC-15 | ui-check | PASS |
+| E16 | AC-15 | judgment | PASS |
 
 ## Evidence
 
+### Regression / suite guards (không gắn AC cụ thể — full-suite chạy lại round này)
+
+- cmd: `pnpm build && pnpm typecheck`
+  exit_code: 0
+  baseline: n-a
+  output: |
+    ƒ  (Dynamic)  server-rendered on demand
+
+    $ tsc --noEmit
+
+- cmd: `pnpm lint:check`
+  exit_code: 0
+  baseline: n-a
+  output: |
+    Checked 472 files in 166ms. No fixes applied.
+
+- cmd: `pnpm test`
+  exit_code: 0
+  baseline: n-a
+  output: |
+          Tests  532 passed | 5 skipped (537)
+       Start at  13:47:42
+       Duration  13.34s (transform 5.70s, setup 0ms, import 10.80s, tests 15.88s, environment 2.56s)
+
+- cmd: `cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q`
+  exit_code: 0
+  baseline: n-a
+  output: |
+    ........................................................................ [ 81%]
+    ..................................................                       [100%]
+    266 passed in 46.95s
+
+- cmd: `pnpm verify:plugins`
+  exit_code: 0
+  baseline: n-a
+  output: |
+    [verify-plugins-scan] OK
+
+- cmd: `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json`
+  exit_code: 0
+  baseline: n-a
+  output: |
+    Wrote src/generated/abi/index.ts
+    Wrote sdk/tongflow/_data/tongflow.abi.json
+
+### Eval carry-forward (P1 — delta round 17 không chạm paths các eval dưới đây)
+
 - eval: E1a
+  criterion: AC-1
+  executor: script
+  verifier: config:executors.script.gen_abi_clean
   run_id: minted-normalize-text-vi-E1a-r2
   exit_code: 0
-  verifier: config:executors.script.gen_abi_clean
   verified_at: 2026-08-26T01:27:25Z
   carried_from_round: 13
   note: carry-forward tu round 13 — delta khong cham paths cua eval
 
 - eval: E1b
+  criterion: AC-1
+  executor: script
+  verifier: config:executors.script.abi_python_gen_clean
   run_id: minted-normalize-text-vi-E1b-r2
   exit_code: 0
-  verifier: config:executors.script.abi_python_gen_clean
   verified_at: 2026-08-26T01:27:25Z
   carried_from_round: 13
   note: carry-forward tu round 13 — delta khong cham paths cua eval
 
 - eval: E2
+  criterion: AC-2
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_money
   run_id: minted-normalize-text-vi-E2-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_money
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    1 passed in 0.05s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E3
+  criterion: AC-3
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_datetime
   run_id: minted-normalize-text-vi-E3-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_datetime
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E4
+  criterion: AC-4
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_identifiers
   run_id: minted-normalize-text-vi-E4-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_identifiers
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E5
+  criterion: AC-5
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_ambiguous
   run_id: minted-normalize-text-vi-E5-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_ambiguous
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.04s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E6a
+  criterion: AC-6
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
   run_id: minted-normalize-text-vi-E6a-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    1 passed in 0.03s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E6b
+  criterion: AC-6
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
   run_id: minted-normalize-text-vi-E6b-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.05s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E7
+  criterion: AC-7
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_idempotent
   run_id: minted-normalize-text-vi-E7-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_idempotent
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.07s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E8
+  criterion: AC-8
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_edges
   run_id: minted-normalize-text-vi-E8-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_edges
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.07s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E9a
+  criterion: AC-9
+  executor: test
+  verifier: config:executors.test.unit_normalize_node
   run_id: minted-normalize-text-vi-E9a-r6
   exit_code: 0
-  verifier: config:executors.test.unit_normalize_node
   verified_at: 2026-08-26T01:27:25Z
   carried_from_round: 13
   note: carry-forward tu round 13 — delta khong cham paths cua eval
 
 - eval: E9b
+  criterion: AC-9
+  executor: test
+  verifier: config:executors.test.unit_normalize_export
   run_id: minted-normalize-text-vi-E9b-r14
   exit_code: 0
-  verifier: config:executors.test.unit_normalize_export
   verified_at: 2026-08-26T02:18:17Z
   carried_from_round: 14
   note: carry-forward tu round 14 — delta khong cham paths cua eval
 
 - eval: E10a
+  criterion: AC-10
+  executor: test
+  verifier: config:executors.test.unit_tts_order_violation
   run_id: minted-normalize-text-vi-E10a-r14
   exit_code: 0
-  verifier: config:executors.test.unit_tts_order_violation
   verified_at: 2026-08-26T02:18:17Z
   carried_from_round: 14
   note: carry-forward tu round 14 — delta khong cham paths cua eval
 
 - eval: E10b
+  criterion: AC-10
+  executor: test
+  verifier: config:executors.test.unit_tts_order_compliant
   run_id: minted-normalize-text-vi-E10b-r14
   exit_code: 0
-  verifier: config:executors.test.unit_tts_order_compliant
   verified_at: 2026-08-26T02:18:17Z
   carried_from_round: 14
   note: carry-forward tu round 14 — delta khong cham paths cua eval
 
 - eval: E10c
+  criterion: AC-10
+  executor: test
+  verifier: config:executors.test.unit_tts_family_matches_abi
   run_id: minted-normalize-text-vi-E10c-r14
   exit_code: 0
-  verifier: config:executors.test.unit_tts_family_matches_abi
   verified_at: 2026-08-26T02:18:17Z
   carried_from_round: 14
   note: carry-forward tu round 14 — delta khong cham paths cua eval
 
 - eval: E11a
+  criterion: AC-11
+  executor: test
+  verifier: config:executors.test.sdk_pytest_node_cache_normalize
   run_id: minted-normalize-text-vi-E11a-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_node_cache_normalize
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    ..                                                                       [100%]
-    2 passed in 0.16s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E11b
+  criterion: AC-11
+  executor: test
+  verifier: config:executors.test.sdk_pytest_tier_a_allowlist
   run_id: minted-normalize-text-vi-E11b-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_tier_a_allowlist
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    1 passed in 0.03s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E12a
+  criterion: AC-12
+  executor: test
+  verifier: config:executors.test.sdk_pytest_normalize_conformance
   run_id: minted-normalize-text-vi-E12a-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.test.sdk_pytest_normalize_conformance
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    .                                                                        [100%]
-    1 passed, 7 deselected in 0.15s
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E12b
+  criterion: AC-12
+  executor: test
+  verifier: config:executors.test.unit_conformance
   run_id: minted-normalize-text-vi-E12b-r16
   exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-         Tests  13 passed (13)
-      Start at  12:58:10
-      Duration  261ms (transform 116ms, setup 0ms, import 139ms, tests 4ms, environment 0ms)
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E13
+  criterion: AC-13
+  executor: script
+  verifier: config:executors.script.normalize_registration_synced
   run_id: minted-normalize-text-vi-E13-r15
   exit_code: 0
-  verifier: config:executors.script.normalize_registration_synced
   verified_at: 2026-08-27T05:18:07Z
   carried_from_round: 15
   note: carry-forward tu round 15 — delta khong cham paths cua eval
+
+- eval: E18
+  criterion: AC-16
+  executor: script
+  verifier: config:executors.script.measuring_instruments_refuse
+  run_id: minted-normalize-text-vi-E18-r16
+  exit_code: 0
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E14a
+  criterion: AC-13
+  executor: script
+  verifier: config:executors.script.normalize_sdk_train_local
   run_id: minted-normalize-text-vi-E14a-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.script.normalize_sdk_train_local
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    OK: SDK 0.2.23 (both files agree) · vietnormalizer==0.2.3 pinned exactly
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E14b
+  criterion: AC-13
+  executor: script
+  verifier: config:executors.script.normalize_sdk_published
   run_id: minted-normalize-text-vi-E14b-r16
   exit_code: 0
-  baseline: red
-  verifier: config:executors.script.normalize_sdk_published
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    OK: artifact mang tongflow/text/, models mới và NORMALIZE_TEXT_VI
-    OK: the plugin shell pins oneflow-sdk==0.2.23
-    OK: the release train is in sync for 0.2.23
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
+
+- eval: E17a
+  criterion: AC-14
+  executor: script
+  verifier: config:executors.script.normalize_plugin_shell
+  run_id: minted-normalize-text-vi-E17a-r16
+  exit_code: 0
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
+
+- eval: E17b
+  criterion: AC-14
+  executor: script
+  verifier: config:executors.script.normalize_plugin_shell
+  run_id: minted-normalize-text-vi-E17b-r16
+  exit_code: 0
+  verified_at: 2026-08-27T05:53:46Z
+  carried_from_round: 16
+  note: carry-forward tu round 16 — delta khong cham paths cua eval
 
 - eval: E15
+  criterion: AC-15
+  executor: ui-check
+  verifier: (judgment/ui-check — panel & frames xem round 15)
   run_id: minted-normalize-text-vi-E15-r15
   exit_code: 0
-  verifier: config:executors.script.measuring_instruments_refuse
   verified_at: 2026-08-27T05:18:07Z
   carried_from_round: 15
-  note: carry-forward tu round 15 — delta khong cham paths cua eval
+  note: carry-forward tu round 15 — delta khong cham paths cua eval (screenshot/observed goc xem round 15, khong chep lai o day)
+
+### Judge panel (E16 — carried)
 
 - eval: E16
-  judged_by: judge panel (carried)
-  verdict: PASS
-  carried_from_round: 15
-  rationale: panel giu nguyen tu round 15 — inputs khong doi, khong cham lai; rationale xem round 15
+  criterion: AC-15
+  executor: judgment
+  proposal: PASS
+  panel: giu nguyen tu round 15 — inputs khong doi, khong cham lai; rationale xem round 15
   votes:
     - domain-correctness: PASS (r15)
     - operational-feasibility: PASS (r15)
     - spec-alignment: PASS (r15)
-
-- eval: E17a
-  run_id: minted-normalize-text-vi-E17a-r16
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    plugin_commit_sha: local-tree-not-a-repo
-    ...                                                                      [100%]
-    3 passed in 0.33s
-
-- eval: E17b
-  run_id: minted-normalize-text-vi-E17b-r16
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    plugin_commit_sha: local-tree-not-a-repo
-    ...                                                                      [100%]
-    3 passed in 0.33s
-
-- eval: E18
-  run_id: minted-normalize-text-vi-E18-r16
-  exit_code: 0
-  baseline: red
-  verifier: config:executors.script.measuring_instruments_refuse
-  verified_at: 2026-08-27T12:58:10Z
-  output: |
-    (checked 9 executor keys whose tests need the engine; each must carry the ${pin:?…} guard)
-    OK: capture refuses a wrong locale and clears the stale frame · shared executor reports a legible pin error
+  carried_from_round: 15
 
 ## Known limits
 
@@ -303,12 +371,14 @@ human_signoff:
 
 ## Analyst
 
-none — moi eval feature deu red tren baseline (co phan biet)
+carried tu round 16 — baseline khong do lai round nay
+
+none — round này không đo lại baseline (carried từ round 16); không có eval nào bị đánh dấu non-discriminating trong round này. Sáu lệnh suite/regression (build+typecheck, lint:check, test, sdk pytest, verify:plugins, gen:abi diff) chạy xanh cả hai phía là regression-guard bình thường, không liệt kê ở đây.
 
 ## Variance
 
-none — khong co eval nao co runs > 1 trong vong nay
+none — không có eval nào mang field runs > 1 (stochastic) trong round này; không có eval deterministic nào flaky.
 
 ## Iterations
 
-Round 15: E13, E15 verified lại (registration sync + P0 design gate) — toàn bộ eval máy xanh, E16 (judgment) giữ nguyên PASS từ panel trước đó; chờ Cổng 2 cho human_signoff. Round 16: 17 eval máy còn lại (E2-E8, E11a/b, E12a/b, E14a/b, E17a/b, E18) chạy lại xanh toàn bộ và các eval carry-forward (E1a/b, E9a/b, E10a/b/c, E13, E15, E16) giữ nguyên do delta không chạm paths của chúng; TUY NHIÊN `pnpm build && pnpm typecheck` vượt hạn mức 600 giây của Bash tool — tiến trình PID 77818 treo tại bước `pnpm gen:abi` / `tsx scripts/gen-abi-types.ts` không log gì thêm sau 30+ phút — nên verifier không hoàn tất trọn vẹn round này; verdict BLOCKED, chờ chạy lại với timeout dài hơn hoặc điều tra nguyên nhân treo ở gen-abi-types.ts.
+Round 17: mọi eval máy (E1a–E18, carry-forward) đều PASS và failed_evals rỗng, nhưng verdict tổng vẫn REJECT theo quyết định gate ngoài phạm vi evals — xem review-findings.md mục "Trong hợp đồng" (finding severity high, AC-6, sdk/tongflow/text/normalize_vi.py:150) để biết lý do; không có eval nào được ghi vào failed_evals vì lỗi được phát hiện qua review, không qua một eval hình thức nào trong evals.yaml.
