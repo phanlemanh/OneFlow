@@ -78,7 +78,9 @@ Quét trục theo `morphological-scan`; thước CE là nguồn đối chiếu c
 - Trục **hướng lệch**: thiếu-ở-roadmap (AC-1, AC-4) | thừa-ở-roadmap (AC-5) | trích-dẫn-quá-hạn (AC-2)
 - Trục **phán quyết**: ĐỎ đúng (AC-1/2/4/5/6) | XANH đúng (AC-3, AC-8) | ĐỎ oan [thước CE: AC-8 là
   chốt chặn duy nhất; nhiễu 0 của răng đo đúng chiều này]
-- Trục **đường gọi**: alias `pnpm` (AC-10) | gọi thẳng `bash scripts/roadmap/...` | trong CI
+- Trục **đường gọi**: gọi thẳng `bash scripts/roadmap/...` | alias `pnpm` | trong CI
+  [thước CE: hai nhánh sau nằm NGOÀI phạm vi hồ sơ này — alias sang `roadmap-alias-guard`
+  (vòng 4), CI là PR riêng. Không tiêu chí nào ở đây bảo đảm chúng.]
   [thước CE: nhánh CI nằm ngoài phạm vi, xem Out of scope]
 - Trục **hạt phán quyết**: một mã thoát cho cả bộ | một mã thoát cho mỗi case (AC-7)
   [thước CE: bài học đã trả giá ở `stale-scope-by-paths`, ghi trong `_acceptance/config.yaml` ~dòng 310]
@@ -190,8 +192,14 @@ này sang hồ sơ riêng `roadmap-alias-guard`.
 Căn cứ là số liệu, không phải cảm tính: **bốn trong bốn lỗ gần nhất đều nằm trong đúng file
 đó**, viết mới ở vòng 1 — quét-rỗng fail-open, tự-nhận-diện bằng chuỗi tên, và (vòng 3) hai
 alias cùng trỏ một file gây đệ quy đo được **78 tiến trình đồng thời trong 60 giây**. Trong
-khi đó `roadmap-drift.mjs` — phần lõi, viết từ 19/08 — qua ba vòng và chín đột biến **không
-lỗi nào**. Lõi làm một việc đơn giản trên dữ liệu ngoài; file kia phải suy luận về chính nó,
+khi đó `roadmap-drift.mjs` — phần lõi, viết từ 19/08 — qua ba vòng và chín đột biến không lỗi
+nào.
+
+> **SỬA 2026-08-27, vòng 4:** câu trên **không còn đúng**, và người kiểm vòng 4 chỉ ra đúng
+> chỗ đó. Lõi CÓ một lỗ fail-open: `docs/adr/` không còn file ADR đánh số nào thì kiểm A và B
+> lặng lẽ hoá no-op và guard in "không có trôi", thoát 0 — **cùng lớp lỗi** vòng 3 bắt được ở
+> guard alias. Cú cắt vẫn đúng theo tương quan (4 lỗ ở một file so với 1 ở lõi), nhưng "không
+> lỗi nào" là khẳng định sai và không được để nguyên trong một hồ sơ sắp ký. Lõi làm một việc đơn giản trên dữ liệu ngoài; file kia phải suy luận về chính nó,
 và mỗi bản vá lại đóng một cửa rồi để ngỏ cửa bên cạnh. Nó xứng đáng có vòng nghiệm thu
 riêng, không phải đi ké vòng của phần đã ổn định.
 
