@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: eb17794298f0cb0dbf5086effce99324083df384
-human_signoff:
+human_signoff: Manh 2026-08-27
 ---
 
 # Evidence Report: roadmap-drift-guard
@@ -330,4 +330,4 @@ Mười lần chạy vòng 5 đồng nhất với mười lần chạy vòng 4 �
       cả hai tái hiện được, không lỗ nào làm rớt eval. Chọn: vá trong nhánh này, mở
       hồ sơ tiếp, hay ghi vào Known limits.
 - [ ] Cân hai con số văn xuôi lệch với bảng sổ cái (mục **Ngoài hợp đồng**)
-- [ ] Điền `human_signoff` trong frontmatter
+- [x] Điền `human_signoff` trong frontmatter
