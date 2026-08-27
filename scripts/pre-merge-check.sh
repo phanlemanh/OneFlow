@@ -1409,8 +1409,30 @@ XLACS
   # gán là rò vc slug trước sang (đúng lớp rò-trạng-thái gap-probe P0-2).
   # Guard kiểm DIFF_READY chứ KHÔNG kiểm $BASE: base-có-mà-diff-không-dựng-được
   # (clone shallow CI) phải rơi về kiểm-tất, không phải tắt im (gap-probe P0-1).
-  if [ "$DIFF_READY" -eq 1 ] && ! slug_in_diff "$slug"; then # STALE-DIFF-SCOPE-GUARD
-    : # sử liệu ngoài diff — không soi verified_commit (AC-2); chạm hồ sơ là nó vào diff và bị soi lại như thường (AC-3)
+  # ─── THU HẸP 2026-08-27: chỉ bỏ qua khi NGOÀI DIFF **VÀ** KHÔNG KHAI paths ──
+  # Bản đầu của fork bọc TRỌN khối cho mọi slug ngoài diff. Cái giá đo được:
+  # feature CÓ khai `paths` cũng bị bỏ qua, nên đường narrow-scope không bao giờ
+  # chạy cho feature đã merge — đúng ca mà `stale-scope-by-paths` sinh ra để
+  # phục vụ. Hệ quả là AC-2 của contract đó ("ngoài union thì KHÔNG stale") mất
+  # chỗ quan sát: muốn khối chạy thì slug phải vào diff, mà vào diff thì
+  # cross-check đòi union phủ coverage set, mà file làm nó phủ lại nằm sẵn
+  # trong tập staleness — nên "được cấp scope" kéo theo "stale" một cách tất
+  # yếu. Fixture không dựng được ca đó, và `case_out_of_scope` xanh RỖNG.
+  #
+  # Thu hẹp lại: slug ngoài diff mà KHAI ĐỦ `paths` thì VẪN vào khối. Cross-check
+  # bên dưới đã tự gate theo `slug_acceptance_touched`, nên nó tự động không
+  # chạy — đúng AC-7 vế 1 ("ngoài diff → narrow scope, KHÔNG cross-check"),
+  # không cần thêm điều kiện nào. Lý do fork vẫn còn nguyên vẹn cho nhóm nó
+  # thật sự bảo vệ: feature KHÔNG khai `paths` (whole-tree) vẫn được bỏ qua
+  # trọn khối, nên nhánh mới không bị chặn vì lịch sử.
+  #
+  # Đánh đổi có mắt: feature CÓ khai `paths` mà ngoài diff nay lại bị soi
+  # verified_commit, nên nó stale khi PR chạm code NẰM TRONG union của chính nó
+  # — đó là AC-1, và cũng đúng là giao kèo mà việc khai `paths` đổi lấy. Kèm
+  # theo, nhóm đó nhận lại các NOTE pin-ma/shallow/no-vc mà bản đầu bọc im.
+  if [ "$DIFF_READY" -eq 1 ] && ! slug_in_diff "$slug" \
+     && ! feature_scope "$dir/evals.yaml" >/dev/null 2>&1; then # STALE-DIFF-SCOPE-GUARD
+    : # sử liệu ngoài diff VÀ không khai paths — không soi verified_commit (AC-2); chạm hồ sơ là nó vào diff và bị soi lại như thường (AC-3)
   else
   if [ -z "$vc" ]; then
     echo "NOTE [$slug]: report has no verified_commit (older template) — evidence is not pinned to a commit; code drift since verify is NOT machine-checked. Re-verify to pin."

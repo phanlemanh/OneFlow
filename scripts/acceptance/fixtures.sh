@@ -372,14 +372,20 @@ mk_pair_fixture() {
 # actually trying to observe. Echoes the gate's combined stdout+stderr.
 run_gate_with_drift() {
   rgw_gate="$1"; rgw_mode="$2"; rgw_drift="$3"
+  rgw_shape="${4:-out-of-diff}"
   rgw_dir="$(new_case_tmpdir)"
   rgw_base="$(mk_committed_report_fixture "$rgw_dir" fx "$rgw_mode")"
-  # The PR carries the feature's artifacts: since the STALE-DIFF-SCOPE-GUARD
-  # fork a feature outside the PR diff is not examined at all, so without this
-  # every gate run here — unpatched baseline and perturbed copies alike —
-  # returns the same `OK [fx]: PASS` and the mutations become undetectable by
-  # construction rather than by the guard working.
-  ( cd "$rgw_dir" && echo drift > "$rgw_drift" && pr_touches_artifacts "$rgw_dir" fx && git add -A && git commit -q -m drift )
+  # Shape matters since STALE-DIFF-SCOPE-GUARD was narrowed (2026-08-27): a
+  # feature outside the PR diff is examined only when it declares complete
+  # `paths`. A DECLARED fixture can therefore stay out-of-diff (the default,
+  # and the shape that exercises the narrow-scope path with no cross-check),
+  # while a fixture the gate treats as UNDECLARED — any `partial` mode — must
+  # pass `in-diff`, or the gate skips it and the assertion ends up measuring
+  # the fork rather than the mechanism under test.
+  if [ "$rgw_shape" = "in-diff" ]; then
+    pr_touches_artifacts "$rgw_dir" fx
+  fi
+  ( cd "$rgw_dir" && echo drift > "$rgw_drift" && git add -A && git commit -q -m drift )
   bash "$rgw_gate" "$rgw_dir" --base "$rgw_base" 2>&1
 }
 
@@ -450,7 +456,9 @@ run_mutation_case() {
   r1="$(run_gate_with_drift "$work/gate.sh" all src/covered/new.txt)"
   printf '%s\n' "$r1" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail mutation "revert: in-scope change no longer caught"
-  r2="$(run_gate_with_drift "$work/gate.sh" partial src/uncovered/new.txt)"
+  # Unpatched + `partial` = treated as UNDECLARED, so the narrowed fork skips it
+  # out-of-diff; in-diff is what makes the whole-tree fallback observable here.
+  r2="$(run_gate_with_drift "$work/gate.sh" partial src/uncovered/new.txt in-diff)"
   printf '%s\n' "$r2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail mutation "revert: partial declaration no longer falls back"
   pass mutation
