@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 65949db8aca0ef788299c66b1a6078ff99f3294e
-human_signoff:
+human_signoff: Manh 2026-08-27
 ---
 
 # Evidence Report: roadmap-drift-guard
@@ -305,4 +305,4 @@ Ba mục thuộc về hồ sơ khác hoặc PR khác, ghi lại để không rơ
 - [ ] Đọc **Known limits** mục 1 và 2 — hai lỗ fail-open MỚI trong code được giữ lại; quyết
       định vá ngay trong nhánh này hay ghi nợ sang hồ sơ kế tiếp
 - [ ] Không có hạng mục judgment nào cần `human_override` (cả 10 eval đều là `script`)
-- [ ] Điền `human_signoff` trong frontmatter
+- [x] Điền `human_signoff` trong frontmatter
