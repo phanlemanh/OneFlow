@@ -429,6 +429,65 @@ def test_digit_losing_dash_runs_are_refused_by_name() -> None:
         )
 
 
+# A SURVIVING SLASH means the library gave up on that token, so the output is a
+# half-reading. Both criteria land here: a price written "đ/kg" (AC-10) and a
+# date the library could not parse (AC-9) leave the same character behind, which
+# is exactly why a post-check watching only digits was blind to both.
+CORPUS_SLASH_REFUSED: tuple[tuple[str, str], ...] = (
+    ("giá theo đơn vị", "Giá 50.000 đ/kg"),
+    ("lãi theo năm", "Lãi 5%/năm"),
+    ("giá theo lít", "Giá 20.000 ₫/lít"),
+    ("ngày kiểu Mỹ", "ngày 12/25/2026"),
+    ("ngày không tồn tại", "ngày 32/8/2026"),
+    ("ngày kiểu Mỹ, không có chữ ngày", "12/25/2026"),
+)
+
+# ...and the slashes the library DOES read. Flagging these would reject correct
+# output, which is the failure direction the residual rule must never take.
+CORPUS_SLASH_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Tốc độ 100km/h", "tốc độ một trăm ki lô mét trên giờ"),
+    ("Giá 5/3 triệu", "giá năm tháng ba triệu"),
+)
+
+# The written "ngày" must SURVIVE when the date is not readable — dropping it was
+# how a half-parsed date lost a field silently.
+CORPUS_DAY_WORD_KEPT: tuple[tuple[str, str], ...] = (
+    ("ngày 12/25/2026", "ngày"),
+    ("ngày 32/8/2026", "ngày"),
+)
+
+
+def test_surviving_slash_is_refused() -> None:
+    for kind, raw in CORPUS_SLASH_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r}: dấu gạch chéo còn sót là token CHƯA ĐỌC ĐƯỢC, "
+            f"phải TỪ CHỐI — nhận ok=True -> {got.text!r}"
+        )
+        assert "/" in got.residual, (
+            f"[{kind}] {raw!r}: từ chối nhưng không nêu dấu gạch chéo: {got.residual}"
+        )
+
+
+def test_readable_slash_is_not_flagged() -> None:
+    for raw, expected in CORPUS_SLASH_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"{raw!r} (ca ÂM): thư viện ĐỌC ĐƯỢC dấu gạch chéo này, không được "
+            f"từ chối — {got.error}"
+        )
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
+def test_day_word_survives_an_unreadable_date() -> None:
+    for raw, word in CORPUS_DAY_WORD_KEPT:
+        got = normalize_vi(raw)
+        assert got.text.startswith(word), (
+            f"{raw!r}: chữ {word!r} bị nuốt dù ngày không đọc được — đó là cách "
+            f"một thành phần của ngày biến mất trong im lặng: {got.text!r}"
+        )
+
+
 # THE TYPOGRAPHIC-DASH MATRIX — 3 dash characters × 3 roles, declared before the
 # cases. The claim is a RELATION, not a literal: a typographic dash must read
 # EXACTLY like its ASCII spelling, so the expectation is computed from the ASCII
@@ -1434,6 +1493,9 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
     ("CORPUS_DASH_REFUSED", CORPUS_DASH_REFUSED),
+    ("CORPUS_SLASH_REFUSED", CORPUS_SLASH_REFUSED),
+    ("CORPUS_SLASH_NEGATIVE", CORPUS_SLASH_NEGATIVE),
+    ("CORPUS_DAY_WORD_KEPT", CORPUS_DAY_WORD_KEPT),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),

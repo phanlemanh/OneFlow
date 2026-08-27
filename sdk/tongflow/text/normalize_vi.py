@@ -35,7 +35,25 @@ _DASH_DATE = re.compile(r"\b(\d{1,2})-(\d{1,2})-(\d{4})\b")
 # chín..." — a voice says the word twice (measured, S4 round 2 finding). Drop
 # the written word and let the library re-add it. Full dates only: a bare d/m
 # reads WITHOUT the word (measured), so there the written "ngày" must stay.
-_DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4}\b)")
+# ...but ONLY when the library can actually read the date. The rule used to fire
+# on every token matching the SHAPE, trusting the library to re-add the word.
+# That assumption holds only for a date it parses: measured on this tree,
+# "ngày 12/25/2026" (US order) came back "mười hai tháng hai/hai nghìn…" — the
+# written "ngày" gone, the 25 gone entirely, month read as 2, and the slash
+# still sitting there with ok=True and an empty residual (S4 round 12 of the
+# parent contract; AC-9 here).
+#
+# Validity is decided on the DAY and MONTH fields, which is the whole
+# difference between a date the library reads and a shape that merely looks
+# like one. An invalid one keeps its written "ngày" and falls through to the
+# residual guard, which refuses rather than speaking half a date.
+_DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=(\d{1,2})[/-](\d{1,2})[/-]\d{4}\b)")
+
+
+def _drop_day_word_if_readable(match: re.Match[str]) -> str:
+    day, month = int(match.group(1)), int(match.group(2))
+    readable = 1 <= day <= 31 and 1 <= month <= 12
+    return "" if readable else match.group(0)
 
 # The SPACED price form "500 đ". has_money deliberately counts it as money
 # ((?<=\d)\s*đ\b), but the pinned library only expands the GLUED form —
@@ -285,6 +303,13 @@ _RESIDUAL = re.compile(
     # there should be none left; keeping them here is the tooth that makes
     # removing the fold a RED test instead of a silent regression.
     rf"|[{_TYPOGRAPHIC_DASHES}]"
+    # A SLASH the library did not turn into words. It reads the ones it knows
+    # ("100km/h" -> "ki lô mét trên giờ"), so a surviving "/" means it gave up:
+    # "Giá 50.000 đ/kg" -> "…đồng/kg" and "Lãi 5%/năm" -> "…phần trăm/năm", both
+    # ok=True with an empty residual before this (AC-10). It is also what makes a
+    # half-parsed date silent — the library leaves a slash, not a digit, so a
+    # post-check watching only [0-9₫%] is blind to it (AC-9).
+    rf"|/"
 )
 
 # The colon left over from a MANGLED CLOCK, decided relationally instead of by
@@ -396,7 +421,7 @@ def _pre(text: str) -> str:
     out = _COMMA_CHAIN.sub(lambda m: m.group(0).replace(",", ", "), out)
     out = _DECIMAL_COMMA.sub(_decimal_tail, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
-    out = _DAY_WORD_BEFORE_DATE.sub("", out)
+    out = _DAY_WORD_BEFORE_DATE.sub(_drop_day_word_if_readable, out)
     # ORDER IS LOAD-BEARING: the range rule runs BEFORE the spaced-đồng rewrite.
     # Reversed (as it shipped in 0.2.21) the rewrite turns "1.000 đ" into
     # "1.000 đồng" and destroys the very "đ" the range rule anchors on, so
