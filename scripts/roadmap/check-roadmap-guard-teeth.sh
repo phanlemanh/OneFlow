@@ -64,8 +64,20 @@ build_fixture() {
   done
 }
 
-guard_is_red()   { ! (cd "$tmp/t" && node "$drift" >/dev/null 2>&1); }
-guard_is_green() {   (cd "$tmp/t" && node "$drift" >/dev/null 2>&1); }
+# Vòng verify 1 (2026-08-27) chỉ ra một lỗ ngay tại đây: mọi case chạy guard với
+# output VỨT ĐI, nên bộ răng chỉ khẳng định ĐỎ hay XANH. AC-1 đòi guard in id KÈM
+# TIÊU ĐỀ, AC-2 đòi nêu cả hai id KÈM TRÍCH DẪN <=110 ký tự — không case nào giữ
+# những thứ đó lại, nên một bản sửa làm nghèo thông điệp vẫn giữ 10/10 xanh.
+# Từ đây guard chạy một lần, output nằm ở $tmp/out, và case nào có yêu cầu nội
+# dung thì khẳng định nội dung.
+guard_capture() {
+  local rc=0
+  (cd "$tmp/t" && node "$drift") > "$tmp/out" 2>&1 || rc=$?
+  return $rc
+}
+guard_is_red()   { ! guard_capture; }
+guard_is_green() {   guard_capture; }
+out_has() { grep -Eq -- "$1" "$tmp/out"; }
 
 # --- the cases ------------------------------------------------------------
 # Each returns 0 when the guard behaved as the criterion requires.
@@ -74,7 +86,19 @@ guard_is_green() {   (cd "$tmp/t" && node "$drift" >/dev/null 2>&1); }
 # noise — and without it a guard hardcoded to `exit 1` passes every other case.
 case_clean() {
   build_fixture
-  guard_is_green
+  guard_is_green || return 1
+  # Dòng đếm phải CÓ MẶT và hai số phải BẰNG NHAU: một guard in "0 đã ký, 0 dòng"
+  # trên cây thật cũng xanh, và cái xanh đó không nghĩa gì.
+  out_has 'sổ cái: [0-9]+ hạng mục đã ký, [0-9]+ dòng trong sổ' || return 1
+  python3 - "$tmp/out" <<'LEDGER'
+import sys, pathlib, re
+m = re.search(r"sổ cái: (\d+) hạng mục đã ký, (\d+) dòng trong sổ",
+              pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+if not m: raise SystemExit("thiếu dòng đếm sổ cái")
+a, b = int(m.group(1)), int(m.group(2))
+if a != b: raise SystemExit(f"sổ cái lệch: {a} đã ký vs {b} dòng")
+if a == 0: raise SystemExit("sổ cái rỗng — cây thật phải có hạng mục đã ký")
+LEDGER
 }
 
 # AC-6. THE REAL DRIFT: roadmap as it stood on main @ 244cb0b (19/08).
@@ -89,7 +113,9 @@ case_historical_244cb0b() {
 case_ledger_missing() {
   build_fixture
   grep -v '`local-cpu-plugins`' "$tmp/t/docs/roadmap.md" > "$tmp/x" && mv "$tmp/x" "$tmp/t/docs/roadmap.md"
-  guard_is_red
+  guard_is_red || return 1
+  out_has 'local-cpu-plugins' || return 1          # AC-4: gọi ĐÚNG TÊN slug
+  out_has 'chưa được phân loại trong sổ cái'
 }
 
 # AC-5. Ledger keeps a row for something no longer signed off.
@@ -102,7 +128,9 @@ s = s.replace("<!-- roadmap-ledger:end -->",
               "| `a-feature-that-never-shipped` | T2 | 01/01 | 9.9 |\n\n<!-- roadmap-ledger:end -->")
 p.write_text(s, encoding="utf-8")
 PY
-  guard_is_red
+  guard_is_red || return 1
+  out_has 'a-feature-that-never-shipped' || return 1   # AC-5: gọi ĐÚNG TÊN slug
+  out_has 'không còn ở trạng thái ký'
 }
 
 # AC-4 suppression half. A slug that is signed off AND carries a ledger row must
@@ -137,7 +165,10 @@ case_adr_uncited() {
   # 0099, not "next number": a real ADR taking the fixture's id would make this
   # perturbation silently test nothing (the id would already be mentioned).
   cp "$tmp/t/docs/adr/0011-local-first-execution.md" "$tmp/t/docs/adr/0099-a-decision-nobody-wrote-down.md"
-  guard_is_red
+  guard_is_red || return 1
+  # AC-1: id VÀ tiêu đề. In mỗi con số bốn chữ thì người đọc log vẫn phải mở thư
+  # mục ADR ra tra — đúng việc thông điệp này sinh ra để khỏi phải làm.
+  out_has 'ADR-0099 không được nhắc lần nào trong docs/roadmap\.md — ".+"'
 }
 
 # Shared by superseded-bare and superseded-paired: strip every mention of the
@@ -168,7 +199,18 @@ PY
 case_superseded_bare() {
   build_fixture
   strip_heir_from_block
-  guard_is_red
+  guard_is_red || return 1
+  out_has 'viện dẫn ADR-0005 \(đã bị ADR-0011 thay thế\)' || return 1
+  # AC-2: kèm trích dẫn khối phạm lỗi, tối đa 110 ký tự. Không có trích dẫn thì
+  # người sửa biết CÓ lỗi mà không biết lỗi nằm ở khối nào trong 197 dòng.
+  python3 - "$tmp/out" <<'EXCERPT'
+import sys, pathlib, re
+txt = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+m = re.search(r'không nhắc ADR thay nó: "(.*?)…"', txt, re.S)
+if not m: raise SystemExit("thông điệp thiếu trích dẫn khối phạm lỗi")
+if not m.group(1).strip(): raise SystemExit("trích dẫn rỗng")
+if len(m.group(1)) > 110: raise SystemExit(f"trích dẫn {len(m.group(1))} ký tự — vượt 110")
+EXCERPT
 }
 
 # AC-3 suppression half. Take the block this guard just went red on and apply

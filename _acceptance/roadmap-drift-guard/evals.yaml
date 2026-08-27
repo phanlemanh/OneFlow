@@ -18,7 +18,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_teeth_adr_uncited
     paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
-    expected: "exit 0; output chứa `CASE adr-uncited: PASS`. Bản sao vứt đi được thêm một ADR mà lộ trình không nhắc; guard phải ĐỎ và in id + tiêu đề ADR đó. In id mà không in tiêu đề là chưa đạt — người đọc log cần biết ADR nào chứ không phải chỉ một con số bốn chữ"
+    expected: "exit 0; output chứa `CASE adr-uncited: PASS`. Bản sao vứt đi được thêm một ADR mà lộ trình không nhắc; guard phải ĐỎ VÀ thông điệp phải khớp `ADR-0099 không được nhắc lần nào trong docs/roadmap.md — \"<tiêu đề khác rỗng>\"`. Vòng 2 nâng: case này trước chỉ khẳng định đỏ/xanh, nên một bản sửa bỏ tiêu đề đi vẫn xanh — đột biến M-A chứng minh nay nó đỏ"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2
@@ -26,7 +26,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_teeth_superseded_bare
     paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
-    expected: "exit 0; output chứa `CASE superseded-bare: PASS`. Một khối viện dẫn ADR-0005 bị gỡ tên ADR thay nó; guard phải ĐỎ, nêu cả id cũ lẫn id thay thế, và trích khối phạm lỗi. Kiểm A phải VẪN XANH trong nhiễu này — nếu A cũng đỏ thì eval không chứng minh được B hoạt động, chỉ chứng minh cây bị hỏng"
+    expected: "exit 0; output chứa `CASE superseded-bare: PASS`. Một khối viện dẫn ADR-0005 bị gỡ tên ADR thay nó; guard phải ĐỎ, thông điệp khớp `viện dẫn ADR-0005 (đã bị ADR-0011 thay thế)` VÀ mang trích dẫn khối phạm lỗi khác rỗng, độ dài **≤ 110 ký tự**. Kiểm A phải VẪN XANH trong nhiễu này — nếu A cũng đỏ thì eval không chứng minh được B hoạt động, chỉ chứng minh cây bị hỏng. Vòng 2 nâng: nửa trích dẫn trước không ai giữ (đột biến M-B)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E3
@@ -42,7 +42,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_teeth_ledger_missing
     paths: ["scripts/roadmap/**", "docs/roadmap.md", "_acceptance/*/contract.md"]
-    expected: "exit 0; output chứa `CASE ledger-missing: PASS`. Một hạng mục đã ký bị xoá khỏi khối `roadmap-ledger`; guard ĐỎ và gọi đúng tên slug"
+    expected: "exit 0; output chứa `CASE ledger-missing: PASS`. Một hạng mục đã ký bị xoá khỏi khối `roadmap-ledger`; guard ĐỎ VÀ thông điệp gọi đúng tên slug `local-cpu-plugins` kèm cụm `chưa được phân loại trong sổ cái`. Vòng 2 nâng: trước chỉ khẳng định đỏ (đột biến M-C)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -50,7 +50,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_teeth_ledger_stale
     paths: ["scripts/roadmap/**", "docs/roadmap.md", "_acceptance/*/contract.md"]
-    expected: "exit 0; output chứa `CASE ledger-stale: PASS`. CHIỀU NGƯỢC của E4: sổ cái giữ dòng cho một hồ sơ không còn ở `status: signed-off`. Sổ cái phình ra cũng là trôi — một guard chỉ kiểm chiều thiếu sẽ để sổ cái tích xác cũ vô hạn"
+    expected: "exit 0; output chứa `CASE ledger-stale: PASS`. CHIỀU NGƯỢC của E4: sổ cái giữ dòng cho một hồ sơ không còn ở `status: signed-off`. Sổ cái phình ra cũng là trôi — một guard chỉ kiểm chiều thiếu sẽ để sổ cái tích xác cũ vô hạn. Thông điệp phải gọi đúng tên `a-feature-that-never-shipped` kèm cụm `không còn ở trạng thái ký` (vòng 2 nâng, đột biến M-C)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
@@ -90,7 +90,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_alias_cited_true
     paths: ["scripts/roadmap/**", "package.json", "docs/assets/oneflow-roadmap-status.html"]
-    expected: "exit 0. Quét MỌI chuỗi khớp `pnpm roadmap:\\S+` trong header của hai script và trong `docs/assets/oneflow-roadmap-status.html`, rồi khẳng định `package.json` khai đúng script đó và đường script trỏ tới file có thật. Đây là eval sinh ra từ lỗi thật: ba chỗ viện dẫn `pnpm roadmap:check` suốt tám ngày trong khi alias chưa hề tồn tại, và không guard nào kêu vì commit message với comment mô tả trạng thái DỰ ĐỊNH, không phải trạng thái THẬT"
+    expected: "exit 0. Quét MỌI chuỗi khớp `pnpm roadmap:\\S+` trong header của hai script và trong `docs/assets/oneflow-roadmap-status.html`, rồi khẳng định `package.json` khai đúng script đó và đường script trỏ tới file có thật. HAI NỬA (vòng 2 nâng, sau khi người kiểm vòng 1 chỉ ra chỉ có nửa (a)): **(a) khai báo** — `package.json` khai đúng script và đường script trỏ tới file có thật; **(b) thực thi** — mỗi alias được viện dẫn CHẠY THẬT qua `pnpm` và thoát 0, trừ chính alias của guard này (đệ quy). AC-10 nói \"phân giải VÀ chạy\"; một alias trỏ đúng file nhưng chết lúc chạy qua được nửa (a) — đột biến M-D chứng minh nửa (b) bắt được. Đây là eval sinh ra từ lỗi thật: ba chỗ viện dẫn `pnpm roadmap:check` suốt tám ngày trong khi alias chưa hề tồn tại"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # W1 (eval-coverage-lint, Cổng 1): AC-4/AC-5 là cặp đếm hai chiều, nên cả hai

@@ -5,7 +5,7 @@ slug: roadmap-drift-guard
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [scripts, docs]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-27
 ---
@@ -56,8 +56,10 @@ pass bằng cách đứng yên.
   Then thoát khác 0 và gọi tên slug đó (chiều ngược của AC-4 — sổ cái phình ra cũng là trôi).
 - AC-6: Given `docs/roadmap.md` đúng như nó đứng trên `main @ 244cb0b` — cú trôi ADR-0005/0011
   có thật, không phải nhiễu bịa, When chạy guard trên cây đó, Then thoát khác 0.
-- AC-7: Given bộ răng, When chạy từng nhiễu riêng lẻ bằng `--case <tên>`, Then **mỗi nhiễu sở
-  hữu một mã thoát riêng** và in đúng một token nhãn của case đó; sáu nhiễu nấp sau một mã
+- AC-7: Given bộ răng, When chạy từng nhiễu riêng lẻ bằng `--case <tên>`, Then **mỗi nhiễu có một lần gọi riêng và mã thoát của lần gọi đó chỉ nói về nó** —
+  case đạt thoát 0, case hỏng thoát khác 0 — kèm đúng một token nhãn `CASE <tên>: PASS`
+  của riêng nó. Đây KHÔNG có nghĩa mỗi case một giá trị số khác nhau (làm rõ vòng 2,
+  sau khi người kiểm vòng 1 chỉ ra câu cũ đọc được hai nghĩa); sáu nhiễu nấp sau một mã
   thoát là sáu tiêu chí gộp thành một, và một case chưa từng được cài trông y hệt một case đã
   qua.
 - AC-8: Given cây sạch đúng như trên `main`, When chạy `pnpm roadmap:check`, Then thoát 0 —
@@ -127,3 +129,25 @@ Quét trục theo `morphological-scan`; thước CE là nguồn đối chiếu c
 - **Bộ răng đi từ 6 lên 10 case.** Ba case mới là nửa KHÔNG-nổ (`superseded-paired`,
   `ledger-paired`, `supersede-source-single`) cộng `case-isolation`. Đã kiểm bằng ba đột
   biến trên bản sao — xem `decisions.jsonl`.
+
+## Amendment — 2026-08-27 vòng 2 (sau verify vòng 1)
+
+Người kiểm context sạch cho verdict PASS 11/11 nhưng nêu ba chỗ **bộ eval yếu hơn chính
+hợp đồng nó chứng minh**. Cả ba đã vá; đây là lý do vòng 1 bị thay chứ không phải bổ sung.
+
+- **Bộ răng nay khẳng định NỘI DUNG thông điệp, không chỉ đỏ/xanh.** Trước đó mọi case
+  chạy guard với output vứt đi, nên nửa "in id kèm tiêu đề" (AC-1) và "trích 110 ký tự"
+  (AC-2) không ai giữ. Nay `adr-uncited` đòi `— "<tiêu đề>"` không rỗng; `superseded-bare`
+  đòi trích dẫn có thật và **≤ 110 ký tự**; `ledger-missing` / `ledger-stale` đòi gọi đúng
+  tên slug; `clean` đòi dòng đếm sổ cái có mặt, hai số bằng nhau và khác 0.
+  Kiểm bằng ba đột biến **chỉ làm nghèo thông điệp, không đổi hành vi đỏ/xanh**: cả ba
+  trước khi vá đều XANH, sau khi vá đều ĐỎ.
+- **E10 nay chạy thật qua `pnpm`.** Trước đó nó chỉ đọc khai báo `package.json` và kiểm
+  file tồn tại, trong khi AC-10 nói "phân giải **và chạy**" — một alias trỏ đúng file
+  nhưng chết lúc chạy (shebang hỏng, thiếu quyền, pnpm không phân giải nổi tên) vẫn qua
+  sạch. Nửa (b) loại chính alias của nó khỏi vòng lặp, cùng lý do `case-isolation` phải
+  loại chính nó. Kiểm bằng đột biến M-D: alias khai đúng + trỏ đúng file + **chạy hỏng**
+  → nửa (a) xanh, nửa (b) đỏ.
+- **AC-7 chốt nghĩa.** "Mỗi nhiễu sở hữu một mã thoát riêng" đọc được hai nghĩa; nay nói
+  thẳng là *một lần gọi riêng cho mỗi case*, không phải *mỗi case một giá trị số khác nhau*.
+  Người kiểm vòng 1 đọc đúng nghĩa này, nhưng câu chữ không được phép dựa vào may mắn đó.
