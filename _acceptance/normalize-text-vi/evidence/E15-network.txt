@@ -1,25 +1,29 @@
-E15 network truth dump — verifier round, tree 4b9c1c7a97da1dde817e35ee240111d2cd6d889a
-dev_server.url scope = http://localhost:3000
+# E15 network dump (dev_server.url = http://localhost:3000)
+# Driver: Claude Browser MCP (mcp__Claude_Browser__read_network_requests / read_console_messages)
+# Captured while /proto/normalize-text-vi?state=wired was open (post NEXT_LOCALE=vi cookie + reload)
 
-=== Interactive browser session (supplementary console/network check, NOT the evidence captures) ===
-First check (tab "seed", after cookie-set + re-navigate over an already-mounted SPA):
-  All requests 200 OK EXCEPT:
-  GET http://localhost:3000/proto/normalize-text-vi?state=wired&_rsc=6gHWkmYAZ4ZvhWVz -> 200 OK [FAILED: net::ERR_ABORTED]
-  (Next.js App Router RSC prefetch request superseded/cancelled by a subsequent client-side
-   navigation I triggered manually while the app was already mounted. Not a server error —
-   response status was 200; the browser cancelled receiving it because a newer navigation
-   started. Self-induced by my re-navigation methodology, not a product defect.)
+## Console (onlyErrors=true)
+No console logs.  (zero console.error entries across the session)
 
-Control test (fresh isolated tab "tab-1", single navigate, no prior SPA state):
-  ALL requests 200 OK, ZERO ERR_ABORTED, ZERO failures. Confirms the ERR_ABORTED above was an
-  artifact of my repeated in-app navigation, not something that occurs on a normal/fresh load
-  (which is exactly how scripts/ui-capture.mjs loads each state for the pinned evidence PNGs).
+## Console (all levels, for context)
+[info] React DevTools download hint (dev-only, expected)
+[warn] [React Flow]: The parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+  -> observed only while the browser tab was backgrounded (0x0 layout); node flipped to visibility:visible
+     and the warning did not recur once the tab was fronted and had real dimensions. Not a console.error.
+[log] task-store handler registration/unregistration noise (expected node lifecycle logging)
+[log] [Fast Refresh] rebuilding / done  (dev-mode HMR from files touched during this verify run, e.g. tsconfig.json checkout)
 
-=== Console messages (both checks) ===
-No [error]-level entries in either session. Only [info] (React DevTools banner), [warn]
-([React Flow] parent container width/height — a known dev-mode layout warning, not an error),
-and [log] (task-store handler registration/unregistration, Fast Refresh).
+## Network requests (all app-origin: http://localhost:3000)
+GET /api/plugins/registry -> 200 OK (x3, one per HMR reload)
+GET /proto/normalize-text-vi?state=wired&_rsc=<id> -> 200 OK [FAILED: net::ERR_ABORTED]  (x2)
+  -> RSC prefetch request cancelled mid-flight by a subsequent Fast Refresh reload
+     (client-initiated navigation abort, not a server error; status line was 200 OK).
+GET /proto/normalize-text-vi?state=wired -> 200 OK (x2, the actual page loads)
+GET /_next/static/** (webpack chunks, hot-update.js/json, css, fonts) -> 200 OK, all app/static-origin
 
-=== Verdict ===
-No FAIL-eligible failure to app origin on a clean/fresh load. The one ERR_ABORTED seen was
-self-induced test noise from an already-mounted SPA re-navigation, not reproducible on fresh load.
+## Scoping verdict
+FAIL-eligible set = all requests above (single-origin app, dev_server.url = http://localhost:3000, no separate api_base configured).
+No request in the FAIL-eligible set returned status >= 500 or an unexpected 4xx.
+The two ERR_ABORTED entries are client-cancelled RSC prefetches superseded by Fast Refresh reloads
+triggered during this verify session (dev-mode HMR artifact), not connection errors or timeouts to the app.
+networkObserved = clean

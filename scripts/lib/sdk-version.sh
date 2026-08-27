@@ -28,7 +28,27 @@
 # `git rev-parse`: the repo root is two levels above scripts/lib/. A cwd-derived
 # root is wrong from inside the plugin clone; a git-derived one is wrong from
 # inside any other repo. The file's own path is neither.
-_SDK_VERSION_DEFAULT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+#
+# BASH_SOURCE alone is not enough: it is a bash array and does not exist under
+# zsh, which is the login shell on macOS and the shell some verifier agents get.
+# There, `dirname ""` yields "." and `cd ./../..` from sdk/ silently resolved the
+# root to the repo's PARENT, then reported the real pyproject.toml as missing.
+# Measured 2026-08-27 (S4 round 15): identical commands passed under bash and
+# aborted under zsh, so two evals came back BLOCKED while their siblings ran.
+# zsh names the file being sourced in the `%x` prompt escape; it is reached
+# through eval so bash never parses the zsh-only substitution.
+_sdk_version_self="${BASH_SOURCE[0]:-}"
+if [ -z "$_sdk_version_self" ] && [ -n "${ZSH_VERSION:-}" ]; then
+    _sdk_version_self="$(eval 'printf %s "${(%):-%x}"')"
+fi
+# No anchor resolved means no root. Leaving this empty makes both readers below
+# refuse by name; guessing a root is the fail-open this file exists to prevent.
+if [ -n "$_sdk_version_self" ]; then
+    _SDK_VERSION_DEFAULT_ROOT="$(cd "$(dirname "$_sdk_version_self")/../.." && pwd)"
+else
+    _SDK_VERSION_DEFAULT_ROOT=""
+fi
+unset _sdk_version_self
 
 sdk_version() {
     local root
