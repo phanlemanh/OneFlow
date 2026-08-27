@@ -5,9 +5,9 @@ slug: chong-doc-sai-em-ru
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, web-ui, docs]
-status: draft
-approved_by:
-approved_at:
+status: approved
+approved_by: Phan Le Manh
+approved_at: 2026-08-27
 ---
 
 # Hợp đồng: chống đọc sai êm ru
