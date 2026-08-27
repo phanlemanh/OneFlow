@@ -5,7 +5,7 @@ slug: normalize-text-vi
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [abi, sdk, web-ui, plugin, docs]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-19
 ---
@@ -463,6 +463,12 @@ code** vì license):
   nhằng, và nghiêng về thập phân giữ nguyên mọi cách đọc giá, thứ slot này sinh ra để phục vụ.
 
 ## Known limits
+- **Định đoạt tại chữ ký Cổng 2, 2026-08-27 (owner ký theo bảng tám mục):** bộ ca họ
+  "Đ nhập nhằng" còn là danh sách phẳng chưa khai ô — KÉO VÀO hợp đồng follow-up
+  `chong-doc-sai-em-ru` (mọi ca hiện có đã ghim, hai chiều đã chứng minh; cái thiếu là khả
+  năng tự lộ ô trống). Cảnh báo lúc lưu trỏ tới node chưa cài được và thông điệp lỗi SDK chưa
+  qua lớp i18n — cùng đi hợp đồng follow-up (i18n đã là AC-6 của nó). Bốn mục chú thích/JSDoc
+  lệch — ghi nhận, dọn bằng một PR nhỏ ngoài cổng, không chạm hành vi.
 - **THU PHẠM VI nấc hai — dấu tiền đứng trước SỐ hoặc DẤU PHẨY** *(owner trả lại Cổng 2 và
   chỉ đạo nới, 2026-08-27)*. Tên đường ở Việt Nam thường LÀ SỐ (Đường 3/2, Đường 30/4,
   Đường 2/9), nên luật từ chối chỉ-bắn-khi-sau-là-CHỮ để lọt cả họ: `Số 25 Đ. 3/2, Q.10`

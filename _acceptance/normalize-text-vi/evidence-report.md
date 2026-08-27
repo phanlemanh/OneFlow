@@ -1,14 +1,14 @@
 ---
 schema_version: 2
 feature_slug: normalize-text-vi
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: b5b3797815203deec771382fdd66215200952b91
-human_signoff:
+human_signoff: Phan Le Manh 2026-08-27
 ---
 
 # Evidence Report: normalize-text-vi
@@ -281,7 +281,7 @@ human_signoff:
     - domain-correctness: PASS (r15)
     - operational-feasibility: PASS (r15)
     - spec-alignment: PASS (r15)
-  human_override:
+  human_override: Phan Le Manh 2026-08-27 — PASS. Đã tự xem hai ảnh 1280x900 và bản phóng to cạnh node (evidence/design/captures/), đặt cạnh các node sẵn có trên bảng vẽ: cùng ngôn ngữ thiết kế, hai handle đúng chỗ. Ảnh giữ nguyên từng byte từ vòng 15 (inputsHash 13fa28cc…) và đã được owner xác nhận lần đầu 26/08; chữ ký hôm nay phê chuẩn lại trên đúng bộ ảnh đó.
 
 ## Known limits
 
