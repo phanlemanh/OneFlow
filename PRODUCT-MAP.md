@@ -9,9 +9,9 @@ flowchart TD
   GD --> B["Sắp mở vòng<br/>chưa có"]
   GD --> XL["Xếp lại sau<br/>chưa có"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
-  B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
+  B --> CD["Chờ duyệt phạm vi<br/>1 việc"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>21 việc"]
+  GB --> DG["Đã giao<br/>22 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -25,6 +25,10 @@ flowchart TD
 
 - Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy (`director-v2`)
 - Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
+
+## Chờ duyệt phạm vi
+
+- chống đọc sai êm ru — bộ đọc phải TỪ CHỐI thay vì phát ra nội dung sai (`chong-doc-sai-em-ru`)
 
 ## Đã giao
 
@@ -41,6 +45,7 @@ flowchart TD
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
 - Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
+- slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`)
 - Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
 - Per-plugin origin in the official manifest (`per-plugin-origin`)
 - pnpm 11 build-script approvals — move to pnpm-workspace.yaml (allowBuilds) and unblock the verify toolchain (`pnpm-build-approvals`)
