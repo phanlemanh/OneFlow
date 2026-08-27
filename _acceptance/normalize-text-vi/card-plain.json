@@ -353,6 +353,14 @@
     {
       "id": "d-20260827T083547Z-88431",
       "p": "Chọn nói ít đi thay vì nói sai: máy khai sẵn những cách viết dấu phẩy nó đọc được và TỪ CHỐI phần còn lại; đổi lại vài câu trước đây đọc được (nhờ may) nay bị từ chối."
+    },
+    {
+      "id": "d-20260827T094057Z-30517",
+      "p": "Anh trả lại Cổng 2 lần hai và chỉ đạo nới luật từ chối thêm một nấc, vì tên đường Việt thường LÀ SỐ nên câu địa chỉ vẫn đọc thành giá."
+    },
+    {
+      "id": "d-20260827T094408Z-64822",
+      "p": "Nay từ chối luôn khi sau dấu tiền là số hoặc dấu phẩy — đo được là không ca nào trong 126 chuỗi đã ghim đổi trạng thái; đổi lại 'Giá 500 đ, bao gồm VAT' bị từ chối, và dấu tiền cuối chuỗi cố ý để nguyên vì chặn ở đó sẽ giết cả 'Giá 500 đ'."
     }
   ]
 }
