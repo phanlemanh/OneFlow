@@ -444,6 +444,12 @@ risk_tiers:
     - "STATUS.md"
     - "CHANGELOG.md"
     - "NOTICE.md"
+    # View máy sinh, KHÔNG phải vật để nghiệm thu: `product-map.mjs` vẽ lại nó từ
+    # `_acceptance/*/` ở mỗi lần đóng cổng người, nên gate hoá nó là bắt hồ sơ
+    # nghiệm thu chính cái bóng của mình. Cổng độc lập duy nhất biện minh cho
+    # miễn trừ này là `product-map.mjs --check` (ADR 0007 của kit) — bỏ khai dòng
+    # này mà vẫn commit bản đồ là cấu hình sai, kit tự có test bắt.
+    - "PRODUCT-MAP.md"
     - ".gitignore"
     - ".claude/**"
     - "_acceptance/**"

@@ -1,0 +1,51 @@
+# Bản đồ sản phẩm
+
+> Bản đồ vẽ lại từ hồ sơ của xưởng mỗi lần một người ký một cổng — đừng sửa tay.
+> (đọc từ thư mục `_acceptance/` và `.out-of-scope/`)
+
+```mermaid
+flowchart TD
+  A["Đang cân nhắc cơ hội<br/>2 việc"] --> GD{"Cổng Đáng"}
+  GD --> B["Sắp mở vòng<br/>chưa có"]
+  GD --> XL["Xếp lại sau<br/>chưa có"]
+  GD --> DB["Đã bác từ khám phá<br/>chưa có"]
+  B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
+  GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
+  GB --> DG["Đã giao<br/>21 việc"]
+  GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
+  GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
+```
+
+> **Bốn cổng người** — mỗi cổng là một câu hỏi chỉ người trả lời được:
+> **Cổng Đáng** việc này có đáng làm không · **Cổng Phạm vi** bộ tiêu chí
+> đã đủ và đúng chưa · **Cổng Bằng chứng** đã làm đúng thứ đã hứa chưa ·
+> **Cổng Giá trị** thứ đã giao có ăn thua không.
+
+## Đang cân nhắc cơ hội
+
+- Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy (`director-v2`)
+- Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
+
+## Đã giao
+
+- BYO-key onboarding — first run reaches a real result before asking for a key (`byo-key-onboarding`)
+- Cache L1 — node_fingerprint() and digest_form(), pure key computation (`cache-l1-fingerprint`)
+- Cache L2 — on-disk node cache, tier A only (`cache-l2-store`)
+- Cache L3 — tier B, per-workflow memo for nondeterministic slots (`cache-l3-tier-b`)
+- Cache L4 — LRU eviction theo dung lượng, purge, reuse API, telemetry % partial (`cache-l4-eviction`)
+- CI actions bump — actions/checkout 4→7, docker/login-action 3→4 (`ci-actions-bump`)
+- CI-a — vitest vào CI + gỡ ghim SDK cứng của guard overlay (khử mìn hạ tầng verify) (`ci-vitest-sdk-pin`)
+- slot dán chữ/khung giá/logo/safe-zone lên ảnh & video (Phase 1.2) (`compose-overlay`)
+- Conformance L0 — pluginRev, node_cached contract, TS↔Python conformance suite (`conformance-l0`)
+- Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
+- Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
+- Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
+- Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
+- Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
+- Per-plugin origin in the official manifest (`per-plugin-origin`)
+- pnpm 11 build-script approvals — move to pnpm-workspace.yaml (allowBuilds) and unblock the verify toolchain (`pnpm-build-approvals`)
+- The plugin scanner reports the reason it already has, instead of blaming entry.py (`scan-scope-diagnostics`)
+- Plugin scanner reads imports by scope boundary, and says why a slot was skipped (`scan-with-block-imports`)
+- Publish the SDK as oneflow-sdk while keeping the tongflow import package (`sdk-distribution-rename`)
+- Scope evidence staleness by declared eval paths (`stale-scope-by-paths`)
+- Per-task metering columns and measured plugin duration (`task-metering`)
