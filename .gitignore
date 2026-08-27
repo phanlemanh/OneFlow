@@ -55,7 +55,10 @@ __pycache__/
 /plugins/*
 !/plugins/.gitkeep
 
-.claude/
+# Ignore agent scratch under .claude/, but TRACK the repo-level plugin declaration
+# so a teammate opening the repo is prompted to install the right kit plugins.
+.claude/*
+!.claude/settings.json
 
 # Agent session scratch (working notes, reports). Untracked and never shipped —
 # listed here so a `git add -A` cannot sweep it into a commit.
