@@ -134,12 +134,53 @@ _DECIMAL_COMMA = re.compile(r"(?<=\d),(\d{1,2})(?!\d)")
 # every price reading intact, which is what this slot exists for.
 _COMMA_CHAIN = re.compile(r"\d+(?:,\d+){2,}")
 
+# THE COMMA TABLE — declared first, and the ONLY comma shapes this reader
+# claims to read. A run is `<digits>(,<digits>)+`; what it means depends on the
+# groups, and two of the four shapes cannot be told apart from another meaning:
+#
+#   một nhóm, 1–2 chữ số   "7,05"          → SỐ THẬP PHÂN, đọc được
+#   nhiều nhóm, không phải  "1,2,3"        → LIỆT KÊ, đọc được
+#     tất cả 3 chữ số
+#   nhiều nhóm, TẤT CẢ      "1,000,000"    → TỪ CHỐI: dấu nghìn kiểu Anh và
+#     3 chữ số                                liệt kê viết giống hệt nhau
+#   một nhóm, ≥3 chữ số     "1,000" "3,14159" → TỪ CHỐI: dấu nghìn kiểu Anh,
+#                                               hoặc phần lẻ ngoài dạng đã khai
+#
+# Measured before this table existed, every one with ok=True and residual
+# empty: "1,000,000 VND" → "một, không, không đồng" (sai sáu bậc);
+# "3,14159" → "ba phẩy mười bốn nghìn một trăm năm mươi chín". Đoán một trong
+# hai nghĩa là nói sai; từ chối thì người dùng THẤY. Cùng học thuyết với
+# _AMBIGUOUS_D ngay dưới đây.
+_COMMA_RUN = re.compile(r"\d+(?:,\d+)+")
+
+
+def _unreadable_comma_runs(text: str) -> tuple[str, ...]:
+    """The comma runs this reader refuses rather than guesses. Table above."""
+    refused: list[str] = []
+    for match in _COMMA_RUN.finditer(text):
+        run = match.group(0)
+        groups = run.split(",")[1:]
+        all_three = all(len(g) == 3 for g in groups)
+        if all_three or (len(groups) == 1 and len(groups[0]) >= 3):
+            refused.append(run)
+    return tuple(dict.fromkeys(refused))
+
+
 
 def _decimal_tail(match: re.Match[str]) -> str:
     # An all-zero fraction is not spoken in a Vietnamese price: "3.000.000,00 đ"
     # is read "ba triệu đồng", never "ba triệu phẩy không đồng".
     digits = match.group(1)
-    return "" if set(digits) == {"0"} else f" phẩy {digits}"
+    if set(digits) == {"0"}:
+        return ""
+    # LEADING ZEROS ARE SPOKEN, the rest is a cardinal. Handing the raw fraction
+    # to the library made it a cardinal as a whole, and a cardinal has no leading
+    # zero: "7,05%" came back "bảy phẩy năm" (7.5%) and "3,09 triệu" was
+    # byte-identical to "3,9 triệu" — a confident, order-of-magnitude-wrong
+    # number spoken as success, with residual empty and the currency word
+    # present, so both post-checks stayed green (S4 round 18).
+    lead = len(digits) - len(digits.lstrip("0"))
+    return f" phẩy {'không ' * lead}{digits[lead:]}"
 
 
 # "<số hoặc đơn vị lớn> đ[.] <từ>" is REFUSED, not guessed.
@@ -316,6 +357,9 @@ def normalize_vi(text: str) -> NormalizeResult:
     # ambiguous is gone by then.
     if _AMBIGUOUS_D.search(unicodedata.normalize("NFC", text)):
         residual = residual + ("đ",)
+    # Same doctrine, decided on the INPUT for the same reason: the comma is gone
+    # from the output, so the shape that made it ambiguous is unreadable there.
+    residual = residual + _unreadable_comma_runs(unicodedata.normalize("NFC", text))
     if residual:
         return NormalizeResult(
             ok=False,

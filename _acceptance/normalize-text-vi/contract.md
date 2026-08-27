@@ -463,6 +463,15 @@ code** vì license):
   nhằng, và nghiêng về thập phân giữ nguyên mọi cách đọc giá, thứ slot này sinh ra để phục vụ.
 
 ## Known limits
+- **THU PHẠM VI dấu phẩy** *(owner chọn đường "thu phạm vi" 2026-08-27, sau khi vòng 18 lại
+  sinh đúng lớp lỗi của vòng 17)*. Reader nay khai một BẢNG các dạng dấu phẩy nó đọc được, và
+  **TỪ CHỐI** hai dạng còn lại thay vì đoán: dãy mà mọi nhóm đều đúng ba chữ số
+  (`1,000,000` · `100,200,300` — dấu nghìn kiểu Anh và liệt kê viết giống hệt nhau) và một
+  nhóm từ ba chữ số trở lên (`1,000` · `3,14159`). Đổi lại: `Giá 1,000 VND` trước đây đọc
+  ĐÚNG — nhưng đúng do thư viện đoán, không do luật nào bảo đảm — nay bị từ chối. Phần lẻ có
+  số 0 đứng đầu đọc đúng trở lại (`7,05%` → "bảy phẩy không năm"; trước đó ra "bảy phẩy năm",
+  tức 7,5%). *(đường (a) — kiểm nghĩa bằng cách đọc ngược đầu ra thành số rồi so với số đầu
+  vào — để lại thành hợp đồng follow-up)*
 - **Ô E17a/E17b đo trên cây plugin CỤC BỘ, không phải bản đã xuất bản.** Kho công khai chưa
   tồn tại nên phép đo không trỏ được tới bản sửa đổi nào — chính nó khai
   `plugin_commit_sha: local-tree-not-a-repo`. Bằng chứng này **không tái lập được** ở máy khác.

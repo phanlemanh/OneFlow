@@ -504,6 +504,64 @@ def test_comma_separated_lists_are_not_decimals() -> None:
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
 
 
+# BẢNG DẤU PHẨY — nửa ÂM. Hai dạng dưới đây viết giống hệt một nghĩa khác, nên
+# reader TỪ CHỐI thay vì đoán (owner chọn đường "thu phạm vi", 2026-08-27, sau
+# khi vòng 18 lại sinh đúng lớp lỗi của vòng 17).
+#
+# Đo trước khi có bảng, mọi ca đều ok=True và residual RỖNG:
+#   "Giá 1,000,000 VND"          -> "giá một, không, không đồng"      (sai sáu bậc)
+#   "Doanh thu 100,200,300 đồng" -> "doanh thu một trăm, hai trăm, ba trăm đồng"
+#   "Giá 1,000 VND"              -> "giá một nghìn đồng"  (ĐÚNG do thư viện ĐOÁN)
+#   "Pi 3,14159"                 -> "pi ba phẩy mười bốn nghìn một trăm năm mươi chín"
+CORPUS_COMMA_UNREADABLE: tuple[tuple[str, str], ...] = (
+    # (chuỗi vào, cụm phải bị nêu tên trong residual)
+    ("Giá 1,000,000 VND", "1,000,000"),
+    ("Doanh thu 100,200,300 đồng", "100,200,300"),
+    ("Giá 1,000 VND", "1,000"),
+    ("Pi 3,14159", "3,14159"),
+)
+
+# ...và nửa DƯƠNG trên CÙNG họ dấu phẩy: dạng đã khai vẫn phải đọc, và phần lẻ
+# có số 0 đứng đầu phải GIỮ được số 0. "7,05%" từng đọc ra "bảy phẩy năm" (7,5%)
+# và "3,09 triệu" từng trùng khít đầu ra của "3,9 triệu" — cardinal không có số 0
+# đứng đầu. Hai dòng cuối là mỏ neo hồi quy của kỳ vọng vàng đã duyệt: phần lẻ
+# KHÔNG có số 0 đầu vẫn đọc y như cũ.
+CORPUS_COMMA_READABLE: tuple[tuple[str, str], ...] = (
+    ("Lãi suất 7,05%", "lãi suất bảy phẩy không năm phần trăm"),
+    ("Giá 3,09 triệu đồng", "giá ba phẩy không chín triệu đồng"),
+    ("Tỷ lệ 0,08%", "tỷ lệ không phẩy không tám phần trăm"),
+    ("Giá 3,9 triệu đồng", "giá ba phẩy chín triệu đồng"),
+    ("Giá 1.999.000,50 đ", "giá một triệu chín trăm chín mươi chín nghìn phẩy năm mươi đồng"),
+)
+
+
+def test_unreadable_comma_shapes_are_refused_by_name() -> None:
+    for raw, run in CORPUS_COMMA_UNREADABLE:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: dạng dấu phẩy không đọc được dứt khoát phải TỪ CHỐI, "
+            f"nhận ok=True -> {got.text!r}"
+        )
+        assert run in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu TÊN cụm gây từ chối "
+            f"({run!r} không có trong {got.residual})"
+        )
+
+
+def test_declared_comma_shapes_still_read_and_keep_leading_zeros() -> None:
+    for raw, expected in CORPUS_COMMA_READABLE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} → {got.error}"
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+    # Quan hệ, không phải hình dạng: phần lẻ khác nhau PHẢI đọc khác nhau.
+    # Đây là mỏ neo bắt được đúng lỗi mà bốn ca literal ở trên có thể bỏ sót
+    # nếu ai đó sửa kỳ vọng cho khớp code thay vì sửa code.
+    assert normalize_vi("Giá 3,09 triệu đồng").text != normalize_vi("Giá 3,9 triệu đồng").text, (
+        "3,09 và 3,9 cho ra CÙNG một câu — số 0 đứng đầu của phần lẻ bị nuốt"
+    )
+
+
 def test_vietnamese_grouped_amounts_read_at_the_right_scale() -> None:
     missing = [
         (grouping, fraction)
@@ -1114,6 +1172,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),
     ("CORPUS_COMMA_LIST", CORPUS_COMMA_LIST),
+    ("CORPUS_COMMA_UNREADABLE", CORPUS_COMMA_UNREADABLE),
+    ("CORPUS_COMMA_READABLE", CORPUS_COMMA_READABLE),
 )
 
 ALL_CORPUS = tuple(
