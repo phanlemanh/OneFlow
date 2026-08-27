@@ -23,7 +23,7 @@ GATE="$ROOT/scripts/pre-merge-check.sh"
 # cleans them all up on pass, on fail()'s exit, and on interrupt alike.
 trap cleanup_case_tmpdirs EXIT
 
-KNOWN_CASES="in-scope out-of-scope partial under-declared malformed indent-drift merged-halves two-bases suppression announce mutation case-completeness guard-not-exempt no-kill-switch"
+KNOWN_CASES="in-scope out-of-scope partial under-declared malformed indent-drift merged-halves two-bases suppression announce fork-undeclared fork-declared-in-union undeclared mutation case-completeness guard-not-exempt no-kill-switch"
 
 # Perturbation knob names. Referenced here and asserted ABSENT from the shipped
 # gate by the no-kill-switch case: an env var in the gate itself would be a
@@ -349,6 +349,71 @@ case_announce() {
   printf '%s\n' "$out2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail announce "undeclared feature was not staled by a gated change — the staleness block did not run, so the silence above proves nothing: $out2"
   pass announce
+}
+
+case_fork_undeclared() {
+  # E4 / AC-3 — nửa SUPPRESSION của hồ sơ gate-tooling-t1. Feature KHÔNG khai
+  # `paths` và `_acceptance/fx/` NGOÀI diff PR: fork STALE-DIFF-SCOPE-GUARD bỏ
+  # qua trọn khối, nên nó không bị báo stale dù có thay đổi gated sau
+  # verified_commit. Đây là lý do fork tồn tại (chống chặn-mọi-PR-vì-lịch-sử),
+  # nên một bản "thu hẹp fork" tay trượt thành gỡ hẳn fork phải làm case này đỏ.
+  d="$(new_case_tmpdir)"
+  base="$(mk_committed_report_fixture "$d" fx none)"
+  ( cd "$d" && echo drift > src/covered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'OK \[fx\]' \
+    || fail fork-undeclared "feature không xuất hiện trong output — case này khẳng định một sự VẮNG MẶT, nên phải chứng minh feature được cổng nhìn thấy trước đã: $out"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    && fail fork-undeclared "feature không khai paths, ngoài diff PR, vẫn bị báo stale — fork đã mất tác dụng bảo vệ và treadmill mở lại cho mọi feature whole-tree: $out"
+  printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' \
+    && fail fork-undeclared "feature không khai paths lại được cấp narrow scope (AC-3 mệnh đề (c) của stale-scope-by-paths): $out"
+
+  # ĐỐI CHỨNG, trong cùng fixture: đưa artifact vào diff thì CHÍNH thay đổi
+  # gated đó PHẢI làm feature stale. Thiếu vế này, case trên vẫn xanh khi
+  # `src/covered/new.txt` không phải file gated chút nào — tức nó sẽ chứng minh
+  # sự im lặng bằng một thay đổi vô hại, không phải bằng fork.
+  ( cd "$d" && pr_touches_artifacts "$d" fx && git add -A && git commit -q -m "artifact touch" )
+  ctl="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$ctl" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail fork-undeclared "đối chứng thất bại: cùng thay đổi đó KHÔNG làm feature stale kể cả khi artifact nằm trong diff, nên sự im lặng ở trên không chứng minh được gì về fork: $ctl"
+  pass fork-undeclared
+}
+
+case_fork_declared_in_union() {
+  # E5 / AC-4 — nửa should-fire, đối xứng với case_out_of_scope. Feature khai
+  # ĐỦ `paths`, `_acceptance/fx/` NGOÀI diff PR (nên fork thu hẹp vẫn cho nó vào
+  # khối, và cross-check không chạy — AC-7 vế 1), và file đổi nằm TRONG union.
+  # Thiếu case này thì "thu hẹp fork" có thể thoái hoá thành "không bao giờ
+  # stale" mà out-of-scope, announce và fork-undeclared vẫn xanh hết.
+  d="$(new_case_tmpdir)"
+  base="$(mk_committed_report_fixture "$d" fx narrow)"
+  ( cd "$d" && echo drift > src/covered/new.txt && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' \
+    || fail fork-declared-in-union "feature khai đủ paths ngoài diff KHÔNG được vào khối staleness — fork chưa thu hẹp, và AC-2 lại mất chỗ quan sát: $out"
+  printf '%s\n' "$out" | grep -qi 'do not cover' \
+    && fail fork-declared-in-union "cross-check chạy dù artifact nằm NGOÀI diff PR (AC-7 vế 1): $out"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail fork-declared-in-union "file NẰM TRONG union đã khai mà không làm feature stale — narrow scope đã thoái hoá thành 'không bao giờ stale': $out"
+  printf '%s\n' "$out" | grep -q 'src/covered/new.txt' \
+    || fail fork-declared-in-union "feature bị báo stale nhưng không nêu tên file — báo stale mà không chỉ được file là không sửa được: $out"
+  pass fork-declared-in-union
+}
+
+case_undeclared() {
+  # E7 / AC-6 — item 0.8(a). AC-3 mệnh đề (a) của stale-scope-by-paths: khai
+  # ZERO `paths` + thay đổi gated thì VẪN phải báo stale. Mệnh đề này mất eval
+  # máy từ 05/08 khi E3 bị descope. Khác case_fork_undeclared ở ĐÚNG MỘT biến:
+  # ở đây `_acceptance/fx/` NẰM TRONG diff, nên khối staleness thật sự chạy.
+  d="$(new_case_tmpdir)"
+  base="$(mk_committed_report_fixture "$d" fx none)"
+  ( cd "$d" && echo drift > src/covered/new.txt && pr_touches_artifacts "$d" fx && git add -A && git commit -q -m drift )
+  out="$(bash "$GATE" "$d" --base "$base" 2>&1)"
+  printf '%s\n' "$out" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
+    || fail undeclared "khai 0 paths + thay đổi gated mà KHÔNG bị báo stale — cơ chế đã thoái hoá thành 'không bao giờ stale' cho đúng nhóm chưa hề chọn tham gia: $out"
+  printf '%s\n' "$out" | grep -q 'narrow staleness scope applied' \
+    && fail undeclared "feature khai 0 paths lại được cấp narrow scope (AC-3 mệnh đề (b)+(c)): $out"
+  pass undeclared
 }
 
 case_under_declared() {
