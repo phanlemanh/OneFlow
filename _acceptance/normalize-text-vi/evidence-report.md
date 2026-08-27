@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 365aef8667048d5ac986d6983081b8d0a356164a
+verified_commit: 673e700dbdfd2127ecae409108f1fa6a5346d42a
 human_signoff: Phan Le Manh 2026-08-27
 ---
 
@@ -305,3 +305,7 @@ Round 21: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hi
 ### Re-pin lần 1 — 2026-08-27, do merge main mang theo dọn dẹp gate-tooling (stale-golden) và tách hồ sơ nháp khỏi PR
 run_id: repin-normalize-text-vi-20260827-a
 sha: 365aef8667048d5ac986d6983081b8d0a356164a · suites: 6 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-27, do hotfix cú pháp f-string cho Python 3.10 của CI (một dòng test, hành vi không đổi)
+run_id: repin-normalize-text-vi-20260827-b
+sha: 673e700dbdfd2127ecae409108f1fa6a5346d42a · suites: 6 lệnh exit 0
