@@ -321,6 +321,15 @@ CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
     # ...và ca mà luật cũ ĐỌC ĐÚNG. Mất nó là cái giá đã khai để không bao giờ
     # đọc sai hai nhóm trên.
     "Số 5 Đ. Lê Lợi",
+    # CÙNG hai địa chỉ ngay trên, chỉ đổi thứ ngăn cách. Luật từ chối neo vào
+    # `[ \t]` trong khi hai luật tiền nó phải phủ quyết neo vào `\s`, nên mọi
+    # ngăn cách KHÔNG phải dấu cách/tab đều lọt: bốn dòng dưới đây từng đọc ra
+    # "số năm đồng. lê lợi" / "nhà mười hai đồng trần phú" với ok=True, không
+    # cờ nào đỏ (S4 vòng 17). Đây là chiều ĐỎ của hằng _SEP dùng chung.
+    "Số 5 Đ.\nLê Lợi",
+    "Số 5 Đ.\xa0Lê Lợi",
+    "Số 5 Đ.Lê Lợi",
+    "Nhà 12 Đ\xa0Trần Phú",
 )
 
 # The price forms the street rule must NOT eat. Two of them are the very cases

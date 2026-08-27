@@ -65,9 +65,18 @@ _MAGNITUDE = "(?:" + "|".join(_MAGNITUDE_WORDS) + ")"
 # (S4 round 6 finding — the reviewer read the claim and checked it).
 _MAGNITUDE_BEHIND = "|".join(f"(?<={w})" for w in _MAGNITUDE_WORDS)
 
+# ONE separator class for the whole "<number> đ <word>" family. The refusal
+# rule and the two rewrites it must veto have to agree on what counts as a gap,
+# or the veto never reaches the inputs the rewrites accept: the rewrites used
+# `\s` while the refusal used `[ \t]`, so a newline, an NBSP, or no gap at all
+# let a street address through as a price with ok=True (S4 round 17, measured:
+# 'Số 5 Đ.\nLê Lợi' -> 'số năm đồng. lê lợi'). Shared the way _MAGNITUDE_WORDS
+# is shared — a second spelling is the drift.
+_SEP = r"\s"
+
 _SPACED_DONG = re.compile(
-    rf"(?<=\d)\s+(?i:đ)\b"
-    rf"|(?i:{_MAGNITUDE_BEHIND})\s*(?i:đ)\b"
+    rf"(?<=\d){_SEP}+(?i:đ)\b"
+    rf"|(?i:{_MAGNITUDE_BEHIND}){_SEP}*(?i:đ)\b"
 )
 
 # A hyphen BETWEEN two numbers is a range in spoken Vietnamese. The library
@@ -148,7 +157,10 @@ def _decimal_tail(match: re.Match[str]) -> str:
 # comma or a slash, or spelled out in full ("ĐỒNG", "VNĐ"). Nothing can follow
 # it there that would make it an address.
 _AMBIGUOUS_D = re.compile(
-    rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND}))[ \t]*(?i:đ)\.?[ \t]+(?=[^\W\d_])"
+    # `\b` after the mark is what makes the zero-width gap safe: without it,
+    # "đồng" would match here (đ + no dot + no gap + a letter) and every price
+    # would be refused. With it, "đ" glued to a letter is not a match at all.
+    rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND})){_SEP}*(?i:đ)\b\.?{_SEP}*(?=[^\W\d_])"
 )
 
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
