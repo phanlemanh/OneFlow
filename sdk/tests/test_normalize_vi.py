@@ -414,6 +414,94 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         )
 
 
+# THE AMBIGUOUS-Đ MATRIX — declared BEFORE the cases, the way the six sibling
+# families in this file are. The flat tuple above is the historical pin list: it
+# grew by four rows in round 17 and four more in round 19, each time AFTER a
+# reviewer found a leak, because a flat list cannot say which cell is empty.
+#
+# Two axes, both named by the leaks themselves:
+#   separator AFTER the mark — round 17: the refusal anchored on `[ \t]` while
+#     the two money rewrites anchored on `\s`, so newline / NBSP / nothing leaked
+#   token FOLLOWING that separator — round 19: the lookahead accepted only a
+#     LETTER, so Vietnamese street names that are NUMBERS (Đường 3/2, 30/4, 2/9)
+#     and addresses followed by a comma leaked
+D_SEPARATORS: dict[str, str] = {
+    "cách": " ",
+    "tab": "\t",
+    "xuống dòng": "\n",
+    "NBSP": "\xa0",
+    "không có": "",
+}
+D_FOLLOWING: dict[str, str] = {
+    "chữ": "Lê Lợi",
+    "số": "3/2, Q.10",
+    "dấu phẩy": ", Q.1",
+    "kết chuỗi": "",
+}
+
+AMBIGUOUS_D_MATRIX: dict[tuple[str, str], str] = {
+    (sep_name, follow_name): f"Số 25 Đ.{sep}{follow}"
+    for sep_name, sep in D_SEPARATORS.items()
+    for follow_name, follow in D_FOLLOWING.items()
+    if follow_name != "kết chuỗi"
+}
+
+# The whole "kết chuỗi" column is out of the refusal ON PURPOSE, and the reason is
+# the same for all five cells, so they are listed rather than silently absent.
+# Refusing a currency mark at end of string would take "Giá 500 đ" with it — the
+# single commonest price spelling this slot exists to read. Declared in the
+# contract's Known limits (widening of 2026-08-27); the five cells also collapse
+# to one input, because trailing whitespace before end of string is not a
+# separator anyone can see.
+DELIBERATELY_UNCOVERED_D_CELLS: dict[tuple[str, str], str] = {
+    (sep_name, "kết chuỗi"): (
+        "dấu tiền ở cuối chuỗi CỐ Ý vẫn đọc — chặn ở đó sẽ giết luôn 'Giá 500 đ'"
+    )
+    for sep_name in D_SEPARATORS
+}
+
+
+def test_ambiguous_d_matrix_has_no_silently_empty_cell() -> None:
+    """Every (separator, following-token) cell is either measured or named."""
+    missing = [
+        (sep_name, follow_name)
+        for sep_name in D_SEPARATORS
+        for follow_name in D_FOLLOWING
+        if (sep_name, follow_name) not in AMBIGUOUS_D_MATRIX
+        and (sep_name, follow_name) not in DELIBERATELY_UNCOVERED_D_CELLS
+    ]
+    assert missing == [], (
+        "ô ma trận Đ-nhập-nhằng không có ca và cũng không được khai là cố ý bỏ: "
+        f"{missing}"
+    )
+    overlap = set(AMBIGUOUS_D_MATRIX) & set(DELIBERATELY_UNCOVERED_D_CELLS)
+    assert overlap == set(), f"ô vừa có ca vừa khai bỏ: {sorted(overlap)}"
+
+
+def test_ambiguous_d_matrix_every_cell_refuses_by_name() -> None:
+    for (sep_name, follow_name), raw in sorted(AMBIGUOUS_D_MATRIX.items()):
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"ô ({sep_name}, {follow_name}) — {raw!r}: dạng nhập nhằng phải TỪ "
+            f"CHỐI, nhận ok=True -> {got.text!r}"
+        )
+        assert "Đ" in got.residual or "đ" in got.residual, (
+            f"ô ({sep_name}, {follow_name}) — {raw!r}: từ chối nhưng không nêu "
+            f"token gây nhập nhằng: {got.residual}"
+        )
+
+
+def test_declared_uncovered_d_cells_are_still_uncovered() -> None:
+    """A limit that has quietly healed is a lie in the file."""
+    for (sep_name, _), _reason in DELIBERATELY_UNCOVERED_D_CELLS.items():
+        raw = f"Số 25 Đ.{D_SEPARATORS[sep_name]}"
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"ô ({sep_name}, kết chuỗi) — {raw!r} nay ĐÃ bị từ chối; gỡ nó khỏi "
+            "DELIBERATELY_UNCOVERED_D_CELLS và cập nhật Known limits"
+        )
+
+
 def test_ambiguous_undotted_d_refuses_rather_than_guessing() -> None:
     for raw in CORPUS_AMBIGUOUS_D:
         got = normalize_vi(raw)
@@ -1197,6 +1285,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_COMMA_LIST", CORPUS_COMMA_LIST),
     ("CORPUS_COMMA_UNREADABLE", CORPUS_COMMA_UNREADABLE),
     ("CORPUS_COMMA_READABLE", CORPUS_COMMA_READABLE),
+    ("AMBIGUOUS_D_MATRIX", AMBIGUOUS_D_MATRIX),
 )
 
 ALL_CORPUS = tuple(
