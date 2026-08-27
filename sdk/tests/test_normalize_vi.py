@@ -415,6 +415,20 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         )
 
 
+def test_digit_losing_dash_runs_are_refused_by_name() -> None:
+    """A run that loses digits when read as a range must be refused, by name."""
+    for kind, raw, run in CORPUS_DASH_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r}: đọc thành khoảng làm MẤT chữ số, phải TỪ CHỐI — "
+            f"nhận ok=True -> {got.text!r}"
+        )
+        assert run in got.residual, (
+            f"[{kind}] {raw!r}: từ chối nhưng không nêu TÊN cụm ({run!r} không "
+            f"có trong {got.residual})"
+        )
+
+
 # THE TYPOGRAPHIC-DASH MATRIX — 3 dash characters × 3 roles, declared before the
 # cases. The claim is a RELATION, not a literal: a typographic dash must read
 # EXACTLY like its ASCII spelling, so the expectation is computed from the ASCII
@@ -1187,21 +1201,25 @@ RANGE_MATRIX: dict[tuple[str, str], str] = {
 # in the suite rather than only in prose, and (b) when someone fixes the rule
 # this test goes RED and forces the contract to be updated with it, instead of
 # the behaviour changing silently.
+# The dash shapes this reader now REFUSES rather than reading as a range, and the
+# ONE that remains a declared limit. Two of the three former limits are gone: an
+# ISO date and a dash-written phone number both lose digits when read as a range
+# ("0912-345-678" dropped its leading zero), and losing a digit while reporting
+# success is the defect class this contract exists to close (AC-3, 2026-08-27).
+CORPUS_DASH_REFUSED: tuple[tuple[str, str, str], ...] = (
+    ("ngày kiểu ISO", "ISO 2026-08-19", "2026-08-19"),
+    ("điện thoại có gạch", "Gọi 0912-345-678 để biết thêm", "0912-345-678"),
+    ("mã có số 0 đứng đầu", "Mã 0123-4567 đã giao", "0123-4567"),
+)
+
+# STILL a limit, and the reason is structural rather than an oversight: two
+# groups with no leading zero is indistinguishable from a real range, and
+# refusing it would take "Giá 5-10 triệu" — the shape the range rule exists for.
 CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
     (
-        "ngày kiểu ISO",
-        "ISO 2026-08-19",
-        "i ét o hai nghìn không trăm hai mươi sáu đến tám đến mười chín",
-    ),
-    (
-        "mã có gạch",
+        "mã có gạch, hai nhóm",
         "Mã đơn 1234-5678 đã giao",
         "mã đơn một nghìn hai trăm ba mươi tư đến năm nghìn sáu trăm bảy mươi tám đã giao",
-    ),
-    (
-        "điện thoại có gạch",
-        "Gọi 0912-345-678 để biết thêm",
-        "gọi chín trăm mười hai đến ba trăm bốn mươi lăm đến sáu trăm bảy mươi tám để biết thêm",
     ),
 )
 
@@ -1415,6 +1433,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_MONEY_MARK_UNAMBIGUOUS", CORPUS_MONEY_MARK_UNAMBIGUOUS),
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
+    ("CORPUS_DASH_REFUSED", CORPUS_DASH_REFUSED),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),

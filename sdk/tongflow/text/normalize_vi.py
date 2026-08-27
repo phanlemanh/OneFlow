@@ -236,6 +236,42 @@ _AMBIGUOUS_D = re.compile(
 _TYPOGRAPHIC_DASHES = "\u2013\u2014\u2212"  # – en, — em, − minus
 _DASH_FOLD = re.compile(f"[{_TYPOGRAPHIC_DASHES}]")
 
+# THE DASH TABLE — which dash-joined digit runs this reader claims to read as a
+# RANGE, and which it refuses rather than guessing. A range has exactly TWO
+# endpoints and both are quantities; the shapes below are neither, and reading
+# them as a range LOSES DIGITS, which no post-check can see:
+#
+#   "ISO 2026-08-19"           -> "hai nghìn… ĐẾN tám ĐẾN mười chín"
+#   "Gọi 0912-345-678"         -> "chín trăm mười hai ĐẾN …"   (leading 0 gone)
+#   "Mã 0123-4567"             -> "một trăm hai mươi ba ĐẾN …" (leading 0 gone)
+#
+# Two structural signals, both properties of the RUN, not of the rule measuring
+# it: three or more groups cannot be a two-endpoint range, and a group with a
+# leading zero is an identifier, never a quantity.
+#
+# Declared limit that stays: "1234-5678" (two groups, no leading zero) is
+# genuinely indistinguishable from the range "1234 đến 5678". Refusing it would
+# take "5-10" with it — the shape this rule exists to read.
+_DASH_RUN = re.compile(r"\d+(?:-\d+)+")
+
+
+def _unreadable_dash_runs(text: str) -> tuple[str, ...]:
+    """Dash-joined digit runs this reader refuses rather than guesses."""
+    # d-m-y dates are rewritten to slashes before the range rule ever sees them,
+    # so they are not candidates: mask them out first or "ngày 19-08-2026" (three
+    # groups, a zero-padded month) would be refused as an identifier.
+    masked = _DASH_DATE.sub(lambda m: "\x00" * len(m.group(0)), text)
+    refused: list[str] = []
+    for match in _DASH_RUN.finditer(masked):
+        run = match.group(0)
+        groups = run.split("-")
+        many_groups = len(groups) >= 3
+        zero_padded = any(len(g) > 1 and g[0] == "0" for g in groups)
+        if many_groups or zero_padded:
+            refused.append(run)
+    return tuple(dict.fromkeys(refused))
+
+
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
 # What must never survive into speech: digits, a currency sign, a percent sign,
@@ -403,6 +439,7 @@ def normalize_vi(text: str) -> NormalizeResult:
     # Same doctrine, decided on the INPUT for the same reason: the comma is gone
     # from the output, so the shape that made it ambiguous is unreadable there.
     residual = residual + _unreadable_comma_runs(unicodedata.normalize("NFC", text))
+    residual = residual + _unreadable_dash_runs(_DASH_FOLD.sub("-", unicodedata.normalize("NFC", text)))
     if residual:
         return NormalizeResult(
             ok=False,
