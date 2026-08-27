@@ -1,0 +1,11 @@
+{"ts": "2026-08-27T08:57:05Z", "round": 1, "evalId": "E1", "run_id": "roadmap-drift-guard-e1-20260827T085705Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case adr-uncited"}
+{"ts": "2026-08-27T08:57:35Z", "round": 1, "evalId": "E2", "run_id": "roadmap-drift-guard-E2-20260827T085735Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-bare"}
+{"ts": "2026-08-27T08:57:36Z", "round": 1, "evalId": "E3", "run_id": "roadmap-drift-guard-E3-20260827T085735Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-paired"}
+{"ts": "2026-08-27T08:57:36Z", "round": 1, "evalId": "E4", "run_id": "roadmap-drift-guard-E4-20260827T085736Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-missing"}
+{"ts": "2026-08-27T08:57:36Z", "round": 1, "evalId": "E5", "run_id": "roadmap-drift-guard-E5-20260827T085736Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-stale"}
+{"ts": "2026-08-27T08:57:36Z", "round": 1, "evalId": "E6", "run_id": "roadmap-drift-guard-E6-20260827T085736Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case historical-244cb0b"}
+{"ts": "2026-08-27T08:57:52Z", "round": 1, "evalId": "E7", "run_id": "roadmap-drift-guard-E7-20260827T085750Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case case-isolation"}
+{"ts": "2026-08-27T08:57:52Z", "round": 1, "evalId": "E8", "run_id": "roadmap-drift-guard-E8-20260827T085752Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-fresh.sh"}
+{"ts": "2026-08-27T08:57:52Z", "round": 1, "evalId": "E9", "run_id": "roadmap-drift-guard-E9-20260827T085752Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single"}
+{"ts": "2026-08-27T08:57:52Z", "round": 1, "evalId": "E10", "run_id": "roadmap-drift-guard-E10-20260827T085752Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-alias-cited.sh"}
+{"ts": "2026-08-27T08:57:52Z", "round": 1, "evalId": "E11", "run_id": "roadmap-drift-guard-E11-20260827T085752Z", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-paired"}
