@@ -1,0 +1,87 @@
+{
+  "feature_plain": "Bộ đọc số tiếng Việt phải TỪ CHỐI thay vì đọc ra nội dung sai — đóng cả LỚP lỗi 'đọc sai mà vẫn báo thành công' mà hợp đồng gốc chỉ đóng từng ca.",
+  "will_do": [
+    {
+      "id": "AC-1",
+      "p": "Sẽ đọc gạch kiểu chữ (– — −) giống hệt dạng ASCII — hôm nay 'Giá 5 – 10 triệu' mất chữ 'đến', '−7 độ' mất chữ 'âm'."
+    },
+    {
+      "id": "AC-2",
+      "p": "Sẽ xử chuỗi có URL/đường dẫn tử tế: đọc đúng phần quanh nó hoặc từ chối — không bao giờ trả thành công với chuỗi cắt cụt."
+    },
+    {
+      "id": "AC-3",
+      "p": "Sẽ thôi đọc 'số-gạch-số' không phải khoảng (ngày ISO, mã đơn, số điện thoại) thành chữ 'đến' — biến giới hạn đã khai thành yêu cầu."
+    },
+    {
+      "id": "AC-4",
+      "p": "Sẽ giữ nguyên hoặc đọc theo cách khai rõ token thương hiệu La-tinh (VNDirect, H.264), và đọc hai lần ra cùng một kết quả."
+    },
+    {
+      "id": "AC-5",
+      "p": "Sẽ có ca đo dương VÀ âm cho MỌI mục từ điển viết tắt — hôm nay 6/11 mục chưa có ca nào."
+    },
+    {
+      "id": "AC-6",
+      "p": "Sẽ hiện lỗi theo ngôn ngữ người dùng: SDK trả mã máy đọc được, câu chữ sống trong 5 file ngôn ngữ — hết cảnh người dùng Nhật/Hàn thấy câu tiếng Việt."
+    },
+    {
+      "id": "AC-7",
+      "p": "Sẽ có mục 'Tiếng Việt' trong bộ chọn ngôn ngữ giọng đọc — mảnh thiếu khiến việc thu hẹp cảnh báo phải gỡ hai lần."
+    },
+    {
+      "id": "AC-8",
+      "p": "Sẽ cấm phép đo tự chọn chủ thể bằng chính thuộc tính nó đo — lỗ đã đo được ở ô E18 của hợp đồng gốc."
+    },
+    {
+      "id": "AC-9",
+      "p": "Sẽ từ chối thay vì nuốt chữ 'ngày' và một thành phần ngày khi gặp ngày kiểu Mỹ hoặc ngày không tồn tại."
+    },
+    {
+      "id": "AC-10",
+      "p": "Sẽ tính dấu gạch chéo còn sót (đ/kg, %/năm) là token chưa đọc được — hôm nay chúng lọt với báo thành công."
+    }
+  ],
+  "wont_do": [
+    {
+      "id": "OOS-1",
+      "p": "Sẽ KHÔNG sửa hay fork thư viện đọc số — chỉ ghim phiên bản và bọc."
+    },
+    {
+      "id": "OOS-2",
+      "p": "Sẽ KHÔNG đọc ngôn ngữ khác ngoài tiếng Việt."
+    },
+    {
+      "id": "OOS-3",
+      "p": "Sẽ KHÔNG làm giọng vùng miền hay phần phát thành tiếng."
+    },
+    {
+      "id": "OOS-4",
+      "p": "Sẽ KHÔNG thu hẹp cảnh báo xuất bản theo ngôn ngữ trước khi bộ chọn có mục tiếng Việt."
+    }
+  ],
+  "coverage_plain": [
+    {
+      "i": 0,
+      "p": "Trục ký tự: gạch kiểu chữ và dấu phân cách URL — AC-1 (gạch chữ về ASCII) và AC-2 (URL không cắt cụt)."
+    },
+    {
+      "i": 1,
+      "p": "Trục hình dạng dễ nhầm: số-gạch-số không phải khoảng và token La-tinh — AC-3 (thôi đọc thành 'đến') và AC-4 (thương hiệu giữ nguyên)."
+    },
+    {
+      "i": 2,
+      "p": "Trục phủ từ điển: mọi mục có ca dương + ca âm — AC-5 (6/11 mục đang trống)."
+    },
+    {
+      "i": 3,
+      "p": "Trục người đọc: lỗi theo ngôn ngữ người dùng và khai được tiếng Việt — AC-6 (mã + i18n) và AC-7 (mục chọn tiếng Việt)."
+    },
+    {
+      "i": 4,
+      "p": "Trục tự soi: phép đo không tự chọn chủ thể theo thứ nó đo — AC-8 (lỗ E18)."
+    }
+  ],
+  "scope_plain": "Không đụng: fork thư viện đọc số, ngôn ngữ khác, giọng vùng miền, phần phát tiếng, và thu hẹp cảnh báo trước khi có mục tiếng Việt.",
+  "decisions_plain": []
+}
