@@ -41,3 +41,13 @@
 {"ts": "2026-08-27T17:09:59+07:00", "round": 4, "evalId": "E8", "run_id": "roadmap-drift-guard-r4-e8-20260827T170959", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-fresh.sh"}
 {"ts": "2026-08-27T17:09:59+07:00", "round": 4, "evalId": "E9", "run_id": "roadmap-drift-guard-r4-e9-20260827T170959", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single"}
 {"ts": "2026-08-27T17:09:59+07:00", "round": 4, "evalId": "E11", "run_id": "roadmap-drift-guard-r4-e11-20260827T170959", "exit_code": 0, "cmd": "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-paired"}
+{"ts":"2026-08-27T10:26:02Z","round":5,"evalId":"E8","run_id":"roadmap-drift-guard-r5-e8-20260827T102602Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-fresh.sh"}
+{"ts":"2026-08-27T10:26:02Z","round":5,"evalId":"E1","run_id":"roadmap-drift-guard-r5-e1-20260827T102602Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case adr-uncited"}
+{"ts":"2026-08-27T10:26:02Z","round":5,"evalId":"E2","run_id":"roadmap-drift-guard-r5-e2-20260827T102602Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-bare"}
+{"ts":"2026-08-27T10:26:02Z","round":5,"evalId":"E3","run_id":"roadmap-drift-guard-r5-e3-20260827T102602Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-paired"}
+{"ts":"2026-08-27T10:26:02Z","round":5,"evalId":"E4","run_id":"roadmap-drift-guard-r5-e4-20260827T102602Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-missing"}
+{"ts":"2026-08-27T10:26:03Z","round":5,"evalId":"E5","run_id":"roadmap-drift-guard-r5-e5-20260827T102603Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-stale"}
+{"ts":"2026-08-27T10:26:15Z","round":5,"evalId":"E6","run_id":"roadmap-drift-guard-r5-e6-20260827T102615Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case historical-244cb0b"}
+{"ts":"2026-08-27T10:26:15Z","round":5,"evalId":"E9","run_id":"roadmap-drift-guard-r5-e9-20260827T102615Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single"}
+{"ts":"2026-08-27T10:26:15Z","round":5,"evalId":"E11","run_id":"roadmap-drift-guard-r5-e11-20260827T102615Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-paired"}
+{"ts":"2026-08-27T10:26:15Z","round":5,"evalId":"E7","run_id":"roadmap-drift-guard-r5-e7-20260827T102615Z","exit_code":0,"cmd":"bash scripts/roadmap/check-roadmap-guard-teeth.sh --case case-isolation"}

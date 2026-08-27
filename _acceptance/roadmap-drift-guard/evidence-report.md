@@ -7,17 +7,16 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 65949db8aca0ef788299c66b1a6078ff99f3294e
-human_signoff: Manh 2026-08-27
+verified_commit: eb17794298f0cb0dbf5086effce99324083df384
+human_signoff:
 ---
 
 # Evidence Report: roadmap-drift-guard
 
-**Vòng 4 — phạm vi ĐÃ THU HẸP.** AC-10 / E10 (`check-roadmap-alias-cited.sh`, alias
-`roadmap:check-alias`, khoá `roadmap_alias_cited_true`) đã rời hồ sơ này sang
-`roadmap-alias-guard`. Bộ eval vòng này là **10**, không phải 11; id `E10` **cố ý bỏ
-trống** trong `evals.yaml` vì `run-log.jsonl` đã mang ba vòng dòng E10 và tái dùng id sẽ
-hoà lẫn hai lịch sử. Người kiểm đã thẩm định riêng việc cắt này — xem *Thẩm định vết cắt*.
+Vòng 5 chạy trên cây **đã merge `main`** (`f69d4d6`) cộng bản vá sổ cái `eb17794`.
+Bằng chứng vòng 4 được ký ở `65949db`; sau đó `main` nhận PR #75 (`PRODUCT-MAP.md`)
+và PR #76 (**xoá** `scripts/acceptance/check-stale-golden.sh`), mà CI checkout kết
+quả **merge**, nên bằng chứng đã ký hết hạn với những file hồ sơ này không sở hữu.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -30,279 +29,305 @@ hoà lẫn hai lịch sử. Người kiểm đã thẩm định riêng việc c�
 | E7 | AC-7 | script | PASS |
 | E8 | AC-8 | script | PASS |
 | E9 | AC-9 | script | PASS |
-| E11 | AC-4 (nửa suppression) | script | PASS |
-
-Đối chiếu phủ: 10 eval ↔ 10 khoá `executors.script.roadmap_*` — không khoá thừa, không
-khoá thiếu. AC-1..AC-9 mỗi tiêu chí có ít nhất một eval; không eval nào trỏ tới một tiêu
-chí đã bị gỡ.
+| E11 | AC-4 | script | PASS |
 
 ## Evidence
 
-- eval: E1
-  run_id: roadmap-drift-guard-r4-e1-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_adr_uncited
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case adr-uncited
-      ✓ CASE adr-uncited: PASS
-    Token nhãn của riêng case có mặt đúng một lần. Khẳng định nội dung AC-1
-    (`ADR-0099 … — "<tiêu đề khác rỗng>"`) nằm trong thân case và đã chạy qua.
-
-- eval: E2
-  run_id: roadmap-drift-guard-r4-e2-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_superseded_bare
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case superseded-bare
-      ✓ CASE superseded-bare: PASS
-    Case khẳng định cả `viện dẫn ADR-0005 (đã bị ADR-0011 thay thế)` lẫn trích
-    dẫn khối phạm lỗi khác rỗng và ≤ 110 ký tự (kiểm bằng heredoc python trong case).
-
-- eval: E3
-  run_id: roadmap-drift-guard-r4-e3-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_superseded_paired
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case superseded-paired
-      ✓ CASE superseded-paired: PASS
-    Nửa suppression: case bắt buộc nửa ĐỎ đứng vững trước, rồi áp đúng bản sửa
-    guard đòi, rồi đòi guard chuyển XANH — nên xanh ở đây không phải xanh rỗng.
-
-- eval: E4
-  run_id: roadmap-drift-guard-r4-e4-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_ledger_missing
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case ledger-missing
-      ✓ CASE ledger-missing: PASS
-    Khẳng định gọi đúng tên slug `local-cpu-plugins` kèm cụm
-    `chưa được phân loại trong sổ cái`.
-
-- eval: E5
-  run_id: roadmap-drift-guard-r4-e5-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_ledger_stale
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case ledger-stale
-      ✓ CASE ledger-stale: PASS
-    Chiều ngược của E4: khẳng định tên `a-feature-that-never-shipped` kèm cụm
-    `không còn ở trạng thái ký`.
-
-- eval: E6
-  run_id: roadmap-drift-guard-r4-e6-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_historical
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case historical-244cb0b
-      ✓ CASE historical-244cb0b: PASS
-    Người kiểm dựng lại Given độc lập và xác nhận cú ĐỎ hôm nay là cú trôi THẬT,
-    không phải đỏ vì lý do khác — guard trên roadmap @ 244cb0b in đúng hai phát hiện:
-      [A/adr-coverage] ADR-0011 không được nhắc lần nào trong docs/roadmap.md — "…"
-      [B/superseded-citation] viện dẫn ADR-0005 (đã bị ADR-0011 thay thế) mà không
-      nhắc ADR thay nó: "1. **Shared deployment mode** ([ADR-0005](…)): …"
-
-- eval: E7
-  run_id: roadmap-drift-guard-r4-e7-20260827T170959
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.script.roadmap_teeth_case_isolation
-  verified_at: 2026-08-27T17:09:59+07:00
-  output: |
-    → răng: case case-isolation
-      ✓ CASE case-isolation: PASS
-    Người kiểm đối chứng thời gian để chắc case này KHÔNG đi tắt: một case đơn lẻ
-    mất 0,188 s; case-isolation mất 1,767 s ≈ 9 × 0,188 s — đúng 9 case anh em
-    được gọi thật, mỗi case một tiến trình riêng. Nửa (b) `--case <tên lạ>` và nửa
-    (c) `--selftest-fail` đều được người kiểm chạy lại độc lập và đều từ chối/ báo
-    hỏng ồn ào đúng như case khẳng định.
-
 - eval: E8
-  run_id: roadmap-drift-guard-r4-e8-20260827T170959
+  run_id: roadmap-drift-guard-r5-e8-20260827T102602Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.roadmap_drift_green
-  verified_at: 2026-08-27T17:09:59+07:00
+  verified_at: 2026-08-27T10:26:02Z
   output: |
     → kiểm tra trôi giữa docs/roadmap.md, docs/adr/ và _acceptance/
-       sổ cái: 21 hạng mục đã ký, 21 dòng trong sổ
+       sổ cái: 22 hạng mục đã ký, 22 dòng trong sổ
     ✅ docs/roadmap.md khớp với docs/adr/ và _acceptance/ — không có trôi.
-    Dòng đếm CÓ MẶT, hai số BẰNG NHAU (21 = 21) và KHÁC 0 — đúng ba điều
-    `expected` của E8 đòi, không chỉ mã thoát.
+  # `expected` đòi hai số BẰNG NHAU và dòng đếm có mặt: 22 = 22, khác 0.
+  # Kiểm độc lập (không qua guard): quét `_acceptance/*/contract.md` cho
+  # `status: signed-off` được 22 slug; quét backtick trong khối
+  # `roadmap-ledger:start/end` được 22 slug; `diff` hai tập → TRÙNG KHỚP HOÀN TOÀN,
+  # không chỉ trùng số lượng. `roadmap-drift-guard` có mặt ở cả hai tập.
+
+- eval: E1
+  run_id: roadmap-drift-guard-r5-e1-20260827T102602Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_adr_uncited
+  verified_at: 2026-08-27T10:26:02Z
+  output: |
+    → răng: case adr-uncited
+      ✓ CASE adr-uncited: PASS
+  # Dựng lại nhiễu bằng tay (bản sao vứt đi, không có .git) để kiểm nửa "id KÈM
+  # TIÊU ĐỀ" của AC-1 chứ không tin mã thoát: thông điệp in đủ
+  # `ADR-0099 không được nhắc lần nào trong docs/roadmap.md — "ADR-0011: Máy của
+  # người dùng là nền thực thi mặc định; managed cloud là tier"` — tiêu đề khác rỗng.
+
+- eval: E2
+  run_id: roadmap-drift-guard-r5-e2-20260827T102602Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_superseded_bare
+  verified_at: 2026-08-27T10:26:02Z
+  output: |
+    → răng: case superseded-bare
+      ✓ CASE superseded-bare: PASS
+  # Dựng lại bằng tay cả ba nửa `expected` nêu:
+  #   (1) thông điệp khớp `viện dẫn ADR-0005 (đã bị ADR-0011 thay thế)`;
+  #   (2) trích dẫn khối phạm lỗi khác rỗng, đo được ĐÚNG 110 ký tự (≤ 110);
+  #   (3) kiểm A VẪN XANH trong nhiễu này — đếm `A/adr-coverage` trong output
+  #       được 0, và guard chỉ ra ĐÚNG MỘT phát hiện, thuộc kiểm B.
+
+- eval: E3
+  run_id: roadmap-drift-guard-r5-e3-20260827T102602Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_superseded_paired
+  verified_at: 2026-08-27T10:26:02Z
+  output: |
+    → răng: case superseded-paired
+      ✓ CASE superseded-paired: PASS
+  # Nửa suppression của AC-2: case đòi nửa ĐỎ giữ trước (`guard_is_red || return 1`)
+  # rồi mới nêu tên ADR thay thế vào cùng khối và đòi guard XANH — nên một guard
+  # nổ vô điều kiện không qua được, và một guard kêu cả khi đã sửa đúng cũng không.
+
+- eval: E4
+  run_id: roadmap-drift-guard-r5-e4-20260827T102602Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_ledger_missing
+  verified_at: 2026-08-27T10:26:02Z
+  output: |
+    → răng: case ledger-missing
+      ✓ CASE ledger-missing: PASS
+  # `expected` đòi gọi ĐÚNG TÊN `local-cpu-plugins` kèm cụm
+  # `chưa được phân loại trong sổ cái`; cả hai khẳng định nằm trong thân case
+  # (`out_has`), chạy trên output đã bắt của guard chứ không phải output vứt đi.
+
+- eval: E5
+  run_id: roadmap-drift-guard-r5-e5-20260827T102603Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_ledger_stale
+  verified_at: 2026-08-27T10:26:03Z
+  output: |
+    → răng: case ledger-stale
+      ✓ CASE ledger-stale: PASS
+  # Chiều ngược của E4: đòi tên `a-feature-that-never-shipped` kèm cụm
+  # `không còn ở trạng thái ký`.
+
+- eval: E6
+  run_id: roadmap-drift-guard-r5-e6-20260827T102615Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_historical
+  verified_at: 2026-08-27T10:26:15Z
+  output: |
+    → răng: case historical-244cb0b
+      ✓ CASE historical-244cb0b: PASS
+  # Vá fail-closed của vòng 4 còn nguyên tác dụng: kiểm được cả mã thoát của
+  # `git show` lẫn kích thước file. Kiểm tay: `git show 244cb0b:docs/roadmap.md`
+  # phân giải, dài 8.516 byte — Given dựng được thật, không phải file rỗng.
+  # Chạy tay guard trên chính cây lịch sử đó cho thấy nó đỏ vì ĐÚNG cú trôi mà
+  # AC-6 neo vào: ADR-0011 và ADR-0012 không được nhắc, khối Phase 2 viện dẫn
+  # ADR-0005 mà không nêu ADR-0011, và chưa có khối sổ cái nào.
+
+- eval: E7
+  run_id: roadmap-drift-guard-r5-e7-20260827T102615Z
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.roadmap_teeth_case_isolation
+  verified_at: 2026-08-27T10:26:15Z
+  output: |
+    → răng: case case-isolation
+      ✓ CASE case-isolation: PASS
+  # Ba nửa của `expected`, kiểm tay từng nửa ngoài harness:
+  #   (a) chín case anh em được gọi riêng, mỗi lần gọi in ĐÚNG MỘT token nhãn
+  #       của chính nó (`grep -c … -eq 1`, không phải `grep -q`);
+  #   (b) `--case khong-ton-tai` bị TỪ CHỐI ồn ào, thoát khác 0 và in đủ danh
+  #       sách mười case hợp lệ — không lặng lẽ thoát sạch;
+  #   (c) `--selftest-fail` thoát khác 0 và in token nhãn hỏng của case selftest,
+  #       chứng minh bộ răng CÓ THỂ báo hỏng. `--list` không lộ cờ này, và nó
+  #       nằm ngoài mảng CASES nên không làm bẩn lần chạy thật.
 
 - eval: E9
-  run_id: roadmap-drift-guard-r4-e9-20260827T170959
+  run_id: roadmap-drift-guard-r5-e9-20260827T102615Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.roadmap_teeth_supersede_source_single
-  verified_at: 2026-08-27T17:09:59+07:00
+  verified_at: 2026-08-27T10:26:15Z
   output: |
     → răng: case supersede-source-single
       ✓ CASE supersede-source-single: PASS
-    Case lấy nền XANH trước, rồi thêm MỘT dòng thay-thế vào bảng
-    `docs/adr/README.md` của bản sao vứt đi và đòi guard nhận ra quan hệ mới mà
-    không sửa gì trong guard — chống hồi quy về nguồn-sự-thật-thứ-hai.
+  # Case giữ baseline xanh trước, rồi thêm MỘT dòng thay-thế mới vào bảng
+  # `docs/adr/README.md` của bản sao và đòi guard nhận ra quan hệ mới mà không
+  # sửa gì trong guard — chốt chặn chống nguồn-sự-thật-thứ-hai của AC-9.
 
 - eval: E11
-  run_id: roadmap-drift-guard-r4-e11-20260827T170959
+  run_id: roadmap-drift-guard-r5-e11-20260827T102615Z
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.roadmap_teeth_ledger_paired
-  verified_at: 2026-08-27T17:09:59+07:00
+  verified_at: 2026-08-27T10:26:15Z
   output: |
     → răng: case ledger-paired
       ✓ CASE ledger-paired: PASS
-    Nửa suppression của cặp đếm hai chiều AC-4/AC-5: slug vừa `signed-off` vừa có
-    dòng sổ cái thì kiểm C phải im.
+  # Nửa KHÔNG-nổ của cặp đếm hai chiều AC-4/AC-5: một slug vừa ở `status:
+  # signed-off` vừa có dòng trong sổ cái phải giữ kiểm C im lặng.
 
-## Thẩm định lỗ E6 (ưu tiên 1) — ĐÃ ĐÓNG
+## Bản vá sổ cái có trung thực không
 
-Người kiểm dựng bản sao đầy đủ của cây, **loại `.git`** (`shutil.ignore_patterns(
-"node_modules", ".git")`) đúng như bài học vòng 3, và xác nhận từ trong bản sao rằng git
-không tìm thấy kho nào (`fatal: not a git repository`). Bốn phép đo, hai nhánh × hai bản:
+Đây là câu hỏi riêng của vòng 5, vì chính hành vi **ký hồ sơ này** đã đặt
+`_acceptance/roadmap-drift-guard/contract.md` sang `status: signed-off`, và kiểm C
+đòi mọi hồ sơ đã ký phải được phân loại trong khối `roadmap-ledger`. Guard bắt được
+đúng cú ký của chính nó. Kiểm bốn cách, không cách nào dựa vào lời khai của guard:
 
-| Đường rìa | Bản vòng 3 (`fded31d`) | Bản vòng 4 (`65949db`) |
-|---|---|---|
-| `git show` KHÔNG phân giải được | in PASS, thoát 0 — **fail-open** | báo hỏng, thoát khác 0, kèm lý do `(Given chưa dựng được: … không phân giải — clone nông?)` |
-| `git` trả về 0 nhưng ra **0 byte** | in PASS, thoát 0 — **fail-open**, im lặng hoàn toàn | báo hỏng, thoát khác 0, kèm lý do `(Given chưa dựng được: roadmap lịch sử rỗng)` |
+1. **Diff thuần cộng thêm.** `git diff 0819d09 eb17794 -- docs/roadmap.md` chỉ có
+   **một dòng thêm** — dòng sổ cái cho `roadmap-drift-guard`. Không dòng nào bị xoá,
+   marker `roadmap-ledger:start/end` không đổi (vẫn ở dòng 167 và 194).
+2. **Không hồ sơ nào bị lật trạng thái.** `git diff 0819d09 HEAD -- '_acceptance/*/contract.md'`
+   trả về **rỗng** — không contract nào đổi `status` để né kiểm C.
+3. **Hai tập trùng khớp phần tử, không chỉ trùng số.** Quét độc lập cho 22 slug đã ký
+   và 22 slug trong sổ; `diff` hai danh sách đã sắp xếp → không lệch dòng nào.
+4. **Ba đường bịt miệng đều ĐỎ** (dựng trên bản sao vứt đi, loại `.git`):
+   gỡ dòng vừa thêm → guard tố `roadmap-drift-guard` chưa được phân loại;
+   lật `status` hồ sơ này khỏi `signed-off` mà giữ dòng sổ → guard tố sổ cái còn
+   dòng cho hồ sơ không còn ở trạng thái ký; xoá marker `roadmap-ledger:start` →
+   guard tố không tìm thấy khối sổ cái. Không có đường nào về xanh ngoài đường
+   phân loại thật.
 
-Nhánh 0-byte là nhánh nguy hiểm hơn: bản cũ không in cả một dòng cảnh báo. Cả hai nhánh
-nay fail-closed, và cả hai đều **phân biệt được** so với bản cũ — tức bản vá có tác dụng
-thật, không phải chép lại hành vi sẵn có.
+Kết luận: bản vá **trung thực**. Nó thêm đúng thứ kiểm C đòi, không nới guard,
+không sửa marker, không hạ trạng thái hồ sơ nào.
 
-## Thẩm định vết cắt — SẠCH, có một ngoại lệ đã truy nguyên
+## `check-stale-golden.sh` bị xoá — có gì phụ thuộc không
 
-- `scripts/roadmap/check-roadmap-alias-cited.sh` — không còn trong cây, không còn được
-  git theo dõi. `scripts/roadmap/` còn đúng ba file.
-- `package.json` — chỉ còn `roadmap:check` và `roadmap:teeth`.
-- `_acceptance/config.yaml` — không còn khoá `roadmap_alias_cited_true`; còn đúng 10 khoá
-  khớp 10 eval.
-- `evals.yaml` — không còn E10; chỗ của nó là một comment giải thích vì sao id bỏ trống.
-- `contract.md` — AC-10 đã rời mục **Criteria**; còn AC-1..AC-9.
+PR #76 xoá `scripts/acceptance/check-stale-golden.sh` và fixture
+`scripts/acceptance/fixtures/baseline-gate-output.txt`, đồng thời gỡ khoá
+`executors.script.stale_scoping_golden` khỏi `_acceptance/config.yaml`. Quét toàn kho
+(trừ `.git`, `node_modules`) cho `stale-golden` / `stale_golden` / `baseline-gate-output`:
 
-**Câu hỏi trọng yếu — vết cắt có tái tạo lại đúng con bug cả tính năng này sinh ra để
-bắt không?** Câu trả lời đo được: **không**, nhưng phải nói rõ vì sao.
+- **Không** eval nào của hồ sơ này tham chiếu tới nó — mười khoá `roadmap_*` trong
+  `_acceptance/config.yaml` (dòng 298–307) chỉ trỏ vào `scripts/roadmap/`.
+- **Không** khoá `executors` nào còn sót lại trỏ vào file đã xoá.
+- **Không** script nào trong `scripts/` gọi nó.
+- Những chỗ còn nhắc tên đều là **hồ sơ lịch sử, không phải đường thực thi**: hai
+  file kế hoạch trong `docs/superpowers/plans/`, `STATUS.md` mục 0.8 (chính là chỗ
+  ghi nhận việc xoá), và các `contract.md` / `decisions.jsonl` / `usage-report.md` /
+  `evidence-report.md` của `stale-scope-by-paths` và `gate-scope-anchors`.
 
-Hôm nay trong kho còn **một** chuỗi `pnpm roadmap:*` trỏ tới lệnh `package.json` không
-khai: `pnpm roadmap:check-alias`. Nó nằm ở bốn chỗ, **tất cả bên trong
-`_acceptance/roadmap-drift-guard/`** (ba dòng Amendment lịch sử của `contract.md`, một
-dòng trong báo cáo bằng chứng cũ). Guard đã bị cắt quét
-`SCAN_DIRS = ["scripts/roadmap", "docs"]` — **không** quét `_acceptance/`. Nên bốn chỗ này
-chưa bao giờ nằm trong tầm với của nó: giữ guard lại cũng không bắt được chúng, và cắt
-guard đi cũng không làm chúng lọt qua thứ gì đang canh. Bốn dòng đó là **văn tự sự lịch
-sử** (thuật lại trạng thái vòng 2/vòng 3), không phải chỉ dẫn bảo người đọc chạy lệnh.
+Ngoài ra `main` thêm `PRODUCT-MAP.md` vào `risk_tiers.t1_skip_globs`; điều đó không
+chạm gì của hồ sơ này, và `scripts/roadmap/**` **không** nằm trong danh sách miễn
+trừ (đúng như mục Notes của hợp đồng đòi).
 
-Con bug gốc — `docs/assets/oneflow-roadmap-status.html` bảo người đọc chạy `pnpm
-roadmap:check` khi lệnh đó chưa tồn tại — **đã đóng và vẫn đóng**: hai chỗ viện dẫn trong
-file HTML đó, cùng ba chỗ trong `scripts/roadmap/`, đều trỏ tới `roadmap:check` /
-`roadmap:teeth`, và cả hai đều được `package.json` khai. Nói cách khác, nếu guard đã cắt
-còn ở đây hôm nay thì nó XANH.
+## Lỗ đường rìa MỚI (ngoài hợp đồng — không làm rớt eval nào)
 
-Kết luận: vết cắt **sạch và trung thực**. Cái mất đi là **năng lực canh về sau**, không
-phải một lỗi đang tồn tại — và `decisions.jsonl` đã khai thẳng đúng điều đó
-(*"Ho so nay khong con bao dam lenh `pnpm roadmap:*` duoc vien dan la co that"*).
+Vòng nào cũng lòi một lỗ; vòng 5 lòi hai, cả hai nằm ở phần lõi
+`roadmap-drift.mjs`, cả hai tái hiện được trên bản sao vứt đi.
 
-## Analyst
+**N-1 — kiểm B lặng lẽ hoá no-op khi bảng `docs/adr/README.md` thôi phân giải
+được quan hệ "thay thế".** Cùng họ fail-open với giới hạn đã chấp nhận ("lõi in ✅
+khi `docs/adr/` không còn file ADR đánh số nào") nhưng ở **đường mã khác**: không
+phải lúc liệt kê thư mục ADR, mà lúc **đọc bảng chỉ mục**. Hai phép thử, cả hai giữ
+nguyên cú trôi thật (khối viện dẫn ADR-0005 đã bị gỡ tên ADR-0011):
 
-Không eval nào xanh-trên-cả-hai: `scripts/roadmap/` **không tồn tại** ở merge-base
-(`068aa40`), nên cả 10 executor đều không chạy được trên cây diffBase — do đó
-`baseline: n-a` cho toàn bộ, và đây là giới hạn môi trường thật chứ không phải né tránh.
-Hệ quả cần người đọc biết: A/B không chứng minh được tính phân biệt của bộ eval theo
-đường baseline. Bù lại, tính phân biệt được chứng minh **trực tiếp** ở mục thẩm định lỗ
-E6 (bản cũ vs bản mới trên cùng một đường rìa) và ở chín đột biến các vòng trước.
+- đổi từ ngữ trong bảng, `thay thế` → `thế chỗ` (một cú biên tập bình thường trên
+  một file hợp đồng tự khai là *hand-maintained*): guard in
+  `✅ … không có trôi` và thoát sạch;
+- giữ nguyên từ ngữ nhưng bỏ liên kết markdown cột id, `[0005](…)` → `ADR-0005`:
+  cũng in `✅` và thoát sạch.
 
-## Variance
+`supersededBy` rỗng thì vòng lặp kiểm B chạy 0 lần, và một kiểm chạy 0 lần trông y
+hệt một kiểm đã qua. Không case nào trong bộ răng khẳng định bản đồ quan hệ khác
+rỗng — E9 chứng minh guard **đọc** bảng, không chứng minh guard **để ý khi bảng
+câm**. Vá rẻ: đòi `supersededBy.size > 0` (kho này có quan hệ thật), hoặc thêm một
+case răng lật đúng hai đột biến trên. **Không có AC nào phủ chiều này**, nên đây là
+ghi nhận cho Cổng 2, không phải hồ sơ đỏ.
 
-none — mọi eval đều tất định (`runs: 1`), chạy một lần, kết quả đồng nhất. Người kiểm chạy
-lại E7 và toàn bộ suite thêm một lần nữa: kết quả không đổi, không có dấu hiệu flaky.
-
-## Iterations
-
-Round 1 (`91f0f25`): PASS 11/11 — nhưng người kiểm chỉ ra bộ eval YẾU HƠN hợp đồng nó chứng minh (không khẳng định nội dung thông điệp; E10 chưa từng chạy qua `pnpm`; AC-7 đọc được hai nghĩa). Trả lại thi công.
-Round 2 (`c342d25`): PASS 11/11, ba điểm vòng 1 đóng — nhưng người kiểm tìm hai lỗ fail-open thật ở `check-roadmap-alias-cited.sh` (quét ra 0 chỗ vẫn in ✅; tự nhận diện bằng khớp chuỗi tên file → đổi tên gây đệ quy). Trả lại thi công.
-Round 3 (`fded31d`): PASS 11/11, hai điểm vòng 2 đóng — nhưng người kiểm tìm HAI lỗ nữa: E6 fail-open khi `git show` hỏng, và hai alias trùng gây đệ quy không chặn (đo được 78 tiến trình đồng thời). Trả lại thi công.
-Round 4 (`65949db`, vòng này): **phạm vi thu hẹp** — AC-10/E10 và file alias-guard tách sang hồ sơ riêng; chỉ lỗ E6 được vá tại chỗ. PASS 10/10 trên phạm vi đã thu hẹp. Vết cắt được thẩm định riêng và kết luận sạch. Người kiểm tìm thêm ba lỗ đường rìa MỚI — không lỗ nào làm hỏng một eval hiện có, cả ba ghi ở *Known limits* để hồ sơ kế tiếp nhận.
+**N-2 — kiểm C chứng minh "được NHẮC", không phải "được PHÂN LOẠI".** Tập
+`inLedger` gom **mọi** token backtick chữ thường trong khối sổ cái, không riêng ô
+đầu của một dòng bảng. Thay dòng bảng thật bằng một chú thích HTML
+`<!-- todo: xep \`roadmap-drift-guard\` sau -->` đặt trong khối: guard vẫn đếm
+`22 hạng mục đã ký, 22 dòng trong sổ` và in `✅`. AC-4 dùng chữ "phân loại", còn
+thứ máy đo được chỉ là sự xuất hiện của tên. Vá rẻ: neo regex vào ô đầu của dòng
+bảng (`^\|\s*\`slug\``). Mức độ: thấp — đường tấn công là người tự viết chú thích
+trong khối, không phải bàn tay thứ ba.
 
 ## Known limits
 
-Ba phát hiện mới của vòng 4. Không phát hiện nào làm một eval hiện có hỏng — chúng nằm
-**ngoài** những gì AC-1..AC-9 và 10 `expected` khẳng định — nên verdict vẫn PASS. Chúng
-được ghi ra vì cùng đúng một họ fail-open mà bốn vòng qua đã đuổi theo.
+Bốn mục đã được chấp nhận ở các vòng trước, mang nguyên sang đây (KHÔNG phải phát
+hiện mới):
 
-1. **`historical-244cb0b` khẳng định "khác 0", không khẳng định "khác 0 VÌ ĐÂU".**
-   Vòng 4 vá phía *Given* của case này (không dựng được fixture thì báo hỏng). Phía *Then*
-   vẫn để ngỏ: người kiểm làm `roadmap-drift.mjs` ném lỗi vì một lý do hoàn toàn không
-   liên quan tới trôi lộ trình, và case vẫn in PASS. Tám case anh em còn lại đều fail-closed
-   trước cùng đột biến đó — nhờ khẳng định nội dung (vòng 2) hoặc nhờ một nửa XANH — nên
-   `historical-244cb0b` là case DUY NHẤT còn hở. Đây đúng là hình dạng mà chính Amendment
-   vòng 4 mô tả: *"mỗi bản vá lại đóng một cửa rồi để ngỏ cửa bên cạnh"* — lần này quan sát
-   được ở phần code ĐƯỢC GIỮ LẠI, không phải ở file đã cắt. Bản vá gợi ý rẻ: thêm một
-   `out_has` đòi thông điệp nêu ADR-0011 và ADR-0005, đúng khuôn bốn case kia đã dùng.
-   *Lưu ý cho người ký:* AC-6 hôm nay VẪN được thoả thật — người kiểm đã dựng lại Given
-   độc lập và xác nhận cú đỏ là cú trôi thật (xem khối E6). Lỗ này là chuyện eval yếu hơn
-   tiêu chí, không phải tiêu chí không đạt.
+1. **E6 khẳng định guard đỏ, không khẳng định đỏ VÌ SAO.** `case_historical_244cb0b`
+   chỉ đòi `guard_is_red`; một hồi quy làm guard đỏ vì lý do khác vẫn giữ case xanh.
+   (Vòng 5 chạy tay để nhìn: nó đang đỏ vì đúng cú trôi ADR-0005/0011 — nhưng đó là
+   quan sát của người kiểm, không phải khẳng định của eval.)
+2. **Lõi in ✅ khi `docs/adr/` không còn file ADR đánh số nào** — kiểm A và B lặng
+   lẽ hoá no-op. (Xem N-1: cùng họ, đường mã khác.)
+3. **`--case X --list` không chạy case nào** — `--list` được xử trước trong vòng
+   lặp CLI, in danh sách rồi thoát sạch.
+4. **Lặp `--case` im lặng giữ giá trị cuối** — `--case a --case b` chạy `b`, không
+   báo gì.
 
-2. **Quét ra 0 ADR thì lõi in ✅.** Với `docs/adr/README.md` còn nguyên nhưng **không có
-   file ADR đánh số nào**, kiểm A và kiểm B lặng lẽ thành no-op và `roadmap-drift.mjs`
-   thoát 0 kèm dòng "không có trôi". Trong kho này 0 ADR không thể là sự thật, nên 0 nghĩa
-   là đường quét hỏng — **đúng cùng một lỗ** mà vòng 3 đã bắt và đã vá trong guard alias
-   ("quét ra 0 chỗ viện dẫn nay ĐỎ"), nhưng chưa ai vá bản sao của nó trong lõi. Không case
-   răng nào canh chiều này: `clean` đặt sàn khác 0 cho **sổ cái** chứ không cho **ADR**.
-   Điều này cũng làm nhẹ bớt một câu trong Amendment vòng 4 — *"`roadmap-drift.mjs` … qua
-   ba vòng và chín đột biến không lỗi nào"* — vốn là một trong hai căn cứ biện minh cho
-   vết cắt. Câu đó đúng với những gì đã được thử, không đúng như một lời khẳng định chung.
+Thêm hai giới hạn môi trường, không vá được bằng code trong nhánh này:
 
-3. **Hai đường rìa tham số của bộ răng.** (a) `--list` đứng ở BẤT KỲ đâu sẽ ngắn mạch:
-   `--case adr-uncited --list` thoát 0 mà **không chạy case nào** — đúng họ "typo biến eval
-   thành no-op xanh vĩnh viễn" mà nửa (b) của AC-7 sinh ra để chặn, chỉ khác cửa vào.
-   (b) `--case a --case b` lặng lẽ chỉ chạy `b`, bỏ `a` không một lời cảnh báo. Cả hai là
-   **tiềm ẩn**, không đang kích hoạt: 10 lệnh đã phân giải trong `_acceptance/config.yaml`
-   đều mang đúng một `--case` và không mang `--list`. Người kiểm đã đối chứng lại các đường
-   rìa vòng trước (`--case` tên lạ, `--case` không có giá trị, cờ lạ, tham số thừa sau
-   `--case`, tên case rỗng) — tất cả vẫn từ chối ồn ào đúng như trước.
-
-Giới hạn môi trường còn nguyên từ vòng 2, không vá được bằng code trong nhánh này:
-`baseline: n-a` toàn bộ (merge-base chưa có `scripts/roadmap/`), và E6 phụ thuộc
-`git show 244cb0b` phân giải được — nay ít nguy hiểm hơn vì đã fail-closed, nhưng vẫn
-nghĩa là E6 sẽ ĐỎ trên clone nông, tức trên năm trong sáu job CI của kho.
+5. **`baseline: n-a` cho cả mười eval.** `git merge-base origin/main HEAD` là
+   `37c174c`, và `scripts/roadmap/` **không tồn tại** ở đó — không chạy được A/B để
+   biết eval có phân biệt hay không. Xác nhận lại ở vòng 5 bằng `git ls-tree`.
+6. **E6 phụ thuộc `git show 244cb0b`.** Trên clone nông case ĐỎ (fail-closed, vá
+   vòng 4) chứ không giả xanh — nhưng nó vẫn là phụ thuộc môi trường.
 
 ## Ngoài hợp đồng
 
-Ba mục thuộc về hồ sơ khác hoặc PR khác, ghi lại để không rơi:
+- **Đoạn văn quanh sổ cái nay lệch số so với bảng.** Dòng dẫn nhập ghi
+  "**21 hạng mục** trên `main` @ `621a30d` (19/08)" — ghim vào một commit nên đọc
+  vẫn được — nhưng đoạn ngay dưới bảng ghi "13/21 hạng mục đã ký là năng lực sản
+  phẩm, 8/21 là hạ tầng" trong khi bảng nay có **22** dòng. Guard không đo văn xuôi
+  nên không AC nào phủ chuyện này và không eval nào rớt; ghi ra vì chính bản vá
+  `eb17794` sinh ra độ lệch, và người ký có thể muốn sửa hai con số cùng lúc.
+- **Không nối vào CI** (đúng mục Out of scope của hợp đồng): guard chỉ chạy theo
+  yêu cầu. Nối dây là PR riêng kèm bump số site trong `scripts/ci/check-action-pins.sh`.
+- **Bốn trang HTML trong `docs/assets/`** vẫn không được phủ, đúng như hợp đồng khai.
 
-1. **`_acceptance/roadmap-drift-guard/contract.md` dòng 81 vẫn nhắc AC-10.** Mục
-   **Coverage**, trục *đường gọi*, còn viết ``alias `pnpm` (AC-10)`` trong khi AC-10 đã rời
-   mục Criteria. Không eval nào trỏ vào đó và Coverage là biên bản quét chứ không phải danh
-   sách tiêu chí, nên nó không làm hỏng gì — nhưng nó là một tham chiếu treo tới một tiêu
-   chí không còn tồn tại, và người đọc sau sẽ mất thì giờ. Sửa văn bản một dòng.
-2. **Hồ sơ `roadmap-alias-guard` thừa hưởng hai lỗ CHƯA VÁ.** Vòng 3 tìm ra chúng ở
-   `check-roadmap-alias-cited.sh` và vòng 4 chuyển file đi thay vì vá: hai alias cùng trỏ
-   một file gây đệ quy không chặn (đo được 78 tiến trình đồng thời trong 60 giây), và lỗ
-   thứ hai đi kèm. Hồ sơ nhận phải mở vòng nghiệm thu với chúng nằm sẵn trên bàn, không
-   được coi là bắt đầu từ nền sạch.
-3. **Nối guard vào CI vẫn là PR riêng.** Amendment vòng 4 nói PR đó "đã lên kế hoạch". Khi
-   nó tới, giới hạn `fetch-depth` ở trên là việc phải xử lý trước, không phải sau: chỉ job
-   Acceptance Gate khai `fetch-depth: 0`, năm job còn lại dùng checkout nông, và E6 nay
-   fail-closed nên nó sẽ báo hỏng ở đó — đúng như thiết kế, nhưng phải chuẩn bị.
+## Analyst
+
+n-a — `scripts/roadmap/` không có mặt trên merge-base `37c174c`, nên không eval nào
+chạy được trên cây diffBase. Không kết luận được eval nào phân-biệt hay không.
+
+## Variance
+
+none — mười eval đều tất định (`runs: 1`), không eval nào chạm nhà cung cấp LLM.
+Mười lần chạy vòng 5 đồng nhất với mười lần chạy vòng 4 ở `65949db`.
+
+## Iterations
+
+- Round 1: PASS 11/11, nhưng người kiểm chỉ ba chỗ **bộ eval yếu hơn hợp đồng** (răng
+  chỉ đo đỏ/xanh, E10 không chạy thật qua `pnpm`, AC-7 đọc được hai nghĩa) → sửa hợp
+  đồng + siết răng.
+- Round 2: PASS 11/11, đóng cả ba điểm vòng 1, nhưng lòi **hai lỗ fail-open thật** ở
+  `check-roadmap-alias-cited.sh` (quét-rỗng vẫn xanh; tự nhận diện bằng khớp tên file).
+- Round 3: PASS 11/11, đóng bốn điểm vòng 2, lại lòi **hai lỗ đường rìa mới** ở đúng
+  file đó — hai alias cùng trỏ một file gây đệ quy đo được 78 tiến trình trong 60 giây.
+- Round 4: **thu hẹp phạm vi** — cắt AC-10/E10 và guard alias sang hồ sơ riêng
+  `roadmap-alias-guard`, vá nốt lỗ fail-open của E6. PASS 10/10 ở `65949db`; chủ hồ
+  sơ ký.
+- Round 5 (vòng này): **`main` dịch chuyển sau khi ký** — nhận PR #75 (`PRODUCT-MAP.md`)
+  và PR #76 (xoá `scripts/acceptance/check-stale-golden.sh`), mà CI checkout kết quả
+  **merge**, nên bằng chứng đã ký hết hạn với những file hồ sơ này không sở hữu. Merge
+  `main` vào làm **5 trong 10 eval đỏ**, và đỏ vì một lý do có thật chứ không phải vì
+  cái ghim cũ: chính hành vi ký đã đặt `contract.md` của hồ sơ này sang
+  `status: signed-off`, mà kiểm C đòi mọi hồ sơ đã ký phải được phân loại trong khối
+  `roadmap-ledger` — guard bắt được đúng cú ký của chính nó. `eb17794` thêm dòng sổ
+  cái; vòng 5 chạy lại độc lập trên cây đã merge: **PASS 10/10**, sổ cái 22 = 22.
 
 ## Gate 2 checklist (human)
 
-- [ ] Đọc bảng + soi ngẫu nhiên 1-2 khối bằng chứng
-- [ ] Đọc mục **Thẩm định vết cắt** — đây là thứ vòng này khác mọi vòng trước: xác nhận
-      bạn đồng ý rằng đánh đổi "mất năng lực canh `pnpm roadmap:*`" là chấp nhận được, và
-      rằng hồ sơ `roadmap-alias-guard` thật sự sẽ được mở
-- [ ] Đọc **Known limits** mục 1 và 2 — hai lỗ fail-open MỚI trong code được giữ lại; quyết
-      định vá ngay trong nhánh này hay ghi nợ sang hồ sơ kế tiếp
-- [ ] Không có hạng mục judgment nào cần `human_override` (cả 10 eval đều là `script`)
-- [x] Điền `human_signoff` trong frontmatter
+- [ ] Đọc bảng + soi 1–2 khối bằng chứng
+- [ ] Đọc mục **Bản vá sổ cái có trung thực không** — đây là câu hỏi riêng của vòng 5
+- [ ] Quyết định chữ ký: chữ ký vòng 4 được ký ở `65949db`, **không** phải commit này.
+      Người kiểm vòng 5 CỐ Ý để trống `human_signoff`; việc chữ ký cũ có mang sang cây
+      đã merge hay không là quyết định của chủ hồ sơ, không phải của máy.
+- [ ] Cân hai lỗ mới N-1 / N-2 ở mục **Lỗ đường rìa MỚI** — cả hai ngoài hợp đồng,
+      cả hai tái hiện được, không lỗ nào làm rớt eval. Chọn: vá trong nhánh này, mở
+      hồ sơ tiếp, hay ghi vào Known limits.
+- [ ] Cân hai con số văn xuôi lệch với bảng sổ cái (mục **Ngoài hợp đồng**)
+- [ ] Điền `human_signoff` trong frontmatter
