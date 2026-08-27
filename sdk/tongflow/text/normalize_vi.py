@@ -221,6 +221,21 @@ _AMBIGUOUS_D = re.compile(
     rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND})){_SEP}*(?i:đ)\b\.?{_SEP}*(?=[^\W_]|,)"
 )
 
+# ONE dash class for the whole family. Every rule that reasons about a dash —
+# range, minus, date, residual — has to agree on what counts as one, or a
+# typographic dash walks straight past all of them. Measured on this tree, every
+# case ok=True with an empty residual:
+#   "Giá 5–10 triệu"   -> "giá năm THÁNG mười triệu"  (library read it as a date)
+#   "Giá 5%–10%"       -> "giá năm phần trăm mười phần trăm"  (word "đến" gone)
+#   "Nhiệt độ −7 độ"   -> "nhiệt độ -bảy độ"  (dash survived INTO the speech)
+# The ASCII spellings of all three read correctly, so this is purely a character
+# class hole, not a rule-logic one.
+#
+# Folded to ASCII in the pre-pass rather than added to each rule: one fold, and
+# every downstream rule keeps the single spelling it was written for.
+_TYPOGRAPHIC_DASHES = "\u2013\u2014\u2212"  # – en, — em, − minus
+_DASH_FOLD = re.compile(f"[{_TYPOGRAPHIC_DASHES}]")
+
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
 # What must never survive into speech: digits, a currency sign, a percent sign,
@@ -228,7 +243,13 @@ _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 # hyphen between letters — the library writes real Vietnamese compounds that way
 # ("ki-lo-met"), and flagging those rejects correct output. The surviving-colon
 # rule used to live here as a shape test; it is relational now, just below.
-_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)")
+_RESIDUAL = re.compile(
+    rf"[0-9₫%]+|(?<=\d)-(?=\d)"
+    # A typographic dash must never reach the voice. After the fold above
+    # there should be none left; keeping them here is the tooth that makes
+    # removing the fold a RED test instead of a silent regression.
+    rf"|[{_TYPOGRAPHIC_DASHES}]"
+)
 
 # The colon left over from a MANGLED CLOCK, decided relationally instead of by
 # shape. The shape test `:(?=\S)` could not tell "mười bốn:ba mươi" (a clock the
@@ -327,6 +348,11 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
+    # Fold typographic dashes to ASCII BEFORE any rule that reasons about a
+    # dash — the date rule, the range rule and the minus rule are all written
+    # for the ASCII spelling. Runs here, ahead of _DASH_DATE, so "19–08–2026"
+    # takes the same path as "19-08-2026".
+    out = _DASH_FOLD.sub("-", out)
     # Before every digit rule below: lift the decimal part into a word the
     # library can read. Runs early so the range and minus rules downstream see
     # plain digits either side of any dash.

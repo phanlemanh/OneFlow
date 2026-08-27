@@ -415,6 +415,78 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         )
 
 
+# THE TYPOGRAPHIC-DASH MATRIX — 3 dash characters × 3 roles, declared before the
+# cases. The claim is a RELATION, not a literal: a typographic dash must read
+# EXACTLY like its ASCII spelling, so the expectation is computed from the ASCII
+# twin rather than retyped. A literal table would let both halves drift together.
+#
+# Measured before the fold, every one ok=True with an empty residual:
+#   "Giá 5–10 triệu" -> "giá năm THÁNG mười triệu"   (read as a date)
+#   "Giá 5%–10%"     -> "giá năm phần trăm mười phần trăm"  ("đến" gone)
+#   "Nhiệt độ −7 độ" -> "nhiệt độ -bảy độ"  (the dash reached the speech)
+DASH_CHARS: dict[str, str] = {"en": "\u2013", "em": "\u2014", "minus": "\u2212"}
+DASH_ROLES: dict[str, str] = {
+    "khoảng số": "Giá 5{d}10 triệu",
+    "khoảng có đơn vị": "Giá 5%{d}10%",
+    "âm": "Nhiệt độ {d}7 độ",
+}
+
+TYPOGRAPHIC_DASH_MATRIX: dict[tuple[str, str], str] = {
+    (dash_name, role_name): template.format(d=dash)
+    for dash_name, dash in DASH_CHARS.items()
+    for role_name, template in DASH_ROLES.items()
+}
+
+# Compound words are the case the fold must NOT touch: the library writes real
+# Vietnamese compounds with a hyphen ("ki-lô-mét"), and an earlier residual rule
+# that flagged those rejected correct output.
+CORPUS_DASH_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Quãng ki-lô-mét", "quãng ki lô mét"),
+    ("Quãng ki\u2013lô\u2013mét", "quãng ki lô mét"),
+    ("Đường Hai-Bà-Trưng", "đường hai bà trưng"),
+)
+
+
+def test_dash_matrix_has_no_silently_empty_cell() -> None:
+    missing = [
+        (d, r)
+        for d in DASH_CHARS
+        for r in DASH_ROLES
+        if (d, r) not in TYPOGRAPHIC_DASH_MATRIX
+    ]
+    assert missing == [], f"ô ma trận gạch kiểu chữ còn trống: {missing}"
+
+
+def test_typographic_dash_reads_exactly_like_ascii() -> None:
+    """Relation, not literal: the typographic twin must equal the ASCII one."""
+    for (dash_name, role_name), raw in sorted(TYPOGRAPHIC_DASH_MATRIX.items()):
+        ascii_twin = DASH_ROLES[role_name].format(d="-")
+        want = normalize_vi(ascii_twin)
+        assert want.ok is True, (
+            f"ca ASCII đối chứng {ascii_twin!r} tự nó đã hỏng — {want.error}"
+        )
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"ô ({dash_name}, {role_name}) — {raw!r} bị từ chối: {got.error}"
+        )
+        assert got.text == want.text, (
+            f"ô ({dash_name}, {role_name}) — {raw!r} đọc KHÁC bản ASCII "
+            f"{ascii_twin!r}: nhận {got.text!r}, mong {want.text!r}"
+        )
+
+
+def test_compound_word_hyphen_is_not_a_range() -> None:
+    for raw, expected in CORPUS_DASH_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} (ca ÂM) bị từ chối: {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} (ca ÂM, từ ghép): mong {expected!r}, nhận {got.text!r}"
+        )
+        assert "đến" not in got.text, (
+            f"{raw!r}: từ ghép bị đọc thành khoảng — {got.text!r}"
+        )
+
+
 # THE DICTIONARY COVERAGE MATRIX — one positive and one negative case for EVERY
 # entry, with the subject set read off the DICTIONARY ITSELF. Adding an entry to
 # vi_dictionary.py without adding cases turns this red by name; a hand-copied
@@ -1352,6 +1424,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("AMBIGUOUS_D_MATRIX", AMBIGUOUS_D_MATRIX),
     ("DICT_ABBREV_MATRIX", DICT_ABBREV_MATRIX),
     ("DICT_PREFIX_MATRIX", DICT_PREFIX_MATRIX),
+    ("TYPOGRAPHIC_DASH_MATRIX", TYPOGRAPHIC_DASH_MATRIX),
+    ("CORPUS_DASH_NEGATIVE", CORPUS_DASH_NEGATIVE),
 )
 
 ALL_CORPUS = tuple(
