@@ -67,7 +67,15 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   máy đọc được + câu người sống trong 5 file ngôn ngữ. Hướng: mã ổn định
   (`EMPTY_INPUT` / `RESIDUAL_TOKENS` / `MONEY_UNIT_LOST`) + khoá i18n; `error` để cho log.*
 
-- AC-7: (web-ui) Given người dùng dựng luồng giọng đọc, When họ muốn khai luồng là tiếng Việt,
+- AC-7: ~~(web-ui)~~ **HOÃN SANG HẠNG MỤC 1.4** *(bước dò T0, 2026-08-27 — điều kiện đảo
+  chiều owner ký sẵn ở Gate 1.5 đã kích hoạt)*. Đo được hai dữ kiện: plugin TTS duy nhất
+  (`tongflow-modal-qwen3tts`) **không kiểm** giá trị `language`, nó đi thẳng tới model; và
+  danh mục shipped đúng **10 ngôn ngữ**, không có tiếng Việt — chính comment của file khai
+  đó là bộ giá trị tham số của Qwen3-TTS. Thêm mục 'Tiếng Việt' hôm nay là hứa thay cho một
+  model không nói được nó, và plugin sẽ **không báo lỗi** — đúng hình dạng thất-bại-theo-
+  chiều-mở mà hợp đồng này lập ra để chặn. Tiêu chí chuyển sang hợp đồng con của hạng mục
+  1.4 (plugin TTS ElevenLabs, tiếng Việt), nơi nó có nghĩa thật.
+  Văn bản gốc giữ lại làm sử liệu: Given người dùng dựng luồng giọng đọc, When họ muốn khai luồng là tiếng Việt,
   Then bộ chọn ngôn ngữ **có mục tiếng Việt**.
   *Đây là mảnh sản phẩm còn thiếu khiến việc thu hẹp cảnh báo TTS phải gỡ bỏ hai lần
   (vòng 7 và 8): danh mục có 11 mục, không mục nào là tiếng Việt, và mặc định `clone` là
@@ -125,7 +133,7 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 - **Trục ký tự**: gạch kiểu chữ (AC-1) · dấu phân cách trong URL/đường dẫn (AC-2)
 - **Trục hình dạng dễ nhầm**: `số-gạch-số` không phải khoảng (AC-3) · token La-tinh (AC-4)
 - **Trục phủ từ điển**: mọi mục có ca dương + ca âm (AC-5)
-- **Trục người đọc**: thông điệp lỗi theo ngôn ngữ người dùng (AC-6) · khai được tiếng Việt (AC-7)
+- **Trục người đọc**: thông điệp lỗi theo ngôn ngữ người dùng (AC-6) · ~~khai được tiếng Việt (AC-7 — HOÃN sang 1.4, xem AC-7)~~ **ô này CỐ Ý TRỐNG ở hồ sơ này**
 - **Trục hậu kiểm mù**: token thư viện bỏ lại KHÔNG phải chữ số nên lớp hậu kiểm không thấy —
   dấu gạch chéo còn sót trong đầu ra (AC-10) · ngày khớp hình dạng nhưng thư viện không parse
   được (AC-9). *Đây là cơ chế trung tâm nêu ở §Vì sao có hợp đồng này; thiếu trục này thì một

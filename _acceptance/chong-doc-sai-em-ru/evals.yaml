@@ -196,6 +196,8 @@ evals:
       người qua BIẾN lúc chạy.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
+  # E12 HOÃN cùng AC-7 sang hạng mục 1.4 (bước dò T0, 2026-08-27): không plugin
+  # nào nói được tiếng Việt nên ảnh chụp bộ chọn không chứng minh được gì cho người dùng.
   - id: E12
     criterion: AC-7
     executor: ui-check
@@ -218,6 +220,8 @@ evals:
       xanh; console sạch; bộ chọn có mục tiếng Việt ở cả hai state.
     evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
 
+  # E13 HOÃN cùng AC-7 sang hạng mục 1.4 (bước dò T0, 2026-08-27): không plugin
+  # nào nói được tiếng Việt nên ảnh chụp bộ chọn không chứng minh được gì cho người dùng.
   - id: E13
     criterion: AC-7
     executor: judgment
