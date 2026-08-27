@@ -105,7 +105,20 @@ LEDGER
 # ADR-0011 unmentioned, Phase 2 citing ADR-0005 alone, no ledger at all.
 case_historical_244cb0b() {
   build_fixture
-  git show 244cb0b:docs/roadmap.md > "$tmp/t/docs/roadmap.md"
+  # FAIL-CLOSED (vòng 4). Bản trước không kiểm mã thoát của `git show`, và thân
+  # case chạy trong ngữ cảnh `if "$fn"` nên `set -e` bị TẮT: trên clone nông
+  # hoặc sau một lần viết lại lịch sử, `git show` hỏng để lại roadmap 0 byte,
+  # guard đỏ vì lý do hoàn toàn khác, và case vẫn in PASS — AC-6, tiêu chí DUY
+  # NHẤT neo vào cú trôi có thật, hoá no-op xanh vĩnh viễn. Một eval không tự
+  # kiểm được Given của nó thì cái Then nó khẳng định không nói lên điều gì.
+  if ! git show 244cb0b:docs/roadmap.md > "$tmp/t/docs/roadmap.md" 2>/dev/null; then
+    echo "    (Given chưa dựng được: git show 244cb0b:docs/roadmap.md không phân giải — clone nông?)" >&2
+    return 1
+  fi
+  if [ ! -s "$tmp/t/docs/roadmap.md" ]; then
+    echo "    (Given chưa dựng được: roadmap lịch sử rỗng)" >&2
+    return 1
+  fi
   guard_is_red
 }
 

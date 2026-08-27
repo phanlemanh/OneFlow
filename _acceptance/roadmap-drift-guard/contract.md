@@ -68,9 +68,6 @@ pass bằng cách đứng yên.
 - AC-9: Given quan hệ "thay thế" chỉ được khai ở bảng trong `docs/adr/README.md`, When thêm
   một dòng thay-thế mới vào bảng đó, Then guard nhận ra quan hệ mới **mà không sửa gì trong
   guard** — không có nguồn sự thật thứ hai.
-- AC-10: Given một checkout sạch, When gõ `pnpm roadmap:check` và `pnpm roadmap:teeth` từ gốc
-  repo, Then cả hai phân giải và chạy — ba chỗ đang viện dẫn hai lệnh này (header của cả hai
-  script, và trang `docs/assets/oneflow-roadmap-status.html`) trở thành đúng.
 
 ## Coverage
 
@@ -180,3 +177,32 @@ fail-open thật** trong `check-roadmap-alias-cited.sh` — file viết mới �
 Ba mục Known limits còn lại của vòng 2 (`baseline: n-a` vì merge-base chưa có
 `scripts/roadmap/`; E6 phụ thuộc `git show 244cb0b`) là giới hạn môi trường, không vá được
 bằng code trong nhánh này.
+
+## Amendment — 2026-08-27 vòng 4 (thu hẹp phạm vi + vá fail-open cuối)
+
+Vòng 3 cho PASS 11/11 và đóng cả bốn điểm của vòng 2, nhưng lại lòi **hai lỗ đường rìa
+mới**. Ba vòng đã dùng hết. Thay vì mở vòng 4 trên nguyên phạm vi, hồ sơ này **thu hẹp**.
+
+**Cắt AC-10 và E10 khỏi hồ sơ** — `scripts/roadmap/check-roadmap-alias-cited.sh`, alias
+`roadmap:check-alias`, và khoá `executors.script.roadmap_alias_cited_true` rời khỏi nhánh
+này sang hồ sơ riêng `roadmap-alias-guard`.
+
+Căn cứ là số liệu, không phải cảm tính: **bốn trong bốn lỗ gần nhất đều nằm trong đúng file
+đó**, viết mới ở vòng 1 — quét-rỗng fail-open, tự-nhận-diện bằng chuỗi tên, và (vòng 3) hai
+alias cùng trỏ một file gây đệ quy đo được **78 tiến trình đồng thời trong 60 giây**. Trong
+khi đó `roadmap-drift.mjs` — phần lõi, viết từ 19/08 — qua ba vòng và chín đột biến **không
+lỗi nào**. Lõi làm một việc đơn giản trên dữ liệu ngoài; file kia phải suy luận về chính nó,
+và mỗi bản vá lại đóng một cửa rồi để ngỏ cửa bên cạnh. Nó xứng đáng có vòng nghiệm thu
+riêng, không phải đi ké vòng của phần đã ổn định.
+
+Id **E10 cố ý bỏ trống** trong `evals.yaml`: `run-log.jsonl` đã mang ba vòng dòng E10, tái
+dùng id cho một eval khác sẽ hoà lẫn hai lịch sử.
+
+**Vá lỗ còn lại (AC-6 / E6) — fail-closed.** `git show 244cb0b:docs/roadmap.md` trước đây
+không kiểm mã thoát, và thân case chạy trong ngữ cảnh `if "$fn"` nên `set -e` bị tắt: trên
+clone nông, lệnh hỏng để lại roadmap **0 byte**, guard đỏ vì lý do hoàn toàn khác, và case
+vẫn in PASS. Nay case ĐỎ khi không dựng được Given của chính nó, kèm lý do. Đây không phải
+lỗi giả định: năm trong sáu job CI của kho dùng `actions/checkout` mặc định (**nông**), chỉ
+job Acceptance Gate khai `fetch-depth: 0` — và nối guard vào CI chính là PR kế tiếp đã lên
+kế hoạch.
+

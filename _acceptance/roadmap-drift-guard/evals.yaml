@@ -85,13 +85,9 @@ evals:
     expected: "exit 0; output chứa `CASE supersede-source-single: PASS`. Thêm MỘT dòng thay-thế mới vào bảng `docs/adr/README.md` của bản sao vứt đi (không sửa gì trong guard) và khẳng định guard nhận ra quan hệ mới. Chống hồi quy về nguồn-sự-thật-thứ-hai: bản sửa sau rất dễ nhét một map cứng vào `roadmap-drift.mjs` cho nhanh, và eval này là thứ duy nhất sẽ kêu"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
-  - id: E10
-    criterion: AC-10
-    executor: script
-    cmd: config:executors.script.roadmap_alias_cited_true
-    paths: ["scripts/roadmap/**", "package.json", "docs/assets/oneflow-roadmap-status.html"]
-    expected: "exit 0. Quét MỌI chuỗi khớp `pnpm roadmap:\\S+` trong header của hai script và trong `docs/assets/oneflow-roadmap-status.html`, rồi khẳng định `package.json` khai đúng script đó và đường script trỏ tới file có thật. HAI NỬA (vòng 2 nâng, sau khi người kiểm vòng 1 chỉ ra chỉ có nửa (a)): **(a) khai báo** — `package.json` khai đúng script và đường script trỏ tới file có thật; **(b) thực thi** — mỗi alias được viện dẫn CHẠY THẬT qua `pnpm` và thoát 0, trừ chính alias của guard này (đệ quy). AC-10 nói \"phân giải VÀ chạy\"; một alias trỏ đúng file nhưng chết lúc chạy qua được nửa (a) — đột biến M-D chứng minh nửa (b) bắt được. Vòng 3 thêm hai yêu cầu FAIL-CLOSED ở đường rìa: quét ra **0** chỗ viện dẫn phải ĐỎ (0 không thể là sự thật — header của chính guard này viện dẫn một lệnh, nên 0 nghĩa là đường quét hỏng), và guard phải nhận ra chính nó bằng **đường dẫn đã phân giải** chứ không bằng khớp chuỗi tên file, đồng thời ĐỎ khi không nhận ra (đổi tên file mà vẫn chạy tiếp là đệ quy không giới hạn). Đây là eval sinh ra từ lỗi thật: ba chỗ viện dẫn `pnpm roadmap:check` suốt tám ngày trong khi alias chưa hề tồn tại"
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+  # E10 (AC-10) ĐÃ CẮT 2026-08-27 vòng 4 — xem Amendment của contract và
+  # decisions.jsonl. Id E10 CỐ Ý bỏ trống: run-log.jsonl đã có 3 vòng dòng E10,
+  # tái dùng id cho một eval khác sẽ làm hoà lẫn hai lịch sử.
 
   # W1 (eval-coverage-lint, Cổng 1): AC-4/AC-5 là cặp đếm hai chiều, nên cả hai
   # cần một nửa KHÔNG-nổ. E11 là nửa đó.
