@@ -7,23 +7,23 @@
     },
     {
       "id": "AC-2",
-      "p": "Sẽ xử chuỗi có URL/đường dẫn tử tế: đọc đúng phần quanh nó hoặc từ chối — không bao giờ trả thành công với chuỗi cắt cụt."
+      "p": "Sẽ xử chuỗi có địa chỉ web tử tế: đọc đúng phần chữ quanh nó hoặc từ chối — không bao giờ báo thành công với câu cắt cụt."
     },
     {
       "id": "AC-3",
-      "p": "Sẽ thôi đọc 'số-gạch-số' không phải khoảng (ngày ISO, mã đơn, số điện thoại) thành chữ 'đến' — biến giới hạn đã khai thành yêu cầu."
+      "p": "Sẽ thôi đọc 'số-gạch-số' không phải khoảng (ngày ISO, mã đơn, số điện thoại) thành chữ 'đến', và không được làm mất chữ số nào."
     },
     {
       "id": "AC-4",
-      "p": "Sẽ giữ nguyên hoặc đọc theo cách khai rõ token thương hiệu La-tinh (VNDirect, H.264), và đọc hai lần ra cùng một kết quả."
+      "p": "Sẽ giữ nguyên token thương hiệu La-tinh (VNDirect, H.264) và đọc hai lần ra cùng một kết quả — hôm nay đọc lần hai khác lần đầu."
     },
     {
       "id": "AC-5",
-      "p": "Sẽ có ca đo dương VÀ âm cho MỌI mục từ điển viết tắt — hôm nay 6/11 mục chưa có ca nào."
+      "p": "Sẽ có ca đo dương VÀ âm cho MỌI mục từ điển viết tắt — hôm nay 6 trên 11 mục chưa có ca nào."
     },
     {
       "id": "AC-6",
-      "p": "Sẽ hiện lỗi theo ngôn ngữ người dùng: SDK trả mã máy đọc được, câu chữ sống trong 5 file ngôn ngữ — hết cảnh người dùng Nhật/Hàn thấy câu tiếng Việt."
+      "p": "Sẽ hiện lỗi theo ngôn ngữ người dùng: người dùng giao diện Anh/Nhật/Hàn/Trung thôi phải đọc câu tiếng Việt."
     },
     {
       "id": "AC-7",
@@ -31,7 +31,7 @@
     },
     {
       "id": "AC-8",
-      "p": "Sẽ cấm phép đo tự chọn chủ thể bằng chính thuộc tính nó đo — lỗ đã đo được ở ô E18 của hợp đồng gốc."
+      "p": "Sẽ cấm phép đo tự chọn chủ thể bằng chính thứ nó đo — lỗ đã đo được ở một ô kiểm của hợp đồng trước."
     },
     {
       "id": "AC-9",
@@ -39,49 +39,83 @@
     },
     {
       "id": "AC-10",
-      "p": "Sẽ tính dấu gạch chéo còn sót (đ/kg, %/năm) là token chưa đọc được — hôm nay chúng lọt với báo thành công."
+      "p": "Sẽ tính dấu gạch chéo còn sót (đ/kg, %/năm) là chưa đọc được — hôm nay chúng lọt kèm báo thành công."
+    },
+    {
+      "id": "AC-11",
+      "p": "Sẽ đổi bộ ca họ nhập nhằng thành bảng khai-trước tự nói ô nào còn trống, thay vì danh sách phẳng phải thêm ca sau mỗi lần có người soi ra."
+    },
+    {
+      "id": "AC-12",
+      "p": "Sẽ chỉ hiện cảnh báo lúc lưu khi việc nó khuyên làm được thật — hôm nay nó bảo thêm một node không ai cài được."
     }
   ],
-  "wont_do": [
-    {
-      "id": "OOS-1",
-      "p": "Sẽ KHÔNG sửa hay fork thư viện đọc số — chỉ ghim phiên bản và bọc."
-    },
-    {
-      "id": "OOS-2",
-      "p": "Sẽ KHÔNG đọc ngôn ngữ khác ngoài tiếng Việt."
-    },
-    {
-      "id": "OOS-3",
-      "p": "Sẽ KHÔNG làm giọng vùng miền hay phần phát thành tiếng."
-    },
-    {
-      "id": "OOS-4",
-      "p": "Sẽ KHÔNG thu hẹp cảnh báo xuất bản theo ngôn ngữ trước khi bộ chọn có mục tiếng Việt."
-    }
-  ],
+  "wont_do": [],
   "coverage_plain": [
     {
       "i": 0,
-      "p": "Trục ký tự: gạch kiểu chữ và dấu phân cách URL — AC-1 (gạch chữ về ASCII) và AC-2 (URL không cắt cụt)."
+      "p": "Trục ký tự: gạch kiểu chữ và dấu phân cách địa chỉ web — AC-1 và AC-2."
     },
     {
       "i": 1,
-      "p": "Trục hình dạng dễ nhầm: số-gạch-số không phải khoảng và token La-tinh — AC-3 (thôi đọc thành 'đến') và AC-4 (thương hiệu giữ nguyên)."
+      "p": "Trục hình dạng dễ nhầm: số-gạch-số không phải khoảng, và token La-tinh — AC-3 và AC-4."
     },
     {
       "i": 2,
-      "p": "Trục phủ từ điển: mọi mục có ca dương + ca âm — AC-5 (6/11 mục đang trống)."
+      "p": "Trục phủ từ điển: mọi mục có ca dương và ca âm — AC-5 (6/11 mục đang trống)."
     },
     {
       "i": 3,
-      "p": "Trục người đọc: lỗi theo ngôn ngữ người dùng và khai được tiếng Việt — AC-6 (mã + i18n) và AC-7 (mục chọn tiếng Việt)."
+      "p": "Trục người đọc: lỗi theo ngôn ngữ người dùng, và khai được tiếng Việt — AC-6 và AC-7."
     },
     {
       "i": 4,
-      "p": "Trục tự soi: phép đo không tự chọn chủ thể theo thứ nó đo — AC-8 (lỗ E18)."
+      "p": "Trục hậu kiểm mù: thứ thư viện bỏ lại không phải chữ số nên lớp canh không thấy — AC-10 (dấu gạch chéo) và AC-9 (ngày không đọc được). Đây là cơ chế gốc của cả lớp lỗi."
+    },
+    {
+      "i": 5,
+      "p": "Trục tự soi: phép đo không tự chọn chủ thể theo thứ nó đo — AC-8."
+    },
+    {
+      "i": 6,
+      "p": "Trục bộ-ca-tự-lộ-ô-trống: họ nhập nhằng theo bảng khai-trước — AC-11."
+    },
+    {
+      "i": 7,
+      "p": "Trục cảnh báo khả thi: chỉ khuyên điều làm được thật — AC-12."
     }
   ],
   "scope_plain": "Không đụng: fork thư viện đọc số, ngôn ngữ khác, giọng vùng miền, phần phát tiếng, và thu hẹp cảnh báo trước khi có mục tiếng Việt.",
-  "decisions_plain": []
+  "decisions_plain": [
+    {
+      "id": "d-20260827T124432Z-51002",
+      "p": "KHÔNG làm phiên duyệt giao diện riêng: thay đổi ở đây là thêm một mục vào danh sách sẵn có và tắt một cảnh báo sẵn có — đổi lại Cổng này duyệt phần nhìn bằng chữ, bù bằng hai ảnh chụp và hội đồng soi ảnh ở cổng sau."
+    },
+    {
+      "id": "d-20260827T124432Z-63417",
+      "p": "Làm sức khoẻ bộ đo trước, lỗi đọc sai sau, mặt người dùng cuối — đổi lại hai vòng đầu trông như không tiến triển gì trên sản phẩm."
+    }
+  ],
+  "gap_probe_plain": [
+    {
+      "i": 0,
+      "p": "Không phép đo nào kiểm câu lỗi THẬT hiện ra cho người dùng ngôn ngữ khác — chỉ kiểm rằng bản dịch có tồn tại. Câu tiếng Việt vẫn lọt ra được qua đường chạy. Đã thêm một ô kiểm đo đúng câu hiển thị ở giao diện tiếng Anh và tiếng Nhật."
+    },
+    {
+      "i": 1,
+      "p": "Ba tiêu chí dùng chung một lệnh kiểm, nên ba dòng bằng chứng thật ra là một kết quả — hai tiêu chí chưa làm vẫn xanh theo ké. Đã tách thành ba lệnh riêng."
+    },
+    {
+      "i": 2,
+      "p": "Cảnh báo lúc lưu chỉ được kiểm ở phần lõi, không kiểm chỗ gọi thật — lõi đúng mà chỗ gọi quên thì người dùng vẫn thấy cảnh báo sai. Đã thêm ô kiểm đo đúng chỗ gọi và nâng tiêu chí thành xuyên-lớp."
+    },
+    {
+      "i": 3,
+      "p": "Hai phép đo tuyên quét cả lớp nhưng chỉ chạy vài ca lẻ; một ký tự vá nửa vời vẫn xanh. Đã đổi sang bảng khai-trước và đo bằng quan hệ giữ đủ chữ số."
+    },
+    {
+      "i": 4,
+      "p": "Bản đồ độ phủ thiếu trục cho đúng cơ chế gốc, nên nếu ai đó cắt hai tiêu chí ấy thì bản đồ vẫn trông đủ. Đã thêm trục đó."
+    }
+  ]
 }

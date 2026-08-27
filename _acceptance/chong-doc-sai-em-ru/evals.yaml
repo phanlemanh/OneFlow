@@ -1,0 +1,302 @@
+schema_version: 1
+feature_slug: chong-doc-sai-em-ru
+
+# Mọi eval máy khai `paths` = các file nó THẬT SỰ kiểm, dùng cho carry-forward
+# vòng delta. Mọi `cmd` là ref `config:` — không hardcode lệnh.
+#
+# Khuôn sinh-phép-đo áp cho TOÀN BỘ file này: mỗi eval mới phải khai được CHIỀU
+# ĐỎ — cặp hai chiều trên CÙNG một fixture (vật lành → xanh; phá vật thật trong
+# bản sao → đỏ với THÔNG ĐIỆP GHIM nêu tên ca, không chỉ exit code). Bài học đắt
+# nhất của hợp đồng gốc: một phép đo chưa từng đỏ không phân biệt được "vật lành"
+# với "thước chưa bao giờ chạy".
+
+evals:
+  # ─── Nhóm B: sức khoẻ bộ đo (làm trước, để nhóm A được đo bằng thước có răng)
+  - id: E1
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.measuring_instruments_refuse
+    paths:
+      - "scripts/acceptance/check-measuring-instruments-refuse.sh"
+      - "_acceptance/config.yaml"
+    expected: >-
+      exit 0; phép đo chọn tập chủ thể từ CẤU TRÚC (liệt mọi khoá dưới
+      executors.* có pytest) chứ không bằng grep chính từ khoá nó đi kiểm; số
+      khoá soi được khai tường minh và khớp số khoá thật trong config. Chiều đỏ:
+      gỡ mỏ neo ${pin:?} khỏi MỘT khoá bất kỳ → đỏ nêu ĐÚNG TÊN KHOÁ đó (bản cũ
+      im lặng vì khoá mất mỏ neo cũng mất luôn từ 'vietnormalizer' nên rơi khỏi
+      tập chủ thể — đo được ở hợp đồng gốc, S4 vòng 21).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_ambiguous
+    paths:
+      - "sdk/tests/test_normalize_vi.py"
+      - "sdk/tongflow/text/**"
+    expected: >-
+      exit 0; họ "Đ nhập nhằng" khai MA TRẬN TRƯỚC hai trục — {dấu ngăn: cách ·
+      tab · xuống dòng · NBSP · không có} × {token theo sau: chữ · số · dấu phẩy
+      · kết chuỗi} = 20 ô; mỗi ô có ca hoặc nằm trong DELIBERATELY_UNCOVERED_D_CELLS
+      kèm lý do; assert missing == [] nêu ĐÚNG TÊN Ô còn trống. Ô (bất kỳ, kết
+      chuỗi) phải nằm trong danh sách bỏ-có-tên với lý do đã khai ở Known limits
+      hợp đồng gốc (chặn ở đó sẽ giết luôn 'Giá 500 đ'). Chiều đỏ: xoá một ô khỏi
+      ma trận → đỏ nêu đúng tên ô, không chỉ exit code.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_identifiers
+    paths:
+      - "sdk/tests/test_normalize_vi.py"
+      - "sdk/tongflow/text/vi_dictionary.py"
+    expected: >-
+      exit 0; MỌI mục trong từ điển viết tắt và tiền tố hành chính có ≥1 ca DƯƠNG
+      (bung đúng) và ≥1 ca ÂM chứng minh mỏ neo chữ cái có tác dụng; tập chủ thể
+      suy TỪ CHÍNH từ điển (lặp qua ABBREVIATION_PATTERNS / PREFIX_PATTERNS),
+      không phải danh sách chép tay — nếu không, thêm mục mới vào từ điển sẽ
+      không làm phép đo đỏ. Hôm nay 6/11 mục chưa có ca nào. Chiều đỏ: thêm một
+      mục từ điển mà không thêm ca → đỏ nêu đúng tên mục thiếu ca.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ─── Nhóm A: lỗ hổng lớp ký tự / hình dạng
+  - id: E4
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_typographic_dash
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; MA TRẬN TOÀN PHẦN khai trước — {– U+2013 · — U+2014 · − U+2212} ×
+      {vai khoảng · vai số âm · vai token còn sót} = 9 ô, mỗi ô có ca hoặc nằm
+      trong DELIBERATELY_UNCOVERED_DASH_CELLS kèm lý do; assert missing == [] nêu
+      ĐÚNG TÊN Ô còn trống (một ký tự đúng MỘT vai là cách lớp này thủng: vá
+      nhánh khoảng mà quên nhánh âm thì ca đã ghim vẫn xanh). Đo bằng QUAN HỆ:
+      normalize(bản gạch kiểu chữ) == normalize(bản ASCII tương ứng),
+      byte-identical, CỘNG chốt chống-tương-đương-rỗng — hai vế cùng bị từ chối
+      thì KHÔNG tính là bằng nhau. Ca ÂM bắt buộc: 'ki-lô-mét' không bị đụng.
+      Chiều đỏ: bỏ một ký tự khỏi hằng lớp ngăn cách dùng chung → đỏ nêu đúng ô
+      (ký tự, vai) lệch.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_range_shapes
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; ngày ISO '2026-08-19', mã đơn 'A-123-B', điện thoại '0901-234-567'.
+      Assert là QUAN HỆ BẢO TOÀN, không phải vắng-mặt-chuỗi: với mỗi ca, hoặc
+      success:false nêu tên cụm, hoặc SỐ CHỮ SỐ đọc ra khớp đúng số chữ số đầu
+      vào VÀ không xuất hiện chữ 'đến'. Chỉ assert "không có chữ đến" là chưa đủ
+      — '0901-234-567' đọc mất một chữ số, không có 'đến', ok=True vẫn lọt và đó
+      đúng là lớp lỗi hợp đồng này lập ra để chặn. Ba ca hôm nay nằm trong
+      CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT; phép đo tự-đỏ-khi-giới-hạn-lành phải gỡ
+      CÙNG LÚC (giới hạn đã lành mà còn khai là lời nói dối trong file). Chiều
+      đỏ: trả luật khoảng về dạng cũ → đỏ nêu đúng ca và số chữ số lệch.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_datetime
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; 'ngày 12/25/2026' (kiểu Mỹ) và 'ngày 32/8/2026' (ngày không tồn
+      tại) → success:false nêu tên cụm, KHÔNG im lặng nuốt chữ 'ngày' và nuốt
+      một thành phần ngày. Ca ÂM bắt buộc: ngày Việt hợp lệ 'ngày 19/8/2026' vẫn
+      đọc đúng như cũ. Chiều đỏ: trả luật xoá chữ 'ngày' về chạy vô điều kiện →
+      đỏ nêu đúng ca 12/25/2026 và số 25 bị mất.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_residual_fail
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; dấu gạch chéo CÒN SÓT TRONG ĐẦU RA tính là token chưa đọc được —
+      'Giá 50.000 đ/kg' và 'Lãi 5%/năm' → success:false nêu '/'. Ca ÂM bắt buộc,
+      đã đo: '100km/h' thư viện đọc đúng thành 'ki lô mét trên giờ' nên KHÔNG
+      được đỏ — luật phải soi đầu ra, không soi đầu vào. Chiều đỏ: gỡ '/' khỏi
+      lớp hậu kiểm → đỏ nêu đúng hai ca đ/kg và %/năm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_idempotent
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; token thương hiệu La-tinh viết hoa lẫn giữ nguyên hoặc đọc theo
+      cách khai rõ, VÀ đọc hai lần ra cùng một kết quả. 'Công ty VNDirect niêm
+      yết' hôm nay ra 'ndi re' lần đầu rồi 'di re' lần hai — vi phạm tính đọc-
+      hai-lần-như-nhau; ca này phải rời IDEMPOTENCE_EXCLUDED và phép đo tự-đỏ-
+      khi-ngoại-lệ-lành phải gỡ cùng lúc. Ca ÂM: 'VNDS' và 'H.264' không đổi
+      hành vi. Chiều đỏ: bỏ luật giữ token → đỏ nêu đúng token bị băm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_edges
+    paths:
+      - "sdk/tongflow/text/**"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; chuỗi chứa URL hoặc đường dẫn → hoặc đọc đúng phần văn bản quanh
+      nó, hoặc success:false; TUYỆT ĐỐI không ok=True với chuỗi rỗng hay cắt
+      cụt. Assert QUAN HỆ: nếu ok=True thì phần chữ ngoài URL phải còn nguyên
+      (so với bản lower() của chính nó), không phải chỉ 'không rỗng'. Chiều đỏ:
+      dựng ca URL làm rỗng đầu ra → đỏ nêu đúng chuỗi vào.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ─── Nhóm C: mặt người dùng
+  - id: E10
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.sdk_pytest_normalize_error_codes
+    paths:
+      - "sdk/tongflow/text/normalize_vi.py"
+      - "sdk/tests/test_normalize_vi.py"
+    expected: >-
+      exit 0; mỗi đường từ chối trả MÃ ỔN ĐỊNH (EMPTY_INPUT / RESIDUAL_TOKENS /
+      MONEY_UNIT_LOST) + tuple residual; assert tập mã khai trong test KHỚP HAI
+      CHIỀU với tập mã sinh ra từ code (không mã lạ, không mã khai mà không
+      đường nào sinh). Chiều đỏ: thêm một đường từ chối không khai mã → đỏ nêu
+      đúng đường đó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.normalize_registration_synced
+    paths:
+      - "src/i18n/messages/**"
+      - "src/lib/task/engine-delegate.server.ts"
+      - "src/components/workspace/nodes/base/abi-node-shell.tsx"
+    layer: backend-effect
+    expected: >-
+      exit 0; đủ 5 locale có khoá cho CẢ BA mã lỗi; dây render đo bằng grep tĩnh
+      khai sàn tường minh: nơi nhận mã đọc khoá i18n. Chiều đỏ BẮT BUỘC (assert
+      âm tính phải có đối chứng dương): xoá khoá của MỘT mã ở MỘT locale trong
+      bản sao → đỏ nêu đúng locale và đúng mã. Đây là phép đo KHAI BÁO; phép đo
+      ĐẦU RA THẬT là E15 — grep tĩnh không thể thấy câu tiếng Việt đi ra mặt
+      người qua BIẾN lúc chạy.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-7
+    executor: ui-check
+    paths:
+      - "src/components/workspace/nodes/**"
+      - "src/i18n/messages/**"
+    steps:
+      - "NEO CÂY: cd repoRoot, kiểm `git rev-parse HEAD` bằng invokedSha; lệch → DỪNG."
+      - "Kiểm cổng 3000 bằng `lsof -nP -iTCP:3000 -sTCP:LISTEN`; có tiến trình lạ NGHE → DỪNG."
+      - "Khởi động dev server với thư mục build RIÊNG: NEXT_DIST_DIR=build pnpm dev."
+      - "`git checkout -- tsconfig.json` NGAY sau khi server lên (Next ghi đè file này một lần lúc khởi động với distDir khác; để nguyên thì lint của chính vòng này đỏ)."
+      - "KIỂM XUẤT XỨ trước mọi lượt chụp: curl -s -H 'Accept-Language: vi' {url}/... phải chứa chuỗi tiếng Việt đã khai; không thấy → DỪNG và báo chụp nhầm cây, KHÔNG ghi là đỏ tiêu chí."
+      - "Chụp state-1-idle: bộ chọn ngôn ngữ mở, thấy mục 'Tiếng Việt' trong danh sách."
+      - "Chụp state-2-wired: đã chọn tiếng Việt, nhãn hiện đúng trên node."
+      - "Chạy sàn P0 design gate bằng config:executors.design.gate trên bản HTML vừa chụp."
+      - "Assert: console sạch; mục 'Tiếng Việt' đọc được bằng chữ, không phải khoá i18n thô."
+      - "DỌN bắt buộc dù thành công hay thất bại: tắt dev server, `git checkout tsconfig.json`, `rm -rf build`."
+    expected: >-
+      hai ảnh tồn tại và là ảnh của CÂY NÀY (đã kiểm xuất xứ); sàn P0 design gate
+      xanh; console sạch; bộ chọn có mục tiếng Việt ở cả hai state.
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E13
+    criterion: AC-7
+    executor: judgment
+    question: >-
+      Chỉ soi HAI ảnh được cấp (bộ chọn ngôn ngữ giọng đọc, state idle và wired):
+      mục "Tiếng Việt" có nằm đúng chỗ người dùng tìm nó không, và nhãn sau khi
+      chọn có đọc được bằng tiếng Việt tự nhiên không? Có gì phá ngôn ngữ thiết
+      kế workspace nhìn thấy được NGAY TRÊN hai ảnh này? Thiếu input nào thì nói
+      THIẾU FILE, đừng suy đoán.
+    inputs:
+      - "evidence/design/captures/state-1-idle.png"
+      - "evidence/design/captures/state-2-wired.png"
+    expected: >-
+      Panel đồng thuận hai capture cho thấy mục tiếng Việt đặt đúng chỗ và nhãn
+      đọc được; UNCERTAIN → human quyết ở Cổng 2. T3 vốn bắt buộc human_override
+      mọi mục judgment kể cả khi PASS.
+    evidence_required: [run_id, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_tts_order_violation
+    paths:
+      - "src/lib/workflow/exporter.ts"
+      - "src/lib/workflow/tts-order-guard.test.ts"
+      - "src/lib/plugins/**"
+    layer: backend-effect
+    expected: >-
+      exit 0; CẶP HAI CHIỀU trên cùng một đồ thị workflow — khi KHÔNG plugin nào
+      nhận slot normalize-text-vi: warnings RỖNG (assert toEqual([]), không phải
+      chỉ 'không ném'); khi CÓ plugin nhận slot: warnings chứa đúng
+      {code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} nêu ĐÚNG id node vi phạm, y
+      như hành vi hôm nay. Điều kiện suy từ nodePluginMap, không phải cờ chép
+      tay. Chiều đỏ: trả cảnh báo về vô điều kiện → đỏ ở nửa 'không plugin'.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ─── Hai ô thêm sau phản biện context sạch (2026-08-27): F1 và F3 cùng một lớp
+  # lỗi — "hàm đúng, quên chỗ gọi". Phép đo khai báo không thay được phép đo đầu ra.
+  - id: E15
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_normalize_error_i18n_render
+    paths:
+      - "src/lib/task/**"
+      - "src/components/workspace/nodes/base/abi-node-shell.tsx"
+      - "src/i18n/messages/**"
+    layer: backend-effect
+    expected: >-
+      exit 0; đo ĐẦU RA THẬT chứ không phải khai báo. Ép locale ≠ vi (en và ja),
+      chạy hai đường từ chối THẬT qua đúng dây sản phẩm — chuỗi rỗng
+      (EMPTY_INPUT) và 'Giá 50.000 đ/kg' (RESIDUAL_TOKENS) — rồi assert QUAN HỆ:
+      chuỗi hiển thị BẰNG giá trị khoá i18n của locale đó, VÀ không chứa ký tự có
+      dấu tiếng Việt nào ngoài danh sách trắng. Lý do phải có ô này: grep tĩnh
+      của E11 chỉ thấy literal trong mã; câu tiếng Việt đi ra mặt người qua BIẾN
+      lúc chạy (ví dụ `err.message ?? t(err.code)`, hoặc `detail: result.error`)
+      thì E10 và E11 đều xanh mà người dùng en/ja vẫn đọc tiếng Việt — cùng lớp
+      "hàm đúng, quên chỗ gọi" [normalize-text-vi#F1]. Chiều đỏ: nối lại
+      `result.error` vào chỗ hiển thị trong bản sao → đỏ nêu ĐÚNG mã lỗi và ĐÚNG
+      locale.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_tts_warning_call_site
+    paths:
+      - "src/hooks/use-export-warning-toast.ts"
+      - "src/lib/workflow/exporter.ts"
+      - "src/lib/plugins/**"
+    layer: backend-effect
+    expected: >-
+      exit 0; đo CHỖ GỌI, không phải hàm guard. Spy chứng minh đường lưu / chạy /
+      xuất lấy bản đồ slot→plugin từ CHÍNH nodePluginMap của registry, không phải
+      hằng chép tay và không phải mặc định rỗng. Cặp hai chiều TẠI CHỖ GỌI:
+      registry KHÔNG có plugin nhận slot → toast được gọi ĐÚNG 0 lần; registry CÓ
+      → gọi đúng 1 lần với đúng nodeIds. Vì sao tách khỏi E14: E14 tiêm map vào
+      hàm nên cả hai nửa xanh trong khi chỗ gọi quên truyền map, gọi trước lúc
+      registry quét xong, hoặc tự tính điều kiện riêng — người dùng vẫn bị bảo
+      thêm một node không plugin nào thực thi được. Chiều đỏ: ghim cứng map rỗng
+      ở chỗ gọi trong bản sao → đỏ nêu đúng tên đường gọi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+

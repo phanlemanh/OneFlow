@@ -27,7 +27,7 @@ Hợp đồng gốc đã đóng từng ca một khi chúng lộ ra. Hợp đồn
 **Nguyên tắc xuyên suốt:** giữa *từ chối đọc* và *đọc sai*, luôn chọn **từ chối**. Một câu bị
 chặn thì người dùng thấy; một giá đọc sai thì không ai thấy cho tới khi khách hàng nghe.
 
-## Tiêu chí nghiệm thu
+## Criteria
 
 - AC-1: (sdk) Given một chuỗi chứa **dấu gạch kiểu chữ** — en dash `–` (U+2013), em dash `—`
   (U+2014), hoặc dấu trừ Unicode `−` (U+2212) — When chuẩn hoá, Then đọc **giống hệt** dạng
@@ -43,7 +43,7 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   phần văn bản quanh nó, hoặc `success:false` — **không** được trả `ok=True` với chuỗi rỗng
   hay bị cắt cụt. *(Rủi ro để lại từ vòng 3, chưa có ca đo.)*
 
-- AC-3: (sdk) Given `số-gạch-số` **không phải khoảng** — ngày kiểu ISO `2026-08-19`, mã đơn
+- AC-3: (sdk) Given một chuỗi `số-gạch-số` mang nghĩa **khác khoảng** — ngày kiểu ISO `2026-08-19`, mã đơn
   `A-123-B`, điện thoại viết gạch `0901-234-567` — When chuẩn hoá, Then **không** đọc thành
   "đến". *(Hôm nay cả ba đều thành "đến" với `ok=True`; đã ghim làm giới hạn đã biết ở
   `CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT`, hợp đồng này biến giới hạn đó thành yêu cầu.)*
@@ -93,7 +93,7 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   `d{1,2}[/-]d{1,2}[/-]d{4}`, dựa vào giả định thư viện sẽ tự thêm lại — giả định chỉ đúng khi
   thư viện parse được. Ngày Việt hợp lệ (`ngày 19/8/2026`) vẫn đọc đúng.*
 
-- AC-10: (sdk) Given đầu ra còn **dấu gạch chéo** mà thư viện không đọc thành chữ, When hậu
+- AC-10: (sdk) Given đầu ra còn **dấu gạch chéo** mà thư viện để nguyên dưới dạng ký tự, When hậu
   kiểm, Then tính là token chưa đọc được.
   *Đo thật: `Giá 50.000 đ/kg` → "giá năm mươi nghìn đồng**/kg**", `Lãi 5%/năm` → "lãi năm phần
   trăm**/năm**", đều `ok=True`, `residual` rỗng. `đ/kg` và `%/năm` là cách viết giá và lãi suất
@@ -102,13 +102,37 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   *Đây cũng là cơ chế khiến AC-9 im lặng: khi thư viện parse hụt, thứ nó bỏ lại là `/`, không
   phải chữ số, nên lớp hậu kiểm — vốn chỉ soi `[0-9₫%]` — hoàn toàn mù.*
 
+- AC-11: (đo lường) Given họ ca "Đ nhập nhằng" *(kéo vào từ triage chữ ký Cổng 2 hợp đồng
+  gốc, owner 2026-08-27)*, When khai bộ ca, Then bộ ca là **ma trận khai-trước** hai trục
+  {dấu ngăn: cách · tab · xuống dòng · NBSP · không có} × {token theo sau: chữ · số · dấu
+  phẩy · kết chuỗi}, mỗi ô có ca hoặc nằm trong danh sách bỏ-có-tên kèm lý do, và assert nêu
+  **ĐÚNG TÊN Ô** còn trống.
+  *Hôm nay bộ ca là danh sách phẳng 17 dòng: vòng 17 và vòng 19 của hợp đồng gốc mỗi lần đều
+  phải thêm bốn dòng SAU khi có người soi ra — thay vì phép đo tự nói ô nào trống. Sáu họ anh
+  em cùng file đều đã theo khuôn ma trận.*
+
+- AC-12: (cross-layer) Given người dùng lưu hoặc chạy một luồng có node giọng đọc *(kéo vào từ
+  triage chữ ký Cổng 2 hợp đồng gốc, owner 2026-08-27)*, When node đọc-số **chưa cài được**
+  (không plugin nào nhận slot), Then **không hiện** cảnh báo bảo họ thêm node đó; cảnh báo chỉ
+  hiện khi hành động nó gợi ý làm được thật.
+  *Hôm nay cảnh báo hiện vô điều kiện trên MỌI lần lưu/chạy/xuất, trỏ tới một node không nằm
+  trong picker nào và không plugin nào thực thi được — plugin đã rút khỏi danh sách chính thức
+  vì kho origin chưa tồn tại công khai. Ca ÂM bắt buộc: khi plugin có mặt trở lại, cảnh báo
+  phải hiện lại đúng như cũ.*
+
 ## Coverage — bộ tiêu chí phủ những trục nào
 
 - **Trục ký tự**: gạch kiểu chữ (AC-1) · dấu phân cách trong URL/đường dẫn (AC-2)
 - **Trục hình dạng dễ nhầm**: `số-gạch-số` không phải khoảng (AC-3) · token La-tinh (AC-4)
 - **Trục phủ từ điển**: mọi mục có ca dương + ca âm (AC-5)
 - **Trục người đọc**: thông điệp lỗi theo ngôn ngữ người dùng (AC-6) · khai được tiếng Việt (AC-7)
+- **Trục hậu kiểm mù**: token thư viện bỏ lại KHÔNG phải chữ số nên lớp hậu kiểm không thấy —
+  dấu gạch chéo còn sót trong đầu ra (AC-10) · ngày khớp hình dạng nhưng thư viện không parse
+  được (AC-9). *Đây là cơ chế trung tâm nêu ở §Vì sao có hợp đồng này; thiếu trục này thì một
+  lượt cắt phạm vi có thể gỡ đúng hai AC bịt lỗ gốc mà bản đồ phủ vẫn trông đủ.*
 - **Trục tự soi**: phép đo không được tự chọn chủ thể theo thứ nó đo (AC-8)
+- **Trục bộ-ca-tự-lộ-ô-trống**: họ ca nhập nhằng theo ma trận khai-trước (AC-11)
+- **Trục cảnh báo khả thi**: chỉ khuyên điều làm được thật (AC-12)
 
 ## Out of scope
 
@@ -119,13 +143,14 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 
 ## Ghi chú cho Cổng 1
 
-Hai mục dưới đây **không** thuộc hợp đồng này mà là lỗi của hợp đồng gốc, đang nằm trong cây
-đóng băng và cần owner quyết riêng:
+Hồ sơ này viết 26/08, **trước** năm vòng nghiệm thu cuối của hợp đồng gốc. Cập nhật hiện
+trạng tại 27/08 (sau khi PR #77 merge):
 
-1. **`Đ` hoa trong câu thường bị đọc thành "đường"** — `Giá 1.999.000 Đ Bao gồm VAT` →
-   "…nghìn **đường** bao gồm…", và `has_money` trả False nên luật quan hệ tắt. Đây là **vi phạm
-   AC-6 của hợp đồng gốc** (đầu vào có dấu tiền, đầu ra không có chữ tiền) và là **hồi quy do
-   luật `STREET_PATTERN` thêm ở vòng 6** — comment chỉ khai giới hạn cho chữ VIẾT HOA TOÀN BỘ,
-   nhưng câu viết thường cũng dính.
-2. **`E18` chọn chủ thể bằng chính thuộc tính đang đo** (xem AC-8) — làm mệnh đề "quét cả lớp"
-   của AC-16 hợp đồng gốc thành vô căn cứ.
+1. **ĐÃ ĐÓNG, không còn là việc của hợp đồng này:** mục cũ "`Đ` hoa trong câu thường đọc
+   thành đường" — luật đường đã gỡ hẳn (từ chối cả họ), và các vòng 17–21 nới luật từ chối
+   sang mọi dấu ngăn + token theo sau là số/dấu phẩy. `Giá 1.999.000 Đ Bao gồm VAT` nay bị
+   TỪ CHỐI, đã ghim trong bộ ca của hợp đồng gốc.
+2. **Mục cũ về `E18` chọn chủ thể bằng thuộc tính đang đo** đã trở thành AC-8 của chính hợp
+   đồng này — không còn là ghi chú ngoài lề.
+3. AC-1/AC-9/AC-10 có số đo từ 25–26/08; các bản vá vòng 17–21 không chạm ba họ này (chỉ chạm
+   họ dấu phẩy và họ Đ-nhập-nhằng) nên số đo còn nguyên giá trị — S4 sẽ đo lại làm bằng chứng.
