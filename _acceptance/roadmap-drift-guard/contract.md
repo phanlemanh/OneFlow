@@ -5,7 +5,7 @@ slug: roadmap-drift-guard
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [scripts, docs]
-status: verified
+status: implemented
 approved_by: Manh
 approved_at: 2026-08-27
 ---
@@ -151,3 +151,32 @@ hợp đồng nó chứng minh**. Cả ba đã vá; đây là lý do vòng 1 b�
 - **AC-7 chốt nghĩa.** "Mỗi nhiễu sở hữu một mã thoát riêng" đọc được hai nghĩa; nay nói
   thẳng là *một lần gọi riêng cho mỗi case*, không phải *mỗi case một giá trị số khác nhau*.
   Người kiểm vòng 1 đọc đúng nghĩa này, nhưng câu chữ không được phép dựa vào may mắn đó.
+
+## Amendment — 2026-08-27 vòng 3 (sau verify vòng 2)
+
+Vòng 2 cho PASS 11/11 và đóng cả ba điểm của vòng 1, nhưng người kiểm tìm ra **hai lỗ
+fail-open thật** trong `check-roadmap-alias-cited.sh` — file viết mới ở vòng 1. Cả hai
+đều tái hiện được, và cả hai nằm ở **đường rìa** (đổi tên, tập rỗng) chứ không phải
+đường chính, đúng chỗ sáu đột biến của vòng 2 không canh tới.
+
+- **Quét ra 0 chỗ viện dẫn nay ĐỎ.** Bản trước in `không có gì để kiểm` rồi thoát 0: dời
+  `docs/` hay đổi tên `scripts/roadmap/` là guard lặng lẽ chuyển sang trạng thái
+  không-đo-gì mà vẫn xanh. Trong kho này số 0 không thể là sự thật — header của chính
+  guard đó viện dẫn `pnpm roadmap:check-alias` — nên 0 nghĩa là đường quét hỏng.
+  Kiểm T-1: gỡ chuỗi viện dẫn khỏi **mọi** file trong đường quét → guard ĐỎ đúng nhánh.
+- **Tự nhận diện bằng đường dẫn đã phân giải, không bằng khớp chuỗi tên file.** Bản trước
+  so `*check-roadmap-alias-cited.sh*`; đổi tên file là `self_alias` rỗng và guard tự gọi
+  chính nó không giới hạn. Nay dùng `os.path.realpath`, và **không nhận ra chính mình thì
+  ĐỎ** thay vì chạy tiếp. Kiểm T-2: đổi tên file + trỏ lại `package.json` trên bản sao cây
+  đầy đủ → nhận đúng, bỏ qua đúng, không treo.
+- **`case-isolation` đòi ĐÚNG MỘT token nhãn** (`grep -c … -eq 1`), không phải có-mặt —
+  AC-7 nói "đúng một" còn `grep -q` chỉ trả lời có-hay-không.
+- **Nửa "case hỏng thoát khác 0" của AC-7 nay có bằng chứng.** Mọi case thật đều đạt, nên
+  không lần chạy nào chứng minh bộ răng *có thể* báo hỏng — một harness chỉ biết in PASS
+  thuộc đúng họ fail-open với một cổng chỉ biết in xanh. Cờ ẩn `--selftest-fail` chạy một
+  case cố tình hỏng; nó **không** nằm trong `CASES` nên không bao giờ làm bẩn lần chạy thật,
+  và **không** hiện trong `--list`. `case-isolation` đòi nó thoát khác 0 kèm token `FAIL`.
+
+Ba mục Known limits còn lại của vòng 2 (`baseline: n-a` vì merge-base chưa có
+`scripts/roadmap/`; E6 phụ thuộc `git show 244cb0b`) là giới hạn môi trường, không vá được
+bằng code trong nhánh này.

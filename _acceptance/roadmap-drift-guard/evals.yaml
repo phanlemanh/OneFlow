@@ -66,7 +66,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_teeth_case_isolation
     paths: ["scripts/roadmap/**"]
-    expected: "exit 0; output chứa `CASE case-isolation: PASS`. RĂNG CỦA RĂNG: chạy từng case riêng lẻ và khẳng định mỗi case sở hữu mã thoát riêng + token nhãn riêng; đồng thời `--case <tên-không-tồn-tại>` phải bị TỪ CHỐI ồn ào (exit khác 0, in danh sách case hợp lệ) chứ không lặng lẽ thoát 0. Không có nửa sau, một typo trong tên case biến eval thành no-op xanh vĩnh viễn"
+    expected: "exit 0; output chứa `CASE case-isolation: PASS`. RĂNG CỦA RĂNG: chạy từng case riêng lẻ và khẳng định mỗi case sở hữu mã thoát riêng + token nhãn riêng; `--case <tên-không-tồn-tại>` phải bị TỪ CHỐI ồn ào (exit khác 0, in danh sách case hợp lệ) chứ không lặng lẽ thoát 0 — không có nửa này, một typo trong tên case biến eval thành no-op xanh vĩnh viễn; và (vòng 3) `--selftest-fail` phải thoát khác 0 kèm token `CASE selftest-fail: FAIL`, chứng minh bộ răng CÓ THỂ báo hỏng — một harness chỉ biết in PASS thuộc đúng họ fail-open với một cổng chỉ biết in xanh. Token nhãn phải xuất hiện ĐÚNG MỘT lần (`grep -c`, không phải `grep -q`) vì AC-7 nói \"đúng một\""
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8
@@ -90,7 +90,7 @@ evals:
     executor: script
     cmd: config:executors.script.roadmap_alias_cited_true
     paths: ["scripts/roadmap/**", "package.json", "docs/assets/oneflow-roadmap-status.html"]
-    expected: "exit 0. Quét MỌI chuỗi khớp `pnpm roadmap:\\S+` trong header của hai script và trong `docs/assets/oneflow-roadmap-status.html`, rồi khẳng định `package.json` khai đúng script đó và đường script trỏ tới file có thật. HAI NỬA (vòng 2 nâng, sau khi người kiểm vòng 1 chỉ ra chỉ có nửa (a)): **(a) khai báo** — `package.json` khai đúng script và đường script trỏ tới file có thật; **(b) thực thi** — mỗi alias được viện dẫn CHẠY THẬT qua `pnpm` và thoát 0, trừ chính alias của guard này (đệ quy). AC-10 nói \"phân giải VÀ chạy\"; một alias trỏ đúng file nhưng chết lúc chạy qua được nửa (a) — đột biến M-D chứng minh nửa (b) bắt được. Đây là eval sinh ra từ lỗi thật: ba chỗ viện dẫn `pnpm roadmap:check` suốt tám ngày trong khi alias chưa hề tồn tại"
+    expected: "exit 0. Quét MỌI chuỗi khớp `pnpm roadmap:\\S+` trong header của hai script và trong `docs/assets/oneflow-roadmap-status.html`, rồi khẳng định `package.json` khai đúng script đó và đường script trỏ tới file có thật. HAI NỬA (vòng 2 nâng, sau khi người kiểm vòng 1 chỉ ra chỉ có nửa (a)): **(a) khai báo** — `package.json` khai đúng script và đường script trỏ tới file có thật; **(b) thực thi** — mỗi alias được viện dẫn CHẠY THẬT qua `pnpm` và thoát 0, trừ chính alias của guard này (đệ quy). AC-10 nói \"phân giải VÀ chạy\"; một alias trỏ đúng file nhưng chết lúc chạy qua được nửa (a) — đột biến M-D chứng minh nửa (b) bắt được. Vòng 3 thêm hai yêu cầu FAIL-CLOSED ở đường rìa: quét ra **0** chỗ viện dẫn phải ĐỎ (0 không thể là sự thật — header của chính guard này viện dẫn một lệnh, nên 0 nghĩa là đường quét hỏng), và guard phải nhận ra chính nó bằng **đường dẫn đã phân giải** chứ không bằng khớp chuỗi tên file, đồng thời ĐỎ khi không nhận ra (đổi tên file mà vẫn chạy tiếp là đệ quy không giới hạn). Đây là eval sinh ra từ lỗi thật: ba chỗ viện dẫn `pnpm roadmap:check` suốt tám ngày trong khi alias chưa hề tồn tại"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # W1 (eval-coverage-lint, Cổng 1): AC-4/AC-5 là cặp đếm hai chiều, nên cả hai

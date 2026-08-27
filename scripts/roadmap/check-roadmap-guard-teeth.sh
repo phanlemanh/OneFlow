@@ -265,14 +265,27 @@ case_case_isolation() {
   for c in "${CASES[@]}"; do
     [ "$c" = "case-isolation" ] && continue    # no recursion
     out=$(bash "$self" --case "$c" 2>&1) || return 1
-    printf '%s\n' "$out" | grep -q "CASE $c: PASS" || return 1
+    # AC-7 nói "kèm ĐÚNG MỘT token nhãn". grep -q chỉ trả lời có-mặt, nên một
+    # case in nhãn của case khác kèm nhãn của mình vẫn lọt (vòng 3).
+    [ "$(printf '%s\n' "$out" | grep -c "CASE $c: PASS")" -eq 1 ] || return 1
   done
   # (b) an invented name must exit non-zero AND print the valid list
   rc=0; out=$(bash "$self" --case khong-ton-tai 2>&1) || rc=$?
   [ "$rc" -ne 0 ] || return 1
   printf '%s\n' "$out" | grep -q "ledger-stale" || return 1
+  # (c) nửa CÒN LẠI của AC-7: "case hỏng thoát khác 0". Mọi case thật đều đạt,
+  # nên không lần chạy nào chứng minh được bộ răng CÓ THỂ báo hỏng — một harness
+  # chỉ biết in PASS thuộc đúng họ fail-open với một cổng chỉ biết in xanh.
+  # `--selftest-fail` chạy một case cố tình hỏng, không nằm trong CASES nên
+  # không bao giờ làm bẩn lần chạy thật (vòng 3, lỗ do người kiểm vòng 2 chỉ ra).
+  rc=0; out=$(bash "$self" --selftest-fail 2>&1) || rc=$?
+  [ "$rc" -ne 0 ] || return 1
+  printf '%s\n' "$out" | grep -q "CASE selftest-fail: FAIL" || return 1
   return 0
 }
+
+# Case cố tình hỏng, CHỦ Ý nằm ngoài mảng CASES: chỉ `--selftest-fail` gọi tới.
+case_selftest_fail() { return 1; }
 
 run_case() {
   local name="$1" fn
@@ -298,6 +311,10 @@ ONE_CASE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --list) printf '%s\n' "${CASES[@]}"; exit 0 ;;
+    --selftest-fail)
+      # Không khai trong --list: đây không phải case của bộ răng, nó là bằng
+      # chứng bộ răng biết nói FAIL. Chỉ case-isolation gọi.
+      run_case selftest-fail; exit $? ;;
     --case)
       [ $# -ge 2 ] || refuse "\`--case\` cần một tên ngay sau nó — nhận được (trống)"
       case "$2" in --*) refuse "\`--case\` cần một tên ngay sau nó — nhận được \`$2\`" ;; esac

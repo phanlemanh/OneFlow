@@ -28,6 +28,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
+self="$(dirname "$0")/$(basename "$0")"
+
 echo "→ kiểm mọi lệnh \`pnpm roadmap:*\` được viện dẫn đều có thật"
 
 ALIAS_LIST="$(mktemp)"
@@ -68,9 +70,19 @@ for (const dir of SCAN_DIRS) {
     }
 }
 
+// FAIL-CLOSED (vòng 3). Bản trước in "không có gì để kiểm" rồi exit 0: nếu ai
+// dời `docs/` hay đổi tên `scripts/roadmap/`, guard lặng lẽ chuyển sang trạng
+// thái không-đo-gì mà vẫn xanh — đúng lớp lỗi cả tính năng này sinh ra để chặn.
+// Trong kho này số 0 không thể là sự thật: header của CHÍNH file này viện dẫn
+// `pnpm roadmap:check-alias`, nên quét ra 0 nghĩa là đường quét hỏng, không
+// phải nghĩa là không ai viện dẫn.
 if (cited.size === 0) {
-    console.log("   không nơi nào viện dẫn `pnpm roadmap:*` — không có gì để kiểm.");
-    process.exit(0);
+    console.error(
+        "\n❌ quét " + SCAN_DIRS.join(", ") + " không thấy chuỗi `pnpm roadmap:*` nào.\n" +
+        "   Header của chính guard này có một chuỗi như vậy, nên 0 nghĩa là đường\n" +
+        "   quét hỏng (thư mục bị dời / đổi tên), KHÔNG phải nghĩa là sạch.",
+    );
+    process.exit(1);
 }
 
 for (const [name, files] of [...cited].sort()) {
@@ -103,12 +115,31 @@ process.exit(1);
 NODE
 
 # --- (b) thực thi: alias phải CHẠY được, không chỉ được khai -----------------
+# Nhận diện chính mình bằng ĐƯỜNG DẪN ĐÃ PHÂN GIẢI, không bằng khớp chuỗi tên
+# file (vòng 3). Bản trước so `*check-roadmap-alias-cited.sh*`: đổi tên file là
+# $self_alias rỗng, và guard tự gọi chính nó không giới hạn.
+real() { python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$1"; }
+self_real=$(real "$self")
 self_alias=""
 while IFS= read -r name; do
   [ -n "$name" ] || continue
   cmd=$(node -e 'const s=require("./package.json").scripts||{};process.stdout.write(s[process.argv[1]]||"")' "$name")
-  case "$cmd" in *check-roadmap-alias-cited.sh*) self_alias="$name"; continue ;; esac
+  for tok in $cmd; do
+    case "$tok" in scripts/*)
+      [ -e "$tok" ] || continue
+      [ "$(real "$tok")" = "$self_real" ] && self_alias="$name"
+    ;; esac
+  done
 done < "$ALIAS_LIST"
+
+# Không nhận ra chính mình = sắp tự gọi chính mình. ĐỎ, đừng thử.
+if [ -z "$self_alias" ]; then
+  echo "" >&2
+  echo "❌ không alias nào phân giải về chính guard này ($self_real)." >&2
+  echo "   Chạy tiếp là đệ quy không giới hạn — khai một alias trỏ tới nó, hoặc" >&2
+  echo "   gỡ chuỗi viện dẫn khỏi header." >&2
+  exit 1
+fi
 
 echo "→ nửa (b): chạy thật qua pnpm (bỏ qua \`$self_alias\` — đệ quy)"
 run_fail=0
