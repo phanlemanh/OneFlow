@@ -11,6 +11,7 @@ from __future__ import annotations
 import unicodedata
 
 from tongflow.text.normalize_vi import has_money, normalize_vi
+from tongflow.text.vi_dictionary import _ABBREVIATIONS, _PREFIXES
 
 # --------------------------------------------------------------------------
 # AC-2 — numbers and money, as a full matrix declared BEFORE the cases.
@@ -411,6 +412,69 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         assert got.ok is True, f"{raw!r} → {got.error}"
         assert got.text == expected, (
             f"{raw!r} (ca ÂM, tên thương hiệu): mong {expected!r}, nhận {got.text!r}"
+        )
+
+
+# THE DICTIONARY COVERAGE MATRIX — one positive and one negative case for EVERY
+# entry, with the subject set read off the DICTIONARY ITSELF. Adding an entry to
+# vi_dictionary.py without adding cases turns this red by name; a hand-copied
+# list of entries could not do that, and 6 of the 11 entries had no case at all
+# until this matrix existed.
+#
+# The negative half is what proves the letter anchor does anything: "VNDirect"
+# became "đồngirect" and "H.264" became "huyện 264" precisely because an entry
+# was matched without one.
+DICT_ABBREV_MATRIX: dict[str, tuple[str, str]] = {
+    src: (f"Địa chỉ ở {src} hôm nay", f"Mã X{src}Y hôm nay")
+    for src, _dst in _ABBREVIATIONS
+}
+
+DICT_PREFIX_MATRIX: dict[str, tuple[str, str]] = {
+    src: (
+        f"Ở {src}7 hôm nay" if src in ("Q.", "P.") else f"Ở {src}Bến Nghé hôm nay",
+        f"Ở {src}abc hôm nay",
+    )
+    for src, _dst, _rule in _PREFIXES
+}
+
+
+def test_dictionary_matrix_covers_every_entry() -> None:
+    missing_abbrev = [src for src, _ in _ABBREVIATIONS if src not in DICT_ABBREV_MATRIX]
+    missing_prefix = [src for src, _, _ in _PREFIXES if src not in DICT_PREFIX_MATRIX]
+    assert missing_abbrev == [] and missing_prefix == [], (
+        "mục từ điển không có ca đo — thêm mục thì phải thêm ca: "
+        f"viết tắt {missing_abbrev}, tiền tố {missing_prefix}"
+    )
+
+
+def test_every_dictionary_entry_expands_and_is_anchored() -> None:
+    """Positive: the entry expands. Negative: glued to letters it must NOT."""
+    for src, dst in _ABBREVIATIONS:
+        pos, neg = DICT_ABBREV_MATRIX[src]
+        head = dst.split()[0].lower()
+        got_pos = normalize_vi(pos)
+        assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
+        assert head in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung — mong thấy {head!r} trong {got_pos.text!r}"
+        )
+        got_neg = normalize_vi(neg)
+        assert head not in got_neg.text.lower(), (
+            f"{src}: ca ÂM bung dù token dính chữ — mỏ neo chữ cái không có tác "
+            f"dụng: {got_neg.text!r}"
+        )
+
+    for src, dst, _rule in _PREFIXES:
+        pos, neg = DICT_PREFIX_MATRIX[src]
+        head = dst.split()[0].lower()
+        got_pos = normalize_vi(pos)
+        assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
+        assert head in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung — mong thấy {head!r} trong {got_pos.text!r}"
+        )
+        got_neg = normalize_vi(neg)
+        assert head not in got_neg.text.lower(), (
+            f"{src}: ca ÂM bung dù sau dấu chấm là chữ thường — mỏ neo không có "
+            f"tác dụng: {got_neg.text!r}"
         )
 
 
@@ -1286,6 +1350,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_COMMA_UNREADABLE", CORPUS_COMMA_UNREADABLE),
     ("CORPUS_COMMA_READABLE", CORPUS_COMMA_READABLE),
     ("AMBIGUOUS_D_MATRIX", AMBIGUOUS_D_MATRIX),
+    ("DICT_ABBREV_MATRIX", DICT_ABBREV_MATRIX),
+    ("DICT_PREFIX_MATRIX", DICT_PREFIX_MATRIX),
 )
 
 ALL_CORPUS = tuple(
