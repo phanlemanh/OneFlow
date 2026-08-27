@@ -5,9 +5,9 @@ slug: gate-tooling-t1
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: draft
-approved_by:
-approved_at:
+status: approved
+approved_by: Manh
+approved_at: 2026-08-27
 ---
 
 # Acceptance Contract: gate-tooling-t1
