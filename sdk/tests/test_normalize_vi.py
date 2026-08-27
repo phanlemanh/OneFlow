@@ -242,9 +242,12 @@ def test_both_money_rules_read_the_same_magnitude_list() -> None:
     import re as _re
 
     behind_in_rule = set(_re.findall(r"\(\?<=([^)]+)\)", _SPACED_DONG.pattern))
+    # Hoisted out of the f-string: a backslash inside the expression part is a
+    # SyntaxError on Python 3.10 (CI) even though 3.12+ accepts it — measured on
+    # the PR #77 merge run.
+    stray_anchors = sorted(behind_in_rule - set(_MAGNITUDE_WORDS) - {"\\d"})
     assert behind_in_rule <= set(_MAGNITUDE_WORDS) | {"\\d"}, (
-        f"luật viết lại có mỏ neo không đến từ hằng dùng chung: "
-        f"{sorted(behind_in_rule - set(_MAGNITUDE_WORDS) - {'\\d'})}"
+        f"luật viết lại có mỏ neo không đến từ hằng dùng chung: {stray_anchors}"
     )
 
 
