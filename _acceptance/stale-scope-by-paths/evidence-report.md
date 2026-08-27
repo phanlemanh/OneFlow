@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: d919b5eb51a0a3dfa70b5718113c935b39099ab0
 human_signoff: Manh 2026-08-07
 ---
 
@@ -219,3 +219,7 @@ a788985 (E3 descoped at Gate 2 and not run).
 - [ ] AC-3 still has no direct machine eval (E3 descoped); confirm that remains an
       accepted, queued gap rather than something this round was expected to close
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260827T101500Z
+sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 15 lệnh exit 0
