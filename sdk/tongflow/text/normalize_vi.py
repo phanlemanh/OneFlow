@@ -138,19 +138,21 @@ _COMMA_CHAIN = re.compile(r"\d+(?:,\d+){2,}")
 # claims to read. A run is `<digits>(,<digits>)+`; what it means depends on the
 # groups, and two of the four shapes cannot be told apart from another meaning:
 #
-#   một nhóm, 1–2 chữ số   "7,05"          → SỐ THẬP PHÂN, đọc được
-#   nhiều nhóm, không phải  "1,2,3"        → LIỆT KÊ, đọc được
-#     tất cả 3 chữ số
-#   nhiều nhóm, TẤT CẢ      "1,000,000"    → TỪ CHỐI: dấu nghìn kiểu Anh và
-#     3 chữ số                                liệt kê viết giống hệt nhau
-#   một nhóm, ≥3 chữ số     "1,000" "3,14159" → TỪ CHỐI: dấu nghìn kiểu Anh,
-#                                               hoặc phần lẻ ngoài dạng đã khai
+#   one group, 1-2 digits    "7,05"             -> DECIMAL, readable
+#   many groups, not all     "1,2,3"            -> ENUMERATION, readable
+#     exactly 3 digits
+#   many groups, ALL         "1,000,000"        -> REFUSE: the English thousand
+#     exactly 3 digits                             separator and an enumeration
+#                                                  are written identically
+#   one group, >=3 digits    "1,000" "3,14159"  -> REFUSE: English thousands, or
+#                                                  a fraction outside the
+#                                                  declared decimal shape
 #
-# Measured before this table existed, every one with ok=True and residual
-# empty: "1,000,000 VND" → "một, không, không đồng" (sai sáu bậc);
-# "3,14159" → "ba phẩy mười bốn nghìn một trăm năm mươi chín". Đoán một trong
-# hai nghĩa là nói sai; từ chối thì người dùng THẤY. Cùng học thuyết với
-# _AMBIGUOUS_D ngay dưới đây.
+# Measured before this table existed, every one with ok=True and an empty
+# residual: "1,000,000 VND" read as "một, không, không đồng" (six orders of
+# magnitude out); "3,14159" as "ba phẩy mười bốn nghìn một trăm năm mươi chín".
+# Guessing one of two meanings is speaking a wrong number; refusing is something
+# the user SEES. Same doctrine as _AMBIGUOUS_D below.
 _COMMA_RUN = re.compile(r"\d+(?:,\d+)+")
 
 

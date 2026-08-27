@@ -321,11 +321,12 @@ CORPUS_AMBIGUOUS_D: tuple[str, ...] = (
     # ...và ca mà luật cũ ĐỌC ĐÚNG. Mất nó là cái giá đã khai để không bao giờ
     # đọc sai hai nhóm trên.
     "Số 5 Đ. Lê Lợi",
-    # CÙNG hai địa chỉ ngay trên, chỉ đổi thứ ngăn cách. Luật từ chối neo vào
-    # `[ \t]` trong khi hai luật tiền nó phải phủ quyết neo vào `\s`, nên mọi
-    # ngăn cách KHÔNG phải dấu cách/tab đều lọt: bốn dòng dưới đây từng đọc ra
-    # "số năm đồng. lê lợi" / "nhà mười hai đồng trần phú" với ok=True, không
-    # cờ nào đỏ (S4 vòng 17). Đây là chiều ĐỎ của hằng _SEP dùng chung.
+    # THE SAME two addresses as above, only the separator differs. The refusal
+    # rule anchored on `[ \t]` while the two money rewrites it must veto anchor
+    # on `\s`, so every separator that is not a space or a tab leaked: the four
+    # rows below used to read "số năm đồng. lê lợi" / "nhà mười hai đồng trần
+    # phú" with ok=True and nothing red (S4 round 17). This is the RED direction
+    # of the shared _SEP constant.
     "Số 5 Đ.\nLê Lợi",
     "Số 5 Đ.\xa0Lê Lợi",
     "Số 5 Đ.Lê Lợi",
@@ -504,28 +505,31 @@ def test_comma_separated_lists_are_not_decimals() -> None:
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
 
 
-# BẢNG DẤU PHẨY — nửa ÂM. Hai dạng dưới đây viết giống hệt một nghĩa khác, nên
-# reader TỪ CHỐI thay vì đoán (owner chọn đường "thu phạm vi", 2026-08-27, sau
-# khi vòng 18 lại sinh đúng lớp lỗi của vòng 17).
+# THE COMMA TABLE — negative half. The two shapes below are written exactly like
+# another meaning, so the reader REFUSES instead of guessing (owner chose the
+# "narrow the scope" path on 2026-08-27, after round 18 produced the same defect
+# class as round 17).
 #
-# Đo trước khi có bảng, mọi ca đều ok=True và residual RỖNG:
-#   "Giá 1,000,000 VND"          -> "giá một, không, không đồng"      (sai sáu bậc)
+# Measured before the table existed, every case ok=True with an EMPTY residual:
+#   "Giá 1,000,000 VND"          -> "giá một, không, không đồng"   (six orders out)
 #   "Doanh thu 100,200,300 đồng" -> "doanh thu một trăm, hai trăm, ba trăm đồng"
-#   "Giá 1,000 VND"              -> "giá một nghìn đồng"  (ĐÚNG do thư viện ĐOÁN)
+#   "Giá 1,000 VND"              -> "giá một nghìn đồng"  (RIGHT, but only because
+#                                    the library GUESSED thousands)
 #   "Pi 3,14159"                 -> "pi ba phẩy mười bốn nghìn một trăm năm mươi chín"
 CORPUS_COMMA_UNREADABLE: tuple[tuple[str, str], ...] = (
-    # (chuỗi vào, cụm phải bị nêu tên trong residual)
+    # (input, the run that must be named in `residual`)
     ("Giá 1,000,000 VND", "1,000,000"),
     ("Doanh thu 100,200,300 đồng", "100,200,300"),
     ("Giá 1,000 VND", "1,000"),
     ("Pi 3,14159", "3,14159"),
 )
 
-# ...và nửa DƯƠNG trên CÙNG họ dấu phẩy: dạng đã khai vẫn phải đọc, và phần lẻ
-# có số 0 đứng đầu phải GIỮ được số 0. "7,05%" từng đọc ra "bảy phẩy năm" (7,5%)
-# và "3,09 triệu" từng trùng khít đầu ra của "3,9 triệu" — cardinal không có số 0
-# đứng đầu. Hai dòng cuối là mỏ neo hồi quy của kỳ vọng vàng đã duyệt: phần lẻ
-# KHÔNG có số 0 đầu vẫn đọc y như cũ.
+# ...and the POSITIVE half of the SAME comma family: a declared shape must still
+# read, and a fraction with a leading zero must KEEP that zero. "7,05%" used to
+# come back "bảy phẩy năm" (7.5%) and "3,09 triệu" was byte-identical to
+# "3,9 triệu" — a cardinal has no leading zero. The last two rows are the
+# regression anchors for the approved goldens: a fraction WITHOUT a leading zero
+# still reads exactly as before.
 CORPUS_COMMA_READABLE: tuple[tuple[str, str], ...] = (
     ("Lãi suất 7,05%", "lãi suất bảy phẩy không năm phần trăm"),
     ("Giá 3,09 triệu đồng", "giá ba phẩy không chín triệu đồng"),
@@ -554,9 +558,9 @@ def test_declared_comma_shapes_still_read_and_keep_leading_zeros() -> None:
         assert got.ok is True, f"{raw!r} → {got.error}"
         assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
 
-    # Quan hệ, không phải hình dạng: phần lẻ khác nhau PHẢI đọc khác nhau.
-    # Đây là mỏ neo bắt được đúng lỗi mà bốn ca literal ở trên có thể bỏ sót
-    # nếu ai đó sửa kỳ vọng cho khớp code thay vì sửa code.
+    # Relational, not shape-based: different fractions MUST read differently.
+    # This anchor catches the very defect the literal rows above would miss if
+    # someone edited the expectations to match the code instead of fixing it.
     assert normalize_vi("Giá 3,09 triệu đồng").text != normalize_vi("Giá 3,9 triệu đồng").text, (
         "3,09 và 3,9 cho ra CÙNG một câu — số 0 đứng đầu của phần lẻ bị nuốt"
     )
