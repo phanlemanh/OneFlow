@@ -1,0 +1,79 @@
+schema_version: 1
+feature_slug: roadmap-alias-guard
+# MỘT khoá config cho MỖI eval, cùng harness với `--case` khác nhau — bài học đã
+# trả giá hai lần trong kho này (stale-scope-by-paths, rồi roadmap-drift-guard).
+#
+# Bộ răng của hồ sơ này phải tự chạy được TỪNG case: bốn lỗ đã tìm ra đều ở
+# đường rìa, và đường rìa chỉ lộ ra khi mỗi rìa có một mã thoát riêng.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.alias_teeth_undeclared
+    paths: ["scripts/roadmap/**", "package.json", "docs/**"]
+    expected: "exit 0; output chứa `CASE undeclared: PASS`. Fixture viện dẫn một lệnh không khai; guard ĐỎ, nêu cả tên lệnh lẫn file viện dẫn"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.alias_teeth_dangling_path
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE dangling-path: PASS`. Alias khai đúng nhưng trỏ `scripts/…` không tồn tại; guard ĐỎ và nêu đường dẫn"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.alias_teeth_declared_but_broken
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE declared-but-broken: PASS`. Alias khai đúng, file có thật, nhưng chạy thoát khác 0; nửa (a) XANH và nửa (b) ĐỎ — chứng minh hai nửa tách bạch"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.alias_teeth_empty_scan
+    paths: ["scripts/roadmap/**", "docs/**"]
+    expected: "exit 0; output chứa `CASE empty-scan: PASS`. Gỡ chuỗi viện dẫn khỏi MỌI file trong cả hai đường quét (gỡ ở một file không bao giờ chạm nhánh này — bẫy đã sập một lần); guard ĐỎ kèm lý do đường quét hỏng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.alias_teeth_renamed
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE renamed: PASS`. Đổi tên file guard + trỏ lại package.json trên bản sao cây ĐẦY ĐỦ (bản sao tối giản thiếu docs/ đỏ vì lý do khác và không nói lên gì); guard nhận ra chính nó, bỏ qua chính nó, kết thúc dưới hạn giờ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.alias_teeth_duplicate_alias
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE duplicate-alias: PASS`. HAI alias cùng phân giải về file guard; CẢ HAI phải bị bỏ qua và lệnh kết thúc dưới hạn giờ. Case phải chạy dưới một hạn giờ cứng và tự giết cả nhóm tiến trình khi vượt — đây là lỗ đo được 78 tiến trình đồng thời/60 giây, một eval treo vô hạn ở đây tệ hơn một eval đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.alias_teeth_self_unknown
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE self-unknown: PASS`. Không alias nào phân giải về guard; guard ĐỎ và DỪNG trước khi bước vào vòng thực thi"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.alias_guard_green
+    paths: ["scripts/roadmap/**", "package.json", "docs/**"]
+    expected: "exit 0 trên cây KHÔNG bị đụng gì, và output liệt kê từng alias được viện dẫn kèm số chỗ viện dẫn. Chốt chặn duy nhất chống `exit 1` vô điều kiện: bỏ eval này thì bảy eval ĐỎ ở trên đều thoả được bằng một guard luôn nổ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.alias_teeth_no_scripts_key
+    paths: ["scripts/roadmap/**", "package.json"]
+    expected: "exit 0; output chứa `CASE no-scripts-key: PASS`. `package.json` không có khoá `scripts`; guard ĐỎ có lý do đọc được, không đổ vỡ khó hiểu và không lặng lẽ thoát 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
