@@ -9,7 +9,7 @@ flowchart TD
   GD --> B["Sắp mở vòng<br/>chưa có"]
   GD --> XL["Xếp lại sau<br/>chưa có"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
-  B --> CD["Chờ duyệt phạm vi<br/>1 việc"] --> GP{"Cổng Phạm vi"}
+  B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
   GB --> DG["Đã giao<br/>22 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
@@ -25,10 +25,6 @@ flowchart TD
 
 - Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy (`director-v2`)
 - Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
-
-## Chờ duyệt phạm vi
-
-- chống đọc sai êm ru — bộ đọc phải TỪ CHỐI thay vì phát ra nội dung sai (`chong-doc-sai-em-ru`)
 
 ## Đã giao
 
