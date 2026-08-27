@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 3be89656939d0e6a87d3076a99ddd6af69753e0a
+verified_commit: 5b0a9272f49e43a98d956f5132fc0cf89ca859bf
 human_signoff:
 ---
 
@@ -62,82 +62,82 @@ human_signoff:
   note: carry-forward tu round 13 — delta khong cham paths cua eval.
 
 - eval: E2
-  run_id: minted-normalize-text-vi-E2-r19
+  run_id: minted-normalize-text-vi-E2-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_money
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.05s
+    1 passed in 0.06s
 
 - eval: E3
-  run_id: minted-normalize-text-vi-E3-r19
+  run_id: minted-normalize-text-vi-E3-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_datetime
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.27s
+    1 passed in 0.04s
 
 - eval: E4
-  run_id: minted-normalize-text-vi-E4-r19
+  run_id: minted-normalize-text-vi-E4-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_identifiers
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.11s
+    1 passed in 0.06s
 
 - eval: E5
-  run_id: minted-normalize-text-vi-E5-r19
+  run_id: minted-normalize-text-vi-E5-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_ambiguous
-  verified_at: 2026-08-27T06:15:00Z
-  output: |
-    1 passed in 0.20s
-
-- eval: E6a
-  run_id: minted-normalize-text-vi-E6a-r19
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
-  verified_at: 2026-08-27T06:15:00Z
-  output: |
-    .                                                                        [100%]
-    1 passed in 0.18s
-
-- eval: E6b
-  run_id: minted-normalize-text-vi-E6b-r19
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     .                                                                        [100%]
     1 passed in 0.05s
 
-- eval: E7
-  run_id: minted-normalize-text-vi-E7-r19
+- eval: E6a
+  run_id: minted-normalize-text-vi-E6a-r20
   exit_code: 0
   baseline: n-a
-  verifier: config:executors.test.sdk_pytest_normalize_idempotent
-  verified_at: 2026-08-27T06:15:00Z
+  verifier: config:executors.test.sdk_pytest_normalize_residual_fail
+  verified_at: 2026-08-27T09:20:00Z
+  output: |
+    .                                                                        [100%]
+    1 passed in 0.05s
+
+- eval: E6b
+  run_id: minted-normalize-text-vi-E6b-r20
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_residual_pass
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     1 passed in 0.07s
 
+- eval: E7
+  run_id: minted-normalize-text-vi-E7-r20
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.sdk_pytest_normalize_idempotent
+  verified_at: 2026-08-27T09:20:00Z
+  output: |
+    1 passed in 0.19s
+
 - eval: E8
-  run_id: minted-normalize-text-vi-E8-r19
+  run_id: minted-normalize-text-vi-E8-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_normalize_edges
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     .                                                                        [100%]
-    1 passed in 0.08s
+    1 passed in 0.19s
 
 - eval: E9a
   run_id: minted-normalize-text-vi-E9a-r6
@@ -244,31 +244,31 @@ human_signoff:
   note: carry-forward tu round 16 — delta khong cham paths cua eval.
 
 - eval: E17a
-  run_id: minted-normalize-text-vi-E17a-r19
+  run_id: minted-normalize-text-vi-E17a-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.11s
+    3 passed in 0.12s
 
 - eval: E17b
-  run_id: minted-normalize-text-vi-E17b-r19
+  run_id: minted-normalize-text-vi-E17b-r20
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.normalize_plugin_shell
-  verified_at: 2026-08-27T06:15:00Z
+  verified_at: 2026-08-27T09:20:00Z
   output: |
     plugin_commit_sha: local-tree-not-a-repo
     ...                                                                      [100%]
-    3 passed in 0.11s
+    3 passed in 0.12s
 
 - eval: E15
   run_id: minted-normalize-text-vi-E15-r15
   exit_code: 0
-  verifier: config:executors.script.measuring_instruments_refuse
+  verifier: config:capture.ui
   verified_at: 2026-08-27T05:18:07Z
   carried_from_round: 15
   note: carry-forward tu round 15 — delta khong cham paths cua eval; frame goc xem round 15 trong Iterations.
@@ -276,7 +276,7 @@ human_signoff:
 - eval: E16
   judged_by: panel (domain-correctness, operational-feasibility, spec-alignment)
   proposal: PASS
-  carried: true (round 15) — inputs khong doi, khong cham lai; rationale xem round 15
+  carried: panel giu nguyen tu round 15 — inputs khong doi, khong cham lai; rationale xem round 15
   votes:
     - domain-correctness: PASS (r15)
     - operational-feasibility: PASS (r15)
@@ -294,8 +294,9 @@ không có mục nào — baseline round này ghi "n-a" trên toàn bộ eval (k
 
 ## Variance
 
-không có eval runs>1 round này — mọi eval trong round 19 là deterministic (runs=1).
+không có eval runs>1 round này — mọi eval trong round 20 là deterministic (runs=1).
 
 ## Iterations
 
-Round 19: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại (baseline không đo lại — carried từ round 16); 16 eval carry-forward (E1a, E1b, E9a, E9b, E10a, E10b, E10c, E11a, E11b, E12a, E12b, E13, E14a, E14b, E15, E18) giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng; E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2 (hợp đồng T3, override bắt buộc trên mọi mục judgment bất kể phiếu). Suite bổ trợ (pnpm build, pnpm typecheck, pnpm lint:check, pnpm test, sdk pytest full, pnpm verify:plugins, pnpm gen:abi + git diff) xanh toàn bộ.
+Round 19: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại (baseline không đo lại — carried từ round 16); 16 eval carry-forward giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng; E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2. Suite bổ trợ xanh toàn bộ.
+Round 20: E2, E3, E4, E5, E6a, E6b, E7, E8, E17a, E17b re-run xanh trên cây hiện tại (baseline không đo lại — carried từ round 16); 16 eval carry-forward (E1a, E1b, E9a, E9b, E10a, E10b, E10c, E11a, E11b, E12a, E12b, E13, E14a, E14b, E15, E18) giữ nguyên bằng chứng vòng gốc vì delta không chạm paths của chúng — riêng verifier của E15 được sửa lại đúng `config:capture.ui` theo evals.yaml (round 19 từng chép nhầm ref của E18); E16 (judgment) carry-forward panel PASS từ round 15, chờ human_override tại Cổng 2 (hợp đồng T3, override bắt buộc trên mọi mục judgment bất kể phiếu). Suite bổ trợ (pnpm build, pnpm typecheck, pnpm lint:check, pnpm test, sdk pytest full, pnpm verify:plugins, pnpm gen:abi + git diff) xanh toàn bộ.
