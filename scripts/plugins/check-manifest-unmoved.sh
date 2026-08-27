@@ -7,7 +7,11 @@
 # local-cpu-plugins AC-14/AC-15) records ADR-0011's first two moves: ffmpeg and
 # pyscenedetect left the upstream org for local plugins under phanlemanh.
 #
-# The invariant is now: 36 plain strings under the default org + exactly THREE
+# FOURTH edition (2026-08-26): normalize-text-vi was registered as a fourth
+# origin entry and then WITHDRAWN in the same feature, because the repository it
+# named — phanlemanh/oneflow-api-normalize-text-vi — does not exist publicly, so
+# the plugin could not be installed anywhere but the machine that wrote it.
+# The invariant is again: 36 plain strings under the default org + exactly THREE
 # origin entries, all under phanlemanh.
 #
 # This is a SNAPSHOT of three PRs, not a standing law. Registering a plugin, or

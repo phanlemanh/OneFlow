@@ -207,6 +207,7 @@
             "musicBrief": "Music Brief"
         },
         "toast": {
+            "ttsNeedsNormalize": "Speech node(s) {nodes} have no “Read numbers aloud” node upstream — numbers, prices and dates may be read incorrectly. Add that node between the text source and the speech node.",
             "executing": "Executing...",
             "completed": "Completed",
             "cancelled": "Cancelled",
@@ -494,7 +495,8 @@
                 "musicExtract": "Extract Stem",
                 "musicLego": "Add Track",
                 "musicComplete": "Complete Arrangement",
-                "musicBrief": "Music Brief"
+                "musicBrief": "Music Brief",
+                "normalizeTextVi": "Read numbers aloud"
             },
             "options": {
                 "portrait": "Portrait",
@@ -556,7 +558,8 @@
                 "addTrack": "Generate Track",
                 "completeMusic": "Complete",
                 "musicBrief": "Generate Brief",
-                "applyOverlay": "Apply Overlay"
+                "applyOverlay": "Apply Overlay",
+                "normalizeTextVi": "Normalize"
             },
             "params": {
                 "prompt": "Prompt",
