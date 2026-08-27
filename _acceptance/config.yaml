@@ -293,6 +293,20 @@ executors:
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
     stale_scoping_golden: bash scripts/acceptance/check-stale-golden.sh
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    # roadmap-drift-guard Gate 1 (2026-08-27). MỘT khoá cho MỖI case: bộ răng cũ
+    # chạy sáu nhiễu sau MỘT mã thoát, nên một case chưa từng được cài trông y hệt
+    # một case đã qua. Cùng bài học đã trả giá ở stale_scope_* ngay phía trên.
+    roadmap_drift_green: bash scripts/roadmap/check-roadmap-fresh.sh
+    roadmap_alias_cited_true: bash scripts/roadmap/check-roadmap-alias-cited.sh
+    roadmap_teeth_adr_uncited: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case adr-uncited
+    roadmap_teeth_superseded_bare: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-bare
+    roadmap_teeth_superseded_paired: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-paired
+    roadmap_teeth_ledger_missing: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-missing
+    roadmap_teeth_ledger_stale: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-stale
+    roadmap_teeth_ledger_paired: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-paired
+    roadmap_teeth_historical: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case historical-244cb0b
+    roadmap_teeth_supersede_source_single: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single
+    roadmap_teeth_case_isolation: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case case-isolation
     own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
     scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
     # gate-scope-anchors (0.6): same-universe scope check + historical anchors.

@@ -37,6 +37,7 @@
         "verify:plugins": "tsx scripts/verify-plugins-scan.ts",
         "roadmap:check": "bash scripts/roadmap/check-roadmap-fresh.sh",
         "roadmap:teeth": "bash scripts/roadmap/check-roadmap-guard-teeth.sh",
+        "roadmap:check-alias": "bash scripts/roadmap/check-roadmap-alias-cited.sh",
         "ui:capture": "node scripts/ui-capture.mjs",
         "hooks:install": "git config core.hooksPath .githooks",
         "sdk:publish": "bash scripts/publish-tongflow-pypi.sh"

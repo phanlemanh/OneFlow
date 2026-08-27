@@ -5,9 +5,9 @@ slug: roadmap-drift-guard
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [scripts, docs]
-status: draft
-approved_by:
-approved_at:
+status: implemented
+approved_by: Manh
+approved_at: 2026-08-27
 ---
 
 # Acceptance Contract: roadmap-drift-guard
@@ -113,3 +113,17 @@ Quét trục theo `morphological-scan`; thước CE là nguồn đối chiếu c
   `check-roadmap-guard-teeth.sh` (AC-7) và khai 8 khoá `executors.script.roadmap_*` tương ứng
   trong `_acceptance/config.yaml`. Mọi khoá `config:` trong `evals.yaml` hôm nay **chưa tồn
   tại** — chúng hạ cánh trong lúc thi công, đúng khuôn `stale-scope-by-paths` đã dùng.
+
+## Amendment — 2026-08-27 (sau Cổng 1, trong lúc thi công)
+
+- **Thêm alias thứ ba `pnpm roadmap:check-alias`.** AC-10 gọi tên hai lệnh; thi công đẻ
+  thêm một guard mới (`check-roadmap-alias-cited.sh`, executor của E10) và guard đó cần
+  đường gọi riêng. E10 vốn quét **mọi** chuỗi khớp `pnpm roadmap:*` nên alias thứ ba nằm
+  trong phạm vi eval sẵn có, không nới tiêu chí. Ghi ra đây vì AC-10 gọi tên hai lệnh chứ
+  không phải "hai lệnh trở lên".
+- **Lần chạy đầu của E10 ĐỎ, và đỏ đúng.** Header của chính guard mới viện dẫn
+  `pnpm roadmap:check-alias` trước khi `package.json` khai nó — tức guard bắt được đúng
+  lớp lỗi nó sinh ra để bắt, trên chính tác giả nó, ở lần chạy đầu tiên.
+- **Bộ răng đi từ 6 lên 10 case.** Ba case mới là nửa KHÔNG-nổ (`superseded-paired`,
+  `ledger-paired`, `supersede-source-single`) cộng `case-isolation`. Đã kiểm bằng ba đột
+  biến trên bản sao — xem `decisions.jsonl`.
