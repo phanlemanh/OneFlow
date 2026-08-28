@@ -2055,8 +2055,8 @@ IDEMPOTENCE_EXCLUDED: dict[str, str] = {
 # prose. On pass two the input already says "đồng/kg", and the same slash is
 # numeric. Same root as every other slash finding: a LEXICAL classifier.
 #
-# ⚠️ CHƯA CÓ CHỮ KÝ. Ghi ở đây để cây xanh và để phép đo không mù, nhưng owner
-# chưa xem chuỗi này. Nếu owner không nhận, dòng này phải rời đi cùng bản sửa.
+# Owner đã xem chuỗi đầu ra của ca này rồi chốt đóng hồ sơ (2026-08-28). Khai
+# trong contract §Known limits; đóng thật thuộc hợp đồng bo-phan-loai-token.
 VERDICT_NOT_IDEMPOTENT: dict[str, str] = {
     "Giá 100đ/kg và/hoặc 200đ/lít": (
         "tiền viết liền '100đ' chỉ thành 'đồng' ở lượt sau, nên cùng một dấu "

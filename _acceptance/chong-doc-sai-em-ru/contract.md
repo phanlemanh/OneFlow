@@ -178,7 +178,9 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 > `oneflow.vn` là tên miền. Bốn vòng nghiệm thu sửa bốn phạm vi khác nhau của cùng luật này —
 > chỉ soi đầu ra · hỏi nguyên liệu thô · đếm tổng · neo theo chữ tiền — và mỗi lần lại lộ một họ
 > mới, vì gốc không đổi. Đóng thật cần **một bộ phân loại token** (tiền · đơn vị · đường dẫn ·
-> thành ngữ): đó là một hợp đồng riêng, không phải lần vá thứ năm vào một biểu thức chính quy.
+> thành ngữ): đó là hợp đồng **[`bo-phan-loai-token`](../bo-phan-loai-token/contract.md)**,
+> mở ngày 2026-08-28 cùng lúc với việc đóng hồ sơ này — không phải lần vá thứ năm vào một biểu
+> thức chính quy.
 
 **Thuộc AC-10** *(hai chuỗi này owner đã xem đầu ra trước khi ký)*:
 
@@ -221,6 +223,23 @@ nó khỏi mục này. Một giới hạn khai mà không đo được sẽ thà
 
 *Cả hai ghim bằng `CORPUS_DATA_LOSS_KNOWN_LIMIT` / `CORPUS_FALSE_REFUSAL_KNOWN_LIMIT` và hai
 phép đo tự-đỏ-khi-lành riêng.*
+
+**Hai giới hạn thêm ở S4 vòng 6** *(owner xem chuỗi đầu ra rồi chốt đóng hồ sơ, 2026-08-28)*:
+
+- **Bộ đọc TỪ CHỐI chính đầu ra của nó.** `Giá 100đ/kg và/hoặc 200đ/lít` → `ok=True`, ra
+  `giá một trăm đồng/kg và/hoặc hai trăm đồng/lít`; đọc lại **chính chuỗi đó** → `ok=False`,
+  `residual=('/',)`, `text` **không đổi**. Tiền viết liền `100đ` chỉ thành chữ `đồng` ở lượt sau,
+  nên cùng một dấu gạch chéo bị xếp loại khác nhau giữa hai lượt.
+  *Node này chạy trong **mọi** dây và có thể chạy hai lượt, nên một dây sẽ bị chặn ở lượt hai
+  trên đúng chuỗi lượt một đã duyệt. Đây là ca **duy nhất** trong 204 dòng corpus.*
+  Ghim bằng `VERDICT_NOT_IDEMPOTENT` — miễn **riêng** phần cờ, phần chữ vẫn đo.
+
+- **Lưới thương hiệu đổ tội sai token.** `Mua iPhone qua vndirect nhé` → **từ chối**, nêu tên
+  `iPhone`. Nhưng `iPhone` → `ai phôn` đọc ổn định và đúng; thủ phạm là `vndirect`. Lưới dùng sự
+  **có mặt** của token thương hiệu làm điều kiện kích hoạt, nhưng đo idempotence của **cả câu**,
+  rồi đưa toàn bộ danh sách vào `residual`.
+  *Hệ quả: người dùng nhận chẩn đoán chỉ sai chỗ, và cùng một khiếm khuyết cho hai phán quyết
+  khác nhau chỉ vì một từ không liên quan có mặt trong câu.*
 
 **KHÔNG phải giới hạn:** `Tỉ lệ 50/50` → **từ chối**, ra `tỉ lệ năm mươi/năm mươi`. Đầu ra có dấu
 gạch chéo thô, nên từ chối là **đúng chữ** của AC-10. Ghi ở đây để lần sau không ai "sửa" nó rồi
