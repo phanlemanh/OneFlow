@@ -346,6 +346,19 @@ executors:
     stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
     stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
     stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    # gate-tooling-t1 (item 0.8). Ba case MỚI của check-stale-scoping.sh giữ
+    # tiền tố stale_scope_* vì chúng là case của guard đó; các guard mới đứng
+    # riêng mang tiền tố gt1_. Một key cho một eval — xem đầu evals.yaml.
+    stale_scope_fork_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case fork-undeclared
+    stale_scope_fork_declared_in_union: bash scripts/acceptance/check-stale-scoping.sh --case fork-declared-in-union
+    stale_scope_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case undeclared
+    gt1_t1_escape_path: bash scripts/acceptance/check-t1-escape-path.sh
+    gt1_all_scoping_cases: bash scripts/acceptance/check-scoping-all-cases.sh
+    gt1_dead_code_absent: bash scripts/acceptance/check-golden-dead-code-absent.sh
+    gt1_fork_teeth: bash scripts/acceptance/check-fork-scope-teeth.sh
+    gt1_no_stale_on_empty_diff: bash scripts/acceptance/check-no-stale-empty-diff.sh
+    gt1_no_golden_claim: bash scripts/acceptance/check-no-golden-claim.sh
+    gt1_landed_merge_repinned: bash scripts/acceptance/check-landed-merge-repinned.sh
     # roadmap-drift-guard Gate 1 (2026-08-27). MỘT khoá cho MỖI case: bộ răng cũ
     # chạy sáu nhiễu sau MỘT mã thoát, nên một case chưa từng được cài trông y hệt
     # một case đã qua. Cùng bài học đã trả giá ở stale_scope_* ngay phía trên.
@@ -501,6 +514,15 @@ executors:
     # tuyến chỉ có nghĩa sau khi owner ký cho phép publish lên PyPI (hành vi không đảo ngược).
     normalize_sdk_train_local: "bash scripts/abi/check-normalize-sdk-train-local.sh"
     normalize_sdk_published: "bash scripts/abi/check-normalize-sdk-published.sh"
+    # Preflight hạ tầng, khai trong feature_loop.suite_keys nên chạy MỌI round.
+    # Nó tự kiểm các bẫy KIỂM-ĐƯỢC-BẰNG-MÁY ghi ở STATUS.md §Bẫy đã biết và tự in
+    # cách đọc ô đỏ của round: xanh -> ô đỏ pnpm là hồi quy thật; đỏ -> mọi ô đỏ
+    # pnpm/node là NGHI NGỜ hạ tầng. Lý do nó là MÁY chứ không phải một đoạn dặn
+    # dò: bẫy agk-baseline đã ghi tròn một tháng kèm cả cách gỡ mà vẫn bị đọc
+    # nhầm thành hồi quy ba round liền của chong-doc-sai-em-ru.
+    # Cố ý KHÔNG gọi pnpm và KHÔNG nạp gì từ node_modules — nó phải chạy được
+    # trên đúng cái cây đang hỏng mà nó chẩn đoán.
+    preflight_env: "bash scripts/acceptance/preflight-verify-env.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
@@ -594,6 +616,10 @@ signoff:
 # Per-feature evals nằm trong evals.yaml của từng feature, KHÔNG khai ở đây.
 feature_loop:
   suite_keys:
+    # Đứng đầu danh sách để người đọc bảng kết quả gặp nó trước; workflow chạy
+    # các lệnh máy SONG SONG nên thứ tự này không phải thứ tự thi hành — bản
+    # thân ô preflight phát biểu cách phân loại các ô còn lại.
+    - executors.script.preflight_env
     - executors.test.build_typecheck
     - executors.test.lint
     - executors.test.unit

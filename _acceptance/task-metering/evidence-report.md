@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868
 human_signoff: Manh 2026-08-07
 ---
 
@@ -212,3 +212,11 @@ Round 1 (re-verification after upstream code change)
       file also carries later cache-counter assertions (see Analyst)
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (n/a — verdict is PASS)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-28, do gỡ `paths` khỏi ba eval thường trực (`pnpm test`, `build && typecheck`, `biome check .`) — feature về whole-tree cho trung thực; chạm `_acceptance/<slug>/` là mở lại phép soi staleness nên phải re-pin cùng lượt. Mã của gói không đổi một byte
+run_id: repin-task-metering-20260828T043000Z
+sha: bee578e120584402211a6c38577f324c040e995b · suites: 5 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-task-metering-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 5 lệnh exit 0

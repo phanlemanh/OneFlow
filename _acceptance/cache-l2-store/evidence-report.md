@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5acc982e7690dc4106d9738ecf6ff99399f3e37f
+verified_commit: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868
 human_signoff: Manh 2026-08-04
 ---
 
@@ -247,3 +247,7 @@ thành cũ theo cơ chế staleness. Đã chạy lại: **18/18 eval xanh** ở
 sơ bị ảnh hưởng — không hồ sơ nào đỏ.
 
 Chi phí này đã khai trước ở Cổng 1 của `gate-scope-anchors`.
+
+### Re-pin lần 1 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-cache-l2-store-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 18 lệnh exit 0

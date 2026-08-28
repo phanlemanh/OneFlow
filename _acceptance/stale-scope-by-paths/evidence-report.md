@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: 1a6c6e0f32a4d624eca821e6be620a6497397c47
 human_signoff: Manh 2026-08-07
 ---
 
@@ -219,3 +219,19 @@ a788985 (E3 descoped at Gate 2 and not run).
 - [ ] AC-3 still has no direct machine eval (E3 descoped); confirm that remains an
       accepted, queued gap rather than something this round was expected to close
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260827T101500Z
+sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 15 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 15 lệnh exit 0
+
+### Re-pin lần 3 — 2026-08-28, do nhánh `claude/silly-proskuriakova-aa99cc` thêm `scripts/acceptance/preflight-verify-env.sh` + `test-preflight-verify-env.sh`: hai file mới rơi vào union `paths` `scripts/acceptance/**` mà mọi eval của hồ sơ này khai, nên bản ghi cũ hoá stale. Guard scoping không đọc tới preflight — hai file đó không thể làm bằng chứng của hồ sơ này mất hiệu lực; union rộng hơn thứ nó cần bảo vệ, đã ghi vào hạng mục 0.8. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T061632Z
+sha: 4f987d8f43fa1edaa46ad61a525930c1d81a2c39 · suites: 15 lệnh exit 0
+
+### Re-pin lần 4 — 2026-08-28, cùng nhánh `feat/preflight-verify-env`: commit `1a6c6e0` sửa `scripts/acceptance/preflight-verify-env.sh` (câu lệnh gỡ in ra thiếu `rm -rf node_modules`, đo được trên cây hỏng thật), lại rơi vào union `paths` `scripts/acceptance/**`. Cùng lý do như lần 3 — guard scoping không đọc tới preflight. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T094424Z
+sha: 1a6c6e0f32a4d624eca821e6be620a6497397c47 · suites: 15 lệnh exit 0

@@ -1,0 +1,13 @@
+{"ts":"2026-08-27T15:39:23Z","round":1,"evalId":"E1","run_id":"gate-tooling-t1-E1-20260827T153924Z","exit_code":0,"cmd":"bash scripts/acceptance/check-t1-escape-path.sh"}
+{"ts":"2026-08-27T15:39:37Z","round":1,"evalId":"E2","run_id":"gate-tooling-t1-E2-20260827T153937Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case out-of-scope"}
+{"ts":"2026-08-27T15:39:37Z","round":1,"evalId":"E3","run_id":"gate-tooling-t1-E3-20260827T153938Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case announce"}
+{"ts":"2026-08-27T15:39:38Z","round":1,"evalId":"E4","run_id":"gate-tooling-t1-E4-20260827T153939Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case fork-undeclared"}
+{"ts":"2026-08-27T15:39:39Z","round":1,"evalId":"E5","run_id":"gate-tooling-t1-E5-20260827T153940Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case fork-declared-in-union"}
+{"ts":"2026-08-27T15:39:40Z","round":1,"evalId":"E6","run_id":"gate-tooling-t1-E6-20260827T153957Z","exit_code":0,"cmd":"bash scripts/acceptance/check-scoping-all-cases.sh"}
+{"ts":"2026-08-27T15:39:57Z","round":1,"evalId":"E7","run_id":"gate-tooling-t1-E7-20260827T153957Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case undeclared"}
+{"ts":"2026-08-27T15:40:14Z","round":1,"evalId":"E8","run_id":"gate-tooling-t1-E8-20260827T154014Z","exit_code":0,"cmd":"bash scripts/acceptance/check-golden-dead-code-absent.sh"}
+{"ts":"2026-08-27T15:40:14Z","round":1,"evalId":"E9","run_id":"gate-tooling-t1-E9-20260827T154018Z","exit_code":0,"cmd":"bash scripts/acceptance/check-fork-scope-teeth.sh"}
+{"ts":"2026-08-27T15:40:18Z","round":1,"evalId":"E10","run_id":"gate-tooling-t1-E10-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-no-stale-empty-diff.sh"}
+{"ts":"2026-08-27T15:40:24Z","round":1,"evalId":"E11","run_id":"gate-tooling-t1-E11-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-no-golden-claim.sh"}
+{"ts":"2026-08-27T15:40:24Z","round":1,"evalId":"E12","run_id":"gate-tooling-t1-E12-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-landed-merge-repinned.sh"}
+{"ts":"2026-08-28T05:45:00Z","kind":"repin","run_id":"repin-gate-tooling-t1-20260828T054500Z","sha":"8512c6e98c48ab3f4cab75dafa9493a0b1e36868","suites_exit":[0,0,0,0,0,0,0,0,0,0,0,0]}
