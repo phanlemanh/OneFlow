@@ -1213,7 +1213,13 @@ for dir in "$ACC"/*/; do
       ' "${dir}evals.yaml" | sort -u)"
       while IFS= read -r xac; do
         [ -n "$xac" ] || continue
-        if ! printf '%s\n' "$xl_paired" | grep -qx "$xac"; then
+        # `xl_paired` giữ giá trị criterion NGUYÊN VĂN từ evals.yaml, mà nhiều repo
+        # viết kèm chữ mô tả cho người đọc (`criterion: AC-7 (ghi sổ phía sau)`).
+        # So nguyên-chuỗi (`grep -qx`) thì mã "AC-7" không bao giờ khớp những dòng
+        # đó → luật bắn dương-tính-giả cho MỌI tiêu chí có nhãn (cross-layer).
+        # Neo ĐẦU CHUỖI + biên không-phải-số: thiếu biên thì "AC-1" khớp nhầm
+        # "AC-16 (...)" và luật tự tạo xanh-giả — đúng thứ nó sinh ra để chặn. (P183)
+        if ! printf '%s\n' "$xl_paired" | grep -qE "^${xac}([^0-9]|$)"; then
           echo "VIOLATION [$slug]: $xac is tagged (cross-layer) but no eval of it declares layer: backend-effect — a cross-layer criterion would merge on UI-only evidence; add the paired test/script eval, or untag it with the human's signoff at Gate 1"
           violations=$((violations+1))
         fi
