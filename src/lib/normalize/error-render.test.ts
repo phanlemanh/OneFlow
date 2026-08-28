@@ -33,11 +33,25 @@ function stubBrowser(cookie: string, language: string): void {
     vi.stubGlobal("navigator", { language, languages: [language] });
 }
 
-/** Render the refusal the way `task-failure-toaster` renders it. */
-async function renderRefusal(): Promise<string> {
+/**
+ * A refusal with nothing to list. `EMPTY_INPUT` is the second refusal path and
+ * its sentence names no tokens, so it is the one that would go wrong if a
+ * catalogue leaned on `{tokens}` always being non-empty.
+ */
+const EMPTY_INPUT_OUTPUT = {
+    success: false,
+    code: "EMPTY_INPUT",
+    residual: [],
+    error: "Chuỗi rỗng",
+};
+
+/** Render a refusal the way `task-failure-toaster` renders it. */
+async function renderRefusal(
+    output: unknown = REFUSAL_OUTPUT,
+): Promise<string> {
     vi.resetModules();
     const { getClientTranslator } = await import("@/i18n/client");
-    const refusal = normalizeRefusalFrom(REFUSAL_OUTPUT);
+    const refusal = normalizeRefusalFrom(output);
     if (!refusal) throw new Error("payload was not recognised as a refusal");
     const t = getClientTranslator(
         "Workspace.nodes.normalizeErrors.normalizeTextVi",
@@ -92,6 +106,29 @@ describe("reader refusal reaches the user in their own language", () => {
         expect(shown).not.toBe(REFUSAL_OUTPUT.error);
         expect(shown.includes(REFUSED_TOKENS_RENDERED)).toBe(true);
     });
+
+    it.each([
+        ["en", "NEXT_LOCALE=en", "en-US"],
+        ["ja", "NEXT_LOCALE=ja", "ja-JP"],
+    ])(
+        "%s renders the second refusal path, the one with nothing to list",
+        async (locale, cookie, language) => {
+            stubBrowser(cookie, language);
+            const shown = await renderRefusal(EMPTY_INPUT_OUTPUT);
+
+            expect(shown).not.toBe(EMPTY_INPUT_OUTPUT.error);
+            expect(
+                shown.includes("EMPTY_INPUT"),
+                `${locale}: khoá thô lọt ra màn hình thay vì một câu`,
+            ).toBe(false);
+            // A sentence, not a fragment: a catalogue that assumed every code
+            // carries tokens would leave a dangling separator here.
+            expect(
+                shown.trim().length > 0 && !shown.includes("{tokens}"),
+                `${locale}: câu EMPTY_INPUT còn chỗ trống chưa thay`,
+            ).toBe(true);
+        },
+    );
 
     it("every locale renders a DIFFERENT sentence", async () => {
         const rendered: string[] = [];

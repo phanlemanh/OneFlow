@@ -276,8 +276,10 @@ evals:
     executor: test
     cmd: config:executors.test.unit_normalize_error_i18n_render
     paths:
-      - "src/lib/task/**"
-      - "src/components/workspace/nodes/base/abi-node-shell.tsx"
+      - "src/lib/normalize/**"
+      - "src/components/workspace/task-failure-toaster.tsx"
+      - "src/types/sse.ts"
+      - "config/tongflow.abi.json"
       - "src/i18n/messages/**"
     layer: backend-effect
     expected: >-
@@ -292,6 +294,17 @@ evals:
       "hàm đúng, quên chỗ gọi" [normalize-text-vi#F1]. Chiều đỏ: nối lại
       `result.error` vào chỗ hiển thị trong bản sao → đỏ nêu ĐÚNG mã lỗi và ĐÚNG
       locale.
+      (sửa lời khai S4 vòng 1, 2026-08-28) Lệnh chạy CẢ THƯ MỤC, nên nó nay cũng
+      mang bước mà vòng 1 chứng minh là còn thiếu: từ TIN BÁO thất bại của máy
+      chủ ra được lời từ chối. Vòng 1 xanh cả hai phép đo dựng câu trong khi câu
+      đó KHÔNG BAO GIỜ hiện ra — đoạn trích đọc `outputs` như một mảng, mà không
+      bên gửi nào gửi mảng. Ba việc thêm: (1) đo hai khuôn tin báo thật (tác vụ
+      một node gửi thẳng kết quả slot; tác vụ luồng gửi object khoá theo node
+      id); (2) ghim chính khuôn dây đó trong `src/types/sse.ts`, để nếu nó đổi
+      thì đỏ ở đây chứ không âm thầm tắt đường hiển thị; (3) fixture dựng TỪ ABI
+      — gỡ `residual` khỏi hợp đồng thì cả ba file test đỏ và NÊU TÊN trường,
+      thay vì xanh mãi nhờ một khuôn bịa. Cộng đường từ chối THỨ HAI
+      (EMPTY_INPUT, không có cụm nào để liệt kê) đúng như lời khai vẫn nói.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E16
