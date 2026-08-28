@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: bee578e120584402211a6c38577f324c040e995b
 human_signoff: Manh 2026-08-07
 ---
 
@@ -308,3 +308,7 @@ Round 1 (re-verification after upstream code change)
       on each (n/a — this contract is T2 and has no judgment evals)
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (n/a — verdict is PASS)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-28, do gỡ `paths` khỏi ba eval thường trực (`pnpm test`, `build && typecheck`, `biome check .`) — feature về whole-tree cho trung thực; chạm `_acceptance/<slug>/` là mở lại phép soi staleness nên phải re-pin cùng lượt. Mã của gói không đổi một byte
+run_id: repin-measure-harness-20260828T043000Z
+sha: bee578e120584402211a6c38577f324c040e995b · suites: 7 lệnh exit 0
