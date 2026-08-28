@@ -250,12 +250,16 @@ evals:
       - "src/lib/plugins/**"
     layer: backend-effect
     expected: >-
-      exit 0; CẶP HAI CHIỀU trên cùng một đồ thị workflow — khi KHÔNG plugin nào
-      nhận slot normalize-text-vi: warnings RỖNG (assert toEqual([]), không phải
-      chỉ 'không ném'); khi CÓ plugin nhận slot: warnings chứa đúng
-      {code: WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} nêu ĐÚNG id node vi phạm, y
-      như hành vi hôm nay. Điều kiện suy từ nodePluginMap, không phải cờ chép
-      tay. Chiều đỏ: trả cảnh báo về vô điều kiện → đỏ ở nửa 'không plugin'.
+      exit 0; NỬA LÕI của cặp hai chiều: exporter nêu SỰ THẬT về đồ thị — node giọng
+      đọc không có bộ đọc thượng nguồn thì warnings chứa đúng {code:
+      WORKFLOW_TTS_NEEDS_NORMALIZE, nodeIds} nêu ĐÚNG id node vi phạm, cho cả 4 slot
+      TTS. Exporter giữ THUẦN và KHÔNG biết plugin nào đã cài. (Sửa lời khai tại S3,
+      2026-08-28: bản viết ở S1 đặt điều kiện nodePluginMap vào chính exporter. Đặt
+      vậy phải bơm tri thức plugin vào một hàm thuần VÀ phá ba phép đo đã ghim của
+      hợp đồng gốc E10a/b/c, vốn chốt rằng exporter LUÔN phát cảnh báo. Câu hỏi
+      "người dùng có làm được điều cảnh báo bảo không" thuộc lớp render, nơi duy
+      nhất thấy registry — nửa đó chuyển sang E16.) Chiều đỏ: bỏ một slot TTS khỏi
+      danh sách → đỏ nêu đúng tên slot không được cảnh báo.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ─── Hai ô thêm sau phản biện context sạch (2026-08-27): F1 và F3 cùng một lớp
