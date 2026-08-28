@@ -1776,8 +1776,26 @@ def test_edge_inputs() -> None:
 
     assert normalize_vi(LONG_INPUT).ok is True
 
-    for messy in ("Xem tại https://a.vn nhé", "Mail: a@b.vn", "Đẹp quá 😍"):
-        normalize_vi(messy)  # must not raise
+    # "must not raise" is not a measurement: this loop stayed green while the
+    # URL case silently dropped the address and answered ok=True (S4 round 1
+    # finding). Each messy input now states what it does, so a change of
+    # behaviour is red here instead of invisible.
+    url_case = normalize_vi("Xem tại https://a.vn nhé")
+    assert url_case.ok is False, "URL bị nuốt mà vẫn nói ok=True"
+    assert url_case.residual == ("https://a.vn",)
+
+    # Read, not refused: "@" has a Vietnamese reading, so the sentence survives.
+    # The Latin token "Mail" reads as "mêu" — an instance of the known limit
+    # declared for AC-4 (a Latin token with no INTERNAL capital cannot be told
+    # apart from a Vietnamese word), not a separate hole.
+    email_case = normalize_vi("Mail: a@b.vn")
+    assert email_case.ok is True
+    assert "a còng" in email_case.text
+
+    # An emoji carries no sound; dropping it loses nothing a voice could say.
+    emoji_case = normalize_vi("Đẹp quá 😍")
+    assert emoji_case.ok is True
+    assert emoji_case.text == "đẹp quá"
 
     # Unicode form is the other half of Gate G1's "no broken diacritics", so it
     # is asserted as a RELATION between the two encodings — not as "did not

@@ -52,7 +52,37 @@ export function normalizeRefusalFrom(output: unknown): {
     return { code: record.code, tokens: residual.join(", ") };
 }
 
-/** The i18n key under `Workspace.nodes.normalizeErrors.normalizeTextVi`. */
-export function normalizeErrorKey(code: NormalizeErrorCode): string {
-    return code;
+/**
+ * The refusal carried by a task-failure SSE payload, or null.
+ *
+ * There are two producers and they emit DIFFERENT shapes, which is the whole
+ * reason this lives in one named function with its own test rather than inline
+ * at the toast:
+ *
+ * - a single-node task (`runner.ts`) passes the slot output itself as `data`,
+ *   so the refusal is at the TOP LEVEL;
+ * - a workflow task (`engine-delegate.server.ts`) passes
+ *   `{status, outputs, errors, failures}` where `outputs` is an OBJECT keyed by
+ *   node id (`SSEMessageData.outputs?: Record<string, unknown>`) — not an array.
+ *
+ * Reading only one of the two, or treating `outputs` as a list, silently
+ * disables the whole localized-refusal path: every failure falls through to the
+ * SDK's Vietnamese sentence, which is the defect AC-6 exists to close.
+ */
+export function normalizeRefusalFromTaskData(data: unknown): {
+    code: NormalizeErrorCode;
+    tokens: string;
+} | null {
+    const direct = normalizeRefusalFrom(data);
+    if (direct) return direct;
+
+    if (typeof data !== "object" || data === null) return null;
+    const outputs = (data as Record<string, unknown>).outputs;
+    if (typeof outputs !== "object" || outputs === null) return null;
+
+    for (const nodeOutput of Object.values(outputs)) {
+        const found = normalizeRefusalFrom(nodeOutput);
+        if (found) return found;
+    }
+    return null;
 }

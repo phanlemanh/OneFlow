@@ -166,6 +166,12 @@
                     },
                     "text": {
                         "type": "string"
+                    },
+                    "residual": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 },
                 "additionalProperties": false

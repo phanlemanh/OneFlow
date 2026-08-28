@@ -5,7 +5,7 @@ import type { ErrorToastAction } from "@/components/ui/error-toast";
 import { showErrorToast } from "@/components/ui/error-toast";
 import { TaskStatus, WorkflowStatus } from "@/constants/task-status";
 import { getClientTranslator } from "@/i18n/client";
-import { normalizeRefusalFrom } from "@/lib/normalize/error-copy";
+import { normalizeRefusalFromTaskData } from "@/lib/normalize/error-copy";
 import type { FailureAction } from "@/lib/onboarding/failure-actions";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { SerializedWorkflowFailure } from "@/lib/task/error-envelope";
@@ -100,13 +100,9 @@ export function TaskFailureToaster() {
             // reads comes from their own locale catalogue rather than from the
             // SDK's Vietnamese `error` string (AC-6 of chống-đọc-sai-êm-ru).
             // Read off the OUTPUTS, never by matching the sentence: the wording
-            // is a log artefact, the code is the contract.
-            const outputs = Array.isArray(data?.outputs)
-                ? (data.outputs as unknown[])
-                : [];
-            const refusal = outputs
-                .map(normalizeRefusalFrom)
-                .find((found) => found !== null);
+            // is a log artefact, the code is the contract. The two SSE
+            // producers emit different shapes; the extraction owns that.
+            const refusal = normalizeRefusalFromTaskData(data);
             if (refusal) {
                 showErrorToast({
                     title: t("taskFailed"),

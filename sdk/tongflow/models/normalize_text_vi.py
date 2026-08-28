@@ -16,5 +16,6 @@ class NormalizeTextViOutput(BaseModel):
     success: bool
     code: str | None = None
     error: str | None = None
+    residual: list[str] | None = None
     text: str | None = None
 

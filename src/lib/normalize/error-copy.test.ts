@@ -4,8 +4,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import {
+    REFUSED_TOKENS_RENDERED,
+    readerRefusalOutput,
+} from "@/lib/normalize/__fixtures__/reader-refusal";
+import {
     NORMALIZE_ERROR_CODES,
-    normalizeErrorKey,
     normalizeRefusalFrom,
 } from "@/lib/normalize/error-copy";
 
@@ -54,7 +57,10 @@ describe("normalize refusal copy", () => {
     it.each(LOCALES)("%s renders every code", (locale) => {
         const catalogue = readCatalogue(locale);
         for (const code of NORMALIZE_ERROR_CODES) {
-            const copy = catalogue[normalizeErrorKey(code)];
+            // Indexed by the code itself, exactly the way the shipping path
+            // does it (`tNormalize(refusal.code)`). An indirection here that
+            // production does not use would let the two drift apart.
+            const copy = catalogue[code];
             expect(
                 typeof copy === "string" && copy.trim().length > 0,
                 `${locale}.json thiếu câu cho mã ${code} — người dùng locale này sẽ thấy khoá thô`,
@@ -76,14 +82,12 @@ describe("normalize refusal copy", () => {
     });
 
     it("reads the refusal off the output object, not the sentence", () => {
-        expect(
-            normalizeRefusalFrom({
-                success: false,
-                code: "RESIDUAL_TOKENS",
-                residual: ["đ", "/"],
-                error: "Chưa đọc được: đ, /",
-            }),
-        ).toEqual({ code: "RESIDUAL_TOKENS", tokens: "đ, /" });
+        // The payload is built FROM the ABI, so this cannot pass against a
+        // field the contract forbids a plugin to emit.
+        expect(normalizeRefusalFrom(readerRefusalOutput())).toEqual({
+            code: "RESIDUAL_TOKENS",
+            tokens: REFUSED_TOKENS_RENDERED,
+        });
     });
 
     it("ignores failures that are not a reader refusal", () => {

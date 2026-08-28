@@ -48,7 +48,7 @@ evals:
   - id: E3
     criterion: AC-5
     executor: test
-    cmd: config:executors.test.sdk_pytest_normalize_identifiers
+    cmd: config:executors.test.sdk_pytest_normalize_dictionary_matrix
     paths:
       - "sdk/tests/test_normalize_vi.py"
       - "sdk/tongflow/text/vi_dictionary.py"
@@ -104,7 +104,7 @@ evals:
   - id: E6
     criterion: AC-9
     executor: test
-    cmd: config:executors.test.sdk_pytest_normalize_datetime
+    cmd: config:executors.test.sdk_pytest_normalize_day_word
     paths:
       - "sdk/tongflow/text/**"
       - "sdk/tests/test_normalize_vi.py"
@@ -119,7 +119,7 @@ evals:
   - id: E7
     criterion: AC-10
     executor: test
-    cmd: config:executors.test.sdk_pytest_normalize_residual_fail
+    cmd: config:executors.test.sdk_pytest_normalize_slash
     paths:
       - "sdk/tongflow/text/**"
       - "sdk/tests/test_normalize_vi.py"
@@ -134,7 +134,7 @@ evals:
   - id: E8
     criterion: AC-4
     executor: test
-    cmd: config:executors.test.sdk_pytest_normalize_idempotent
+    cmd: config:executors.test.sdk_pytest_normalize_brand
     paths:
       - "sdk/tongflow/text/**"
       - "sdk/tests/test_normalize_vi.py"
@@ -145,12 +145,19 @@ evals:
       hai-lần-như-nhau; ca này phải rời IDEMPOTENCE_EXCLUDED và phép đo tự-đỏ-
       khi-ngoại-lệ-lành phải gỡ cùng lúc. Ca ÂM: 'VNDS' và 'H.264' không đổi
       hành vi. Chiều đỏ: bỏ luật giữ token → đỏ nêu đúng token bị băm.
+      (sửa lời khai S4 vòng 1, 2026-08-28) Cách ĐÓNG lại khác cách dự đoán: chuỗi
+      không được đọc ổn định thì bị TỪ CHỐI nêu tên token, chứ không đọc theo
+      cách khai rõ. Nên VNDirect nay có ok=False và bị vòng lặp idempotence bỏ
+      qua — chủ thể của AC-4 KHÔNG còn nằm trong test_idempotent_and_byte_identical.
+      Lệnh vì thế chạy thêm test_unstable_brand_token_is_refused_by_name (nửa
+      'phải từ chối') và test_stable_latin_token_still_reads (nửa 'phải đọc'),
+      giữ test idempotence cho ca âm.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9
     criterion: AC-2
     executor: test
-    cmd: config:executors.test.sdk_pytest_normalize_edges
+    cmd: config:executors.test.sdk_pytest_normalize_url
     paths:
       - "sdk/tongflow/text/**"
       - "sdk/tests/test_normalize_vi.py"

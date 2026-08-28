@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+    REFUSED_TOKENS_RENDERED,
+    readerRefusalOutput,
+} from "@/lib/normalize/__fixtures__/reader-refusal";
 import { normalizeRefusalFrom } from "@/lib/normalize/error-copy";
 
 /**
@@ -17,15 +21,12 @@ import { normalizeRefusalFrom } from "@/lib/normalize/error-copy";
  * resolver breaking.
  */
 
-/** A refusal exactly as the slot emits it: code + the tokens that stopped it. */
-const REFUSAL_OUTPUT = {
-    success: false,
-    code: "RESIDUAL_TOKENS",
-    residual: ["đ", "/"],
-    // The Vietnamese sentence the SDK keeps for logs. Nothing the user reads
-    // may be derived from it — that is the whole point of the code.
-    error: "Chưa đọc được: đ, /",
-};
+/**
+ * A refusal as the slot emits it, built from the ABI rather than typed out —
+ * see `__fixtures__/reader-refusal.ts` for why a hand-written one proves
+ * nothing about what a plugin can actually send.
+ */
+const REFUSAL_OUTPUT = readerRefusalOutput();
 
 function stubBrowser(cookie: string, language: string): void {
     vi.stubGlobal("document", { cookie });
@@ -75,7 +76,7 @@ describe("reader refusal reaches the user in their own language", () => {
             // The tokens that stopped the reading must survive translation, or the
             // user is told "something failed" with no way to find what.
             expect(
-                shown.includes("đ, /"),
+                shown.includes(REFUSED_TOKENS_RENDERED),
                 `${locale}: mất danh sách cụm chặn, người dùng không biết sửa gì`,
             ).toBe(true);
         },
@@ -89,7 +90,7 @@ describe("reader refusal reaches the user in their own language", () => {
         // sentence could be confused. They are deliberately different wordings,
         // so an accidental fall-through to `result.error` is still visible here.
         expect(shown).not.toBe(REFUSAL_OUTPUT.error);
-        expect(shown.includes("đ, /")).toBe(true);
+        expect(shown.includes(REFUSED_TOKENS_RENDERED)).toBe(true);
     });
 
     it("every locale renders a DIFFERENT sentence", async () => {
