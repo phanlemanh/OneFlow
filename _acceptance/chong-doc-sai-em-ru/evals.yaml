@@ -99,6 +99,18 @@ evals:
       CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT; phép đo tự-đỏ-khi-giới-hạn-lành phải gỡ
       CÙNG LÚC (giới hạn đã lành mà còn khai là lời nói dối trong file). Chiều
       đỏ: trả luật khoảng về dạng cũ → đỏ nêu đúng ca và số chữ số lệch.
+      SỬA Ở S4 VÒNG 4: phép quét dãy-gạch nay NEO bằng (?<![\d.]) để một dãy
+      không thể BẮT ĐẦU giữa một con số — bản không neo bắt trúng mảnh vụn
+      '000-2' bên trong 'Giá 1.000-2.000 đồng' (tiếng Việt ngăn nghìn bằng DẤU
+      CHẤM), rồi từ chối một chuỗi thư viện ĐÃ đọc ra đúng, và nêu tên một cụm
+      người dùng không hề gõ. Chiều đỏ: gỡ neo → đỏ nêu đúng ca 1.000-2.000.
+      SỬA LỆNH ĐO Ở S4 VÒNG 6: lệnh cũ khai 'range_negative' — đó là tên một
+      CORPUS, không phải tên hàm kiểm, nên nó KHÔNG chọn được gì; và 'dotted'
+      lại vô tình kéo một test Đ không liên quan vào (khớp chuỗi 'undotted').
+      Tức trục ÂM mà chính lời khai này gọi là bắt buộc KHÔNG nằm trong tập được
+      đo — bằng chứng AC-3 chỉ có nhánh TỪ CHỐI. Nay lệnh chạy thêm
+      test_ambiguous_policy_pinned (nơi trục âm thật sự sống) và gọi
+      test_dotted_thousand_ranges_are_not_refused bằng đúng tên đầy đủ.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6

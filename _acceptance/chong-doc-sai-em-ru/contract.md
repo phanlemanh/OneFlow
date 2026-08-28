@@ -202,6 +202,26 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 `test_declared_limits_are_still_broken`: ngày nào một giới hạn LÀNH, phép đo đỏ và buộc phải gỡ
 nó khỏi mục này. Một giới hạn khai mà không đo được sẽ thành lời nói dối trong file.*
 
+**Hai giới hạn thêm ở S4 vòng 5 — KHÔNG cùng một bậc với bốn giới hạn trên:**
+
+- ⚠️ **MẤT DỮ LIỆU** — `ngày 12/25/2026, tốc độ 100km/h` → **đọc**, ra
+  `ngày mười hai tháng hai/hai nghìn không trăm hai mươi sáu, tốc độ một trăm ki lô mét trên giờ`.
+  **Số 25 biến mất và tháng đọc thành 2.** Chính chuỗi đó khi KHÔNG có `100km/h` thì bị từ chối
+  đúng — thêm một gạch chéo văn xuôi mà thư viện *nuốt* là ngân sách trừ lệch đi một, và ngày
+  nửa-đọc lọt qua.
+  *Đây là bậc NẶNG NHẤT: bản đọc SAI, nói ra với `ok=True`. Bốn giới hạn trên chỉ sót một dấu
+  trong một bản đọc ĐÚNG. Nó nằm ở đây thay vì được đóng vì owner chốt (vòng 5) rằng đóng nó
+  cần bộ phân loại token, và một lần đổi-lỗi-lấy-lỗi ở vòng cuối thì không còn vòng nào chấm.*
+
+- **TỪ CHỐI OAN** — `Giá 1,05-2,5 triệu` → **từ chối**, nêu `('05-2',)`, trong khi
+  `text` đã là `giá một phẩy không năm đến hai phẩy năm triệu` — **đọc đúng rồi**. Neo thêm ở
+  vòng 4 chỉ có dấu **chấm**; tiếng Việt dùng dấu **phẩy** cho thập phân. Bản một chữ số lẻ
+  (`Giá 1,5-2,5 triệu`) không dính, nên bộ ca cũ không thấy.
+  *Bậc nhẹ hơn: chặn dây giọng đọc, nhưng không bao giờ nói sai.*
+
+*Cả hai ghim bằng `CORPUS_DATA_LOSS_KNOWN_LIMIT` / `CORPUS_FALSE_REFUSAL_KNOWN_LIMIT` và hai
+phép đo tự-đỏ-khi-lành riêng.*
+
 **KHÔNG phải giới hạn:** `Tỉ lệ 50/50` → **từ chối**, ra `tỉ lệ năm mươi/năm mươi`. Đầu ra có dấu
 gạch chéo thô, nên từ chối là **đúng chữ** của AC-10. Ghi ở đây để lần sau không ai "sửa" nó rồi
 mở lại lỗ.

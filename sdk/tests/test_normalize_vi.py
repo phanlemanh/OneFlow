@@ -8,6 +8,7 @@ corpus that can no longer catch the library.
 
 from __future__ import annotations
 
+import re
 import sys
 import unicodedata
 
@@ -536,6 +537,67 @@ CORPUS_PATH_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
 )
 
 
+# Two more, found at S4 round 5. They sit on DIFFERENT tiers and the file says
+# so, because "reads instead of refusing" covers two very unlike harms:
+#
+#   MẤT DỮ LIỆU  — the reading itself is WRONG. Heaviest tier; this is the exact
+#                  shape the whole contract exists to prevent, and it is declared
+#                  rather than closed only because closing it needs the token
+#                  classifier (see the root note above).
+#   TỪ CHỐI OAN  — the reading is CORRECT and we refuse anyway. Blocks the voice
+#                  chain, but never speaks anything false.
+CORPUS_DATA_LOSS_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "ngày nửa-đọc lọt khi câu còn một gạch chéo văn xuôi BỊ NUỐT",
+        "ngày 12/25/2026, tốc độ 100km/h",
+        "ngày mười hai tháng hai/hai nghìn không trăm hai mươi sáu, "
+        "tốc độ một trăm ki lô mét trên giờ",
+    ),
+)
+
+CORPUS_FALSE_REFUSAL_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "khoảng thập phân dùng DẤU PHẨY",
+        "Giá 1,05-2,5 triệu",
+        "giá một phẩy không năm đến hai phẩy năm triệu",
+    ),
+)
+
+
+def test_data_loss_limit_is_still_broken() -> None:
+    """The heaviest declared limit, pinned so it cannot rot unnoticed.
+
+    Unlike the others this one SPEAKS A WRONG READING: the 25 is gone and the
+    month is read as 2. It is here, and not in the code, only because the owner
+    ruled at round 5 that closing it needs the token classifier — a contract of
+    its own. Anyone who makes this go green has fixed a real defect and must
+    delete this block along with the contract entry.
+    """
+    for kind, raw, today in CORPUS_DATA_LOSS_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"[{kind}] {raw!r} NAY ĐÃ BỊ TỪ CHỐI — giới hạn MẤT DỮ LIỆU đã đóng. "
+            f"Gỡ nó khỏi contract §Known limits và khỏi corpus này."
+        )
+        assert got.text == today, (
+            f"[{kind}] {raw!r}: hành vi đã đổi — mong {today!r}, nhận {got.text!r}"
+        )
+
+
+def test_false_refusal_limit_is_still_broken() -> None:
+    """A refusal we know is wrong: the reading was already correct."""
+    for kind, raw, correct_reading in CORPUS_FALSE_REFUSAL_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r} NAY ĐÃ ĐỌC ĐƯỢC — giới hạn đã lành, gỡ khỏi "
+            f"contract §Known limits và khỏi corpus này."
+        )
+        assert got.text == correct_reading, (
+            f"[{kind}] {raw!r}: bản đọc bị từ chối lẽ ra ĐÚNG — mong "
+            f"{correct_reading!r}, nhận {got.text!r}"
+        )
+
+
 def test_declared_limits_are_still_broken() -> None:
     """A declared limit that has quietly healed is a lie in the contract."""
     for kind, raw, today in CORPUS_SLASH_KNOWN_LIMIT + CORPUS_PATH_KNOWN_LIMIT:
@@ -839,12 +901,27 @@ DICT_PREFIX_MATRIX: dict[str, tuple[str, str]] = {
 
 
 def test_dictionary_matrix_covers_every_entry() -> None:
-    missing_abbrev = [src for src, _ in _ABBREVIATIONS if src not in DICT_ABBREV_MATRIX]
-    missing_prefix = [src for src, _, _ in _PREFIXES if src not in DICT_PREFIX_MATRIX]
-    assert missing_abbrev == [] and missing_prefix == [], (
-        "mục từ điển không có ca đo — thêm mục thì phải thêm ca: "
-        f"viết tắt {missing_abbrev}, tiền tố {missing_prefix}"
-    )
+    """Each generated case must actually CONTAIN the entry it claims to cover.
+
+    Deriving the cases from the dictionary is the point — add an entry and it is
+    covered automatically — so "is every entry a key?" is an identity and cannot
+    fail (S4 round 5 finding). The relation that CAN fail is the one below: a
+    template edit that stops embedding `src` leaves a case that runs, passes, and
+    measures a different string than the entry it is filed under. The prefix
+    templates already branch on `src`, so this is not hypothetical.
+    """
+    for src, _dst in _ABBREVIATIONS:
+        pos, neg = DICT_ABBREV_MATRIX[src]
+        assert src in pos and src in neg, (
+            f"ca của mục viết tắt {src!r} không chứa chính nó — "
+            f"dương={pos!r}, âm={neg!r}"
+        )
+    for src, _dst, _rule in _PREFIXES:
+        pos, neg = DICT_PREFIX_MATRIX[src]
+        assert src in pos and src in neg, (
+            f"ca của tiền tố {src!r} không chứa chính nó — "
+            f"dương={pos!r}, âm={neg!r}"
+        )
 
 
 def test_every_dictionary_entry_expands_and_is_anchored() -> None:
@@ -923,6 +1000,32 @@ DELIBERATELY_UNCOVERED_D_CELLS: dict[tuple[str, str], str] = {
     )
     for sep_name in D_SEPARATORS
 }
+
+
+def test_ambiguous_d_separators_are_what_the_rule_calls_a_separator() -> None:
+    """The test's separator axis must be the IMPLEMENTATION's, not a wish.
+
+    `AMBIGUOUS_D_MATRIX` is generated from `D_SEPARATORS` × `D_FOLLOWING` and the
+    completeness test below then asserts against those same two dicts, so that
+    assert is an identity — it cannot fail. What CAN drift, invisibly, is the
+    axis itself: the rule decides what counts as a gap with `_SEP`, and if that
+    class narrows, a separator listed here stops being one while every cell
+    still reports "covered" (S4 round 5 finding, same shape as the dash matrix
+    at round 4). So assert the RELATION between axis and implementation.
+    """
+    module = sys.modules["tongflow.text.normalize_vi"]
+    sep_class = re.compile(module._SEP)
+    for name, sep in D_SEPARATORS.items():
+        if name == "không có":
+            # The deliberate non-separator: the zero-width gap. It must NOT be
+            # matched, and that is half the relation.
+            assert sep == "", f"ô '{name}' phải là khoảng trống rỗng, nhận {sep!r}"
+            continue
+        assert sep_class.fullmatch(sep), (
+            f"'{name}' ({sep!r}) được khai là dấu ngăn trong bộ ca, nhưng luật "
+            f"(_SEP = {module._SEP!r}) KHÔNG coi nó là dấu ngăn — ma trận đang "
+            f"đo một trục mà bản cài đặt không có"
+        )
 
 
 def test_ambiguous_d_matrix_has_no_silently_empty_cell() -> None:
@@ -1796,6 +1899,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_DASH_NEGATIVE", CORPUS_DASH_NEGATIVE),
     ("CORPUS_SLASH_KNOWN_LIMIT", CORPUS_SLASH_KNOWN_LIMIT),
     ("CORPUS_PATH_KNOWN_LIMIT", CORPUS_PATH_KNOWN_LIMIT),
+    ("CORPUS_DATA_LOSS_KNOWN_LIMIT", CORPUS_DATA_LOSS_KNOWN_LIMIT),
+    ("CORPUS_FALSE_REFUSAL_KNOWN_LIMIT", CORPUS_FALSE_REFUSAL_KNOWN_LIMIT),
 )
 
 ALL_CORPUS = tuple(
