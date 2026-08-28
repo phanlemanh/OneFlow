@@ -13,3 +13,5 @@
 {"ts":"2026-08-07T01:35:45Z","round":1,"evalId":"E14","run_id":"stale-scope-by-paths-E14-20260807T013545Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-real-repo.sh"}
 {"ts":"2026-08-07T01:34:34Z","round":1,"evalId":"E15","run_id":"stale-scope-by-paths-E15-20260807T013434Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case announce"}
 {"ts":"2026-08-07T01:35:33Z","round":1,"evalId":"E16","run_id":"stale-scope-by-paths-E16-20260807T013533Z","exit_code":0,"cmd":"bash scripts/acceptance/check-stale-scoping.sh --case indent-drift"}
+{"ts":"2026-08-27T10:15:00Z","kind":"repin","run_id":"repin-stale-scope-by-paths-20260827T101500Z","sha":"d919b5eb51a0a3dfa70b5718113c935b39099ab0","suites_exit":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+{"ts":"2026-08-28T05:30:00Z","kind":"repin","run_id":"repin-stale-scope-by-paths-20260828T053000Z","sha":"8512c6e98c48ab3f4cab75dafa9493a0b1e36868","suites_exit":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}

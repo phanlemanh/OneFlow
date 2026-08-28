@@ -13,3 +13,5 @@
 {"ts":"2026-08-07T01:32:37Z","round":1,"evalId":"E11","run_id":"conformance-l0-E11-20260807T013237Z","exit_code":0,"cmd":"pnpm vitest run src/lib/plugins/plugin-rev.test.ts"}
 {"ts":"2026-08-07T01:32:38Z","round":1,"evalId":"E12","run_id":"conformance-l0-E12-20260807T013238Z","exit_code":0,"cmd":"pnpm vitest run src/lib/task/node-cached.test.ts"}
 {"ts":"2026-08-07T01:32:10Z","round":1,"evalId":"E13","run_id":"conformance-l0-E13-20260807T013210Z","exit_code":0,"cmd":"cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_engine_batch.py"}
+{"ts":"2026-08-27T10:15:00Z","kind":"repin","run_id":"repin-conformance-l0-20260827T101500Z","sha":"d919b5eb51a0a3dfa70b5718113c935b39099ab0","suites_exit":[0,0,0,0,0,0,0,0,0]}
+{"ts":"2026-08-28T05:30:00Z","kind":"repin","run_id":"repin-conformance-l0-20260828T053000Z","sha":"8512c6e98c48ab3f4cab75dafa9493a0b1e36868","suites_exit":[0,0,0,0,0,0,0,0,0]}
