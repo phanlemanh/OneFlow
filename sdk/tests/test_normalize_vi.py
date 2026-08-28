@@ -644,11 +644,31 @@ def test_readable_slash_is_not_flagged() -> None:
 
 
 def test_day_word_survives_an_unreadable_date() -> None:
+    """AC-9 in full, not just its first word.
+
+    The single `startswith` assert this used to carry passed on `text="ngày"`
+    alone, and passed on ok=True with a mis-read date — while E6's other test
+    (`test_datetime_golden`) only carries VALID dates. So the half AC-9 calls its
+    core, "refuse and name the token rather than swallow a date component", was
+    in no test E6 ran; it lived only in a test belonging to AC-10 (S4 round 6).
+    """
     for raw, word in CORPUS_DAY_WORD_KEPT:
         got = normalize_vi(raw)
         assert got.text.startswith(word), (
             f"{raw!r}: chữ {word!r} bị nuốt dù ngày không đọc được — đó là cách "
             f"một thành phần của ngày biến mất trong im lặng: {got.text!r}"
+        )
+        assert got.ok is False, (
+            f"{raw!r}: ngày KHÔNG đọc được mà vẫn ok=True — chữ {word!r} còn "
+            f"đó không cứu được gì nếu chuỗi vẫn được gửi cho giọng đọc: "
+            f"{got.text!r}"
+        )
+        assert got.residual, (
+            f"{raw!r}: từ chối mà không NÊU TÊN cụm nào — người dùng không biết "
+            f"sửa gì"
+        )
+        assert got.text != word, (
+            f"{raw!r}: đầu ra chỉ còn đúng chữ {word!r}, phần ngày biến mất hẳn"
         )
 
 
@@ -928,28 +948,34 @@ def test_every_dictionary_entry_expands_and_is_anchored() -> None:
     """Positive: the entry expands. Negative: glued to letters it must NOT."""
     for src, dst in _ABBREVIATIONS:
         pos, neg = DICT_ABBREV_MATRIX[src]
-        head = dst.split()[0].lower()
+        # The WHOLE expansion, not its first word. "thành" is the head of
+        # TP.HCM, TPHCM, TP.HN and the TP. prefix alike, so a head-only check
+        # cannot tell an entry's own expansion from one another rule produced —
+        # swap TP.HN's target to the wrong city and it stays green (S4 round 6).
+        want = dst.lower()
         got_pos = normalize_vi(pos)
         assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
-        assert head in got_pos.text.lower(), (
-            f"{src}: ca DƯƠNG không bung — mong thấy {head!r} trong {got_pos.text!r}"
+        assert want in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung ĐÚNG — mong nguyên cụm {want!r} trong "
+            f"{got_pos.text!r}"
         )
         got_neg = normalize_vi(neg)
-        assert head not in got_neg.text.lower(), (
+        assert want not in got_neg.text.lower(), (
             f"{src}: ca ÂM bung dù token dính chữ — mỏ neo chữ cái không có tác "
             f"dụng: {got_neg.text!r}"
         )
 
     for src, dst, _rule in _PREFIXES:
         pos, neg = DICT_PREFIX_MATRIX[src]
-        head = dst.split()[0].lower()
+        want = dst.strip().lower()
         got_pos = normalize_vi(pos)
         assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
-        assert head in got_pos.text.lower(), (
-            f"{src}: ca DƯƠNG không bung — mong thấy {head!r} trong {got_pos.text!r}"
+        assert want in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung ĐÚNG — mong nguyên cụm {want!r} trong "
+            f"{got_pos.text!r}"
         )
         got_neg = normalize_vi(neg)
-        assert head not in got_neg.text.lower(), (
+        assert want not in got_neg.text.lower(), (
             f"{src}: ca ÂM bung dù sau dấu chấm là chữ thường — mỏ neo không có "
             f"tác dụng: {got_neg.text!r}"
         )
@@ -1026,6 +1052,35 @@ def test_ambiguous_d_separators_are_what_the_rule_calls_a_separator() -> None:
             f"(_SEP = {module._SEP!r}) KHÔNG coi nó là dấu ngăn — ma trận đang "
             f"đo một trục mà bản cài đặt không có"
         )
+
+
+def test_ambiguous_d_following_tokens_are_what_the_rule_looks_for() -> None:
+    """The SECOND axis, anchored the same way as the first.
+
+    Round 6 anchored `D_SEPARATORS` to `_SEP` and stopped there — leaving
+    `D_FOLLOWING` free-floating, so deleting a key silently shrank the matrix
+    from 20 declared cells to 15 while every assert stayed green and the
+    evals.yaml text still said "20 ô" (S4 round 6 finding, found in the very
+    round chartered to close this shape). The rule's lookahead is what decides
+    which token counts as "following", so assert against it.
+    """
+    module = sys.modules["tongflow.text.normalize_vi"]
+    # The lookahead the rule actually carries: a word character, or a comma.
+    follows = re.compile(r"[^\W_]|,")
+    for name, token in D_FOLLOWING.items():
+        if name == "kết chuỗi":
+            assert token == "", f"ô '{name}' phải là kết chuỗi rỗng, nhận {token!r}"
+            continue
+        assert token and follows.match(token[0]), (
+            f"'{name}' ({token!r}) được khai là token-theo-sau trong bộ ca, nhưng "
+            f"ký tự đầu của nó không khớp lớp mà luật _AMBIGUOUS_D nhìn tới — "
+            f"ma trận đang đo một trục bản cài đặt không có"
+        )
+    assert len(D_SEPARATORS) * len(D_FOLLOWING) == 20, (
+        f"lời khai trong evals.yaml nói 20 ô; hai trục hiện cho "
+        f"{len(D_SEPARATORS)} × {len(D_FOLLOWING)} = "
+        f"{len(D_SEPARATORS) * len(D_FOLLOWING)}"
+    )
 
 
 def test_ambiguous_d_matrix_has_no_silently_empty_cell() -> None:
@@ -1988,6 +2043,40 @@ IDEMPOTENCE_EXCLUDED: dict[str, str] = {
 }
 
 
+# The ONE input whose VERDICT is not idempotent, named rather than skipped.
+#
+# Deliberately narrow: it exempts the `.ok` comparison only, so the byte-level
+# idempotence check still runs on this string. Putting it in
+# IDEMPOTENCE_EXCLUDED would have hidden both.
+#
+# The flip is a CONSEQUENCE of a limit already declared under AC-10: money
+# written without a space ("100đ") is not rewritten to the word "đồng" on pass
+# one, so `_NUM_LEFT_OF_SLASH` — anchored on the WORD — reads that slash as
+# prose. On pass two the input already says "đồng/kg", and the same slash is
+# numeric. Same root as every other slash finding: a LEXICAL classifier.
+#
+# ⚠️ CHƯA CÓ CHỮ KÝ. Ghi ở đây để cây xanh và để phép đo không mù, nhưng owner
+# chưa xem chuỗi này. Nếu owner không nhận, dòng này phải rời đi cùng bản sửa.
+VERDICT_NOT_IDEMPOTENT: dict[str, str] = {
+    "Giá 100đ/kg và/hoặc 200đ/lít": (
+        "tiền viết liền '100đ' chỉ thành 'đồng' ở lượt sau, nên cùng một dấu "
+        "gạch chéo bị xếp loại khác nhau giữa hai lượt — hệ quả của giới hạn "
+        "AC-10 đã khai, cùng gốc phân loại từ vựng"
+    ),
+}
+
+
+def test_verdict_flip_exclusions_are_still_broken() -> None:
+    """An exemption that has quietly healed is a lie in the file."""
+    for raw, reason in VERDICT_NOT_IDEMPOTENT.items():
+        once = normalize_vi(raw)
+        twice = normalize_vi(once.text)
+        assert once.ok != twice.ok, (
+            f"{raw!r} nay đã ĐỒNG NHẤT verdict qua hai lượt — gỡ khỏi "
+            f"VERDICT_NOT_IDEMPOTENT và khỏi contract. Lý do đang khai: {reason}"
+        )
+
+
 def test_idempotent_and_byte_identical() -> None:
     for raw, _ in ALL_CORPUS:
         if raw in IDEMPOTENCE_EXCLUDED:
@@ -2007,6 +2096,19 @@ def test_idempotent_and_byte_identical() -> None:
             continue
         twice = normalize_vi(once.text)
         assert twice.text == once.text, f"{raw!r} không idempotent: {twice.text!r}"
+        # The VERDICT has to be idempotent too, not just the bytes. This node
+        # "sits in every chain and may run twice"; a chain that reads a string,
+        # gets ok=True, then reads the result again and gets ok=False is blocked
+        # on a string it already approved. Comparing only `.text` cannot see it —
+        # the text is byte-identical in exactly that case (S4 round 6 finding).
+        if raw in VERDICT_NOT_IDEMPOTENT:
+            continue
+        assert twice.ok == once.ok, (
+            f"{raw!r}: đọc lại chính đầu ra của mình thì cờ lật "
+            f"{once.ok} → {twice.ok} trong khi text KHÔNG đổi. Một dây chạy bộ "
+            f"đọc hai lần sẽ bị chặn ở lần hai trên đúng chuỗi lần một đã duyệt. "
+            f"residual lần hai: {twice.residual}"
+        )
 
 
 # --------------------------------------------------------------------------
