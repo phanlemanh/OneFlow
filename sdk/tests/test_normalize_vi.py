@@ -493,6 +493,64 @@ CORPUS_SLASH_NEGATIVE: tuple[tuple[str, str], ...] = (
     ("Giá 5 triệu, nam/nữ đều được", "giá năm triệu, nam/nữ đều được"),
 )
 
+# ---------------------------------------------------------------------------
+# DECLARED LIMITS, pinned so they cannot rot.
+#
+# A limit written in the contract and nowhere else is a claim nobody re-checks:
+# the day a library bump or a rule change closes it, the file keeps confessing
+# to a defect that no longer exists, and the next reader trusts a lie. So each
+# declared limit is measured HERE with its today-behaviour, and the test goes
+# red when the limit HEALS — that red is the reminder to delete it from the
+# contract. Same shape as `test_idempotence_exclusions_are_still_broken`.
+#
+# Root cause of all four, written once: `_NUM_LEFT_OF_SLASH` is a LEXICAL guess
+# about what standing next to a slash makes it a number. It cannot see that
+# "100đ" (no space before đ) is money, that "/home" is a path, or that a domain
+# is a domain. Closing these needs a token classifier — money / unit / path /
+# idiom — which is a contract of its own, not a fifth patch to this regex
+# (owner, 2026-08-28, after four rounds each fixing a different wrong scope).
+
+# AC-10: two slash families the rule reads instead of refusing.
+CORPUS_SLASH_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "hai họ gạch chéo triệt tiêu nhau",
+        "Tốc độ 100km/h, lãi 5%/năm",
+        "tốc độ một trăm ki lô mét trên giờ, lãi năm phần trăm/năm",
+    ),
+    (
+        "tiền không dấu cách, trộn hai họ",
+        "Giá 100đ/kg và/hoặc 200đ/lít",
+        "giá một trăm đồng/kg và/hoặc hai trăm đồng/lít",
+    ),
+)
+
+# AC-2: the "đường dẫn" half. A scheme or a `www.` prefix is recognised; a bare
+# path and a schemeless domain are not, and their raw slashes reach the voice.
+CORPUS_PATH_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    ("đường dẫn trần", "Mở /home/user/file.txt", "mở /hôm/u xơ/phai.txt"),
+    (
+        "tên miền không có scheme",
+        "Truy cập oneflow.vn/gia",
+        "truy cập o nép lô.vn/gia",
+    ),
+)
+
+
+def test_declared_limits_are_still_broken() -> None:
+    """A declared limit that has quietly healed is a lie in the contract."""
+    for kind, raw, today in CORPUS_SLASH_KNOWN_LIMIT + CORPUS_PATH_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"[{kind}] {raw!r} NAY ĐÃ BỊ TỪ CHỐI — giới hạn đã lành. Gỡ nó khỏi "
+            f"contract §Known limits và khỏi corpus này, đừng để hồ sơ nhận một "
+            f"khuyết tật không còn tồn tại. residual={got.residual}"
+        )
+        assert got.text == today, (
+            f"[{kind}] {raw!r}: hành vi hôm nay đã đổi — mong {today!r}, "
+            f"nhận {got.text!r}. Cập nhật cả contract lẫn dòng này."
+        )
+
+
 # The written "ngày" must SURVIVE when the date is not readable — dropping it was
 # how a half-parsed date lost a field silently.
 CORPUS_DAY_WORD_KEPT: tuple[tuple[str, str], ...] = (
@@ -1736,6 +1794,8 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("DICT_PREFIX_MATRIX", DICT_PREFIX_MATRIX),
     ("TYPOGRAPHIC_DASH_MATRIX", TYPOGRAPHIC_DASH_MATRIX),
     ("CORPUS_DASH_NEGATIVE", CORPUS_DASH_NEGATIVE),
+    ("CORPUS_SLASH_KNOWN_LIMIT", CORPUS_SLASH_KNOWN_LIMIT),
+    ("CORPUS_PATH_KNOWN_LIMIT", CORPUS_PATH_KNOWN_LIMIT),
 )
 
 ALL_CORPUS = tuple(

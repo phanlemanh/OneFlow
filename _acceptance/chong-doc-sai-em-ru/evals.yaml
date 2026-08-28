@@ -145,6 +145,16 @@ evals:
       không phải chữ cái 'đ'.
       Chiều đỏ: hỏi nguyên liệu thô → đỏ ở 'Giá 50.000 đ/kg'; quay về phép thử
       có/không → đỏ ở 'Ngày 19/8/2026 và/hoặc thứ hai'.
+      PHẠM VI ĐÃ THU HẸP (owner ký 2026-08-28 sau khi XEM đầu ra): tiêu chí nay
+      là "một cấu trúc gạch chéo tiền/tỷ-lệ trong chuỗi thì phải từ chối". HAI
+      GIỚI HẠN KHAI RÕ, ghim bằng CORPUS_SLASH_KNOWN_LIMIT — KHÔNG phải phát
+      hiện mới: 'Tốc độ 100km/h, lãi 5%/năm' → ĐỌC (thư viện nuốt gạch chéo văn
+      xuôi nên hai số đếm triệt tiêu nhau); 'Giá 100đ/kg và/hoặc 200đ/lít' → ĐỌC
+      (tiền viết liền không thành 'đồng' ở bước tiền xử lý + trộn hai họ).
+      KHÔNG phải giới hạn: 'Tỉ lệ 50/50' → TỪ CHỐI là ĐÚNG chữ của tiêu chí, vì
+      đầu ra còn gạch chéo thô. Gốc chung ghi trong contract §Known limits:
+      _NUM_LEFT_OF_SLASH là phân loại TỪ VỰNG; đóng thật cần bộ phân loại token,
+      là hợp đồng riêng.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8
@@ -183,6 +193,16 @@ evals:
       cụt. Assert QUAN HỆ: nếu ok=True thì phần chữ ngoài URL phải còn nguyên
       (so với bản lower() của chính nó), không phải chỉ 'không rỗng'. Chiều đỏ:
       dựng ca URL làm rỗng đầu ra → đỏ nêu đúng chuỗi vào.
+      HAI GIỚI HẠN KHAI RÕ dưới tiêu chí này (owner ký 2026-08-28 sau khi XEM
+      đầu ra), ghim bằng CORPUS_PATH_KNOWN_LIMIT — KHÔNG phải phát hiện mới:
+      luật URL chỉ nhận scheme (https://, ftp://) hoặc tiền tố www., nên
+      'Mở /home/user/file.txt' → ĐỌC ra 'mở /hôm/u xơ/phai.txt' và
+      'Truy cập oneflow.vn/gia' → ĐỌC ra 'truy cập o nép lô.vn/gia' — gạch chéo
+      thô đi thẳng tới giọng đọc. Tên miền không scheme là cách viết link phổ
+      biến nhất trong kịch bản bán hàng tiếng Việt. Vòng lặp 'messy' trong
+      test_edge_inputs nay có assert thật cho cả ba ca (URL từ chối nêu tên ·
+      email đọc được · emoji bỏ đi); trước đó nó chỉ gọi normalize_vi() với chú
+      thích 'must not raise', không assert gì.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ─── Nhóm C: mặt người dùng

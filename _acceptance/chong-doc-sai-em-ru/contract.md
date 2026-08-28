@@ -121,8 +121,10 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   `d{1,2}[/-]d{1,2}[/-]d{4}`, dựa vào giả định thư viện sẽ tự thêm lại — giả định chỉ đúng khi
   thư viện parse được. Ngày Việt hợp lệ (`ngày 19/8/2026`) vẫn đọc đúng.*
 
-- AC-10: (sdk) Given đầu ra còn **dấu gạch chéo** mà thư viện để nguyên dưới dạng ký tự, When hậu
-  kiểm, Then tính là token chưa đọc được.
+- AC-10: (sdk) **THU HẸP tại S4 vòng 4, 2026-08-28 — owner ký sau khi thấy chuỗi đầu ra**.
+  Given chuỗi có **một cấu trúc gạch chéo tiền hoặc tỷ lệ**, When hậu kiểm, Then tính là token
+  chưa đọc được và TỪ CHỐI. *(Văn bản cũ — "mọi dấu gạch chéo còn sót trong đầu ra" — giữ lại
+  làm sử liệu; nó là bản khiến luật từ chối cả `TP/HCM` và `và/hoặc`.)*
   *Đo thật: `Giá 50.000 đ/kg` → "giá năm mươi nghìn đồng**/kg**", `Lãi 5%/năm` → "lãi năm phần
   trăm**/năm**", đều `ok=True`, `residual` rỗng. `đ/kg` và `%/năm` là cách viết giá và lãi suất
   phổ biến nhất trong đúng loại nội dung slot này phục vụ. Đáng chú ý: `100km/h` thư viện đọc
@@ -169,6 +171,40 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 - **Trục cảnh báo khả thi**: chỉ khuyên điều làm được thật (AC-12)
 
 ## Known limits — khai rõ, không để im
+
+> **Gốc chung của bốn giới hạn dưới đây, ghi một lần.** `_NUM_LEFT_OF_SLASH` là một phân loại
+> **TỪ VỰNG**: nó đoán "cái gì đứng cạnh dấu gạch chéo thì dấu đó thuộc về một con số". Nó không
+> biết `100đ` (không có dấu cách trước `đ`) là tiền, không biết `/home` là đường dẫn, không biết
+> `oneflow.vn` là tên miền. Bốn vòng nghiệm thu sửa bốn phạm vi khác nhau của cùng luật này —
+> chỉ soi đầu ra · hỏi nguyên liệu thô · đếm tổng · neo theo chữ tiền — và mỗi lần lại lộ một họ
+> mới, vì gốc không đổi. Đóng thật cần **một bộ phân loại token** (tiền · đơn vị · đường dẫn ·
+> thành ngữ): đó là một hợp đồng riêng, không phải lần vá thứ năm vào một biểu thức chính quy.
+
+**Thuộc AC-10** *(hai chuỗi này owner đã xem đầu ra trước khi ký)*:
+
+- `Tốc độ 100km/h, lãi 5%/năm` → **đọc**, ra `tốc độ một trăm ki lô mét trên giờ, lãi năm phần
+  trăm/năm`. Thư viện **nuốt** gạch chéo văn xuôi (`km/h` → "trên giờ") trong khi gạch chéo số
+  sống sót, nên hai số đếm triệt tiêu nhau. Riêng lẻ, `Lãi 5%/năm` bị từ chối đúng.
+- `Giá 100đ/kg và/hoặc 200đ/lít` → **đọc**, ra `giá một trăm đồng/kg và/hoặc hai trăm đồng/lít`.
+  Tiền viết liền không dấu cách nên không thành `đồng` ở bước tiền xử lý, và chuỗi lại trộn hai
+  họ.
+
+**Thuộc AC-2, khai riêng — không tính vào sổ nợ của AC-10**:
+
+- `Mở /home/user/file.txt` → **đọc**, ra `mở /hôm/u xơ/phai.txt`.
+- `Truy cập oneflow.vn/gia` → **đọc**, ra `truy cập o nép lô.vn/gia`.
+
+  Luật URL chỉ nhận scheme (`https://`, `ftp://`) hoặc tiền tố `www.`. Một đường dẫn trần và một
+  tên miền không scheme đều lọt, và gạch chéo thô đi thẳng tới giọng đọc. Tên miền không scheme
+  là cách viết link phổ biến nhất trong kịch bản bán hàng tiếng Việt.
+
+*Cả bốn được ghim bằng `CORPUS_SLASH_KNOWN_LIMIT` / `CORPUS_PATH_KNOWN_LIMIT` và
+`test_declared_limits_are_still_broken`: ngày nào một giới hạn LÀNH, phép đo đỏ và buộc phải gỡ
+nó khỏi mục này. Một giới hạn khai mà không đo được sẽ thành lời nói dối trong file.*
+
+**KHÔNG phải giới hạn:** `Tỉ lệ 50/50` → **từ chối**, ra `tỉ lệ năm mươi/năm mươi`. Đầu ra có dấu
+gạch chéo thô, nên từ chối là **đúng chữ** của AC-10. Ghi ở đây để lần sau không ai "sửa" nó rồi
+mở lại lỗ.
 
 - **Token La-tinh bị nuốt chữ một cách ỔN ĐỊNH vẫn lọt** *(đo S4 vòng 3)*. Lưới AC-4 quyết định
   bằng **tính ổn định** — đọc hai lần ra khác nhau thì từ chối — chứ không bằng **bảo toàn**.
