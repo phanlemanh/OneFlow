@@ -425,7 +425,7 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
         )
 
 
-def test_digit_losing_dash_runs_are_refused_by_name() -> None:
+def test_number_dash_number_that_is_not_a_range() -> None:
     """A run that loses digits when read as a range must be refused, by name."""
     for kind, raw, run in CORPUS_DASH_REFUSED:
         got = normalize_vi(raw)
@@ -551,7 +551,7 @@ def test_url_is_refused_by_name() -> None:
         )
 
 
-def test_error_codes_are_closed_and_every_one_is_reachable() -> None:
+def test_refusal_paths_return_stable_codes() -> None:
     """Two-way: nothing produced is undeclared, nothing declared is dead.
 
     The set is what a user-facing message is rendered FROM (AC-6), so a code
@@ -646,17 +646,25 @@ CORPUS_DASH_NEGATIVE: tuple[tuple[str, str], ...] = (
 )
 
 
+# Every cell of the dash matrix has a case today. The mapping is declared empty
+# rather than omitted so the shape matches its sibling matrices: the day a cell
+# becomes genuinely unreachable, there is an obvious place to name it and a
+# reason to write, instead of a row quietly going missing.
+DELIBERATELY_UNCOVERED_DASH_CELLS: dict[tuple[str, str], str] = {}
+
+
 def test_dash_matrix_has_no_silently_empty_cell() -> None:
     missing = [
         (d, r)
         for d in DASH_CHARS
         for r in DASH_ROLES
         if (d, r) not in TYPOGRAPHIC_DASH_MATRIX
+        and (d, r) not in DELIBERATELY_UNCOVERED_DASH_CELLS
     ]
     assert missing == [], f"ô ma trận gạch kiểu chữ còn trống: {missing}"
 
 
-def test_typographic_dash_reads_exactly_like_ascii() -> None:
+def test_typographic_dashes_read_as_ascii() -> None:
     """Relation, not literal: the typographic twin must equal the ASCII one."""
     for (dash_name, role_name), raw in sorted(TYPOGRAPHIC_DASH_MATRIX.items()):
         ascii_twin = DASH_ROLES[role_name].format(d="-")
