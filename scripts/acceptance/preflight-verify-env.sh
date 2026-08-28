@@ -69,6 +69,25 @@ read_modules_field() {
 #    tree that is already dead. Resolve the path and test that it exists.
 #  - Never count entries under node_modules/.pnpm. A broken tree still holds all
 #    474 of them; only the bookkeeping file was overwritten.
+#
+# HOW THE CORRUPTION HAPPENS, reproduced end to end on 2026-08-28 in a throwaway
+# repo (never on a shared tree): `git worktree add "$TMP/agk-baseline"`, symlink
+# its node_modules at the original tree's, then run pnpm inside the worktree.
+# pnpm first refuses with ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY — and that
+# message TELLS the reader to set CI=true. Doing what it says is what writes the
+# original tree's virtualStoreDir out to the temp worktree; deleting the temp dir
+# then leaves every top-level link dangling. The red cell a verifier sees is a
+# bare MODULE_NOT_FOUND pointing at the repo path, with nothing in it naming
+# agk-baseline — which is exactly why it reads as a code regression.
+#
+# THE RECORDED FIX IS NOT SUFFICIENT ON ITS OWN. Measured on that broken tree:
+# `CI=true pnpm install --frozen-lockfile` answers "Already up to date" and
+# repairs nothing; so does adding --force; so does deleting .modules.yaml first
+# (pnpm does not even recreate it). Only `rm -rf node_modules` followed by the
+# frozen install restored it (`pnpm build` back to green, lockfile shasum
+# unchanged). Keep --frozen-lockfile regardless: it is what stops pnpm rewriting
+# the committed lockfile. STATUS.md records the fix working in the original
+# incident, so treat it as "not always enough", not as wrong.
 check_pnpm_virtual_store() {
   if [ ! -d node_modules ]; then
     fail pnpm-virtual-store "không có node_modules/ — deps chưa cài ở cây này"
@@ -147,11 +166,11 @@ main() {
   # Kept last so it survives a truncated output tail: the verifier agent
   # captures only the final ~10 lines of each command.
   cat <<'EOF'
-VERDICT: RED — cây node_modules của repo này đang hỏng. Đây là bẫy "agent baseline của kit phá node_modules cây gốc", ghi ở STATUS.md §Bẫy đã biết từ commit 3ad98c8 (28/07/2026).
+VERDICT: RED — cây node_modules hỏng: bẫy "agent baseline của kit phá node_modules cây gốc" (STATUS.md §Bẫy đã biết, commit 3ad98c8).
 => MỌI ô đỏ của lệnh chạy qua pnpm/node trong vòng verify này là NGHI NGỜ (hạ tầng), KHÔNG được đọc là hồi quy của mã.
-=> Gỡ:  CI=true pnpm install --frozen-lockfile  — rồi đối chiếu  shasum -a 1 pnpm-lock.yaml  trước/sau để chắc lockfile không đổi.
-=> TUYỆT ĐỐI không chạy `pnpm install` trần: lockfile đã commit có importer packages/proprietary không tồn tại trong repo public, install trần có thể prune và ghi lại nó.
-=> Gỡ xong thì chạy LẠI vòng verify. Bằng chứng của vòng này không dùng được.
+=> Gỡ:  rm -rf node_modules && CI=true pnpm install --frozen-lockfile
+=> ĐO 28/08 trên cây hỏng thật: THIẾU `rm -rf` thì pnpm báo "Already up to date" rồi bỏ qua, KHÔNG gỡ (kể cả thêm --force). Giữ `--frozen-lockfile` — nó là thứ chặn pnpm ghi lại lockfile; đối chiếu `shasum -a 1 pnpm-lock.yaml` trước/sau.
+=> `rm -rf node_modules` phá cây DÙNG CHUNG: chắc chắn không phiên nào đang chạy vòng verify trước khi xoá. Gỡ xong chạy LẠI vòng; bằng chứng vòng này bỏ.
 EOF
   return 1
 }
