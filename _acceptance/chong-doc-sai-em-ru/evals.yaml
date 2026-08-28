@@ -124,11 +124,27 @@ evals:
       - "sdk/tongflow/text/**"
       - "sdk/tests/test_normalize_vi.py"
     expected: >-
-      exit 0; dấu gạch chéo CÒN SÓT TRONG ĐẦU RA tính là token chưa đọc được —
-      'Giá 50.000 đ/kg' và 'Lãi 5%/năm' → success:false nêu '/'. Ca ÂM bắt buộc,
-      đã đo: '100km/h' thư viện đọc đúng thành 'ki lô mét trên giờ' nên KHÔNG
-      được đỏ — luật phải soi đầu ra, không soi đầu vào. Chiều đỏ: gỡ '/' khỏi
-      lớp hậu kiểm → đỏ nêu đúng hai ca đ/kg và %/năm.
+      exit 0; luật ĐẾM THEO VỊ TRÍ (sửa S4 vòng 3). Đếm số gạch chéo VĂN XUÔI
+      trong bản ĐÃ TIỀN XỬ LÝ, so với số gạch chéo còn sót trong đầu RA — nhiều
+      hơn nghĩa là một gạch chéo SỐ đã trở về chưa đọc được.
+      Ca DƯƠNG: 'Giá 50.000 đ/kg' · 'Lãi 5%/năm' · 'Giá 20.000 ₫/lít' ·
+      'ngày 12/25/2026' · và cùng ngày đó viết bằng GẠCH NGANG
+      ('Hop dong 12-25-2026', bản gạch en, 'Han 00-12-2026').
+      Ca ÂM NẶNG NGANG ca dương: '100km/h' · 'Giá 5/3 triệu' · bốn ca văn xuôi
+      'và/hoặc' 'TP/HCM' 'nam/nữ' 'N/A' · và hai ca TRỘN hai họ trong một chuỗi
+      ('Ngày 19/8/2026 và/hoặc thứ hai', 'Giá 5 triệu, nam/nữ đều được').
+      LỊCH SỬ HAI LẦN SAI, giữ lại vì mỗi lần sai theo một chiều khác nhau:
+      lời khai S1 nói 'soi đầu ra, không soi đầu vào' — bản đó từ chối cả văn
+      xuôi thường, một lần từ chối oan chặn cả dây giọng đọc trên đoạn văn không
+      có con số nào. Bản vòng 2 sửa sang quan hệ nhưng hỏi NGUYÊN LIỆU THÔ và
+      thử CÓ/KHÔNG trên cả chuỗi, nên vừa để lọt 'Hop dong 12-25-2026' → đọc ra
+      '…tháng hai/hai nghìn…' MẤT SỐ 25 với ok=True, vừa vẫn từ chối oan chuỗi
+      trộn hai họ. Hai chi tiết là bản lề: (a) đọc bản ĐÃ tiền xử lý, vì chính
+      bước đó viết 'd-m-y' thành 'd/m/y'; (b) ĐẾM chứ không thử có/không, vì hai
+      nửa phải khớp trên CÙNG một dấu gạch chéo. Neo trái là CHỮ tiền ('đồng'),
+      không phải chữ cái 'đ'.
+      Chiều đỏ: hỏi nguyên liệu thô → đỏ ở 'Giá 50.000 đ/kg'; quay về phép thử
+      có/không → đỏ ở 'Ngày 19/8/2026 và/hoặc thứ hai'.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8

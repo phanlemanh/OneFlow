@@ -184,6 +184,15 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 
 - **`Mã đơn 1234-5678`** không phân biệt được với một khoảng thật.
 
+- **Khi từ chối, trường `text` VẪN mang bản đọc sai** *(đo tại `8eb1c7f`, phiên soi độc lập)*.
+  `normalize_vi('Hop dong 12-25-2026')` trả `ok=False` nhưng
+  `text='hóp đông mười hai tháng hai/hai nghìn…'` — số 25 đã mất, mà chuỗi đó vẫn nằm trong kết
+  quả. An toàn **chỉ khi** mọi chỗ tiêu thụ đều gác theo cờ `ok`. Nguyên tắc *thà từ chối còn
+  hơn đọc sai* hiện ép ở **CỜ**, chưa ép ở **PAYLOAD** — không tiêu chí nào buộc `text` rỗng khi
+  từ chối. Đây là "đọc sai êm ru" dịch lên một tầng. Không đóng ở hồ sơ này vì nó phải đi cùng
+  nửa `runner.py` đã hoãn (xem AC-6): chính chỗ đó là seam đã biết nơi một node `success=False`
+  bị đổi thành chuỗi lỗi, nên sửa payload mà không sửa seam thì chưa đóng được đường nào.
+
 ## Out of scope
 
 - Sửa chính thư viện `vietnormalizer` — ta ghim phiên bản và bọc, không fork.
