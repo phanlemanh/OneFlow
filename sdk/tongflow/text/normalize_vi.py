@@ -350,13 +350,34 @@ _RESIDUAL = re.compile(
 # a digit, a percent sign, or a currency mark that itself follows digits. Both
 # halves are required: a surviving slash in the OUTPUT *and* a numeric slash in
 # the INPUT.
-_NUMERIC_SLASH_IN = re.compile(
-    rf"\d{_SEP}*/"
-    rf"|%{_SEP}*/"
-    rf"|₫{_SEP}*/"
-    rf"|(?<=\d){_SEP}*(?i:đ)\.?{_SEP}*/"
-    rf"|/{_SEP}*\d"
-)
+_SLASH = re.compile("/")
+# What sits against a slash to make it part of a NUMBER: a digit, a percent
+# sign, a currency glyph, or the currency WORD. The word — not the letter "đ" —
+# because this runs on the PRE-PROCESSED string, where `_SPACED_DONG` has
+# already turned "50.000 đ/kg" into "50.000 đồng/kg". Anchoring on "đ" here
+# silently stopped matching the most common price shape in the corpus.
+_NUM_LEFT_OF_SLASH = re.compile(rf"(?:\d|%|₫|{CURRENCY_WORD}){_SEP}*$")
+_NUM_RIGHT_OF_SLASH = re.compile(rf"^{_SEP}*\d")
+
+
+def _prose_slash_count(pre: str) -> int:
+    """Slashes in the pre-processed input that were never part of a number.
+
+    Counted PER OCCURRENCE, because the two halves of the rule have to line up
+    on the SAME slash. Testing them independently over the whole string refused
+    "Ngày 19/8/2026 và/hoặc thứ hai" — the date read perfectly and only the
+    prose slash survived, yet one numeric slash anywhere condemned every prose
+    slash in the sentence (S4 round 3 finding).
+    """
+    prose = 0
+    for match in _SLASH.finditer(pre):
+        i = match.start()
+        numeric = bool(_NUM_LEFT_OF_SLASH.search(pre[:i])) or bool(
+            _NUM_RIGHT_OF_SLASH.match(pre[i + 1 :])
+        )
+        if not numeric:
+            prose += 1
+    return prose
 
 # The colon left over from a MANGLED CLOCK, decided relationally instead of by
 # shape. The shape test `:(?=\S)` could not tell "mười bốn:ba mươi" (a clock the
@@ -419,11 +440,19 @@ class NormalizeResult:
     text: str
     residual: tuple[str, ...]
     error: str | None = None
-    # STABLE, machine-readable reason. `error` is a Vietnamese sentence and is
-    # for logs; anything a user reads is rendered from this code plus `residual`
-    # in the i18n catalogues, the way the exporter's warning already is. Before
-    # this, the Vietnamese sentence went straight to the canvas for every
-    # locale (AC-6).
+    # STABLE, machine-readable reason for the refusal. `error` is a Vietnamese
+    # sentence and is for LOGS ONLY.
+    #
+    # Scope, stated plainly so the comment does not describe a thing that is not
+    # here: today this code is used inside the SDK and its tests, and NOWHERE
+    # else. It does not reach a user. The slot's ABI outputs are
+    # {success, error, text} with `additionalProperties: false`, so a plugin
+    # cannot even emit it. Rendering a refusal in the viewer's own language was
+    # narrowed out of this contract on 2026-08-28 (owner, ngả b) and stays open
+    # in roadmap item 1.3 — see `_acceptance/chong-doc-sai-em-ru/contract.md`
+    # under AC-6 for the two measured blockers. Carrying it to the interface
+    # means adding the field to the ABI first, then `pnpm gen:abi` +
+    # `gen_models.py`, then an i18n catalogue — in that order.
     code: str | None = None
 
 
@@ -515,13 +544,23 @@ def normalize_vi(text: str) -> NormalizeResult:
         )
 
     had_money = has_money(text)
-    out = _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(_pre(text)))
+    # Kept, not inlined: the slash rule below has to look at what `_pre`
+    # PRODUCED, not at what the user typed. `_pre` rewrites "d-m-y" into
+    # "d/m/y", so a dash-written date carries no slash in the raw input at all.
+    pre = _pre(text)
+    out = _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(pre))
     out = unicodedata.normalize("NFC", out)
 
     residual = tuple(dict.fromkeys(m.group(0) for m in _RESIDUAL.finditer(out)))
     if _COLON_BETWEEN_WORDS.search(out) and _CLOCK_IN.search(text):
         residual = residual + (":",)
-    if "/" in out and _NUMERIC_SLASH_IN.search(unicodedata.normalize("NFC", text)):
+    # More slashes survived than the prose put there ⇒ at least one NUMERIC
+    # slash came back unread. Counting is what ties the two halves to the same
+    # occurrence; a plain `"/" in out` test got this wrong in both directions
+    # at once (S4 round 3): it refused a perfectly read date sitting next to
+    # "và/hoặc", and it let "Hop dong 12-25-2026" through speaking
+    # "mười hai tháng hai/hai nghìn…" with ok=True — the 25 silently gone.
+    if out.count("/") > _prose_slash_count(pre):
         residual = residual + ("/",)
     # Relational, like the clock-colon rule above: decided on the INPUT, because
     # the output is lower-cased and the capital that makes "<số> Đ <TênHoa>"

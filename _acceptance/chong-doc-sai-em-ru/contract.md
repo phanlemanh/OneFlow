@@ -168,6 +168,22 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 - **Trục bộ-ca-tự-lộ-ô-trống**: họ ca nhập nhằng theo ma trận khai-trước (AC-11)
 - **Trục cảnh báo khả thi**: chỉ khuyên điều làm được thật (AC-12)
 
+## Known limits — khai rõ, không để im
+
+- **Token La-tinh bị nuốt chữ một cách ỔN ĐỊNH vẫn lọt** *(đo S4 vòng 3)*. Lưới AC-4 quyết định
+  bằng **tính ổn định** — đọc hai lần ra khác nhau thì từ chối — chứ không bằng **bảo toàn**.
+  Nên `Mã AbCd và XyZw` ra `mã a và xi du` với `ok=True`: `AbCd` mất 3/4 ký tự nhưng mất **y
+  hệt nhau** ở cả hai lần đọc, nên không có gì đỏ. Đây là đúng hình dạng "đọc sai mà nói ok" mà
+  hợp đồng lập ra để chặn, và nó **chưa** đóng. Không đóng ở hồ sơ này vì chốt bảo toàn (so độ
+  dài / số âm tiết đầu ra với token vào) là một họ luật mới cần bộ ca riêng, không phải một
+  dòng thêm vào lưới đang có. Bộ ca hiện chỉ ghim `VNDirect` (ca không ổn định) và `iPhone`
+  (ca lành), nên nó **không** phân biệt được "lưới có răng" với "lưới bắt đúng một ca đã biết".
+
+- **Dạng chữ thường của token thương hiệu** (`vndirect`) không có tín hiệu cấu trúc nào tách
+  khỏi một từ tiếng Việt. Cùng lý do, `Mail` đọc thành `mêu`.
+
+- **`Mã đơn 1234-5678`** không phân biệt được với một khoảng thật.
+
 ## Out of scope
 
 - Sửa chính thư viện `vietnormalizer` — ta ghim phiên bản và bọc, không fork.

@@ -450,6 +450,15 @@ CORPUS_SLASH_REFUSED: tuple[tuple[str, str], ...] = (
     ("ngày kiểu Mỹ", "ngày 12/25/2026"),
     ("ngày không tồn tại", "ngày 32/8/2026"),
     ("ngày kiểu Mỹ, không có chữ ngày", "12/25/2026"),
+    # The SAME mis-parse written with dashes. `_pre` rewrites "d-m-y" into
+    # "d/m/y", so these carry no slash in the raw input at all — a rule that
+    # asked the RAW input whether a numeric slash existed let every one of them
+    # through speaking a wrong date with ok=True (S4 round 3). They are also
+    # invisible to the dash-run rule, which deliberately masks `_DASH_DATE`
+    # matches, so this family has exactly one net left.
+    ("ngày kiểu Mỹ viết bằng gạch ngang", "Hop dong 12-25-2026 co hieu luc"),
+    ("cùng ca, gạch en", "Hop dong 12–25–2026"),
+    ("ngày có nhóm 0 đứng đầu, gạch ngang", "Han 00-12-2026"),
 )
 
 # ...and the slashes that must NOT be flagged. Two different reasons, both real:
@@ -471,6 +480,16 @@ CORPUS_SLASH_NEGATIVE: tuple[tuple[str, str], ...] = (
     ("TP/HCM đông quá", "tê pê/hát xê em đông quá"),
     ("Giới tính nam/nữ", "giới tính nam/nữ"),
     ("Trạng thái N/A", "trạng thái n/a"),
+    # BOTH families in one string. The date reads perfectly and only the prose
+    # slash survives, so refusing here fails a whole voice chain over text that
+    # was read correctly. Testing the two halves independently over the whole
+    # string did exactly that (S4 round 3) — the corpus had no mixed case, so
+    # 37 tests stayed green over it.
+    (
+        "Ngày 19/8/2026 và/hoặc thứ hai",
+        "ngày mười chín tháng tám năm hai nghìn không trăm hai mươi sáu và/hoặc thứ hai",
+    ),
+    ("Giá 5 triệu, nam/nữ đều được", "giá năm triệu, nam/nữ đều được"),
 )
 
 # The written "ngày" must SURVIVE when the date is not readable — dropping it was
