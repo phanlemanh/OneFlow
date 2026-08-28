@@ -8,6 +8,7 @@ surfaces: [ci]
 status: verified
 approved_by: Manh
 approved_at: 2026-08-27
+amended_at: 2026-08-28
 ---
 
 # Acceptance Contract: gate-tooling-t1
@@ -23,8 +24,17 @@ t1-escape. Nói cách khác, hiện **không có đường hợp lệ nào để
 ngoài việc mở hồ sơ nghiệm thu cho chính nó. Đó là nợ STATUS.md item 0.8, mở từ
 Cổng 2 của CI-a (ký 05/08) và đã đốt 4 wave ký lại.
 
-Hồ sơ này đóng nợ đó, và đóng luôn hai khuyết tật đo được trong lúc chẩn đoán
-27/08: fork bọc TRỌN khối staleness nên **AC-2 của `stale-scope-by-paths` —
+**PHẠM VI ĐÃ THU HẸP 28/08 — đọc trước khi tin tiêu đề.** Nợ 0.8 có HAI vế chặn
+việc sửa một guard: (i) luật `t1-escape` nổ, và (ii) thay đổi gated làm cũ pin đã
+ký. Hồ sơ này đóng **vế (i)** và KHÔNG đóng vế (ii). Đo được ngày 28/08 (xem
+`gap-probe.md` §Kiểm chứng): một PR chỉ sửa `scripts/acceptance/**` kèm artifact
+thoát được `t1-escape` đúng như AC-1 khẳng định, nhưng vẫn sinh **ba** violation
+staleness — `measure-harness`, `task-metering` (cả hai khai `scripts/**`) và
+`stale-scope-by-paths` (khai chính `scripts/acceptance/**`). Vế (ii) chuyển thành
+nợ có tên, xem `## Out of scope` và bản ghi `d-20260828T031500Z-scope`.
+
+Hồ sơ này đóng vế (i) của nợ đó, và đóng luôn hai khuyết tật đo được trong lúc
+chẩn đoán 27/08: fork bọc TRỌN khối staleness nên **AC-2 của `stale-scope-by-paths` —
 "ngoài union thì KHÔNG stale", đúng hành vi feature đó sinh ra để tạo — mất chỗ
 quan sát**, và 5/14 case của `check-stale-scoping.sh` đỏ trên `main` sạch.
 
@@ -70,8 +80,18 @@ dùng preset test-matrix: preset mô tả feature sản phẩm, còn đây là m
 - **Đổi ngữ nghĩa `stale_files` sang đo theo range của PR** (`BASE...HEAD`) thay vì `verified_commit...HEAD`. Nó xoá được wave re-verify nhưng phá luật nền "bằng chứng chứng nhận cây tại `verified_commit`".
 - **Tách `scripts/acceptance/fixtures.sh`** (đang 831 dòng, vượt cap 800 của CLAUDE.md — đã vượt từ trước ở mức 805). Refactor riêng; gộp vào đây là trộn hai loại rủi ro.
 - **Đụng `_acceptance/normalize-text-vi/`** — nhánh đó đang giữa Cổng 2.
+- **Vế (ii) của nợ 0.8 — làm cho PR sửa guard MERGE ĐƯỢC, không chỉ thoát
+  `t1-escape`.** Đo được là còn ba hồ sơ bị stale bởi một guard edit. Đường ra mà
+  judge của AC-12 chỉ (BỎ KHAI `paths` ở ba eval thường trực của `measure-harness`
+  và `task-metering`, gỡ `scripts/**` khỏi union) nằm ngoài hồ sơ này vì nó chạm
+  `_acceptance/<slug>/` của hai feature khác và phải đi kèm wave của chúng. Bản
+  ghi `d-20260828T031500Z-scope`.
+- **Ô A4 của `## Coverage` — "khai đủ nhưng union rỗng nghĩa".** Khai thẳng ở đây
+  để bảng Coverage không đọc như một lời khai phủ kín: ô này là fail-open đã được
+  Cổng 2 của `stale-scope-by-paths` cố ý hoãn sang contract riêng
+  (`d-20260729T095807Z-19845`); hồ sơ này giữ nguyên quyết định đó, không vá.
 
-## Amendment — 2026-08-27, sau vòng verify 1
+## Amendment 1 — 2026-08-27, sau vòng verify 1 · duyệt tại chỗ bởi Manh 2026-08-28 (cùng lượt duyệt Amendment 2)
 
 **AC-5 bỏ con số cứng "14".** Bản duyệt ở Cổng 1 viết "đủ 14 `--case`". Con số đó
 đúng lúc duyệt và đã cũ ngay trong lượt thi công của chính hồ sơ này: AC-3, AC-4 và
@@ -90,6 +110,26 @@ E6 xanh với 17/17 và lớp chống rỗng của nó xác nhận `config.yaml`
 Ba case thêm là của chính hồ sơ này, không phải dấu hiệu guard khác thế hệ — vòng
 verify có nêu khả năng đó như một điều cần người soi, và đây là câu trả lời: đã đối
 chiếu `KNOWN_CASES` ở commit `14b872d` với danh sách trước đó.
+
+## Amendment 2 — 2026-08-28, sau gap-probe · duyệt bởi Manh
+
+**Thu hẹp phạm vi, do gap-probe P0-1.** Câu tuyên bố trung tâm của bản duyệt Cổng 1
+— nợ 0.8 được đóng — SAI theo phép đo. Nó đóng vế `t1-escape` và không đóng vế
+staleness. Sửa là thu hẹp lời tuyên bố cho khớp thứ đo được, không phải nới tiêu
+chí cho khớp thứ đã xây: **không AC nào bị đổi, không eval nào bị nới**. Mười ba
+eval vẫn khẳng định đúng thứ chúng vẫn khẳng định; chỉ Context và Out of scope
+thôi nói quá.
+
+**Cũng ghi nhận, không vá trong hồ sơ này:** ba P0 còn lại của gap-probe (AC-5 sau
+Amendment 1 không có sàn nên tập case tự khai có thể CO lại; E12 chỉ kiểm anchor
+"phân giải được" chứ chưa kiểm "đúng"; E8/E11 khẳng định vắng mặt mà không gieo
+chứng dương) và bốn P1/P2 — tất cả chuyển sang contract kế. Dữ liệu `landed_merge`
+hiện tại đã soi tay và sạch, nên đây là nợ RĂNG chứ không phải nợ dữ liệu.
+
+**Vì sao vẫn ký thay vì mở vòng sửa:** mười ba eval xanh là thật và đo được thứ
+chúng nói; cái sai là một câu văn xuôi, và sửa câu đó rẻ hơn nhiều so với vứt cả
+gói. Nợ còn lại nay có tên, có bản ghi ledger, và có người chịu trách nhiệm mở
+contract kế — khác hẳn với việc để nó vô hình sau một dấu tích xanh.
 
 ## Notes
 
