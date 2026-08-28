@@ -1,0 +1,99 @@
+schema_version: 1
+feature_slug: ci-recheck-all
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.cra_flag_present
+    expected: >
+      exit 0; bước "Pre-merge acceptance check" của ci.yml chứa `--recheck-all`
+      VÀ chuỗi `--base "origin/${GITHUB_BASE_REF:-main}"` còn nguyên từng ký tự
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.cra_ci_log_scope
+    expected: >
+      exit 0; log job "Acceptance Gate" của lần chạy CI mới nhất trên nhánh có dòng
+      NOTE recheck-all "runs on ALL slugs", và KHÔNG có dòng
+      "NOTE: recheck scope — <N> slug ngoài diff PR không được re-check"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.cra_clean_main_no_regression
+    expected: >
+      exit 0; cổng chạy với --recheck-all trên checkout sạch của origin/main in
+      "pre-merge-check: clean", 0 VIOLATION
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.cra_positive_control
+    expected: >
+      exit 0; trên fixture có hồ sơ nửa-vời NGOÀI diff, cổng KHÔNG cờ in "clean" exit 0
+      (nửa should-NOT-fire), cổng CÓ cờ in VIOLATION nêu đúng slug đó và exit 1.
+      Eval đỏ nếu BẤT KỲ nửa nào không đúng — kể cả nửa "clean"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.cra_github_not_exempt
+    expected: >
+      exit 0; risk_tiers.t1_skip_globs KHÔNG có mục nào khớp `.github/**`.
+      Eval này phải ĐỎ nếu ai đó thêm miễn trừ để lấy màu xanh
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.cra_fetch_depth_intact
+    expected: >
+      exit 0; bước actions/checkout của job "Acceptance Gate" vẫn khai `fetch-depth: 0`
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.cra_workflow_line_isolated
+    expected: >
+      exit 0; trong phạm vi ci-recheck-all tự sở hữu (neo qua ACCEPTANCE_SLUG +
+      scripts/acceptance/own-range.sh), dòng không-phải-chú-thích DUY NHẤT đổi dưới
+      .github/workflows/ là dòng `run:` của bước gate; 0 trigger / permission / job /
+      `uses:` pin đổi
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.cra_guard_teeth
+    expected: >
+      exit 0; nhiễu bản sao workflow theo N cách (đổi trigger · thêm job · dời pin ·
+      đổi --base · xoá fetch-depth) thì guard E7 ĐỎ ở từng cách. Guard xanh trên cây
+      lành chưa chứng minh gì — răng phải cắn
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.cra_blast_radius
+    expected: >
+      exit 0; trên fixture có hồ sơ nửa-vời ở BASE và một diff PR không hề chạm hồ sơ đó,
+      cổng có cờ ĐỎ (exit 1) — chứng minh bán kính nổ đúng như đã khai ở AC-8,
+      không phải phát hiện muộn lúc vận hành
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-8
+    executor: judgment
+    question: >
+      Sau thay đổi này, sức khoẻ của `main` trở thành điều kiện để MỌI pull request xanh:
+      một hồ sơ nửa-vời trên main làm đỏ CI của cả những PR không liên quan. Với repo
+      một người, nhịp merge hiện tại và số hồ sơ đang mở, đánh đổi đó có đáng so với
+      việc giữ nguyên khoảng trống "24 slug không được re-check" không?
+    inputs: [contract.md, evals.yaml]
+    evidence_required: [judged_by, verdict, rationale]
