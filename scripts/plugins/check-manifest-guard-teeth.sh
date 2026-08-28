@@ -51,9 +51,9 @@ if ! (cd "$WORK/tree" && bash scripts/plugins/check-manifest-unmoved.sh >/dev/nu
 fi
 echo "  ok — guard is green on the real manifest"
 
-# 2. A fourth origin entry.
+# 2. One origin entry beyond the real count (a fifth, as of normalize-text-vi).
 stage "m.plugins.push({ id: 'oneflow-api-something', origin: 'https://github.com/phanlemanh' });"
-expect_red "a fourth origin entry was added"
+expect_red "one origin entry beyond the real count was added"
 
 # 3. One origin URL altered.
 stage "m.plugins.find((e) => typeof e === 'object').origin = 'https://github.com/someone-else';"

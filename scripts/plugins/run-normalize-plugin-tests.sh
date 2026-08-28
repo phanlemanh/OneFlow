@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# E17a / E17b (normalize-text-vi AC-14) — run the plugin shell's own tests.
+#
+# The shell lives in its own repository (this repo's plugins/ is gitignored and
+# populated at runtime), so measuring the REAL slot method means reaching that
+# tree. Same mechanism as run-overlay-plugin-tests.sh, and used for the same
+# reason: only the shell can prove the shell delegates.
+#
+# Prefers an already-installed plugin tree; falls back to a shallow clone. Prints
+# the plugin's commit sha either way so evidence can cite exactly what ran.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PLUGIN_ID="oneflow-api-normalize-text-vi"
+ORIGIN="https://github.com/phanlemanh"
+LOCAL="$ROOT/plugins/$PLUGIN_ID"
+
+if [ -d "$LOCAL" ]; then
+    tree="$LOCAL"
+    # `git -C` walks UP to the host repo when the plugin tree is not its own
+    # repository, which would print the OneFlow sha under a "plugin_commit_sha"
+    # label — a provenance claim about the wrong tree. Only trust the sha when
+    # the tree actually owns a .git.
+    if [ -e "$tree/.git" ]; then
+        sha="$(git -C "$tree" rev-parse HEAD)"
+    else
+        sha="local-tree-not-a-repo"
+    fi
+    echo "plugin tree: installed at plugins/$PLUGIN_ID"
+else
+    tmp="$(mktemp -d)"
+    trap 'rm -rf "$tmp"' EXIT
+    git clone --depth 1 "$ORIGIN/$PLUGIN_ID.git" "$tmp/$PLUGIN_ID" >/dev/null 2>&1 || {
+        echo "FAIL: could not clone $ORIGIN/$PLUGIN_ID.git"
+        exit 1
+    }
+    tree="$tmp/$PLUGIN_ID"
+    sha="$(git -C "$tree" rev-parse HEAD)"
+    echo "plugin tree: cloned from $ORIGIN"
+fi
+echo "plugin_commit_sha: $sha"
+
+# The SDK comes from THIS repo's source, not from PyPI: the shell under test must
+# be measured against the reader that ships in the same change, otherwise a green
+# run only proves the shell agrees with whatever version happens to be installed.
+# vietnormalizer carries the SAME pin the SDK declares — the SDK arrives via
+# PYTHONPATH, so pip never resolves sdk/pyproject.toml's own pin, and a bare
+# `--with vietnormalizer` pulled the latest from PyPI: the shell could be
+# measured against a different reader than the one shipping in this change,
+# exactly the drift the pin exists to rule out (S4 round 2 finding). Derived
+# from pyproject, not hard-coded, so a pin bump cannot silently fork the two.
+# Derived by the ONE file that knows how, not by a local sed: this script and
+# check-normalize-sdk-train-local.sh used two different regex dialects for the
+# same fact, so a pin written with spaces around `==` matched in one and not the
+# other (S4 round 7 finding). scripts/lib/sdk-version.sh already carries that
+# law for the SDK version itself.
+. "$ROOT/scripts/lib/sdk-version.sh"
+viet_pin="$(reader_pin)" || exit 1
+cd "$ROOT/sdk"
+PYTHONPATH="$ROOT/sdk" uv run --no-project \
+    --with pytest --with tomli --with pydantic --with typing_extensions \
+    --with "$viet_pin" \
+    python -m pytest -q -p no:cacheprovider "$tree/tests" "$@"

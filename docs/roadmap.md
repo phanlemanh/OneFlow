@@ -104,7 +104,7 @@ không đánh lại số cũ):
 
 - **1.1** ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
 - **1.2** ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
-- **1.3** 🔜 **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Hạng mục kế tiếp — không phụ thuộc G0; đường guard đã an toàn sau gói CI-a.*
+- **1.3** ✅ **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Ký 27/08 (PR #77). Slot ABI, logic SDK và node canvas đã lên `main`; **plugin thực thi chưa đăng ký** trong `config/official-plugins.json`, nên node kéo ra bàn làm việc được mà bấm chạy báo lỗi — ma trận năng lực README giữ ⬜ cho tới khi có plugin.*
 - **1.3b** **Node nạp-từ-kho** — giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md): search → chọn thẻ → URL ký → `file_key`. Add node không ABI-driven nên không đụng ABI/SDK; key qua kho khoá BYO; làm được trước G0. Mở khoá input cho skill #1.
 - **S3** **Transcribe không-Modal** — *chen trước 1.4, chốt 19/08*: nằm trên **hai** đường tới hạn cùng lúc (chuỗi skill #1 và phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có nó thì ngày corpus về là đo được ngay. Trong chuỗi skill #1, transcribe cũng đứng trước TTS.
 - **1.4** **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
@@ -189,9 +189,11 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `pnpm-build-approvals` | T2 | 18/08 | *ngoài lộ trình* — hạ tầng chuỗi công cụ verify |
 | `scan-with-block-imports` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
 | `scan-scope-diagnostics` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
+| `normalize-text-vi` | T3 | 27/08 | **1.3** — đọc số/giá/ngày thành chữ, bắt buộc đứng trước TTS |
+| `roadmap-drift-guard` | T2 | 27/08 | *ngoài lộ trình* — răng cho luật cập nhật của chính file này |
 
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này:** 13/21 hạng mục đã ký là năng lực sản phẩm, 8/21 là hạ tầng quy
+**Đọc được gì từ tỉ lệ này:** 14/23 hạng mục đã ký là năng lực sản phẩm, 9/23 là hạ tầng quy
 trình và CI. Con số thứ hai không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.

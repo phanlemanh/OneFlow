@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ByoKeyOnboardingProto } from "@/components/proto/byo-key-onboarding-proto";
+import { NormalizeTextViProto } from "@/components/proto/normalize-text-vi-proto";
 
 /**
  * Clickable prototype route — the object a `design-pass` session works on.
@@ -18,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 const PROTOS: Record<string, (state: string) => React.ReactNode> = {
     "byo-key-onboarding": (state) => <ByoKeyOnboardingProto state={state} />,
+    "normalize-text-vi": (state) => <NormalizeTextViProto state={state} />,
 };
 
 // Dark mode is class-based (`@custom-variant dark (&:is(.dark *))`), so the

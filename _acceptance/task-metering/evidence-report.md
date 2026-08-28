@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: d919b5eb51a0a3dfa70b5718113c935b39099ab0
+verified_commit: bee578e120584402211a6c38577f324c040e995b
 human_signoff: Manh 2026-08-07
 ---
 
@@ -213,6 +213,6 @@ Round 1 (re-verification after upstream code change)
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (n/a — verdict is PASS)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
 
-### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
-run_id: repin-task-metering-20260827T101500Z
-sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 5 lệnh exit 0
+### Re-pin lần 1 — 2026-08-28, do gỡ `paths` khỏi ba eval thường trực (`pnpm test`, `build && typecheck`, `biome check .`) — feature về whole-tree cho trung thực; chạm `_acceptance/<slug>/` là mở lại phép soi staleness nên phải re-pin cùng lượt. Mã của gói không đổi một byte
+run_id: repin-task-metering-20260828T043000Z
+sha: bee578e120584402211a6c38577f324c040e995b · suites: 5 lệnh exit 0

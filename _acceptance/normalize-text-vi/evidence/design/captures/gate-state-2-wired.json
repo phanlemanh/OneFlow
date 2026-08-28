@@ -1,0 +1,106 @@
+{
+  "run_id": "design-gate-295f112343",
+  "verifier": "scripts/design-gate.mjs (vendored Impeccable detector)",
+  "verified_at": "2026-08-26T01:31:15.491Z",
+  "target": "_acceptance/normalize-text-vi/evidence/design/captures/state-2-wired.html",
+  "fail_on": [
+    "P0"
+  ],
+  "mode": "dom",
+  "verdict": "PASS",
+  "exit_code": 0,
+  "p0_count": 0,
+  "blocking": [],
+  "hits": [
+    "cramped-padding",
+    "nested-cards",
+    "flat-type-hierarchy",
+    "gradient-text"
+  ],
+  "findings": [
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "0px vertical padding (need ≥4.8px for 16px text)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"h-screen\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"react-flow\": children flush against border+bg on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"rounded-md\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"relative\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"p-4\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"bg-card\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "nested-cards",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "Card inside card"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"space-y-2\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<span>: children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "cramped-padding",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "<div> \"flex\": children flush against border on all sides (no inset)"
+    },
+    {
+      "rule": "flat-type-hierarchy",
+      "severity": "warning",
+      "pTier": "P2",
+      "detail": "Sizes: 10px, 16px, 18.7px (ratio 1.9:1)"
+    },
+    {
+      "rule": "gradient-text",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "background-clip: text + gradient"
+    },
+    {
+      "rule": "gradient-text",
+      "severity": "warning",
+      "pTier": "P1",
+      "detail": "bg-clip-text + bg-gradient (Tailwind)"
+    }
+  ]
+}
