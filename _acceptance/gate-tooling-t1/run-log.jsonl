@@ -10,3 +10,4 @@
 {"ts":"2026-08-27T15:40:18Z","round":1,"evalId":"E10","run_id":"gate-tooling-t1-E10-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-no-stale-empty-diff.sh"}
 {"ts":"2026-08-27T15:40:24Z","round":1,"evalId":"E11","run_id":"gate-tooling-t1-E11-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-no-golden-claim.sh"}
 {"ts":"2026-08-27T15:40:24Z","round":1,"evalId":"E12","run_id":"gate-tooling-t1-E12-20260827T154024Z","exit_code":0,"cmd":"bash scripts/acceptance/check-landed-merge-repinned.sh"}
+{"ts":"2026-08-28T05:45:00Z","kind":"repin","run_id":"repin-gate-tooling-t1-20260828T054500Z","sha":"8512c6e98c48ab3f4cab75dafa9493a0b1e36868","suites_exit":[0,0,0,0,0,0,0,0,0,0,0,0]}

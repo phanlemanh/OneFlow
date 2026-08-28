@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: f9783e012dc0dfbd537d0dda9dfcbd0c466aab47
+verified_commit: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868
 human_signoff: Manh 2026-08-28
 ---
 
@@ -251,3 +251,7 @@ cứng; nội dung khẳng định không đổi, nên báo cáo này vẫn ch�
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (this write is when
       the hook re-validates evidence + overrides)
 - [ ] Fill `human_signoff` in frontmatter
+
+### Re-pin lần 1 — 2026-08-28, do merge `origin/main` (6516eaa) mang vào thay đổi gated dưới `scripts/`; chữ ký Cổng 2 ngày 28/08 GIỮ NGUYÊN — lane mới chỉ chuyển mốc ghim, không phán quyết lại
+run_id: repin-gate-tooling-t1-20260828T054500Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 12 lệnh exit 0
