@@ -300,7 +300,15 @@ def _is_brand_token(token: str) -> bool:
 _URL = re.compile(r"(?i)\b(?:https?://|ftp://|www\.)\S+")
 
 
-_DASH_RUN = re.compile(r"\d+(?:-\d+)+")
+# Anchored so a run cannot START in the middle of a number. Vietnamese groups
+# thousands with a DOT, and this scan reads the raw input, so an unanchored
+# pattern matched the FRAGMENT "000-2" inside "Giá 1.000-2.000 đồng" — three
+# leading zeros then a single digit, which trips the leading-zero signal below
+# and refused a price the reader had already read CORRECTLY ("giá một nghìn
+# đến hai nghìn đồng"). Worse, the refusal named "000-2", a token the user
+# never typed. Measured S4 round 4; dotted price ranges are the commonest shape
+# this slot exists to read.
+_DASH_RUN = re.compile(r"(?<![\d.])\d+(?:-\d+)+")
 
 
 def _unreadable_dash_runs(text: str) -> tuple[str, ...]:

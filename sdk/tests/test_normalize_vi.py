@@ -8,6 +8,7 @@ corpus that can no longer catch the library.
 
 from __future__ import annotations
 
+import sys
 import unicodedata
 
 from tongflow.text.normalize_vi import (
@@ -656,17 +657,36 @@ def test_every_refusal_carries_a_code() -> None:
 #   "Giá 5–10 triệu" -> "giá năm THÁNG mười triệu"   (read as a date)
 #   "Giá 5%–10%"     -> "giá năm phần trăm mười phần trăm"  ("đến" gone)
 #   "Nhiệt độ −7 độ" -> "nhiệt độ -bảy độ"  (the dash reached the speech)
-DASH_CHARS: dict[str, str] = {"en": "\u2013", "em": "\u2014", "minus": "\u2212"}
+# The character axis is read out of the IMPLEMENTATION, not retyped. A fourth
+# typographic dash added to `_TYPOGRAPHIC_DASHES` without cases is then red by
+# name, instead of a matrix that quietly stays "complete" because it was
+# generated from its own axis (S4 round 4 finding: the cells were built by a
+# comprehension over DASH_CHARS × DASH_ROLES and then asserted against those
+# same two dicts, so `missing` was the empty list by construction and no change
+# whatsoever could turn the measure red).
+DASH_CHARS: dict[str, str] = {
+    unicodedata.name(ch).split()[0].lower(): ch
+    for ch in sys.modules["tongflow.text.normalize_vi"]._TYPOGRAPHIC_DASHES
+}
 DASH_ROLES: dict[str, str] = {
     "khoảng số": "Giá 5{d}10 triệu",
     "khoảng có đơn vị": "Giá 5%{d}10%",
     "âm": "Nhiệt độ {d}7 độ",
 }
 
+# WRITTEN OUT, one line per cell — deliberately not a comprehension. This is the
+# case list the completeness assert measures; generating it from the axes is
+# what made that assert vacuous. Deleting a line here is red by name.
 TYPOGRAPHIC_DASH_MATRIX: dict[tuple[str, str], str] = {
-    (dash_name, role_name): template.format(d=dash)
-    for dash_name, dash in DASH_CHARS.items()
-    for role_name, template in DASH_ROLES.items()
+    ("en", "khoảng số"): "Giá 5\u201310 triệu",
+    ("en", "khoảng có đơn vị"): "Giá 5%\u201310%",
+    ("en", "âm"): "Nhiệt độ \u20137 độ",
+    ("em", "khoảng số"): "Giá 5\u201410 triệu",
+    ("em", "khoảng có đơn vị"): "Giá 5%\u201410%",
+    ("em", "âm"): "Nhiệt độ \u20147 độ",
+    ("minus", "khoảng số"): "Giá 5\u221210 triệu",
+    ("minus", "khoảng có đơn vị"): "Giá 5%\u221210%",
+    ("minus", "âm"): "Nhiệt độ \u22127 độ",
 }
 
 # Compound words are the case the fold must NOT touch: the library writes real
@@ -695,6 +715,16 @@ def test_dash_matrix_has_no_silently_empty_cell() -> None:
         and (d, r) not in DELIBERATELY_UNCOVERED_DASH_CELLS
     ]
     assert missing == [], f"ô ma trận gạch kiểu chữ còn trống: {missing}"
+
+    # ...and the other way. A case for a character the implementation no longer
+    # folds is a case measuring nothing, and it would otherwise sit here looking
+    # like coverage.
+    stray = [
+        (d, r) for (d, r) in TYPOGRAPHIC_DASH_MATRIX if d not in DASH_CHARS
+    ]
+    assert stray == [], (
+        f"ma trận có ô cho ký tự mà bản cài đặt không còn gấp: {stray}"
+    )
 
 
 def test_typographic_dashes_read_as_ascii() -> None:
@@ -1441,6 +1471,31 @@ CORPUS_DASH_REFUSED: tuple[tuple[str, str, str], ...] = (
     ("mã có số 0 đứng đầu", "Mã 0123-4567 đã giao", "0123-4567"),
 )
 
+# The negative half of the dash rule, and it carries the same weight as the
+# positive half. The scan reads the RAW input, where Vietnamese groups thousands
+# with a DOT, so an unanchored pattern matched the FRAGMENT "000-2" inside
+# "Giá 1.000-2.000 đồng": three leading zeros then one digit, which trips the
+# leading-zero signal. The reader had already produced the CORRECT sentence
+# ("giá một nghìn đến hai nghìn đồng") and the post-check overrode it, naming a
+# token the user never typed (S4 round 4). Dotted price ranges are the
+# commonest shape this slot exists to read, so a false refusal here fails the
+# voice chain on ordinary catalogue copy.
+CORPUS_DOTTED_RANGE_READS: tuple[tuple[str, str], ...] = (
+    ("Giá 1.000-2.000 đồng", "giá một nghìn đến hai nghìn đồng"),
+    ("Khoảng 10.000-20.000 người", "khoảng mười nghìn đến hai mươi nghìn người"),
+)
+
+
+def test_dotted_thousand_ranges_are_not_refused() -> None:
+    for raw, expected in CORPUS_DOTTED_RANGE_READS:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"{raw!r}: đọc ra ĐÚNG ({got.text!r}) mà vẫn bị từ chối vì "
+            f"{got.residual} — cụm đó không phải thứ người dùng gõ"
+        )
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
 # STILL a limit, and the reason is structural rather than an oversight: two
 # groups with no leading zero is indistinguishable from a real range, and
 # refusing it would take "Giá 5-10 triệu" — the shape the range rule exists for.
@@ -1663,6 +1718,7 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
     ("CORPUS_DASH_REFUSED", CORPUS_DASH_REFUSED),
+    ("CORPUS_DOTTED_RANGE_READS", CORPUS_DOTTED_RANGE_READS),
     ("CORPUS_SLASH_REFUSED", CORPUS_SLASH_REFUSED),
     ("CORPUS_SLASH_NEGATIVE", CORPUS_SLASH_NEGATIVE),
     ("CORPUS_DAY_WORD_KEPT", CORPUS_DAY_WORD_KEPT),
