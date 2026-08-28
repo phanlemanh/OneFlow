@@ -43,6 +43,14 @@ evals:
       chuỗi) phải nằm trong danh sách bỏ-có-tên với lý do đã khai ở Known limits
       hợp đồng gốc (chặn ở đó sẽ giết luôn 'Giá 500 đ'). Chiều đỏ: xoá một ô khỏi
       ma trận → đỏ nêu đúng tên ô, không chỉ exit code.
+      SỬA PHÉP ĐO Ở S4 VÒNG 6: assert `missing == []` là HẰNG ĐÚNG — ô được SINH
+      bằng comprehension trên đúng hai trục mà nó rồi đi kiểm, nên vế trái và vế
+      phải là cùng một tập và không thay đổi nào làm nó đỏ được. Nhưng bằng chứng
+      AC-11 KHÔNG rỗng: phép đo hành vi bên cạnh (mỗi ô phải TỪ CHỐI nêu tên) có
+      răng thật. Chỗ hổng là TRỤC không suy từ bản cài đặt. Nay thêm quan hệ
+      TRỤC ↔ BẢN CÀI ĐẶT: mọi dấu ngăn khai trong bộ ca phải được chính `_SEP`
+      coi là dấu ngăn, và ô 'không có' phải là khoảng trống RỖNG. Chiều đỏ đã
+      chứng minh: thu hẹp `_SEP` về [ \t] → đỏ nêu đúng 'xuống dòng'.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E3
@@ -59,6 +67,14 @@ evals:
       không phải danh sách chép tay — nếu không, thêm mục mới vào từ điển sẽ
       không làm phép đo đỏ. Hôm nay 6/11 mục chưa có ca nào. Chiều đỏ: thêm một
       mục từ điển mà không thêm ca → đỏ nêu đúng tên mục thiếu ca.
+      SỬA PHÉP ĐO Ở S4 VÒNG 6: assert "mục nào cũng là khoá của ma trận" là HẰNG
+      ĐÚNG, vì ca được sinh TỪ CHÍNH từ điển. Nhưng việc sinh đó là thiết kế đã
+      khai và ĐÚNG — viết tay lại sẽ phá nó, vì khi ấy thêm mục mới không còn tự
+      được phủ. Nên giữ nguyên cách sinh, và thay assert vô nghĩa bằng một quan
+      hệ CÓ THỂ hỏng: mỗi ca phải CHỨA chính mục nó khai là đang đo. Không phải
+      giả định — khuôn tiền tố đã có nhánh rẽ theo `src`, một lần sửa khuôn là đủ
+      để ca rời khỏi mục nó mang tên. Chiều đỏ đã chứng minh: sửa khuôn ca dương
+      → đỏ nêu đúng 'TP.HCM'.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ─── Nhóm A: lỗ hổng lớp ký tự / hình dạng
