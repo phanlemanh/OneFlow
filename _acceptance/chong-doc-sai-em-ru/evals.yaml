@@ -185,26 +185,6 @@ evals:
       đúng đường đó.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
-  - id: E11
-    criterion: AC-6
-    executor: script
-    cmd: config:executors.script.normalize_registration_synced
-    paths:
-      - "src/i18n/messages/**"
-      - "src/lib/task/engine-delegate.server.ts"
-      - "src/components/workspace/nodes/base/abi-node-shell.tsx"
-    layer: backend-effect
-    expected: >-
-      exit 0; đủ 5 locale có khoá cho CẢ BA mã lỗi; dây render đo bằng grep tĩnh
-      khai sàn tường minh: nơi nhận mã đọc khoá i18n. Chiều đỏ BẮT BUỘC (assert
-      âm tính phải có đối chứng dương): xoá khoá của MỘT mã ở MỘT locale trong
-      bản sao → đỏ nêu đúng locale và đúng mã. Đây là phép đo KHAI BÁO; phép đo
-      ĐẦU RA THẬT là E15 — grep tĩnh không thể thấy câu tiếng Việt đi ra mặt
-      người qua BIẾN lúc chạy.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  # E12 HOÃN cùng AC-7 sang hạng mục 1.4 (bước dò T0, 2026-08-27): không plugin
-  # nào nói được tiếng Việt nên ảnh chụp bộ chọn không chứng minh được gì cho người dùng.
   - id: E12
     criterion: AC-7
     executor: ui-check
@@ -271,42 +251,6 @@ evals:
 
   # ─── Hai ô thêm sau phản biện context sạch (2026-08-27): F1 và F3 cùng một lớp
   # lỗi — "hàm đúng, quên chỗ gọi". Phép đo khai báo không thay được phép đo đầu ra.
-  - id: E15
-    criterion: AC-6
-    executor: test
-    cmd: config:executors.test.unit_normalize_error_i18n_render
-    paths:
-      - "src/lib/normalize/**"
-      - "src/components/workspace/task-failure-toaster.tsx"
-      - "src/types/sse.ts"
-      - "config/tongflow.abi.json"
-      - "src/i18n/messages/**"
-    layer: backend-effect
-    expected: >-
-      exit 0; đo ĐẦU RA THẬT chứ không phải khai báo. Ép locale ≠ vi (en và ja),
-      chạy hai đường từ chối THẬT qua đúng dây sản phẩm — chuỗi rỗng
-      (EMPTY_INPUT) và 'Giá 50.000 đ/kg' (RESIDUAL_TOKENS) — rồi assert QUAN HỆ:
-      chuỗi hiển thị BẰNG giá trị khoá i18n của locale đó, VÀ không chứa ký tự có
-      dấu tiếng Việt nào ngoài danh sách trắng. Lý do phải có ô này: grep tĩnh
-      của E11 chỉ thấy literal trong mã; câu tiếng Việt đi ra mặt người qua BIẾN
-      lúc chạy (ví dụ `err.message ?? t(err.code)`, hoặc `detail: result.error`)
-      thì E10 và E11 đều xanh mà người dùng en/ja vẫn đọc tiếng Việt — cùng lớp
-      "hàm đúng, quên chỗ gọi" [normalize-text-vi#F1]. Chiều đỏ: nối lại
-      `result.error` vào chỗ hiển thị trong bản sao → đỏ nêu ĐÚNG mã lỗi và ĐÚNG
-      locale.
-      (sửa lời khai S4 vòng 1, 2026-08-28) Lệnh chạy CẢ THƯ MỤC, nên nó nay cũng
-      mang bước mà vòng 1 chứng minh là còn thiếu: từ TIN BÁO thất bại của máy
-      chủ ra được lời từ chối. Vòng 1 xanh cả hai phép đo dựng câu trong khi câu
-      đó KHÔNG BAO GIỜ hiện ra — đoạn trích đọc `outputs` như một mảng, mà không
-      bên gửi nào gửi mảng. Ba việc thêm: (1) đo hai khuôn tin báo thật (tác vụ
-      một node gửi thẳng kết quả slot; tác vụ luồng gửi object khoá theo node
-      id); (2) ghim chính khuôn dây đó trong `src/types/sse.ts`, để nếu nó đổi
-      thì đỏ ở đây chứ không âm thầm tắt đường hiển thị; (3) fixture dựng TỪ ABI
-      — gỡ `residual` khỏi hợp đồng thì cả ba file test đỏ và NÊU TÊN trường,
-      thay vì xanh mãi nhờ một khuôn bịa. Cộng đường từ chối THỨ HAI
-      (EMPTY_INPUT, không có cụm nào để liệt kê) đúng như lời khai vẫn nói.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
   - id: E16
     criterion: AC-12
     executor: test

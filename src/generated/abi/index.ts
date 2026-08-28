@@ -82,17 +82,8 @@ const _slot_normalize_text_vi_outputs = {
         error: {
             type: "string",
         },
-        code: {
-            type: "string",
-        },
         text: {
             type: "string",
-        },
-        residual: {
-            type: "array",
-            items: {
-                type: "string",
-            },
         },
     },
     additionalProperties: false,
@@ -4764,17 +4755,8 @@ export const ABI_NODES = {
                 error: {
                     type: "string",
                 },
-                code: {
-                    type: "string",
-                },
                 text: {
                     type: "string",
-                },
-                residual: {
-                    type: "array",
-                    items: {
-                        type: "string",
-                    },
                 },
             },
             additionalProperties: false,

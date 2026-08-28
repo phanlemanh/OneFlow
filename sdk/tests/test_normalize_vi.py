@@ -452,11 +452,25 @@ CORPUS_SLASH_REFUSED: tuple[tuple[str, str], ...] = (
     ("ngày kiểu Mỹ, không có chữ ngày", "12/25/2026"),
 )
 
-# ...and the slashes the library DOES read. Flagging these would reject correct
-# output, which is the failure direction the residual rule must never take.
+# ...and the slashes that must NOT be flagged. Two different reasons, both real:
+#
+#  - the library reads some of them into words ("100km/h"), so no slash survives;
+#  - ordinary prose slashes were never a number, and a rule watching only the
+#    OUTPUT refused all of them. Measured at S4 round 2: "và/hoặc", "TP/HCM",
+#    "nam/nữ", "N/A" every one came back ok=False naming "/" while the speech
+#    string was already correct. A false refusal blocks the whole voice chain
+#    over text carrying no number at all, so these carry the same weight as the
+#    positive cases.
 CORPUS_SLASH_NEGATIVE: tuple[tuple[str, str], ...] = (
     ("Tốc độ 100km/h", "tốc độ một trăm ki lô mét trên giờ"),
     ("Giá 5/3 triệu", "giá năm tháng ba triệu"),
+    ("và/hoặc là được", "và/hoặc là được"),
+    # Measured, not guessed: the library spells the letters out rather than
+    # expanding the abbreviation. Either reading is speakable; what matters for
+    # AC-10 is that it is NOT refused.
+    ("TP/HCM đông quá", "tê pê/hát xê em đông quá"),
+    ("Giới tính nam/nữ", "giới tính nam/nữ"),
+    ("Trạng thái N/A", "trạng thái n/a"),
 )
 
 # The written "ngày" must SURVIVE when the date is not readable — dropping it was

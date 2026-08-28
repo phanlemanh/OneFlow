@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { OUTPUT_META_FIELDS } from "@/lib/abi/handle-introspect";
 import { MIN_SUPPORTED_ABI_VERSION } from "@/lib/schema/abi-version";
 import tongflowAbi from "../../../config/tongflow.abi.json";
 
@@ -65,12 +64,7 @@ export function resolveAbiOutputMappings(
     const routes: ResolvedOutputRoute[] = [];
 
     for (const [field, schema] of Object.entries(properties)) {
-        // The protocol-level fields, read from the ONE set that defines them.
-        // They were retyped here, so adding "code" to the ABI gave the exporter
-        // an output route the canvas did not have — measured 2026-08-28. A
-        // second spelling of a closed set is the drift this repo keeps paying
-        // for; there is now one spelling.
-        if (OUTPUT_META_FIELDS.has(field)) {
+        if (field === "success" || field === "error" || field === "thinking") {
             continue;
         }
 

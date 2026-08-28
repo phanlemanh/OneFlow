@@ -964,13 +964,6 @@
                 "endLabel": "終了（秒）",
                 "editOp": "オペを編集",
                 "removeOp": "オペを削除"
-            },
-            "normalizeErrors": {
-                "normalizeTextVi": {
-                    "EMPTY_INPUT": "読み上げる内容がありません — テキストが空です。",
-                    "RESIDUAL_TOKENS": "読み取れませんでした：{tokens}。テキストは音声に渡していないため、誤読は発生しません。",
-                    "MONEY_UNIT_LOST": "金額の単位が読み上げ中に失われたため、テキストを音声に渡していません。"
-                }
             }
         },
         "firstRun": {

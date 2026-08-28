@@ -161,17 +161,8 @@
                     "error": {
                         "type": "string"
                     },
-                    "code": {
-                        "type": "string"
-                    },
                     "text": {
                         "type": "string"
-                    },
-                    "residual": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
                     }
                 },
                 "additionalProperties": false

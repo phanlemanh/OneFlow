@@ -60,12 +60,32 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   *(Hôm nay 6/11 mục chưa có ca nào — `VNDirect` → "đồngirect" và `H.264` → "huyện 264" đều
   từng lọt đúng vì thiếu ca âm.)*
 
-- AC-6: (cross-layer) Given bộ đọc từ chối một chuỗi, When lỗi hiện cho người dùng, Then thông
-  điệp hiển thị **theo ngôn ngữ của người dùng**, không phải tiếng Việt cứng trong SDK.
-  *Hôm nay `normalize_vi()` trả câu tiếng Việt trong trường `error` và nó đi thẳng ra giao
-  diện ở cả 5 locale. Trái ngay với khuôn mà chính nhánh gốc dựng cho cảnh báo xuất bản: mã
-  máy đọc được + câu người sống trong 5 file ngôn ngữ. Hướng: mã ổn định
-  (`EMPTY_INPUT` / `RESIDUAL_TOKENS` / `MONEY_UNIT_LOST`) + khoá i18n; `error` để cho log.*
+- AC-6: (sdk) **THU HẸP tại S4 vòng 2, 2026-08-28 — owner chọn ngả (b)**. Given bộ đọc từ chối
+  một chuỗi, When nó trả kết quả, Then mỗi đường từ chối mang một **mã ổn định máy đọc được**
+  (`EMPTY_INPUT` / `RESIDUAL_TOKENS` / `MONEY_UNIT_LOST`) kèm danh sách cụm chặn; câu tiếng Việt
+  trong `error` chỉ còn để cho log. *Nửa này đo bằng E10, hai chiều: không mã lạ, không mã khai
+  mà không đường nào sinh.*
+
+  **Nửa hiển thị — "câu theo ngôn ngữ người dùng" — HOÃN, ở lại trong hạng mục 1.3.** Không phải
+  vì khó, mà vì hai điều kiện tiên quyết nằm ngoài phạm vi hồ sơ này và **đo được**:
+
+  1. **Không có bên GHI để đo ngược.** Plugin `normalize-text-vi` đã bị **rút khỏi manifest**
+     ngày 2026-08-26 (repo mà `origin` của nó trỏ tới không tồn tại công khai). Không plugin nào
+     phục vụ slot này, nên đường plugin → câu chưa từng chạy thật được lần nào, và mọi fixture
+     buộc phải bịa. Đo tại S4 vòng 2: fixture tôi dựng khai `residual = ('đ', '/')` trong khi
+     bên ghi thật trả `('/',)` — ba file kiểm đồng thuận với nhau về một khuôn chưa từng tồn tại.
+  2. **Máy chạy luồng chủ động vứt mã.** `sdk/tongflow/engine/runner.py:540` đổi node
+     `success=False` thành `RuntimeError(str(error))`, và dòng `raise` nằm **trên** dòng ghi
+     `node_outputs[node_id]`. Nên với mọi lượt chạy cả luồng — cách dùng bình thường của node
+     này — `code` và `residual` bị nuốt thành một chuỗi trước khi tới giao diện. Sửa việc đó là
+     chạm `sdk/**`: đường t3, kéo cả hồ sơ lên T3 kèm một chuyến phát hành SDK, mà executor đã
+     triển khai thì ghim `tongflow` lúc cấp phát và không tự trôi lên.
+
+  Hai lần thử đóng nửa này ở S4 (vòng 1 và vòng 2) đều tái hiện **cùng một lớp lỗi** — câu dựng
+  đúng, chỗ gọi không bao giờ chạy — nên điều khoản dừng-vá kích hoạt và owner chốt thu hẹp.
+  Văn bản gốc giữ lại làm sử liệu: *(cross-layer)* Given bộ đọc từ chối một chuỗi, When lỗi hiện
+  cho người dùng, Then thông điệp hiển thị **theo ngôn ngữ của người dùng**, không phải tiếng
+  Việt cứng trong SDK.
 
 - AC-7: ~~(web-ui)~~ **HOÃN SANG HẠNG MỤC 1.4** *(bước dò T0, 2026-08-27 — điều kiện đảo
   chiều owner ký sẵn ở Gate 1.5 đã kích hoạt)*. Đo được hai dữ kiện: plugin TTS duy nhất
@@ -109,6 +129,12 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
   đúng thành "ki lô mét trên giờ", nên đây là lỗ hổng theo ca chứ không phải toàn bộ.*
   *Đây cũng là cơ chế khiến AC-9 im lặng: khi thư viện parse hụt, thứ nó bỏ lại là `/`, không
   phải chữ số, nên lớp hậu kiểm — vốn chỉ soi `[0-9₫%]` — hoàn toàn mù.*
+  **Luật này QUAN HỆ, không phải hình dạng** *(sửa tại S4 vòng 2)*: đòi cả hai nửa — đầu RA còn
+  dấu gạch chéo **và** đầu VÀO có dấu gạch chéo sát chữ số, dấu phần trăm, hoặc ký hiệu tiền
+  theo sau chữ số. Bản chỉ soi đầu ra từ chối cả văn xuôi thường: `và/hoặc`, `TP/HCM`, `nam/nữ`,
+  `N/A` đều ra `ok=False` trong khi chuỗi đọc đã đúng — một lần từ chối oan chặn cả dây giọng
+  đọc trên đoạn văn không có lấy một con số. Đây đúng khuôn mà luật dấu hai chấm của hợp đồng
+  gốc đã phải sửa vì cùng lý do; ca âm nay nặng ngang ca dương trong bộ ca.
 
 - AC-11: (đo lường) Given họ ca "Đ nhập nhằng" *(kéo vào từ triage chữ ký Cổng 2 hợp đồng
   gốc, owner 2026-08-27)*, When khai bộ ca, Then bộ ca là **ma trận khai-trước** hai trục
@@ -133,7 +159,7 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 - **Trục ký tự**: gạch kiểu chữ (AC-1) · dấu phân cách trong URL/đường dẫn (AC-2)
 - **Trục hình dạng dễ nhầm**: `số-gạch-số` không phải khoảng (AC-3) · token La-tinh (AC-4)
 - **Trục phủ từ điển**: mọi mục có ca dương + ca âm (AC-5)
-- **Trục người đọc**: thông điệp lỗi theo ngôn ngữ người dùng (AC-6) · ~~khai được tiếng Việt (AC-7 — HOÃN sang 1.4, xem AC-7)~~ **ô này CỐ Ý TRỐNG ở hồ sơ này**
+- **Trục người đọc**: mã từ chối ổn định máy đọc được (AC-6, nửa SDK) · ~~thông điệp theo ngôn ngữ người dùng (AC-6, nửa hiển thị — HOÃN, ở lại 1.3, xem AC-6)~~ · ~~khai được tiếng Việt (AC-7 — HOÃN sang 1.4, xem AC-7)~~ **hai ô sau CỐ Ý TRỐNG ở hồ sơ này**
 - **Trục hậu kiểm mù**: token thư viện bỏ lại KHÔNG phải chữ số nên lớp hậu kiểm không thấy —
   dấu gạch chéo còn sót trong đầu ra (AC-10) · ngày khớp hình dạng nhưng thư viện không parse
   được (AC-9). *Đây là cơ chế trung tâm nêu ở §Vì sao có hợp đồng này; thiếu trục này thì một

@@ -104,7 +104,7 @@ không đánh lại số cũ):
 
 - **1.1** ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
 - **1.2** ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
-- **1.3** 🔜 **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Hạng mục kế tiếp — không phụ thuộc G0; đường guard đã an toàn sau gói CI-a.*
+- **1.3** 🚧 **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Hồ sơ gốc đã ký 21/08; hồ sơ chống-đọc-sai kế tiếp. **Còn mở trong hạng mục này:** câu từ chối hiển thị theo ngôn ngữ người dùng — thu hẹp khỏi `chong-doc-sai-em-ru` ngày 28/08 (owner chọn ngả b) vì hai điều kiện tiên quyết đo được: chưa plugin nào phục vụ slot (bản cũ rút khỏi manifest 26/08), và `sdk/tongflow/engine/runner.py` đổi node `success=False` thành chuỗi lỗi trước khi ghi `node_outputs`, nuốt mất mã máy đọc được. Sửa nửa sau là đường t3.*
 - **1.3b** **Node nạp-từ-kho** — giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md): search → chọn thẻ → URL ký → `file_key`. Add node không ABI-driven nên không đụng ABI/SDK; key qua kho khoá BYO; làm được trước G0. Mở khoá input cho skill #1.
 - **S3** **Transcribe không-Modal** — *chen trước 1.4, chốt 19/08*: nằm trên **hai** đường tới hạn cùng lúc (chuỗi skill #1 và phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có nó thì ngày corpus về là đo được ngay. Trong chuỗi skill #1, transcribe cũng đứng trước TTS.
 - **1.4** **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
@@ -181,6 +181,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `compose-overlay` | T3 | 02/08 | **1.2** — slot overlay text/giá/logo/safe-zone |
 | `local-cpu-plugins` | T2 | 06/08 | **S2** — làn local-first ([ADR-0011](adr/0011-local-first-execution.md)) |
 | `byo-key-onboarding` | T3 | 19/08 | **S4** — làn local-first: UX BYO key lượt chạy đầu; mở khoá phép đo điều kiện đảo chiều ADR-0011 |
+| `normalize-text-vi` | T3 | 21/08 | **1.3** — slot/node đọc số-giá-ngày tất định, bắt buộc đứng trước TTS |
 | `dependency-refresh-2026-07` | T2 | 26/07 | *ngoài lộ trình* — bảo trì phụ thuộc |
 | `ci-actions-bump` | T2 | 26/07 | *ngoài lộ trình* — hạ tầng CI |
 | `stale-scope-by-paths` | T2 | 28/07 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu |

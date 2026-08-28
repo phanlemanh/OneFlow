@@ -5,7 +5,6 @@ import type { ErrorToastAction } from "@/components/ui/error-toast";
 import { showErrorToast } from "@/components/ui/error-toast";
 import { TaskStatus, WorkflowStatus } from "@/constants/task-status";
 import { getClientTranslator } from "@/i18n/client";
-import { normalizeRefusalFromTaskData } from "@/lib/normalize/error-copy";
 import type { FailureAction } from "@/lib/onboarding/failure-actions";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { SerializedWorkflowFailure } from "@/lib/task/error-envelope";
@@ -65,10 +64,6 @@ export function TaskFailureToaster() {
 
     useEffect(() => {
         const t = getClientTranslator("Workspace.toast");
-        // The reader-refusal catalogue: one bucket, one key per stable code.
-        const tNormalize = getClientTranslator(
-            "Workspace.nodes.normalizeErrors.normalizeTextVi",
-        );
 
         const handle = (event: CustomEvent<SSEMessage>) => {
             const message = event.detail;
@@ -95,24 +90,6 @@ export function TaskFailureToaster() {
 
             const data = message.data;
             const errorText = taskErrorFromSSE(message);
-
-            // A reader refusal carries a stable code, so the sentence the user
-            // reads comes from their own locale catalogue rather than from the
-            // SDK's Vietnamese `error` string (AC-6 of chống-đọc-sai-êm-ru).
-            // Read off the OUTPUTS, never by matching the sentence: the wording
-            // is a log artefact, the code is the contract. The two SSE
-            // producers emit different shapes; the extraction owns that.
-            const refusal = normalizeRefusalFromTaskData(data);
-            if (refusal) {
-                showErrorToast({
-                    title: t("taskFailed"),
-                    message: tNormalize(refusal.code, {
-                        tokens: refusal.tokens,
-                    }),
-                    id: `task-failed:${taskId}`,
-                });
-                return;
-            }
             const detail = buildTaskErrorDetail({
                 message: errorText,
                 errors: data?.errors as string[] | undefined,

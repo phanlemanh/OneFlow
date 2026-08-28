@@ -333,13 +333,29 @@ _RESIDUAL = re.compile(
     # there should be none left; keeping them here is the tooth that makes
     # removing the fold a RED test instead of a silent regression.
     rf"|[{_TYPOGRAPHIC_DASHES}]"
-    # A SLASH the library did not turn into words. It reads the ones it knows
-    # ("100km/h" -> "ki lô mét trên giờ"), so a surviving "/" means it gave up:
-    # "Giá 50.000 đ/kg" -> "…đồng/kg" and "Lãi 5%/năm" -> "…phần trăm/năm", both
-    # ok=True with an empty residual before this (AC-10). It is also what makes a
-    # half-parsed date silent — the library leaves a slash, not a digit, so a
-    # post-check watching only [0-9₫%] is blind to it (AC-9).
-    rf"|/"
+)
+
+# A SLASH the library did not turn into words. It reads the ones it knows
+# ("100km/h" -> "ki lô mét trên giờ"), so a surviving "/" can mean it gave up:
+# "Giá 50.000 đ/kg" -> "…đồng/kg" and "Lãi 5%/năm" -> "…phần trăm/năm", both
+# ok=True with an empty residual before this (AC-10). It is also what makes a
+# half-parsed date silent — the library leaves a slash, not a digit, so a
+# post-check watching only [0-9₫%] is blind to it (AC-9).
+#
+# Decided RELATIONALLY, exactly like the clock colon above and for the same
+# reason. Watching the output alone refused ordinary prose that was never a
+# number: "và/hoặc", "TP/HCM", "nam/nữ", "N/A" all came back ok=False naming
+# "/" while the speech string was already correct (S4 round 2 finding). What
+# separates the two families is the INPUT — a number-related slash sits against
+# a digit, a percent sign, or a currency mark that itself follows digits. Both
+# halves are required: a surviving slash in the OUTPUT *and* a numeric slash in
+# the INPUT.
+_NUMERIC_SLASH_IN = re.compile(
+    rf"\d{_SEP}*/"
+    rf"|%{_SEP}*/"
+    rf"|₫{_SEP}*/"
+    rf"|(?<=\d){_SEP}*(?i:đ)\.?{_SEP}*/"
+    rf"|/{_SEP}*\d"
 )
 
 # The colon left over from a MANGLED CLOCK, decided relationally instead of by
@@ -505,6 +521,8 @@ def normalize_vi(text: str) -> NormalizeResult:
     residual = tuple(dict.fromkeys(m.group(0) for m in _RESIDUAL.finditer(out)))
     if _COLON_BETWEEN_WORDS.search(out) and _CLOCK_IN.search(text):
         residual = residual + (":",)
+    if "/" in out and _NUMERIC_SLASH_IN.search(unicodedata.normalize("NFC", text)):
+        residual = residual + ("/",)
     # Relational, like the clock-colon rule above: decided on the INPUT, because
     # the output is lower-cased and the capital that makes "<số> Đ <TênHoa>"
     # ambiguous is gone by then.

@@ -1050,13 +1050,6 @@
                 "endLabel": "Kết thúc (giây)",
                 "editOp": "Sửa op",
                 "removeOp": "Xoá op"
-            },
-            "normalizeErrors": {
-                "normalizeTextVi": {
-                    "EMPTY_INPUT": "Không có gì để đọc — chuỗi rỗng.",
-                    "RESIDUAL_TOKENS": "Chưa đọc được: {tokens}. Văn bản chưa được đưa cho giọng đọc, nên không có gì bị đọc sai.",
-                    "MONEY_UNIT_LOST": "Một khoản tiền bị mất đơn vị khi đọc, nên văn bản chưa được đưa cho giọng đọc."
-                }
             }
         },
         "firstRun": {

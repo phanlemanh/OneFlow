@@ -90,23 +90,8 @@ const REF_TO_NODE_TYPE: Record<RefName, DataNodeType> = {
     ModelRef: "modelNode",
 };
 
-/**
- * Reserved output fields that are protocol-level, not data routes.
- *
- * `code` and `residual` joined them on 2026-08-28: together they are the stable,
- * machine-readable reason a slot refused — the code names the reason, the
- * residual names the tokens that caused it — read by the failure toast to
- * render a sentence in the viewer's locale. Left out of this set each became a
- * connectable `out:<field>` handle — measured the moment it was added to the
- * ABI — inviting a user to wire a diagnostic into a text node.
- */
-export const OUTPUT_META_FIELDS = new Set([
-    "success",
-    "error",
-    "code",
-    "residual",
-    "thinking",
-]);
+/** Reserved output fields that are protocol-level, not data routes. */
+const OUTPUT_META_FIELDS = new Set(["success", "error", "thinking"]);
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
