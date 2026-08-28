@@ -5,7 +5,7 @@ slug: gate-tooling-t1
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: verified
+status: signed-off
 approved_by: Manh
 approved_at: 2026-08-27
 amended_at: 2026-08-28

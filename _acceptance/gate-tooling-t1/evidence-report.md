@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: f9783e012dc0dfbd537d0dda9dfcbd0c466aab47
-human_signoff:
+human_signoff: Manh 2026-08-28
 ---
 
 # Evidence Report: gate-tooling-t1
