@@ -178,9 +178,11 @@ chặn thì người dùng thấy; một giá đọc sai thì không ai thấy c
 > `oneflow.vn` là tên miền. Bốn vòng nghiệm thu sửa bốn phạm vi khác nhau của cùng luật này —
 > chỉ soi đầu ra · hỏi nguyên liệu thô · đếm tổng · neo theo chữ tiền — và mỗi lần lại lộ một họ
 > mới, vì gốc không đổi. Đóng thật cần **một bộ phân loại token** (tiền · đơn vị · đường dẫn ·
-> thành ngữ): đó là hợp đồng **[`bo-phan-loai-token`](../bo-phan-loai-token/contract.md)**,
-> mở ngày 2026-08-28 cùng lúc với việc đóng hồ sơ này — không phải lần vá thứ năm vào một biểu
-> thức chính quy.
+> thành ngữ): đó là hợp đồng **`bo-phan-loai-token`**, mở ngày 2026-08-28 cùng lúc với việc
+> đóng hồ sơ này, trên nhánh riêng `draft/bo-phan-loai-token` — **cố ý không nằm trong PR
+> này**, vì một hồ sơ bản nháp đi kèm một PR đổi mã thì cổng không chấm được nó (nó ở
+> `status: draft`, ngoài tập implemented/verified/signed-off) và sẽ tàng hình. Không phải
+> lần vá thứ năm vào một biểu thức chính quy — xem mục 1.3 của lộ trình.
 
 **Thuộc AC-10** *(hai chuỗi này owner đã xem đầu ra trước khi ký)*:
 
