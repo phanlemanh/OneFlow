@@ -5,7 +5,7 @@ slug: chong-doc-sai-em-ru
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk, web-ui, docs]
-status: approved
+status: implemented
 approved_by: Phan Le Manh
 approved_at: 2026-08-27
 ---
