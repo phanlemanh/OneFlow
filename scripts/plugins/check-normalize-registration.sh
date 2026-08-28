@@ -99,6 +99,20 @@ for locale in en vi ja ko zh; do
           if (typeof v !== 'string' || !v.trim()) process.exit(1);
         " || fail "$locale.json is missing Workspace.nodes.$bucket.normalizeTextVi"
     done
+    # The refusal copy: every stable reader code needs a sentence in every
+    # locale, or a zh/ja/ko/en user reads the raw key — which is the same defect
+    # as reading Vietnamese, one layer along (AC-6). The code list is READ OUT of
+    # the SDK rather than retyped, so adding a code there without copy here is
+    # red instead of an unrenderable message.
+    codes="$(sed -n 's/^ERROR_[A-Z_]* = "\([A-Z_]*\)"/\1/p' "$ROOT/sdk/tongflow/text/normalize_vi.py")"
+    [ -n "$codes" ] || fail "could not read the error-code set out of the SDK"
+    for code in $codes; do
+        node -e "
+          const d = require('$file');
+          const v = d?.Workspace?.nodes?.normalizeErrors?.normalizeTextVi?.['$code'];
+          if (typeof v !== 'string' || !v.trim()) process.exit(1);
+        " || fail "$locale.json is missing the sentence for reader code $code"
+    done
     # The TTS-order warning copy (AC-10's human sentence). This claim used to
     # live only in E10a's `expected` prose while no executor read the key —
     # measured here now, next to its sibling keys (S4 round 2 finding).

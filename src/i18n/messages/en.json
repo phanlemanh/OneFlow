@@ -1050,6 +1050,13 @@
                 "endLabel": "End (s)",
                 "editOp": "Edit op",
                 "removeOp": "Remove op"
+            },
+            "normalizeErrors": {
+                "normalizeTextVi": {
+                    "EMPTY_INPUT": "Nothing to read — the text is empty.",
+                    "RESIDUAL_TOKENS": "Could not read: {tokens}. The text was not sent to the voice, so nothing is spoken incorrectly.",
+                    "MONEY_UNIT_LOST": "A currency amount lost its unit while being read, so the text was not sent to the voice."
+                }
             }
         },
         "firstRun": {

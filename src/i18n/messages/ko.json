@@ -1050,6 +1050,13 @@
                 "endLabel": "종료(초)",
                 "editOp": "작업 편집",
                 "removeOp": "작업 삭제"
+            },
+            "normalizeErrors": {
+                "normalizeTextVi": {
+                    "EMPTY_INPUT": "읽을 내용이 없습니다 — 텍스트가 비어 있습니다.",
+                    "RESIDUAL_TOKENS": "읽지 못했습니다: {tokens}. 텍스트를 음성으로 보내지 않았으므로 잘못 읽히지 않습니다.",
+                    "MONEY_UNIT_LOST": "금액의 단위가 읽는 중 사라져 텍스트를 음성으로 보내지 않았습니다."
+                }
             }
         },
         "firstRun": {

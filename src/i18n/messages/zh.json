@@ -1050,6 +1050,13 @@
                 "endLabel": "结束（秒）",
                 "editOp": "编辑操作",
                 "removeOp": "删除操作"
+            },
+            "normalizeErrors": {
+                "normalizeTextVi": {
+                    "EMPTY_INPUT": "没有可朗读的内容 — 文本为空。",
+                    "RESIDUAL_TOKENS": "无法读出：{tokens}。文本未送往语音，因此不会被读错。",
+                    "MONEY_UNIT_LOST": "金额在朗读时丢失了单位，因此文本未送往语音。"
+                }
             }
         },
         "firstRun": {

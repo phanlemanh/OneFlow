@@ -161,6 +161,9 @@
                     "error": {
                         "type": "string"
                     },
+                    "code": {
+                        "type": "string"
+                    },
                     "text": {
                         "type": "string"
                     }
