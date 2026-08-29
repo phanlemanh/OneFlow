@@ -28,7 +28,9 @@
         "types/**/*.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        ".next/types/**/*.ts"
+        ".next/types/**/*.ts",
+        "build/types/**/*.ts",
+        "build/aml-a11y/types/**/*.ts"
     ],
     "exclude": ["node_modules", "desktop"]
 }

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context machine lane (không hội đồng — xem §Vì sao LANE thay cho VÒNG)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 665ff72bf34a07fc6156be70360d7dcf5dfc0592
+verified_commit: df22a16b63139b3d34ab753a1ebefa76615e6cb7
 human_signoff: Phan Le Manh 2026-08-29
 ---
 
@@ -271,3 +271,7 @@ preflight GREEN, tất cả exit 0, mã gói đó không đổi một byte.
 ### Lane chốt — 2026-08-28, lane máy thuần thay cho vòng verify thứ bảy; 12 eval + 7 lệnh suite tại HEAD, preflight GREEN, tất cả exit 0. Lý do dùng lane thay vòng ở §Vì sao LANE thay cho VÒNG
 run_id: lane-chong-doc-sai-em-ru-20260828T133500Z
 sha: 665ff72bf34a07fc6156be70360d7dcf5dfc0592 · suites: 7 lệnh exit 0
+
+### Re-pin lần 1 — 2026-08-29, KHÔNG CẦN THIẾT; giữ lại vì phép đo là thật, nhưng lý do ban đầu thì sai. Nó được lấy vì `pre-merge-check.sh` báo hồ sơ này đã cũ — nhưng lượt chạy đó **thiếu `--base`**, chế độ mà chính công cụ in ra `rules ran=2 declared-off=2 expected=4` và `NOTE: T1-escape backstop skipped — no PR base given`. Chạy đúng cách CI gọi (`bash scripts/pre-merge-check.sh . --base origin/main`) thì tại `df22a16` — mốc **trước** lần re-pin này — cổng đã **sạch**. Đo lại từng mốc sau khi phát hiện: `129928a` 2 vi phạm (verdict PENDING-JUDGMENT + `conformance-l0` cũ), `3196853` 1 vi phạm (`conformance-l0` cũ), `df22a16` sạch. Tức chỉ lần re-pin `conformance-l0` là bắt buộc. Bài học ghi ở đây thay vì xoá dấu vết: **đọc số vi phạm từ một lượt chạy nửa số luật là đọc một phép đo khác với phép đo mình tưởng** — và công cụ đã nói thẳng điều đó ở dòng NOTE ngay trên con số. Bản thân số đo dưới đây vẫn đúng và vẫn dùng được: bộ đọc không đổi một byte, một phiên tươi chạy lại cả 12 suite máy trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0
+run_id: repin-chong-doc-sai-em-ru-20260829T134935Z
+sha: df22a16b63139b3d34ab753a1ebefa76615e6cb7 · suites: 12 lệnh exit 0

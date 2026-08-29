@@ -204,7 +204,8 @@
             "extractStem": "Tách track nhạc cụ",
             "addTrack": "Thêm track",
             "completeMusic": "Hoàn thiện",
-            "musicBrief": "Kế hoạch nhạc"
+            "musicBrief": "Kế hoạch nhạc",
+            "tooltipMediaLibrary": "Kho media"
         },
         "toast": {
             "ttsNeedsNormalize": "Node giọng đọc {nodes} chưa có node “Đọc số thành chữ” ở phía trên — số, giá và ngày có thể bị đọc sai. Thêm node đó vào giữa nguồn chữ và node giọng đọc.",
@@ -1050,6 +1051,36 @@
                 "endLabel": "Kết thúc (giây)",
                 "editOp": "Sửa op",
                 "removeOp": "Xoá op"
+            },
+            "addMediaLibrary": {
+                "title": "Nạp từ kho",
+                "searchPlaceholder": "Mô tả cảnh bạn cần, ví dụ: phòng khách ngập nắng",
+                "search": "Tìm",
+                "searching": "Đang tìm…",
+                "importing": "Đang nạp clip về kho file của bạn… Xong sẽ hiện thành node video trên canvas.",
+                "results": "{count} clip khớp mô tả. Chọn một clip để nạp về workspace.",
+                "thinShelf": "Không clip nào dựng được thẻ cho mô tả này (kho có {candidates} clip qua bộ lọc). Thử mô tả khác hoặc nới yêu cầu.",
+                "unranked": "Kết quả chưa xếp hạng theo ngữ nghĩa: kho đang thiếu embedding. Danh sách vẫn đúng bộ lọc, thứ tự không phản ánh độ hợp.",
+                "error": "Lời gọi tới kho không thành công.",
+                "missingConfig": "Chưa nối với kho media.",
+                "saveConfig": "Lưu rồi tìm lại",
+                "savingConfig": "Đang lưu…",
+                "urlLabel": "https://kho.vidu.com",
+                "keyLabel": "Khoá có scope search",
+                "failure": {
+                    "AUTH_REJECTED": "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY.",
+                    "MISSING_SCOPE": "Khoá thiếu quyền search — xin cấp scope search cho khoá này.",
+                    "BAD_REQUEST": "Yêu cầu gửi tới kho không hợp lệ.",
+                    "NOT_FOUND": "Không thấy clip — đã xoá, hoặc khoá này không thấy được nó.",
+                    "NOT_IMPLEMENTED": "Kho chưa nối đủ phụ thuộc cho lối gọi này.",
+                    "VERSION_MISMATCH": "Kho đổi phiên bản giao kèo. Đã dừng, không đoán hình dạng dữ liệu.",
+                    "BAD_RESPONSE": "Kho trả về hình dạng bản này không nhận.",
+                    "NETWORK_ERROR": "Không gọi được tới kho.",
+                    "UPSTREAM_ERROR": "Kho trả lỗi.",
+                    "LOCAL_FAILURE": "OneFlow không hoàn tất được việc này ở phía máy của bạn — xem log ứng dụng để biết nguyên nhân thật."
+                },
+                "readFailed": "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
+                "writeFailed": "Không lưu được khoá. Chưa có gì thay đổi."
             }
         },
         "firstRun": {

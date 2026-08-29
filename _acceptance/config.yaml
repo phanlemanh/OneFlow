@@ -223,6 +223,18 @@ executors:
     # gap-probe P0-2: AC-6 promises FOUR collection cases unchanged; the negatives alone
     # are half a floor. All four of the parent's own node-ids, run as one criterion.
     sdk_pytest_diag_import_floor: cd sdk && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions python -m pytest -q tests/test_scan_scope.py::test_block_matrix_covers_the_ten_keywords tests/test_scan_scope.py::test_non_scope_block_collects_import tests/test_scan_scope.py::test_nested_blocks_collect_import tests/test_scan_scope.py::test_prior_behaviour_module_level_and_try tests/test_scan_scope.py::test_function_local_import_is_not_collected tests/test_scan_scope.py::test_class_body_import_is_not_collected
+    # add-media-library Gate 1 (2026-08-19): test files land during implementation;
+    # keys declared now so eval refs stay portable. One key per seam, not per test
+    # file bundle — a seam that is never implemented must not hide behind another
+    # seam's exit code (standing rule, lesson: cache-l1 round 1).
+    unit_aml_config: "pnpm vitest run src/lib/media-library/config.server.test.ts"
+    unit_aml_client: "pnpm vitest run src/lib/media-library/client.server.test.ts"
+    unit_aml_import: "pnpm vitest run src/lib/media-library/import.server.test.ts src/lib/media-library/import-roundtrip.server.test.ts"
+    unit_aml_ext: "pnpm vitest run src/lib/media-library/extension.test.ts src/lib/media-library/extension-serving.server.test.ts"
+    unit_aml_node: "pnpm vitest run src/components/workspace/nodes/add/add-media-library-node.test.tsx"
+    unit_aml_wiring: "pnpm vitest run src/lib/workflow/media-library-wiring.test.ts"
+    # Sinh sau gap-probe P0: đo call-site qua chính route, không qua lời gọi hàm.
+    unit_aml_route: "pnpm vitest run src/app/api/media-library/route.test.ts"
     # normalize-text-vi Gate 1 (2026-08-19): corpus vang song trong kho nay (design §3), nen moi
     # eval doc-thanh-chu la pytest SDK chu khong phai guard clone repo plugin nhu ho overlay_*.
     # --with vietnormalizer==<pin tu pyproject>: engine chuan hoa la dep runtime cua SDK
@@ -501,6 +513,16 @@ executors:
     pnpm_keys_intact: "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
     pnpm_scope_confined: "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
     pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
+    # add-media-library Gate 1 (2026-08-19). The tier-boundary key reuses the shared
+    # scanner: --allow names the two t3 paths this feature legitimately touches (the
+    # add-node registration lives under src/lib/workflow/**), --require proves the
+    # diff window is not vacuous, and everything else under t3_paths stays forbidden.
+    aml_no_boot_dependency: "bash scripts/media-library/check-no-boot-dependency.sh"
+    aml_no_domain_vocab: "bash scripts/media-library/check-no-domain-vocab.sh"
+    aml_a11y_proto: "bash scripts/media-library/check-a11y-proto.sh"
+    aml_no_dormant_fetch: "bash scripts/media-library/check-no-dormant-fetch.sh"
+    aml_fixture_provenance: "bash scripts/media-library/check-fixture-provenance.sh"
+    aml_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh add-media-library origin/main --allow 'src/lib/workflow/**' --allow 'src/app/api/media-library/**' --require 'src/lib/workflow/**'"
     # normalize-text-vi Gate 1 (2026-08-19): hai guard moi, file ha canh luc implement.
     normalize_registration_synced: "bash scripts/plugins/check-normalize-registration.sh"
     # normalize-text-vi Gate 2 round 5 (2026-08-22, owner mở rộng vùng phủ):
@@ -628,7 +650,17 @@ feature_loop:
     - executors.script.gen_abi_clean
 
 dev_server:
-  start: "pnpm dev"
+  # Own dist dir, not the shared `.next`. The machine lane runs
+  # `pnpm build && pnpm typecheck` (a standing suite key) in PARALLEL with the
+  # ui-check lane, and a build landing while this server serves deletes the
+  # chunks it is handing out. next.config.ts measured all three arms and named
+  # this opt-out; only PAGES die, so the round loses its UI evidence while the
+  # route-handler evals stay green — a broken round that reads like a clean one.
+  # E24 boots its own server under build/aml-a11y for the same reason.
+  # Cost, also measured there: Next rewrites tsconfig.json when the dist dir
+  # differs from the recorded one, so a run must restore that file or the same
+  # round's lint goes red on an otherwise clean tree.
+  start: "NEXT_DIST_DIR=build pnpm dev"
   url: "http://localhost:3000"
 
 # capture.ui: omitted for now — no screenshot-to-file command in repo yet.

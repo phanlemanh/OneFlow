@@ -1,0 +1,36 @@
+{
+  "feature_plain": "Người dùng gõ mô tả cảnh mình cần, chọn một clip từ kho dùng chung, và clip đó được tải hẳn về kho file của họ thành một node video trên canvas.",
+
+  "decisions": [
+    {
+      "id": "E25",
+      "q": "Qua năm màn hình, người dùng có luôn biết mình đang ở đâu không?",
+      "why": "Máy đề xuất Đạt, nhưng KHÔNG có hội đồng nào chấm ở lượt này — kết quả Đạt được mang sang từ lượt kiểm trước, nên chưa có lá phiếu nào đứng sau nó. Anh là người đầu tiên thật sự nhìn chín khung hình."
+    }
+  ],
+
+  "scope_plain": "Giai đoạn này chỉ đọc và chỉ nhận video; ghi ngược về kho, đồ thị thực thể, ảnh/âm thanh/mặt bằng, phân trang quá 50 kết quả và nạp nhiều clip một lượt đều để lại cho các hạng mục sau.",
+
+  "decisions_plain": [
+    { "id": "d-20260819T141719Z-4672", "p": "Đường gọi từ giao diện xuống máy chủ đi theo đúng khuôn 28 chỗ khác trong sản phẩm đang dùng — đổi lại việc này phải qua cổng duyệt nghiêm nhất." },
+    { "id": "d-20260819T141719Z-2737", "p": "Giai đoạn này chỉ nhận video — đổi lại không phải sửa cơ chế dùng chung của bảy nút thêm-nội-dung đang chạy." },
+    { "id": "d-20260819T141719Z-6257", "p": "KHÔNG làm phần nạp ảnh, âm thanh và mặt bằng — mở lại khi có kỹ năng thật sự cần đến chúng." },
+    { "id": "d-20260819T141719Z-1921", "p": "Đường tải clip được viết riêng có chặn địa chỉ và chặn kích thước — đổi lại không dùng lại một đường tải cũ vốn không kiểm gì cả." },
+    { "id": "d-20260819T141719Z-5974", "p": "Kho đổi phiên bản hợp đồng thì sản phẩm dừng lại và nói rõ, thay vì đoán hình dạng dữ liệu — đổi lại một bản vá nhỏ bên kho cũng làm node ngừng chạy cho tới khi hai bên khớp lại." },
+    { "id": "d-20260819T141719Z-3350", "p": "KHÔNG làm buổi duyệt giao diện có người ngồi xem — đổi lại giao diện được duyệt qua ảnh chụp thay vì qua bản bấm được tại chỗ." },
+    { "id": "d-20260819T142118Z-7656", "p": "Gộp hai lần duyệt đầu vào một lần ngồi — đổi lại anh phải đọc nhiều hơn trong một lượt." },
+    { "id": "d-20260819T143050Z-4411", "p": "Hồ sơ thử được canh không trôi khỏi hợp đồng của kho — đổi lại vẫn không phát hiện được nếu hồ sơ thử sai ngay từ đầu." },
+    { "id": "d-20260819T143050Z-8823", "p": "Việc chặn địa chỉ nội bộ được đo qua đúng đường mà sản phẩm thật đi, không đo bằng cách gọi thẳng hàm." },
+    { "id": "d-20260819T143050Z-1207", "p": "Ghi nhận bộ chặn tài nguyên của đợt chạy thử hai làn báo nhầm nhiều lần — đổi lại mất một ít thời gian mỗi lần bị chặn oan." },
+
+    { "id": "d-20260820T053200Z-5510", "p": "Phép canh đường tải cũ thôi đếm nhầm những dòng chú thích chỉ nhắc tên nó." },
+    { "id": "d-20260820T064500Z-7731", "p": "Bảy lỗi soát xét được sửa, nặng nhất là ba chỗ có chặn nhưng đường đi thật không hề chạm tới chỗ chặn đó." },
+    { "id": "d-20260820T064500Z-2214", "p": "Bộ tiêu chí đo được sửa SAU khi anh đã duyệt — hai thay đổi, trình ở đây để anh biết chứ không giấu." },
+    { "id": "d-20260820T080500Z-9012", "p": "Máy chạy thử và bản dựng thật không còn giẫm lên thư mục của nhau — đổi lại thêm một biến vận hành mà bản phát hành không dùng tới." },
+    { "id": "d-20260820T080500Z-3345", "p": "Phép đo chuyển-hướng được sửa để thật sự chạm luật chặn địa chỉ nội bộ, thay vì dừng ở luật khác trước đó." },
+    { "id": "d-20260820T090000Z-4471", "p": "Việc phán một địa chỉ có an toàn hay không được gom về MỘT chỗ duy nhất — đổi lại vẫn không chặn được tên miền công khai trỏ ngầm về máy nội bộ." },
+    { "id": "d-20260820T103000Z-8812", "p": "Tám trong mười lỗi lượt đó là bộ đo tự nói quá khả năng của nó; chọn cách làm phép đo mạnh lên trước, rồi mới hạ lời mô tả xuống cho khớp." },
+    { "id": "d-20260820T111500Z-9903", "p": "Sáu lỗi lượt đó gồm hai lỗi sản phẩm thật và bốn phép đo nhắm sai chỗ — cả sáu đã sửa và đều chứng minh được là sẽ báo đỏ khi hỏng." },
+    { "id": "d-20260820T115500Z-7741", "p": "Hai lỗi cuối đã sửa; phép đo cho lỗi thứ hai ban đầu báo xanh sai nên phải làm lại cho tới khi nó thật sự đo đúng chỗ." }
+  ]
+}

@@ -204,7 +204,8 @@
             "extractStem": "ステム抽出",
             "addTrack": "トラック追加",
             "completeMusic": "編曲補完",
-            "musicBrief": "音楽ブリーフ"
+            "musicBrief": "音楽ブリーフ",
+            "tooltipMediaLibrary": "メディアライブラリ"
         },
         "toast": {
             "ttsNeedsNormalize": "音声ノード {nodes} の上流に「数字を読み上げ用に変換」ノードがありません。数値・価格・日付が正しく読み上げられない可能性があります。テキストソースと音声ノードの間に追加してください。",
@@ -964,6 +965,36 @@
                 "endLabel": "終了（秒）",
                 "editOp": "オペを編集",
                 "removeOp": "オペを削除"
+            },
+            "addMediaLibrary": {
+                "title": "ライブラリから読み込む",
+                "searchPlaceholder": "必要なシーンを記述してください（例：日差しの入るリビング）",
+                "search": "検索",
+                "searching": "検索中…",
+                "importing": "クリップをファイルストアに取り込んでいます… 完了するとキャンバスに動画ノードとして表示されます。",
+                "results": "{count} 件のクリップが一致しました。ワークスペースに取り込むクリップを選んでください。",
+                "thinShelf": "この記述に合うクリップはありませんでした（フィルタを通過したクリップは {candidates} 件）。表現を変えるか条件を緩めてください。",
+                "unranked": "結果は意味順に並んでいません（ライブラリの埋め込みが未生成）。フィルタ条件は満たしていますが、順序は適合度を表しません。",
+                "error": "ライブラリの呼び出しに失敗しました。",
+                "missingConfig": "メディアライブラリがまだ接続されていません。",
+                "saveConfig": "保存して再検索",
+                "savingConfig": "保存中…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "search スコープを持つキー",
+                "failure": {
+                    "AUTH_REJECTED": "ライブラリのキーが拒否されました。MEDIA_LIBRARY_API_KEY を確認してください。",
+                    "MISSING_SCOPE": "キーに search 権限がありません。search スコープを付与してください。",
+                    "BAD_REQUEST": "ライブラリへのリクエストが不正でした。",
+                    "NOT_FOUND": "クリップが見つかりません（削除済み、またはこのキーでは見えません）。",
+                    "NOT_IMPLEMENTED": "ライブラリ側でこの経路がまだ有効化されていません。",
+                    "VERSION_MISMATCH": "ライブラリの契約バージョンが変わりました。推測せず停止しました。",
+                    "BAD_RESPONSE": "ライブラリの応答形式をこのバージョンは受け付けません。",
+                    "NETWORK_ERROR": "ライブラリに接続できませんでした。",
+                    "UPSTREAM_ERROR": "ライブラリがエラーを返しました。",
+                    "LOCAL_FAILURE": "お使いの端末側で処理を完了できませんでした。原因はアプリのログをご確認ください。"
+                },
+                "readFailed": "保存済みのキーを読み取れなかったため、何も変更していません。もう一度お試しください。",
+                "writeFailed": "キーを保存できませんでした。変更はありません。"
             }
         },
         "firstRun": {
