@@ -1,33 +1,25 @@
-E16 (AC-9) network truth — round 3 re-verify
+E16 (AC-9) network truth — verifier re-check (this round)
 driver: Claude_Browser (mcp), read_network_requests + read_console_messages
 Scope (config.yaml dev_server.url): http://localhost:3000
-Shared browser tab tab-11 reused (tab cap reached, no fresh tab available).
 
 === Requests directly caused by THIS eval's two steps ===
 GET http://localhost:3000/proto/add-media-library?state=importing -> 200 OK
 GET http://localhost:3000/proto/add-media-library?state=imported  -> 200 OK
-  (both confirmed via urlPattern=add-media-library filter on the same tab's log)
-  (plus their static asset loads: layout.css, main-app.js, app-pages-internals.js,
-   app/proto/[slug]/page.js, app/layout.js, woff2 fonts — all 200 OK)
+Static asset loads for each navigation (layout.css, proto/[slug]/page.css,
+webpack.js, main-app.js, app-pages-internals.js, app/proto/[slug]/page.js,
+app/layout.js, woff2 fonts) — all 200 OK.
 
 Console errors after both navigations (onlyErrors=true): "No console logs." (none)
 
-=== Unrelated pre-existing entries in the same shared tab's history (noise) ===
-Several GET http://localhost:3000/workspace?_rsc=... requests appear EARLIER in this
-tab's cumulative network log (before either of this eval's navigations), each marked
-[FAILED: net::ERR_ABORTED]. These:
-  - target /workspace, a route this eval's steps never visit (steps only hit
-    /proto/add-media-library?state=importing and ?state=imported),
-  - are interleaved with a long chain of distinct webpack hot-update hashes,
-    i.e. leftover history from earlier dev-session activity in this shared
-    browser tab — this pane is shared across concurrently-running verifier
-    sessions (tab-1..tab-11 exist; a leftover ?state=version-mismatch request
-    from a prior/peer run also shows up, which this session's steps never
-    requested either),
-  - ERR_ABORTED on an _rsc prefetch is standard Next.js dev-mode behavior when
-    an earlier soft-navigation's RSC fetch gets cancelled by a later
-    navigation — not a 4xx/5xx, and not produced by this eval's steps.
-Treated as out-of-scope noise from a shared tab/session, not attributed to E16.
+=== Unrelated pre-existing entries in the same tab's cumulative log (noise) ===
+- Two GET .../proto/add-media-library?state=version-mismatch requests appear
+  earlier in this tab's history — a different state, not requested by this
+  eval's two steps (importing / imported only).
+- One GET http://localhost:3000/workspace?_rsc=... [FAILED: net::ERR_ABORTED] —
+  targets /workspace, a route this eval's steps never visit; standard
+  Next.js dev-mode RSC-prefetch cancellation from earlier navigation activity
+  in this tab, not a 4xx/5xx, not produced by this eval's steps.
+Treated as out-of-scope noise from earlier tab activity, not attributed to E16.
 
 === Verdict ===
 FAIL-eligible set for this eval's own two steps: empty (0 failures, 0 4xx/5xx,

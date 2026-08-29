@@ -5,9 +5,10 @@ slug: add-media-library
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [ui, api]
-status: implemented
+status: signed-off
 approved_by: Phan Le Manh
 approved_at: 2026-08-19T14:58:44Z
+human_signoff: Phan Le Manh 2026-08-29
 ---
 
 # Acceptance Contract: add-media-library
@@ -274,6 +275,137 @@ hành. Chúng không bị vứt: hai thứ có cấu tính đi vào hợp đồn
 - **Guard đồ thị import chỉ thấy khai báo `import`.** `import-graph.mjs` bỏ qua
   re-export và `import()` động, nên `check-no-boot-dependency` /
   `check-no-dormant-fetch` đi lọt hai lối.
+
+### Lane máy thuần sau đóng băng (29/08/2026) — verdict PASS
+
+Lane chạy lại 19 eval máy + 7 lệnh suite tại HEAD, gánh 9 eval ui-check từ vòng 8
+(không mã giao diện nào đổi sau `5a181df`, đo bằng `git diff`). **Không ô nào đỏ.**
+Lớp phản biện vẫn chạy — args của kit không có cờ tắt nó — và ra thêm **13** phát
+hiện, lần thứ ba liên tiếp không giảm. Một cái đã sửa (xoá `git checkout` phá dữ
+liệu khỏi guard a11y). Mười hai cái còn lại nhận trước khi phát hành:
+
+- **Kho khoá có thể bị xoá sạch khi lưu cấu hình — NHƯNG đây là nợ sẵn của `main`,
+  không phải của nhánh này.** `loadEnvStore()` nuốt **mọi** lỗi bằng `catch { return {} }`
+  và `GET /api/settings/env` trả 200 với `{env:{}}`, nên không bên gọi nào phân biệt
+  được "kho rỗng" với "kho đọc không nổi"; `PUT` thì thay nguyên bản đồ. Blob
+  `settings.json` hỏng hoặc codec giải mã thất bại → người dùng lưu hai khoá
+  media-library và mất toàn bộ khoá còn lại, không một thông báo nào.
+  **Đo được:** `src/lib/settings/env-store.server.ts` và route của nó **không đổi
+  một dòng nào** trên nhánh (`git diff main...HEAD` rỗng), và
+  `abi-node-shell.tsx:110` trên `main` làm cùng thao tác PUT mà **không có tấm chắn
+  nào cả** — bảng cấu hình của nhánh này là bên gọi cẩn thận hơn, không phải bên
+  gây ra. Sửa thật phải ở phía máy chủ (phân biệt rỗng với không-đọc-được, thêm
+  điểm cuối chỉ-gộp), tức ngoài phạm vi hồ sơ này; đã tách thành việc riêng.
+- **Trạng thái `imported` được thiết kế, quét a11y và duyệt — nhưng không tồn tại
+  trong sản phẩm.** Proto vẽ nó và guard E24 quét đúng mười trạng thái gồm nó, còn
+  node thật sau khi nạp xong gọi `expands(...)` rồi `setOutcome({kind:"idle"})`,
+  xoá danh sách và không hiện gì. Không có nhánh `imported` trong `Outcome`, không
+  khoá `imported` trong cả năm file ngôn ngữ. Guard proto **không thể** đỏ vì việc
+  này — nó chỉ đo proto.
+- **Tải nửa chừng bị đứt bị báo là `LOCAL_FAILURE` ("máy của bạn").** `readCapped()`
+  không bọc `try/catch`, nên timeout sau khi đã có header hoặc `TypeError: terminated`
+  của undici thoát ra tới catch của route và thành 500 `LOCAL_FAILURE` — đẩy người
+  dùng đi soi đĩa của mình vì một sự cố hoàn toàn ở phía trên.
+- **Tải về 0 byte vẫn được lưu và báo nhập thành công.**
+- **`message` đi xuyên bốn tầng rồi không ai đọc.** Được điền tiếng Việt cứng ở
+  `errors.ts`, `config.server.ts`, `client.server.ts`, `import.server.ts`, tuần tự
+  hoá qua cả hai route, parse lại ở `readFailure`, lưu vào `Outcome` — và cả hai
+  chỗ hiển thị đều cố ý dùng `t(...)`. Quyết định "câu của máy chủ chỉ để ghi log"
+  không có gì cưỡng chế: bên đọc kế tiếp render nó là người dùng en/ja/ko/zh lại
+  gặp tiếng Việt.
+- **Ba README không được cập nhật.** `CLAUDE.md` nói thẳng chúng trôi lặng lẽ và
+  bắt sửa cả ba khi có năng lực mới; nhánh này thêm một add node người dùng thấy
+  được và hai khoá env mà không chạm file nào.
+
+Và **sáu lỗ thủng nữa của chính bộ đo**, cùng năm hình dạng đã đặt tên:
+`import.server.test.ts:104` (assertion âm-tính-một-mình: ca "không tải được URL ký"
+bị guard host chặn trước, chưa từng tới chặng tải) · `provenance.test.ts:21` (E28
+hứa quét cả lớp, code chỉ bắt trường thừa) · `client.server.test.ts:192` ("sinh tám
+mã phân biệt" tính trên bảng kỳ vọng của chính test, không đọc đầu ra nào) ·
+`e4-verify.mjs:31` (tiền đề "kho khoá RỖNG" dựng bằng profile trình duyệt mới, trong
+khi kho khoá nằm phía máy chủ) · `add-media-library-node.test.tsx:339` (cặp
+kệ-mỏng-vs-lỗi chỉ so trên `en`) · và `client.server.ts:171` (payload ép kiểu không
+kiểm — cùng cái đã nêu ở đợt trước, lần này chỉ đúng địa chỉ).
+
+**Đây là dữ liệu xác nhận, không phải thất bại:** ba vòng liên tiếp (7, 8, lane) lớp
+phép đo hội tụ còn lớp phản biện thì không. Điều kiện dừng đặt ở lớp thứ hai là điều
+kiện không bao giờ thoả — nên nó không được quyền quyết định.
+
+### Lượt đo lại E24 tại HEAD (29/08/2026) — verdict PASS, và 17 phát hiện nữa
+
+Delta `6ba9902..HEAD` đúng **một** file, và file đó là dụng cụ đo của E24, nên chỉ
+E24 chạy lại; 27 eval còn lại gánh sang. **Không ô nào đỏ.** Lớp phản biện ra thêm
+**17** phát hiện. Cộng ba lượt: **12 → 13 → 17**. Không giảm, lần thứ ba.
+
+Ba cái owner cần thấy tên đầy đủ:
+
+- **Chuyển hướng trên đường API đi vòng qua `url-safety.ts` — lỗ SSRF mà chính tính
+  năng này tuyên đã bịt.** `call()` (`client.server.ts:38`) gọi `fetch` **không đặt
+  `redirect`**, tức mặc định `"follow"`. Mọi tấm chắn trong `url-safety.ts` chỉ được
+  áp trên đường **tải byte** (`fetchGuarded`, `redirect: "manual"`, guard lại từng
+  chặng). Docstring của `url-safety.ts` tự nhận là *"nơi DUY NHẤT quyết định OneFlow
+  có được nạp một URL hay không"*, và docstring của `fetchGuarded` gọi đích danh
+  đúng khuyết tật này (*"guard đã viết, chỉ là không bao giờ tới được sau chặng
+  một"*) — nhưng bản sửa chỉ áp cho **một trong hai** đường nhận URL từ phía kia.
+  Một 302 từ library trên `/v1/search` đẩy chính request của OneFlow tới host bất
+  kỳ, gồm `169.254.169.254` và dải RFC1918, không giới hạn số chặng.
+  **Đã kiểm tại nguồn:** `grep 'redirect:' src/lib/media-library/*.ts` chỉ ra một
+  chỗ duy nhất, ở `import.server.ts:97`. Mức độ có giới hạn — theo chuẩn fetch,
+  header `Authorization` bị gỡ khi chuyển hướng khác origin, và `contracts_version`
+  chặn phần lớn đường đọc ngược — nên đây là SSRF **mù/dò**, không phải đọc được dữ
+  liệu. Nhưng request vẫn được phát đi, và bất biến kiến trúc thì gãy. Sửa là một
+  dòng mỗi chỗ gọi, hoặc nâng `fetchGuarded` lên dùng chung.
+- **`MEDIA_LIBRARY_URL` không được kiểm — khoá API đi được qua `http` trần.**
+  `resolveConfig()` chỉ trim và bỏ dấu `/` cuối, không `new URL()`, không ép scheme;
+  `call()` thì gắn `authorization: Bearer <apiKey>` vào mọi request. Cùng tính năng
+  đó **từ chối** URL ký không phải https ở đường tải byte, nên hai nửa của một biên
+  bất đồng về cùng một luật, và nửa yếu hơn lại là nửa mang bí mật.
+- **Nhánh chẩn đoán của guard a11y là mã chết.** Script chạy dưới `set -euo pipefail`;
+  dòng gán `got=$(... | grep -o 'data-proto-state=...' | ...)` khi trang **không**
+  đóng dấu — đúng ca guard sinh ra để bắt — thì `grep` trả 1, `pipefail` đẩy lên,
+  `set -e` giết script ngay tại đó. Câu `FAIL: rendered state '<none>'` và cả bộ đếm
+  `MISSING` không bao giờ chạy. **Tái lập được trên bash 3.2.57 (mặc định macOS):**
+  heredoc lặp lại đúng bốn dòng đó thoát 1 và không in gì. Hệ quả: E24 đỏ thì báo
+  cáo ghi một exit 1 trần không lời giải thích, thay vì nêu tên trạng thái lệch.
+  PASS của E24 **không** bị yếu đi vì thế — nhánh chết chỉ chạm tới khi đã có lỗi —
+  nhưng lần đỏ kế tiếp sẽ khó đọc.
+
+Mười bốn cái còn lại: `MEDIA_LIBRARY_URL=""` lưu trong kho khoá âm thầm che mất giá
+trị hợp lệ trong `process.env` · bảng cấu hình in nguyên văn `SyntaxError` /
+`"Failed to fetch"` ra mặt người dùng · `Location` dị dạng bị báo là hỏng ở máy mình ·
+nhập thành công mà `id` vắng thì `fileKey` bị vứt lặng lẽ · Enter đi vòng qua khoá
+nút Tìm · một chú thích tiếng Việt trong `.env.example` phạm luật *English only* ·
+và bảy lỗ thủng nữa của bộ đo, gồm cái **sáu ui-check chụp hằng viết cứng trong file
+prototype chứ không phải câu node thật render qua `t()`** — chính là điều owner đã
+đọc và ký nhận ở mục E25 dưới đây.
+
+### E25 / AC-15 — owner ký ĐẠT kèm một chặng khai rõ là KHÔNG đạt (29/08/2026)
+
+Owner xem lại mười lăm khung sau khi được trình đúng ba sự thật, **trước** khi ký:
+
+1. **Sáu trên chín khung ui là bản mô phỏng** (`/proto/add-media-library?state=…`),
+   ba khung là sản phẩm thật (E4, E20, E29). Lượt đo cuối độc lập xác nhận cùng
+   điều đó theo đường khác: sáu ui-check khẳng định trên **hằng viết cứng trong file
+   prototype**, không phải câu node thật render qua `t()`.
+2. **Khung `E16-step2` — băng xanh "Đã nạp xong…" kèm thẻ "Node video mới trên
+   canvas / file_key: …" — KHÔNG tồn tại trong sản phẩm.** Kiểm bốn chỗ độc lập:
+   hợp `Outcome` không có nhánh `imported`; sau khi nạp node gọi `expands(...)` rồi
+   `setOutcome({kind:"idle"})`; không file nào trong năm file ngôn ngữ có khoá
+   `imported`; và `outcomeMessageKey` trả `"idle"` — một khoá **không được render ở
+   đâu cả**, nó chỉ dùng để so với `thinShelf`.
+3. **Chặng sau-khi-nạp trong sản phẩm: node trở về một ô tìm kiếm trống.** Phản hồi
+   thật duy nhất là node video xuất hiện trên canvas, và **không khung nào trong bộ
+   bằng chứng này chụp được điều đó** — E20 chụp chính node "Nạp từ kho" ở trạng
+   thái rỗng, không phải node video sau khi nạp.
+
+**Phán quyết của người ký:** E25 **ĐẠT** cho tám chặng còn lại — chưa-cấu-hình, lối
+thoát ngay tại chỗ hỏng, đang-tìm, có-kết-quả, kệ-mỏng, chưa-xếp-theo-nghĩa,
+đang-nạp, lệch-phiên-bản — mỗi chặng đọc khác các chặng kia và kết quả suy giảm
+không bao giờ trình y hệt kết quả sạch. **Chặng sau-khi-nạp: KHÔNG đạt**, khai rõ ở
+đây thay vì để chữ ký phủ lên nó. Trạng thái `imported` đã được thiết kế, quét a11y
+và duyệt ở Cổng 1, nhưng chưa bao giờ tới sản phẩm; guard proto **không thể** đỏ vì
+việc đó, vì nó chỉ đo proto. Việc cài nó là hợp đồng riêng, không phải một vòng vá
+nữa trong hồ sơ này.
 
 ## Notes
 - `suggested_in_s` / `suggested_out_s` có trong schema nhưng library **chưa bao giờ

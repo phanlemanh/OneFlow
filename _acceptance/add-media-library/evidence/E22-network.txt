@@ -1,86 +1,21 @@
-E22 network dump — /proto/add-media-library?state=version-mismatch (AC-13)
-Driver: mcp__Claude_Browser (read_network_requests / read_console_messages)
-dev_server.url in config: http://localhost:3000 (no api_base declared)
+E22 network dump (Claude_Browser, http://localhost:3000/proto/add-media-library?state=version-mismatch)
 
---- prior round on file (kept for history, different eval target: state=error) ---
-An earlier verifier's dump for this same eval id, captured against
-?state=error, is preserved below the divider. It reached the same
-classification (no-app-traffic) for the same reason: proto page issues no
-fetch/XHR.
+FAIL-eligible scope: same-origin http://localhost:3000 (dev_server.url).
 
---- this round (2026-08-20) ---
-Reused tab-11 (already at localhost:3000 from earlier activity in this browser
-session, including the E22-step1 capture pass above); navigated to
-/proto/add-media-library?state=version-mismatch and read both logs. Full tab
-history (workspace page, other ?state= fixtures visited earlier in this
-session, then the target URL) is included below for completeness; it does not
-change the classification.
+Target route requests (post-navigation to the proto URL under test):
+[61376CA035D2C111BE3B4D8E686ECB2E] GET /proto/add-media-library?state=version-mismatch -> 200 OK
+[41AFDE3370BCBEAF45A2AE7359766606] GET /proto/add-media-library?state=version-mismatch -> 200 OK (revisit)
+All supporting _next/static chunks/css/fonts for this route -> 200 OK.
 
---- network requests (this round, target navigation highlighted) ---
-[03FD6CB3B7C9788B75D16BB3AA9AF3F0] GET http://localhost:3000/proto/add-media-library?state=version-mismatch -> 200 OK   <== target page
-[38453.2234] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-[38453.2235] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-[38453.2236] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787199751150 -> 200 OK
-[38453.2238] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787199751150 -> 200 OK
-[38453.2239] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787199751150 -> 200 OK
-[38453.2240] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-[38453.2241] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-[38453.2242] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-(earlier-in-session entries on the reused tab: /workspace navigations + their
-_next/static/* HMR/CSS assets, and .../proto/add-media-library?state=importing
-and ?state=imported document requests from earlier steps of this same verify
-session — all 200 OK. The only "FAILED" markers anywhere in the log are
-net::ERR_ABORTED on /workspace?_rsc=... prefetches, which belong to the
-/workspace route, not to this eval's target page, and are self-aborted by
-client-side router navigation, not a >=400/>=500 or connection failure.)
+Console errors: none (read_console_messages onlyErrors=true -> "No console logs.")
 
---- console messages (onlyErrors=true) ---
-No console logs.
+Noise, pre-dates the proto-route navigation, unrelated to this eval's steps:
+GET /workspace?_rsc=... -> 200 OK but reported [FAILED: net::ERR_ABORTED] (5 occurrences,
+timestamps 52566.86-52566.129, all BEFORE the proto route load). These are leftover
+Fast-Refresh/RSC requests from the tab's prior /workspace session that got cancelled when
+this session's own navigate() calls fired -- not a request the version-mismatch flow itself
+issues, and not a connection error (status still 200). Not counted toward FAIL-eligible
+verdict for E22.
 
---- classification ---
-No fetch/XHR calls observed at all: every entry is the document navigation
-itself, a same-origin Next.js dev asset (_next/static/* — css/js chunks,
-fonts), or an RSC prefetch (?_rsc=...) for a different route. Matches the
-proto component's own doc comment: "Fixtures only. No fetch, no key read, no
-write path." No third-party requests. No console errors.
-=> networkObserved = no-app-traffic
-
-===================================================================
---- PRIOR ROUND ON FILE (target was ?state=error, kept for history) ---
-===================================================================
-Driver: mcp__Claude_Browser (read_network_requests / read_console_messages)
-
---- re-verified round (2026-08-20, fresh subagent) ---
-Reused tab-11 (already at localhost:3000 from earlier activity in this browser
-session); navigated to /proto/add-media-library?state=error and re-read both
-logs. Full history in the tab (workspace page, other ?state= fixtures visited
-earlier, then the target URL again) is included below for completeness, but
-none of it changes the classification: every entry across the whole session is
-either the document navigation itself, a same-origin Next.js dev asset
-(_next/static/* — css/js chunks, fonts, webpack HMR json), or an RSC prefetch
-(?_rsc=...) for the /workspace route — never a fetch/XHR call this proto page
-issues itself. Zero fetch/XHR entries at any point. Console: only [log]/[info]
-dev-tooling noise (Fast Refresh, task-store registration, React DevTools
-hint) — no [error]/[warning].
-
---- network requests (original single-navigation capture) ---
-[5BA8E325F99DC1A0D4E17FD10E34BCFE] GET http://localhost:3000/proto/add-media-library?state=error -> 200 OK
-[13330.38] GET http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK
-[13330.39] GET http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK
-[13330.40] GET http://localhost:3000/_next/static/css/app/layout.css?v=1787188359323 -> 200 OK
-[13330.42] GET http://localhost:3000/_next/static/chunks/webpack.js?v=1787188359323 -> 200 OK
-[13330.43] GET http://localhost:3000/_next/static/chunks/main-app.js?v=1787188359323 -> 200 OK
-[13330.44] GET http://localhost:3000/_next/static/chunks/app-pages-internals.js -> 200 OK
-[13330.45] GET http://localhost:3000/_next/static/chunks/app/proto/%5Bslug%5D/page.js -> 200 OK
-[13330.46] GET http://localhost:3000/_next/static/chunks/app/layout.js -> 200 OK
-
---- console messages ---
-[info] Download the React DevTools for a better development experience...
-[info] (duplicate)
-
---- classification ---
-No fetch/XHR calls observed at all, in either capture. The document GET and
-all other entries are the page navigation + static assets (fonts, css, js
-chunks) — none are fetch/XHR app-scope calls. Matches proto component's own
-doc comment: "Fixtures only. No fetch, no key read, no write path."
-=> networkObserved = no-app-traffic
+Verdict: no FAIL-eligible request for the tested route failed (no 4xx/5xx, no connection
+error/timeout on /proto/add-media-library or its assets).

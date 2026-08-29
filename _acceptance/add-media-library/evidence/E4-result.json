@@ -20,6 +20,11 @@
       "url": "http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt",
       "kind": "requestfailed",
       "detail": "net::ERR_ABORTED"
+    },
+    {
+      "url": "http://localhost:3000/workspace?_rsc=z3Wp789TB5zg5EPt",
+      "kind": "requestfailed",
+      "detail": "net::ERR_ABORTED"
     }
   ]
 }
