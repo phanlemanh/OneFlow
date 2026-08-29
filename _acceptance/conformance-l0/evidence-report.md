@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: eb06c07db7847512021a8edc03352c7c719ce62c
+verified_commit: 1406d9686404e9924c19797908b00bc2f40d524a
 human_signoff: Manh 2026-08-07
 ---
 
@@ -247,6 +247,6 @@ sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 9 lệnh exit 0
 run_id: repin-conformance-l0-20260828T124500Z
 sha: 9caa25568b35132ab0387e09e5aa0b503c8a8deb · suites: 9 lệnh exit 0
 
-### Re-pin lần 4 — 2026-08-29, do nhánh `feat/add-media-library` thêm ba route API dưới `src/app/api/media-library/`: hồ sơ này khai `src/app/api/**` trong `paths` của một eval, nên ba file đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` vào nhánh — trên chính `main` thì cổng sạch, staleness sinh ra từ nhánh chứ không phải từ `main`. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0
-run_id: repin-conformance-l0-20260829T024337Z
-sha: eb06c07db7847512021a8edc03352c7c719ce62c · suites: 9 lệnh exit 0
+### Re-pin lần 4 — 2026-08-29, do nhánh `feat/add-media-library` thêm ba route API dưới `src/app/api/media-library/`: hồ sơ này khai `src/app/api/**` trong `paths` của một eval, nên ba file đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` vào nhánh — trên chính `main` thì cổng sạch, staleness sinh ra từ nhánh chứ không phải từ `main`. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0. Lane chạy LẠI ở mốc cuối sau khi hai file `scripts/acceptance/` bỏ dở trong worktree được commit — một ghim chỉ được dời sau một lane đã thật sự chạy tại đúng mốc đó
+run_id: repin-conformance-l0-20260829T025815Z
+sha: 1406d9686404e9924c19797908b00bc2f40d524a · suites: 9 lệnh exit 0
