@@ -193,6 +193,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `normalize-text-vi` | T3 | 27/08 | **1.3** — đọc số/giá/ngày thành chữ, bắt buộc đứng trước TTS |
 | `roadmap-drift-guard` | T2 | 27/08 | *ngoài lộ trình* — răng cho luật cập nhật của chính file này |
 | `gate-tooling-t1` | T2 | 27/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: đường hợp lệ để sửa guard, trả ba nợ 0.8 |
+| `chong-doc-sai-em-ru` | T3 | 29/08 | **1.3** — bộ đọc TỪ CHỐI thay vì phát nội dung sai; 11/12 tiêu chí, sáu giới hạn có tên |
 
 <!-- roadmap-ledger:end -->
 

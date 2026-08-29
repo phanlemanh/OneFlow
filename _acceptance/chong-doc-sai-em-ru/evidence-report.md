@@ -8,7 +8,7 @@ verified_by: fresh-context machine lane (không hội đồng — xem §Vì sao 
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 665ff72bf34a07fc6156be70360d7dcf5dfc0592
-human_signoff:
+human_signoff: Phan Le Manh 2026-08-29
 ---
 
 # Evidence Report: chống đọc sai êm ru
