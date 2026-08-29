@@ -202,6 +202,79 @@ cách bỏ ô.
   bằng một hạn tự làm mới đặt cứng ngắn hơn TTL; không làm hôm nay vì chưa AC nào
   đòi, và một hạn đặt cứng theo hằng số của bên kia là thứ trôi lặng lẽ.)
 
+### Đợt đóng băng sau S4 vòng 8 (owner chốt 29/08/2026)
+
+Vòng 8 xanh cả 29 eval. Lớp phản biện vẫn ra 12 phát hiện, tỉ lệ **tăng** so với
+vòng 7 (2 nặng → 4 nặng) — đúng dấu hiệu lớp không hội tụ theo thiết kế. Một cái
+đã sửa (phép đo locale đo chỉ dẫn thay vì đầu ra). Mười một cái còn lại nằm dưới
+đây, **không** cái nào được đo bởi một AC nào; người ký nhận chúng trước khi phát
+hành. Chúng không bị vứt: hai thứ có cấu tính đi vào hợp đồng con
+(xem `decisions.jsonl` d-20260829T123449Z-8004).
+
+**Khuyết tật sản phẩm**
+
+- **Payload của library chỉ được kiểm MỘT tầng.** `client.server.ts` trả
+  `body as T`; `readResults` kiểm `Array.isArray(record.cards)` rồi ép sang
+  `MediaCard[]`. `media-card-list.tsx` sau đó đọc thẳng `card.renditions.thumb_url`.
+  Một 200 mang card thiếu `renditions` ném TypeError **trong lúc React render**,
+  thay vì rơi về trạng thái `BAD_RESPONSE` mà chính bảng phân loại đã định nghĩa.
+  Đây là cùng lớp lỗi đã sửa ở nhánh 2xx của `pick()` vòng 7, chỉ thấp hơn một
+  tầng — và chính vì thế nó **không** được vá tiếp ở đây: điều lệ ngừng-vá cấm mở
+  vòng thứ ba trên cùng một lớp. Cách sửa đúng là kiểm một lần ở biên, đã đưa sang
+  hợp đồng con. Lưu ý luật "hợp đồng chỉ ép lúc biên dịch" của `CLAUDE.md` áp cho
+  biên ABI/plugin; media-library là dịch vụ REST **ngoài**, nơi luật chung
+  "kiểm ở biên hệ thống, không tin dữ liệu ngoài" mới là luật áp.
+- **`.mkv` nhập được nhưng không bao giờ phát được.** `MIME_TO_EXT` ánh xạ
+  `video/x-matroska` → `mkv`, nhưng bảng `MIME_TYPES` của
+  `/api/uploads/[...path]/route.ts` không có mục `.mkv`, nên file phát ra dưới
+  `application/octet-stream`; trong khi `task/completion.ts` lại xếp `mkv` là video
+  nên canvas vẫn dựng thẻ `<video>`. Người dùng thấy "nhập thành công" rồi nhận một
+  clip câm không lỗi ở đâu cả. **Đây đúng thứ mà chú thích đầu `extension.ts` nói
+  module đó sinh ra để chặn.** Gỡ bằng cách thêm `.mkv` vào bảng MIME của uploads,
+  hoặc bỏ `mkv` khỏi `MIME_TO_EXT` — một dòng, nhưng nằm ngoài đóng băng.
+- **Nhập lần hai từ cùng một node ghi đè lần một.** `pick()` gọi `expands` với
+  DUY NHẤT khoá vừa nhập, và `addMediaLibraryNode` không nằm trong `DATA_NODE_TYPES`
+  nên `use-flow` gom con theo kiểu và tái dùng: `{...node.data, ...data}` thay
+  `fileKeys` nguyên khối. Clip A biến mất khỏi canvas, không một câu nào. Mọi node
+  `add/*` khác truyền cả danh sách tích luỹ của mình, nên ngữ nghĩa "thay" đúng ở
+  đó và sai ở đây.
+- **Băng "kết quả chưa xếp theo nghĩa" tắt ngay khi bấm chọn.** `isUnranked()` chỉ
+  đúng khi `kind === "results"`. Biến thể `importing` được cấp `warnings` chính là
+  để giữ băng đó suốt lượt nhập, và node có mang nó sang — nhưng không ai đọc.
+  Trường `warnings` trên `importing` là mã chết như đang viết.
+- **Phím Enter mở được lượt tìm thứ hai khi lượt một chưa xong.** Nút Tìm có khoá
+  theo `outcome.kind === "searching"`, ô nhập thì không; hai phản hồi về không theo
+  thứ tự thì cái cũ ghi đè cái mới.
+
+**Vệ sinh mã**
+
+- **Bảng cấu hình dùng id DOM tĩnh.** `id="media-library-url"` là hằng, trong khi
+  mọi node `add/*` khác gắn id theo node (`file-upload-${id}`) đúng vì một canvas
+  chứa được nhiều bản. Hai node chưa cấu hình trên cùng canvas phát id trùng và
+  cả hai `<Label htmlFor>` trỏ về ô của node thứ nhất. Guard a11y của chính tính
+  năng chạy trên trang proto một-bản nên **không thể** thấy điều này.
+- **Thân phản hồi không được xả trên nhánh chuyển hướng thủ công.** `fetchGuarded`
+  dùng `redirect: "manual"` và chỉ đọc header `location`; nhánh không-OK của
+  `importAsset` cũng trả về mà không đọc thân. Dưới undici, thân chưa đọc giữ kết
+  nối ngoài pool tới lúc GC.
+
+**Lỗ thủng của chính bộ đo — nợ kỹ thuật có tên**
+
+- **E18/AC-11 tuyên quét cả LỚP nhưng chỉ có điểm-case.**
+  `extension-serving.server.test.ts` nói "phục vụ đúng kiểu video cho **mỗi** đuôi
+  mà đường nhập có thể chọn" nhưng chỉ chạy `webm` và `mp4`; `mkv` và `mov` chưa
+  từng đi vòng qua route. Phần tử bị bỏ chính là lỗi `.mkv` ở trên. **Một ô PASS
+  chứng minh được là không thể nhìn thấy khuyết tật thật thì không phải bằng
+  chứng** — owner đã đọc câu này và vẫn chọn đóng băng.
+- **Assertion âm-tính-một-mình.** `import-roundtrip.server.test.ts` ca "URL ký
+  không tải được" thực ra chết ở nhánh malformed, chưa từng chạm đường tải; nó
+  khẳng định *không* xảy ra điều gì mà không ghim *vì sao*.
+- **Kịch bản đo E4 không có assert và luôn `exit 0`.** Đối chứng dương được thu
+  nhưng không bao giờ được so.
+- **Guard đồ thị import chỉ thấy khai báo `import`.** `import-graph.mjs` bỏ qua
+  re-export và `import()` động, nên `check-no-boot-dependency` /
+  `check-no-dormant-fetch` đi lọt hai lối.
+
 ## Notes
 - `suggested_in_s` / `suggested_out_s` có trong schema nhưng library **chưa bao giờ
   điền** — không xây gì trên chúng hôm nay.
