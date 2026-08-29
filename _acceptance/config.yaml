@@ -650,7 +650,17 @@ feature_loop:
     - executors.script.gen_abi_clean
 
 dev_server:
-  start: "pnpm dev"
+  # Own dist dir, not the shared `.next`. The machine lane runs
+  # `pnpm build && pnpm typecheck` (a standing suite key) in PARALLEL with the
+  # ui-check lane, and a build landing while this server serves deletes the
+  # chunks it is handing out. next.config.ts measured all three arms and named
+  # this opt-out; only PAGES die, so the round loses its UI evidence while the
+  # route-handler evals stay green — a broken round that reads like a clean one.
+  # E24 boots its own server under build/aml-a11y for the same reason.
+  # Cost, also measured there: Next rewrites tsconfig.json when the dist dir
+  # differs from the recorded one, so a run must restore that file or the same
+  # round's lint goes red on an otherwise clean tree.
+  start: "NEXT_DIST_DIR=build pnpm dev"
   url: "http://localhost:3000"
 
 # capture.ui: omitted for now — no screenshot-to-file command in repo yet.

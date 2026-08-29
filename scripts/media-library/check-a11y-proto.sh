@@ -18,10 +18,19 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-# Next rewrites tsconfig.json's `include` to point at whichever dist dir is
-# live, so a run with NEXT_DIST_DIR leaves the tree dirty and `pnpm lint:check`
-# red for a reason that has nothing to do with the feature. Restore it on the
-# way out, however this script exits.
+# Belt and braces on tsconfig.json.
+#
+# Next rewrites its `include` to point at whichever dist dir is live, and
+# rewriting REFORMATS the whole file — S4 round 8 went red on a `+ "exclude":`
+# line nobody had touched, which is the tell that a tool rewrote the file
+# rather than a human editing it. Restoring on exit was never enough: the
+# suite runs in parallel, so lint samples the file DURING the window, not
+# after it. The real fix is in tsconfig.json, whose `include` now pre-declares
+# every dist dir this repo's tooling can use, so Next finds its entry already
+# there and writes nothing. Measured across all three dirs: untouched.
+#
+# This restore stays as a second line of defence for a dist dir nobody
+# declared yet, and it must not be a bare `trap` of its own — see cleanup().
 # One trap, not two: a second `trap ... EXIT` REPLACES the first, so the server
 # would leak or the tsconfig would stay dirty depending on declaration order.
 cleanup() {
@@ -65,7 +74,12 @@ else
     # arms and named this exact opt-out; the tsconfig restore below is the
     # cleanup that opt-out requires, and it outlived the flag it cleaned up
     # after (S4 round 7 red: `pnpm build && pnpm typecheck` exit 1).
-    NEXT_DIST_DIR=build pnpm dev --port "$PORT" >/dev/null 2>&1 &
+    #
+    # A SUBdirectory of build/, not build/ itself: the ui-check lane's own dev
+    # server takes build/, so sharing it would just move the collision from
+    # build-vs-dev to dev-vs-dev. build/ is gitignored recursively, so the
+    # nested name needs no ignore rule of its own.
+    NEXT_DIST_DIR=build/aml-a11y pnpm dev --port "$PORT" >/dev/null 2>&1 &
     SERVER_PID=$!
     OWN_SERVER=1
 fi
