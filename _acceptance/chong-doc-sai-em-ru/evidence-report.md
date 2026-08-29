@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context machine lane (không hội đồng — xem §Vì sao LANE thay cho VÒNG)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 665ff72bf34a07fc6156be70360d7dcf5dfc0592
+verified_commit: df22a16b63139b3d34ab753a1ebefa76615e6cb7
 human_signoff: Phan Le Manh 2026-08-29
 ---
 
@@ -271,3 +271,7 @@ preflight GREEN, tất cả exit 0, mã gói đó không đổi một byte.
 ### Lane chốt — 2026-08-28, lane máy thuần thay cho vòng verify thứ bảy; 12 eval + 7 lệnh suite tại HEAD, preflight GREEN, tất cả exit 0. Lý do dùng lane thay vòng ở §Vì sao LANE thay cho VÒNG
 run_id: lane-chong-doc-sai-em-ru-20260828T133500Z
 sha: 665ff72bf34a07fc6156be70360d7dcf5dfc0592 · suites: 7 lệnh exit 0
+
+### Re-pin lần 1 — 2026-08-29, do nhánh `feat/add-media-library` thêm `scripts/media-library/**` và `src/app/api/media-library/**`, rơi vào vùng `paths` hồ sơ này khai. Trên chính `main` hồ sơ vẫn sạch — các file đó chưa tồn tại ở đó — nên staleness sinh ra từ nhánh, đúng như lần 3 của `conformance-l0` đã ghi: cổng chỉ nói thật khi chạy trên cây đã merge `main`. Bộ đọc không đổi một byte; một phiên tươi chạy lại cả 12 suite máy trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0
+run_id: repin-chong-doc-sai-em-ru-20260829T134935Z
+sha: df22a16b63139b3d34ab753a1ebefa76615e6cb7 · suites: 12 lệnh exit 0
