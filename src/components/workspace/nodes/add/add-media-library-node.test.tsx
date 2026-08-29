@@ -7,6 +7,9 @@
  * vocabulary survives, that the mandatory licence label is printed, and that a
  * thin shelf is worded differently from a failure.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import en from "@/i18n/messages/en.json";
@@ -21,6 +24,7 @@ import {
     VIDEO_CARD,
 } from "@/lib/media-library/__fixtures__/cards";
 import { MEDIA_LIBRARY_ERROR_CODES } from "@/lib/media-library/errors";
+import { readImportedFileKey } from "./add-media-library-node";
 import { MediaCardList } from "./media-card-list";
 import {
     codeForStatus,
@@ -262,5 +266,94 @@ describe("every failure code reaches a real, distinct sentence (AC-6)", () => {
         for (const code of failureCodes) {
             expect(copyFor(LOCALES.en, code)).not.toBe(thin);
         }
+    });
+});
+
+/**
+ * The import SUCCESS path (S4 round 7).
+ *
+ * Both halves below shipped because nothing exercised them: the node cannot be
+ * driven from a unit test, so the 2xx branch was the one response the feature
+ * read without checking. The reader is now a pure function for exactly that
+ * reason — the branch that has no test is the branch that rots.
+ */
+function jsonResponse(body: string): Response {
+    return new Response(body, {
+        status: 200,
+        headers: { "content-type": "application/json" },
+    });
+}
+
+describe("the import success body is read, not assumed (AC-9 / AC-10)", () => {
+    it("returns the file key when the body carries one", async () => {
+        const got = await readImportedFileKey(
+            jsonResponse(JSON.stringify({ fileKey: "uploads/abc.mp4" })),
+        );
+        expect(got).toBe("uploads/abc.mp4");
+    });
+
+    it("refuses a 200 whose body will not parse, instead of throwing", async () => {
+        // A dev-server or proxy error page answers HTML with a 200. Letting
+        // this reject sent the failure to the caller's network branch, which
+        // told the user to check MEDIA_LIBRARY_URL over a local fault.
+        const got = await readImportedFileKey(
+            jsonResponse("<!doctype html><title>oops</title>"),
+        );
+        expect(got).toBeNull();
+    });
+
+    it.each([
+        ["thiếu hẳn fileKey", "{}"],
+        ["fileKey null", JSON.stringify({ fileKey: null })],
+        ["fileKey rỗng", JSON.stringify({ fileKey: "" })],
+        ["fileKey không phải chuỗi", JSON.stringify({ fileKey: 42 })],
+    ])("refuses a 200 with %s", async (_kind, body) => {
+        // String(undefined) used to yield the literal "undefined", so the canvas
+        // gained a videoNode pointing at nothing while the node reported plain
+        // success — the wrong reading spoken confidently.
+        const got = await readImportedFileKey(jsonResponse(body));
+        expect(got).toBeNull();
+    });
+
+    it("never returns the string 'undefined'", async () => {
+        for (const body of ["{}", JSON.stringify({ fileKey: undefined })]) {
+            expect(await readImportedFileKey(jsonResponse(body))).not.toBe(
+                "undefined",
+            );
+        }
+    });
+});
+
+describe("the not-yet-configured panel speaks the viewer's language (AC-1)", () => {
+    const CATALOGUES = { en, vi, ja, ko, zh } as const;
+
+    it("has a translated sentence in every locale", () => {
+        for (const [locale, cat] of Object.entries(CATALOGUES)) {
+            const line = (cat as typeof en).Workspace.nodes.addMediaLibrary
+                .missingConfig;
+            expect(
+                typeof line === "string" && line.trim().length > 0,
+                `${locale}.json thiếu câu missingConfig — người dùng locale này sẽ thấy câu tiếng Việt của máy chủ`,
+            ).toBe(true);
+        }
+    });
+
+    it("renders that key at the call site, not the server sentence", () => {
+        // The server's message is Vietnamese by construction
+        // (config.server.ts). The node used to pass it straight to the panel,
+        // so an en/ja/ko/zh user met Vietnamese in the FIRST state they see —
+        // while this key sat unused in all five files (S4 round 7).
+        const source = readFileSync(
+            join(__dirname, "add-media-library-node.tsx"),
+            "utf8",
+        );
+        expect(
+            /message=\{t\("missingConfig"\)\}/.test(source),
+            "bảng cấu hình phải render t('missingConfig'), không phải outcome.message của máy chủ",
+        ).toBe(true);
+        expect(
+            /message=\{outcome\.message\}/.test(source),
+            "câu tiếng Việt của máy chủ vẫn đang được truyền thẳng ra mặt người",
+        ).toBe(false);
     });
 });

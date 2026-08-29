@@ -22,10 +22,53 @@ cd "$ROOT"
 # live, so a run with NEXT_DIST_DIR leaves the tree dirty and `pnpm lint:check`
 # red for a reason that has nothing to do with the feature. Restore it on the
 # way out, however this script exits.
-restore_tsconfig() { git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true; }
-trap restore_tsconfig EXIT
+# One trap, not two: a second `trap ... EXIT` REPLACES the first, so the server
+# would leak or the tsconfig would stay dirty depending on declaration order.
+cleanup() {
+    if [ "${OWN_SERVER:-0}" -eq 1 ] && [ -n "${SERVER_PID:-}" ]; then
+        kill "$SERVER_PID" 2>/dev/null || true
+        wait "$SERVER_PID" 2>/dev/null || true
+    fi
+    git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true
+}
+trap cleanup EXIT
 
-BASE="${BASE_URL:-http://localhost:3000}"
+# SELF-CONTAINED, like scripts/onboarding/check-a11y-proto.sh.
+#
+# This used to default to localhost:3000 and assume somebody had a dev server
+# up. Run by hand that is invisible — the author always has one. Run by a fresh
+# verification agent there is none, so the scan reached no page and the script
+# exited 3 (S4 round 7). Exit 3 was the right ANSWER; the question was wrong.
+# An eval that only passes on the machine that wrote it measures the machine.
+#
+# So boot a server on a port of our own and tear it down on the way out. A
+# dedicated port also rules out the opposite failure: silently scanning
+# somebody else's server, running somebody else's branch.
+#
+# BASE_URL still wins, so a human debugging can point this at a server they
+# are already watching.
+PORT="${AML_A11Y_PORT:-3198}"
+OWN_SERVER=0
+if [ -n "${BASE_URL:-}" ]; then
+    BASE="$BASE_URL"
+else
+    BASE="http://localhost:$PORT"
+    if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+        echo "FAIL: port $PORT is already in use — set AML_A11Y_PORT to a free port"
+        exit 1
+    fi
+    # Own dist dir, not the shared `.next`. Suite commands run in PARALLEL, and
+    # `pnpm build && pnpm typecheck` is a standing suite key: a build landing
+    # while this server serves deletes the chunks it is still handing out, and
+    # only PAGES die — the route-handler evals stay green, so the round reads
+    # like a healthy tree with a broken UI. next.config.ts measured all three
+    # arms and named this exact opt-out; the tsconfig restore below is the
+    # cleanup that opt-out requires, and it outlived the flag it cleaned up
+    # after (S4 round 7 red: `pnpm build && pnpm typecheck` exit 1).
+    NEXT_DIST_DIR=build pnpm dev --port "$PORT" >/dev/null 2>&1 &
+    SERVER_PID=$!
+    OWN_SERVER=1
+fi
 REPORT="${REPORT_PATH:-/tmp/aml-a11y.json}"
 STATES=(missing-config idle searching results thin-shelf unranked importing imported error version-mismatch)
 
@@ -34,6 +77,22 @@ for state in "${STATES[@]}"; do
     URLS+=("$BASE/proto/add-media-library?state=$state")
     URLS+=("$BASE/proto/add-media-library?state=$state&theme=dark")
 done
+
+# Dev compiles the route on first hit, so the first request is slow. Wait for
+# a real 200 before scanning; without this the sweep races the compiler and
+# reads an empty sheet as a clean one.
+if [ "$OWN_SERVER" -eq 1 ]; then
+    for i in $(seq 1 60); do
+        if curl -sf -o /dev/null "$BASE/proto/add-media-library?state=idle"; then
+            break
+        fi
+        if [ "$i" -eq 60 ]; then
+            echo "FAIL: dev server never served the proto route on port $PORT"
+            exit 3
+        fi
+        sleep 2
+    done
+fi
 
 EXPECTED=$(( ${#STATES[@]} * 2 ))
 if [ "${#URLS[@]}" -ne "$EXPECTED" ]; then

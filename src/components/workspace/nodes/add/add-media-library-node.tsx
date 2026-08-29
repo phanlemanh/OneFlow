@@ -79,6 +79,35 @@ async function readResults(response: Response): Promise<Outcome> {
     };
 }
 
+/**
+ * The import SUCCESS body, read as defensively as `readResults` reads the
+ * search one. Exported because the node cannot be driven from a unit test, and
+ * an unexercised branch is how both halves below shipped unnoticed (S4 round 7):
+ *
+ *   · a 200 whose body will not parse (a dev-server or proxy HTML page) used to
+ *     reject into the caller's outer catch and come back NETWORK_ERROR — telling
+ *     the user to check MEDIA_LIBRARY_URL over a fault that has nothing to do
+ *     with the remote service;
+ *   · an absent `fileKey` became the literal string "undefined" via String(),
+ *     so the canvas gained a videoNode pointing at nothing while the node
+ *     reported plain success. Every downstream consumer then failed far from
+ *     the cause.
+ *
+ * Returns the file key on success, or null when the body cannot back one.
+ */
+export async function readImportedFileKey(
+    response: Response,
+): Promise<string | null> {
+    let body: unknown;
+    try {
+        body = await response.json();
+    } catch {
+        return null;
+    }
+    const fileKey = (body as Record<string, unknown> | null)?.fileKey;
+    return typeof fileKey === "string" && fileKey ? fileKey : null;
+}
+
 async function readFailure(
     response: Response,
 ): Promise<{ code: string; message: string; missing: string[] }> {
@@ -173,15 +202,20 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 });
                 return;
             }
-            const body = await response.json();
+            const fileKey = await readImportedFileKey(response);
+            if (fileKey === null) {
+                setOutcome({
+                    kind: "failure",
+                    code: "BAD_RESPONSE",
+                    message: t("error"),
+                });
+                return;
+            }
             if (id) {
                 // Same shape every add node uses: the asset becomes a modality
                 // node downstream, this node keeps nothing.
                 expands(id, [
-                    {
-                        type: "videoNode",
-                        data: { fileKeys: [String(body.fileKey)] },
-                    },
+                    { type: "videoNode", data: { fileKeys: [fileKey] } },
                 ]);
             }
             setOutcome({ kind: "idle" });
@@ -238,7 +272,16 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 {outcome.kind === "missing-config" ? (
                     <MediaLibraryConfigPanel
                         missing={outcome.missing}
-                        message={outcome.message}
+                        // The viewer's own language, not the server's sentence.
+                        // The server's `message` is Vietnamese and stays a log
+                        // artefact — the same rule the `failure` branch already
+                        // follows via failureMessageKey(). This branch passed it
+                        // through, so an en/ja/ko/zh user met Vietnamese in the
+                        // FIRST state they ever see, while the translated key
+                        // sat unused in all five message files (S4 round 7).
+                        // The variable NAMES stay data and are rendered from
+                        // `missing`, so nothing about "name it exactly" is lost.
+                        message={t("missingConfig")}
                         labels={{
                             urlLabel: t("urlLabel"),
                             keyLabel: t("keyLabel"),
