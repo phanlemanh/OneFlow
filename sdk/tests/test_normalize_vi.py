@@ -8,9 +8,19 @@ corpus that can no longer catch the library.
 
 from __future__ import annotations
 
+import re
+import sys
 import unicodedata
 
-from tongflow.text.normalize_vi import has_money, normalize_vi
+from tongflow.text.normalize_vi import (
+    ERROR_EMPTY_INPUT,
+    ERROR_MONEY_UNIT_LOST,
+    ERROR_RESIDUAL_TOKENS,
+    NORMALIZE_ERROR_CODES,
+    has_money,
+    normalize_vi,
+)
+from tongflow.text.vi_dictionary import _ABBREVIATIONS, _PREFIXES
 
 # --------------------------------------------------------------------------
 # AC-2 — numbers and money, as a full matrix declared BEFORE the cases.
@@ -408,9 +418,709 @@ def test_iso_currency_codes_are_case_insensitive() -> None:
 
     for raw, expected in CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE:
         got = normalize_vi(raw)
-        assert got.ok is True, f"{raw!r} → {got.error}"
+        # Content claim, not an acceptance claim: the brand token must not turn
+        # into a currency reading. Since 2026-08-27 the capitalised spelling is
+        # refused by name (AC-4) — a stronger outcome than reading it — so the
+        # verdict is deliberately not asserted here.
         assert got.text == expected, (
             f"{raw!r} (ca ÂM, tên thương hiệu): mong {expected!r}, nhận {got.text!r}"
+        )
+
+
+def test_number_dash_number_that_is_not_a_range() -> None:
+    """A run that loses digits when read as a range must be refused, by name."""
+    for kind, raw, run in CORPUS_DASH_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r}: đọc thành khoảng làm MẤT chữ số, phải TỪ CHỐI — "
+            f"nhận ok=True -> {got.text!r}"
+        )
+        assert run in got.residual, (
+            f"[{kind}] {raw!r}: từ chối nhưng không nêu TÊN cụm ({run!r} không "
+            f"có trong {got.residual})"
+        )
+
+
+# A SURVIVING SLASH means the library gave up on that token, so the output is a
+# half-reading. Both criteria land here: a price written "đ/kg" (AC-10) and a
+# date the library could not parse (AC-9) leave the same character behind, which
+# is exactly why a post-check watching only digits was blind to both.
+CORPUS_SLASH_REFUSED: tuple[tuple[str, str], ...] = (
+    ("giá theo đơn vị", "Giá 50.000 đ/kg"),
+    ("lãi theo năm", "Lãi 5%/năm"),
+    ("giá theo lít", "Giá 20.000 ₫/lít"),
+    ("ngày kiểu Mỹ", "ngày 12/25/2026"),
+    ("ngày không tồn tại", "ngày 32/8/2026"),
+    ("ngày kiểu Mỹ, không có chữ ngày", "12/25/2026"),
+    # The SAME mis-parse written with dashes. `_pre` rewrites "d-m-y" into
+    # "d/m/y", so these carry no slash in the raw input at all — a rule that
+    # asked the RAW input whether a numeric slash existed let every one of them
+    # through speaking a wrong date with ok=True (S4 round 3). They are also
+    # invisible to the dash-run rule, which deliberately masks `_DASH_DATE`
+    # matches, so this family has exactly one net left.
+    ("ngày kiểu Mỹ viết bằng gạch ngang", "Hop dong 12-25-2026 co hieu luc"),
+    ("cùng ca, gạch en", "Hop dong 12–25–2026"),
+    ("ngày có nhóm 0 đứng đầu, gạch ngang", "Han 00-12-2026"),
+)
+
+# ...and the slashes that must NOT be flagged. Two different reasons, both real:
+#
+#  - the library reads some of them into words ("100km/h"), so no slash survives;
+#  - ordinary prose slashes were never a number, and a rule watching only the
+#    OUTPUT refused all of them. Measured at S4 round 2: "và/hoặc", "TP/HCM",
+#    "nam/nữ", "N/A" every one came back ok=False naming "/" while the speech
+#    string was already correct. A false refusal blocks the whole voice chain
+#    over text carrying no number at all, so these carry the same weight as the
+#    positive cases.
+CORPUS_SLASH_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Tốc độ 100km/h", "tốc độ một trăm ki lô mét trên giờ"),
+    ("Giá 5/3 triệu", "giá năm tháng ba triệu"),
+    ("và/hoặc là được", "và/hoặc là được"),
+    # Measured, not guessed: the library spells the letters out rather than
+    # expanding the abbreviation. Either reading is speakable; what matters for
+    # AC-10 is that it is NOT refused.
+    ("TP/HCM đông quá", "tê pê/hát xê em đông quá"),
+    ("Giới tính nam/nữ", "giới tính nam/nữ"),
+    ("Trạng thái N/A", "trạng thái n/a"),
+    # BOTH families in one string. The date reads perfectly and only the prose
+    # slash survives, so refusing here fails a whole voice chain over text that
+    # was read correctly. Testing the two halves independently over the whole
+    # string did exactly that (S4 round 3) — the corpus had no mixed case, so
+    # 37 tests stayed green over it.
+    (
+        "Ngày 19/8/2026 và/hoặc thứ hai",
+        "ngày mười chín tháng tám năm hai nghìn không trăm hai mươi sáu và/hoặc thứ hai",
+    ),
+    ("Giá 5 triệu, nam/nữ đều được", "giá năm triệu, nam/nữ đều được"),
+)
+
+# ---------------------------------------------------------------------------
+# DECLARED LIMITS, pinned so they cannot rot.
+#
+# A limit written in the contract and nowhere else is a claim nobody re-checks:
+# the day a library bump or a rule change closes it, the file keeps confessing
+# to a defect that no longer exists, and the next reader trusts a lie. So each
+# declared limit is measured HERE with its today-behaviour, and the test goes
+# red when the limit HEALS — that red is the reminder to delete it from the
+# contract. Same shape as `test_idempotence_exclusions_are_still_broken`.
+#
+# Root cause of all four, written once: `_NUM_LEFT_OF_SLASH` is a LEXICAL guess
+# about what standing next to a slash makes it a number. It cannot see that
+# "100đ" (no space before đ) is money, that "/home" is a path, or that a domain
+# is a domain. Closing these needs a token classifier — money / unit / path /
+# idiom — which is a contract of its own, not a fifth patch to this regex
+# (owner, 2026-08-28, after four rounds each fixing a different wrong scope).
+
+# AC-10: two slash families the rule reads instead of refusing.
+CORPUS_SLASH_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "hai họ gạch chéo triệt tiêu nhau",
+        "Tốc độ 100km/h, lãi 5%/năm",
+        "tốc độ một trăm ki lô mét trên giờ, lãi năm phần trăm/năm",
+    ),
+    (
+        "tiền không dấu cách, trộn hai họ",
+        "Giá 100đ/kg và/hoặc 200đ/lít",
+        "giá một trăm đồng/kg và/hoặc hai trăm đồng/lít",
+    ),
+)
+
+# AC-2: the "đường dẫn" half. A scheme or a `www.` prefix is recognised; a bare
+# path and a schemeless domain are not, and their raw slashes reach the voice.
+CORPUS_PATH_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    ("đường dẫn trần", "Mở /home/user/file.txt", "mở /hôm/u xơ/phai.txt"),
+    (
+        "tên miền không có scheme",
+        "Truy cập oneflow.vn/gia",
+        "truy cập o nép lô.vn/gia",
+    ),
+)
+
+
+# Two more, found at S4 round 5. They sit on DIFFERENT tiers and the file says
+# so, because "reads instead of refusing" covers two very unlike harms:
+#
+#   MẤT DỮ LIỆU  — the reading itself is WRONG. Heaviest tier; this is the exact
+#                  shape the whole contract exists to prevent, and it is declared
+#                  rather than closed only because closing it needs the token
+#                  classifier (see the root note above).
+#   TỪ CHỐI OAN  — the reading is CORRECT and we refuse anyway. Blocks the voice
+#                  chain, but never speaks anything false.
+CORPUS_DATA_LOSS_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "ngày nửa-đọc lọt khi câu còn một gạch chéo văn xuôi BỊ NUỐT",
+        "ngày 12/25/2026, tốc độ 100km/h",
+        "ngày mười hai tháng hai/hai nghìn không trăm hai mươi sáu, "
+        "tốc độ một trăm ki lô mét trên giờ",
+    ),
+)
+
+CORPUS_FALSE_REFUSAL_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
+    (
+        "khoảng thập phân dùng DẤU PHẨY",
+        "Giá 1,05-2,5 triệu",
+        "giá một phẩy không năm đến hai phẩy năm triệu",
+    ),
+)
+
+
+def test_data_loss_limit_is_still_broken() -> None:
+    """The heaviest declared limit, pinned so it cannot rot unnoticed.
+
+    Unlike the others this one SPEAKS A WRONG READING: the 25 is gone and the
+    month is read as 2. It is here, and not in the code, only because the owner
+    ruled at round 5 that closing it needs the token classifier — a contract of
+    its own. Anyone who makes this go green has fixed a real defect and must
+    delete this block along with the contract entry.
+    """
+    for kind, raw, today in CORPUS_DATA_LOSS_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"[{kind}] {raw!r} NAY ĐÃ BỊ TỪ CHỐI — giới hạn MẤT DỮ LIỆU đã đóng. "
+            f"Gỡ nó khỏi contract §Known limits và khỏi corpus này."
+        )
+        assert got.text == today, (
+            f"[{kind}] {raw!r}: hành vi đã đổi — mong {today!r}, nhận {got.text!r}"
+        )
+
+
+def test_false_refusal_limit_is_still_broken() -> None:
+    """A refusal we know is wrong: the reading was already correct."""
+    for kind, raw, correct_reading in CORPUS_FALSE_REFUSAL_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r} NAY ĐÃ ĐỌC ĐƯỢC — giới hạn đã lành, gỡ khỏi "
+            f"contract §Known limits và khỏi corpus này."
+        )
+        assert got.text == correct_reading, (
+            f"[{kind}] {raw!r}: bản đọc bị từ chối lẽ ra ĐÚNG — mong "
+            f"{correct_reading!r}, nhận {got.text!r}"
+        )
+
+
+def test_declared_limits_are_still_broken() -> None:
+    """A declared limit that has quietly healed is a lie in the contract."""
+    for kind, raw, today in CORPUS_SLASH_KNOWN_LIMIT + CORPUS_PATH_KNOWN_LIMIT:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"[{kind}] {raw!r} NAY ĐÃ BỊ TỪ CHỐI — giới hạn đã lành. Gỡ nó khỏi "
+            f"contract §Known limits và khỏi corpus này, đừng để hồ sơ nhận một "
+            f"khuyết tật không còn tồn tại. residual={got.residual}"
+        )
+        assert got.text == today, (
+            f"[{kind}] {raw!r}: hành vi hôm nay đã đổi — mong {today!r}, "
+            f"nhận {got.text!r}. Cập nhật cả contract lẫn dòng này."
+        )
+
+
+# The written "ngày" must SURVIVE when the date is not readable — dropping it was
+# how a half-parsed date lost a field silently.
+CORPUS_DAY_WORD_KEPT: tuple[tuple[str, str], ...] = (
+    ("ngày 12/25/2026", "ngày"),
+    ("ngày 32/8/2026", "ngày"),
+)
+
+
+def test_surviving_slash_is_refused() -> None:
+    for kind, raw in CORPUS_SLASH_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"[{kind}] {raw!r}: dấu gạch chéo còn sót là token CHƯA ĐỌC ĐƯỢC, "
+            f"phải TỪ CHỐI — nhận ok=True -> {got.text!r}"
+        )
+        assert "/" in got.residual, (
+            f"[{kind}] {raw!r}: từ chối nhưng không nêu dấu gạch chéo: {got.residual}"
+        )
+
+
+def test_readable_slash_is_not_flagged() -> None:
+    for raw, expected in CORPUS_SLASH_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"{raw!r} (ca ÂM): thư viện ĐỌC ĐƯỢC dấu gạch chéo này, không được "
+            f"từ chối — {got.error}"
+        )
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
+def test_day_word_survives_an_unreadable_date() -> None:
+    """AC-9 in full, not just its first word.
+
+    The single `startswith` assert this used to carry passed on `text="ngày"`
+    alone, and passed on ok=True with a mis-read date — while E6's other test
+    (`test_datetime_golden`) only carries VALID dates. So the half AC-9 calls its
+    core, "refuse and name the token rather than swallow a date component", was
+    in no test E6 ran; it lived only in a test belonging to AC-10 (S4 round 6).
+    """
+    for raw, word in CORPUS_DAY_WORD_KEPT:
+        got = normalize_vi(raw)
+        assert got.text.startswith(word), (
+            f"{raw!r}: chữ {word!r} bị nuốt dù ngày không đọc được — đó là cách "
+            f"một thành phần của ngày biến mất trong im lặng: {got.text!r}"
+        )
+        assert got.ok is False, (
+            f"{raw!r}: ngày KHÔNG đọc được mà vẫn ok=True — chữ {word!r} còn "
+            f"đó không cứu được gì nếu chuỗi vẫn được gửi cho giọng đọc: "
+            f"{got.text!r}"
+        )
+        assert got.residual, (
+            f"{raw!r}: từ chối mà không NÊU TÊN cụm nào — người dùng không biết "
+            f"sửa gì"
+        )
+        assert got.text != word, (
+            f"{raw!r}: đầu ra chỉ còn đúng chữ {word!r}, phần ngày biến mất hẳn"
+        )
+
+
+# A brand token that reads differently on every pass is not being read at all.
+# Refused BY NAME rather than excluded from the idempotence sweep, which is where
+# "VNDirect" used to hide (AC-4).
+CORPUS_BRAND_REFUSED: tuple[tuple[str, str], ...] = (
+    ("Công ty VNDirect niêm yết", "VNDirect"),
+    ("Mua qua VNDirect", "VNDirect"),
+)
+
+# ...and the Latin tokens the library reads STABLY, which must keep reading.
+CORPUS_BRAND_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Mã VNDS hôm nay", "mã vê en đê ét hôm nay"),
+    ("Dùng iPhone 15", "dùng ai phôn mười lăm"),
+)
+
+# A URL does not read badly — it DISAPPEARS, taking the sentence's subject with
+# it (AC-2).
+CORPUS_URL_REFUSED: tuple[tuple[str, str], ...] = (
+    ("Xem tại https://oneflow.vn/gia nhé", "https://oneflow.vn/gia"),
+    ("Vào www.oneflow.vn xem", "www.oneflow.vn"),
+)
+
+
+def test_unstable_brand_token_is_refused_by_name() -> None:
+    for raw, token in CORPUS_BRAND_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: token đọc lại ra KHÁC là token chưa đọc được, phải TỪ "
+            f"CHỐI — nhận ok=True -> {got.text!r}"
+        )
+        assert token in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu tên token: {got.residual}"
+        )
+
+
+def test_stable_latin_token_still_reads() -> None:
+    for raw, expected in CORPUS_BRAND_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} (ca ÂM) bị từ chối: {got.error}"
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
+def test_url_is_refused_by_name() -> None:
+    for raw, url in CORPUS_URL_REFUSED:
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"{raw!r}: địa chỉ web BIẾN MẤT khỏi câu, phải TỪ CHỐI — nhận "
+            f"ok=True -> {got.text!r}"
+        )
+        assert url in got.residual, (
+            f"{raw!r}: từ chối nhưng không nêu địa chỉ: {got.residual}"
+        )
+
+
+def test_refusal_paths_return_stable_codes() -> None:
+    """Two-way: nothing produced is undeclared, nothing declared is dead.
+
+    The set is what a user-facing message is rendered FROM (AC-6), so a code
+    that no path produces would be a translation key nobody can ever see, and a
+    code produced but undeclared would reach the UI with no sentence attached.
+    """
+    produced: dict[str, str] = {}
+    for raw, _ in ALL_CORPUS:
+        got = normalize_vi(raw)
+        if got.code:
+            produced.setdefault(got.code, raw)
+    for raw in ("", "   "):
+        got = normalize_vi(raw)
+        if got.code:
+            produced.setdefault(got.code, raw)
+
+    undeclared = sorted(set(produced) - NORMALIZE_ERROR_CODES)
+    assert undeclared == [], (
+        f"mã lỗi sinh ra nhưng không khai trong NORMALIZE_ERROR_CODES: {undeclared}"
+    )
+    assert {ERROR_EMPTY_INPUT, ERROR_RESIDUAL_TOKENS} <= set(produced), (
+        "hai mã này phải đạt tới bằng đầu vào THẬT trong corpus, không phải bằng "
+        f"phép nhiễu — hiện đạt tới: {sorted(produced)}"
+    )
+
+    # MONEY_UNIT_LOST is a BACKSTOP, and saying so out loud is the point: the
+    # currency pre-pass always injects the word, so no natural input reaches it.
+    # A guard nobody has ever seen fire is indistinguishable from a dead one, so
+    # it is proven here by removing the pre-pass it backs up.
+    # `import tongflow.text.normalize_vi as module` binds the FUNCTION, not the
+    # module: the package re-exports normalize_vi under the same name, so the
+    # attribute lookup wins. Reach the module object through sys.modules.
+    import sys
+
+    module = sys.modules["tongflow.text.normalize_vi"]
+
+    saved = module.CURRENCY_SIGN_PATTERNS
+    module.CURRENCY_SIGN_PATTERNS = ()
+    try:
+        hurt = normalize_vi("Tổng 1.999.000₫")
+    finally:
+        module.CURRENCY_SIGN_PATTERNS = saved
+    assert hurt.code == ERROR_MONEY_UNIT_LOST, (
+        "gỡ bước tiền xử lý ký hiệu tiền mà lưới chặn mất-đơn-vị-tiền KHÔNG bắn "
+        f"— nó đã chết: nhận code={hurt.code!r}, ok={hurt.ok}"
+    )
+
+    dead = sorted(NORMALIZE_ERROR_CODES - set(produced) - {ERROR_MONEY_UNIT_LOST})
+    assert dead == [], f"mã khai nhưng không đường nào sinh ra: {dead}"
+
+
+def test_every_refusal_carries_a_code() -> None:
+    """A refusal with no code cannot be shown to a non-Vietnamese user."""
+    for raw, _ in ALL_CORPUS:
+        got = normalize_vi(raw)
+        if got.ok is False:
+            assert got.code in NORMALIZE_ERROR_CODES, (
+                f"{raw!r}: bị từ chối nhưng không mang mã máy đọc được "
+                f"(code={got.code!r}) — câu lỗi sẽ không dịch được"
+            )
+
+
+# THE TYPOGRAPHIC-DASH MATRIX — 3 dash characters × 3 roles, declared before the
+# cases. The claim is a RELATION, not a literal: a typographic dash must read
+# EXACTLY like its ASCII spelling, so the expectation is computed from the ASCII
+# twin rather than retyped. A literal table would let both halves drift together.
+#
+# Measured before the fold, every one ok=True with an empty residual:
+#   "Giá 5–10 triệu" -> "giá năm THÁNG mười triệu"   (read as a date)
+#   "Giá 5%–10%"     -> "giá năm phần trăm mười phần trăm"  ("đến" gone)
+#   "Nhiệt độ −7 độ" -> "nhiệt độ -bảy độ"  (the dash reached the speech)
+# The character axis is read out of the IMPLEMENTATION, not retyped. A fourth
+# typographic dash added to `_TYPOGRAPHIC_DASHES` without cases is then red by
+# name, instead of a matrix that quietly stays "complete" because it was
+# generated from its own axis (S4 round 4 finding: the cells were built by a
+# comprehension over DASH_CHARS × DASH_ROLES and then asserted against those
+# same two dicts, so `missing` was the empty list by construction and no change
+# whatsoever could turn the measure red).
+DASH_CHARS: dict[str, str] = {
+    unicodedata.name(ch).split()[0].lower(): ch
+    for ch in sys.modules["tongflow.text.normalize_vi"]._TYPOGRAPHIC_DASHES
+}
+DASH_ROLES: dict[str, str] = {
+    "khoảng số": "Giá 5{d}10 triệu",
+    "khoảng có đơn vị": "Giá 5%{d}10%",
+    "âm": "Nhiệt độ {d}7 độ",
+}
+
+# WRITTEN OUT, one line per cell — deliberately not a comprehension. This is the
+# case list the completeness assert measures; generating it from the axes is
+# what made that assert vacuous. Deleting a line here is red by name.
+TYPOGRAPHIC_DASH_MATRIX: dict[tuple[str, str], str] = {
+    ("en", "khoảng số"): "Giá 5\u201310 triệu",
+    ("en", "khoảng có đơn vị"): "Giá 5%\u201310%",
+    ("en", "âm"): "Nhiệt độ \u20137 độ",
+    ("em", "khoảng số"): "Giá 5\u201410 triệu",
+    ("em", "khoảng có đơn vị"): "Giá 5%\u201410%",
+    ("em", "âm"): "Nhiệt độ \u20147 độ",
+    ("minus", "khoảng số"): "Giá 5\u221210 triệu",
+    ("minus", "khoảng có đơn vị"): "Giá 5%\u221210%",
+    ("minus", "âm"): "Nhiệt độ \u22127 độ",
+}
+
+# Compound words are the case the fold must NOT touch: the library writes real
+# Vietnamese compounds with a hyphen ("ki-lô-mét"), and an earlier residual rule
+# that flagged those rejected correct output.
+CORPUS_DASH_NEGATIVE: tuple[tuple[str, str], ...] = (
+    ("Quãng ki-lô-mét", "quãng ki lô mét"),
+    ("Quãng ki\u2013lô\u2013mét", "quãng ki lô mét"),
+    ("Đường Hai-Bà-Trưng", "đường hai bà trưng"),
+)
+
+
+# Every cell of the dash matrix has a case today. The mapping is declared empty
+# rather than omitted so the shape matches its sibling matrices: the day a cell
+# becomes genuinely unreachable, there is an obvious place to name it and a
+# reason to write, instead of a row quietly going missing.
+DELIBERATELY_UNCOVERED_DASH_CELLS: dict[tuple[str, str], str] = {}
+
+
+def test_dash_matrix_has_no_silently_empty_cell() -> None:
+    missing = [
+        (d, r)
+        for d in DASH_CHARS
+        for r in DASH_ROLES
+        if (d, r) not in TYPOGRAPHIC_DASH_MATRIX
+        and (d, r) not in DELIBERATELY_UNCOVERED_DASH_CELLS
+    ]
+    assert missing == [], f"ô ma trận gạch kiểu chữ còn trống: {missing}"
+
+    # ...and the other way. A case for a character the implementation no longer
+    # folds is a case measuring nothing, and it would otherwise sit here looking
+    # like coverage.
+    stray = [
+        (d, r) for (d, r) in TYPOGRAPHIC_DASH_MATRIX if d not in DASH_CHARS
+    ]
+    assert stray == [], (
+        f"ma trận có ô cho ký tự mà bản cài đặt không còn gấp: {stray}"
+    )
+
+
+def test_typographic_dashes_read_as_ascii() -> None:
+    """Relation, not literal: the typographic twin must equal the ASCII one."""
+    for (dash_name, role_name), raw in sorted(TYPOGRAPHIC_DASH_MATRIX.items()):
+        ascii_twin = DASH_ROLES[role_name].format(d="-")
+        want = normalize_vi(ascii_twin)
+        assert want.ok is True, (
+            f"ca ASCII đối chứng {ascii_twin!r} tự nó đã hỏng — {want.error}"
+        )
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"ô ({dash_name}, {role_name}) — {raw!r} bị từ chối: {got.error}"
+        )
+        assert got.text == want.text, (
+            f"ô ({dash_name}, {role_name}) — {raw!r} đọc KHÁC bản ASCII "
+            f"{ascii_twin!r}: nhận {got.text!r}, mong {want.text!r}"
+        )
+
+
+def test_compound_word_hyphen_is_not_a_range() -> None:
+    for raw, expected in CORPUS_DASH_NEGATIVE:
+        got = normalize_vi(raw)
+        assert got.ok is True, f"{raw!r} (ca ÂM) bị từ chối: {got.error}"
+        assert got.text == expected, (
+            f"{raw!r} (ca ÂM, từ ghép): mong {expected!r}, nhận {got.text!r}"
+        )
+        assert "đến" not in got.text, (
+            f"{raw!r}: từ ghép bị đọc thành khoảng — {got.text!r}"
+        )
+
+
+# THE DICTIONARY COVERAGE MATRIX — one positive and one negative case for EVERY
+# entry, with the subject set read off the DICTIONARY ITSELF. Adding an entry to
+# vi_dictionary.py without adding cases turns this red by name; a hand-copied
+# list of entries could not do that, and 6 of the 11 entries had no case at all
+# until this matrix existed.
+#
+# The negative half is what proves the letter anchor does anything: "VNDirect"
+# became "đồngirect" and "H.264" became "huyện 264" precisely because an entry
+# was matched without one.
+DICT_ABBREV_MATRIX: dict[str, tuple[str, str]] = {
+    src: (f"Địa chỉ ở {src} hôm nay", f"Mã X{src}Y hôm nay")
+    for src, _dst in _ABBREVIATIONS
+}
+
+DICT_PREFIX_MATRIX: dict[str, tuple[str, str]] = {
+    src: (
+        f"Ở {src}7 hôm nay" if src in ("Q.", "P.") else f"Ở {src}Bến Nghé hôm nay",
+        f"Ở {src}abc hôm nay",
+    )
+    for src, _dst, _rule in _PREFIXES
+}
+
+
+def test_dictionary_matrix_covers_every_entry() -> None:
+    """Each generated case must actually CONTAIN the entry it claims to cover.
+
+    Deriving the cases from the dictionary is the point — add an entry and it is
+    covered automatically — so "is every entry a key?" is an identity and cannot
+    fail (S4 round 5 finding). The relation that CAN fail is the one below: a
+    template edit that stops embedding `src` leaves a case that runs, passes, and
+    measures a different string than the entry it is filed under. The prefix
+    templates already branch on `src`, so this is not hypothetical.
+    """
+    for src, _dst in _ABBREVIATIONS:
+        pos, neg = DICT_ABBREV_MATRIX[src]
+        assert src in pos and src in neg, (
+            f"ca của mục viết tắt {src!r} không chứa chính nó — "
+            f"dương={pos!r}, âm={neg!r}"
+        )
+    for src, _dst, _rule in _PREFIXES:
+        pos, neg = DICT_PREFIX_MATRIX[src]
+        assert src in pos and src in neg, (
+            f"ca của tiền tố {src!r} không chứa chính nó — "
+            f"dương={pos!r}, âm={neg!r}"
+        )
+
+
+def test_every_dictionary_entry_expands_and_is_anchored() -> None:
+    """Positive: the entry expands. Negative: glued to letters it must NOT."""
+    for src, dst in _ABBREVIATIONS:
+        pos, neg = DICT_ABBREV_MATRIX[src]
+        # The WHOLE expansion, not its first word. "thành" is the head of
+        # TP.HCM, TPHCM, TP.HN and the TP. prefix alike, so a head-only check
+        # cannot tell an entry's own expansion from one another rule produced —
+        # swap TP.HN's target to the wrong city and it stays green (S4 round 6).
+        want = dst.lower()
+        got_pos = normalize_vi(pos)
+        assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
+        assert want in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung ĐÚNG — mong nguyên cụm {want!r} trong "
+            f"{got_pos.text!r}"
+        )
+        got_neg = normalize_vi(neg)
+        assert want not in got_neg.text.lower(), (
+            f"{src}: ca ÂM bung dù token dính chữ — mỏ neo chữ cái không có tác "
+            f"dụng: {got_neg.text!r}"
+        )
+
+    for src, dst, _rule in _PREFIXES:
+        pos, neg = DICT_PREFIX_MATRIX[src]
+        want = dst.strip().lower()
+        got_pos = normalize_vi(pos)
+        assert got_pos.ok is True, f"{src}: ca DƯƠNG bị từ chối — {got_pos.error}"
+        assert want in got_pos.text.lower(), (
+            f"{src}: ca DƯƠNG không bung ĐÚNG — mong nguyên cụm {want!r} trong "
+            f"{got_pos.text!r}"
+        )
+        got_neg = normalize_vi(neg)
+        assert want not in got_neg.text.lower(), (
+            f"{src}: ca ÂM bung dù sau dấu chấm là chữ thường — mỏ neo không có "
+            f"tác dụng: {got_neg.text!r}"
+        )
+
+
+# THE AMBIGUOUS-Đ MATRIX — declared BEFORE the cases, the way the six sibling
+# families in this file are. The flat tuple above is the historical pin list: it
+# grew by four rows in round 17 and four more in round 19, each time AFTER a
+# reviewer found a leak, because a flat list cannot say which cell is empty.
+#
+# Two axes, both named by the leaks themselves:
+#   separator AFTER the mark — round 17: the refusal anchored on `[ \t]` while
+#     the two money rewrites anchored on `\s`, so newline / NBSP / nothing leaked
+#   token FOLLOWING that separator — round 19: the lookahead accepted only a
+#     LETTER, so Vietnamese street names that are NUMBERS (Đường 3/2, 30/4, 2/9)
+#     and addresses followed by a comma leaked
+D_SEPARATORS: dict[str, str] = {
+    "cách": " ",
+    "tab": "\t",
+    "xuống dòng": "\n",
+    "NBSP": "\xa0",
+    "không có": "",
+}
+D_FOLLOWING: dict[str, str] = {
+    "chữ": "Lê Lợi",
+    "số": "3/2, Q.10",
+    "dấu phẩy": ", Q.1",
+    "kết chuỗi": "",
+}
+
+AMBIGUOUS_D_MATRIX: dict[tuple[str, str], str] = {
+    (sep_name, follow_name): f"Số 25 Đ.{sep}{follow}"
+    for sep_name, sep in D_SEPARATORS.items()
+    for follow_name, follow in D_FOLLOWING.items()
+    if follow_name != "kết chuỗi"
+}
+
+# The whole "kết chuỗi" column is out of the refusal ON PURPOSE, and the reason is
+# the same for all five cells, so they are listed rather than silently absent.
+# Refusing a currency mark at end of string would take "Giá 500 đ" with it — the
+# single commonest price spelling this slot exists to read. Declared in the
+# contract's Known limits (widening of 2026-08-27); the five cells also collapse
+# to one input, because trailing whitespace before end of string is not a
+# separator anyone can see.
+DELIBERATELY_UNCOVERED_D_CELLS: dict[tuple[str, str], str] = {
+    (sep_name, "kết chuỗi"): (
+        "dấu tiền ở cuối chuỗi CỐ Ý vẫn đọc — chặn ở đó sẽ giết luôn 'Giá 500 đ'"
+    )
+    for sep_name in D_SEPARATORS
+}
+
+
+def test_ambiguous_d_separators_are_what_the_rule_calls_a_separator() -> None:
+    """The test's separator axis must be the IMPLEMENTATION's, not a wish.
+
+    `AMBIGUOUS_D_MATRIX` is generated from `D_SEPARATORS` × `D_FOLLOWING` and the
+    completeness test below then asserts against those same two dicts, so that
+    assert is an identity — it cannot fail. What CAN drift, invisibly, is the
+    axis itself: the rule decides what counts as a gap with `_SEP`, and if that
+    class narrows, a separator listed here stops being one while every cell
+    still reports "covered" (S4 round 5 finding, same shape as the dash matrix
+    at round 4). So assert the RELATION between axis and implementation.
+    """
+    module = sys.modules["tongflow.text.normalize_vi"]
+    sep_class = re.compile(module._SEP)
+    for name, sep in D_SEPARATORS.items():
+        if name == "không có":
+            # The deliberate non-separator: the zero-width gap. It must NOT be
+            # matched, and that is half the relation.
+            assert sep == "", f"ô '{name}' phải là khoảng trống rỗng, nhận {sep!r}"
+            continue
+        assert sep_class.fullmatch(sep), (
+            f"'{name}' ({sep!r}) được khai là dấu ngăn trong bộ ca, nhưng luật "
+            f"(_SEP = {module._SEP!r}) KHÔNG coi nó là dấu ngăn — ma trận đang "
+            f"đo một trục mà bản cài đặt không có"
+        )
+
+
+def test_ambiguous_d_following_tokens_are_what_the_rule_looks_for() -> None:
+    """The SECOND axis, anchored the same way as the first.
+
+    Round 6 anchored `D_SEPARATORS` to `_SEP` and stopped there — leaving
+    `D_FOLLOWING` free-floating, so deleting a key silently shrank the matrix
+    from 20 declared cells to 15 while every assert stayed green and the
+    evals.yaml text still said "20 ô" (S4 round 6 finding, found in the very
+    round chartered to close this shape). The rule's lookahead is what decides
+    which token counts as "following", so assert against it.
+    """
+    module = sys.modules["tongflow.text.normalize_vi"]
+    # The lookahead the rule actually carries: a word character, or a comma.
+    follows = re.compile(r"[^\W_]|,")
+    for name, token in D_FOLLOWING.items():
+        if name == "kết chuỗi":
+            assert token == "", f"ô '{name}' phải là kết chuỗi rỗng, nhận {token!r}"
+            continue
+        assert token and follows.match(token[0]), (
+            f"'{name}' ({token!r}) được khai là token-theo-sau trong bộ ca, nhưng "
+            f"ký tự đầu của nó không khớp lớp mà luật _AMBIGUOUS_D nhìn tới — "
+            f"ma trận đang đo một trục bản cài đặt không có"
+        )
+    assert len(D_SEPARATORS) * len(D_FOLLOWING) == 20, (
+        f"lời khai trong evals.yaml nói 20 ô; hai trục hiện cho "
+        f"{len(D_SEPARATORS)} × {len(D_FOLLOWING)} = "
+        f"{len(D_SEPARATORS) * len(D_FOLLOWING)}"
+    )
+
+
+def test_ambiguous_d_matrix_has_no_silently_empty_cell() -> None:
+    """Every (separator, following-token) cell is either measured or named."""
+    missing = [
+        (sep_name, follow_name)
+        for sep_name in D_SEPARATORS
+        for follow_name in D_FOLLOWING
+        if (sep_name, follow_name) not in AMBIGUOUS_D_MATRIX
+        and (sep_name, follow_name) not in DELIBERATELY_UNCOVERED_D_CELLS
+    ]
+    assert missing == [], (
+        "ô ma trận Đ-nhập-nhằng không có ca và cũng không được khai là cố ý bỏ: "
+        f"{missing}"
+    )
+    overlap = set(AMBIGUOUS_D_MATRIX) & set(DELIBERATELY_UNCOVERED_D_CELLS)
+    assert overlap == set(), f"ô vừa có ca vừa khai bỏ: {sorted(overlap)}"
+
+
+def test_ambiguous_d_matrix_every_cell_refuses_by_name() -> None:
+    for (sep_name, follow_name), raw in sorted(AMBIGUOUS_D_MATRIX.items()):
+        got = normalize_vi(raw)
+        assert got.ok is False, (
+            f"ô ({sep_name}, {follow_name}) — {raw!r}: dạng nhập nhằng phải TỪ "
+            f"CHỐI, nhận ok=True -> {got.text!r}"
+        )
+        assert "Đ" in got.residual or "đ" in got.residual, (
+            f"ô ({sep_name}, {follow_name}) — {raw!r}: từ chối nhưng không nêu "
+            f"token gây nhập nhằng: {got.residual}"
+        )
+
+
+def test_declared_uncovered_d_cells_are_still_uncovered() -> None:
+    """A limit that has quietly healed is a lie in the file."""
+    for (sep_name, _), _reason in DELIBERATELY_UNCOVERED_D_CELLS.items():
+        raw = f"Số 25 Đ.{D_SEPARATORS[sep_name]}"
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"ô ({sep_name}, kết chuỗi) — {raw!r} nay ĐÃ bị từ chối; gỡ nó khỏi "
+            "DELIBERATELY_UNCOVERED_D_CELLS và cập nhật Known limits"
         )
 
 
@@ -885,7 +1595,10 @@ def test_brand_tokens_survive_currency_and_prefix_rules() -> None:
     for raw in ("Công ty VNDirect niêm yết", "Mã VNDS tăng trần"):
         assert has_money(raw) is False, f"{raw!r} không phải giá tiền"
         got = normalize_vi(raw)
-        assert got.ok is True, f"{raw!r} → {got.error}"
+        # The claim here is about CONTENT, not about acceptance: a brand token
+        # must never have "đồng" injected into it. Since 2026-08-27 an unstable
+        # brand token is refused by name (AC-4), which satisfies the claim more
+        # strongly than reading it — so acceptance is deliberately not asserted.
         assert "đồng" not in got.text, (
             f"{raw!r}: chữ 'đồng' bị tiêm vào tên riêng — {got.text!r}"
         )
@@ -963,21 +1676,50 @@ RANGE_MATRIX: dict[tuple[str, str], str] = {
 # in the suite rather than only in prose, and (b) when someone fixes the rule
 # this test goes RED and forces the contract to be updated with it, instead of
 # the behaviour changing silently.
+# The dash shapes this reader now REFUSES rather than reading as a range, and the
+# ONE that remains a declared limit. Two of the three former limits are gone: an
+# ISO date and a dash-written phone number both lose digits when read as a range
+# ("0912-345-678" dropped its leading zero), and losing a digit while reporting
+# success is the defect class this contract exists to close (AC-3, 2026-08-27).
+CORPUS_DASH_REFUSED: tuple[tuple[str, str, str], ...] = (
+    ("ngày kiểu ISO", "ISO 2026-08-19", "2026-08-19"),
+    ("điện thoại có gạch", "Gọi 0912-345-678 để biết thêm", "0912-345-678"),
+    ("mã có số 0 đứng đầu", "Mã 0123-4567 đã giao", "0123-4567"),
+)
+
+# The negative half of the dash rule, and it carries the same weight as the
+# positive half. The scan reads the RAW input, where Vietnamese groups thousands
+# with a DOT, so an unanchored pattern matched the FRAGMENT "000-2" inside
+# "Giá 1.000-2.000 đồng": three leading zeros then one digit, which trips the
+# leading-zero signal. The reader had already produced the CORRECT sentence
+# ("giá một nghìn đến hai nghìn đồng") and the post-check overrode it, naming a
+# token the user never typed (S4 round 4). Dotted price ranges are the
+# commonest shape this slot exists to read, so a false refusal here fails the
+# voice chain on ordinary catalogue copy.
+CORPUS_DOTTED_RANGE_READS: tuple[tuple[str, str], ...] = (
+    ("Giá 1.000-2.000 đồng", "giá một nghìn đến hai nghìn đồng"),
+    ("Khoảng 10.000-20.000 người", "khoảng mười nghìn đến hai mươi nghìn người"),
+)
+
+
+def test_dotted_thousand_ranges_are_not_refused() -> None:
+    for raw, expected in CORPUS_DOTTED_RANGE_READS:
+        got = normalize_vi(raw)
+        assert got.ok is True, (
+            f"{raw!r}: đọc ra ĐÚNG ({got.text!r}) mà vẫn bị từ chối vì "
+            f"{got.residual} — cụm đó không phải thứ người dùng gõ"
+        )
+        assert got.text == expected, f"{raw!r}: mong {expected!r}, nhận {got.text!r}"
+
+
+# STILL a limit, and the reason is structural rather than an oversight: two
+# groups with no leading zero is indistinguishable from a real range, and
+# refusing it would take "Giá 5-10 triệu" — the shape the range rule exists for.
 CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT: tuple[tuple[str, str, str], ...] = (
     (
-        "ngày kiểu ISO",
-        "ISO 2026-08-19",
-        "i ét o hai nghìn không trăm hai mươi sáu đến tám đến mười chín",
-    ),
-    (
-        "mã có gạch",
+        "mã có gạch, hai nhóm",
         "Mã đơn 1234-5678 đã giao",
         "mã đơn một nghìn hai trăm ba mươi tư đến năm nghìn sáu trăm bảy mươi tám đã giao",
-    ),
-    (
-        "điện thoại có gạch",
-        "Gọi 0912-345-678 để biết thêm",
-        "gọi chín trăm mười hai đến ba trăm bốn mươi lăm đến sáu trăm bảy mươi tám để biết thêm",
     ),
 )
 
@@ -1191,12 +1933,29 @@ _DECLARED_CORPORA: tuple[tuple[str, object], ...] = (
     ("CORPUS_MONEY_MARK_UNAMBIGUOUS", CORPUS_MONEY_MARK_UNAMBIGUOUS),
     ("RANGE_MATRIX", RANGE_MATRIX),
     ("CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT", CORPUS_RANGE_NEGATIVE_KNOWN_LIMIT),
+    ("CORPUS_DASH_REFUSED", CORPUS_DASH_REFUSED),
+    ("CORPUS_DOTTED_RANGE_READS", CORPUS_DOTTED_RANGE_READS),
+    ("CORPUS_SLASH_REFUSED", CORPUS_SLASH_REFUSED),
+    ("CORPUS_SLASH_NEGATIVE", CORPUS_SLASH_NEGATIVE),
+    ("CORPUS_DAY_WORD_KEPT", CORPUS_DAY_WORD_KEPT),
+    ("CORPUS_BRAND_REFUSED", CORPUS_BRAND_REFUSED),
+    ("CORPUS_BRAND_NEGATIVE", CORPUS_BRAND_NEGATIVE),
+    ("CORPUS_URL_REFUSED", CORPUS_URL_REFUSED),
     ("CORPUS_MONEY_LOWERCASE_ISO", CORPUS_MONEY_LOWERCASE_ISO),
     ("CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE", CORPUS_MONEY_LOWERCASE_ISO_NEGATIVE),
     ("CORPUS_AMBIGUOUS_D", CORPUS_AMBIGUOUS_D),
     ("CORPUS_COMMA_LIST", CORPUS_COMMA_LIST),
     ("CORPUS_COMMA_UNREADABLE", CORPUS_COMMA_UNREADABLE),
     ("CORPUS_COMMA_READABLE", CORPUS_COMMA_READABLE),
+    ("AMBIGUOUS_D_MATRIX", AMBIGUOUS_D_MATRIX),
+    ("DICT_ABBREV_MATRIX", DICT_ABBREV_MATRIX),
+    ("DICT_PREFIX_MATRIX", DICT_PREFIX_MATRIX),
+    ("TYPOGRAPHIC_DASH_MATRIX", TYPOGRAPHIC_DASH_MATRIX),
+    ("CORPUS_DASH_NEGATIVE", CORPUS_DASH_NEGATIVE),
+    ("CORPUS_SLASH_KNOWN_LIMIT", CORPUS_SLASH_KNOWN_LIMIT),
+    ("CORPUS_PATH_KNOWN_LIMIT", CORPUS_PATH_KNOWN_LIMIT),
+    ("CORPUS_DATA_LOSS_KNOWN_LIMIT", CORPUS_DATA_LOSS_KNOWN_LIMIT),
+    ("CORPUS_FALSE_REFUSAL_KNOWN_LIMIT", CORPUS_FALSE_REFUSAL_KNOWN_LIMIT),
 )
 
 ALL_CORPUS = tuple(
@@ -1270,9 +2029,52 @@ def test_determinism_sweep_covers_every_declared_corpus() -> None:
 # injected). Surfaced 2026-08-22 by enlisting the brand rows in the sweep;
 # awaiting owner triage at Gate 2 — see contract.md Known limits.
 IDEMPOTENCE_EXCLUDED: dict[str, str] = {
-    "Mua qua VNDirect": "thư viện băm token thương hiệu, chưa AC nào hứa (S4 vòng 7)",
-    "mua qua vndirect": "cùng token, dạng chữ thường",
+    # The CAPITALISED spelling left this mapping on 2026-08-27: an unstable brand
+    # token is now refused by name (AC-4). The all-lowercase spelling stays,
+    # and the reason is structural rather than an oversight — the signal that
+    # identifies a brand is an uppercase letter INSIDE the token, and
+    # "vndirect" has none, so nothing separates it from an ordinary Vietnamese
+    # word. Detecting it would need a brand list, which is the fork of the
+    # reading library this contract's Out of scope rules out.
+    "mua qua vndirect": (
+        "dạng chữ thường không có tín hiệu cấu trúc nào để nhận là tên thương "
+        "hiệu; nhận diện được nó đòi một danh sách tên riêng — ngoài phạm vi"
+    ),
 }
+
+
+# The ONE input whose VERDICT is not idempotent, named rather than skipped.
+#
+# Deliberately narrow: it exempts the `.ok` comparison only, so the byte-level
+# idempotence check still runs on this string. Putting it in
+# IDEMPOTENCE_EXCLUDED would have hidden both.
+#
+# The flip is a CONSEQUENCE of a limit already declared under AC-10: money
+# written without a space ("100đ") is not rewritten to the word "đồng" on pass
+# one, so `_NUM_LEFT_OF_SLASH` — anchored on the WORD — reads that slash as
+# prose. On pass two the input already says "đồng/kg", and the same slash is
+# numeric. Same root as every other slash finding: a LEXICAL classifier.
+#
+# Owner đã xem chuỗi đầu ra của ca này rồi chốt đóng hồ sơ (2026-08-28). Khai
+# trong contract §Known limits; đóng thật thuộc hợp đồng bo-phan-loai-token.
+VERDICT_NOT_IDEMPOTENT: dict[str, str] = {
+    "Giá 100đ/kg và/hoặc 200đ/lít": (
+        "tiền viết liền '100đ' chỉ thành 'đồng' ở lượt sau, nên cùng một dấu "
+        "gạch chéo bị xếp loại khác nhau giữa hai lượt — hệ quả của giới hạn "
+        "AC-10 đã khai, cùng gốc phân loại từ vựng"
+    ),
+}
+
+
+def test_verdict_flip_exclusions_are_still_broken() -> None:
+    """An exemption that has quietly healed is a lie in the file."""
+    for raw, reason in VERDICT_NOT_IDEMPOTENT.items():
+        once = normalize_vi(raw)
+        twice = normalize_vi(once.text)
+        assert once.ok != twice.ok, (
+            f"{raw!r} nay đã ĐỒNG NHẤT verdict qua hai lượt — gỡ khỏi "
+            f"VERDICT_NOT_IDEMPOTENT và khỏi contract. Lý do đang khai: {reason}"
+        )
 
 
 def test_idempotent_and_byte_identical() -> None:
@@ -1280,9 +2082,33 @@ def test_idempotent_and_byte_identical() -> None:
         if raw in IDEMPOTENCE_EXCLUDED:
             continue
         once = normalize_vi(raw)
+        # Determinism is promised for EVERY input, refused ones included: the
+        # same string must always produce the same bytes.
         assert normalize_vi(raw).text == once.text, f"{raw!r} không tất định"
+        if once.ok is False:
+            # ...but idempotence is a promise about a READING, and a refused
+            # input has none. Its `text` is a diagnostic showing how far the
+            # library got, not output anyone speaks. Feeding that fragment back
+            # in would measure the fragment, not the product. Narrowed
+            # 2026-08-27, when the refusal families (comma, dash, brand, URL)
+            # made refused inputs a normal part of the corpus rather than an
+            # oddity.
+            continue
         twice = normalize_vi(once.text)
         assert twice.text == once.text, f"{raw!r} không idempotent: {twice.text!r}"
+        # The VERDICT has to be idempotent too, not just the bytes. This node
+        # "sits in every chain and may run twice"; a chain that reads a string,
+        # gets ok=True, then reads the result again and gets ok=False is blocked
+        # on a string it already approved. Comparing only `.text` cannot see it —
+        # the text is byte-identical in exactly that case (S4 round 6 finding).
+        if raw in VERDICT_NOT_IDEMPOTENT:
+            continue
+        assert twice.ok == once.ok, (
+            f"{raw!r}: đọc lại chính đầu ra của mình thì cờ lật "
+            f"{once.ok} → {twice.ok} trong khi text KHÔNG đổi. Một dây chạy bộ "
+            f"đọc hai lần sẽ bị chặn ở lần hai trên đúng chuỗi lần một đã duyệt. "
+            f"residual lần hai: {twice.residual}"
+        )
 
 
 # --------------------------------------------------------------------------
@@ -1306,8 +2132,26 @@ def test_edge_inputs() -> None:
 
     assert normalize_vi(LONG_INPUT).ok is True
 
-    for messy in ("Xem tại https://a.vn nhé", "Mail: a@b.vn", "Đẹp quá 😍"):
-        normalize_vi(messy)  # must not raise
+    # "must not raise" is not a measurement: this loop stayed green while the
+    # URL case silently dropped the address and answered ok=True (S4 round 1
+    # finding). Each messy input now states what it does, so a change of
+    # behaviour is red here instead of invisible.
+    url_case = normalize_vi("Xem tại https://a.vn nhé")
+    assert url_case.ok is False, "URL bị nuốt mà vẫn nói ok=True"
+    assert url_case.residual == ("https://a.vn",)
+
+    # Read, not refused: "@" has a Vietnamese reading, so the sentence survives.
+    # The Latin token "Mail" reads as "mêu" — an instance of the known limit
+    # declared for AC-4 (a Latin token with no INTERNAL capital cannot be told
+    # apart from a Vietnamese word), not a separate hole.
+    email_case = normalize_vi("Mail: a@b.vn")
+    assert email_case.ok is True
+    assert "a còng" in email_case.text
+
+    # An emoji carries no sound; dropping it loses nothing a voice could say.
+    emoji_case = normalize_vi("Đẹp quá 😍")
+    assert emoji_case.ok is True
+    assert emoji_case.text == "đẹp quá"
 
     # Unicode form is the other half of Gate G1's "no broken diacritics", so it
     # is asserted as a RELATION between the two encodings — not as "did not

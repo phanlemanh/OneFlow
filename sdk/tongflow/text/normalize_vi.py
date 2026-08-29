@@ -35,7 +35,25 @@ _DASH_DATE = re.compile(r"\b(\d{1,2})-(\d{1,2})-(\d{4})\b")
 # chín..." — a voice says the word twice (measured, S4 round 2 finding). Drop
 # the written word and let the library re-add it. Full dates only: a bare d/m
 # reads WITHOUT the word (measured), so there the written "ngày" must stay.
-_DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=\d{1,2}[/-]\d{1,2}[/-]\d{4}\b)")
+# ...but ONLY when the library can actually read the date. The rule used to fire
+# on every token matching the SHAPE, trusting the library to re-add the word.
+# That assumption holds only for a date it parses: measured on this tree,
+# "ngày 12/25/2026" (US order) came back "mười hai tháng hai/hai nghìn…" — the
+# written "ngày" gone, the 25 gone entirely, month read as 2, and the slash
+# still sitting there with ok=True and an empty residual (S4 round 12 of the
+# parent contract; AC-9 here).
+#
+# Validity is decided on the DAY and MONTH fields, which is the whole
+# difference between a date the library reads and a shape that merely looks
+# like one. An invalid one keeps its written "ngày" and falls through to the
+# residual guard, which refuses rather than speaking half a date.
+_DAY_WORD_BEFORE_DATE = re.compile(r"(?i)\bngày\s+(?=(\d{1,2})[/-](\d{1,2})[/-]\d{4}\b)")
+
+
+def _drop_day_word_if_readable(match: re.Match[str]) -> str:
+    day, month = int(match.group(1)), int(match.group(2))
+    readable = 1 <= day <= 31 and 1 <= month <= 12
+    return "" if readable else match.group(0)
 
 # The SPACED price form "500 đ". has_money deliberately counts it as money
 # ((?<=\d)\s*đ\b), but the pinned library only expands the GLUED form —
@@ -221,6 +239,95 @@ _AMBIGUOUS_D = re.compile(
     rf"(?:(?<=\d)|(?i:{_MAGNITUDE_BEHIND})){_SEP}*(?i:đ)\b\.?{_SEP}*(?=[^\W_]|,)"
 )
 
+# ONE dash class for the whole family. Every rule that reasons about a dash —
+# range, minus, date, residual — has to agree on what counts as one, or a
+# typographic dash walks straight past all of them. Measured on this tree, every
+# case ok=True with an empty residual:
+#   "Giá 5–10 triệu"   -> "giá năm THÁNG mười triệu"  (library read it as a date)
+#   "Giá 5%–10%"       -> "giá năm phần trăm mười phần trăm"  (word "đến" gone)
+#   "Nhiệt độ −7 độ"   -> "nhiệt độ -bảy độ"  (dash survived INTO the speech)
+# The ASCII spellings of all three read correctly, so this is purely a character
+# class hole, not a rule-logic one.
+#
+# Folded to ASCII in the pre-pass rather than added to each rule: one fold, and
+# every downstream rule keeps the single spelling it was written for.
+_TYPOGRAPHIC_DASHES = "\u2013\u2014\u2212"  # – en, — em, − minus
+_DASH_FOLD = re.compile(f"[{_TYPOGRAPHIC_DASHES}]")
+
+# THE DASH TABLE — which dash-joined digit runs this reader claims to read as a
+# RANGE, and which it refuses rather than guessing. A range has exactly TWO
+# endpoints and both are quantities; the shapes below are neither, and reading
+# them as a range LOSES DIGITS, which no post-check can see:
+#
+#   "ISO 2026-08-19"           -> "hai nghìn… ĐẾN tám ĐẾN mười chín"
+#   "Gọi 0912-345-678"         -> "chín trăm mười hai ĐẾN …"   (leading 0 gone)
+#   "Mã 0123-4567"             -> "một trăm hai mươi ba ĐẾN …" (leading 0 gone)
+#
+# Two structural signals, both properties of the RUN, not of the rule measuring
+# it: three or more groups cannot be a two-endpoint range, and a group with a
+# leading zero is an identifier, never a quantity.
+#
+# Declared limit that stays: "1234-5678" (two groups, no leading zero) is
+# genuinely indistinguishable from the range "1234 đến 5678". Refusing it would
+# take "5-10" with it — the shape this rule exists to read.
+# A BRAND TOKEN is Latin letters with an uppercase INSIDE it — the signal that
+# separates "VNDirect" and "iPhone" from an ordinary capitalised Vietnamese word
+# ("Hotline", "Thanh") and from an all-caps abbreviation ("VAT", "VNDS"), both of
+# which the library reads correctly. Measured: exactly 1 of the 170 strings in
+# the declared corpora carries one, and it is the token already pinned as a
+# limit — "Mua qua VNDirect" came back "mua qua ndi re", then "di re" on a second
+# pass, breaking the idempotence promise (AC-4).
+#
+# Masking it away from the library was tried first and is WORSE: a digit-bearing
+# placeholder gets read as a number, and a private-use code point is deleted
+# outright, so the brand vanished from the sentence (both measured 2026-08-27).
+#
+# What separates a mangling from a legitimate transliteration is measurable, and
+# it is the promise the parent contract already makes: reading a reading must
+# change nothing. "iPhone" -> "ai phôn" -> "ai phôn" is stable and stays.
+# "VNDirect" -> "ndi re" -> "di re" is not, and a token that reads differently
+# every pass is not being read at all — so it is refused BY NAME.
+_LATIN_TOKEN = re.compile(r"\b[A-Za-z]{3,}\b")
+
+
+def _is_brand_token(token: str) -> bool:
+    return any(c.isupper() for c in token[1:]) and any(c.islower() for c in token)
+
+
+# A URL is not speech. Left to the library it does not merely read badly — it
+# DISAPPEARS: measured, "Xem tại https://oneflow.vn/gia nhé" came back
+# "xem tại nhé" with ok=True, i.e. a sentence quietly missing its subject (AC-2).
+_URL = re.compile(r"(?i)\b(?:https?://|ftp://|www\.)\S+")
+
+
+# Anchored so a run cannot START in the middle of a number. Vietnamese groups
+# thousands with a DOT, and this scan reads the raw input, so an unanchored
+# pattern matched the FRAGMENT "000-2" inside "Giá 1.000-2.000 đồng" — three
+# leading zeros then a single digit, which trips the leading-zero signal below
+# and refused a price the reader had already read CORRECTLY ("giá một nghìn
+# đến hai nghìn đồng"). Worse, the refusal named "000-2", a token the user
+# never typed. Measured S4 round 4; dotted price ranges are the commonest shape
+# this slot exists to read.
+_DASH_RUN = re.compile(r"(?<![\d.])\d+(?:-\d+)+")
+
+
+def _unreadable_dash_runs(text: str) -> tuple[str, ...]:
+    """Dash-joined digit runs this reader refuses rather than guesses."""
+    # d-m-y dates are rewritten to slashes before the range rule ever sees them,
+    # so they are not candidates: mask them out first or "ngày 19-08-2026" (three
+    # groups, a zero-padded month) would be refused as an identifier.
+    masked = _DASH_DATE.sub(lambda m: "\x00" * len(m.group(0)), text)
+    refused: list[str] = []
+    for match in _DASH_RUN.finditer(masked):
+        run = match.group(0)
+        groups = run.split("-")
+        many_groups = len(groups) >= 3
+        zero_padded = any(len(g) > 1 and g[0] == "0" for g in groups)
+        if many_groups or zero_padded:
+            refused.append(run)
+    return tuple(dict.fromkeys(refused))
+
+
 _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 
 # What must never survive into speech: digits, a currency sign, a percent sign,
@@ -228,7 +335,57 @@ _NEGATIVE = re.compile(r"(?<![\w])-(?=\d)")
 # hyphen between letters — the library writes real Vietnamese compounds that way
 # ("ki-lo-met"), and flagging those rejects correct output. The surviving-colon
 # rule used to live here as a shape test; it is relational now, just below.
-_RESIDUAL = re.compile(r"[0-9₫%]+|(?<=\d)-(?=\d)")
+_RESIDUAL = re.compile(
+    rf"[0-9₫%]+|(?<=\d)-(?=\d)"
+    # A typographic dash must never reach the voice. After the fold above
+    # there should be none left; keeping them here is the tooth that makes
+    # removing the fold a RED test instead of a silent regression.
+    rf"|[{_TYPOGRAPHIC_DASHES}]"
+)
+
+# A SLASH the library did not turn into words. It reads the ones it knows
+# ("100km/h" -> "ki lô mét trên giờ"), so a surviving "/" can mean it gave up:
+# "Giá 50.000 đ/kg" -> "…đồng/kg" and "Lãi 5%/năm" -> "…phần trăm/năm", both
+# ok=True with an empty residual before this (AC-10). It is also what makes a
+# half-parsed date silent — the library leaves a slash, not a digit, so a
+# post-check watching only [0-9₫%] is blind to it (AC-9).
+#
+# Decided RELATIONALLY, exactly like the clock colon above and for the same
+# reason. Watching the output alone refused ordinary prose that was never a
+# number: "và/hoặc", "TP/HCM", "nam/nữ", "N/A" all came back ok=False naming
+# "/" while the speech string was already correct (S4 round 2 finding). What
+# separates the two families is the INPUT — a number-related slash sits against
+# a digit, a percent sign, or a currency mark that itself follows digits. Both
+# halves are required: a surviving slash in the OUTPUT *and* a numeric slash in
+# the INPUT.
+_SLASH = re.compile("/")
+# What sits against a slash to make it part of a NUMBER: a digit, a percent
+# sign, a currency glyph, or the currency WORD. The word — not the letter "đ" —
+# because this runs on the PRE-PROCESSED string, where `_SPACED_DONG` has
+# already turned "50.000 đ/kg" into "50.000 đồng/kg". Anchoring on "đ" here
+# silently stopped matching the most common price shape in the corpus.
+_NUM_LEFT_OF_SLASH = re.compile(rf"(?:\d|%|₫|{CURRENCY_WORD}){_SEP}*$")
+_NUM_RIGHT_OF_SLASH = re.compile(rf"^{_SEP}*\d")
+
+
+def _prose_slash_count(pre: str) -> int:
+    """Slashes in the pre-processed input that were never part of a number.
+
+    Counted PER OCCURRENCE, because the two halves of the rule have to line up
+    on the SAME slash. Testing them independently over the whole string refused
+    "Ngày 19/8/2026 và/hoặc thứ hai" — the date read perfectly and only the
+    prose slash survived, yet one numeric slash anywhere condemned every prose
+    slash in the sentence (S4 round 3 finding).
+    """
+    prose = 0
+    for match in _SLASH.finditer(pre):
+        i = match.start()
+        numeric = bool(_NUM_LEFT_OF_SLASH.search(pre[:i])) or bool(
+            _NUM_RIGHT_OF_SLASH.match(pre[i + 1 :])
+        )
+        if not numeric:
+            prose += 1
+    return prose
 
 # The colon left over from a MANGLED CLOCK, decided relationally instead of by
 # shape. The shape test `:(?=\S)` could not tell "mười bốn:ba mươi" (a clock the
@@ -291,6 +448,32 @@ class NormalizeResult:
     text: str
     residual: tuple[str, ...]
     error: str | None = None
+    # STABLE, machine-readable reason for the refusal. `error` is a Vietnamese
+    # sentence and is for LOGS ONLY.
+    #
+    # Scope, stated plainly so the comment does not describe a thing that is not
+    # here: today this code is used inside the SDK and its tests, and NOWHERE
+    # else. It does not reach a user. The slot's ABI outputs are
+    # {success, error, text} with `additionalProperties: false`, so a plugin
+    # cannot even emit it. Rendering a refusal in the viewer's own language was
+    # narrowed out of this contract on 2026-08-28 (owner, ngả b) and stays open
+    # in roadmap item 1.3 — see `_acceptance/chong-doc-sai-em-ru/contract.md`
+    # under AC-6 for the two measured blockers. Carrying it to the interface
+    # means adding the field to the ABI first, then `pnpm gen:abi` +
+    # `gen_models.py`, then an i18n catalogue — in that order.
+    code: str | None = None
+
+
+# The closed set of refusal reasons. Declared here so the test can check the
+# relation BOTH ways — every declared code reachable, every produced code
+# declared — instead of grepping the source for string literals.
+ERROR_EMPTY_INPUT = "EMPTY_INPUT"
+ERROR_RESIDUAL_TOKENS = "RESIDUAL_TOKENS"
+ERROR_MONEY_UNIT_LOST = "MONEY_UNIT_LOST"
+
+NORMALIZE_ERROR_CODES: frozenset[str] = frozenset(
+    {ERROR_EMPTY_INPUT, ERROR_RESIDUAL_TOKENS, ERROR_MONEY_UNIT_LOST}
+)
 
 
 def has_money(text: str) -> bool:
@@ -327,6 +510,11 @@ def _pre(text: str) -> str:
         out = pattern.sub(dst, out)
     for pattern, dst in CURRENCY_SIGN_PATTERNS:
         out = pattern.sub(dst, out)
+    # Fold typographic dashes to ASCII BEFORE any rule that reasons about a
+    # dash — the date rule, the range rule and the minus rule are all written
+    # for the ASCII spelling. Runs here, ahead of _DASH_DATE, so "19–08–2026"
+    # takes the same path as "19-08-2026".
+    out = _DASH_FOLD.sub("-", out)
     # Before every digit rule below: lift the decimal part into a word the
     # library can read. Runs early so the range and minus rules downstream see
     # plain digits either side of any dash.
@@ -334,7 +522,7 @@ def _pre(text: str) -> str:
     out = _COMMA_CHAIN.sub(lambda m: m.group(0).replace(",", ", "), out)
     out = _DECIMAL_COMMA.sub(_decimal_tail, out)
     out = _DASH_DATE.sub(r"\1/\2/\3", out)
-    out = _DAY_WORD_BEFORE_DATE.sub("", out)
+    out = _DAY_WORD_BEFORE_DATE.sub(_drop_day_word_if_readable, out)
     # ORDER IS LOAD-BEARING: the range rule runs BEFORE the spaced-đồng rewrite.
     # Reversed (as it shipped in 0.2.21) the rewrite turns "1.000 đ" into
     # "1.000 đồng" and destroys the very "đ" the range rule anchors on, so
@@ -360,15 +548,28 @@ def normalize_vi(text: str) -> NormalizeResult:
             text="",
             residual=(),
             error="Chuỗi vào rỗng — không có gì để đọc",
+            code=ERROR_EMPTY_INPUT,
         )
 
     had_money = has_money(text)
-    out = _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(_pre(text)))
+    # Kept, not inlined: the slash rule below has to look at what `_pre`
+    # PRODUCED, not at what the user typed. `_pre` rewrites "d-m-y" into
+    # "d/m/y", so a dash-written date carries no slash in the raw input at all.
+    pre = _pre(text)
+    out = _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(pre))
     out = unicodedata.normalize("NFC", out)
 
     residual = tuple(dict.fromkeys(m.group(0) for m in _RESIDUAL.finditer(out)))
     if _COLON_BETWEEN_WORDS.search(out) and _CLOCK_IN.search(text):
         residual = residual + (":",)
+    # More slashes survived than the prose put there ⇒ at least one NUMERIC
+    # slash came back unread. Counting is what ties the two halves to the same
+    # occurrence; a plain `"/" in out` test got this wrong in both directions
+    # at once (S4 round 3): it refused a perfectly read date sitting next to
+    # "và/hoặc", and it let "Hop dong 12-25-2026" through speaking
+    # "mười hai tháng hai/hai nghìn…" with ok=True — the 25 silently gone.
+    if out.count("/") > _prose_slash_count(pre):
+        residual = residual + ("/",)
     # Relational, like the clock-colon rule above: decided on the INPUT, because
     # the output is lower-cased and the capital that makes "<số> Đ <TênHoa>"
     # ambiguous is gone by then.
@@ -377,12 +578,24 @@ def normalize_vi(text: str) -> NormalizeResult:
     # Same doctrine, decided on the INPUT for the same reason: the comma is gone
     # from the output, so the shape that made it ambiguous is unreadable there.
     residual = residual + _unreadable_comma_runs(unicodedata.normalize("NFC", text))
+    residual = residual + _unreadable_dash_runs(_DASH_FOLD.sub("-", unicodedata.normalize("NFC", text)))
+    residual = residual + tuple(dict.fromkeys(_URL.findall(unicodedata.normalize("NFC", text))))
+    # Brand tokens only: re-reading the output must change nothing. Costs a
+    # second pass, and only for the rare input that carries such a token.
+    brands = [t for t in _LATIN_TOKEN.findall(text) if _is_brand_token(t)]
+    if brands:
+        again = unicodedata.normalize(
+            "NFC", _LETTER_HYPHEN.sub(" ", _NORMALIZER.normalize(_pre(out)))
+        )
+        if again != out:
+            residual = residual + tuple(dict.fromkeys(brands))
     if residual:
         return NormalizeResult(
             ok=False,
             text=out,
             residual=residual,
             error="Chưa đọc được: " + ", ".join(residual),
+            code=ERROR_RESIDUAL_TOKENS,
         )
 
     # Relational rule, not an absence rule. Money in must mean money word out:
@@ -397,6 +610,7 @@ def normalize_vi(text: str) -> NormalizeResult:
                 "Mất đơn vị tiền: chuỗi vào có ký hiệu tiền, "
                 "chuỗi ra không có chữ 'đồng'"
             ),
+            code=ERROR_MONEY_UNIT_LOST,
         )
 
     return NormalizeResult(ok=True, text=out, residual=(), error=None)

@@ -94,7 +94,7 @@ export const MUSIC_SLOTS: readonly NodeSlot[] = [
  */
 export const WORKFLOW_TTS_NEEDS_NORMALIZE = "WORKFLOW_TTS_NEEDS_NORMALIZE";
 
-const NORMALIZE_SLOT = "normalize-text-vi";
+export const NORMALIZE_SLOT = "normalize-text-vi";
 
 /** Index edges by target once; `hasUpstreamSlot` runs once per TTS node. */
 function buildParentIndex(edges: Edge[]): Map<string, string[]> {

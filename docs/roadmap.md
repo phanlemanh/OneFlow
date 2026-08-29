@@ -104,7 +104,7 @@ không đánh lại số cũ):
 
 - **1.1** ✅ **Cache + partial re-render** hạ cánh trong `sdk/tongflow/engine/` ([ADR-0001](adr/0001-cache-before-cloud.md)) + test conformance TS↔Python đầu tiên (lấy `batchField` drift làm test case số 1). *Đóng trọn L0→L4, 01/08.*
 - **1.2** ✅ **Slot `compose-overlay`** (media + ops[] typed: text/khung giá/logo/safe-zone) → `pnpm gen:abi` → plugin CPU (font phủ đủ dấu tiếng Việt) → node UI. *Ký 03/08, merge 05/08 (PR #43).*
-- **1.3** ✅ **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Ký 27/08 (PR #77). Slot ABI, logic SDK và node canvas đã lên `main`; **plugin thực thi chưa đăng ký** trong `config/official-plugins.json`, nên node kéo ra bàn làm việc được mà bấm chạy báo lỗi — ma trận năng lực README giữ ⬜ cho tới khi có plugin.*
+- **1.3** ✅ **Slot/node `normalize-text-vi`** tất định (số, giá, ngày → chữ), bắt buộc đứng trước TTS trong mọi template. *Ký 27/08 (PR #77). Slot ABI, logic SDK và node canvas đã lên `main`; **plugin thực thi chưa đăng ký** trong `config/official-plugins.json`, nên node kéo ra bàn làm việc được mà bấm chạy báo lỗi — ma trận năng lực README giữ ⬜ cho tới khi có plugin. **Hồ sơ chống-đọc-sai đóng 28/08** sau sáu vòng nghiệm thu, với sáu giới hạn owner ký sau khi xem đầu ra thật. **Còn mở trong hạng mục này:** câu từ chối hiển thị theo ngôn ngữ người dùng — thu hẹp khỏi `chong-doc-sai-em-ru` (ngả b) vì hai điều kiện tiên quyết đo được: chưa plugin nào phục vụ slot, và `sdk/tongflow/engine/runner.py` đổi node `success=False` thành chuỗi lỗi trước khi ghi `node_outputs`, nuốt mất mã máy đọc được — sửa là đường t3. Gốc chung của sáu giới hạn tách thành hợp đồng riêng `bo-phan-loai-token` (bản nháp, chưa qua Cổng 1), vì bốn lần sửa bốn phạm vi khác nhau của cùng một luật đều lộ ra một họ ca mới.*
 - **1.3b** **Node nạp-từ-kho** — giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md): search → chọn thẻ → URL ký → `file_key`. Add node không ABI-driven nên không đụng ABI/SDK; key qua kho khoá BYO; làm được trước G0. Mở khoá input cho skill #1.
 - **S3** **Transcribe không-Modal** — *chen trước 1.4, chốt 19/08*: nằm trên **hai** đường tới hạn cùng lúc (chuỗi skill #1 và phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có nó thì ngày corpus về là đo được ngay. Trong chuỗi skill #1, transcribe cũng đứng trước TTS.
 - **1.4** **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
@@ -181,6 +181,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `compose-overlay` | T3 | 02/08 | **1.2** — slot overlay text/giá/logo/safe-zone |
 | `local-cpu-plugins` | T2 | 06/08 | **S2** — làn local-first ([ADR-0011](adr/0011-local-first-execution.md)) |
 | `byo-key-onboarding` | T3 | 19/08 | **S4** — làn local-first: UX BYO key lượt chạy đầu; mở khoá phép đo điều kiện đảo chiều ADR-0011 |
+| `normalize-text-vi` | T3 | 21/08 | **1.3** — slot/node đọc số-giá-ngày tất định, bắt buộc đứng trước TTS |
 | `dependency-refresh-2026-07` | T2 | 26/07 | *ngoài lộ trình* — bảo trì phụ thuộc |
 | `ci-actions-bump` | T2 | 26/07 | *ngoài lộ trình* — hạ tầng CI |
 | `stale-scope-by-paths` | T2 | 28/07 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu |
@@ -191,6 +192,8 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `scan-scope-diagnostics` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
 | `normalize-text-vi` | T3 | 27/08 | **1.3** — đọc số/giá/ngày thành chữ, bắt buộc đứng trước TTS |
 | `roadmap-drift-guard` | T2 | 27/08 | *ngoài lộ trình* — răng cho luật cập nhật của chính file này |
+| `gate-tooling-t1` | T2 | 27/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: đường hợp lệ để sửa guard, trả ba nợ 0.8 |
+| `chong-doc-sai-em-ru` | T3 | 29/08 | **1.3** — bộ đọc TỪ CHỐI thay vì phát nội dung sai; 11/12 tiêu chí, sáu giới hạn có tên |
 
 <!-- roadmap-ledger:end -->
 
