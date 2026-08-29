@@ -7,11 +7,10 @@
  * vocabulary survives, that the mandatory licence label is printed, and that a
  * thin shelf is worded differently from a failure.
  */
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { ReactFlow, ReactFlowProvider } from "@xyflow/react";
+import { NextIntlClientProvider } from "next-intl";
+import { afterEach, beforeAll, describe, expect, it, vi as vi_ } from "vitest";
 import en from "@/i18n/messages/en.json";
 import ja from "@/i18n/messages/ja.json";
 import ko from "@/i18n/messages/ko.json";
@@ -24,7 +23,9 @@ import {
     VIDEO_CARD,
 } from "@/lib/media-library/__fixtures__/cards";
 import { MEDIA_LIBRARY_ERROR_CODES } from "@/lib/media-library/errors";
-import { readImportedFileKey } from "./add-media-library-node";
+import AddMediaLibraryNode, {
+    readImportedFileKey,
+} from "./add-media-library-node";
 import { MediaCardList } from "./media-card-list";
 import {
     codeForStatus,
@@ -32,6 +33,81 @@ import {
     isUnranked,
     outcomeMessageKey,
 } from "./media-library-outcome";
+
+/* ------------------------------------------------------------------ */
+/* jsdom shims + node harness, per the xyflow testing guidance the      */
+/* repo already follows in transfer/normalize-text-vi.test.tsx.         */
+/* ------------------------------------------------------------------ */
+
+class ResizeObserverStub {
+    private readonly callback: ResizeObserverCallback;
+    constructor(callback: ResizeObserverCallback) {
+        this.callback = callback;
+    }
+    observe(target: Element) {
+        const contentRect = {
+            width: 1200,
+            height: 800,
+            x: 0,
+            y: 0,
+            top: 0,
+            left: 0,
+            right: 1200,
+            bottom: 800,
+        };
+        this.callback(
+            [{ target, contentRect } as unknown as ResizeObserverEntry],
+            this as unknown as ResizeObserver,
+        );
+    }
+    unobserve() {}
+    disconnect() {}
+}
+
+class DOMMatrixReadOnlyStub {
+    m22 = 1;
+}
+
+beforeAll(() => {
+    globalThis.ResizeObserver =
+        ResizeObserverStub as unknown as typeof ResizeObserver;
+    globalThis.DOMMatrixReadOnly =
+        DOMMatrixReadOnlyStub as unknown as typeof DOMMatrixReadOnly;
+    Object.defineProperties(HTMLElement.prototype, {
+        offsetHeight: {
+            get(): number {
+                return 60;
+            },
+        },
+        offsetWidth: {
+            get(): number {
+                return 340;
+            },
+        },
+    });
+    (SVGElement.prototype as unknown as { getBBox: () => DOMRect }).getBBox =
+        () => ({ x: 0, y: 0, width: 0, height: 0 }) as unknown as DOMRect;
+});
+
+const NODE_TYPES = { addMediaLibraryNode: AddMediaLibraryNode };
+
+function renderNode() {
+    const nodes = [
+        {
+            id: "aml1",
+            type: "addMediaLibraryNode",
+            position: { x: 0, y: 0 },
+            data: {},
+        },
+    ];
+    return render(
+        <NextIntlClientProvider locale="en" messages={en}>
+            <ReactFlowProvider>
+                <ReactFlow nodes={nodes} edges={[]} nodeTypes={NODE_TYPES} />
+            </ReactFlowProvider>
+        </NextIntlClientProvider>,
+    );
+}
 
 afterEach(cleanup);
 
@@ -338,22 +414,54 @@ describe("the not-yet-configured panel speaks the viewer's language (AC-1)", () 
         }
     });
 
-    it("renders that key at the call site, not the server sentence", () => {
-        // The server's message is Vietnamese by construction
-        // (config.server.ts). The node used to pass it straight to the panel,
-        // so an en/ja/ko/zh user met Vietnamese in the FIRST state they see —
-        // while this key sat unused in all five files (S4 round 7).
-        const source = readFileSync(
-            join(__dirname, "add-media-library-node.tsx"),
-            "utf8",
+    // Rendered, not grepped. The first version of this test matched a regex
+    // against the component's SOURCE TEXT, which measures the INSTRUCTION
+    // rather than the OUTPUT: it would stay green if the panel dropped the
+    // prop on the floor, and red on a rename that changed nothing a user can
+    // see. The repo already had a harness for mounting a node inside
+    // ReactFlow + NextIntl under jsdom (see
+    // src/components/workspace/nodes/transfer/normalize-text-vi.test.tsx), so
+    // grepping the file was never the only option available.
+    //
+    // Driving the node here also closes the gap S4 round 7 named — that
+    // nothing exercised this component at all.
+    it("renders the viewer's sentence, not the server's, when config is missing", async () => {
+        const SERVER_SENTENCE =
+            "Chưa gọi được media-library: thiếu MEDIA_LIBRARY_URL.";
+        vi_.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    code: "MISSING_CONFIG",
+                    missing: ["MEDIA_LIBRARY_URL"],
+                    message: SERVER_SENTENCE,
+                }),
+                {
+                    status: 503,
+                    headers: { "content-type": "application/json" },
+                },
+            ) as Response,
         );
+
+        renderNode();
+        const box = await screen.findByPlaceholderText(
+            en.Workspace.nodes.addMediaLibrary.searchPlaceholder,
+        );
+        fireEvent.change(box, { target: { value: "mèo con" } });
+        fireEvent.click(
+            screen.getByRole("button", {
+                name: en.Workspace.nodes.addMediaLibrary.search,
+            }),
+        );
+
+        // The translated sentence is on screen...
         expect(
-            /message=\{t\("missingConfig"\)\}/.test(source),
-            "bảng cấu hình phải render t('missingConfig'), không phải outcome.message của máy chủ",
-        ).toBe(true);
-        expect(
-            /message=\{outcome\.message\}/.test(source),
-            "câu tiếng Việt của máy chủ vẫn đang được truyền thẳng ra mặt người",
-        ).toBe(false);
+            await screen.findByText(
+                en.Workspace.nodes.addMediaLibrary.missingConfig,
+            ),
+        ).toBeTruthy();
+        // ...and the server's Vietnamese one is nowhere on it. The variable
+        // NAME still is, because that half is data, not prose.
+        expect(screen.queryByText(SERVER_SENTENCE)).toBeNull();
+        expect(screen.getByText("MEDIA_LIBRARY_URL")).toBeTruthy();
     });
 });
