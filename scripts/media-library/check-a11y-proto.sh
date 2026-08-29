@@ -18,27 +18,26 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
-# Belt and braces on tsconfig.json.
+# Clean up the server this script starts, and nothing else.
 #
-# Next rewrites its `include` to point at whichever dist dir is live, and
-# rewriting REFORMATS the whole file — S4 round 8 went red on a `+ "exclude":`
-# line nobody had touched, which is the tell that a tool rewrote the file
-# rather than a human editing it. Restoring on exit was never enough: the
-# suite runs in parallel, so lint samples the file DURING the window, not
-# after it. The real fix is in tsconfig.json, whose `include` now pre-declares
-# every dist dir this repo's tooling can use, so Next finds its entry already
-# there and writes nothing. Measured across all three dirs: untouched.
+# There used to be a `git checkout -- tsconfig.json` here, because Next rewrote
+# that file whenever the live dist dir was missing from `include`. Two things
+# were wrong with it. It could not work: the suite runs in parallel, so lint
+# reads the file DURING the window, not after it — which is how S4 round 8 went
+# red. And it was destructive: a `git checkout` on a tracked file throws away
+# whatever the person running this had uncommitted there, to fix a mess this
+# script made.
 #
-# This restore stays as a second line of defence for a dist dir nobody
-# declared yet, and it must not be a bare `trap` of its own — see cleanup().
-# One trap, not two: a second `trap ... EXIT` REPLACES the first, so the server
-# would leak or the tsconfig would stay dirty depending on declaration order.
+# The cause is gone instead. tsconfig.json's `include` now pre-declares every
+# dist dir this repo's tooling uses, so Next finds its entry already present
+# and writes nothing — measured across `.next`, `build` and `build/aml-a11y`,
+# sha1 unchanged in all three. With nothing to undo, an undo that can eat the
+# user's work has no reason to exist.
 cleanup() {
     if [ "${OWN_SERVER:-0}" -eq 1 ] && [ -n "${SERVER_PID:-}" ]; then
         kill "$SERVER_PID" 2>/dev/null || true
         wait "$SERVER_PID" 2>/dev/null || true
     fi
-    git -C "$ROOT" checkout -- tsconfig.json 2>/dev/null || true
 }
 trap cleanup EXIT
 
