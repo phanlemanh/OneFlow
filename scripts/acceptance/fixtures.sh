@@ -236,6 +236,27 @@ human_signoff: Fixture 2026-07-28
 REP
 }
 
+# pr_touches_artifacts <dir> <slug> — append a byte to the feature's run-log so
+# the PR commit the caller is about to make includes `_acceptance/<slug>/`.
+#
+# Required since the STALE-DIFF-SCOPE-GUARD fork (97b5b12): the gate skips the
+# WHOLE staleness block — verdict, narrow scope and its announcement alike —
+# for any feature whose own `_acceptance/<slug>/` is outside the PR diff. A
+# fixture that leaves the artifacts out of the diff therefore asserts against
+# silence, and passes or fails for reasons unrelated to what it set out to
+# measure. run-log.jsonl is the cheapest carrier: `_acceptance/**` is excluded
+# from every staleness set (AC-8), so this puts the slug in the diff WITHOUT
+# contributing a stale file of its own.
+#
+# Note for the caller: putting the artifacts in the diff also switches the
+# Task-6 cross-check ON (AC-7). Under this fork the two are welded together —
+# "examined but not cross-checked" is no longer an expressible shape — so a
+# case that needs a granted narrow scope must also keep the PR's gated
+# coverage set inside the declared union, the way case_two_bases does.
+pr_touches_artifacts() {
+  echo touched >> "$1/_acceptance/$2/run-log.jsonl"
+}
+
 # mk_committed_report_fixture <dir> <slug> <paths-mode> — mk_fixture() plus a
 # report committed in its OWN commit (prints the post-report commit SHA on
 # stdout, for the caller's --base). Any case that needs "this feature's
@@ -351,8 +372,19 @@ mk_pair_fixture() {
 # actually trying to observe. Echoes the gate's combined stdout+stderr.
 run_gate_with_drift() {
   rgw_gate="$1"; rgw_mode="$2"; rgw_drift="$3"
+  rgw_shape="${4:-out-of-diff}"
   rgw_dir="$(new_case_tmpdir)"
   rgw_base="$(mk_committed_report_fixture "$rgw_dir" fx "$rgw_mode")"
+  # Shape matters since STALE-DIFF-SCOPE-GUARD was narrowed (2026-08-27): a
+  # feature outside the PR diff is examined only when it declares complete
+  # `paths`. A DECLARED fixture can therefore stay out-of-diff (the default,
+  # and the shape that exercises the narrow-scope path with no cross-check),
+  # while a fixture the gate treats as UNDECLARED — any `partial` mode — must
+  # pass `in-diff`, or the gate skips it and the assertion ends up measuring
+  # the fork rather than the mechanism under test.
+  if [ "$rgw_shape" = "in-diff" ]; then
+    pr_touches_artifacts "$rgw_dir" fx
+  fi
   ( cd "$rgw_dir" && echo drift > "$rgw_drift" && git add -A && git commit -q -m drift )
   bash "$rgw_gate" "$rgw_dir" --base "$rgw_base" 2>&1
 }
@@ -424,7 +456,9 @@ run_mutation_case() {
   r1="$(run_gate_with_drift "$work/gate.sh" all src/covered/new.txt)"
   printf '%s\n' "$r1" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail mutation "revert: in-scope change no longer caught"
-  r2="$(run_gate_with_drift "$work/gate.sh" partial src/uncovered/new.txt)"
+  # Unpatched + `partial` = treated as UNDECLARED, so the narrowed fork skips it
+  # out-of-diff; in-diff is what makes the whole-tree fallback observable here.
+  r2="$(run_gate_with_drift "$work/gate.sh" partial src/uncovered/new.txt in-diff)"
   printf '%s\n' "$r2" | grep -q 'VIOLATION \[fx\]: evidence is stale' \
     || fail mutation "revert: partial declaration no longer falls back"
   pass mutation

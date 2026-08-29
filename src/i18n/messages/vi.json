@@ -208,6 +208,7 @@
             "tooltipMediaLibrary": "Kho media"
         },
         "toast": {
+            "ttsNeedsNormalize": "Node giọng đọc {nodes} chưa có node “Đọc số thành chữ” ở phía trên — số, giá và ngày có thể bị đọc sai. Thêm node đó vào giữa nguồn chữ và node giọng đọc.",
             "executing": "Đang thực thi...",
             "completed": "Hoàn thành",
             "cancelled": "Đã huỷ",
@@ -495,7 +496,8 @@
                 "musicExtract": "Tách track nhạc cụ",
                 "musicLego": "Thêm track",
                 "musicComplete": "Hoàn thiện phối khí",
-                "musicBrief": "Kế hoạch nhạc"
+                "musicBrief": "Kế hoạch nhạc",
+                "normalizeTextVi": "Đọc số thành chữ"
             },
             "options": {
                 "portrait": "Dọc",
@@ -557,7 +559,8 @@
                 "addTrack": "Tạo track",
                 "completeMusic": "Hoàn thiện",
                 "musicBrief": "Tạo kế hoạch",
-                "applyOverlay": "Dán lên media"
+                "applyOverlay": "Dán lên media",
+                "normalizeTextVi": "Đọc thành chữ"
             },
             "params": {
                 "prompt": "Prompt",

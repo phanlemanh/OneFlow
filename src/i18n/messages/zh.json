@@ -208,6 +208,7 @@
             "tooltipMediaLibrary": "媒体素材库"
         },
         "toast": {
+            "ttsNeedsNormalize": "语音节点 {nodes} 的上游缺少“数字转文字”节点——数字、价格、日期可能被误读。请在文本源与语音节点之间添加该节点。",
             "executing": "执行中...",
             "completed": "执行完成",
             "cancelled": "已取消",
@@ -495,7 +496,8 @@
                 "musicExtract": "分离音轨",
                 "musicLego": "添加乐轨",
                 "musicComplete": "补全编曲",
-                "musicBrief": "音乐企划"
+                "musicBrief": "音乐企划",
+                "normalizeTextVi": "数字转文字"
             },
             "options": {
                 "portrait": "竖屏",
@@ -557,7 +559,8 @@
                 "addTrack": "生成乐轨",
                 "completeMusic": "开始补全",
                 "musicBrief": "生成企划",
-                "applyOverlay": "应用叠加"
+                "applyOverlay": "应用叠加",
+                "normalizeTextVi": "规范化"
             },
             "params": {
                 "prompt": "提示词",

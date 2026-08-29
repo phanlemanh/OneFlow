@@ -208,6 +208,7 @@
             "tooltipMediaLibrary": "미디어 보관함"
         },
         "toast": {
+            "ttsNeedsNormalize": "음성 노드 {nodes} 상류에 '숫자 읽어주기 변환' 노드가 없습니다. 숫자·가격·날짜가 잘못 읽힐 수 있습니다. 텍스트 소스와 음성 노드 사이에 해당 노드를 추가하세요.",
             "executing": "실행 중...",
             "completed": "완료됨",
             "cancelled": "취소됨",
@@ -495,7 +496,8 @@
                 "musicExtract": "스템 추출",
                 "musicLego": "트랙 추가",
                 "musicComplete": "편곡 완성",
-                "musicBrief": "음악 브리프"
+                "musicBrief": "음악 브리프",
+                "normalizeTextVi": "숫자를 읽기용으로 변환"
             },
             "options": {
                 "portrait": "세로",
@@ -557,7 +559,8 @@
                 "addTrack": "트랙 생성",
                 "completeMusic": "보완 시작",
                 "musicBrief": "브리프 생성",
-                "applyOverlay": "오버레이 적용"
+                "applyOverlay": "오버레이 적용",
+                "normalizeTextVi": "정규화"
             },
             "params": {
                 "prompt": "프롬프트",

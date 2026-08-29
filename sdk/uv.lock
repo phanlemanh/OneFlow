@@ -16,6 +16,23 @@ wheels = [
 ]
 
 [[package]]
+name = "oneflow-sdk"
+version = "0.2.23"
+source = { editable = "." }
+dependencies = [
+    { name = "pydantic" },
+    { name = "typing-extensions" },
+    { name = "vietnormalizer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "typing-extensions", specifier = ">=4.12" },
+    { name = "vietnormalizer", specifier = "==0.2.3" },
+]
+
+[[package]]
 name = "pydantic"
 version = "2.13.4"
 source = { registry = "https://pypi.org/simple" }
@@ -147,21 +164,6 @@ wheels = [
 ]
 
 [[package]]
-name = "tongflow"
-version = "0.1.1"
-source = { editable = "." }
-dependencies = [
-    { name = "pydantic" },
-    { name = "typing-extensions" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "typing-extensions", specifier = ">=4.12" },
-]
-
-[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -180,4 +182,13 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/55/e3/70399cb7dd41c10ac53367ae42139cf4b1ca5f36bb3dc6c9d33acdb43655/typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464", size = 75949, upload-time = "2025-10-01T02:14:41.687Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dc/9b/47798a6c91d8bdb567fe2698fe81e0c6b7cb7ef4d13da4114b41d239f65d/typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7", size = 14611, upload-time = "2025-10-01T02:14:40.154Z" },
+]
+
+[[package]]
+name = "vietnormalizer"
+version = "0.2.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/61/b11a8035eada9b328fd6536b0da7b41dfe66ff0e8d4998bb1a3b4b955302/vietnormalizer-0.2.3.tar.gz", hash = "sha256:cb5ee9a93f1a1bd064fe2d47292cdba755d4a8e353453e9defadbcdd8ea49999", size = 180235, upload-time = "2026-02-25T21:14:21.571Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cf/34/988fb8af8f3e0520f279f1ecda36a20b347367921c27ae1dc7d57f3067f1/vietnormalizer-0.2.3-py3-none-any.whl", hash = "sha256:0ccddbccb52c26e5b06f164f737b07feb1d7833432128dd093119fd59c7ce557", size = 178783, upload-time = "2026-02-25T21:14:19.696Z" },
 ]

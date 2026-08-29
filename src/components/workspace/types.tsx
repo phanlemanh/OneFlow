@@ -77,6 +77,7 @@ import MusicCompleteNode from "./nodes/transfer/music-complete";
 import MusicExtractNode from "./nodes/transfer/music-extract";
 import MusicLegoNode from "./nodes/transfer/music-lego";
 import MusicRepaintNode from "./nodes/transfer/music-repaint";
+import NormalizeTextViNode from "./nodes/transfer/normalize-text-vi";
 import RemoveVideoSubtitleNode from "./nodes/transfer/remove-subtitle";
 import RemoveVideoAudioNode from "./nodes/transfer/remove-video-audio";
 import RemoveWatermarkNode from "./nodes/transfer/remove-watermark";
@@ -134,6 +135,7 @@ export const NODE_TYPES: NodeTypes = {
     imageGenImageNode: ImageGenImageNode,
     imageGenImageUpscaleNode: ImageGenImageUpscaleNode,
     genTextNode: GenTextNode,
+    normalizeTextViNode: NormalizeTextViNode,
     textGenImageNode: TextGenImageNode,
     textGenMusicNode: TextGenMusicNode,
     textGenSpeechCloneNode: TextGenSpeechCloneNode,
@@ -241,6 +243,7 @@ export const NODE_CATEGORIES = {
         "imageGenImageNode",
         "imageGenImageUpscaleNode",
         "genTextNode",
+        "normalizeTextViNode",
         "textGenImageNode",
         "textGenMusicNode",
         "textGenSpeechCloneNode",

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: 9caa25568b35132ab0387e09e5aa0b503c8a8deb
 human_signoff: Manh 2026-08-07
 ---
 
@@ -234,3 +234,15 @@ a788985.
 - [ ] Read the table + spot-check 1-2 evidence blocks
 - [ ] No judgment items in this feature — nothing to override
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-conformance-l0-20260827T101500Z
+sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 9 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-conformance-l0-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 9 lệnh exit 0
+
+### Re-pin lần 3 — 2026-08-28, do nhánh `draft/chong-doc-sai-em-ru` sửa `sdk/tongflow/text/normalize_vi.py` và `sdk/tests/test_normalize_vi.py`: hồ sơ này khai `sdk/**` trong `paths` của một eval, nên thay đổi đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` (PR #83) vào nhánh — trước merge cả hai cổng đều xanh, đúng lý do "cổng chạy trên cây đã merge main mới là cổng thật". Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh, preflight GREEN, mọi lệnh exit 0
+run_id: repin-conformance-l0-20260828T124500Z
+sha: 9caa25568b35132ab0387e09e5aa0b503c8a8deb · suites: 9 lệnh exit 0

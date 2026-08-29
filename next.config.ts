@@ -5,29 +5,37 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
     output: "standalone",
-    // `next build` run WHILE a dev server is live deletes the chunk files that
-    // server is still serving from. The dev server keeps its in-memory module
-    // graph pointing at paths that no longer exist, so page renders die with
-    // "Could not find the module ... in the React Client Manifest" and
-    // "__webpack_modules__[moduleId] is not a function". An acceptance round
-    // does exactly this: the verify suite has `pnpm build` in its suite keys, so
-    // it runs every round, with a dev server up for the UI checks.
+    // A build that lands WHILE a dev server is serving from the same directory
+    // deletes the chunk files that server is still handing out. Measured, three
+    // arms, 2026-08-20:
+    //   · build during serving  → served page 500s, its static chunk 404s
+    //   · build first, dev after (same dir, no overlap) → 200; the dev server
+    //     rebuilds what it needs, so the two layouts CAN share a directory —
+    //     the failure is about timing, not about layout incompatibility
+    //   · dev in its own dir, build into .next → 200 throughout
+    // Pinned message from the broken arm: `Could not find the module
+    // "…/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest`.
     //
-    // Measured three ways rather than assumed, because the obvious wider story
-    // ("the two layouts can't share a directory at all") is FALSE and would have
-    // justified the same fix for the wrong reason:
-    //   build while dev runs   -> page 500, chunk 404 on disk    (breaks)
-    //   build first, dev after -> 200 everywhere                 (fine)
-    //   dev on its own distDir -> 200 through a full build       (fine)
-    // Two refinements worth keeping: the collision needs CONCURRENCY, not merely
-    // a shared directory; and only PAGES break — route handlers keep compiling
-    // and answering, which is why a round can lose every UI check while its API
-    // evals still pass and look like proof the tree was healthy.
+    // Scope, and this is the part that misleads: only PAGES die. Route handlers
+    // kept answering correctly in every arm, so a verify round can lose all of
+    // its UI evidence while the API evals stay green — and that green cluster
+    // reads exactly like a healthy tree.
     //
-    // So the dev server can be handed its own directory. Point it at `build`,
-    // which .gitignore and biome.json already exclude — no new ignore entry, no
-    // config loosened. Unset (the default, and what CI and the desktop build
-    // use) nothing changes.
+    // Not hypothetical here: `pnpm build && pnpm typecheck` sits in
+    // `feature_loop.suite_keys`, so it runs on every verify round, alongside the
+    // ui-check evals that need a live dev server. It killed 9 capture runs
+    // across the N=2 pilot before anyone found it.
+    // Default is unchanged, so CI and the desktop assemble script see `.next`
+    // exactly as before; a capture run opts out with NEXT_DIST_DIR=build, which
+    // .gitignore and biome.json already exclude, so it needs no config change of
+    // its own.
+    //
+    // KNOWN COST, measured: Next rewrites tsconfig.json on every start whose
+    // dist dir differs from the one recorded there — it changes CONTENT, not
+    // just formatting (`include` points at <distDir>/types). So switching modes
+    // flips that file back and forth, and a capture run must restore it
+    // afterwards or the same round's lint goes red on an otherwise clean tree.
+    // The capture eval (E15) carries that cleanup as an explicit final step.
     distDir: process.env.NEXT_DIST_DIR || ".next",
     // NOTE: do not add outputFileTracingExcludes for data//plugins//desktop
     // here — its glob matching is unanchored, so "data/**" (even as
