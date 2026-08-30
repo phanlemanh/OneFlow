@@ -14,8 +14,14 @@
  * key, which is the shape that erases the rest.
  */
 
+import { act, renderHook } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { EnvStoreUnreadableError, saveAndVerifyKey } from "./abi-node-shell";
+import {
+    EnvStoreUnreadableError,
+    saveAndVerifyKey,
+    useNodeKeyGate,
+} from "./abi-node-shell";
 
 type Call = { url: string; method: string; body?: string };
 let calls: Call[] = [];
@@ -88,5 +94,86 @@ describe("abi node key field: unreadable store", () => {
             OTHER: "keep-me",
             K: "v",
         });
+    });
+});
+
+/**
+ * The WIRING, not the pieces.
+ *
+ * `node-key-prompt.test.tsx` proves the `store-unreadable` phase renders
+ * correctly, and the block above proves no PUT goes out. Neither notices if the
+ * catch stops recognising the error by type — which is exactly the defect round
+ * 1 shipped: the refusal was correct and the user still read "your key is
+ * invalid" with a machine code appended. This closes that gap by driving the
+ * real hook and asserting the phase it lands in.
+ */
+describe("abi node key gate: wiring", () => {
+    const failedTask = {
+        id: "t1",
+        status: "FAILED",
+        error: "missing OPENAI_API_KEY",
+    } as unknown as Parameters<
+        ReturnType<typeof useNodeKeyGate>["noteTask"]
+    >[0];
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <ReactFlowProvider>{children}</ReactFlowProvider>
+    );
+
+    it("lands in store-unreadable — not invalid — when the store cannot be read", async () => {
+        stubFetch(503, { code: "ENV_STORE_UNREADABLE" });
+        const { result } = renderHook(() => useNodeKeyGate(), { wrapper });
+
+        act(() => result.current.noteTask(failedTask));
+        expect(result.current.envKey).toBe("OPENAI_API_KEY");
+
+        await act(async () => {
+            await result.current.save();
+        });
+
+        expect(result.current.state.phase).toBe("store-unreadable");
+        expect(calls.filter((c) => c.method === "PUT")).toHaveLength(0);
+    });
+
+    it("still lands in invalid when the provider rejects the key", async () => {
+        // Positive control: a gate that always says store-unreadable would pass
+        // the case above and destroy the phase that actually reports a bad key.
+        stubFetch(200, { env: {} });
+        globalThis.fetch = vi.fn(
+            async (input: RequestInfo | URL, init?: RequestInit) => {
+                const method = (init?.method ?? "GET").toUpperCase();
+                calls.push({ url: String(input), method });
+                if (method === "PUT") {
+                    return new Response(
+                        JSON.stringify({
+                            env: {},
+                            verdicts: {
+                                OPENAI_API_KEY: {
+                                    works: false,
+                                    checked: true,
+                                    detail: "provider said no",
+                                },
+                            },
+                        }),
+                        {
+                            status: 200,
+                            headers: { "content-type": "application/json" },
+                        },
+                    );
+                }
+                return new Response(JSON.stringify({ env: {} }), {
+                    status: 200,
+                    headers: { "content-type": "application/json" },
+                });
+            },
+        ) as typeof fetch;
+
+        const { result } = renderHook(() => useNodeKeyGate(), { wrapper });
+        act(() => result.current.noteTask(failedTask));
+        await act(async () => {
+            await result.current.save();
+        });
+
+        expect(result.current.state.phase).toBe("invalid");
     });
 });

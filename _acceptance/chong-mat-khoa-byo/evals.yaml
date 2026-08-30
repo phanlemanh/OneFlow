@@ -230,14 +230,22 @@ evals:
       - "src/components/workspace/nodes/base/abi-node-shell.tsx"
       - "src/components/workspace/nodes/add/media-library-config-panel.test.tsx"
       - "src/components/workspace/nodes/base/abi-node-shell.test.tsx"
+      - "src/components/workspace/node-key-prompt.tsx"
+      - "src/components/workspace/node-key-prompt.test.tsx"
     expected: >-
-      exit 0; hai vế, mỗi vế ma trận hai panel (số assert bằng số panel).
+      exit 0; BA vế (vòng 2 thêm vế 3 sau REJECT vòng 1), mỗi vế ma trận hai panel (số assert bằng số panel).
       VẾ 1 — với GET trả 503, thao tác lưu ở CẢ HAI panel phát ra KHÔNG một lời
       gọi PUT nào (assert trên danh sách lời gọi đã theo dõi, = 0).
       VẾ 2 — quyết định 3: ở trạng thái kho-hỏng, mỗi panel có
       queryAllByRole("button", {name: /bỏ kho cũ|nhập lại|thoát/i}).length === 0,
       và ĐỐI CHỨNG DƯƠNG là cùng truy vấn đó trên settings-dialog phải === 1 —
       không có đối chứng thì một truy vấn sai chính tả cũng cho 0 ở mọi nơi.
+      VẾ 3 — thứ người dùng THẤY, và cái dây dẫn tới nó: pha rơi vào
+      `store-unreadable` chứ KHÔNG phải `invalid` (đo qua chính hook thật, có
+      đối chứng dương là ca nhà cung cấp từ chối vẫn phải ra `invalid`), và màn
+      hiện câu đã dịch + lối sang Cài đặt, KHÔNG hiện mã máy `ENV_STORE_UNREADABLE`,
+      KHÔNG đặt aria-invalid. Vòng 1 thiếu đúng vế này: nó đo lỗi được NÉM và số
+      PUT, nên panel từ chối đúng mà vẫn nói với người dùng rằng khoá của họ hỏng.
       Vế 2 sinh từ gap-probe P1: trước đó nó chỉ được đo trên bản mẫu (E15). CHIỀU ĐỎ: gỡ
       chốt chặn ở abi-node-shell (trạng thái hôm nay, nơi `loaded.ok` không hề được
       kiểm) thì eval đỏ và nêu đích danh panel nào đã gửi PUT.

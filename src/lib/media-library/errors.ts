@@ -50,6 +50,15 @@ export interface MediaLibraryFailure {
      * the sentence. The sentence is for people; this list is for the form.
      */
     missing?: string[];
+    /**
+     * Present only on MISSING_CONFIG, and only when the cause is that the key
+     * store could NOT BE READ rather than that variables are absent. The code
+     * stays MISSING_CONFIG so this boundary's vocabulary is unchanged, but the
+     * caller must not tell the user their configuration is missing: their keys
+     * may be on disk and intact, and sending them off to re-enter keys is the
+     * path that overwrites the ones they still have.
+     */
+    storeUnreadable?: true;
 }
 
 export function classify(

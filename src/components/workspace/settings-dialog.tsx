@@ -383,12 +383,17 @@ export function SettingsDialog() {
                 const k = key.trim();
                 if (k) env[k] = value;
             }
-            const data = await apiPut<EnvResponse>("/api/settings/env", {
+            await apiPut<EnvResponse>("/api/settings/env", {
                 env,
                 replaceUnreadableStore: true,
             });
             setUnreadableReason("");
-            applyEnv(data.env ?? {}, decls);
+            // Re-read instead of applying the PUT response: the 503 branch
+            // cleared the plugin declarations, and the write response carries
+            // only `{ env, verdicts }`. Applying it would drop the user on a
+            // form with no provider cards at the exact moment the copy has
+            // just told them to re-enter every provider key.
+            await fetchEnv();
             toast.success(t("saved"));
         } catch (error) {
             logger.error("Failed to replace the key store:", error);
@@ -396,7 +401,7 @@ export function SettingsDialog() {
             setSaving(false);
             setConfirmingDrop(false);
         }
-    }, [customRows, decls, applyEnv, t]);
+    }, [customRows, fetchEnv, t]);
 
     useEffect(() => {
         if (open) void fetchEnv();

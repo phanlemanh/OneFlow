@@ -51,6 +51,32 @@ function stubFetch(get: { status: number; body: unknown }) {
     ) as typeof fetch;
 }
 
+/** Flip the stubbed GET to a healthy store, as it is after a successful drop. */
+function stubFetchAfterDrop(body: unknown) {
+    const previous = globalThis.fetch;
+    void previous;
+    globalThis.fetch = vi.fn(
+        async (input: RequestInfo | URL, init?: RequestInit) => {
+            const method = (init?.method ?? "GET").toUpperCase();
+            calls.push({
+                url: String(input),
+                method,
+                body: init?.body as string | undefined,
+            });
+            if (method === "PUT") {
+                return new Response(JSON.stringify({ env: {}, verdicts: {} }), {
+                    status: 200,
+                    headers: { "content-type": "application/json" },
+                });
+            }
+            return new Response(JSON.stringify(body), {
+                status: 200,
+                headers: { "content-type": "application/json" },
+            });
+        },
+    ) as typeof fetch;
+}
+
 function mount() {
     return render(
         <NextIntlClientProvider locale="en" messages={en}>
@@ -157,6 +183,50 @@ describe("settings dialog: escape hatch", () => {
                     JSON.parse(c.body ?? "{}").replaceUnreadableStore !== true,
             ),
         ).toHaveLength(0);
+    });
+
+    it("brings the usable form back after the discard succeeds", async () => {
+        // Round 1 shipped the write and stopped there: the 503 branch clears
+        // the plugin declarations, and applying the PUT response (which carries
+        // no `pluginEnv`) left the user staring at a form with no provider
+        // cards at the exact moment the confirmation copy had just told them to
+        // re-enter every provider key.
+        stubFetch({
+            status: 503,
+            body: { error: "decode", code: "ENV_STORE_UNREADABLE" },
+        });
+        await openDialog();
+        await screen.findByText(en.Settings.storeUnreadableTitle);
+
+        // The store is healthy from here on, as it is after a successful drop.
+        stubFetchAfterDrop({ env: {}, pluginEnv: [] });
+
+        fireEvent.click(
+            screen.getByRole("button", { name: en.Settings.dropStore }),
+        );
+        fireEvent.click(
+            screen.getByRole("button", {
+                name: en.Settings.dropStoreConfirmOk,
+            }),
+        );
+
+        // The error panel is gone and the form is usable again WITHOUT the user
+        // having to close and reopen the dialog.
+        await waitFor(() =>
+            expect(
+                screen.queryByText(en.Settings.storeUnreadableTitle),
+            ).toBeNull(),
+        );
+        await screen.findByRole("button", { name: en.Settings.addRow });
+        const save = screen.getByRole("button", {
+            name: en.Settings.save,
+        }) as HTMLButtonElement;
+        expect(save.disabled).toBe(false);
+
+        // And it came from a re-read, not from the write response: a GET must
+        // follow the PUT.
+        const order = calls.map((c) => c.method);
+        expect(order.lastIndexOf("GET")).toBeGreaterThan(order.indexOf("PUT"));
     });
 
     it("writes nothing when the user cancels", async () => {

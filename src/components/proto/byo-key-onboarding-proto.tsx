@@ -56,6 +56,9 @@ const KEY_LABELS: NodeKeyPromptLabels = {
     invalid: "Khoá không dùng được",
     verified: "Khoá hoạt động",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
+    storeUnreadable:
+        "Không đọc được kho khoá đang lưu nên chưa thể lưu thêm khoá nào.",
+    openSettings: "Mở Cài đặt để xử lý",
 };
 
 // Capability labels, not plugin ids: this is what the strip shows a seller who

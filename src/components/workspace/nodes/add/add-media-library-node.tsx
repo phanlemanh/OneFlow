@@ -108,9 +108,12 @@ export async function readImportedFileKey(
     return typeof fileKey === "string" && fileKey ? fileKey : null;
 }
 
-async function readFailure(
-    response: Response,
-): Promise<{ code: string; message: string; missing: string[] }> {
+async function readFailure(response: Response): Promise<{
+    code: string;
+    message: string;
+    missing: string[];
+    storeUnreadable: boolean;
+}> {
     const fallback = codeForStatus(response.status);
     try {
         const body = await response.json();
@@ -120,9 +123,18 @@ async function readFailure(
             missing: Array.isArray(body.missing)
                 ? (body.missing as string[])
                 : [],
+            // One code, two causes: the store being unreadable arrives under
+            // MISSING_CONFIG so the boundary vocabulary stays put, and this
+            // flag is what keeps the node from blaming the wrong thing.
+            storeUnreadable: body.storeUnreadable === true,
         };
     } catch {
-        return { code: fallback, message: "", missing: [] };
+        return {
+            code: fallback,
+            message: "",
+            missing: [],
+            storeUnreadable: false,
+        };
     }
 }
 
@@ -158,6 +170,9 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                               // them back out of the sentence.
                               missing: failure.missing,
                               message: failure.message,
+                              ...(failure.storeUnreadable
+                                  ? { storeUnreadable: true as const }
+                                  : {}),
                           }
                         : {
                               kind: "failure",
@@ -273,29 +288,51 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                 </div>
 
                 {outcome.kind === "missing-config" ? (
-                    <MediaLibraryConfigPanel
-                        missing={outcome.missing}
-                        // The viewer's own language, not the server's sentence.
-                        // The server's `message` is Vietnamese and stays a log
-                        // artefact — the same rule the `failure` branch already
-                        // follows via failureMessageKey(). This branch passed it
-                        // through, so an en/ja/ko/zh user met Vietnamese in the
-                        // FIRST state they ever see, while the translated key
-                        // sat unused in all five message files (S4 round 7).
-                        // The variable NAMES stay data and are rendered from
-                        // `missing`, so nothing about "name it exactly" is lost.
-                        message={t("missingConfig")}
-                        labels={{
-                            urlLabel: t("urlLabel"),
-                            keyLabel: t("keyLabel"),
-                            save: t("saveConfig"),
-                            saving: t("savingConfig"),
-                            readFailed: t("readFailed"),
-                            storeUnreadable: tSettings("saveBlockedUnreadable"),
-                            writeFailed: t("writeFailed"),
-                        }}
-                        onSaved={() => void search()}
-                    />
+                    outcome.storeUnreadable ? (
+                        /*
+                         * The store could not be READ. Showing the config form here
+                         * would offer zero fields (nothing is "missing") and a Save
+                         * button whose only effect is to surface the real reason
+                         * after the click. Say what happened and point at the one
+                         * screen that can deal with it — translated, never the
+                         * server's Vietnamese sentence (S4 round 7 of this node).
+                         */
+                        <p
+                            role="alert"
+                            className="flex items-start gap-1 text-xs text-destructive"
+                        >
+                            <span>
+                                {tSettings("saveBlockedUnreadable")}{" "}
+                                {tSettings("openSettingsHint")}
+                            </span>
+                        </p>
+                    ) : (
+                        <MediaLibraryConfigPanel
+                            missing={outcome.missing}
+                            // The viewer's own language, not the server's sentence.
+                            // The server's `message` is Vietnamese and stays a log
+                            // artefact — the same rule the `failure` branch already
+                            // follows via failureMessageKey(). This branch passed it
+                            // through, so an en/ja/ko/zh user met Vietnamese in the
+                            // FIRST state they ever see, while the translated key
+                            // sat unused in all five message files (S4 round 7).
+                            // The variable NAMES stay data and are rendered from
+                            // `missing`, so nothing about "name it exactly" is lost.
+                            message={t("missingConfig")}
+                            labels={{
+                                urlLabel: t("urlLabel"),
+                                keyLabel: t("keyLabel"),
+                                save: t("saveConfig"),
+                                saving: t("savingConfig"),
+                                readFailed: t("readFailed"),
+                                storeUnreadable: tSettings(
+                                    "saveBlockedUnreadable",
+                                ),
+                                writeFailed: t("writeFailed"),
+                            }}
+                            onSaved={() => void search()}
+                        />
+                    )
                 ) : null}
 
                 {isUnranked(outcome) ? (

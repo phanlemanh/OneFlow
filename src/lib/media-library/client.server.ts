@@ -36,6 +36,7 @@ async function call<T>(
                 code: "MISSING_CONFIG",
                 message: cfg.message,
                 missing: cfg.unreadable ? [] : cfg.missing,
+                ...(cfg.unreadable ? { storeUnreadable: true as const } : {}),
             },
         };
     }
