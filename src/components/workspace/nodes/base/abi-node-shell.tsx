@@ -100,17 +100,38 @@ function useProviderName(feature: string): string {
  * it. The verdict is what the server got back from the provider — the UI never
  * declares success on its own.
  */
-async function saveAndVerifyKey(
+/** Thrown when the key store exists but cannot be read — never merge onto it. */
+export class EnvStoreUnreadableError extends Error {
+    constructor() {
+        super("ENV_STORE_UNREADABLE");
+        this.name = "EnvStoreUnreadableError";
+    }
+}
+
+export async function saveAndVerifyKey(
     envKey: string,
     value: string,
 ): Promise<KeyVerdict> {
     const loaded = await fetch("/api/settings/env", { cache: "no-store" });
+    // Refuse before merging. A 503 here means the store exists and cannot be
+    // read; spreading onto `{}` would send up a map holding only the key the
+    // user just typed, and the save would take every other key with it.
+    if (loaded.status === 503) throw new EnvStoreUnreadableError();
+    if (!loaded.ok)
+        throw new Error(`Không đọc được kho khoá (HTTP ${loaded.status}).`);
     const current = (await loaded.json()) as { env?: Record<string, string> };
+    if (
+        !current.env ||
+        typeof current.env !== "object" ||
+        Array.isArray(current.env)
+    ) {
+        throw new Error("Kho khoá trả về hình dạng lạ; chưa lưu gì.");
+    }
     const res = await fetch("/api/settings/env", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            env: { ...(current.env ?? {}), [envKey]: value },
+            env: { ...current.env, [envKey]: value },
             // Explicit: probe THIS key even when its value is unchanged. A
             // re-save of the same string used to come back with no verdict at
             // all, which the UI could only render as "invalid" (S4 round 1

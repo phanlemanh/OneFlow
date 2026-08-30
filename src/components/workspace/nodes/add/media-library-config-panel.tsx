@@ -28,6 +28,8 @@ export function MediaLibraryConfigPanel({
         save: string;
         saving: string;
         readFailed: string;
+        /** Shown when the store exists but cannot be read — distinct from a read failure. */
+        storeUnreadable?: string;
         writeFailed: string;
     };
     onSaved: () => void;
@@ -48,6 +50,12 @@ export function MediaLibraryConfigPanel({
             const current = await fetch("/api/settings/env", {
                 cache: "no-store",
             });
+            // 503 is its own case: the store is there and unreadable, so the
+            // guard below cannot help — an empty map is a perfectly valid
+            // object and that is exactly what the server used to send.
+            if (current.status === 503) {
+                throw new Error(labels.storeUnreadable ?? labels.readFailed);
+            }
             if (!current.ok) {
                 throw new Error(labels.readFailed);
             }

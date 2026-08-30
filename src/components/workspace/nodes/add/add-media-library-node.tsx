@@ -128,6 +128,9 @@ async function readFailure(
 
 const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.addMediaLibrary");
+    // The unreadable-store copy lives in Settings: it is the same sentence on
+    // every surface, and the surface that can act on it is Settings.
+    const tSettings = useTranslations("Settings");
     const id = useNodeId();
     const expands = useFlow((s) => s.expands);
 
@@ -288,6 +291,7 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                             save: t("saveConfig"),
                             saving: t("savingConfig"),
                             readFailed: t("readFailed"),
+                            storeUnreadable: tSettings("saveBlockedUnreadable"),
                             writeFailed: t("writeFailed"),
                         }}
                         onSaved={() => void search()}
