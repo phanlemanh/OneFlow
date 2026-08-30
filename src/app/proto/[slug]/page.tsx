@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AddMediaLibraryProto } from "@/components/proto/add-media-library-proto";
 import { ByoKeyOnboardingProto } from "@/components/proto/byo-key-onboarding-proto";
+import { ChongMatKhoaByoProto } from "@/components/proto/chong-mat-khoa-byo-proto";
 import { NormalizeTextViProto } from "@/components/proto/normalize-text-vi-proto";
 
 /**
@@ -22,6 +23,7 @@ const PROTOS: Record<string, (state: string) => React.ReactNode> = {
     "byo-key-onboarding": (state) => <ByoKeyOnboardingProto state={state} />,
     "add-media-library": (state) => <AddMediaLibraryProto state={state} />,
     "normalize-text-vi": (state) => <NormalizeTextViProto state={state} />,
+    "chong-mat-khoa-byo": (state) => <ChongMatKhoaByoProto state={state} />,
 };
 
 // Dark mode is class-based (`@custom-variant dark (&:is(.dark *))`), so the

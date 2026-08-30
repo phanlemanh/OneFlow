@@ -1,0 +1,51 @@
+{
+  "feature_plain": "Khi ứng dụng không đọc nổi kho khoá nhà cung cấp đã lưu, nó nói thẳng ra và từ chối ghi đè — thay vì im lặng coi như bạn chưa có khoá nào rồi xoá sạch khoá cũ ở lần lưu kế tiếp.",
+
+  "will_do": [
+    {"id": "AC-1", "p": "Sẽ phân biệt được 'chưa có tệp khoá' với 'có tệp nhưng đọc không nổi' — hôm nay hai thứ này ra cùng một kết quả."},
+    {"id": "AC-2", "p": "Sẽ nhận ra kho lành và kho trống là hai chuyện khác nhau, và không báo động khi bạn chỉ đơn giản là chưa nhập khoá nào."},
+    {"id": "AC-3", "p": "Sẽ bắt được cả bốn kiểu hỏng: tệp không đọc được, nội dung sai cú pháp, nội dung đúng cú pháp nhưng sai hình dạng, và giải mã thất bại."},
+    {"id": "AC-5", "p": "Sẽ báo cho màn hình biết kho đang hỏng, thay vì trả về một danh sách khoá rỗng trông y như bình thường."},
+    {"id": "AC-10", "p": "Sẽ thay ô nhập khoá bằng một tấm giải thích khi kho hỏng, để bạn không gõ lại khoá vào một cái phễu thủng."},
+    {"id": "AC-11", "p": "Sẽ hỏi lại một lần trước khi bỏ kho cũ, và nói thẳng rằng khoá cũ mất là mất hẳn."},
+    {"id": "AC-13", "p": "Sẽ có đủ câu chữ ở cả năm ngôn ngữ, để người dùng tiếng Nhật/Hàn/Trung không gặp một màn báo lỗi nửa tiếng Anh."},
+    {"id": "AC-14", "p": "Sẽ đạt sàn tiếp cận trên cả giao diện sáng và tối, đo bằng trình duyệt thật chứ không phải trình duyệt giả lập."}
+  ],
+
+  "wont_do": [
+    {"id": "AC-4", "p": "Sẽ KHÔNG chặn lượt chạy nào khi kho hỏng — kể cả node xử lý video chạy ngay trên máy vốn chẳng cần khoá nào."},
+    {"id": "AC-6", "p": "Chặn lần lưu vào kho hỏng: máy trả lỗi và tệp cũ trên đĩa không đổi một byte."},
+    {"id": "AC-7", "p": "Sẽ chỉ ghi đè khi bạn đã bấm nút bỏ-kho-cũ một cách có ý thức."},
+    {"id": "AC-8", "p": "Sẽ KHÔNG đổi gì với người có kho lành — lưu và đọc khoá vẫn y như hôm nay."},
+    {"id": "AC-9", "p": "Sẽ KHÔNG còn mời bạn 'nhập lại khoá' khi thật ra kho đang hỏng — đó chính là câu dẫn thẳng vào chỗ mất dữ liệu."},
+    {"id": "AC-12", "p": "Chặn lưu khoá từ hai bảng nhỏ trên bản vẽ, và chỉ bạn sang màn Cài đặt — hai bảng đó sẽ KHÔNG có nút xoá kho."}
+  ],
+
+  "scope_plain": "Không làm bản sao lưu của kho hỏng trước khi ghi đè, và không đụng vào đường chạy node — hai việc đó tách ra riêng.",
+
+  "coverage_plain": [
+    {"i": 0, "p": "Đã kê đủ sáu tình trạng kho có thể xảy ra, đọc thẳng từ các nhánh xử lý đang có trong mã chứ không nghĩ ra. Đối chiếu với cách một công cụ quản lý cấu hình phổ biến xử lý tệp hỏng: nó từ chối và giữ nguyên dữ liệu cũ."},
+    {"i": 1, "p": "Đã kê đủ bốn tầng mà việc này đi qua, từ chỗ đọc tệp lên tới màn hình. Bằng chứng 'đủ': đếm được chính xác có bao nhiêu chỗ trong mã gọi tới kho khoá."},
+    {"i": 2, "p": "Đã tách ba vai dùng kho khác hẳn nhau: ghi khoá, hiện khoá lên màn, và đọc khoá để chạy việc. Bằng chứng 'đủ': lịch sử lỗi thật của kho này đã ghi đúng con bug đang sửa."},
+    {"i": 3, "p": "Có một chỗ CHƯA kiểm được: bản chạy trên đám mây dùng cách lưu và mã hoá riêng, mà mã đó không nằm trong kho này. Mọi tiêu chí chạm tới ca 'giải mã thất bại' chỉ đo được bằng bản giả lập. Đây là dòng cần anh gạch."}
+  ],
+
+  "gap_probe_plain": [
+    {"i": 0, "p": "Nặng nhất: bộ tiêu chí về màn Cài đặt lại không có phép đo nào chạm vào màn Cài đặt thật — một ô đo đang dùng lại y hệt câu lệnh của ô khác. Hậu quả nếu để nguyên: sửa xong phần lõi, mọi ô đo đều xanh, mà đúng con bug ban đầu vẫn còn sống. ĐÃ SỬA: viết lại ô đó để nó dựng màn Cài đặt thật lên rồi kiểm bốn điều trên chính màn đó."},
+    {"i": 1, "p": "Lời hứa 'hai bảng nhỏ trên bản vẽ không có nút xoá kho' chỉ được kiểm trên bản mẫu, không kiểm trên mã thật. Hậu quả: ai đó thêm nút xoá vào bảng nhỏ cho tiện thì không ô nào đỏ, và chỗ nguy hiểm nhất mở lại ngay trên bản vẽ. ĐÃ SỬA: thêm phép đếm nút trên mã thật, kèm một phép so ngược để phép đếm không thể luôn ra số không."},
+    {"i": 2, "p": "Phép đo cho câu báo lỗi chỉ kiểm 'hai câu khác nhau', trong khi điều cần bảo đảm là câu đó không mời người dùng đi nhập lại khoá. Hậu quả: một câu mới vẫn dẫn vào chỗ mất dữ liệu mà phép đo vẫn xanh. ĐÃ SỬA: ghim đúng dấu hiệu nhận biết, và cấm hẳn cụm 'nhập lại khoá' trong câu báo kho hỏng."},
+    {"i": 3, "p": "Phép đo ngôn ngữ lấy danh sách câu chữ từ một bảng chép tay trong chính bài kiểm. Hậu quả: thêm một câu mới mà quên chép vào bảng thì bài kiểm vẫn xanh tuyệt đối, còn người dùng bốn thứ tiếng thì thấy chữ thô. ĐÃ SỬA: rút danh sách từ chính mã đang hiển thị, nên câu mới không thể trốn."},
+    {"i": 4, "p": "Nhẹ: một phép đo tự khai 'tôi không phải bằng chứng tiếp cận' lại đang được xếp vào ô tiêu chí tiếp cận. Hậu quả: nếu phép đo thật không chạy được, bảng tổng hợp vẫn trông như tiêu chí đó có bằng chứng. ĐÃ SỬA: ghi rõ tiêu chí này TRƯỢT khi phép đo thật không đạt, bất kể ô kia xanh."}
+  ],
+
+  "decisions_plain": [
+    {"id": "d-20260830T211905Z-5150", "p": "Chọn cách bắt máy phân biệt ba tình trạng kho ngay lúc biên dịch — đổi lại phải sửa cả bốn chỗ đang gọi tới kho, nhưng chỗ nào cố tình bỏ qua lỗi thì sẽ là một dòng có chủ ý chứ không phải tai nạn."},
+    {"id": "d-20260830T211905Z-5295", "p": "Chọn nhận mức rủi ro cao nhất cho việc này — đổi lại thêm một lần anh phải duyệt kế hoạch, nhưng tránh được cách sửa tắt vốn chỉ là nuốt lỗi kiểu khác."},
+    {"id": "d-20260830T211905Z-6172", "p": "Chọn viết phép đo bằng bài kiểm đơn vị thay vì kịch bản shell — đổi lại không có gì mất, và tránh được hai hồ sơ cũ phải ký lại oan."},
+    {"id": "d-20260830T211905Z-4558", "p": "KHÔNG làm bản sao lưu kho hỏng trước khi ghi đè — đổi lại người dùng bấm nút là mất khoá cũ thật, và câu hỏi xác nhận là hàng rào duy nhất. Lý do: thêm bản sao lưu đòi đổi một giao ước dùng chung với bản chạy trên đám mây, sẽ làm hỏng bản dựng bên đó."},
+    {"id": "d-20260830T211905Z-7403", "p": "KHÔNG đụng vào đường chạy node — đổi lại trong mã vẫn còn đúng một chỗ bỏ qua lỗi. Lý do: nếu chặn ở đó thì một tệp cài đặt hỏng sẽ làm đứng cả những việc chạy ngay trên máy vốn chẳng cần khoá nào."},
+    {"id": "d-20260830T211905Z-3130", "p": "Chọn thêm một bước hỏi lại trước khi xoá kho — đổi lại thêm một màn phải đo, nhưng vì đã bỏ bản sao lưu nên mất là mất hẳn, cần một nhịp dừng."},
+    {"id": "d-20260830T214159Z-2825", "p": "Chọn đo tiếp cận bằng trình duyệt thật — đổi lại thêm một kịch bản nhỏ. Lý do: đã đo và thấy công cụ cũ chạy trên trình duyệt giả lập không đọc nổi màu sắc thật của giao diện, nên con số 'đạt' của nó không nói lên điều gì về tương phản."},
+    {"id": "d-20260830T214159Z-3658", "p": "Chọn dựng bản mẫu ở mức khung tĩnh — đổi lại bản mẫu không cho thấy hộp xác nhận phủ lên màn Cài đặt như khi chạy thật; anh nên đọc quan hệ đó từ sơ đồ trong tài liệu thiết kế."}
+  ]
+}

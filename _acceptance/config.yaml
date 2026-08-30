@@ -274,8 +274,37 @@ executors:
     unit_tts_order_violation: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t violation"
     unit_tts_order_compliant: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t compliant"
     unit_tts_family_matches_abi: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t two-way"
+
+    # --- chong-mat-khoa-byo (31/08) ---
+    # Mọi khoá dưới đây chạy trên THƯ MỤC TẠM THẬT (test tự đặt TONGFLOW_DATA_DIR)
+    # với seam thật qua alias @ext -> src/ext-default của vitest.config.ts. Không
+    # khoá nào mock lớp lưu trữ: mock chính là cách hồ sơ trước đo trượt một nửa.
+    unit_byo_seam: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'seam'"
+    unit_byo_read_ok_absent: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'ok vs absent'"
+    unit_byo_read_unreadable: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'unreadable matrix'"
+    unit_byo_load_tolerant: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'stays tolerant'"
+    unit_byo_route_get: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'GET'"
+    unit_byo_route_put_refuse: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'refuses and leaves the blob'"
+    unit_byo_route_put_force: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'replaceUnreadableStore'"
+    unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts"
+    unit_byo_aml_config: "pnpm vitest run src/lib/media-library/config.server.test.ts -t 'unreadable'"
+    unit_byo_escape_wire: "pnpm vitest run src/components/workspace/settings-dialog.test.tsx -t 'escape hatch'"
+    # Mount settings-dialog THẬT (RTL + @vitest-environment jsdom, đúng khuôn
+    # compose-overlay/normalize-text-vi/add-media-library-node đã dùng) với fetch
+    # giả trả 503. Ô này sinh ra từ gap-probe P0: bản đầu để AC-10 dùng lại đúng
+    # lệnh của E5, nên không ô nào chạm màn Cài đặt thật.
+    unit_byo_settings_dialog_503: "pnpm vitest run src/components/workspace/settings-dialog.test.tsx -t 'unreadable store'"
+    unit_byo_panels_refuse: "pnpm vitest run src/components/workspace/nodes/add/media-library-config-panel.test.tsx src/components/workspace/nodes/base/abi-node-shell.test.tsx -t 'unreadable store'"
+    unit_byo_locale_parity: "pnpm vitest run src/i18n/locale-parity.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
+    # AC-14 của chong-mat-khoa-byo: axe-core trong Chrome THẬT trên 6 trang
+    # (3 trạng thái × sáng/tối). KHÔNG dùng executors.design.gate cho vế này —
+    # gate chạy dưới jsdom, mà jsdom không parse nổi Tailwind v4 của app (đo
+    # 31/08 trên chính các bản chụp này: 188 cssRules / 153KB, mọi phần tử trả
+    # về chữ đen trên nền trong suốt), nên p0_count của nó không phải bằng
+    # chứng tương phản. Tự dựng server riêng cổng 3198 rồi dọn.
+    byo_a11y_proto: "bash scripts/settings/check-a11y-proto.sh"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
     gen_abi_clean: "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
     # measure-harness: end-to-end CLI runs over the fixtures committed with the
