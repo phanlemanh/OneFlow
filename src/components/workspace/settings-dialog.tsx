@@ -36,13 +36,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Input } from "@/components/ui/input";
 import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { showErrorToast } from "@/components/ui/error-toast";
 import { apiGet, apiPut } from "@/lib/api/client";
 import { openExternalUrl } from "@/lib/desktop/open-external";
 import { logger } from "@/lib/logger";

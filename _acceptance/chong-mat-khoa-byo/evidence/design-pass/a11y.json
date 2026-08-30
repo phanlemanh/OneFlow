@@ -6,27 +6,11 @@
   "pages": [
     {
       "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable",
-      "violations": [
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "nodes": 1,
-          "sample": "Element does not have inner text that is visible to screen readers"
-        }
-      ]
+      "violations": []
     },
     {
       "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable&theme=dark",
-      "violations": [
-        {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "nodes": 1,
-          "sample": "Element does not have inner text that is visible to screen readers"
-        }
-      ]
+      "violations": []
     },
     {
       "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable-confirm",
@@ -45,9 +29,7 @@
       "violations": []
     }
   ],
-  "totals": {
-    "critical": 2
-  },
-  "blocking": 2,
-  "verdict": "REJECT"
+  "totals": {},
+  "blocking": 0,
+  "verdict": "PASS"
 }

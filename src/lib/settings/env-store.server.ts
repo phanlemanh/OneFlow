@@ -19,6 +19,14 @@ import { readSettingsBlob, writeSettingsBlob } from "@ext/settings-store";
 
 export type EnvStore = Record<string, string>;
 
+/**
+ * The one code a caller checks to tell "no keys stored yet" from "your keys
+ * cannot be read". It lives here rather than in the route because a Next.js
+ * route module may only export its handlers and a fixed set of config fields —
+ * `pnpm build` rejects anything else, which lint and typecheck both let past.
+ */
+export const ENV_STORE_UNREADABLE = "ENV_STORE_UNREADABLE" as const;
+
 /** Why a store could not be read. Each cause stays tellable from the others. */
 export type EnvStoreReadReason = "io" | "decode" | "parse" | "shape";
 

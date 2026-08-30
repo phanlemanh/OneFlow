@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
  * whole point of the feature is that one write path must stop firing.
  */
 
-const COPY = {
+export const COPY = {
     settingsTitle: "Cài đặt",
     settingsSection: "Khoá nhà cung cấp",
     unreadableTitle: "Không đọc được kho khoá đã lưu",

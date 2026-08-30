@@ -2,19 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { type KeyVerdict, verifyKey } from "@/lib/onboarding/key-verify";
 import { loadPluginEnvDecls } from "@/lib/plugins/plugin-env-manifests.server";
 import {
+    ENV_STORE_UNREADABLE,
     type EnvStore,
     readEnvStore,
     saveEnvStore,
 } from "@/lib/settings/env-store.server";
 
 export const runtime = "nodejs";
-
-/**
- * The one code a client checks to tell "you have no keys yet" from "we cannot
- * read the keys you have". Without it both states look like an empty map, and
- * the next save replaces keys nobody could see.
- */
-export const ENV_STORE_UNREADABLE = "ENV_STORE_UNREADABLE" as const;
 
 function unreadableBody(reason: string) {
     return {
