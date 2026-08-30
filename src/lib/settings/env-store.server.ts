@@ -19,27 +19,80 @@ import { readSettingsBlob, writeSettingsBlob } from "@ext/settings-store";
 
 export type EnvStore = Record<string, string>;
 
-/** Read the stored env map. Returns `{}` when absent or unreadable. */
-export async function loadEnvStore(): Promise<EnvStore> {
-    try {
-        const raw = await readSettingsBlob();
-        if (raw == null) return {};
-        const parsed = JSON.parse(await decodeEnvStore(raw)) as unknown;
-        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-            return {};
-        }
-        const out: EnvStore = {};
-        for (const [k, v] of Object.entries(
-            parsed as Record<string, unknown>,
-        )) {
-            if (typeof k === "string" && k.trim() && typeof v === "string") {
-                out[k] = v;
-            }
-        }
-        return out;
-    } catch {
-        return {};
+/** Why a store could not be read. Each cause stays tellable from the others. */
+export type EnvStoreReadReason = "io" | "decode" | "parse" | "shape";
+
+export type EnvStoreRead =
+    | { state: "ok"; env: EnvStore }
+    | { state: "absent" }
+    | { state: "unreadable"; reason: EnvStoreReadReason };
+
+function coerceEnv(parsed: unknown): EnvStore | null {
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return null;
     }
+    const out: EnvStore = {};
+    for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+        if (typeof k === "string" && k.trim() && typeof v === "string") {
+            out[k] = v;
+        }
+    }
+    return out;
+}
+
+/**
+ * The one reader, and the only place that decides what each failure means.
+ *
+ * Callers must handle all three states, and the compiler makes them: the
+ * previous single-shape reader let every call site inherit "treat a broken
+ * store as an empty one" without ever choosing it, which is how saving one key
+ * could delete the rest. Anything that still wants the old forgiving behaviour
+ * asks for it by name — see `loadEnvStore` below.
+ */
+export async function readEnvStore(): Promise<EnvStoreRead> {
+    let raw: string | null;
+    try {
+        raw = await readSettingsBlob();
+    } catch {
+        return { state: "unreadable", reason: "io" };
+    }
+    if (raw == null) return { state: "absent" };
+
+    let decoded: string;
+    try {
+        decoded = await decodeEnvStore(raw);
+    } catch {
+        return { state: "unreadable", reason: "decode" };
+    }
+
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(decoded);
+    } catch {
+        return { state: "unreadable", reason: "parse" };
+    }
+
+    const env = coerceEnv(parsed);
+    // Valid JSON of the wrong shape is a corrupt store, not an empty one. This
+    // branch used to return {} and was the quietest of the three swallows: a
+    // settings file holding `[1,2,3]` looked exactly like a fresh install.
+    if (env == null) return { state: "unreadable", reason: "shape" };
+    return { state: "ok", env };
+}
+
+/**
+ * Forgiving reader for the RUN path (`withStoredEnv`, the director).
+ *
+ * Owner decision, 2026-08-31: an unreadable store must NOT block a run. Failing
+ * here would stop even local nodes that need no key at all, turning one broken
+ * settings file into a total outage — a worse fault than the one being fixed.
+ * So both `absent` and `unreadable` collapse to `{}`, deliberately, in one
+ * named place. The write path and the display path use `readEnvStore` and
+ * decide for themselves.
+ */
+export async function loadEnvStore(): Promise<EnvStore> {
+    const read = await readEnvStore();
+    return read.state === "ok" ? read.env : {};
 }
 
 /** Persist the env map, overwriting the previous contents. */

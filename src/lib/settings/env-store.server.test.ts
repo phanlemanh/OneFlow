@@ -85,7 +85,9 @@ describe("seam: absent vs unreadable", () => {
 describe("readEnvStore: ok vs absent", () => {
     it("returns the stored map verbatim", async () => {
         writeFileSync(store(), '{"A":"1","B":"2"}', "utf8");
-        const { readEnvStore } = await import("@/lib/settings/env-store.server");
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(readEnvStore()).resolves.toEqual({
             state: "ok",
             env: { A: "1", B: "2" },
@@ -95,7 +97,9 @@ describe("readEnvStore: ok vs absent", () => {
     it("says absent — not unreadable — when nothing was ever stored", async () => {
         // Suppression half: a reader that always answers "unreadable" passes
         // the unreadable matrix below and is exactly the bug this guards.
-        const { readEnvStore } = await import("@/lib/settings/env-store.server");
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(readEnvStore()).resolves.toEqual({ state: "absent" });
     });
 });
@@ -109,14 +113,19 @@ describe("readEnvStore: unreadable matrix", () => {
         ["shape-scalar", '"just a string"', "shape"],
     ] as const;
 
-    it.each(BLOB_CAUSES)("%s reads as unreadable", async (_label, blob, reason) => {
-        writeFileSync(store(), blob, "utf8");
-        const { readEnvStore } = await import("@/lib/settings/env-store.server");
-        await expect(readEnvStore()).resolves.toEqual({
-            state: "unreadable",
-            reason,
-        });
-    });
+    it.each(BLOB_CAUSES)(
+        "%s reads as unreadable",
+        async (_label, blob, reason) => {
+            writeFileSync(store(), blob, "utf8");
+            const { readEnvStore } = await import(
+                "@/lib/settings/env-store.server"
+            );
+            await expect(readEnvStore()).resolves.toEqual({
+                state: "unreadable",
+                reason,
+            });
+        },
+    );
 
     it("io: an unreadable file reads as unreadable", async () => {
         if (isRoot()) {
@@ -125,7 +134,9 @@ describe("readEnvStore: unreadable matrix", () => {
         }
         writeFileSync(store(), '{"A":"1"}', "utf8");
         chmodSync(store(), 0o000);
-        const { readEnvStore } = await import("@/lib/settings/env-store.server");
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(readEnvStore()).resolves.toEqual({
             state: "unreadable",
             reason: "io",
@@ -140,7 +151,9 @@ describe("readEnvStore: unreadable matrix", () => {
                 throw new Error("bad key");
             },
         }));
-        const { readEnvStore } = await import("@/lib/settings/env-store.server");
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(readEnvStore()).resolves.toEqual({
             state: "unreadable",
             reason: "decode",
@@ -170,7 +183,9 @@ describe("loadEnvStore stays tolerant", () => {
 
     it.each(CASES)("%s: returns {} and never throws", async (_label, blob) => {
         if (blob !== null) writeFileSync(store(), blob, "utf8");
-        const { loadEnvStore } = await import("@/lib/settings/env-store.server");
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(loadEnvStore()).resolves.toEqual({});
     });
 
@@ -181,7 +196,9 @@ describe("loadEnvStore stays tolerant", () => {
         }
         writeFileSync(store(), '{"A":"1"}', "utf8");
         chmodSync(store(), 0o000);
-        const { loadEnvStore } = await import("@/lib/settings/env-store.server");
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(loadEnvStore()).resolves.toEqual({});
     });
 
@@ -189,7 +206,9 @@ describe("loadEnvStore stays tolerant", () => {
         // Positive control: a reader that always returns {} passes every case
         // above.
         writeFileSync(store(), '{"A":"1"}', "utf8");
-        const { loadEnvStore } = await import("@/lib/settings/env-store.server");
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
         await expect(loadEnvStore()).resolves.toEqual({ A: "1" });
     });
 });
