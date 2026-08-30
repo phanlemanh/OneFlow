@@ -23,12 +23,19 @@ async function call<T>(
 ): Promise<ClientResult<T>> {
     const cfg = await resolveConfig();
     if (!cfg.ok) {
+        // An unreadable key store is still a configuration problem from this
+        // side of the wire, so it keeps the existing code rather than adding a
+        // vocabulary term the media-library boundary would have to learn. What
+        // it does NOT do is claim variables are missing: `missing` stays empty
+        // and the message says the store could not be read, because listing
+        // variable names here is what walks the user into re-entering keys
+        // they may still have.
         return {
             ok: false,
             failure: {
                 code: "MISSING_CONFIG",
                 message: cfg.message,
-                missing: cfg.missing,
+                missing: cfg.unreadable ? [] : cfg.missing,
             },
         };
     }
