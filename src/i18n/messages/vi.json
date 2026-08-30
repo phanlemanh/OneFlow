@@ -38,7 +38,17 @@
         "customSectionTitle": "Biến tuỳ chỉnh",
         "customSectionHint": "Các biến chưa được plugin nào khai báo.",
         "getKey": "Lấy key",
-        "requiredHint": "Bắt buộc"
+        "requiredHint": "Bắt buộc",
+        "storeUnreadableTitle": "Không đọc được kho khoá đã lưu",
+        "storeUnreadableBody": "Chưa có gì bị thay đổi. Các khoá đang lưu vẫn nằm nguyên trên máy, nhưng ứng dụng không giải được nội dung của tệp nên chưa hiện ra được.",
+        "storeUnreadableReasonLabel": "Lý do kỹ thuật",
+        "dropStore": "Bỏ kho cũ và nhập lại",
+        "dropStoreConfirmTitle": "Bỏ toàn bộ kho khoá đang lưu?",
+        "dropStoreConfirmBody": "Mọi khoá đang lưu sẽ mất và không khôi phục được. Sau khi bỏ, bạn phải nhập lại từng khoá của từng nhà cung cấp.",
+        "dropStoreConfirmOk": "Bỏ và nhập lại",
+        "dropStoreCancel": "Huỷ",
+        "openSettingsHint": "Mở Cài đặt để xử lý",
+        "saveBlockedUnreadable": "Không đọc được kho khoá đang lưu nên chưa thể lưu thêm khoá nào."
     },
     "Index": {
         "title": "Ý tưởng mới"

@@ -38,7 +38,17 @@
         "customSectionTitle": "Custom variables",
         "customSectionHint": "Variables not declared by any installed plugin.",
         "getKey": "Get key",
-        "requiredHint": "Required"
+        "requiredHint": "Required",
+        "storeUnreadableTitle": "Cannot read your saved key store",
+        "storeUnreadableBody": "Nothing has been changed. Your saved keys are still on this machine, but the app could not make sense of the file, so it cannot show them yet.",
+        "storeUnreadableReasonLabel": "Technical reason",
+        "dropStore": "Discard the old store and start over",
+        "dropStoreConfirmTitle": "Discard every saved key?",
+        "dropStoreConfirmBody": "Every saved key will be lost and cannot be recovered. Afterwards you must re-enter each provider's key yourself.",
+        "dropStoreConfirmOk": "Discard and start over",
+        "dropStoreCancel": "Cancel",
+        "openSettingsHint": "Open Settings to sort this out",
+        "saveBlockedUnreadable": "Your saved key store cannot be read, so no further key can be saved right now."
     },
     "Index": {
         "title": "New Idea"

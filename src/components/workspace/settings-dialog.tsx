@@ -10,12 +10,23 @@ import {
     Plus,
     Settings,
     Trash2,
+    TriangleAlert,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -31,6 +42,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { apiGet, apiPut } from "@/lib/api/client";
 import { openExternalUrl } from "@/lib/desktop/open-external";
 import { logger } from "@/lib/logger";
@@ -321,17 +333,70 @@ export function SettingsDialog() {
         [],
     );
 
+    const [unreadableReason, setUnreadableReason] = useState("");
+    const [confirmingDrop, setConfirmingDrop] = useState(false);
+    const storeUnreadable = unreadableReason !== "";
+
     const fetchEnv = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await apiGet<EnvResponse>("/api/settings/env");
+            // The toast is suppressed on purpose: an unreadable store gets a
+            // whole panel explaining itself, and a toast on top of it is noise.
+            const data = await apiGet<EnvResponse>("/api/settings/env", {
+                showErrorToast: false,
+            });
+            setUnreadableReason("");
             applyEnv(data.env ?? {}, data.pluginEnv ?? []);
         } catch (error) {
             logger.error("Failed to load settings:", error);
+            // 503 means the store exists and cannot be read. It is NOT an
+            // empty store, and rendering the usual empty form here is what let
+            // the next save replace keys nobody could see.
+            const status = (error as { status?: number })?.status;
+            if (status === 503) {
+                setUnreadableReason(
+                    (error as { message?: string })?.message ?? "unknown",
+                );
+                setDecls([]);
+                setValues({});
+                setCustomRows([]);
+            } else {
+                showErrorToast({
+                    message: (error as { message?: string })?.message ?? "",
+                });
+            }
         } finally {
             setLoading(false);
         }
     }, [applyEnv]);
+
+    /**
+     * The one way out of an unreadable store, and it is deliberately explicit:
+     * the flag names the CONDITION it permits, so the server refuses every
+     * other write while the store is in this state.
+     */
+    const dropStoreAndSave = useCallback(async () => {
+        setSaving(true);
+        try {
+            const env: Record<string, string> = {};
+            for (const { key, value } of customRows) {
+                const k = key.trim();
+                if (k) env[k] = value;
+            }
+            const data = await apiPut<EnvResponse>("/api/settings/env", {
+                env,
+                replaceUnreadableStore: true,
+            });
+            setUnreadableReason("");
+            applyEnv(data.env ?? {}, decls);
+            toast.success(t("saved"));
+        } catch (error) {
+            logger.error("Failed to replace the key store:", error);
+        } finally {
+            setSaving(false);
+            setConfirmingDrop(false);
+        }
+    }, [customRows, decls, applyEnv, t]);
 
     useEffect(() => {
         if (open) void fetchEnv();
@@ -406,6 +471,40 @@ export function SettingsDialog() {
                 {loading ? (
                     <div className="flex justify-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                ) : storeUnreadable ? (
+                    /*
+                     * This REPLACES the key form rather than sitting above it.
+                     * A form left mounted underneath is a form the user can
+                     * still type into, and typing into it is the first half of
+                     * the data loss this whole screen exists to stop.
+                     */
+                    <div
+                        role="alert"
+                        className="rounded-lg border border-destructive/40 bg-destructive/5 p-4"
+                    >
+                        <div className="flex gap-3">
+                            <TriangleAlert
+                                className="mt-0.5 h-5 w-5 shrink-0 text-destructive"
+                                aria-hidden="true"
+                            />
+                            <div className="space-y-2">
+                                <h3 className="text-sm font-medium text-foreground">
+                                    {t("storeUnreadableTitle")}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {t("storeUnreadableBody")}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                    <span className="font-medium">
+                                        {t("storeUnreadableReasonLabel")}:{" "}
+                                    </span>
+                                    <span className="font-mono">
+                                        {unreadableReason}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
@@ -522,10 +621,15 @@ export function SettingsDialog() {
                     </div>
                 )}
 
-                <DialogFooter>
+                <DialogFooter className="sm:justify-between">
+                    {/*
+                     * Save stays MOUNTED and disabled rather than disappearing:
+                     * a control that vanishes reads as "I clicked the wrong
+                     * place", a dimmed one reads as "not right now".
+                     */}
                     <Button
                         type="button"
-                        disabled={saving || loading}
+                        disabled={saving || loading || storeUnreadable}
                         onClick={save}
                     >
                         {saving ? (
@@ -533,7 +637,52 @@ export function SettingsDialog() {
                         ) : null}
                         {t("save")}
                     </Button>
+                    {storeUnreadable ? (
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={saving}
+                            onClick={() => setConfirmingDrop(true)}
+                        >
+                            {t("dropStore")}
+                        </Button>
+                    ) : null}
                 </DialogFooter>
+
+                <AlertDialog
+                    open={confirmingDrop}
+                    onOpenChange={setConfirmingDrop}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                {t("dropStoreConfirmTitle")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {t("dropStoreConfirmBody")}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>
+                                {t("dropStoreCancel")}
+                            </AlertDialogCancel>
+                            {/*
+                             * buttonVariants, not a copied class string: the
+                             * repo's destructive variant carries two dark-mode
+                             * branches and a focus ring that a hand-written
+                             * copy silently drops.
+                             */}
+                            <AlertDialogAction
+                                className={buttonVariants({
+                                    variant: "destructive",
+                                })}
+                                onClick={dropStoreAndSave}
+                            >
+                                {t("dropStoreConfirmOk")}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </DialogContent>
         </Dialog>
     );
