@@ -1,0 +1,14 @@
+→ răng của check-product-map.mjs
+CASE clean: PASS
+CASE missing-slug: PASS
+CASE count-mismatch: PASS
+CASE opportunity-mismatch: PASS
+CASE artifact-missing: PASS
+CASE artifact-unreadable: PASS
+CASE extra-slug: PASS
+CASE status-downgraded: PASS
+CASE contract-unparsable: PASS
+CASE status-unknown: PASS
+CASE dir-empty: PASS
+
+✅ răng: 11/11 case — mỗi case một mã thoát riêng
