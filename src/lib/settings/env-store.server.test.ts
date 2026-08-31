@@ -160,15 +160,63 @@ describe("readEnvStore: unreadable matrix", () => {
         });
     });
 
-    it("keeps the four reasons distinct", async () => {
-        const seen = new Set<string>();
-        for (const [, blob, reason] of BLOB_CAUSES) {
-            void blob;
-            seen.add(reason);
+    it("keeps the four reasons distinct — read back from readEnvStore itself", async () => {
+        // The first draft of this test built a Set out of THIS FILE's own
+        // constants and asserted it had four members. It never imported the
+        // module, so it stayed green even if readEnvStore collapsed all four
+        // causes into one string — precisely the regression it was named for.
+        // This drives the real function once per cause and collects what it
+        // actually answers.
+        const reasons: string[] = [];
+
+        const causes: Array<[string, () => void | Promise<void>]> = [
+            ["parse", () => writeFileSync(store(), "{oops", "utf8")],
+            ["shape", () => writeFileSync(store(), "[1,2,3]", "utf8")],
+            [
+                "decode",
+                () => {
+                    writeFileSync(store(), "ciphertext", "utf8");
+                    vi.doMock("@ext/settings-codec", () => ({
+                        encodeEnvStore: async (x: string) => x,
+                        decodeEnvStore: async () => {
+                            throw new Error("bad key");
+                        },
+                    }));
+                },
+            ],
+        ];
+        if (!isRoot()) {
+            causes.push([
+                "io",
+                () => {
+                    writeFileSync(store(), '{"A":"1"}', "utf8");
+                    chmodSync(store(), 0o000);
+                },
+            ]);
+        } else {
+            console.warn("SKIP io cause: running as uid 0");
         }
-        seen.add("io");
-        seen.add("decode");
-        expect([...seen].sort()).toEqual(["decode", "io", "parse", "shape"]);
+
+        for (const [, arrange] of causes) {
+            rmSync(dir, { recursive: true, force: true });
+            mkdirSync(dir, { recursive: true });
+            vi.resetModules();
+            vi.doUnmock("@ext/settings-codec");
+            await arrange();
+            const { readEnvStore } = await import(
+                "@/lib/settings/env-store.server"
+            );
+            const read = await readEnvStore();
+            expect(read.state).toBe("unreadable");
+            if (read.state === "unreadable") reasons.push(read.reason);
+        }
+
+        // One distinct answer per cause exercised — the whole point of the
+        // field. Under root the io case is skipped and the count says so.
+        expect(new Set(reasons).size).toBe(causes.length);
+        expect([...reasons].sort()).toEqual(
+            causes.map(([name]) => name).sort(),
+        );
     });
 });
 
@@ -196,6 +244,23 @@ describe("loadEnvStore stays tolerant", () => {
         }
         writeFileSync(store(), '{"A":"1"}', "utf8");
         chmodSync(store(), 0o000);
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        await expect(loadEnvStore()).resolves.toEqual({});
+    });
+
+    it("decode: returns {} and never throws", async () => {
+        // The class this describe claims is all six states; the first draft
+        // listed five and quietly left `decode` out, so a loadEnvStore that let
+        // a codec failure escape would still have gone green.
+        writeFileSync(store(), "ciphertext", "utf8");
+        vi.doMock("@ext/settings-codec", () => ({
+            encodeEnvStore: async (x: string) => x,
+            decodeEnvStore: async () => {
+                throw new Error("bad key");
+            },
+        }));
         const { loadEnvStore } = await import(
             "@/lib/settings/env-store.server"
         );

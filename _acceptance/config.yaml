@@ -286,7 +286,11 @@ executors:
     unit_byo_route_get: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'GET'"
     unit_byo_route_put_refuse: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'refuses and leaves the blob'"
     unit_byo_route_put_force: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'replaceUnreadableStore'"
-    unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts"
+    # AC-8 tuyên bốn điều: GET kho lành/trống, PUT ghi được + verdicts, và cờ
+    # BỊ BỎ QUA khi kho lành (so cả body lẫn nội dung đĩa). Ba trong bốn điều đó
+    # nằm ở route.unreadable.test.ts chứ không ở route.test.ts, nên lệnh phải
+    # chạy CẢ HAI — bản đầu chỉ trỏ file thứ hai và tuyên bốn điều nó không đo.
+    unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts src/app/api/settings/env/route.unreadable.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").

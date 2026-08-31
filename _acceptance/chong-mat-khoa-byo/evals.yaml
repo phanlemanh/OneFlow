@@ -68,9 +68,11 @@ evals:
       (seam ném), parse (file chứa '{oops'), shape (file chứa '[1,2,3]'), decode
       (decodeEnvStore ném). Cả bốn trả state 'unreadable', và `reason` PHÂN BIỆT
       được bốn ca (bốn giá trị khác nhau, assert trên nội dung reason chứ không
-      trên một boolean). CHIỀU ĐỎ: ca `shape` chạy trên mã hôm nay (`:28-30` trả
-      `{}`) PHẢI đỏ với thông điệp nêu chữ 'shape' — đây là ca sót dễ nhất và là
-      lý do eval này tồn tại tách khỏi E2.
+      trên một boolean). Ca cuối GỌI THẬT `readEnvStore` một lượt cho từng nguyên
+      nhân rồi đếm số `reason` phân biệt được — bản đầu chỉ so bảng hằng của
+      chính file test với literal của chính nó, nên xanh vĩnh viễn kể cả khi cả
+      bốn gộp làm một. CHIỀU ĐỎ đã đo 31/08: gộp bốn reason về `io` → 5 ca đỏ
+      (bản cũ VẪN xanh); cho ca `shape` trả `{}` như mã cũ → 2 ca đỏ nêu chữ 'shape'.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E4
@@ -82,8 +84,10 @@ evals:
       exit 0; loadEnvStore() chạy qua CẢ SÁU trạng thái (ok, absent, io, parse,
       shape, decode) và KHÔNG ném lần nào; trả map thật ở 'ok' và `{}` ở năm ca
       còn lại — đúng hành vi trước gói việc này. Đây là eval chứng minh quyết định
-      2 (nhóm Đọc-để-chạy không đổi). CHIỀU ĐỎ: cho loadEnvStore ném ở ca 'io' thì
-      eval đỏ với thông điệp nêu chữ 'tolerant'/'không được ném'.
+      2 (nhóm Đọc-để-chạy không đổi). MA TRẬN ĐỦ SÁU: ok · absent · io · parse ·
+      shape · decode — bản đầu thiếu ca `decode` nên một loadEnvStore để lỗi codec
+      thoát ra vẫn xanh. CHIỀU ĐỎ đã đo 31/08: cho nó ném ở ca `io` → 3 đỏ; cho nó
+      ném ở ca `decode` → 1 đỏ (bản cũ VẪN xanh).
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
   # ---------- C. API — chỗ mất dữ liệu ----------
@@ -135,5 +139,9 @@ evals:
       về cho khoá đã đổi y như trước gói việc này. THÊM: PUT kèm cờ khi kho LÀNH thì
       cờ BỊ BỎ QUA — kết quả giống hệt PUT không cờ (so deep-equal cả body lẫn nội
       dung đĩa). Vế sau canh đúng thứ Notes hợp đồng nêu: cờ không được thành đường
-      ghi thứ hai. CHIỀU ĐỎ: cho cờ đi nhánh riêng khi kho lành thì eval đỏ.
+      ghi thứ hai. LỆNH CHẠY CẢ HAI FILE route test: ba trong bốn điều AC-8 tuyên
+      (GET, kho `absent`, cờ-bị-bỏ-qua có so đĩa) nằm ở `route.unreadable.test.ts`
+      trên thư mục tạm thật, chỉ vế PUT+verdicts nằm ở `route.test.ts` vốn mock kho.
+      Bản đầu chỉ trỏ file thứ hai và tuyên bốn điều nó không đo.
+      CHIỀU ĐỎ: cho cờ đi nhánh riêng khi kho lành thì eval đỏ.
     evidence_required: [run_id, exit_code, verifier, verified_at]
