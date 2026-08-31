@@ -5,10 +5,11 @@ slug: chong-mat-khoa-byo
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api]
-status: verified
+status: signed-off
 design_doc: docs/superpowers/specs/2026-08-31-chong-mat-khoa-byo-design.md
 approved_by: Phan Le Manh
 approved_at: 2026-08-30T22:03:03Z
+human_signoff: Phan Le Manh 2026-08-31
 ---
 
 # Acceptance Contract: chong-mat-khoa-byo
@@ -205,6 +206,71 @@ nặng đã tìm ra không phải tìm lại.
 - **Mã hoá kho ở bản OSS** — codec là seam, để trống có chủ ý.
 - **Role/quyền trên route settings** — bản OSS một tenant; thêm là đổi kiến trúc.
 - **Versioning / migrate schema `settings.json`** — chưa có nhu cầu.
+
+## Known limits (người ký nhận trước khi phát hành)
+
+Owner ký 31/08/2026 sau S4 vòng 4 (PASS, 8/8 ô đo, `triage_failed: false`). Mười một
+phát hiện của vòng đó — 4 trong hợp đồng, 7 ngoài — **không** cái nào bị sửa trước khi
+ký. Chúng nằm đây, có tên.
+
+### 1. Một đường xoá im lặng VẪN CÒN, đã đo trực tiếp
+
+Kho chứa **giá trị không phải chuỗi** được `readEnvStore` báo là `state: "ok"`, và lần
+lưu kế tiếp xoá sạch các mục đó. Đo 31/08 trên thư mục tạm thật:
+
+```
+đĩa TRƯỚC : {"KEEP":"x","NUMERIC":1,"NESTED":{"a":1}}
+readEnvStore → state: ok · env: {"KEEP":"x"}
+đĩa SAU PUT: {"KEEP":"x"}          ← NUMERIC và NESTED biến mất
+```
+
+`coerceEnv` từ chối top-level không phải object (→ `unreadable/shape`) nhưng **lọc lặng**
+từng giá trị không phải chuỗi rồi vẫn tuyên `ok`. Đây đúng lớp lỗi hồ sơ này tồn tại để
+đóng, đi qua một cửa mà chính tính năng báo là lành.
+
+**Phân định trách nhiệm:** hành vi bỏ-giá-trị-không-phải-chuỗi có sẵn trên `main` (bộ đọc
+cũ cũng bỏ). Cái **mới** là lời khẳng định `ok` về một kho mà nó không biểu diễn trung
+thực được. Hồ sơ này có cơ hội đóng và đã không đóng. → hợp đồng con.
+
+### 2. Bốn phát hiện TRONG hợp đồng — phép đo dùng bao hàm thay cho bằng-đúng
+
+`route.unreadable.test.ts` dùng `toMatchObject` (bao hàm) ở các chỗ mà lời hứa là quan hệ
+**bằng đúng**: dòng 62 (`env: {}` ca absent), dòng 98 (`env: {NEW:"v"}` vòng khứ hồi của
+AC-7), và một chỗ so-gương hai lượt chạy không ghim giá trị thật (dòng 120). Với một tính
+năng về *khoá bị mất im lặng*, lời hứa đúng là **"không khoá nào tôi không ghi có mặt,
+không khoá nào tôi ghi bị thiếu"** — bao hàm không nói được điều đó. Sửa là đổi sang
+`toEqual`, không đụng mã sản phẩm.
+
+### 3. Bảy phát hiện NGOÀI hợp đồng
+
+- **`saveAndVerifyKey` vẫn merge lên GET hỏng** (`abi-node-shell.tsx:107`) — không kiểm
+  `loaded.ok`, nên một GET không-2xx *khi kho vẫn LÀNH* (500 từ `loadPluginEnvDecls`,
+  proxy 502, trang HTML lỗi) làm PUT ghi đè và xoá mọi khoá khác. Lỗ gốc còn nguyên trên
+  đường giao diện; nay chỉ được che bởi 409 của máy chủ ở ca `unreadable`. Hệ quả đã biết
+  của Amendment 1 — thuộc hợp đồng kế.
+- **Bốn `catch` nuốt trọn errno** (`env-store.server.ts:64,72,79,87`) — AC-1 cố ý sửa seam
+  để ném errno THẬT, rồi errno đó bị vứt ngay một khung sau. Người vận hành thấy `io` mà
+  không phân biệt được `EACCES` với `EISDIR`. Trái luật lỗi của repo (*"never silently
+  swallow errors"*); module này không import logger.
+- **PUT trả map của request, không phải map đã ghi** (`route.ts:137`) — `saveEnvStore`
+  trim khoá và bỏ khoá rỗng, phản hồi thì không. `{" A ":"1"}` lưu thành `A` nhưng trả về
+  `" A "`. Bản trước gói việc này trả `await loadEnvStore()`, tức sự thật sau chuẩn hoá.
+  AC-8 hứa đường lành không đổi; đây là đúng một chỗ nó đổi.
+- **Chuỗi tiếng Việt ghi cứng + rò enum nội bộ** (`route.ts:15,125`) — mọi thân lỗi khác
+  dưới `src/app/api/**` là tiếng Anh, kể cả hai lỗi 400 của chính file này; `apiClient`
+  đổ thẳng trường `error` vào toast, nên người dùng en/ja/ko/zh nhận câu tiếng Việt kèm
+  token `io|decode|parse|shape`.
+- **Bài kiểm dùng `return` thay vì `skip` dưới `uid 0`** (`env-store.server.test.ts:62,
+  131,188,241`) — một màu xanh không khẳng định gì. Chú thích của chính file nói *"bỏ qua
+  câm là xanh giả"*, mà `return` trần **là** một bài kiểm PASS trong báo cáo vitest. Chưa
+  nổ vì CI chạy non-root; container root thì nửa `EACCES` của AC-1, AC-3, AC-4 bốc hơi
+  thành xanh trong khi ba khoá suite vẫn báo PASS. `it.skipIf(isRoot())` là cách đúng.
+- **`writeSettingsBlob` ghi cắt-rồi-ghi, không nguyên tử** (`ext-default/settings-store.ts`)
+  — chính nó **tạo ra** kho hỏng. Hồ sơ này chỉ giảm hậu quả, không giảm tần suất.
+  → hợp đồng con riêng.
+- **Đường RUN báo "thiếu khoá" khi thật ra kho hỏng** (`media-library/config.server.ts`) —
+  hệ quả trực tiếp và có chủ ý của quyết định 2 (kho hỏng không chặn lượt chạy nào), cộng
+  với việc không nhánh nào log lại rằng kho hỏng.
 
 ## Notes
 
