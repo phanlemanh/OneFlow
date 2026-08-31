@@ -8,7 +8,7 @@ verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 72870b0fe0bd4c8a8e4574f5b865f4404cc40450
-human_signoff:
+human_signoff: Phan Le Manh 2026-08-31
 ---
 
 # Evidence Report: kho-khoa-toan-ven
