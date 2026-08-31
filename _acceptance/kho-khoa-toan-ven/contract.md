@@ -5,7 +5,7 @@ slug: kho-khoa-toan-ven
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [api]
-status: approved
+status: implemented
 design_doc: docs/superpowers/specs/2026-08-31-kho-khoa-toan-ven-design.md
 approved_by: Phan Le Manh
 approved_at: 2026-08-31
