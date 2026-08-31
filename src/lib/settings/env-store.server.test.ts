@@ -277,3 +277,91 @@ describe("loadEnvStore stays tolerant", () => {
         await expect(loadEnvStore()).resolves.toEqual({ A: "1" });
     });
 });
+
+describe("coerceEnv decision table", () => {
+    it("coerces scalars and keeps every key", async () => {
+        writeFileSync(
+            store(),
+            JSON.stringify({
+                OPENAI_API_KEY: "sk-fake",
+                PORT: 8080,
+                DEBUG: true,
+            }),
+            "utf8",
+        );
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        const read = await readEnvStore();
+        // Assert the whole MAP, not one key. Measured before the fix
+        // (2026-08-31): four keys vanished while the state still read "ok", so
+        // a check that only looks at OPENAI_API_KEY passes on the broken
+        // version too.
+        expect(read).toEqual({
+            state: "ok",
+            env: { OPENAI_API_KEY: "sk-fake", PORT: "8080", DEBUG: "true" },
+        });
+    });
+
+    it("refuses structured values instead of stringifying them", async () => {
+        // Full matrix: one store per shape, three assertions for three members.
+        for (const bad of [
+            { NESTED: { a: 1 } },
+            { LIST: [1, 2] },
+            { NULLED: null },
+        ]) {
+            rmSync(store(), { force: true });
+            writeFileSync(
+                store(),
+                JSON.stringify({ OPENAI_API_KEY: "sk-fake", ...bad }),
+                "utf8",
+            );
+            vi.resetModules();
+            const { readEnvStore } = await import(
+                "@/lib/settings/env-store.server"
+            );
+            const read = await readEnvStore();
+            expect(read).toEqual({ state: "unreadable", reason: "shape" });
+            // The trap String(v) would spring: "[object Object]" is a garbage
+            // value that looks valid — a different kind of quiet, not the end
+            // of quiet.
+            expect(JSON.stringify(read)).not.toContain("[object Object]");
+        }
+    });
+
+    it("refuses empty keys", async () => {
+        for (const key of ["", "   "]) {
+            rmSync(store(), { force: true });
+            writeFileSync(
+                store(),
+                JSON.stringify({ [key]: "x", OPENAI_API_KEY: "sk-fake" }),
+                "utf8",
+            );
+            vi.resetModules();
+            const { readEnvStore } = await import(
+                "@/lib/settings/env-store.server"
+            );
+            expect(await readEnvStore()).toEqual({
+                state: "unreadable",
+                reason: "shape",
+            });
+        }
+    });
+
+    it("leaves an all strings untouched store exactly as it is", async () => {
+        // The suppressing half. Without it, a fix that always returns
+        // "unreadable", or one that rewrites every value, passes the three
+        // cases above. REGION is deliberately an empty VALUE: an env var set
+        // to "" is legal, only an empty KEY is not.
+        const onDisk = {
+            OPENAI_API_KEY: "sk-fake",
+            ANTHROPIC_API_KEY: "sk-fake-2",
+            REGION: "",
+        };
+        writeFileSync(store(), JSON.stringify(onDisk), "utf8");
+        const { readEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        expect(await readEnvStore()).toEqual({ state: "ok", env: onDisk });
+    });
+});

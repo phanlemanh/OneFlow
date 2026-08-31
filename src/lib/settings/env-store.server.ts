@@ -35,15 +35,41 @@ export type EnvStoreRead =
     | { state: "absent" }
     | { state: "unreadable"; reason: EnvStoreReadReason };
 
+/**
+ * Read a parsed store into the flat string map, or refuse the whole thing.
+ *
+ * Closed decision table, one behaviour per branch — and NO branch drops a key
+ * silently, which is the bug this replaces:
+ *
+ *   string            kept as is
+ *   number, boolean   String(v). Environment values are strings anyway, so
+ *                     this is the value the system would have used.
+ *   object/array/null the WHOLE store is unreadable. String({a:1}) is
+ *                     "[object Object]": that turns a fault into a
+ *                     valid-looking garbage value, which is a different kind
+ *                     of quiet, not the end of quiet.
+ *   empty/blank key   the WHOLE store is unreadable. An empty environment
+ *                     variable name cannot be repaired by a type change.
+ *
+ * Measured before this change (2026-08-31): a store holding four non-string
+ * values read back as ONE key with state "ok", and the round trip
+ * read - display - save then erased the other four from disk.
+ *
+ * The key is kept verbatim rather than trimmed: trimming would silently rename
+ * " KEY " to "KEY", and two keys differing only by whitespace would collide so
+ * one would vanish — the same class of loss this function exists to end.
+ */
 function coerceEnv(parsed: unknown): EnvStore | null {
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         return null;
     }
     const out: EnvStore = {};
     for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
-        if (typeof k === "string" && k.trim() && typeof v === "string") {
-            out[k] = v;
-        }
+        if (!k.trim()) return null;
+        if (typeof v === "string") out[k] = v;
+        else if (typeof v === "number" || typeof v === "boolean")
+            out[k] = String(v);
+        else return null;
     }
     return out;
 }
