@@ -60,6 +60,24 @@ const vitestFlag = args.indexOf("--vitest-root");
 const VITEST_ROOT =
     vitestFlag >= 0 ? path.resolve(args[vitestFlag + 1] ?? "") : ROOT;
 
+// Refuse arguments this checker does not know, rather than ignoring them.
+// A guard that swallows `--strict` and exits 0 cannot be told apart from a
+// guard that ran, so a typo in the ci.yml `run:` line would read as a clean
+// check forever. Caught by check-gate-guards-job.sh's guard-of-the-guard —
+// the same lesson check-roadmap-fresh.sh learned one package earlier.
+const KNOWN_FLAGS = new Set(["--show-shapes", "--root", "--vitest-root"]);
+for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (!a.startsWith("--")) continue;
+    if (!KNOWN_FLAGS.has(a)) {
+        console.error(
+            `check-eval-filters: tham số lạ \`${a}\` — chỉ nhận ${[...KNOWN_FLAGS].join(", ")}`,
+        );
+        process.exit(2);
+    }
+    if (a === "--root" || a === "--vitest-root") i++;
+}
+
 const failures = [];
 const fail = (rule, msg) => failures.push(`FAIL ${rule}: ${msg}`);
 

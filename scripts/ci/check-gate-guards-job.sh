@@ -15,6 +15,7 @@
 # running the extracted command measures behaviour.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
+repo_root=$(pwd)
 
 WF=.github/workflows/ci.yml
 MODE="${1:?usage: check-gate-guards-job.sh <shape|no-softening|teeth|job-count|reachable|suite-keys|a11y-dist-dir>}"
@@ -32,7 +33,7 @@ job_block() {
 
 # The two guard commands this package wires in. Named once so every mode agrees
 # on what it is looking for.
-GUARD_NEEDLES=(check-roadmap-fresh.sh check-product-map.mjs)
+GUARD_NEEDLES=(check-roadmap-fresh.sh check-product-map.mjs check-eval-filters.mjs)
 
 case "$MODE" in
 shape)
@@ -223,6 +224,12 @@ teeth)
         [ -f "$d/opportunity.md" ] && cp "$d/opportunity.md" "$probe/t/_acceptance/$slug/"
     done
     cp -R scripts "$probe/t/scripts"
+    cp -R _acceptance/config.yaml "$probe/t/_acceptance/config.yaml"
+    # node_modules so the eval-filter guard fails on a BROKEN FILTER rather than
+    # on a missing tool. Without it that guard went "red" for the wrong reason
+    # and this mode credited a red that proved nothing — the vague-red trap the
+    # mode exists to avoid.
+    ln -s "$repo_root/node_modules" "$probe/t/node_modules" 2>/dev/null || true
 
     python3 - "$probe/t" <<'PERTURB'
 import sys, pathlib
@@ -239,15 +246,32 @@ end = next(i for i, l in enumerate(lines) if "roadmap-ledger:end" in l)
 row = next(i for i in range(start, end) if "`local-cpu-plugins`" in lines[i])
 lines.insert(row + 1, lines[row])
 r.write_text("".join(lines), encoding="utf-8")
+# Break one eval filter so the third guard has real drift to catch.
+c = root / "_acceptance" / "config.yaml"
+t = c.read_text(encoding="utf-8")
+assert "-t 'seam'" in t, "fixture anchor moved"
+c.write_text(t.replace("-t 'seam'", "-t 'ten ca khong ton tai'", 1), encoding="utf-8")
 PERTURB
 
     for cmd in "${cmds[@]}"; do
+        # The probe tree holds the CONFIG and the docs the guards read, but not
+        # the source tree — symlinking src breaks vitest's module resolution
+        # and hard-linking it just moves the failure to config/. So the
+        # eval-filter guard is pointed back at the real sources while still
+        # reading the PERTURBED config. Without this it went red because the
+        # tool was missing, not because a filter was broken: removing the
+        # perturbation entirely left this mode green, which is a red that
+        # proves nothing — the exact trap this mode exists to avoid.
+        run="$cmd"
+        case "$cmd" in
+        *check-eval-filters.mjs*) run="$cmd --vitest-root \"$repo_root\"" ;;
+        esac
         set +e
-        (cd "$probe/t" && eval "$cmd") >/tmp/cggj-red.log 2>&1
+        (cd "$probe/t" && eval "$run") >/tmp/cggj-red.log 2>&1
         red_rc=$?
         set -e
         [ "$red_rc" -ne 0 ] \
-            || fail "'$cmd' thoát 0 trên cây đã phá — guard rỗng. Xem /tmp/cggj-red.log"
+            || fail "'$run' thoát 0 trên cây đã phá — guard rỗng. Xem /tmp/cggj-red.log"
     done
 
     # GUARD-OF-THE-GUARD. Append a junk flag to the first extracted command and
@@ -264,7 +288,7 @@ PERTURB
 
     cleanup
     trap - EXIT
-    echo "OK: cả hai lệnh (rút từ $WF) xanh trên cây lành và đỏ trên cây đã phá; cờ rác bị từ chối"
+    echo "OK: ${#cmds[@]} lệnh (rút từ $WF) xanh trên cây lành và đỏ trên cây đã phá; cờ rác bị từ chối"
     ;;
 
 suite-keys)

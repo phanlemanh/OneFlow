@@ -65,6 +65,10 @@ destroy_tree() {
 }
 trap destroy_tree EXIT INT TERM
 
+# Snapshot the two files the cases patch, so the isolation check at the end
+# compares against reality rather than against the last commit.
+BEFORE_HASHES=$(shasum "$repo_root/$CFG" "$repo_root/$GUARDS" | awk '{print $1}' | tr '\n' ' ')
+
 out=""
 run_checker() {
     local rc=0
@@ -233,7 +237,11 @@ s = s[:i] + "    teeth_probe_new_wrapper: \"bash scripts/settings/run-other-test
 case_needle_missing() {
     make_tree
     patch "$GUARDS" 's = s.replace(" check-eval-filters.mjs)", ")", 1)'
-    grep -q 'check-eval-filters.mjs' "$tmp/t/$GUARDS" && return 1
+    # Look inside the GUARD_NEEDLES line only. The script names the guard
+    # elsewhere too (teeth mode special-cases it), so grepping the whole file
+    # would report the needle as still present and this case would never fail
+    # for the right reason — measuring the wrong object.
+    grep -E '^GUARD_NEEDLES=' "$tmp/t/$GUARDS" | grep -q 'check-eval-filters.mjs' && return 1
     return 0
 }
 
@@ -287,9 +295,13 @@ for c in "${SELECTED[@]}"; do
     if run_case "$c"; then pass=$((pass + 1)); else fail=$((fail + 1)); fi
 done
 
-# Isolation, proven rather than promised.
-if git -C "$repo_root" diff --quiet -- "$CFG" "$GUARDS"; then
-    echo "cây chung sạch: $CFG và $GUARDS không đổi"
+# Isolation, proven rather than promised — and measured against the tree AS IT
+# WAS, not against HEAD. Comparing to HEAD reports a false leak whenever the
+# person running this has legitimate uncommitted work in those files, which is
+# the normal state while writing the very feature being tested.
+after=$(shasum "$repo_root/$CFG" "$repo_root/$GUARDS" | awk '{print $1}' | tr '\n' ' ')
+if [ "$after" = "$BEFORE_HASHES" ]; then
+    echo "cây chung sạch: $CFG và $GUARDS không đổi một byte"
 else
     echo "FAIL: cây chung BẨN sau khi chạy răng — bản vá đã rò ra ngoài bản sao" >&2
     exit 1
