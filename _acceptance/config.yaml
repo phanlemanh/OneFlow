@@ -683,7 +683,12 @@ feature_loop:
     # các lệnh máy SONG SONG nên thứ tự này không phải thứ tự thi hành — bản
     # thân ô preflight phát biểu cách phân loại các ô còn lại.
     - executors.script.preflight_env
-    - executors.test.build_typecheck
+    # Tach doi tu build_typecheck (cong-tu-canh-minh, 31/08). Mot luot build bi
+    # cong cu giet (exit 144, do 322s) truoc day nuot luon tin hieu typecheck
+    # di cung (24s). executors.test.build_typecheck VAN CON trong executors:
+    # bay ho so da ky tham chieu no.
+    - executors.test.build
+    - executors.test.typecheck
     - executors.test.lint
     - executors.test.unit
     - executors.test.sdk_pytest

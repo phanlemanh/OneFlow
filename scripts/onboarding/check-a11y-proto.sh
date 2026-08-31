@@ -19,7 +19,16 @@ if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     exit 1
 fi
 
-pnpm dev --port "$PORT" >/dev/null 2>&1 &
+# Own dist dir, not the shared `.next`. Suite commands run in PARALLEL and
+# `pnpm build` is a standing suite key: a build landing while this server is
+# serving deletes the chunks it is still handing out, and only PAGES die — the
+# route-handler evals stay green, so the round reads like a healthy tree with a
+# broken UI. scripts/media-library/check-a11y-proto.sh reached this conclusion in
+# S4 round 7; this wrapper predates that finding and was still running bare.
+# A SUBdirectory of build/, because the ui-check lane's own dev server takes
+# build/ itself — sharing it would just move the collision from build-vs-dev to
+# dev-vs-dev. build/ is gitignored recursively, so the nested name needs no rule.
+NEXT_DIST_DIR=build/bko-a11y pnpm dev --port "$PORT" >/dev/null 2>&1 &
 SERVER_PID=$!
 trap 'kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true' EXIT
 
