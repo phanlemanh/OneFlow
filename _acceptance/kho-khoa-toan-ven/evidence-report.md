@@ -56,7 +56,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E1
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'coerces scalars'
+  verifier: config:executors.test.unit_kkt_coerce_scalar
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -69,7 +69,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E2
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'refuses structured'
+  verifier: config:executors.test.unit_kkt_refuse_structured
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -82,7 +82,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E3
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'refuses empty key'
+  verifier: config:executors.test.unit_kkt_refuse_empty_key
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -95,7 +95,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E4
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'all strings untouched'
+  verifier: config:executors.test.unit_kkt_all_strings_untouched
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -108,7 +108,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E5
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'save refuses'
+  verifier: config:executors.test.unit_kkt_save_throws
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -121,7 +121,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E6
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'concurrent reader'
+  verifier: config:executors.test.unit_kkt_atomic_reader
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -134,7 +134,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E7
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'no temp file'
+  verifier: config:executors.test.unit_kkt_no_temp_left
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -147,7 +147,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E8
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/check-env-store-teeth.sh --case seam-signature
+  verifier: config:executors.script.kkt_seam_signature
   verified_at: 2026-08-31T15:18:02Z
   output: |
     → răng: seam-signature
@@ -159,7 +159,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E9
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'run path'
+  verifier: config:executors.test.unit_kkt_run_path
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -172,7 +172,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E10
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'round trip'
+  verifier: config:executors.test.unit_kkt_round_trip
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -185,7 +185,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E11
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/check-env-store-teeth.sh
+  verifier: config:executors.script.kkt_teeth_all
   verified_at: 2026-08-31T15:18:02Z
   output: |
     CASE save-throws: PASS
@@ -198,7 +198,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E12
   exit_code: 0
   baseline: n-a
-  verifier: pnpm vitest run src/lib/settings/env-store.server.test.ts src/app/api/settings/env/route.unreadable.test.ts src/app/api/settings/env/route.test.ts
+  verifier: config:executors.test.unit_kkt_no_regression
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
@@ -211,7 +211,7 @@ Dòng thứ ba giải thích vì sao phép đo phải đổi giữa chừng: xem
   run_id: kkt-machine-20260831T151802Z-E13
   exit_code: 0
   baseline: n-a
-  verifier: bash scripts/settings/run-one-test.sh 'empty key through PUT'
+  verifier: config:executors.test.unit_kkt_empty_key_put
   verified_at: 2026-08-31T15:18:02Z
   output: |
      RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
