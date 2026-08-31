@@ -5,7 +5,7 @@ slug: chong-mat-khoa-byo
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api]
-status: implemented
+status: verified
 design_doc: docs/superpowers/specs/2026-08-31-chong-mat-khoa-byo-design.md
 approved_by: Phan Le Manh
 approved_at: 2026-08-30T22:03:03Z
