@@ -1,110 +1,11 @@
 {
   "feature_plain": "Hai chốt tự canh bản đồ sản phẩm và sổ lộ trình nay chạy trên mọi thay đổi, và vòng nghiệm thu thôi tự làm hỏng lượt chạy của chính mình.",
-  "will_do": [
-    {
-      "id": "AC-1",
-      "p": "Sẽ báo đỏ, gọi đích danh việc nào, khi một việc đã ký mà bản đồ sản phẩm chưa nhắc tới."
-    },
-    {
-      "id": "AC-2",
-      "p": "Sẽ báo đỏ kèm CẢ HAI con số khi bản đồ ghi sai số việc đã giao — người đọc biết ngay lệch bao nhiêu và về phía nào."
-    },
-    {
-      "id": "AC-3",
-      "p": "Sẽ canh cả khối cơ hội đang cân nhắc, không chỉ khối việc đã giao."
-    },
-    {
-      "id": "AC-12",
-      "p": "Sẽ báo đỏ, gọi tên thư mục, khi một hồ sơ có phần khai đầu trang hỏng hoặc trạng thái lạ — thay vì lặng lẽ xếp nó vào nhóm chưa ký."
-    },
-    {
-      "id": "AC-5",
-      "p": "Sẽ bắt được một việc bị ghi hai lần trong sổ lộ trình — điều chốt hiện nay hoàn toàn không thấy."
-    },
-    {
-      "id": "AC-6",
-      "p": "Sẽ chặn hợp nhất khi bản đồ hoặc sổ lộ trình lệch, thay vì đợi ai đó nhớ gõ tay."
-    },
-    {
-      "id": "AC-13",
-      "p": "Sẽ bảo đảm hai chốt thật sự chạy trên mọi thay đổi, không bị một điều kiện âm thầm tắt đi."
-    },
-    {
-      "id": "AC-7",
-      "p": "Sẽ không làm chậm hay đổi định nghĩa năm phần kiểm sẵn có — chỉ thêm việc vào phần đã có."
-    },
-    {
-      "id": "AC-8",
-      "p": "Sẽ tách hai phép kiểm nặng ra riêng, để một phép bị treo không nuốt luôn tín hiệu của phép kia."
-    },
-    {
-      "id": "AC-9",
-      "p": "Sẽ cho phép kiểm giao diện dùng thư mục dựng riêng, hết cảnh hai việc tranh nhau một chỗ."
-    },
-    {
-      "id": "AC-10",
-      "p": "Sẽ chứng minh mọi phép kiểm mới bằng cặp hai chiều: bản lành phải xanh, bản cố ý làm hỏng phải đỏ và nói rõ hỏng ở đâu."
-    }
-  ],
-  "wont_do": [
-    {
-      "id": "AC-4",
-      "p": "Chặn tình huống chốt không tìm thấy thứ cần kiểm mà vẫn báo xanh — không tìm thấy thì phải đỏ, kèm tên thứ đọc không được."
-    },
-    {
-      "id": "AC-11",
-      "p": "Chặn tình huống bản đồ còn quảng cáo một việc mà hồ sơ của nó đã bị rút hoặc hạ về bản nháp."
-    }
-  ],
-  "scope_plain": "Sáu nhánh để lại lần sau: soi con số trong văn xuôi sổ lộ trình, bù siêu dữ liệu cho 18 hồ sơ cũ, chuyện ngôn ngữ trong file mượn từ bộ công cụ, và ba nhánh bị loại vì phải mang bộ sinh bản đồ vào kho hoặc dựng thêm một phần kiểm mới.",
-  "coverage_plain": [
-    {
-      "i": 0,
-      "p": "Bốn thứ được canh, đúng bốn — chốt bằng chính những chỗ hai mặt của gói việc chạm vào, không phải danh sách nghĩ ra."
-    },
-    {
-      "i": 1,
-      "p": "Năm kiểu lệch. Ô trùng-mục vào nhóm làm-ngay vì kho này ĐANG có một việc ghi hai lần mà chốt vẫn xanh (đo 31/08), không phải vì suy luận. Ô thừa-mục là lỗ phản biện tìm ra: được khai là phủ nhưng không tiêu chí nào đo — nay là AC-11 (bản đồ quảng cáo việc đã rút)."
-    },
-    {
-      "i": 2,
-      "p": "Trục sinh ra từ phản biện: một phép so có hai vế thì cơ chế không-tìm-thấy-thì-đỏ phải áp cả hai. Bản nháp đầu chỉ canh vế bản đồ — AC-12 (canh vế hồ sơ nguồn) bịt vế còn lại."
-    },
-    {
-      "i": 3,
-      "p": "Hai nơi chạy. Đếm được: hiện nay hai chốt xuất hiện 0 lần trong cấu hình kiểm tự động — đó là toàn bộ lỗ hổng gói việc này đóng."
-    },
-    {
-      "i": 4,
-      "p": "Khuôn ngành cho việc này là sinh-lại-rồi-so; ta cố ý làm khác. GIẢ ĐỊNH CHƯA ĐO: hai công cụ đối chiếu chưa cài trên máy, nên lập luận đứng trên tên gọi chứ chưa đứng trên phép đo. Đây là dòng cần anh gạch tại cổng này."
-    }
-  ],
-  "gap_probe_plain": [
-    {
-      "i": 0,
-      "p": "Chốt chỉ canh một chiều: việc đã ký phải có trên bản đồ. Chiều ngược bỏ trống — bản đồ còn quảng cáo một việc mà hồ sơ đã bị rút thì vẫn xanh. Kho này đã rút một hồ sơ thật hồi 26/08. Đã vá: thêm tiêu chí chiều ngược và buộc ba con số phải bằng nhau trong cùng một khẳng định."
-    },
-    {
-      "i": 1,
-      "p": "Ba phép kiểm về phần chạy tự động chỉ soi NỘI DUNG khai báo, không phép nào hỏi phần đó có thật sự chạy hay không. Thêm một điều kiện âm thầm là cả ba vẫn xanh trong khi chốt không bao giờ chạy — đúng tình trạng gói việc này sinh ra để đóng. Đã vá: thêm tiêu chí đo khả năng chạy thật."
-    },
-    {
-      "i": 2,
-      "p": "Phép kiểm chỉ có vế đỏ, thiếu vế xanh trên cùng đường lấy lệnh. Một lệnh gõ sai cờ thì vế đỏ vẫn qua, và phần kiểm tự động đỏ trên MỌI thay đổi ngay sau khi hợp nhất. Đã vá: chạy chính lệnh đó trên bản lành trước, rồi mới trên bản hỏng."
-    },
-    {
-      "i": 3,
-      "p": "Lời hứa không-làm-hỏng-phần-cũ chỉ được đo bằng cách đếm và so tên. Làm mềm một phần kiểm cho đỡ ồn thì vẫn đủ số, vẫn đúng tên. Đã vá: so từng phần cũ với chính nó ở điểm rẽ nhánh, đỏ thì nói rõ phần nào đổi khoá nào."
-    },
-    {
-      "i": 4,
-      "p": "Cơ chế không-tìm-thấy-thì-đỏ chỉ đặt ở vế bản đồ. Vế hồ sơ nguồn không có ràng buộc nào: một phần khai đầu trang viết lệch bị xếp thầm vào nhóm chưa ký, số đếm vẫn khớp, cả bộ kiểm xanh trong khi bản đồ thiếu đúng hồ sơ đó. Đã vá: phân loại mọi thư mục vào bốn nhóm đóng, nhóm không-phân-loại-được là đỏ có tên."
-    }
-  ],
+  "scope_plain": "Sáu nhánh để lại lần sau, trong đó có việc soi con số nằm trong văn xuôi sổ lộ trình và ba nhánh bị loại vì phải mang bộ sinh bản đồ vào kho.",
+  "analyst_plain": "",
   "decisions_plain": [
     {
       "id": "d-20260831T034714Z-4847",
-      "p": "KHÔNG làm phần khai trước về cấu trúc màn hình — gói này không chạm giao diện nào; đổi lại nếu sau này nó chạm thì cấu trúc chưa được khai trước."
+      "p": "KHÔNG làm phần khai trước về cấu trúc màn hình — gói này không chạm giao diện nào."
     },
     {
       "id": "d-20260831T034714Z-2512",
@@ -112,7 +13,7 @@
     },
     {
       "id": "d-20260831T034714Z-6650",
-      "p": "Khẳng định bất biến thay vì sinh-lại-rồi-so, tức cố ý làm khác khuôn sẵn có của kho; đổi lại phải ghi rõ chỗ lệch để nó không trôi qua im lặng."
+      "p": "Khẳng định bất biến thay vì sinh-lại-rồi-so, tức cố ý làm khác khuôn sẵn có của kho; đổi lại phải ghi rõ chỗ lệch."
     },
     {
       "id": "d-20260831T034714Z-9275",
@@ -120,27 +21,47 @@
     },
     {
       "id": "d-20260831T034714Z-1813",
-      "p": "Tách hai phép kiểm nặng ra riêng nhưng GIỮ nguyên phép gộp cũ — bảy hồ sơ đã ký còn trỏ vào nó, xoá là làm hỏng bảy bộ bằng chứng."
+      "p": "Tách hai phép kiểm nặng ra riêng nhưng GIỮ nguyên phép gộp cũ — bảy hồ sơ đã ký còn trỏ vào nó."
     },
     {
       "id": "d-20260831T034714Z-7085",
-      "p": "Mở rộng phạm vi để vá lỗ ghi-hai-lần của chốt lộ trình; đổi lại gói việc to hơn dự tính ban đầu, nhưng cắm điện cho một chốt đang có lỗ thì tệ hơn không cắm."
+      "p": "Mở rộng phạm vi để vá lỗ ghi-hai-lần của chốt lộ trình; cắm điện cho một chốt đang có lỗ thì tệ hơn không cắm."
     },
     {
       "id": "d-20260831T034714Z-8956",
-      "p": "KHÔNG soi con số nằm trong văn xuôi sổ lộ trình lần này; đổi lại con số đó vẫn trôi tự do cho đến khi có hồ sơ riêng."
+      "p": "KHÔNG soi con số nằm trong văn xuôi sổ lộ trình lần này; đổi lại con số đó vẫn trôi tự do."
     },
     {
       "id": "d-20260831T113000Z-7741",
-      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ thay vì ghi vào phần hạn chế đã biết; đổi lại hồ sơ dài thêm ba tiêu chí và ba phép đo."
+      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ thay vì ghi vào phần hạn chế; đổi lại hồ sơ dài thêm ba tiêu chí."
     },
     {
       "id": "d-20260831T113100Z-2218",
-      "p": "Cơ chế không-tìm-thấy-thì-đỏ áp cả hai vế của phép so; đổi lại bộ kiểm phải đọc phần khai đầu trang của mọi hồ sơ, chậm hơn cách dò chuỗi."
+      "p": "Cơ chế không-tìm-thấy-thì-đỏ áp cả hai vế của phép so; đổi lại bộ kiểm phải đọc phần khai đầu trang của mọi hồ sơ."
     },
     {
       "id": "d-20260831T113200Z-9053",
-      "p": "Tách riêng phép đo khả-năng-chạy khỏi ba phép đo nội dung; đổi lại nếu đổi cách kích hoạt phần kiểm tự động thì phải sửa phép đo này."
+      "p": "Tách riêng phép đo khả-năng-chạy khỏi ba phép đo nội dung; đổi lại đổi cách kích hoạt thì phải sửa phép đo này."
+    },
+    {
+      "id": "d-20260831T124000Z-5512",
+      "p": "Bộ kiểm bản đồ chỉ dùng công cụ có sẵn của Node, để chạy được ở phần kiểm tự động vốn không cài thư viện."
+    },
+    {
+      "id": "d-20260831T124100Z-8830",
+      "p": "Phép đo quét mọi tệp kiểm giao diện thay vì ghim cứng hai tệp, nên một tệp mới chép sai cũng bị bắt."
+    },
+    {
+      "id": "d-20260831T124200Z-1907",
+      "p": "Ca thử tự thêm dòng mồi vào bản sao thay vì sửa tay bản đồ — bản đồ do máy sinh, sửa tay sẽ bị xoá."
+    },
+    {
+      "id": "d-20260831T134000Z-4471",
+      "p": "Hai chốt nay từ chối tham số lạ thay vì bỏ qua lặng lẽ; một dòng lệnh gõ sai không còn đọc ra thành đã-kiểm-sạch."
+    },
+    {
+      "id": "d-20260831T134100Z-6628",
+      "p": "Số lượt đóng dấu lại đo được là 1 chứ không phải 3 như dự đoán; một trường hợp chưa giải thích được nên ghi lại thay vì bịa lý do."
     }
   ]
 }
