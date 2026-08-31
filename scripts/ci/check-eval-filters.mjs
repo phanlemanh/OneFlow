@@ -50,6 +50,15 @@ const SHOW_SHAPES = args.includes("--show-shapes");
 const rootFlag = args.indexOf("--root");
 const ROOT =
     rootFlag >= 0 ? path.resolve(args[rootFlag + 1] ?? "") : DEFAULT_ROOT;
+// The config and the source tree are genuinely different inputs: one says what
+// the evals CLAIM to run, the other holds the tests that actually exist. In CI
+// they are the same directory and neither flag is passed. The teeth need to
+// perturb one without the other — a copied config against real sources, or a
+// real config against a tree where vitest cannot run — so the second root is
+// addressable rather than assumed equal.
+const vitestFlag = args.indexOf("--vitest-root");
+const VITEST_ROOT =
+    vitestFlag >= 0 ? path.resolve(args[vitestFlag + 1] ?? "") : ROOT;
 
 const failures = [];
 const fail = (rule, msg) => failures.push(`FAIL ${rule}: ${msg}`);
@@ -108,11 +117,15 @@ function readExecutors() {
         const entry = raw.match(/^ {4}([a-z0-9_]+):\s*(.+?)\s*$/);
         if (!entry || !kind) continue;
         let value = entry[2];
-        if (
-            (value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))
-        ) {
+        if (value.startsWith('"') && value.endsWith('"')) {
             value = value.slice(1, -1);
+        } else if (value.startsWith("'") && value.endsWith("'")) {
+            // YAML escapes a single quote inside a single-quoted scalar by
+            // doubling it. No executor uses that form today, but a parser that
+            // does not unescape it reads a mangled filter and reports the eval
+            // as matching nothing — a false RED, which is the failure direction
+            // that erodes trust in a guard fastest.
+            value = value.slice(1, -1).replace(/''/g, "'");
         }
         out.set(`${kind}.${entry[1]}`, value);
     }
@@ -196,11 +209,11 @@ function classify(cmd) {
  * Measured 31/08: 720 cases, 1 second, 149 KB.
  */
 function collectNames() {
-    const bin = path.join(ROOT, "node_modules", "vitest", "vitest.mjs");
+    const bin = path.join(VITEST_ROOT, "node_modules", "vitest", "vitest.mjs");
     let raw;
     try {
         raw = execFileSync(process.execPath, [bin, "list", "--json"], {
-            cwd: ROOT,
+            cwd: VITEST_ROOT,
             encoding: "utf8",
             maxBuffer: 64 * 1024 * 1024,
             stdio: ["ignore", "pipe", "pipe"],
@@ -263,7 +276,7 @@ const names = collectNames();
 const byFile = new Map();
 for (const n of names) {
     if (!n?.file || !n?.name) continue;
-    const rel = path.relative(ROOT, n.file);
+    const rel = path.relative(VITEST_ROOT, n.file);
     if (!byFile.has(rel)) byFile.set(rel, []);
     byFile.get(rel).push(n.name);
 }
