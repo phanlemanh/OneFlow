@@ -5,7 +5,7 @@ CASE refuse-empty-key: PASS
 CASE all-strings: PASS
 CASE save-throws: PASS
 CASE seam-signature: PASS
-CASE atomic: FAIL
+CASE atomic: PASS
 cây chung sạch: src/lib/settings/env-store.server.ts và src/ext-default/settings-store.ts không đổi
 
-❌ răng: 6 đạt / 1 hỏng — bộ kiểm kho khoá không đáng tin
+✅ răng: 7/7 case — mỗi case một mã thoát riêng
