@@ -5,13 +5,13 @@
 
 ```mermaid
 flowchart TD
-  A["Đang cân nhắc cơ hội<br/>2 việc"] --> GD{"Cổng Đáng"}
+  A["Đang cân nhắc cơ hội<br/>3 việc"] --> GD{"Cổng Đáng"}
   GD --> B["Sắp mở vòng<br/>chưa có"]
   GD --> XL["Xếp lại sau<br/>chưa có"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
-  GP --> DL["Đang làm<br/>1 việc"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>27 việc"]
+  GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
+  GB --> DG["Đã giao<br/>28 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -24,11 +24,8 @@ flowchart TD
 ## Đang cân nhắc cơ hội
 
 - Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy (`director-v2`)
+- Chốt chặn có thể đang bỏ qua kiểm bằng chứng lỗi thời cho hồ sơ khai thiếu paths (`staleness-ho-so-thieu-paths`)
 - Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
-
-## Đang làm
-
-- Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng (`cong-tu-canh-minh`)
 
 ## Đã giao
 
@@ -44,6 +41,7 @@ flowchart TD
 - CI-a — vitest vào CI + gỡ ghim SDK cứng của guard overlay (khử mìn hạ tầng verify) (`ci-vitest-sdk-pin`)
 - slot dán chữ/khung giá/logo/safe-zone lên ảnh & video (Phase 1.2) (`compose-overlay`)
 - Conformance L0 — pluginRev, node_cached contract, TS↔Python conformance suite (`conformance-l0`)
+- Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng (`cong-tu-canh-minh`)
 - Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)
