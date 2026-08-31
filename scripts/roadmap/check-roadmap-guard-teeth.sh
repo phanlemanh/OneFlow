@@ -41,6 +41,7 @@ CASES=(
   ledger-missing
   ledger-stale
   ledger-paired
+  ledger-duplicate
   adr-uncited
   superseded-bare
   superseded-paired
@@ -120,6 +121,34 @@ case_historical_244cb0b() {
     return 1
   fi
   guard_is_red
+}
+
+# AC-5 (cong-tu-canh-minh). Check C compares the SET of slugs inside the marker
+# block, so two rows for the same slug collapse into one and the guard is blind.
+# Measured 31/08 before the rule existed: the real ledger HAD two
+# `normalize-text-vi` rows, dated 21/08 and 27/08, and this guard reported clean.
+# A duplicated row is real drift — the same item classified twice, usually with
+# two different dates, so the ledger no longer says one thing.
+case_ledger_duplicate() {
+  build_fixture
+  python3 - "$tmp/t/docs/roadmap.md" <<'DUP'
+import sys, pathlib
+# The row must be duplicated INSIDE the marker block. `local-cpu-plugins` is
+# also named in prose above it (line 46 today, an S2 status row), and the first
+# version of this case duplicated THAT line: the guard stayed silent about it
+# because check C only ever reads between the markers, and the case failed for a
+# reason that had nothing to do with the rule under test.
+p = pathlib.Path(sys.argv[1])
+lines = p.read_text(encoding="utf-8").splitlines(keepends=True)
+start = next(i for i, l in enumerate(lines) if "roadmap-ledger:start" in l)
+end = next(i for i, l in enumerate(lines) if "roadmap-ledger:end" in l)
+row = next(i for i in range(start, end) if "`local-cpu-plugins`" in lines[i])
+lines.insert(row + 1, lines[row])
+p.write_text("".join(lines), encoding="utf-8")
+DUP
+  guard_is_red || return 1
+  out_has 'local-cpu-plugins' || return 1      # names the slug, not "ledger is off"
+  out_has 'hai dòng|trùng|lặp' || return 1     # says WHAT is wrong with it
 }
 
 # AC-4. One signed contract dropped out of the ledger.

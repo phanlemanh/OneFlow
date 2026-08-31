@@ -181,7 +181,6 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `compose-overlay` | T3 | 02/08 | **1.2** — slot overlay text/giá/logo/safe-zone |
 | `local-cpu-plugins` | T2 | 06/08 | **S2** — làn local-first ([ADR-0011](adr/0011-local-first-execution.md)) |
 | `byo-key-onboarding` | T3 | 19/08 | **S4** — làn local-first: UX BYO key lượt chạy đầu; mở khoá phép đo điều kiện đảo chiều ADR-0011 |
-| `normalize-text-vi` | T3 | 21/08 | **1.3** — slot/node đọc số-giá-ngày tất định, bắt buộc đứng trước TTS |
 | `dependency-refresh-2026-07` | T2 | 26/07 | *ngoài lộ trình* — bảo trì phụ thuộc |
 | `ci-actions-bump` | T2 | 26/07 | *ngoài lộ trình* — hạ tầng CI |
 | `stale-scope-by-paths` | T2 | 28/07 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu |

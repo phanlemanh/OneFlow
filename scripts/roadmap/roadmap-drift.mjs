@@ -116,9 +116,26 @@ if (!ledger) {
         `không tìm thấy khối roadmap-ledger:start/end trong ${ROADMAP}`,
     );
 } else {
-    const inLedger = new Set(
-        [...ledger[1].matchAll(/`([a-z0-9][a-z0-9-]*)`/g)].map((m) => m[1]),
+    const ledgerSlugs = [...ledger[1].matchAll(/`([a-z0-9][a-z0-9-]*)`/g)].map(
+        (m) => m[1],
     );
+    const inLedger = new Set(ledgerSlugs);
+
+    // A Set hides duplicates, and a duplicated row IS drift: the same item
+    // classified twice, usually with two different dates, so the ledger no
+    // longer says one thing. Measured 31/08, before this rule existed: the
+    // ledger carried two `normalize-text-vi` rows (21/08 and 27/08) and this
+    // guard reported clean — a guard that is green while the thing it watches
+    // is visibly wrong.
+    const seenSlugs = new Set();
+    for (const slug of ledgerSlugs) {
+        if (seenSlugs.has(slug))
+            fail(
+                "C/ledger",
+                `sổ cái có hai dòng cùng slug \`${slug}\` — mỗi hạng mục chỉ một dòng`,
+            );
+        seenSlugs.add(slug);
+    }
     const signed = readdirSync(ACCEPTANCE_DIR, { withFileTypes: true })
         .filter((d) => d.isDirectory())
         .map((d) => d.name)
