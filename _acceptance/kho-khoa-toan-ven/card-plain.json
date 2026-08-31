@@ -1,114 +1,23 @@
 {
   "feature_plain": "Kho khoá API thôi âm thầm đánh rơi khoá khi đọc, và thôi để lại file hỏng khi ghi dở dang.",
-  "will_do": [
-    {
-      "id": "AC-1",
-      "p": "Sẽ giữ đủ mọi khoá khi ai đó lỡ viết một con số thay vì chữ trong file cài đặt — đổi nó thành chữ thay vì làm khoá biến mất."
-    },
-    {
-      "id": "AC-2",
-      "p": "Sẽ báo hỏng khi giá trị là một cấu trúc lồng nhau, thay vì đổi bừa thành chuỗi rác trông hợp lệ."
-    },
-    {
-      "id": "AC-4",
-      "p": "Sẽ không đụng gì tới kho đã đúng — mọi khoá và mọi giá trị giữ nguyên."
-    },
-    {
-      "id": "AC-6",
-      "p": "Sẽ bảo đảm người đọc song song luôn thấy hoặc bản cũ trọn vẹn hoặc bản mới trọn vẹn, không bao giờ thấy file cụt."
-    },
-    {
-      "id": "AC-8",
-      "p": "Sẽ giữ nguyên cách gọi hai hàm lưu trữ, để bản chạy trên đám mây không hỏng âm thầm ở nơi không ai chạy được phép thử."
-    },
-    {
-      "id": "AC-9",
-      "p": "Sẽ giao đủ mọi khoá cho plugin lúc chạy — hôm nay đường này đánh rơi đúng những khoá đó."
-    },
-    {
-      "id": "AC-10",
-      "p": "Sẽ bảo đảm vòng đọc rồi lưu không làm mất khoá nào; đây chính là đường làm mất vĩnh viễn đã đo được."
-    },
-    {
-      "id": "AC-11",
-      "p": "Sẽ chứng minh mọi phép đo mới bằng cặp hai chiều — kể cả phép đo khó nhất, bằng máy chứ không bằng một lượt chạy tay."
-    }
-  ],
-  "wont_do": [
-    {
-      "id": "AC-3",
-      "p": "Chặn kho có tên khoá rỗng — một tên biến môi trường rỗng không sửa được, nên đó là kho hỏng chứ không phải kho cần chữa."
-    },
-    {
-      "id": "AC-5",
-      "p": "Chặn đường lưu ghi bừa một giá trị sai kiểu: báo lỗi nêu đích danh khoá, và không chạm đĩa."
-    },
-    {
-      "id": "AC-7",
-      "p": "Chặn việc để lại file tạm mồ côi — cả khi ghi xong lẫn khi ghi hỏng giữa chừng."
-    },
-    {
-      "id": "AC-12",
-      "p": "Chặn việc lưu một nửa: gửi lên một tên khoá rỗng lẫn khoá tốt thì hỏng cả lượt và báo rõ, thay vì lặng lẽ bỏ cái rỗng."
-    }
-  ],
-  "scope_plain": "Sáu nhánh để lại lần sau, đáng chú ý nhất là cửa lọc thứ ba nằm ở tầng giao tiếp — sửa nó sẽ nâng gói lên mức cần thêm một cổng duyệt.",
-  "coverage_plain": [
-    {
-      "i": 0,
-      "p": "Bốn dạng giá trị, và đúng bốn — không dạng thứ năm nào tồn tại trong dữ liệu hợp lệ."
-    },
-    {
-      "i": 1,
-      "p": "Ba cửa mà dữ liệu đi qua. Cửa thứ tư CÓ THẬT và cố ý để ngoài vì sửa nó nâng hạng gói — ghi ở phần bỏ, không giấu."
-    },
-    {
-      "i": 2,
-      "p": "Bốn cách xử lý. Ô 'bỏ qua im lặng' bị loại khỏi bảng — đó chính là lỗi đang sửa."
-    },
-    {
-      "i": 3,
-      "p": "Hai kiểu hỏng độc lập: nội dung sai, và ghi bị ngắt giữa chừng. Cả hai đo được trên cây hôm nay."
-    }
-  ],
-  "gap_probe_plain": [
-    {
-      "i": 0,
-      "p": "Phép đo khó nhất có thể XANH mà chưa đo gì: nếu vòng đọc không bắc qua đúng lúc đang ghi thì mọi mẫu đều là bản mới, và điều kiện thoả một cách rỗng. Đã vá: bắt buộc phải bắt được cả mẫu cũ lẫn mẫu mới, không bắc qua được thì báo không-kết-luận-được chứ không báo đạt."
-    },
-    {
-      "i": 1,
-      "p": "Bản sửa tự tạo ra một hồi quy: gửi lên một tên khoá rỗng kèm một khoá tốt thì cả lượt lưu hỏng, trong khi trước đây khoá tốt vẫn được lưu. Đã vá: thêm một tiêu chí đo đúng tình huống đó và chốt là được-tất-hoặc-không-gì, báo rõ tên khoá sai."
-    },
-    {
-      "i": 2,
-      "p": "Bộ kiểm chiều đỏ sửa thẳng vào file thật trong lúc các phép đo khác đang đọc chính file đó và chạy song song. Đã vá: nó làm việc trên một bản sao riêng và phải chứng minh cây làm việc còn sạch khi xong."
-    },
-    {
-      "i": 3,
-      "p": "Bộ kiểm chiều đỏ có thể báo đạt chỉ vì file bị sửa hỏng cú pháp. Đã vá: mỗi ca phải khai trước đúng phép đo nào phải đỏ và thông điệp nào phải hiện; hỏng cú pháp là không-kết-luận-được."
-    },
-    {
-      "i": 4,
-      "p": "Hai lời hứa không-để-dấu-vết chỉ phủ đường thành công, nên máy mới chưa có file cài đặt là chỗ không ai đo. Đã vá: thêm tình huống máy mới và tình huống ghi hỏng giữa chừng."
-    }
-  ],
+  "scope_plain": "Sáu nhánh để lại lần sau, đáng chú ý nhất là cửa lọc thứ ba ở tầng giao tiếp — sửa nó sẽ nâng gói lên mức cần thêm một cổng duyệt.",
+  "analyst_plain": "",
   "decisions_plain": [
     {
       "id": "d-20260831T160000Z-4410",
-      "p": "Giá trị không phải chữ thì đổi thành chữ và giữ khoá, thay vì từ chối cả kho; đường bị loại có lý do đo được — từ chối cả kho sẽ làm mọi khoá biến mất khỏi mọi lượt chạy."
+      "p": "Giá trị không phải chữ thì đổi thành chữ và giữ khoá; đường bị loại có lý do đo được — từ chối cả kho sẽ làm mọi khoá biến mất khỏi mọi lượt chạy."
     },
     {
       "id": "d-20260831T160100Z-9265",
-      "p": "Cấu trúc lồng nhau và tên khoá rỗng vẫn bị từ chối; đổi lại bảng xử lý có hai nhánh nên phải có ô đo riêng cho từng nhánh."
+      "p": "Cấu trúc lồng nhau và tên khoá rỗng vẫn bị từ chối, vì đổi chúng thành chữ chỉ tạo ra rác trông hợp lệ."
     },
     {
       "id": "d-20260831T160200Z-3078",
-      "p": "KHÔNG sửa cửa lọc thứ ba ở tầng giao tiếp, để giữ gói ở mức hai cổng duyệt; đổi lại cửa đó vẫn lọc lặng, nhưng nó trả lại đúng kết quả nên người dùng thấy được."
+      "p": "KHÔNG sửa cửa lọc thứ ba ở tầng giao tiếp, để giữ gói ở mức hai cổng duyệt; đổi lại cửa đó vẫn lọc lặng."
     },
     {
       "id": "d-20260831T160300Z-7791",
-      "p": "Thêm một bộ kiểm chiều đỏ để đo bằng máy, kể cả phép đo khó nhất; đo trước cho thấy không tốn thêm lượt đóng dấu lại nào."
+      "p": "Thêm bộ kiểm chiều đỏ để đo bằng máy, kể cả phép đo khó nhất; đo trước cho thấy không tốn thêm lượt đóng dấu lại nào."
     },
     {
       "id": "d-20260831T160400Z-5523",
@@ -116,11 +25,15 @@
     },
     {
       "id": "d-20260831T163000Z-8814",
-      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ; đổi lại hồ sơ dài thêm một tiêu chí và một phép đo."
+      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ, trước khi viết dòng mã nào."
     },
     {
       "id": "d-20260831T163100Z-2245",
-      "p": "Giữ việc từ chối tên khoá rỗng ở tầng lưu, vì nếu cho qua thì chính bộ đọc của ta sẽ từ chối kho đó ở lần đọc kế; đổi lại đây là thay đổi hành vi thật — đổi im lặng lấy kêu to, có chủ ý."
+      "p": "Giữ việc từ chối tên khoá rỗng ở tầng lưu, vì cho qua thì chính bộ đọc của ta sẽ từ chối kho đó ở lần đọc kế; đổi lại là thay đổi hành vi thật."
+    },
+    {
+      "id": "d-20260831T173000Z-9107",
+      "p": "Phép đo cho tình huống tên khoá rỗng đo hành vi THẬT — tầng giao tiếp không bắt lỗi nên nó thoát ra thành ngoại lệ, không phải một phản hồi gọn; biến nó thành phản hồi gọn phải sửa tầng đó, tức nâng hạng gói."
     }
   ]
 }
