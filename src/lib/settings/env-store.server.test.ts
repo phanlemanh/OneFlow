@@ -12,6 +12,7 @@
  * data dir is chosen per test; a top-level import would bind the first one.
  */
 
+import { spawn } from "node:child_process";
 import {
     chmodSync,
     existsSync,
@@ -448,4 +449,81 @@ describe("saveEnvStore refuses instead of filtering", () => {
         // All or nothing: the valid key must NOT be half-saved.
         expect(readFileSync(store(), "utf8")).toBe(before);
     });
+});
+
+describe("writeSettingsBlob is atomic", () => {
+    it("no temp file is left behind, on the success path and the failure path", async () => {
+        const { writeSettingsBlob } = await import("@ext/settings-store");
+        await writeSettingsBlob(JSON.stringify({ A: "1" }));
+        expect(readdirSync(dir).sort()).toEqual(["settings.json"]);
+
+        // The FAILURE path is the half that is easy to forget, and it is the
+        // half that leaves an orphan behind. Skipped as root, which ignores
+        // mode bits — the pattern this file already uses.
+        if (!isRoot()) {
+            chmodSync(dir, 0o500);
+            await expect(writeSettingsBlob("x".repeat(1024))).rejects.toThrow();
+            chmodSync(dir, 0o700);
+            expect(readdirSync(dir).sort()).toEqual(["settings.json"]);
+        }
+    });
+
+    it("a concurrent reader never sees a partial file", async () => {
+        // THE assertion that distinguishes the two implementations. Two rules,
+        // both from the clean-context review, both load-bearing:
+        //
+        // 1. The reader is a SEPARATE OS PROCESS. A same-process loop cannot
+        //    interleave with a synchronous write — JS will not schedule it —
+        //    so it would observe only the new bytes and pass on the broken
+        //    implementation too.
+        // 2. The samples must STRADDLE the write: at least one old and at
+        //    least one new. Not straddling is INCONCLUSIVE, not PASS —
+        //    "every sample is valid" is vacuously true for a reader that ran
+        //    entirely after the write.
+        const OLD = JSON.stringify({ OLD: "y".repeat(1_000) });
+        writeFileSync(store(), OLD, "utf8");
+        const NEW = JSON.stringify({ NEW: "z".repeat(6_000_000) });
+
+        const reader = spawn(process.execPath, [
+            "-e",
+            `const fs=require("node:fs");const out=[];const until=Date.now()+4000;
+             while(Date.now()<until){try{out.push(fs.readFileSync(process.argv[1],"utf8").length)}catch{}}
+             process.stdout.write(JSON.stringify(out));`,
+            store(),
+        ]);
+        const collected = new Promise<string>((resolve) => {
+            let buf = "";
+            reader.stdout.on("data", (c) => {
+                buf += String(c);
+            });
+            reader.on("close", () => resolve(buf));
+        });
+
+        await new Promise((r) => setTimeout(r, 150));
+        const { writeSettingsBlob } = await import("@ext/settings-store");
+        await writeSettingsBlob(NEW);
+
+        const samples: number[] = JSON.parse(await collected);
+        const old = samples.filter((n) => n === OLD.length).length;
+        const fresh = samples.filter((n) => n === NEW.length).length;
+        const partial = samples.filter(
+            (n) => n !== OLD.length && n !== NEW.length,
+        );
+        console.log(
+            `mẫu cũ=${old} mẫu mới=${fresh} tổng=${samples.length} cụt=${partial.length}`,
+        );
+
+        if (old === 0 || fresh === 0) {
+            throw new Error(
+                `không bắc qua được lượt ghi (cũ=${old} mới=${fresh}) — KHÔNG KẾT LUẬN ĐƯỢC, không phải đạt`,
+            );
+        }
+        expect(
+            partial.length === 0
+                ? []
+                : [
+                      `${partial.length} mẫu cụt, độ dài ${partial.slice(0, 3)}, không khớp cũ (${OLD.length}) lẫn mới (${NEW.length})`,
+                  ],
+        ).toEqual([]);
+    }, 20_000);
 });
