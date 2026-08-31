@@ -325,6 +325,22 @@ executors:
     roadmap_teeth_duplicate: "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-duplicate"
     # Job CI: rut lenh RA TU ci.yml roi CHAY no, theo khuon check-vitest-job.sh.
     # Doc YAML la do chi dan; chay lenh rut ra moi la do hanh vi.
+    # o-do-chay-0-ca-van-xanh: mot o do loc theo ten ca ma khong ca nao khop
+    # thi `vitest -t` THOAT 0 va o do bao DAT vinh vien. Do 31/08: 23/23 o dang
+    # lanh, nen day la hang rao chu khong phai ban sua.
+    evalfilter_check: "node scripts/ci/check-eval-filters.mjs"
+    evalfilter_both_shapes: "node scripts/ci/check-eval-filters.mjs --show-shapes"
+    evalfilter_teeth_all: "bash scripts/ci/check-eval-filters-teeth.sh"
+    evalfilter_teeth_no_match: "bash scripts/ci/check-eval-filters-teeth.sh --case no-match"
+    evalfilter_teeth_empty: "bash scripts/ci/check-eval-filters-teeth.sh --case zero-executors"
+    evalfilter_teeth_unparsable: "bash scripts/ci/check-eval-filters-teeth.sh --case unparsable"
+    evalfilter_teeth_list_broken: "bash scripts/ci/check-eval-filters-teeth.sh --case list-broken"
+    evalfilter_teeth_regex: "bash scripts/ci/check-eval-filters-teeth.sh --case regex-semantics"
+    evalfilter_teeth_unknown_wrapper: "bash scripts/ci/check-eval-filters-teeth.sh --case unknown-wrapper"
+    evalfilter_teeth_undercount: "bash scripts/ci/check-eval-filters-teeth.sh --case undercount"
+    evalfilter_teeth_clean: "bash scripts/ci/check-eval-filters-teeth.sh --case clean"
+    evalfilter_teeth_needle: "bash scripts/ci/check-eval-filters-teeth.sh --case needle-missing"
+    action_pins: "bash scripts/ci/check-action-pins.sh"
     gate_guards_job_teeth: "bash scripts/ci/check-gate-guards-job.sh teeth"
     gate_guards_job_reachable: "bash scripts/ci/check-gate-guards-job.sh reachable"
     gate_guards_job_shape: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh no-softening"
