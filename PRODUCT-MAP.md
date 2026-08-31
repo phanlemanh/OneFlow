@@ -5,13 +5,13 @@
 
 ```mermaid
 flowchart TD
-  A["Đang cân nhắc cơ hội<br/>3 việc"] --> GD{"Cổng Đáng"}
+  A["Đang cân nhắc cơ hội<br/>4 việc"] --> GD{"Cổng Đáng"}
   GD --> B["Sắp mở vòng<br/>chưa có"]
   GD --> XL["Xếp lại sau<br/>chưa có"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>28 việc"]
+  GB --> DG["Đã giao<br/>29 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -24,6 +24,7 @@ flowchart TD
 ## Đang cân nhắc cơ hội
 
 - Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy (`director-v2`)
+- Ô đo chạy 0 ca thử mà vẫn báo đạt — 23 executor còn mang lỗ (`o-do-chay-0-ca-van-xanh`)
 - Chốt chặn có thể đang bỏ qua kiểm bằng chứng lỗi thời cho hồ sơ khai thiếu paths (`staleness-ho-so-thieu-paths`)
 - Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
 
@@ -45,6 +46,7 @@ flowchart TD
 - Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)
+- Kho khoá toàn vẹn — đọc không cắt bớt âm thầm, ghi không để lại file cụt (`kho-khoa-toan-ven`)
 - Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
 - Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
 - slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`)

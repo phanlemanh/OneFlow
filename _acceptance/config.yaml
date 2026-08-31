@@ -291,12 +291,26 @@ executors:
     # nằm ở route.unreadable.test.ts chứ không ở route.test.ts, nên lệnh phải
     # chạy CẢ HAI — bản đầu chỉ trỏ file thứ hai và tuyên bốn điều nó không đo.
     unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts src/app/api/settings/env/route.unreadable.test.ts"
+    # kho-khoa-toan-ven: doc khong cat bot am tham, ghi khong de lai file cut.
+    unit_kkt_coerce_scalar: "bash scripts/settings/run-one-test.sh 'coerces scalars'"
+    unit_kkt_refuse_structured: "bash scripts/settings/run-one-test.sh 'refuses structured'"
+    unit_kkt_refuse_empty_key: "bash scripts/settings/run-one-test.sh 'refuses empty key'"
+    unit_kkt_all_strings_untouched: "bash scripts/settings/run-one-test.sh 'all strings untouched'"
+    unit_kkt_save_throws: "bash scripts/settings/run-one-test.sh 'save refuses'"
+    unit_kkt_atomic_reader: "bash scripts/settings/run-one-test.sh 'concurrent reader'"
+    unit_kkt_no_temp_left: "bash scripts/settings/run-one-test.sh 'no temp file'"
+    unit_kkt_run_path: "bash scripts/settings/run-one-test.sh 'run path'"
+    unit_kkt_round_trip: "bash scripts/settings/run-one-test.sh 'round trip'"
+    unit_kkt_empty_key_put: "bash scripts/settings/run-one-test.sh 'empty key through PUT'"
+    unit_kkt_no_regression: "pnpm vitest run src/lib/settings/env-store.server.test.ts src/app/api/settings/env/route.unreadable.test.ts src/app/api/settings/env/route.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # --- cong-tu-canh-minh (31/08) ---
     # Bo kiem ban do + rang cua no. Dat o scripts/ci/ chu khong scripts/roadmap/
     # hay scripts/acceptance/ vi gia re-pin: 0 vs 1 vs 2 ho so (do tren paths da
     # khai cua 29 ho so).
+    kkt_seam_signature: "bash scripts/settings/check-env-store-teeth.sh --case seam-signature"
+    kkt_teeth_all: "bash scripts/settings/check-env-store-teeth.sh"
     pmap_check: "node scripts/ci/check-product-map.mjs"
     pmap_teeth_all: "bash scripts/ci/check-product-map-teeth.sh"
     pmap_teeth_missing_slug: "bash scripts/ci/check-product-map-teeth.sh --case missing-slug"
