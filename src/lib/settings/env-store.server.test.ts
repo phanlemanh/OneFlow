@@ -438,7 +438,10 @@ describe("saveEnvStore refuses instead of filtering", () => {
         // t3_paths and therefore a named out-of-scope item, not a silent gap.
         let named = false;
         try {
-            const res = await PUT(req);
+            // `as never` matches the pattern route.unreadable.test.ts already
+            // uses: the handler declares NextRequest, and a plain Request
+            // carries everything it actually reads.
+            const res = await PUT(req as never);
             expect(res.status).toBeGreaterThanOrEqual(400);
             named = /empty|key/i.test(JSON.stringify(await res.json()));
         } catch (err) {
