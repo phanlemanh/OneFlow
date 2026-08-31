@@ -17,6 +17,8 @@ import {
     existsSync,
     mkdirSync,
     mkdtempSync,
+    readdirSync,
+    readFileSync,
     rmSync,
     writeFileSync,
 } from "node:fs";
@@ -363,5 +365,87 @@ describe("coerceEnv decision table", () => {
             "@/lib/settings/env-store.server"
         );
         expect(await readEnvStore()).toEqual({ state: "ok", env: onDisk });
+    });
+});
+
+describe("saveEnvStore refuses instead of filtering", () => {
+    it("save refuses a bad key and leaves an existing store untouched", async () => {
+        writeFileSync(
+            store(),
+            JSON.stringify({ OPENAI_API_KEY: "sk-fake" }),
+            "utf8",
+        );
+        const before = readFileSync(store(), "utf8");
+        const { saveEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        // The message must NAME the offending key — assert on the string, not
+        // merely on "it threw".
+        await expect(
+            saveEnvStore({ "": "x" } as unknown as Record<string, string>),
+        ).rejects.toThrow(/empty/i);
+        await expect(
+            saveEnvStore({ PORT: 8080 } as unknown as Record<string, string>),
+        ).rejects.toThrow(/PORT/);
+        // The half that matters: it threw AND it did not touch the disk.
+        expect(readFileSync(store(), "utf8")).toBe(before);
+    });
+
+    it("save refuses on a machine with no store yet and leaves the directory clean", async () => {
+        // "Wrote nothing" means something different here: the target must stay
+        // ABSENT. The sha compare above needs the file to exist, so it cannot
+        // see this case — and this is exactly where an orphaned empty
+        // settings.json would turn "no store yet" into "empty store".
+        expect(existsSync(store())).toBe(false);
+        const { saveEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        await expect(
+            saveEnvStore({ "  ": "x" } as unknown as Record<string, string>),
+        ).rejects.toThrow();
+        expect(existsSync(store())).toBe(false);
+        expect(readdirSync(dir)).toEqual([]);
+    });
+
+    it("empty key through PUT fails loudly and saves nothing", async () => {
+        // Imports the route handler; edits NOTHING under src/app/api/**, which
+        // is what keeps this package at T2.
+        //
+        // Why this case exists: route.ts filters by VALUE TYPE, not by key, so
+        // an empty key reaches saveEnvStore and now throws. Before this change
+        // the valid key was still saved. All-or-nothing is the deliberate new
+        // behaviour — trading a silent drop for a loud failure.
+        writeFileSync(
+            store(),
+            JSON.stringify({ OPENAI_API_KEY: "sk-old" }),
+            "utf8",
+        );
+        const before = readFileSync(store(), "utf8");
+        const { PUT } = await import("@/app/api/settings/env/route");
+        const req = new Request("http://localhost/api/settings/env", {
+            method: "PUT",
+            body: JSON.stringify({
+                env: { "": "x", OPENAI_API_KEY: "sk-fake" },
+            }),
+        });
+
+        // The route does NOT catch, so the refusal escapes the handler as a
+        // rejection rather than a 4xx Response. Both shapes satisfy the
+        // contract — loud, naming the key, nothing written — and the test
+        // asserts whichever actually happens instead of the one preferred.
+        // Turning this into a clean 400 means editing route.ts, which is in
+        // t3_paths and therefore a named out-of-scope item, not a silent gap.
+        let named = false;
+        try {
+            const res = await PUT(req);
+            expect(res.status).toBeGreaterThanOrEqual(400);
+            named = /empty|key/i.test(JSON.stringify(await res.json()));
+        } catch (err) {
+            named = /empty environment variable name/i.test(String(err));
+        }
+        expect(named).toBe(true);
+
+        // All or nothing: the valid key must NOT be half-saved.
+        expect(readFileSync(store(), "utf8")).toBe(before);
     });
 });

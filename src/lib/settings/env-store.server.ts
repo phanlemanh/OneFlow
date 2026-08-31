@@ -129,14 +129,34 @@ export async function loadEnvStore(): Promise<EnvStore> {
     return read.state === "ok" ? read.env : {};
 }
 
-/** Persist the env map, overwriting the previous contents. */
+/**
+ * Persist the env map, overwriting the previous contents.
+ *
+ * A non-string value or a blank key reaching here is a PROGRAMMING error, not
+ * user data: the parameter is typed `Record<string, string>`. The previous
+ * version filtered both away silently, which hid the mistake — and for a blank
+ * key it did worse than hide it, because writing one produces a store that
+ * `coerceEnv` refuses on the very next read. Write succeeds, read fails: a
+ * worse outcome than either half.
+ *
+ * The whole map is checked BEFORE anything is encoded or written, so a refusal
+ * never leaves a partial file — and on a machine with no store yet, the target
+ * stays absent rather than becoming an empty one.
+ */
 export async function saveEnvStore(env: EnvStore): Promise<void> {
-    const clean: EnvStore = {};
     for (const [k, v] of Object.entries(env)) {
-        const key = k.trim();
-        if (key && typeof v === "string") clean[key] = v;
+        if (!k.trim()) {
+            throw new Error(
+                "saveEnvStore: refusing an empty environment variable name — the store would be unreadable on the next read",
+            );
+        }
+        if (typeof v !== "string") {
+            throw new Error(
+                `saveEnvStore: value for \`${k}\` is ${typeof v}, expected string`,
+            );
+        }
     }
-    const encoded = await encodeEnvStore(JSON.stringify(clean, null, 2));
+    const encoded = await encodeEnvStore(JSON.stringify(env, null, 2));
     await writeSettingsBlob(encoded);
 }
 
