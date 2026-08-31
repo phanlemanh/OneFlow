@@ -35,6 +35,17 @@ const STATUS_CLOSED = new Set([
     "signed-off",
 ]);
 
+// Takes no arguments, and REFUSES the ones it does not know rather than ignoring
+// them. A checker that swallows an unknown flag and exits 0 cannot be told apart
+// from a checker that ran, so a typo in the ci.yml `run:` line would read as a
+// clean check forever — the same fail-open this file exists to close.
+if (process.argv.length > 2) {
+    console.error(
+        `check-product-map: không nhận tham số nào — nhận được: ${process.argv.slice(2).join(" ")}`,
+    );
+    process.exit(2);
+}
+
 const failures = [];
 const fail = (rule, msg) => failures.push(`FAIL ${rule}: ${msg}`);
 const read = (p) => readFileSync(p, "utf8");

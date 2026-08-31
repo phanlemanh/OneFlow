@@ -35,6 +35,238 @@ job_block() {
 GUARD_NEEDLES=(check-roadmap-fresh.sh check-product-map.mjs)
 
 case "$MODE" in
+shape)
+    # AC-6. Both guards run inside the existing acceptance-gate job, and the job
+    # still has what they need.
+    [ -f "$WF" ] || fail "missing $WF"
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF"
+
+    for needle in "${GUARD_NEEDLES[@]}"; do
+        printf '%s\n' "$block" | grep -q "$needle" \
+            || fail "job acceptance-gate không có step nào chạy $needle"
+    done
+
+    # fetch-depth: 0 is not decoration — check-roadmap-fresh.sh reads history,
+    # and a shallow clone makes its historical case fail for the wrong reason.
+    printf '%s\n' "$block" | grep -q 'fetch-depth: 0' \
+        || fail "job acceptance-gate mất 'fetch-depth: 0' — guard lộ trình cần lịch sử"
+    printf '%s\n' "$block" | grep -q 'node-version: 24' \
+        || fail "job acceptance-gate mất 'node-version: 24'"
+
+    # Triggers are workflow-level, so the steps inherit them — assert both are
+    # still there, otherwise "it runs on PRs" is an assumption.
+    grep -q '^  pull_request:' "$WF" || fail "$WF lost its pull_request trigger"
+    grep -q '^  push:' "$WF" || fail "$WF lost its push trigger"
+    echo "OK: cả hai guard nằm trong job acceptance-gate; fetch-depth 0, Node 24, hai trigger còn nguyên"
+    ;;
+
+no-softening)
+    # AC-6. Nothing in the job may swallow a non-zero exit. A guard that cannot
+    # go red is worse than no guard — it reports safety it does not provide.
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF"
+    while IFS= read -r line; do
+        case "$line" in
+        *continue-on-error*) fail "job acceptance-gate làm mềm lỗi: $line" ;;
+        *"|| true"*) fail "job acceptance-gate làm mềm lỗi: $line" ;;
+        *"set +e"*) fail "job acceptance-gate làm mềm lỗi: $line" ;;
+        esac
+    done <<<"$block"
+    echo "OK: không có continue-on-error / || true / set +e trong job acceptance-gate"
+    ;;
+
+reachable)
+    # AC-13. The half no other mode covers: whether the job actually RUNS.
+    #
+    # shape, no-softening, teeth and job-count all read the CONTENT of the job
+    # block. Put `if: github.ref == 'refs/heads/main'` on a guard step and every
+    # one of them stays green while the guard never runs on a pull request —
+    # which is precisely the zero-reference state this package exists to close.
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF"
+
+    while IFS= read -r line; do
+        case "$line" in
+        *if:*) fail "job acceptance-gate mang điều kiện có thể bỏ qua nó: $line" ;;
+        *needs:*) fail "job acceptance-gate xếp sau 'needs:' — một job trước đó bị bỏ qua sẽ kéo theo nó: $line" ;;
+        esac
+    done <<<"$block"
+
+    # A workflow-level path filter is the same outcome by a different route: the
+    # job is fine, it just never fires for the files being watched.
+    python3 - <<'PY' || exit 1
+import sys, yaml
+wf = yaml.safe_load(open(".github/workflows/ci.yml"))
+# PyYAML reads a bare `on:` key as the boolean True (YAML 1.1). Accept both.
+trig = wf.get("on", wf.get(True)) or {}
+pr = trig.get("pull_request") or {}
+watched = ["PRODUCT-MAP.md", "docs/roadmap.md", "_acceptance/**"]
+errs = []
+for key in ("paths", "paths-ignore"):
+    if key in pr:
+        errs.append(
+            f"trigger pull_request có `{key}: {pr[key]}` — lọc đường dẫn ở mức workflow "
+            f"có thể khiến guard không chạy cho {', '.join(watched)}"
+        )
+if errs:
+    for e in errs:
+        print(f"FAIL: {e}", file=sys.stderr)
+    sys.exit(1)
+print("OK: trigger pull_request không lọc đường dẫn; step và job không mang if: hay needs:")
+PY
+    ;;
+
+job-count)
+    # AC-7 first half: this package adds STEPS, not a JOB.
+    #
+    # Two measured reasons, not one. (a) acceptance-gate has already paid for
+    # checkout + setup-node. (b) scripts/ci/check-action-pins.sh asserts
+    # EXPECTED_CHECKOUT_SITES=8; a new job adds a ninth `actions/checkout` and
+    # turns that unrelated guard red — the exact trap CLAUDE.md documents for
+    # the manifest guard.
+    python3 - <<'PY' || exit 1
+import sys, yaml
+wf = yaml.safe_load(open(".github/workflows/ci.yml"))
+jobs = set(wf["jobs"])
+want = {"lint", "typecheck", "build", "unit-tests", "sdk-tests", "acceptance-gate"}
+errs = []
+if len(jobs) != 6:
+    errs.append(f"ci.yml có {len(jobs)} job, cần đúng 6: {sorted(jobs)}")
+if jobs != want:
+    extra, gone = sorted(jobs - want), sorted(want - jobs)
+    if extra: errs.append(f"job lạ: {', '.join(extra)}")
+    if gone: errs.append(f"job biến mất: {', '.join(gone)}")
+if errs:
+    for e in errs:
+        print(f"FAIL: {e}", file=sys.stderr)
+    sys.exit(1)
+print("OK: đúng 6 job, đúng tập tên đã biết")
+PY
+
+    # AC-7 second half. Counting jobs and matching names says nothing about a
+    # job's BODY: `continue-on-error: true` on `lint` keeps six jobs and the
+    # same five names, and shape/no-softening only look inside acceptance-gate.
+    base=$(git merge-base HEAD origin/main 2>/dev/null || true)
+    if [ -z "$base" ]; then
+        echo "  (bỏ qua so sánh merge-base: không phân giải được origin/main — vế 'năm job không đổi định nghĩa' KHÔNG được đo ở lượt này)"
+    else
+        python3 - "$base" <<'PY' || exit 1
+import subprocess, sys, yaml
+base = sys.argv[1]
+old = yaml.safe_load(subprocess.run(
+    ["git", "show", f"{base}:.github/workflows/ci.yml"],
+    capture_output=True, text=True, check=True).stdout)
+new = yaml.safe_load(open(".github/workflows/ci.yml"))
+errs = []
+for job in ("lint", "typecheck", "build", "unit-tests", "sdk-tests"):
+    o, n = old["jobs"].get(job) or {}, new["jobs"].get(job) or {}
+    if o != n:
+        changed = sorted({k for k in set(o) | set(n) if o.get(k) != n.get(k)})
+        errs.append(f"job `{job}` đổi định nghĩa ở khoá: {', '.join(changed) or '(thân step)'}")
+if errs:
+    for e in errs:
+        print(f"FAIL: {e}", file=sys.stderr)
+    sys.exit(1)
+print(f"OK: năm job còn lại deep-equal với merge-base {base[:8]}")
+PY
+    fi
+    ;;
+
+teeth)
+    # AC-6. Prove the commands THE JOB RUNS actually go red on real drift.
+    #
+    # The commands are READ OUT OF ci.yml, never hardcoded. check-vitest-job.sh
+    # learned this the hard way: an earlier version ran `pnpm test` directly and
+    # stayed green on a tree with no CI job at all — it proved the test runner
+    # had teeth while saying nothing about the job.
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF — nothing to prove teeth about"
+
+    cmds=()
+    for needle in "${GUARD_NEEDLES[@]}"; do
+        cmd=$(printf '%s\n' "$block" | sed -n "s|^[[:space:]]*run:[[:space:]]*\(.*${needle}.*\)$|\1|p" | tail -1)
+        [ -n "$cmd" ] || fail "không rút được lệnh chạy $needle ra từ $WF"
+        echo "lệnh dưới phép thử (rút từ $WF): $cmd"
+        cmds+=("$cmd")
+    done
+
+    # GREEN HALF, on the healthy tree, on the SAME extracted string.
+    #
+    # Without it a red-only assertion cannot tell "the guard caught the drift"
+    # from "the command is simply broken": a typo'd flag exits non-zero on the
+    # perturbed copy too, the mode passes, and CI is then red on every PR after
+    # this lands.
+    for cmd in "${cmds[@]}"; do
+        set +e
+        eval "$cmd" >/tmp/cggj-green.log 2>&1
+        green_rc=$?
+        set -e
+        [ "$green_rc" -eq 0 ] \
+            || fail "'$cmd' đỏ trên cây LÀNH (exit $green_rc) — lệnh sai, không phải guard bắt lỗi. Xem /tmp/cggj-green.log"
+    done
+
+    # RED HALF: perturb a throwaway copy and run the same commands against it.
+    probe=$(mktemp -d)
+    cleanup() { rm -rf "$probe"; }
+    trap cleanup EXIT
+
+    mkdir -p "$probe/t/docs"
+    cp -R docs/adr "$probe/t/docs/adr"
+    cp docs/roadmap.md "$probe/t/docs/roadmap.md"
+    cp PRODUCT-MAP.md "$probe/t/PRODUCT-MAP.md"
+    mkdir -p "$probe/t/_acceptance"
+    for d in _acceptance/*/; do
+        slug=$(basename "$d")
+        mkdir -p "$probe/t/_acceptance/$slug"
+        [ -f "$d/contract.md" ] && cp "$d/contract.md" "$probe/t/_acceptance/$slug/"
+        [ -f "$d/opportunity.md" ] && cp "$d/opportunity.md" "$probe/t/_acceptance/$slug/"
+    done
+    cp -R scripts "$probe/t/scripts"
+
+    python3 - "$probe/t" <<'PERTURB'
+import sys, pathlib
+root = pathlib.Path(sys.argv[1])
+# Drop one signed slug from the delivered block of the map.
+m = root / "PRODUCT-MAP.md"
+m.write_text("".join(l for l in m.read_text(encoding="utf-8").splitlines(keepends=True)
+                     if "(`roadmap-drift-guard`)" not in l), encoding="utf-8")
+# Duplicate one ledger row INSIDE the marker block.
+r = root / "docs" / "roadmap.md"
+lines = r.read_text(encoding="utf-8").splitlines(keepends=True)
+start = next(i for i, l in enumerate(lines) if "roadmap-ledger:start" in l)
+end = next(i for i, l in enumerate(lines) if "roadmap-ledger:end" in l)
+row = next(i for i in range(start, end) if "`local-cpu-plugins`" in lines[i])
+lines.insert(row + 1, lines[row])
+r.write_text("".join(lines), encoding="utf-8")
+PERTURB
+
+    for cmd in "${cmds[@]}"; do
+        set +e
+        (cd "$probe/t" && eval "$cmd") >/tmp/cggj-red.log 2>&1
+        red_rc=$?
+        set -e
+        [ "$red_rc" -ne 0 ] \
+            || fail "'$cmd' thoát 0 trên cây đã phá — guard rỗng. Xem /tmp/cggj-red.log"
+    done
+
+    # GUARD-OF-THE-GUARD. Append a junk flag to the first extracted command and
+    # require THIS MODE's own green half to reject it — proof that the mode
+    # distinguishes "the guard caught it" from "any command is broken".
+    for cmd in "${cmds[@]}"; do
+        set +e
+        eval "$cmd --co-rac-khong-ton-tai" >/dev/null 2>&1
+        junk_rc=$?
+        set -e
+        [ "$junk_rc" -ne 0 ] \
+            || fail "'$cmd' nuốt một cờ rác và vẫn thoát 0 — vế xanh của ô này không phân biệt được 'guard bắt lỗi' với 'lệnh nào cũng hỏng'"
+    done
+
+    cleanup
+    trap - EXIT
+    echo "OK: cả hai lệnh (rút từ $WF) xanh trên cây lành và đỏ trên cây đã phá; cờ rác bị từ chối"
+    ;;
+
 suite-keys)
     # AC-8. Three assertions on _acceptance/config.yaml, read with a YAML parser
     # rather than grep.

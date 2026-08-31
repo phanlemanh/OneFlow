@@ -33,5 +33,15 @@ set -euo pipefail
 
 cd "$(dirname "$0")/../.."
 
+# Takes no arguments, and REFUSES the ones it does not know rather than ignoring
+# them. A guard that swallows `--strict` and exits 0 cannot be told apart from a
+# guard that ran: a typo in the ci.yml `run:` line would then read as a clean
+# check forever. Same fail-open class this repo already refuses for `--case` in
+# check-roadmap-guard-teeth.sh.
+if [ $# -gt 0 ]; then
+    echo "check-roadmap-fresh: không nhận tham số nào — nhận được: $*" >&2
+    exit 2
+fi
+
 echo "→ kiểm tra trôi giữa docs/roadmap.md, docs/adr/ và _acceptance/"
 node scripts/roadmap/roadmap-drift.mjs
