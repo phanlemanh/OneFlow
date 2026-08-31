@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 31968535286d7800678c5f9af0e2aa0a33c4c54a
+verified_commit: 292d740129ec49e46dda86ecef6b6f0a51b5080e
 human_signoff: Manh 2026-08-07
 ---
 
@@ -254,3 +254,11 @@ sha: 1406d9686404e9924c19797908b00bc2f40d524a · suites: 9 lệnh exit 0
 ### Re-pin lần 5 — 2026-08-29, do nhánh `feat/add-media-library` đi tiếp tới chữ ký Cổng 2: sau lần re-pin 4 nhánh còn commit thêm bảy lượt (hai lỗi nặng của vòng 7, khai thư mục dist trong `tsconfig.json`, bỏ bước khôi phục phá dữ liệu khỏi guard a11y, và bộ hồ sơ nghiệm thu). Hồ sơ này khai `src/**` và `sdk/**` trong `paths`, nên các commit đó rơi vào vùng soi staleness. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN ở mọi agent kiểm nó, mọi lệnh exit 0. Ghim dời **sau** khi mọi commit ngoài `_acceptance/**` đã xong — đúng bài học lần 4: ghim trước rồi commit tiếp là tự huỷ ghim vừa lấy. Hai lệnh pytest đỏ ở lượt đầu là **lỗi gọi của người dựng lane**, không phải hồ sơ đỏ: exit 4 là mã *usage error* của pytest (target không tồn tại) chứ không phải mã test trượt — target thật là `tests/test_engine_batch.py` và `tests/conformance`, sai vì bản liệt kê config bị cắt ở 110 ký tự rồi bị coi là nguồn. Sửa target, chạy lại: 9/9 exit 0.
 run_id: repin-conformance-l0-20260829T134252Z
 sha: 31968535286d7800678c5f9af0e2aa0a33c4c54a · suites: 9 lệnh exit 0
+
+### Re-pin lần 6 — 2026-08-31, do `chong-mat-khoa-byo` chạm `src/app/api/**` mà hồ sơ này khai trong `paths`
+run_id: repin-20260831T022203Z-2767
+sha: 292d740129ec49e46dda86ecef6b6f0a51b5080e · suites: 7 lệnh exit 0
+
+Lane máy thuần chạy bởi một agent tươi tại HEAD: preflight GREEN · build+typecheck ·
+lint · vitest 708 · sdk pytest 292 · verify:plugins · gen:abi sạch. Cây sạch trước và
+sau. Không chữ ký người nào bị đụng.
