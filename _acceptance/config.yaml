@@ -275,9 +275,9 @@ executors:
     unit_tts_order_compliant: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t compliant"
     unit_tts_family_matches_abi: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t two-way"
 
-    # --- chong-mat-khoa-byo (31/08) ---
-    # Mọi khoá dưới đây chạy trên THƯ MỤC TẠM THẬT (test tự đặt TONGFLOW_DATA_DIR)
-    # với seam thật qua alias @ext -> src/ext-default của vitest.config.ts. Không
+    # --- chong-mat-khoa-byo (31/08, phạm vi sau Amendment 1: nửa máy chủ) ---
+    # Mọi khoá chạy trên THƯ MỤC TẠM THẬT (test tự đặt TONGFLOW_DATA_DIR) với
+    # seam thật qua alias @ext -> src/ext-default của vitest.config.ts. Không
     # khoá nào mock lớp lưu trữ: mock chính là cách hồ sơ trước đo trượt một nửa.
     unit_byo_seam: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'seam'"
     unit_byo_read_ok_absent: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'ok vs absent'"
@@ -287,9 +287,402 @@ executors:
     unit_byo_route_put_refuse: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'refuses and leaves the blob'"
     unit_byo_route_put_force: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'replaceUnreadableStore'"
     unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts"
-    # Mount settings-dialog THẬT (RTL + @vitest-environment jsdom, đúng khuôn
-    # compose-overlay/normalize-text-vi/add-media-library-node đã dùng) với fetch
-    # giả trả 503. Ô này sinh ra từ gap-probe P0: bản đầu để AC-10 dùng lại đúng
-    # lệnh của E5, nên không ô nào chạm màn Cài đặt thật.
   script:
     verify_plugins: "pnpm verify:plugins"
+    # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
+    gen_abi_clean: "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
+    # measure-harness: end-to-end CLI runs over the fixtures committed with the
+    # feature — proves the wiring, not just the pure core.
+    smoke_measure_wer: "pnpm tsx scripts/measure/wer.ts src/lib/measure/__fixtures__/wer"
+    # tsx rather than the bash wrapper declared at Gate 1: the selftests build
+    # temp databases and sample trees, which is TypeScript work. The eval refs
+    # are unchanged — only the command they resolve to.
+    smoke_measure_mos: "pnpm tsx scripts/measure/selftest-mos.ts"
+    smoke_measure_cogs: "pnpm tsx scripts/measure/selftest-cogs.ts"
+    # dependency-refresh-2026-07 Gate 1 (2026-07-26).
+    deps_manifest_intact: "bash scripts/deps/check-manifest.sh"
+    deps_lockfile_clean: "pnpm install --frozen-lockfile"
+    deps_no_t3_drift: "ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh origin/main"
+    # ci-actions-bump Gate 1 (2026-07-26). The run-reading keys query real
+    # Actions runs via `gh` rather than re-running the work locally — a bumped
+    # action can only be proved by the runner that executes it.
+    ci_actions_pinned: "bash scripts/ci/check-action-pins.sh"
+    # Narrowed after Gate 1 (see contract "Amendment"): the gate job's colour is
+    # dominated by acceptance bookkeeping, so it cannot serve as evidence about
+    # a checkout bump. This asserts the plumbing instead.
+    ci_gate_plumbing: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh"
+    ci_jobs_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)'"
+    ci_docker_dryrun_guard: "bash scripts/ci/check-docker-dryrun.sh"
+    ci_docker_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker"
+    ci_ghcr_untouched: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    ci_desktop_dispatch_green: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    ci_no_behaviour_drift: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh origin/main"
+    # oneflow-plugin-prefix Gate 1 (2026-07-26).
+    docs_plugin_prefix: "bash scripts/plugins/check-prefix-docs.sh"
+    prefix_no_config_drift: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh origin/main"
+    # per-plugin-origin Gate 1 (2026-07-27).
+    origin_single_impl: "bash scripts/plugins/check-single-url-rule.sh"
+    origin_installer_parity: "pnpm tsx scripts/plugins/check-installer-parity.ts"
+    origin_manifest_unmoved: "bash scripts/plugins/check-manifest-unmoved.sh"
+    # cache-l4-eviction Gate 1 (2026-07-31): guard lands during implementation.
+    cache_test_layout: "bash scripts/cache/check-test-layout.sh"
+    # compose-overlay Gate 1 (2026-08-02): guard scripts land during implementation.
+    # Render evals run in the PLUGIN repo (outside this tree) via a clone-and-pytest
+    # wrapper — one key per criterion, each a distinct pytest node-id (standing rule).
+    # Network-dependent by design, same class as the ci_* keys above.
+    abi_python_gen_clean: "bash scripts/abi/check-python-gen-clean.sh"
+    overlay_diacritics: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_vietnamese_diacritics_golden_image_video_identical"
+    overlay_multiline: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_multiline_and_wrap_golden"
+    overlay_price_tag: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_price_tag_verbatim_golden"
+    overlay_logo: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_placement_golden"
+    overlay_logo_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_logo_op_without_logo_input_fails_cleanly"
+    overlay_safe_zone: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_safe_zone_clamps_intruding_op_only"
+    overlay_placeholder: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_substitution_verbatim"
+    overlay_placeholder_missing: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_placeholder_without_input_text_fails_cleanly"
+    overlay_time_window: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_only_between"
+    overlay_time_window_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_time_window_ignored_for_image"
+    overlay_modality_image: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_image_in_image_out_video_absent"
+    overlay_modality_video: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_video_in_video_out_audio_duration_preserved"
+    overlay_determinism: "bash scripts/plugins/run-overlay-plugin-tests.sh tests/test_overlay.py::test_two_runs_byte_identical"
+    overlay_registration_synced: "bash scripts/plugins/check-overlay-registration.sh"
+    overlay_sdk_train: "bash scripts/abi/check-overlay-sdk-train.sh"
+    # conformance-l0 Gate 1 (2026-07-28).
+    conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
+    plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
+    # stale-scope-by-paths Gate 1 (2026-07-28): every file below lands during
+    # implementation. These live under scripts/acceptance/ on purpose — the
+    # t1_skip_globs exemption for the gate tooling lists EXACT paths, so a guard
+    # in a new subdirectory is gated and the gate applies to itself.
+    # One key per eval, same guard with a different --case: nine evals behind one
+    # command collapse nine criteria into one exit code, and a case that was
+    # never implemented then looks identical to a case that passed.
+    stale_scope_in_scope: bash scripts/acceptance/check-stale-scoping.sh --case in-scope
+    stale_scope_out_of_scope: bash scripts/acceptance/check-stale-scoping.sh --case out-of-scope
+    stale_scope_partial: bash scripts/acceptance/check-stale-scoping.sh --case partial
+    stale_scope_under_declared: bash scripts/acceptance/check-stale-scoping.sh --case under-declared
+    stale_scope_malformed: bash scripts/acceptance/check-stale-scoping.sh --case malformed
+    stale_scope_indent_drift: bash scripts/acceptance/check-stale-scoping.sh --case indent-drift
+    stale_scope_merged_halves: bash scripts/acceptance/check-stale-scoping.sh --case merged-halves
+    stale_scope_suppression: bash scripts/acceptance/check-stale-scoping.sh --case suppression
+    stale_scope_two_bases: bash scripts/acceptance/check-stale-scoping.sh --case two-bases
+    stale_scope_announce: bash scripts/acceptance/check-stale-scoping.sh --case announce
+    stale_scope_mutation: bash scripts/acceptance/check-stale-scoping.sh --case mutation
+    stale_scope_case_completeness: bash scripts/acceptance/check-stale-scoping.sh --case case-completeness
+    stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
+    stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
+    stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
+    # gate-tooling-t1 (item 0.8). Ba case MỚI của check-stale-scoping.sh giữ
+    # tiền tố stale_scope_* vì chúng là case của guard đó; các guard mới đứng
+    # riêng mang tiền tố gt1_. Một key cho một eval — xem đầu evals.yaml.
+    stale_scope_fork_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case fork-undeclared
+    stale_scope_fork_declared_in_union: bash scripts/acceptance/check-stale-scoping.sh --case fork-declared-in-union
+    stale_scope_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case undeclared
+    gt1_t1_escape_path: bash scripts/acceptance/check-t1-escape-path.sh
+    gt1_all_scoping_cases: bash scripts/acceptance/check-scoping-all-cases.sh
+    gt1_dead_code_absent: bash scripts/acceptance/check-golden-dead-code-absent.sh
+    gt1_fork_teeth: bash scripts/acceptance/check-fork-scope-teeth.sh
+    gt1_no_stale_on_empty_diff: bash scripts/acceptance/check-no-stale-empty-diff.sh
+    gt1_no_golden_claim: bash scripts/acceptance/check-no-golden-claim.sh
+    gt1_landed_merge_repinned: bash scripts/acceptance/check-landed-merge-repinned.sh
+    # roadmap-drift-guard Gate 1 (2026-08-27). MỘT khoá cho MỖI case: bộ răng cũ
+    # chạy sáu nhiễu sau MỘT mã thoát, nên một case chưa từng được cài trông y hệt
+    # một case đã qua. Cùng bài học đã trả giá ở stale_scope_* ngay phía trên.
+    roadmap_drift_green: bash scripts/roadmap/check-roadmap-fresh.sh
+    roadmap_teeth_adr_uncited: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case adr-uncited
+    roadmap_teeth_superseded_bare: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-bare
+    roadmap_teeth_superseded_paired: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case superseded-paired
+    roadmap_teeth_ledger_missing: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-missing
+    roadmap_teeth_ledger_stale: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-stale
+    roadmap_teeth_ledger_paired: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-paired
+    roadmap_teeth_historical: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case historical-244cb0b
+    roadmap_teeth_supersede_source_single: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single
+    roadmap_teeth_case_isolation: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case case-isolation
+    own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
+    scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
+    # gate-scope-anchors (0.6): same-universe scope check + historical anchors.
+    # b2_* and ghcr_anchored hit the network (gh) — local verify only, not CI.
+    gate_ns_exempt_refused: bash scripts/acceptance/test-scope-namespace.sh exempt-refused
+    gate_ns_variants_red: bash scripts/acceptance/test-scope-namespace.sh variants-discriminating
+    gate_ns_legit_granted: bash scripts/acceptance/test-scope-namespace.sh legit-granted
+    own_range_anchored: bash scripts/acceptance/test-own-range.sh anchored
+    own_range_unlanded: bash scripts/acceptance/test-own-range.sh unlanded
+    own_range_malformed: bash scripts/acceptance/test-own-range.sh malformed
+    b1_anchored_green: "ACCEPTANCE_SLUG=oneflow-plugin-prefix bash scripts/plugins/check-no-config-drift.sh && ACCEPTANCE_SLUG=dependency-refresh-2026-07 bash scripts/deps/check-no-t3-drift.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh"
+    b1_violation_red: bash scripts/acceptance/test-own-range.sh b1-red
+    b2_runs_found: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-gate-plumbing.sh && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh docker && ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"
+    b2_no_run_exit2: bash scripts/acceptance/test-own-range.sh no-run-exit2
+    ghcr_anchored: "ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"
+    anchors_backfilled: bash scripts/acceptance/test-own-range.sh backfill-integration
+    b1_unanchored_compat: bash scripts/acceptance/test-own-range.sh unanchored-compat
+    # ci-vitest-sdk-pin (CI-a) Gate 1 (2026-08-05): both guard scripts land during
+    # implementation; keys declared now so eval refs stay portable.
+    # One key per criterion — sub-commands rather than one shared exit code, per the
+    # stale-scope-by-paths F1 lesson (merging exit codes destroys which half failed).
+    # civ_run_jobs_green hits the network (gh): local verify only, never wired into CI.
+    civ_job_shape: bash scripts/ci/check-vitest-job.sh shape
+    civ_job_no_softening: bash scripts/ci/check-vitest-job.sh no-softening
+    civ_job_teeth: bash scripts/ci/check-vitest-job.sh teeth
+    civ_run_jobs_green: "ACCEPTANCE_SLUG=ci-vitest-sdk-pin bash scripts/ci/check-run-jobs.sh ci Lint 'Type Check' Build 'SDK Tests (Python)' 'Unit Tests (vitest)'"
+    civ_pin_derived: bash scripts/plugins/check-overlay-pin-derived.sh shape
+    civ_pin_teeth: bash scripts/plugins/check-overlay-pin-derived.sh teeth
+    civ_pin_override: bash scripts/plugins/check-overlay-pin-derived.sh override
+    civ_pin_single_impl: bash scripts/plugins/check-overlay-pin-derived.sh single-impl
+    civ_docs_guard_synced: bash scripts/plugins/check-manifest-doc-synced.sh
+    civ_eval_keys_intact: bash scripts/ci/check-eval-keys-intact.sh origin/main
+    # AC-11 amended 2026-08-05 (Gate 2, Manh): the literal `pre-merge-check clean`
+    # is unreachable from inside a verify round — the check violates on the
+    # in-flight feature in all three states it can occupy, including a PASS whose
+    # human_signoff the verifier is forbidden to fill. civ_gate_residual asserts
+    # the reachable half; the post-signature half moved to the Gate-2 checklist.
+    # Rebound 2026-08-07 (AC-11 Amendment 2): the wider "gate clear apart from me"
+    # question deadlocks once two features carry residual evals; the wave is staleness.
+    civ_gate_residual: bash scripts/acceptance/check-resign-wave.sh ci-vitest-sdk-pin origin/main
+    # local-cpu-plugins Gate 1 (2026-08-06): every script below lands during
+    # implementation. Slot evals run in the two PLUGIN repos (outside this tree)
+    # via the same clone-and-pytest wrapper compose-overlay established — one key
+    # per criterion, each a distinct pytest node-id. Network-dependent by design.
+    # Arg 1 is the plugin repo name so ONE wrapper serves both plugins.
+    lcp_ffmpeg_slots: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_all_six_slots_return_assets"
+    lcp_ffmpeg_missing_input: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_missing_asset_fails_cleanly_without_emitting_a_file"
+    lcp_ffmpeg_no_audio_track: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_slots.py::test_extract_audio_on_silent_video_errors_not_zero_bytes"
+    lcp_ffmpeg_resolver_order: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_resolution_order_env_then_path_then_wheel"
+    lcp_ffmpeg_resolver_teeth: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-ffmpeg tests/test_resolver.py::test_no_route_resolves_fails_loudly_naming_the_fix"
+    lcp_split_video_parts: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_split_returns_video_parts_for_both_scenes"
+    lcp_split_ffprobe_required: "bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_missing_ffprobe_fails_loudly_naming_ffprobe"
+    # Static scans + guards, run in THIS tree against the two plugin clones.
+    lcp_no_modal: "bash scripts/plugins/check-local-plugins-no-modal.sh"
+    lcp_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh local-cpu-plugins origin/main"
+    lcp_venv_conflicting_pins: "bash scripts/plugins/check-venv-isolation.sh"
+    lcp_manifest_counts: "bash scripts/plugins/check-manifest-unmoved.sh"
+    lcp_manifest_guard_teeth: "bash scripts/plugins/check-manifest-guard-teeth.sh"
+    lcp_docs_synced: "bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh"
+    # byo-key-onboarding Gate 1 (2026-08-07): guard scripts land during implementation.
+    bko_example_needs_no_keys: "bash scripts/onboarding/check-example-needs-no-keys.sh"
+    bko_one_action_installs_all: "bash scripts/onboarding/check-one-action-installs-all.sh"
+    bko_no_restart_after_install: "bash scripts/onboarding/check-no-restart-after-install.sh"
+    bko_no_telemetry_sinks: "bash scripts/onboarding/check-no-telemetry-sinks.sh"
+    # Self-contained E19: boots its own dev server on port 3199 (override with
+    # BKO_A11Y_PORT), scans 20 proto pages with axe-core in real Chrome, tears
+    # down. The bare executors.design.a11y is the generic scanner and takes no
+    # URLs, so an eval pointing at it directly would exit 2 (bad usage).
+    bko_a11y_proto: "bash scripts/onboarding/check-a11y-proto.sh"
+    # Ba bề mặt t3 nhánh thật sự chạm. Hai cái dưới KHÔNG có trong kế hoạch
+    # duyệt ở Cổng 1.5 (Task 5 mang theo settings/env, Task 3 thêm hẳn route
+    # install-missing) — khai ra đây để chúng hiện ở Cổng 2 thay vì lọt im.
+    # --require giữ nguyên một đường: cửa sổ diff rỗng thì mọi lời khai
+    # "không chạm gì cấm" đều đúng một cách vô nghĩa.
+    # Globs are SINGLE-QUOTED so the shell hands them to t3-scan verbatim.
+    # Unquoted, bash (globstar off) expanded `src/lib/plugin-executor/**` to
+    # the directory's top-level entries before the script ever ran: --allow
+    # became one literal FILE, provisioning-events.ts and runners/generic.ts
+    # fell outside it, and E18 failed on the very path it was written to
+    # allow (S4 round 1).
+    bko_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh byo-key-onboarding origin/main --allow 'src/lib/plugin-executor/**' --allow 'src/app/api/settings/env/**' --allow 'src/app/api/plugins/install-missing/**' --require 'src/lib/plugin-executor/**'"
+    lcp_gate_residual_teeth: "bash scripts/acceptance/check-gate-residual-teeth.sh"
+    # AC-17 asks whether the re-sign WAVE cleared (does any other feature carry
+    # stale evidence), which is narrower and answerable; check-gate-residual's
+    # wider "gate clear apart from me" is unreachable with two features in flight.
+    lcp_resign_wave: "bash scripts/acceptance/check-resign-wave.sh local-cpu-plugins origin/main"
+    lcp_resign_wave_teeth: "bash scripts/acceptance/check-resign-wave-teeth.sh"
+    check_scan_noise: bash scripts/plugins/check-scan-noise.sh
+    check_overlay_discoverable_fixture: bash scripts/plugins/check-overlay-discoverable.sh fixture
+    check_overlay_discoverable_real: bash scripts/plugins/check-overlay-discoverable.sh real
+    check_scan_blast_radius: bash scripts/plugins/check-scan-blast-radius.sh
+    check_scope_walker_teeth: bash scripts/plugins/check-scope-walker-teeth.sh
+    check_reason_teeth: bash scripts/plugins/check-reason-teeth.sh
+    # scan-scope-diagnostics Gate 1 (2026-08-18): scripts land during implementation.
+    # One wrapper, one subcommand per perturbation (the check-vitest-job.sh pattern) —
+    # three teeth evals sharing one exit code would hide which perturbation went
+    # uncaught, which is the one thing a teeth eval exists to tell you.
+    # DIAG_BASE_REF overrides the base: this feature is STACKED on
+    # feat/scan-with-block-imports, so merge-base-with-origin/main would attribute the
+    # parent's diff to this package.
+    diag_blast_radius: bash scripts/plugins/check-diagnostics-blast-radius.sh
+    diag_scope_gate_teeth: bash scripts/plugins/check-diagnostics-teeth.sh scope-gate
+    diag_parse_failure_teeth: bash scripts/plugins/check-diagnostics-teeth.sh parse-failure
+    diag_dedupe_teeth: bash scripts/plugins/check-diagnostics-teeth.sh dedupe
+    # gap-probe P1-1: AC-6 promises a RELATION (both readers routed through ONE function).
+    # A unit test of the walker cannot prove routing; only neutering the one site can.
+    diag_shared_walker_teeth: bash scripts/plugins/check-diagnostics-teeth.sh shared-walker
+    # gap-probe P1-2: plugins/ is gitignored and runtime-populated, so a noise check that
+    # only reads it goes vacuously green on a clean checkout — the parent hit this exact
+    # shape (scan-with-block-imports#F2) and split it. fixture ALWAYS runs; real skips by name.
+    diag_noise_fixture: bash scripts/plugins/check-diagnostics-noise.sh fixture
+    diag_noise_real: bash scripts/plugins/check-diagnostics-noise.sh real
+    # pnpm-build-approvals Gate 1 (2026-08-18): one key per criterion via --case
+    # (standing rule) — several criteria behind one exit code collapse into a
+    # single signal, and a case never implemented then looks like a case passing.
+    # The teeth/CI cases install into a throwaway project with an isolated store,
+    # so they need the network: local verify only, not wired into CI (same
+    # precedent as the overlay_* keys).
+    pnpm_no_pnpm_field: "bash scripts/pnpm/check-build-approvals.sh --case no-pnpm-field"
+    pnpm_install_clean: "bash scripts/pnpm/check-build-approvals.sh --case install-clean"
+    pnpm_addon_built: "bash scripts/pnpm/check-build-approvals.sh --case addon-built"
+    pnpm_teeth_removed: "bash scripts/pnpm/check-build-approvals.sh --case teeth-removed"
+    pnpm_teeth_legacy_key: "bash scripts/pnpm/check-build-approvals.sh --case teeth-legacy-key"
+    pnpm_ci_pnpm10: "bash scripts/pnpm/check-build-approvals.sh --case ci-pnpm10"
+    pnpm_tracked_not_ignored: "bash scripts/pnpm/check-build-approvals.sh --case tracked-not-ignored"
+    pnpm_explicit_decisions: "bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"
+    pnpm_keys_intact: "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
+    pnpm_scope_confined: "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
+    pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
+    # add-media-library Gate 1 (2026-08-19). The tier-boundary key reuses the shared
+    # scanner: --allow names the two t3 paths this feature legitimately touches (the
+    # add-node registration lives under src/lib/workflow/**), --require proves the
+    # diff window is not vacuous, and everything else under t3_paths stays forbidden.
+    aml_no_boot_dependency: "bash scripts/media-library/check-no-boot-dependency.sh"
+    aml_no_domain_vocab: "bash scripts/media-library/check-no-domain-vocab.sh"
+    aml_a11y_proto: "bash scripts/media-library/check-a11y-proto.sh"
+    aml_no_dormant_fetch: "bash scripts/media-library/check-no-dormant-fetch.sh"
+    aml_fixture_provenance: "bash scripts/media-library/check-fixture-provenance.sh"
+    aml_tier_boundary: "bash scripts/acceptance/check-t3-untouched.sh add-media-library origin/main --allow 'src/lib/workflow/**' --allow 'src/app/api/media-library/**' --require 'src/lib/workflow/**'"
+    # normalize-text-vi Gate 1 (2026-08-19): hai guard moi, file ha canh luc implement.
+    normalize_registration_synced: "bash scripts/plugins/check-normalize-registration.sh"
+    # normalize-text-vi Gate 2 round 5 (2026-08-22, owner mở rộng vùng phủ):
+    # đo chính hai DỤNG CỤ ĐO — lượt chụp và phép suy pin của các khoá trên.
+    measuring_instruments_refuse: "bash scripts/acceptance/check-measuring-instruments-refuse.sh"
+    # Vỏ plugin sống ở kho riêng (plugins/ bị gitignore), nên phép đo nó phải với
+    # tới cây đó — cùng cơ chế run-overlay-plugin-tests.sh. Lệch này đã trình và
+    # được duyệt ở Cổng 1.5; lời tiêu chí AC-14 không đổi.
+    normalize_plugin_shell: "bash scripts/plugins/run-normalize-plugin-tests.sh"
+    # Tách đôi theo phản biện context sạch F4: nhánh ngoại tuyến chạy mọi vòng, nhánh trực
+    # tuyến chỉ có nghĩa sau khi owner ký cho phép publish lên PyPI (hành vi không đảo ngược).
+    normalize_sdk_train_local: "bash scripts/abi/check-normalize-sdk-train-local.sh"
+    normalize_sdk_published: "bash scripts/abi/check-normalize-sdk-published.sh"
+    # Preflight hạ tầng, khai trong feature_loop.suite_keys nên chạy MỌI round.
+    # Nó tự kiểm các bẫy KIỂM-ĐƯỢC-BẰNG-MÁY ghi ở STATUS.md §Bẫy đã biết và tự in
+    # cách đọc ô đỏ của round: xanh -> ô đỏ pnpm là hồi quy thật; đỏ -> mọi ô đỏ
+    # pnpm/node là NGHI NGỜ hạ tầng. Lý do nó là MÁY chứ không phải một đoạn dặn
+    # dò: bẫy agk-baseline đã ghi tròn một tháng kèm cả cách gỡ mà vẫn bị đọc
+    # nhầm thành hồi quy ba round liền của chong-doc-sai-em-ru.
+    # Cố ý KHÔNG gọi pnpm và KHÔNG nạp gì từ node_modules — nó phải chạy được
+    # trên đúng cái cây đang hỏng mà nó chẩn đoán.
+    preflight_env: "bash scripts/acceptance/preflight-verify-env.sh"
+  design:
+    # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
+    # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
+    # --jsdom . is REQUIRED, not decoration: the gate resolves jsdom from its own
+    # install (the plugin cache), which has no node_modules, so DOM mode returns
+    # verdict BLOCKED / exit 3 without it. Measured 2026-08-21 on the
+    # normalize-text-vi round-3 captures — same HTML: BLOCKED bare, PASS with the
+    # flag. `.` is the repo root, where evals run and where jsdom is installed.
+    # Note for whoever reads a raw run: jsdom prints "Could not parse CSS
+    # stylesheet" on STDERR; capture stdout alone or the JSON will not parse.
+    gate: "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1) --jsdom ."
+    # ui_check is a browser-injected asset (runner loads it INTO the page) — PATH only, no `node` prefix.
+    ui_check: "$(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-scan.js | sort -V | tail -1)"
+    a11y: node scripts/a11y-scan.mjs
+
+risk_tiers:
+  # Docs/branding/config-only changes — acceptance gate skipped entirely.
+  t1_skip_globs:
+    - "docs/**"
+    - "**/*.md"
+    # Root-level .md files do NOT match "**/*.md" — list them explicitly
+    # (lesson: artifact-platform PR #200/#302 treadmill).
+    - "README.md"
+    - "CLAUDE.md"
+    - "AGENTS.md"
+    - "CONTRIBUTING.md"
+    - "STATUS.md"
+    - "CHANGELOG.md"
+    - "NOTICE.md"
+    # View máy sinh, KHÔNG phải vật để nghiệm thu: `product-map.mjs` vẽ lại nó từ
+    # `_acceptance/*/` ở mỗi lần đóng cổng người, nên gate hoá nó là bắt hồ sơ
+    # nghiệm thu chính cái bóng của mình. Cổng độc lập duy nhất biện minh cho
+    # miễn trừ này là `product-map.mjs --check` (ADR 0007 của kit) — bỏ khai dòng
+    # này mà vẫn commit bản đồ là cấu hình sai, kit tự có test bắt.
+    - "PRODUCT-MAP.md"
+    - ".gitignore"
+    - ".claude/**"
+    - "_acceptance/**"
+    - "public/**"
+    - "src/i18n/messages/**"
+    # Vendored gate tooling = measuring stick, not product code; upgrading it must
+    # not stale-invalidate signed feature evidence (exact paths, not globs).
+    - "scripts/pre-merge-check.sh"
+    # CẢ HAI bộ tên phải nằm đây cho tới khi commit đổi tên rời khỏi MỌI cửa sổ
+    # diff. Kit 1.40.0 đổi `.js` -> `.cjs`; git ghi đổi tên vào diff PR như
+    # «xoá đường cũ + thêm đường mới», nên nếu chỉ khai `.cjs` thì phía XOÁ nằm
+    # ngoài miễn trừ và mọi slug có hồ sơ trong cùng diff hoá stale cùng lúc
+    # (đo thật ở artifact-platform: 137 hồ sơ, thủ phạm là đúng một dòng).
+    - "scripts/recheck-evidence.cjs"
+    - "scripts/recheck-evidence.js"
+    - "lib/evidence-core.cjs"
+    - "lib/evidence-core.js"
+    - "lib/gap-probe.cjs"
+    - "lib/gap-probe.js"
+    # pre-merge-check.sh gọi ac-line + md-section trong CÙNG một lệnh node để chấm
+    # răng cross-layer. Thiếu một trong hai thì cổng vẫn chạy nhưng tụt về awk
+    # rộng hơn và in NOTE — cùng lớp measuring-stick.
+    - "lib/ac-line.cjs"
+    - "lib/ac-line.js"
+    - "lib/md-section.cjs"
+    - "lib/md-section.js"
+    # workspace-record: vendor LẦN ĐẦU ở lượt này. Trước đây oneflow thiếu hẳn
+    # file này nên nhánh đọc workspace của cổng chưa từng chạy.
+    - "lib/workspace-record.cjs"
+    # Lint configuration only — it constrains how source is written, never what
+    # the product does at runtime, so a change here cannot invalidate evidence.
+    - "biome.json"
+  # Contract chokepoints & wire/persistence shape — always T3 (full gate).
+  t3_paths:
+    - "config/tongflow.abi.json"
+    - "src/generated/abi/**"
+    - "src/lib/abi/**"
+    - "sdk/**"
+    - "src/db/**"
+    - "src/lib/plugin-executor/**"
+    - "src/lib/workflow/**"
+    - "src/app/api/**"
+    - "scripts/publish-tongflow-pypi.sh"
+
+signoff:
+  required_for: [T2, T3]     # tiers that pre-merge-check requires signoff for
+  approvers: ["Manh"]        # informational in v1 (not yet machine-enforced)
+  # require_human_commit ĐÃ GỠ 2026-08-17: kit 2.1 cho khoá này (và agent_authors)
+  # hết hiệu lực — ADR 0012. Provenance chữ ký nay lấy từ forge (ai approve / ai bấm
+  # merge PR), và gate in một dòng NOTE «chữ ký mới trong diff» khi chữ ký xuất hiện
+  # lần đầu trong diff. Đo trên chính kho này: lớp mất đi là «chữ ký không nằm trong
+  # commit nào của báo cáo» — gate 1.38.0 chặn (exit 1), gate 2.1.0 cho qua (exit 0).
+  # Giữ khoá lại chỉ khiến config KHAI một sự cưỡng chế không còn xảy ra.
+
+# Suite verify chạy mỗi round S4 của plugin feature-loop (dotted keys trỏ vào executors.* ở trên).
+# Per-feature evals nằm trong evals.yaml của từng feature, KHÔNG khai ở đây.
+feature_loop:
+  suite_keys:
+    # Đứng đầu danh sách để người đọc bảng kết quả gặp nó trước; workflow chạy
+    # các lệnh máy SONG SONG nên thứ tự này không phải thứ tự thi hành — bản
+    # thân ô preflight phát biểu cách phân loại các ô còn lại.
+    - executors.script.preflight_env
+    - executors.test.build_typecheck
+    - executors.test.lint
+    - executors.test.unit
+    - executors.test.sdk_pytest
+    - executors.script.verify_plugins
+    - executors.script.gen_abi_clean
+
+dev_server:
+  # Own dist dir, not the shared `.next`. The machine lane runs
+  # `pnpm build && pnpm typecheck` (a standing suite key) in PARALLEL with the
+  # ui-check lane, and a build landing while this server serves deletes the
+  # chunks it is handing out. next.config.ts measured all three arms and named
+  # this opt-out; only PAGES die, so the round loses its UI evidence while the
+  # route-handler evals stay green — a broken round that reads like a clean one.
+  # E24 boots its own server under build/aml-a11y for the same reason.
+  # Cost, also measured there: Next rewrites tsconfig.json when the dist dir
+  # differs from the recorded one, so a run must restore that file or the same
+  # round's lint goes red on an otherwise clean tree.
+  start: "NEXT_DIST_DIR=build pnpm dev"
+  url: "http://localhost:3000"
+
+# capture.ui: omitted for now — no screenshot-to-file command in repo yet.
+# To enable Gate-2 UI slideshow evidence: scaffold scripts/ui-capture.mjs from the kit
+# reference + `pnpm add -D puppeteer-core`, then set:
+#   capture:
+#     ui: "node scripts/ui-capture.mjs"
+capture:
+  ui: pnpm ui:capture
+design_pass:
+  proto_route: http://localhost:3000/proto/{slug}
+  dev_cmd: pnpm dev
