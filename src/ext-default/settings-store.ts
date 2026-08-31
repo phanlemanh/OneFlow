@@ -13,12 +13,22 @@ async function storeFile(): Promise<string> {
     return path.join(await scopedDataDir(), "settings.json");
 }
 
-/** Raw settings blob for the current scope, or null when absent. */
+/**
+ * Raw settings blob for the current scope, or null when absent.
+ *
+ * `null` means one thing only: nothing has been stored yet. Every other errno
+ * is a store we cannot read, and it is rethrown. Collapsing those into `null`
+ * here is what let one unreadable file masquerade as an empty one all the way
+ * up to the write path, where the next save replaced the keys it could not
+ * see. A cloud shell substituting its own `src/ext/settings-store.ts` owes the
+ * same contract; the signature is unchanged so it keeps compiling either way.
+ */
 export async function readSettingsBlob(): Promise<string | null> {
     try {
         return readFileSync(await storeFile(), "utf8");
-    } catch {
-        return null;
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code === "ENOENT") return null;
+        throw error;
     }
 }
 

@@ -274,6 +274,23 @@ executors:
     unit_tts_order_violation: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t violation"
     unit_tts_order_compliant: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t compliant"
     unit_tts_family_matches_abi: "pnpm vitest run src/lib/workflow/tts-order-guard.test.ts -t two-way"
+
+    # --- chong-mat-khoa-byo (31/08, phạm vi sau Amendment 1: nửa máy chủ) ---
+    # Mọi khoá chạy trên THƯ MỤC TẠM THẬT (test tự đặt TONGFLOW_DATA_DIR) với
+    # seam thật qua alias @ext -> src/ext-default của vitest.config.ts. Không
+    # khoá nào mock lớp lưu trữ: mock chính là cách hồ sơ trước đo trượt một nửa.
+    unit_byo_seam: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'seam'"
+    unit_byo_read_ok_absent: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'ok vs absent'"
+    unit_byo_read_unreadable: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'unreadable matrix'"
+    unit_byo_load_tolerant: "pnpm vitest run src/lib/settings/env-store.server.test.ts -t 'stays tolerant'"
+    unit_byo_route_get: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'GET'"
+    unit_byo_route_put_refuse: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'refuses and leaves the blob'"
+    unit_byo_route_put_force: "pnpm vitest run src/app/api/settings/env/route.unreadable.test.ts -t 'replaceUnreadableStore'"
+    # AC-8 tuyên bốn điều: GET kho lành/trống, PUT ghi được + verdicts, và cờ
+    # BỊ BỎ QUA khi kho lành (so cả body lẫn nội dung đĩa). Ba trong bốn điều đó
+    # nằm ở route.unreadable.test.ts chứ không ở route.test.ts, nên lệnh phải
+    # chạy CẢ HAI — bản đầu chỉ trỏ file thứ hai và tuyên bốn điều nó không đo.
+    unit_byo_route_no_regression: "pnpm vitest run src/app/api/settings/env/route.test.ts src/app/api/settings/env/route.unreadable.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # ABI is the contract; generated TS must be committed in sync (CLAUDE.md "ABI first").
