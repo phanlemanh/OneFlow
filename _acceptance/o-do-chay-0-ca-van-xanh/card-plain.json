@@ -1,102 +1,7 @@
 {
-  "feature_plain": "Một phép kiểm không chạy thử điều gì sẽ không còn báo đạt được nữa — chốt tự động bắt được ngay khi ai đó đổi tên một ca thử.",
-  "will_do": [
-    {
-      "id": "AC-2",
-      "p": "Sẽ báo xanh trên cây hiện tại và in ra ĐỦ BA con số đã kiểm — tổng và từng nhóm — để 'đã kiểm 33' không lẫn với 'đã kiểm 5'."
-    },
-    {
-      "id": "AC-3",
-      "p": "Sẽ báo đỏ khi không tìm thấy phép kiểm nào để canh, thay vì im lặng phủ không gì cả rồi báo đạt."
-    },
-    {
-      "id": "AC-6",
-      "p": "Sẽ nhận cả hai cách viết lệnh đang có, kể cả cách mới ra đời hôm qua — bỏ sót nó thì mười phép kiểm mới nhất vô hình."
-    },
-    {
-      "id": "AC-13",
-      "p": "Sẽ báo đỏ trước một cách viết lệnh nó CHƯA biết, thay vì lặng lẽ xếp vào nhóm không cần canh."
-    },
-    {
-      "id": "AC-7",
-      "p": "Sẽ kết luận giống hệt công cụ thử nghiệm, kiểm bằng bốn trường hợp phủ cả hai chiều bất đồng chứ không một chuỗi tự chọn."
-    },
-    {
-      "id": "AC-8",
-      "p": "Sẽ chặn hợp nhất khi có phép kiểm rỗng, đo bằng cách chạy đúng lệnh rút ra từ cấu hình tự động chứ không đọc mô tả."
-    },
-    {
-      "id": "AC-10",
-      "p": "Sẽ khai chốt mới vào danh sách được canh, để nó không nằm ngoài mọi lớp bảo vệ như một chốt không ai canh."
-    },
-    {
-      "id": "AC-11",
-      "p": "Sẽ giữ nguyên sáu phần kiểm tự động, không đổi định nghĩa năm phần cũ, và giữ nguyên số điểm tải mã nguồn."
-    },
-    {
-      "id": "AC-12",
-      "p": "Sẽ chứng minh mọi phép đo mới bằng cặp hai chiều, với danh sách trường hợp ghim trong hợp đồng chứ không do chính công cụ tự khai."
-    }
-  ],
-  "wont_do": [
-    {
-      "id": "AC-1",
-      "p": "Chặn tình huống một phép kiểm lọc theo tên mà không ca thử nào khớp — báo đỏ, gọi đích danh phép kiểm và chuỗi lọc."
-    },
-    {
-      "id": "AC-4",
-      "p": "Chặn việc bỏ qua im lặng một lệnh nó không hiểu được — không hiểu thì báo đỏ, nêu tên."
-    },
-    {
-      "id": "AC-5",
-      "p": "Chặn việc biến một lỗi công cụ thành phán quyết về sản phẩm: liệt kê hỏng thì báo đỏ nêu nguyên nhân, không kết luận 'không có gì để kiểm'."
-    },
-    {
-      "id": "AC-9",
-      "p": "Chặn tình huống chốt được cắm vào nhưng không bao giờ chạy — điều kiện âm thầm tắt nó đi sẽ bị bắt."
-    }
-  ],
+  "feature_plain": "Một phép kiểm không chạy thử điều gì sẽ không còn qua được chốt tự động nữa.",
   "scope_plain": "Sáu nhánh để lại: không sửa 33 phép kiểm hiện có vì tất cả đang lành, không bọc từng phép kiểm, và không mở sang bộ lọc theo tên của làn Python vì chưa đo ra có thật.",
-  "coverage_plain": [
-    {
-      "i": 0,
-      "p": "Bốn cách viết lệnh, trong đó giá trị 'cách viết CHƯA biết' sinh ra từ phản biện — bản kê 'đóng' chỉ là ảnh chụp hôm nay, mà cách viết thứ hai mới ra đời hôm qua."
-    },
-    {
-      "i": 1,
-      "p": "Bốn kiểu hỏng, mỗi kiểu một tiêu chí. Kiểu thứ tư là 'chính bộ kiểm rỗng' — nó vào bản kê vì đúng lớp lỗi đang sửa, không vì suy luận."
-    },
-    {
-      "i": 2,
-      "p": "Hai nơi có thể chặn. Anh chốt chặn ở chốt tự động; đường còn lại ghi ở phần bỏ kèm lý do."
-    },
-    {
-      "i": 3,
-      "p": "Ba con số hạ tầng mà gói này có thể vô tình làm đỏ — đó là lý do chúng thành một tiêu chí chứ không phải một dòng ghi chú."
-    }
-  ],
-  "gap_probe_plain": [
-    {
-      "i": 0,
-      "p": "Con số 33 chỉ nằm trong văn xuôi, không phép đo nào biến nó thành khẳng định. Bộ kiểm gom thiếu, thấy 5 trên 33, in một con số trông hợp lý rồi báo đạt — 28 phép kiểm nằm ngoài hàng rào mà mọi đèn vẫn xanh. Nguy hiểm hơn cả trường hợp tìm thấy 0. Đã vá: ghim ba con số và thêm trường hợp đếm-thiếu."
-    },
-    {
-      "i": 1,
-      "p": "Cửa an toàn chỉ bật khi lệnh có cờ lọc. Một cách viết lệnh mới — như cách vừa ra đời hôm qua — sẽ lọt qua mọi cửa và bị xếp vào nhóm không cần canh. Lớp lỗi tái sinh y nguyên bên trong hàng rào vừa dựng. Đã vá: đổi tiêu chí gom, và bắt báo đỏ trước cái nó chưa nhận diện."
-    },
-    {
-      "i": 2,
-      "p": "Phép đo tính đủ trường hợp lại hỏi chính công cụ xem nó có bao nhiêu trường hợp — công cụ tự khai bao nhiêu thì thoả bấy nhiêu. Kèm theo, văn xuôi ghi sáu nhưng liệt kê bảy tên. Đã vá: ghim danh sách chín tên vào hợp đồng, và giữ trường hợp cây-lành làm đối chứng có mã thoát riêng."
-    },
-    {
-      "i": 3,
-      "p": "Hợp đồng hứa 'kết luận giống công cụ thử nghiệm' nhưng phép đo chỉ thử một chuỗi tự chọn, một chiều, và không lần nào chạy công cụ thật để đối chiếu. Đã vá: bốn trường hợp phủ cả hai chiều bất đồng, mỗi cái chạy công cụ thật."
-    },
-    {
-      "i": 4,
-      "p": "Tôi tuyên '23/23 đang lành' trong khi nhóm mười phép kiểm — đúng nhóm nơi lỗi được phát hiện — chưa từng được đo. Đã đo bù: nhóm đó 10/10 lành, tổng 33/33. Bảng số theo từng nhóm nay nằm trong hợp đồng, kèm câu cấm đường thoát rẻ là sửa chuỗi lọc của một hồ sơ đã ký."
-    }
-  ],
+  "analyst_plain": "",
   "decisions_plain": [
     {
       "id": "d-20260831T190000Z-3391",
@@ -104,11 +9,11 @@
     },
     {
       "id": "d-20260831T190100Z-7752",
-      "p": "KHÔNG sửa 33 phép kiểm hiện có — đo cho thấy tất cả đang lành. Đây là phát hiện làm gói việc nhỏ lại, ghi ra chứ không lặng lẽ bỏ."
+      "p": "KHÔNG sửa 33 phép kiểm hiện có — đo cho thấy tất cả đang lành. Phát hiện này làm gói việc nhỏ lại, và nó được ghi ra chứ không lặng lẽ bỏ."
     },
     {
       "id": "d-20260831T190200Z-5518",
-      "p": "Hỏi chính công cụ thử nghiệm để lấy danh sách tên ca, thay vì tự đọc file mà đoán; đổi lại bộ kiểm cần thư viện phụ thuộc nên phần kiểm tự động phải cài chúng."
+      "p": "Hỏi chính công cụ thử nghiệm để lấy danh sách tên ca thay vì tự đọc file mà đoán; đổi lại bộ kiểm cần thư viện phụ thuộc nên phần kiểm nghiệm thu phải cài chúng."
     },
     {
       "id": "d-20260831T190300Z-9064",
@@ -116,7 +21,7 @@
     },
     {
       "id": "d-20260831T190400Z-2287",
-      "p": "Khai chốt mới vào danh sách được canh, để nó hưởng cùng lớp bảo vệ với hai chốt trước; đổi lại phải chạm file của một hồ sơ khác."
+      "p": "Khai chốt mới vào danh sách được canh, để nó hưởng cùng lớp bảo vệ với hai chốt trước."
     },
     {
       "id": "d-20260831T190500Z-6673",
@@ -128,7 +33,7 @@
     },
     {
       "id": "d-20260831T193100Z-4903",
-      "p": "Gom theo 'có gọi công cụ thử nghiệm' chứ không theo 'có cờ lọc'; đổi lại một cách viết lệnh hợp lệ mới cũng sẽ làm chốt đỏ cho tới khi được khai."
+      "p": "Gom theo 'có trao một cái tên cho công cụ thử nghiệm' chứ không theo 'có cờ lọc'; đổi lại một cách viết lệnh hợp lệ mới cũng sẽ làm chốt đỏ cho tới khi được khai."
     }
   ]
 }
