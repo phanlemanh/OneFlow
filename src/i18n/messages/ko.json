@@ -38,17 +38,7 @@
         "customSectionTitle": "사용자 지정 변수",
         "customSectionHint": "설치된 어떤 플러그인도 선언하지 않은 변수입니다.",
         "getKey": "키 발급",
-        "requiredHint": "필수",
-        "storeUnreadableTitle": "저장된 키 저장소를 읽을 수 없습니다",
-        "storeUnreadableBody": "아직 아무것도 변경되지 않았습니다. 저장된 키는 이 기기에 그대로 있지만 파일 내용을 해석할 수 없어 표시하지 못합니다.",
-        "storeUnreadableReasonLabel": "기술적 원인",
-        "dropStore": "이전 저장소를 버리고 다시 입력",
-        "dropStoreConfirmTitle": "저장된 키를 모두 버릴까요?",
-        "dropStoreConfirmBody": "저장된 키가 모두 사라지며 복구할 수 없습니다. 이후에는 각 공급자의 키를 직접 다시 입력해야 합니다.",
-        "dropStoreConfirmOk": "버리고 다시 입력",
-        "dropStoreCancel": "취소",
-        "openSettingsHint": "설정을 열어 해결하기",
-        "saveBlockedUnreadable": "저장된 키 저장소를 읽을 수 없어 지금은 키를 더 저장할 수 없습니다."
+        "requiredHint": "필수"
     },
     "Index": {
         "title": "새 아이디어"

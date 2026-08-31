@@ -5,9 +5,6 @@ vi.mock("server-only", () => ({}));
 const store = vi.hoisted(() => ({ env: {} as Record<string, string> }));
 vi.mock("@/lib/settings/env-store.server", () => ({
     loadEnvStore: async () => ({ ...store.env }),
-    // Healthy store: the unreadable branch is measured on a real temp dir
-    // in env-store.server.test.ts and route.unreadable.test.ts.
-    readEnvStore: async () => ({ state: "ok", env: { ...store.env } }),
 }));
 
 const saved = vi.hoisted(() => ({ calls: [] as string[] }));

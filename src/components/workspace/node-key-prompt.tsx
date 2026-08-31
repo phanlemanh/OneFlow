@@ -35,13 +35,6 @@ export type KeyPromptState =
      * broken (S4 round 1 finding).
      */
     | { phase: "saved-unverified"; reason: string }
-    /**
-     * The key store itself could not be read, so nothing was written and the
-     * provider was never asked. Distinct from `invalid` (asked and told no)
-     * and from `saved-unverified` (written but unconfirmed): here the user's
-     * key may be perfectly good and their existing keys are still on disk.
-     */
-    | { phase: "store-unreadable" }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -65,10 +58,6 @@ export interface NodeKeyPromptLabels {
     invalid: string;
     verified: string;
     savedUnverified: string;
-    /** Shown when the key store cannot be read — nothing was saved or checked. */
-    storeUnreadable: string;
-    /** Where the user can actually deal with it. */
-    openSettings: string;
 }
 
 export function NodeKeyPrompt({
@@ -141,18 +130,6 @@ export function NodeKeyPrompt({
                     <Check className="mt-0.5 h-3 w-3 shrink-0" />
                     <span>
                         {labels.savedUnverified} — {state.reason}
-                    </span>
-                </p>
-            ) : null}
-
-            {state.phase === "store-unreadable" ? (
-                <p
-                    role="alert"
-                    className="flex items-start gap-1 text-xs text-muted-foreground"
-                >
-                    <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
-                    <span>
-                        {labels.storeUnreadable} {labels.openSettings}
                     </span>
                 </p>
             ) : null}

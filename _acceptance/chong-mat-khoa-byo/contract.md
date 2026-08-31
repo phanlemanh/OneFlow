@@ -4,7 +4,7 @@ feature: Chống mất khoá BYO — kho khoá từ chối ghi đè khi không �
 slug: chong-mat-khoa-byo
 owner: phanlemanh@gmail.com
 risk_tier: T3
-surfaces: [ui, api]
+surfaces: [api]
 status: implemented
 design_doc: docs/superpowers/specs/2026-08-31-chong-mat-khoa-byo-design.md
 approved_by: Phan Le Manh
@@ -39,6 +39,24 @@ không bao giờ báo "rỗng". `sqlite3` mở file lạ → `file is not a data
 "database rỗng".
 
 ## Criteria
+
+> **Amendment 1 — thu phạm vi, owner chốt 31/08 sau S4 vòng 2 (BLOCKED).** Hồ sơ này
+> nay chỉ còn **nửa máy chủ**: AC-1…AC-8. Sáu tiêu chí AC-9…AC-14 (media-library, ba
+> mặt giao diện, i18n, tiếp cận) **rời khỏi hợp đồng** và nằm ở §Out of scope kèm
+> nguyên văn — chúng không biến mất, chúng đổi chủ. Mã hiện thực của chúng đã được
+> hoàn nguyên khỏi nhánh; cây hiện tại chạm đúng **sáu file**.
+>
+> Vì sao: điều lệ ngừng-vá kích hoạt ở vòng 2 (cùng lớp lỗi "văn bản thô lọt ra người
+> dùng" tái xuất ở ba chỗ mới trong chính mã vừa viết), và hai phát hiện **nặng** cho
+> thấy sai ở *khuôn* chứ không ở chi tiết: (a) nhánh kho-hỏng của `resolveConfig` thoát
+> **trước** bước dự phòng `process.env`, biến một tệp hỏng thành **ngưng toàn bộ**
+> media-library cho bản triển khai cấu hình bằng biến môi trường — mâu thuẫn thẳng với
+> quyết định 2 của owner; (b) màn Cài đặt chỉ chặn **HTTP 503**, nên một lỗi 500 hay
+> một trang HTML lỗi vẫn để lại form rỗng lưu được.
+>
+> **Lỗ mất dữ liệu vẫn đóng** với phạm vi này, và đóng ở đúng chỗ phải đóng: người dùng
+> gõ khoá vào form rỗng rồi bấm Lưu sẽ nhận **409 và không mất gì** (AC-6). Giao diện
+> chỉ là phần đỡ cho người dùng, không phải chốt chặn.
 
 ### A. Seam — chỗ nuốt lỗi thứ hai
 
@@ -79,40 +97,6 @@ không bao giờ báo "rỗng". `sqlite3` mở file lạ → `file is not a data
   trước gói việc này, Then hành vi **không đổi** — 200, ghi được, và `verdicts` của các khoá
   đã đổi vẫn trả về như cũ. Cờ `replaceUnreadableStore` khi kho lành thì **bị bỏ qua**,
   không được biến thành một đường ghi thứ hai.
-- AC-9: Given kho không đọc được, When [`media-library/config.server.ts`](../../src/lib/media-library/config.server.ts)
-  đọc cấu hình, Then nó phân biệt được **"kho hỏng"** với **"chưa cấu hình khoá"** — hai
-  trạng thái này hôm nay cùng ra một câu, và câu đó dẫn người dùng đi nhập lại khoá, tức
-  dẫn thẳng vào đường mất dữ liệu.
-
-### D. UI — ba mặt, ba mức
-
-- AC-10: **(cross-layer)** Given kho không đọc được, When người dùng mở màn Cài đặt, Then
-  form khoá **bị thay** bằng tấm nêu lý do và câu "chưa có gì bị thay đổi", nút Lưu ở
-  trạng thái **tắt** (hiện diện nhưng không bấm được, không phải bị ẩn), và có đúng **một**
-  nút thoát. Nửa server: `GET` trả 503 đúng lúc đó.
-- AC-11: **(cross-layer)** Given màn Cài đặt đang ở trạng thái kho-hỏng, When người dùng
-  bấm nút thoát, Then hiện hộp xác nhận nói rõ **"mọi khoá đang lưu sẽ mất và không khôi
-  phục được"**; When người dùng xác nhận, Then khoá vừa nhập được lưu và màn về trạng thái
-  bình thường. Nửa server: đúng một `PUT` mang cờ rời khỏi trình duyệt — **không** có `PUT`
-  nào không cờ trước đó.
-- AC-12: **(cross-layer)** Given kho không đọc được, When người dùng thử lưu khoá từ
-  [`media-library-config-panel`](../../src/components/workspace/nodes/add/media-library-config-panel.tsx)
-  hoặc từ ô khoá trong [`abi-node-shell`](../../src/components/workspace/nodes/base/abi-node-shell.tsx),
-  Then cả hai **từ chối lưu** và chỉ người dùng sang màn Cài đặt; hai panel này **không** có
-  nút thoát. Nửa server: **không** một `PUT` nào rời khỏi trình duyệt trong cả hai ca —
-  `abi-node-shell` hôm nay không kiểm cả `loaded.ok`, nên đây là nửa dễ xanh giả nhất.
-
-### E. Cắt ngang
-
-- AC-13: Given mọi chuỗi hiển thị mới của gói việc này, When kiểm tệp thông điệp, Then mỗi
-  khoá có mặt ở **đủ 5 locale** (`en/ja/ko/vi/zh`) và không khoá nào để nguyên tiếng Anh
-  trong bốn tệp còn lại. Repo đã có nợ đo được ở trục này (`ja.json` thiếu 76 khoá).
-- AC-14: Given ba trạng thái mới của bản mẫu × hai giao diện sáng/tối (**6 trang**), When
-  quét bằng **axe-core trong Chrome thật**, Then **0 vi phạm mức `critical` hoặc `serious`**.
-  Dụng cụ là `a11y-scan.mjs` — nó thoát mã 3 khi không với tới trang nào, nên một server
-  không dựng được đọc thành trượt chứ không thành tờ giấy trắng. **Tiêu chí này TRƯỢT khi
-  phép đo axe không ở trạng thái PASS, bất kể `design-gate` xanh** — gate kia là phép đo
-  tham khảo, không phải bằng chứng a11y (xem §Notes).
 
 ## Coverage
 
@@ -155,6 +139,56 @@ này chỉ có hiệu lực trên bản OSS/desktop.
 phải bằng cách bỏ ô.
 
 ## Out of scope
+
+### Rời khỏi hợp đồng theo Amendment 1 (31/08) — nguyên văn, chờ hợp đồng kế
+
+Sáu tiêu chí dưới đây **đã được viết và duyệt ở Cổng 1**, rồi rời phạm vi sau S4 vòng 2.
+Giữ nguyên văn ở đây để hợp đồng kế thừa chúng thay vì viết lại từ đầu, và để hai lỗi
+nặng đã tìm ra không phải tìm lại.
+
+> - AC-9: Given kho không đọc được, When [`media-library/config.server.ts`](../../src/lib/media-library/config.server.ts)
+>   đọc cấu hình, Then nó phân biệt được **"kho hỏng"** với **"chưa cấu hình khoá"** — hai
+>   trạng thái này hôm nay cùng ra một câu, và câu đó dẫn người dùng đi nhập lại khoá, tức
+>   dẫn thẳng vào đường mất dữ liệu.
+
+### D. UI — ba mặt, ba mức
+
+> - AC-10: **(cross-layer)** Given kho không đọc được, When người dùng mở màn Cài đặt, Then
+>   form khoá **bị thay** bằng tấm nêu lý do và câu "chưa có gì bị thay đổi", nút Lưu ở
+>   trạng thái **tắt** (hiện diện nhưng không bấm được, không phải bị ẩn), và có đúng **một**
+>   nút thoát. Nửa server: `GET` trả 503 đúng lúc đó.
+> - AC-11: **(cross-layer)** Given màn Cài đặt đang ở trạng thái kho-hỏng, When người dùng
+>   bấm nút thoát, Then hiện hộp xác nhận nói rõ **"mọi khoá đang lưu sẽ mất và không khôi
+>   phục được"**; When người dùng xác nhận, Then khoá vừa nhập được lưu và màn về trạng thái
+>   bình thường. Nửa server: đúng một `PUT` mang cờ rời khỏi trình duyệt — **không** có `PUT`
+>   nào không cờ trước đó.
+> - AC-12: **(cross-layer)** Given kho không đọc được, When người dùng thử lưu khoá từ
+>   [`media-library-config-panel`](../../src/components/workspace/nodes/add/media-library-config-panel.tsx)
+>   hoặc từ ô khoá trong [`abi-node-shell`](../../src/components/workspace/nodes/base/abi-node-shell.tsx),
+>   Then cả hai **từ chối lưu** và chỉ người dùng sang màn Cài đặt; hai panel này **không** có
+>   nút thoát. Nửa server: **không** một `PUT` nào rời khỏi trình duyệt trong cả hai ca —
+>   `abi-node-shell` hôm nay không kiểm cả `loaded.ok`, nên đây là nửa dễ xanh giả nhất.
+
+### E. Cắt ngang
+
+> - AC-13: Given mọi chuỗi hiển thị mới của gói việc này, When kiểm tệp thông điệp, Then mỗi
+>   khoá có mặt ở **đủ 5 locale** (`en/ja/ko/vi/zh`) và không khoá nào để nguyên tiếng Anh
+>   trong bốn tệp còn lại. Repo đã có nợ đo được ở trục này (`ja.json` thiếu 76 khoá).
+> - AC-14: Given ba trạng thái mới của bản mẫu × hai giao diện sáng/tối (**6 trang**), When
+>   quét bằng **axe-core trong Chrome thật**, Then **0 vi phạm mức `critical` hoặc `serious`**.
+>   Dụng cụ là `a11y-scan.mjs` — nó thoát mã 3 khi không với tới trang nào, nên một server
+>   không dựng được đọc thành trượt chứ không thành tờ giấy trắng. **Tiêu chí này TRƯỢT khi
+>   phép đo axe không ở trạng thái PASS, bất kể `design-gate` xanh** — gate kia là phép đo
+>   tham khảo, không phải bằng chứng a11y (xem §Notes).
+
+**Ba thứ hợp đồng kế PHẢI mang theo** (đo được từ vòng 1 và 2, đừng học lại):
+1. `resolveConfig` chỉ được tuyên "kho hỏng" **sau khi** dự phòng `process.env` thất bại
+   — nếu không, một tệp hỏng hạ cả node cho bản triển khai dùng biến môi trường.
+2. Màn Cài đặt phải phân loại **mọi** lỗi đọc kho, không riêng 503 — 500, trang HTML
+   lỗi, proxy 502 đều để lại form rỗng lưu được ở bản hiện tại.
+3. Phép đo phải chạm **thứ người dùng thấy** và **dây nối tới nó**, không dừng ở lỗi
+   được ném hay số lời gọi mạng — đó là gốc của REJECT vòng 1.
+
 
 - **Giữ bản hỏng trước khi ghi đè** — quyết định 4 của owner (31/08). Đổi lại: người dùng
   bấm thoát là mất khoá cũ thật, hộp xác nhận của AC-11 là toàn bộ hàng rào. Việc này tách

@@ -33,13 +33,7 @@ export type Outcome =
           warnings: string[];
       }
     | { kind: "failure"; code: string; message: string }
-    | {
-          kind: "missing-config";
-          missing: string[];
-          message: string;
-          /** The store could not be READ; the variables may be there and fine. */
-          storeUnreadable?: true;
-      };
+    | { kind: "missing-config"; missing: string[]; message: string };
 
 export type OutcomeMessageKey =
     | "idle"
@@ -48,8 +42,7 @@ export type OutcomeMessageKey =
     | "results"
     | "thinShelf"
     | "error"
-    | "missingConfig"
-    | "storeUnreadable";
+    | "missingConfig";
 
 export function outcomeMessageKey(outcome: Outcome): OutcomeMessageKey {
     switch (outcome.kind) {
@@ -60,12 +53,7 @@ export function outcomeMessageKey(outcome: Outcome): OutcomeMessageKey {
         case "importing":
             return "importing";
         case "missing-config":
-            // Two different causes wear one code on the wire. Telling the user
-            // their configuration is missing when the store merely could not be
-            // read is the sentence that walks them into re-entering keys.
-            return outcome.storeUnreadable
-                ? "storeUnreadable"
-                : "missingConfig";
+            return "missingConfig";
         case "failure":
             return "error";
         case "results":

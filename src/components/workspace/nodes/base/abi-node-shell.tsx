@@ -7,14 +7,7 @@
  */
 
 import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
-import { useTranslations } from "next-intl";
-import {
-    type ReactNode,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import {
     type KeyPromptState,
@@ -56,12 +49,6 @@ const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-    // The two entries below are overridden per-render from the Settings
-    // bundle: they are NEW copy, and new copy owes all five locales. The rest
-    // of this constant is pre-existing hardcoded Vietnamese and stays out of
-    // scope for this change.
-    storeUnreadable: "",
-    openSettings: "",
 };
 
 /** Failure messages that mean "a key is missing or was rejected". */
@@ -113,38 +100,17 @@ function useProviderName(feature: string): string {
  * it. The verdict is what the server got back from the provider — the UI never
  * declares success on its own.
  */
-/** Thrown when the key store exists but cannot be read — never merge onto it. */
-export class EnvStoreUnreadableError extends Error {
-    constructor() {
-        super("ENV_STORE_UNREADABLE");
-        this.name = "EnvStoreUnreadableError";
-    }
-}
-
-export async function saveAndVerifyKey(
+async function saveAndVerifyKey(
     envKey: string,
     value: string,
 ): Promise<KeyVerdict> {
     const loaded = await fetch("/api/settings/env", { cache: "no-store" });
-    // Refuse before merging. A 503 here means the store exists and cannot be
-    // read; spreading onto `{}` would send up a map holding only the key the
-    // user just typed, and the save would take every other key with it.
-    if (loaded.status === 503) throw new EnvStoreUnreadableError();
-    if (!loaded.ok)
-        throw new Error(`Không đọc được kho khoá (HTTP ${loaded.status}).`);
     const current = (await loaded.json()) as { env?: Record<string, string> };
-    if (
-        !current.env ||
-        typeof current.env !== "object" ||
-        Array.isArray(current.env)
-    ) {
-        throw new Error("Kho khoá trả về hình dạng lạ; chưa lưu gì.");
-    }
     const res = await fetch("/api/settings/env", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            env: { ...current.env, [envKey]: value },
+            env: { ...(current.env ?? {}), [envKey]: value },
             // Explicit: probe THIS key even when its value is unchanged. A
             // re-save of the same string used to come back with no verdict at
             // all, which the UI could only render as "invalid" (S4 round 1
@@ -179,7 +145,7 @@ interface NodeKeyGate {
  * Needs-key state for one node. The prompt opens in place, on the node that
  * failed; the settings dialog is never part of this sequence.
  */
-export function useNodeKeyGate(): NodeKeyGate {
+function useNodeKeyGate(): NodeKeyGate {
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
     const [value, setValue] = useState("");
@@ -235,14 +201,6 @@ export function useNodeKeyGate(): NodeKeyGate {
                 setState({ phase: "saved-unverified", reason: verdict.detail });
             }
         } catch (error) {
-            if (error instanceof EnvStoreUnreadableError) {
-                // Nothing was written and the provider was never asked, so
-                // "invalid" would be the same false negative the branch above
-                // documents: it would tell the user their key is bad when the
-                // key was never tested and their stored keys are still there.
-                setState({ phase: "store-unreadable" });
-                return;
-            }
             setState({
                 phase: "invalid",
                 reason: error instanceof Error ? error.message : String(error),
@@ -317,17 +275,6 @@ export function AbiNodeShell<F extends NodeSlot>({
 }: AbiNodeShellProps<F>) {
     const keyGate = useNodeKeyGate();
     const providerName = useProviderName(feature);
-    const tSettings = useTranslations("Settings");
-    // Only the two NEW strings come from the bundle; the rest of the constant
-    // is pre-existing hardcoded copy this change deliberately does not touch.
-    const keyPromptLabels = useMemo<NodeKeyPromptLabels>(
-        () => ({
-            ...KEY_PROMPT_LABELS,
-            storeUnreadable: tSettings("saveBlockedUnreadable"),
-            openSettings: tSettings("openSettingsHint"),
-        }),
-        [tSettings],
-    );
     const { noteTask } = keyGate;
 
     const handleTaskUpdate = useCallback(
@@ -379,7 +326,7 @@ export function AbiNodeShell<F extends NodeSlot>({
                     envKey={keyGate.envKey}
                     providerName={providerName}
                     state={keyGate.state}
-                    labels={keyPromptLabels}
+                    labels={KEY_PROMPT_LABELS}
                     value={keyGate.value}
                     onChange={keyGate.setValue}
                     onSave={keyGate.save}

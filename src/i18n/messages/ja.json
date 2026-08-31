@@ -38,17 +38,7 @@
         "customSectionTitle": "カスタム変数",
         "customSectionHint": "どのインストール済みプラグインにも宣言されていない変数。",
         "getKey": "キーを取得",
-        "requiredHint": "必須",
-        "storeUnreadableTitle": "保存済みのキーストアを読み取れません",
-        "storeUnreadableBody": "まだ何も変更されていません。保存済みのキーはこの端末に残っていますが、ファイルの内容を解釈できないため表示できません。",
-        "storeUnreadableReasonLabel": "技術的な理由",
-        "dropStore": "古いストアを破棄して入力し直す",
-        "dropStoreConfirmTitle": "保存済みのキーをすべて破棄しますか？",
-        "dropStoreConfirmBody": "保存済みのキーはすべて失われ、復元できません。破棄後は各プロバイダーのキーを自分で入力し直す必要があります。",
-        "dropStoreConfirmOk": "破棄して入力し直す",
-        "dropStoreCancel": "キャンセル",
-        "openSettingsHint": "設定を開いて対処する",
-        "saveBlockedUnreadable": "保存済みのキーストアを読み取れないため、今は新しいキーを保存できません。"
+        "requiredHint": "必須"
     },
     "Index": {
         "title": "新しいアイデア"

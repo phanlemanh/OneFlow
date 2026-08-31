@@ -38,17 +38,7 @@
         "customSectionTitle": "自定义变量",
         "customSectionHint": "未被任何已安装插件声明的变量。",
         "getKey": "获取 Key",
-        "requiredHint": "必填",
-        "storeUnreadableTitle": "无法读取已保存的密钥库",
-        "storeUnreadableBody": "目前尚未改动任何内容。已保存的密钥仍在本机上，但应用无法解析该文件，因此暂时无法显示。",
-        "storeUnreadableReasonLabel": "技术原因",
-        "dropStore": "丢弃旧密钥库并重新输入",
-        "dropStoreConfirmTitle": "要丢弃全部已保存的密钥吗？",
-        "dropStoreConfirmBody": "所有已保存的密钥都将丢失且无法恢复。丢弃后，你需要自行重新输入每个服务商的密钥。",
-        "dropStoreConfirmOk": "丢弃并重新输入",
-        "dropStoreCancel": "取消",
-        "openSettingsHint": "打开设置进行处理",
-        "saveBlockedUnreadable": "无法读取已保存的密钥库，因此暂时无法再保存任何密钥。"
+        "requiredHint": "必填"
     },
     "Index": {
         "title": "新创意"

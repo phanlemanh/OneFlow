@@ -1,125 +1,101 @@
 ## Trong hợp đồng
 
-- **Node key prompt renders the unreadable-store refusal as "key invalid" with a raw error code**
-  file: `src/components/workspace/nodes/base/abi-node-shell.tsx:227`
-  severity: high
-  AC: AC-12
-  detail: `saveAndVerifyKey` throws `EnvStoreUnreadableError` (message literally `"ENV_STORE_UNREADABLE"`) on a 503, but nothing catches it by type. `useNodeKeyGate.save`'s catch funnels every error into `setState({ phase: "invalid", reason: error.message })`, and `node-key-prompt.tsx` renders that phase with a destructive border, `aria-invalid` on the input and the text `{labels.invalid} — ENV_STORE_UNREADABLE`.
+### Tuyên quét LỚP (sáng × tối) nhưng chỉ có điểm-case: cột "sáng" chưa bao giờ được chụp — cả 6 bản chụp đều ở chế độ tối
+- file: `_acceptance/chong-mat-khoa-byo/evals.yaml:292`
+- severity: high
+- source: measurement
+- AC: AC-14
 
-  Three problems, all in one place:
-  1. It is the exact false negative the surrounding code documents as an S4 round-1 regression ("could not ask" rendered as "asked and was told no"). Nobody asked the provider; the key may be perfectly good.
-  2. A raw machine code is shown as user copy, untranslated, on a screen that is otherwise fully next-intl driven.
-  3. AC-12 requires both node panels to "refuse to save AND point the user at Settings". The media-library panel does this via `tSettings("saveBlockedUnreadable")`; this panel does not point anywhere. The i18n keys added for it exist and are unused here — `Settings.saveBlockedUnreadable` is wired only into `add-media-library-node.tsx`, and `Settings.openSettingsHint` was added to all five locales and is referenced by nothing in shipped code at all (only by `locale-parity.test.ts` PAIRS and the proto).
+E17 tuyên "axe-core... quét 6 trang (3 trạng thái × sáng/tối)" và design-pass.md:14 khai `themes: [light, dark]` với bảng 12 dòng chụp. Nhưng ma trận theme không tồn tại về mặt cơ chế: `src/app/proto/[slug]/page.tsx` chỉ làm `theme === "dark" ? <div className="dark">{body}</div> : body` — tham số URL chỉ có thể THÊM dark, không có đường nào ép sáng; còn theme thật do script trong `src/app/layout.tsx:38-39` gắn `class="dark"` lên `<html>` theo localStorage/prefers-color-scheme của trình duyệt chụp. Bằng chứng trong chính diff xác nhận điều đó đã xảy ra: cả 6 file `evidence/design-pass/*.html` — kể cả ba file tên `--light.html` — đều mở bằng `<html lang="vi" class="dark">` (file `--dark` chỉ khác ở chỗ có thêm một div `.dark` lồng bên trong, không đổi token nào); và các PNG light/dark trùng byte: `panel-unreadable--light.png` = `--dark.png` = `--desktop--light.png` = `--desktop--dark.png` (md5 3412b679…), tương tự cho store-unreadable (3e2740ea…) và store-unreadable-confirm (f7134b76…). Nên 12 dòng bảng chụp thực chất là 6 khung phân biệt (3 trạng thái × 2 viewport), và cả a11y.json (6 URL, violations rỗng) lẫn E18 đều không nói gì về tương phản/token ở theme sáng. Đáng chú ý: design-pass.md:75-77 ghi một phát hiện về nhánh `dark:` bị đánh rơi — phát hiện đó đến từ đọc mã, không từ phép đo, vì phép đo chưa từng dựng bản sáng.
 
-  The refusal half (no PUT goes out) is correct and tested; only the message half is wrong, and `abi-node-shell.test.tsx` asserts on the thrown error type, never on what the user sees, so no test catches it.
+### Assertion âm-tính-một-mình: "không có nút bỏ kho" không có đối chứng dương, và ma trận hai panel chỉ đo một panel
+- file: `src/components/workspace/nodes/add/media-library-config-panel.test.tsx:90`
+- severity: medium
+- source: measurement
+- AC: AC-12
 
-  rationale: AC-12 đòi hỏi cả hai panel từ chối lưu VÀ chỉ người dùng sang màn Cài đặt; panel này từ chối lưu đúng nhưng không chỉ đường, nên làm AC-12 thất bại.
+Test `offers no way to drop the store` chỉ assert `screen.queryAllByRole("button", { name: /bỏ kho cũ|nhập lại|discard/i }).toHaveLength(0)` (dòng 96-101). Không nơi nào trong bộ đo chứng minh truy vấn ĐÓ có thể trả về khác 0: grep toàn repo cho thấy regex này chỉ xuất hiện đúng một lần, còn settings-dialog.test.tsx:120,143 dùng tên chính xác `en.Settings.dropStore` chứ không dùng cùng regex — nghĩa là một regex viết sai (sai chính tả, sai ngôn ngữ, đổi role) sẽ cho 0 ở mọi nơi và ô này vẫn xanh. Đây đúng thứ evals.yaml E14 vế 2 yêu cầu chặn bằng chữ: "ĐỐI CHỨNG DƯƠNG là cùng truy vấn đó trên settings-dialog phải === 1 — không có đối chứng thì một truy vấn sai chính tả cũng cho 0 ở mọi nơi", và đối chứng đó không được cài. Cùng ô còn hụt nửa ma trận: E14 vế 2 khai "ma trận hai panel (số assert bằng số panel)", nhưng abi-node-shell.test.tsx và node-key-prompt.test.tsx không có assert nào về nút bỏ-kho — chỉ 1/2 phần tử được đo.
 
-- **Discarding the broken key store leaves the settings form with no plugin key cards to re-enter into**
-  file: `src/components/workspace/settings-dialog.tsx:391`
-  severity: medium
-  AC: AC-11
-  detail: `fetchEnv` clears `setDecls([])` when the store is unreadable (correct — the form must not be usable). `dropStoreAndSave` then finishes with `applyEnv(data.env ?? {}, decls)`, passing that now-empty `decls`, and the PUT response carries no `pluginEnv` to refill it (the route returns `{ env, verdicts }` only).
+### Fixture VIẾT TAY đúng khuôn bên đọc: nhãn của node prompt do chính test cấp, nên mặc định chuỗi rỗng trong mã ship không phép đo nào bắt được
+- file: `src/components/workspace/node-key-prompt.test.tsx:17`
+- severity: medium
+- source: measurement
+- AC: AC-12
 
-  So the moment after the user confirms "Discard every saved key?" — whose copy promises "afterwards you must re-enter each provider's key yourself" — the dialog drops back to a form with zero declared-variable cards and zero custom rows. The only way to reach the provider cards again is to close and reopen the dialog so `fetchEnv` runs. The escape hatch lands the user one step short of the thing it exists to enable. `void fetchEnv()` in place of the `applyEnv` call would restore both env and declarations from the same source of truth.
+Test dựng `LABELS` viết tay (dòng 17-30) rồi assert `getByText(/không đọc được kho khoá/i)` và `getByText(/mở cài đặt/i)` — tức là khớp lại đúng chuỗi mà chính test vừa truyền vào, không round-trip từ writer thật. Writer thật là `src/components/workspace/nodes/base/abi-node-shell.tsx:63-64`, nơi `KEY_PROMPT_LABELS.storeUnreadable` và `.openSettings` được đặt là chuỗi RỖNG `""` và chỉ được ghi đè trong `useMemo` của `AbiNodeShell` (dòng 320-330). Không test nào mount `AbiNodeShell` (grep `<AbiNodeShell` trong *.test.tsx: không kết quả; abi-node-shell.test.tsx chỉ import `saveAndVerifyKey`/`useNodeKeyGate`), nên nếu phần ghi đè đó biến mất, người dùng thấy một khối alert rỗng còn cả ba file test vẫn xanh. E14 vế 3 tuyên đo "màn hiện câu đã dịch + lối sang Cài đặt", nhưng câu được đo là câu của test, không phải câu từ bundle đi qua shell.
 
-  rationale: AC-11 đòi hỏi sau khi xác nhận thoát, màn Cài đặt phải về đúng trạng thái bình thường; mất sạch các thẻ khoá là không về trạng thái bình thường.
+### Đo hằng số của chính bài đo thay vì đầu ra: "keeps the four reasons distinct" không gọi mã sản phẩm lần nào
+- file: `src/lib/settings/env-store.server.test.ts:163`
+- severity: medium
+- source: measurement
+- AC: AC-3
 
-- **Unreadable key store renders as "key is invalid" with a raw error code in the node key prompt**
-  file: `src/components/workspace/nodes/base/abi-node-shell.tsx:226`
-  severity: high
-  AC: AC-12
-  detail: `saveAndVerifyKey` now throws `EnvStoreUnreadableError` (message = the literal string "ENV_STORE_UNREADABLE") on a 503, but `useNodeKeyGate.save`'s catch funnels EVERY throw into `setState({ phase: "invalid", reason: error.message })`. `node-key-prompt.tsx` renders that phase with `aria-invalid`, a destructive border, `role="alert"` and the text `labels.invalid + " — " + reason`, so the user sees "Khoá chưa dùng được — ENV_STORE_UNREADABLE". Two defects in one: (a) it asserts the key is unusable when nothing was written and the key was never checked — exactly the false negative the file's own comments at lines 137 and 221 say was fixed in S4 round 1; (b) it leaks a machine code / hardcoded Vietnamese to every locale (lines 121 and 128 also throw untranslated Vietnamese sentences into the same slot). The feature added `Settings.saveBlockedUnreadable` in all five bundles for precisely this message, and the media-library panel uses it — the ABI node prompt never does. The added test (abi-node-shell.test.tsx) stops at the throw and asserts no PUT is sent, so nothing measures the rendered state. Fix: add a distinct non-destructive phase (or reuse `saved-unverified` semantics) and pass the translated `saveBlockedUnreadable` string.
-  rationale: Cùng lý do như finding song sinh: AC-12 yêu cầu panel chỉ người dùng sang màn Cài đặt, panel này không làm vậy nên AC-12 thất bại.
+Test dựng `const seen = new Set()`, đổ vào đó `reason` lấy từ chính mảng literal `BLOB_CAUSES` khai ở dòng 105-109 của file test, cộng thêm hai chuỗi gõ tay `seen.add("io")` / `seen.add("decode")`, rồi assert `expect([...seen].sort()).toEqual(["decode","io","parse","shape"])`. Không có lời gọi `readEnvStore()` nào trong test này (`void blob;` cho thấy fixture bị bỏ đi luôn), nên nó chỉ có thể đỏ khi ai đó sửa chính bảng literal trong file test — mọi thay đổi ở `src/lib/settings/env-store.server.ts` đều vô hình với nó. Nó nằm trong ô E3, ô tuyên "MA TRẬN TOÀN PHẦN bốn nguyên nhân... `reason` PHÂN BIỆT được bốn ca", nên nó đọc như bằng chứng cho tính phân biệt trong khi bằng chứng thật chỉ nằm ở bốn assert kia.
 
-- **After the escape hatch succeeds, the settings screen loses every plugin key declaration**
-  file: `src/components/workspace/settings-dialog.tsx:391`
-  severity: medium
-  AC: AC-11
-  detail: `fetchEnv`'s 503 branch clears state with `setDecls([])` (line 360). `dropStoreAndSave` is reachable only from that state, and on success calls `applyEnv(data.env ?? {}, decls)` with the now-empty `decls`. The PUT response body is `{ env, verdicts }` — it carries no `pluginEnv` — so there is no path back to the declarations. Result: right after the user discards a corrupt store (the one moment they must re-enter every provider key), the dialog renders zero declared-key cards and only the free-form custom rows; they have to close and reopen the dialog to get the form back. `settings-dialog.test.tsx` asserts the flagged PUT is sent but never asserts what the screen shows afterwards, so this is untested. Fix: `await fetchEnv()` after a successful drop instead of `applyEnv(..., decls)`.
-  rationale: Cùng lý do như finding song sinh: mất mọi thẻ khoá sau khi xác nhận thoát là không quay về trạng thái bình thường mà AC-11 yêu cầu.
+### Ma trận thiếu phần tử viết-trước: danh sách WRITER của phép đo parity bỏ sót đúng file mà gói việc này thêm t() vào
+- file: `src/i18n/locale-parity.test.ts:23`
+- severity: medium
+- source: measurement
+- AC: AC-13
 
-- **Unreadable store surfaces on the media-library node as "configuration missing" with no fields and no way out**
-  file: `src/components/workspace/nodes/add/add-media-library-node.tsx:287`
-  severity: medium
-  AC: AC-9
-  detail: `resolveConfig` returns the unreadable case under `code: "MISSING_CONFIG"` and `client.server.ts:38` deliberately blanks `missing` to `[]`; the search route maps MISSING_CONFIG to HTTP 400. The node then enters `kind: "missing-config"` and renders `MediaLibraryConfigPanel` with `missing=[]` and `message={t("missingConfig")}` — the server's real explanation ("Không đọc được kho khoá đã lưu … Mở Cài đặt để xử lý") is dropped on purpose at line 287. The user is told their configuration is missing (wrong cause: the keys may well be on disk), is shown zero input fields because both `missing.includes(...)` guards are false, and gets a lone Save button whose only effect is to surface the real reason after they click it. There is no pointer to Settings: `Settings.openSettingsHint` was added to all five bundles and is rendered by the prototype (chong-mat-khoa-byo-proto.tsx:229) but by no shipped component. Fix: propagate the unreadable state as its own code/branch so the panel can render the store-unreadable sentence plus the Settings hint immediately, rather than a missing-config form with nothing in it.
-  rationale: AC-9 đòi hỏi phân biệt được "kho hỏng" với "chưa cấu hình khoá"; finding cho thấy cả hai vẫn ra cùng một mã/thông điệp, tức AC-9 thất bại.
+File tự nêu nguyên tắc "key list is DERIVED from the writers, never hand-listed", nhưng TẬP WRITER lại là hằng viết tay gồm đúng hai đường dẫn (dòng 23-27: settings-dialog.tsx, add-media-library-node.tsx). Gói việc này còn thêm một writer thứ ba: `src/components/workspace/nodes/base/abi-node-shell.tsx:326-327` gọi `tSettings("saveBlockedUnreadable")` và `tSettings("openSettingsHint")`, và file đó không có trong WRITERS. Evals.yaml E16 mô tả phạm vi rộng hơn hiện trạng — "đúng tập file mà gói việc này khai (settings-dialog, hai panel node, proto)" — trong khi chỉ một panel node được quét. Hai khoá kể trên hiện được phủ tình cờ vì add-media-library-node.tsx cũng dùng chúng; một khoá mới chỉ xuất hiện trong abi-node-shell.tsx sẽ không bao giờ làm ô này đỏ, tức đúng chiều (b) mà E16 tuyên là lý do nó được viết lại ("thêm một t(\"khoa.moi\") vào mã mà không dịch → PHẢI đỏ").
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **"Technical reason" line shows the whole localized error sentence, not the reason code — and its test fixture does not match what the route sends**
-  Người dùng thấy gì: Người dùng dùng giao diện tiếng Anh, Nhật, Hàn hoặc Trung có thể thấy dòng giải thích kỹ thuật hiện bằng một câu tiếng Việt đầy đủ thay vì một mã ngắn gọn, gây khó hiểu.
-  file: `src/components/workspace/settings-dialog.tsx:357`
-  severity: medium
-  Đề xuất: known-limits
-
-- **New a11y script shares the default .next dist dir with the parallel `pnpm build` suite key**
-  Người dùng thấy gì: Việc kiểm tra khả năng tiếp cận có thể thỉnh thoảng báo lỗi giả hoặc bị kẹt do chạy cùng lúc với một tác vụ dựng bản khác, chứ không phải vì tính năng thực sự có lỗi.
-  file: `scripts/settings/check-a11y-proto.sh:31`
-  severity: medium
-  Đề xuất: known-limits
-
-- **The "Technical reason" field shows the server's Vietnamese sentence in every locale**
-  Người dùng thấy gì: Người dùng dùng giao diện không phải tiếng Việt có thể thấy nguyên một câu tiếng Việt ở dòng lý do kỹ thuật thay vì một mã ngắn gọn phù hợp ngôn ngữ của họ.
-  file: `src/components/workspace/settings-dialog.tsx:502`
-  severity: medium
-  Đề xuất: known-limits
-
-- **readEnvStore discards the underlying error in all four failure paths — nothing is ever logged**
-  Người dùng thấy gì: Khi kho khoá không đọc được, đội vận hành sẽ không có manh mối kỹ thuật nào trong nhật ký để biết nguyên nhân (quyền truy cập, file hỏng, v.v.), khiến việc khắc phục sự cố khó hơn.
-  file: `src/lib/settings/env-store.server.ts:65`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 4 — assertion âm-tính-một-mình: "form đã bị THAY" đo bằng queryAllByRole("textbox") mà đối chứng dương cũng cho 0**
-  Người dùng thấy gì: Bài kiểm tra xác nhận màn Cài đặt đã đổi sang thông báo lỗi có thể vẫn báo đạt ngay cả khi màn hình chưa thực sự đổi, nên một lỗi thật ở đây có thể lọt qua mà không ai phát hiện.
-  file: `src/components/workspace/settings-dialog.test.tsx:86`
+- **Unreadable key store now disables media-library even when the vars come from process.env**
+  Người dùng thấy gì: Nếu thư viện media được cấu hình qua biến môi trường thay vì màn Cài đặt, một file cấu hình không liên quan bị hỏng vẫn có thể làm tính năng ngừng hoạt động và chỉ người dùng vào Cài đặt — nơi không có gì để sửa.
+  file: `src/lib/media-library/config.server.ts`
   severity: high
+  Đề xuất: new-contract
+
+- **Server's hardcoded Vietnamese error sentence is rendered to the user under a translated label**
+  Người dùng thấy gì: Người dùng dùng giao diện tiếng Anh, Nhật, Hàn hoặc Trung có thể thấy một câu lỗi tiếng Việt xen trong màn Cài đặt khi kho khoá không đọc được, thay vì một thông báo bằng đúng ngôn ngữ họ đang dùng.
+  file: `src/app/api/settings/env/route.ts`
+  severity: medium
+  Đề xuất: new-contract
+
+- **New user-facing throws in abi-node-shell are hardcoded Vietnamese and surface as the prompt's reason line**
+  Người dùng thấy gì: Khi việc đọc khoá gặp một lỗi bất ngờ khác với 'kho hỏng' chuẩn, người dùng ở mọi ngôn ngữ khác tiếng Việt có thể thấy một câu báo lỗi tiếng Việt ngay trên node, thay vì một thông báo đã được dịch.
+  file: `src/components/workspace/nodes/base/abi-node-shell.tsx`
+  severity: medium
+  Đề xuất: new-contract
+
+- **ENV_STORE_UNREADABLE is exported as the contract but every caller branches on the raw 503 instead**
+  Người dùng thấy gì: Không ảnh hưởng đến những gì người dùng thấy hôm nay — đây là một khoản nợ kỹ thuật nội bộ khiến việc bảo trì về sau rủi ro hơn, không phải một lỗi người dùng gặp phải.
+  file: `src/lib/settings/env-store.server.ts`
+  severity: medium
   Đề xuất: known-limits
 
-- **Hình dạng 5 — E16 tuyên quét LỚP "mọi khoá t() mới" nhưng bộ lọc OWNED kéo nó về đúng danh sách viết tay mà nó nói là đã bỏ**
-  Người dùng thấy gì: Bài kiểm tra dịch thuật có thể bỏ sót một dòng chữ mới chưa được dịch, khiến người dùng ở giao diện không phải tiếng Việt nhìn thấy văn bản chưa dịch mà không ai phát hiện.
-  file: `src/i18n/locale-parity.test.ts:32`
+- **dropStoreAndSave iterates customRows that the 503 branch has already cleared**
+  Người dùng thấy gì: Không ảnh hưởng người dùng hôm nay vì hành vi hiện tại đúng như mong đợi (xác nhận sẽ xoá sạch kho); đây là một rủi ro tiềm ẩn nếu màn hình này được sửa sau này mà không để ý đến đoạn mã đó.
+  file: `src/components/workspace/settings-dialog.tsx`
+  severity: low
+  Đề xuất: known-limits
+
+- **Domain error type and internals exported from a component file for test access**
+  Người dùng thấy gì: Không ảnh hưởng người dùng — đây là cách tổ chức mã nguồn nội bộ, không làm thay đổi những gì người dùng thấy hoặc có thể làm.
+  file: `src/components/workspace/nodes/base/abi-node-shell.tsx`
+  severity: low
+  Đề xuất: known-limits
+
+- **Settings dialog only guards HTTP 503 — any other failed GET still leaves an empty, savable form that wipes the store**
+  Người dùng thấy gì: Nếu màn Cài đặt tải lỗi vì một nguyên nhân khác với kho khoá bị hỏng, người dùng vẫn thấy form lưu khoá bình thường và có thể bấm Lưu — thao tác đó có thể xoá sạch mọi khoá đã lưu mà không có cảnh báo nào trước đó.
+  file: `src/components/workspace/settings-dialog.tsx`
   severity: high
-  Đề xuất: known-limits
+  Đề xuất: new-contract
 
-- **Hình dạng 5 — E14 vế 2 tuyên ma trận HAI panel (số assert = số panel) nhưng chỉ có một panel được đếm nút**
-  Người dùng thấy gì: Bài kiểm tra có thể không phát hiện nếu ô nhập khoá ở một trong hai màn hình vô tình có thêm một nút thoát không nên có.
-  file: `src/components/workspace/nodes/base/abi-node-shell.test.tsx:60`
-  severity: high
-  Đề xuất: known-limits
-
-- **Hình dạng 4 — truy vấn âm /bỏ kho cũ|nhập lại|discard/i không có đối chứng dương ở đâu cả (đối chứng mà eval khai không tồn tại)**
-  Người dùng thấy gì: Bài kiểm tra khẳng định panel này không có nút thoát nhưng không có phép đo đối chứng để chứng minh cách kiểm tra đó thực sự hoạt động, nên một lỗi thật ở đây có thể bị bỏ lọt.
-  file: `src/components/workspace/nodes/add/media-library-config-panel.test.tsx:99`
+- **resolveConfig short-circuits before the process.env fallback, so an env-var-configured media library breaks on an unrelated corrupt settings.json**
+  Người dùng thấy gì: Một cài đặt dùng biến môi trường cho thư viện media (không qua màn Cài đặt) có thể ngừng hoạt động chỉ vì một file cấu hình không liên quan bị hỏng, dù bản thân cấu hình thư viện media hoàn toàn bình thường.
+  file: `src/lib/media-library/config.server.ts`
   severity: medium
+  Đề xuất: new-contract
+
+- **writeSettingsBlob is a non-atomic truncate-then-write, so an interrupted save is what creates the unreadable state this feature now only offers 'discard everything' to escape**
+  Người dùng thấy gì: Nếu ứng dụng bị tắt đột ngột hoặc hết dung lượng đĩa đúng lúc đang lưu Cài đặt, file khoá có thể bị hỏng — và lối thoát duy nhất hiện có là xoá sạch toàn bộ khoá đã lưu để nhập lại từ đầu.
+  file: `src/ext-default/settings-store.ts`
+  severity: low
   Đề xuất: known-limits
 
-- **Hình dạng 5 — E4 tuyên loadEnvStore chạy qua CẢ SÁU trạng thái, bảng CASES chỉ có năm (thiếu 'decode')**
-  Người dùng thấy gì: Bài kiểm tra tuyên bố đã kiểm đủ sáu tình huống hỏng kho khoá nhưng thực ra thiếu một tình huống, nên một lỗi chỉ xảy ra ở tình huống đó có thể không bị phát hiện.
-  file: `src/lib/settings/env-store.server.test.ts:178`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 2 — test "keeps the four reasons distinct" chỉ assert lại bảng hằng của chính file test, không gọi mã sản phẩm**
-  Người dùng thấy gì: Bài kiểm tra này chỉ so sánh với chính bảng dữ liệu viết tay của nó chứ không chạy qua mã sản phẩm thật, nên không đảm bảo bốn loại lỗi kho khoá thực sự được phân biệt đúng như đã hứa.
-  file: `src/lib/settings/env-store.server.test.ts:163`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 5 — E8 mô tả ba phép đo mà lệnh gắn với nó không chạy (GET, kho 'absent', cờ-bị-bỏ-qua)**
-  Người dùng thấy gì: Một số phép đo được tuyên bố cho khu vực API cài đặt thực ra không được chạy, nên một lỗi ở đó có thể không bị phát hiện trước khi phát hành.
-  file: `_acceptance/config.yaml:289`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 5 — ma trận capture khai 12 khung sáng×tối, nhưng ảnh tối trùng byte với ảnh sáng: trục theme không sinh phép đo nào**
-  Người dùng thấy gì: Ảnh minh hoạ giao diện tối trong tài liệu thiết kế thực chất là ảnh sáng dán nhãn lại, nên các vấn đề chỉ hiện ra ở giao diện tối có thể chưa được nhìn thấy trong lần rà soát thiết kế này — dù đây không phải bằng chứng chính thức về khả năng tiếp cận.
-  file: `_acceptance/chong-mat-khoa-byo/design-pass.md:28`
-  severity: medium
-  Đề xuất: known-limits
-
-⚠ Cụm ngoài vùng phủ: 4/17 lỗi rơi vào file không bộ đo nào phủ (scripts/settings/check-a11y-proto.sh, src/components/workspace/nodes/add/add-media-library-node.tsx, _acceptance/config.yaml, _acceptance/chong-mat-khoa-byo/design-pass.md) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).
