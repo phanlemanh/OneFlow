@@ -1,0 +1,90 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · cong-tu-canh-minh</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng</h1><div class="sub">Trang bằng chứng · <span class="mono">cong-tu-canh-minh</span> · tier T2</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>—</b></span><span>Human signoff: <b>CHƯA ký</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>`bash scripts/ci/check-product-map-teeth.sh --case missing-slug`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>`bash scripts/ci/check-product-map-teeth.sh --case count-mismatch`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>`bash scripts/ci/check-product-map-teeth.sh --case opportunity-mismatch`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>`bash scripts/ci/check-product-map-teeth.sh --case artifact-missing --case artifact-unreadable`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-1</td><td>`node scripts/ci/check-product-map.mjs`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-5</td><td>`bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-duplicate`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-5</td><td>`bash scripts/roadmap/check-roadmap-fresh.sh`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-6</td><td>`bash scripts/ci/check-gate-guards-job.sh teeth`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-6</td><td>`bash scripts/ci/check-gate-guards-job.sh shape &amp;&amp; bash scripts/ci/check-gate-guards-job.sh no-softening`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-7</td><td>`bash scripts/ci/check-gate-guards-job.sh job-count`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-8</td><td>`bash scripts/ci/check-gate-guards-job.sh suite-keys`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-9</td><td>`bash scripts/ci/check-gate-guards-job.sh a11y-dist-dir`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-11</td><td>`bash scripts/ci/check-product-map-teeth.sh --case extra-slug --case status-downgraded`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-12</td><td>`bash scripts/ci/check-product-map-teeth.sh --case contract-unparsable --case status-unknown --case dir-empty`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-13</td><td>`bash scripts/ci/check-gate-guards-job.sh reachable`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-10</td><td>`bash scripts/ci/check-product-map-teeth.sh`</td><td><span class="badge neutral">0</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge neutral">0</span> &nbsp;E1 · `bash scripts/ci/check-product-map-teeth.sh --case missing-slug`</h3><p class="crit">AC-1: Given một slug có `status: signed-off` trong `_acceptance/&lt;slug&gt;/contract.md` mà</p>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge neutral">0</span> &nbsp;E2 · `bash scripts/ci/check-product-map-teeth.sh --case count-mismatch`</h3><p class="crit">AC-2: Given số trong nút mermaid `Đã giao&lt;br/&gt;N việc` khác số slug đã ký, When chạy bộ</p>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge neutral">0</span> &nbsp;E3 · `bash scripts/ci/check-product-map-teeth.sh --case opportunity-mismatch`</h3><p class="crit">AC-3: Given khối `## Đang cân nhắc cơ hội` và nút mermaid của nó, When chạy bộ kiểm,</p>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge neutral">0</span> &nbsp;E4 · `bash scripts/ci/check-product-map-teeth.sh --case artifact-missing --case artifact-unreadable`</h3><p class="crit">AC-4: Given `PRODUCT-MAP.md` vắng, hoặc còn đó nhưng **không tìm thấy** khối cần đọc</p>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge neutral">0</span> &nbsp;E5 · `node scripts/ci/check-product-map.mjs`</h3><p class="crit">AC-1: Given một slug có `status: signed-off` trong `_acceptance/&lt;slug&gt;/contract.md` mà</p>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge neutral">0</span> &nbsp;E6 · `bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-duplicate`</h3><p class="crit">AC-5: Given sổ cái lộ trình có **hai dòng cùng một slug**, When chạy</p>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge neutral">0</span> &nbsp;E7 · `bash scripts/roadmap/check-roadmap-fresh.sh`</h3><p class="crit">AC-5: Given sổ cái lộ trình có **hai dòng cùng một slug**, When chạy</p>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge neutral">0</span> &nbsp;E8 · `bash scripts/ci/check-gate-guards-job.sh teeth`</h3><p class="crit">AC-6: Given một PR có sổ cái hoặc bản đồ lệch, When CI chạy, Then job `Acceptance Gate`</p>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge neutral">0</span> &nbsp;E9 · `bash scripts/ci/check-gate-guards-job.sh shape &amp;&amp; bash scripts/ci/check-gate-guards-job.sh no-softening`</h3><p class="crit">AC-6: Given một PR có sổ cái hoặc bản đồ lệch, When CI chạy, Then job `Acceptance Gate`</p>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge neutral">0</span> &nbsp;E10 · `bash scripts/ci/check-gate-guards-job.sh job-count`</h3><p class="crit">AC-7: Given gói việc này đã hạ cánh, When CI chạy trên một PR bình thường, Then vẫn</p>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge neutral">0</span> &nbsp;E11 · `bash scripts/ci/check-gate-guards-job.sh suite-keys`</h3><p class="crit">AC-8: Given `_acceptance/config.yaml`, When đọc `feature_loop.suite_keys`, Then nó liệt</p>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge neutral">0</span> &nbsp;E12 · `bash scripts/ci/check-gate-guards-job.sh a11y-dist-dir`</h3><p class="crit">AC-9: Given `scripts/onboarding/check-a11y-proto.sh`, When nó dựng dev server, Then nó</p>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge neutral">0</span> &nbsp;E14 · `bash scripts/ci/check-product-map-teeth.sh --case extra-slug --case status-downgraded`</h3><p class="crit">AC-11: Given khối `## Đã giao` có một mục `` (`slug`) `` mà `_acceptance/&lt;slug&gt;/` **không</p>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge neutral">0</span> &nbsp;E15 · `bash scripts/ci/check-product-map-teeth.sh --case contract-unparsable --case status-unknown --case dir-empty`</h3><p class="crit">AC-12: Given thư mục `_acceptance/*/` bất kỳ, When bộ kiểm phân loại nguồn, Then **mọi**</p>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge neutral">0</span> &nbsp;E16 · `bash scripts/ci/check-gate-guards-job.sh reachable`</h3><p class="crit">AC-13: Given khối job và chính workflow, When kiểm khả-năng-chạy, Then step guard và job</p>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge neutral">0</span> &nbsp;E13 · `bash scripts/ci/check-product-map-teeth.sh`</h3><p class="crit">AC-10: Given mỗi bộ kiểm mới hoặc mỗi luật mới thêm vào bộ kiểm cũ, When chạy nó trên</p>
+</div>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

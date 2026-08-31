@@ -1,0 +1,67 @@
+{
+  "feature_plain": "Hai chốt tự canh bản đồ sản phẩm và sổ lộ trình nay chạy trên mọi thay đổi, và vòng nghiệm thu thôi tự làm hỏng lượt chạy của chính mình.",
+  "scope_plain": "Sáu nhánh để lại lần sau, trong đó có việc soi con số nằm trong văn xuôi sổ lộ trình và ba nhánh bị loại vì phải mang bộ sinh bản đồ vào kho.",
+  "analyst_plain": "",
+  "decisions_plain": [
+    {
+      "id": "d-20260831T034714Z-4847",
+      "p": "KHÔNG làm phần khai trước về cấu trúc màn hình — gói này không chạm giao diện nào."
+    },
+    {
+      "id": "d-20260831T034714Z-2512",
+      "p": "Viết bộ kiểm riêng của kho thay vì mang bộ sinh bản đồ từ bộ công cụ vào; đổi lại bộ kiểm chỉ khẳng định, không tự sinh lại được bản đồ."
+    },
+    {
+      "id": "d-20260831T034714Z-6650",
+      "p": "Khẳng định bất biến thay vì sinh-lại-rồi-so, tức cố ý làm khác khuôn sẵn có của kho; đổi lại phải ghi rõ chỗ lệch."
+    },
+    {
+      "id": "d-20260831T034714Z-9275",
+      "p": "Đặt bộ kiểm mới ở chỗ rẻ nhất theo giá đã đo, tiết kiệm một đến hai lượt đóng dấu lại cho hồ sơ khác."
+    },
+    {
+      "id": "d-20260831T034714Z-1813",
+      "p": "Tách hai phép kiểm nặng ra riêng nhưng GIỮ nguyên phép gộp cũ — bảy hồ sơ đã ký còn trỏ vào nó."
+    },
+    {
+      "id": "d-20260831T034714Z-7085",
+      "p": "Mở rộng phạm vi để vá lỗ ghi-hai-lần của chốt lộ trình; cắm điện cho một chốt đang có lỗ thì tệ hơn không cắm."
+    },
+    {
+      "id": "d-20260831T034714Z-8956",
+      "p": "KHÔNG soi con số nằm trong văn xuôi sổ lộ trình lần này; đổi lại con số đó vẫn trôi tự do."
+    },
+    {
+      "id": "d-20260831T113000Z-7741",
+      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ thay vì ghi vào phần hạn chế; đổi lại hồ sơ dài thêm ba tiêu chí."
+    },
+    {
+      "id": "d-20260831T113100Z-2218",
+      "p": "Cơ chế không-tìm-thấy-thì-đỏ áp cả hai vế của phép so; đổi lại bộ kiểm phải đọc phần khai đầu trang của mọi hồ sơ."
+    },
+    {
+      "id": "d-20260831T113200Z-9053",
+      "p": "Tách riêng phép đo khả-năng-chạy khỏi ba phép đo nội dung; đổi lại đổi cách kích hoạt thì phải sửa phép đo này."
+    },
+    {
+      "id": "d-20260831T124000Z-5512",
+      "p": "Bộ kiểm bản đồ chỉ dùng công cụ có sẵn của Node, để chạy được ở phần kiểm tự động vốn không cài thư viện."
+    },
+    {
+      "id": "d-20260831T124100Z-8830",
+      "p": "Phép đo quét mọi tệp kiểm giao diện thay vì ghim cứng hai tệp, nên một tệp mới chép sai cũng bị bắt."
+    },
+    {
+      "id": "d-20260831T124200Z-1907",
+      "p": "Ca thử tự thêm dòng mồi vào bản sao thay vì sửa tay bản đồ — bản đồ do máy sinh, sửa tay sẽ bị xoá."
+    },
+    {
+      "id": "d-20260831T134000Z-4471",
+      "p": "Hai chốt nay từ chối tham số lạ thay vì bỏ qua lặng lẽ; một dòng lệnh gõ sai không còn đọc ra thành đã-kiểm-sạch."
+    },
+    {
+      "id": "d-20260831T134100Z-6628",
+      "p": "Số lượt đóng dấu lại đo được là 1 chứ không phải 3 như dự đoán; một trường hợp chưa giải thích được nên ghi lại thay vì bịa lý do."
+    }
+  ]
+}

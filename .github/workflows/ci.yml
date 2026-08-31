@@ -131,3 +131,17 @@ jobs:
 
       - name: Pre-merge acceptance check
         run: bash scripts/pre-merge-check.sh . --base "origin/${GITHUB_BASE_REF:-main}"
+
+      # Both guards below ran only when somebody typed them (zero references in
+      # this file, measured 31/08), and both had already let real drift through:
+      # PRODUCT-MAP.md advertised 22 delivered items while 26 dossiers were
+      # signed. They live on this job rather than a new one because it has
+      # already paid for checkout + setup-node, and because a seventh job would
+      # add a ninth actions/checkout and turn check-action-pins.sh red for a
+      # reason unrelated to its own change. Both scripts use bash and Node
+      # builtins only, so this job's missing `pnpm install` is not a problem.
+      - name: Roadmap ledger freshness
+        run: bash scripts/roadmap/check-roadmap-fresh.sh
+
+      - name: Product map freshness
+        run: node scripts/ci/check-product-map.mjs

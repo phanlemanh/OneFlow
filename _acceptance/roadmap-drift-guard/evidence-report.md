@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: eb17794298f0cb0dbf5086effce99324083df384
+verified_commit: edd4fa9a86ae54bac66fb43f5fdfa779a0e1fb0d
 human_signoff: Manh 2026-08-27
 ---
 
@@ -331,3 +331,20 @@ Mười lần chạy vòng 5 đồng nhất với mười lần chạy vòng 4 �
       hồ sơ tiếp, hay ghi vào Known limits.
 - [ ] Cân hai con số văn xuôi lệch với bảng sổ cái (mục **Ngoài hợp đồng**)
 - [x] Điền `human_signoff` trong frontmatter
+
+### Re-pin lần 1 — 31/08/2026, do `cong-tu-canh-minh` vá lỗ trùng dòng của chính guard này
+
+run_id: repin-ctcm-20260831T142000Z
+sha: edd4fa9a86ae54bac66fb43f5fdfa779a0e1fb0d · suites: 8 lệnh exit 0
+
+Gói `cong-tu-canh-minh` chạm ba file trong phạm vi đã khai của hồ sơ này:
+`scripts/roadmap/roadmap-drift.mjs` (thêm luật cấm hai dòng cùng slug),
+`scripts/roadmap/check-roadmap-guard-teeth.sh` (thêm ca `ledger-duplicate`),
+`scripts/roadmap/check-roadmap-fresh.sh` (gỡ chú thích "chưa cắm vào CI" nay đã
+sai, và cho nó từ chối tham số lạ thay vì bỏ qua lặng lẽ).
+
+**Làn máy chạy TRONG PHIÊN, không phải bởi một agent ngữ cảnh sạch.** Owner chốt
+làn máy thuần cho vòng này (31/08); nghi thức chuẩn gọi một agent tươi. Đây là
+một lệch có khai, không phải một bước bị bỏ: tám lệnh là tám lệnh đã khai trong
+`feature_loop.suite_keys`, chạy tại đúng sha ghi trên, mã thoát ở
+`scratchpad/lane-*.log` của phiên.

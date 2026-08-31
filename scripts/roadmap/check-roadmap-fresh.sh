@@ -23,15 +23,27 @@
 # (`pnpm roadmap:teeth`), whose first perturbation is the roadmap exactly as it
 # stood on main @ 244cb0b.
 #
-# NOT wired into CI yet, on purpose. scripts/ci/check-action-pins.sh counts
-# pinned `actions/checkout` SITES (6 today) rather than asserting a floor, so any
-# PR that adds a CI job turns that guard red for a reason unrelated to its own
-# change — the exact trap CLAUDE.md documents for the manifest guard. Wiring this
-# in is therefore a two-file change that belongs in its own PR, together with
-# bumping the expected site count. Until then it runs on demand.
+# Wired into CI on 2026-08-31 (`cong-tu-canh-minh`): the `Acceptance Gate` job in
+# .github/workflows/ci.yml runs this on every PR and every push to main.
+#
+# The note that stood here said wiring it in would first need
+# scripts/ci/check-action-pins.sh re-numbered, because that guard counts pinned
+# `actions/checkout` SITES rather than asserting a floor. That only applies to
+# adding a JOB. This went in as a STEP on a job that already checks out, so the
+# count never moved — it was 8 before and 8 after, not the 6 the old note cited.
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
+
+# Takes no arguments, and REFUSES the ones it does not know rather than ignoring
+# them. A guard that swallows `--strict` and exits 0 cannot be told apart from a
+# guard that ran: a typo in the ci.yml `run:` line would then read as a clean
+# check forever. Same fail-open class this repo already refuses for `--case` in
+# check-roadmap-guard-teeth.sh.
+if [ $# -gt 0 ]; then
+    echo "check-roadmap-fresh: không nhận tham số nào — nhận được: $*" >&2
+    exit 2
+fi
 
 echo "→ kiểm tra trôi giữa docs/roadmap.md, docs/adr/ và _acceptance/"
 node scripts/roadmap/roadmap-drift.mjs

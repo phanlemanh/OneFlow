@@ -181,7 +181,6 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `compose-overlay` | T3 | 02/08 | **1.2** — slot overlay text/giá/logo/safe-zone |
 | `local-cpu-plugins` | T2 | 06/08 | **S2** — làn local-first ([ADR-0011](adr/0011-local-first-execution.md)) |
 | `byo-key-onboarding` | T3 | 19/08 | **S4** — làn local-first: UX BYO key lượt chạy đầu; mở khoá phép đo điều kiện đảo chiều ADR-0011 |
-| `normalize-text-vi` | T3 | 21/08 | **1.3** — slot/node đọc số-giá-ngày tất định, bắt buộc đứng trước TTS |
 | `dependency-refresh-2026-07` | T2 | 26/07 | *ngoài lộ trình* — bảo trì phụ thuộc |
 | `ci-actions-bump` | T2 | 26/07 | *ngoài lộ trình* — hạ tầng CI |
 | `stale-scope-by-paths` | T2 | 28/07 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu |
@@ -196,6 +195,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `chong-doc-sai-em-ru` | T3 | 29/08 | **1.3** — bộ đọc TỪ CHỐI thay vì phát nội dung sai; 11/12 tiêu chí, sáu giới hạn có tên |
 | `add-media-library` | T3 | 29/08 | **1.3b** — node nạp-từ-kho, giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md); 29/29 eval, 23 giới hạn có tên |
 | `chong-mat-khoa-byo` | T3 | 31/08 | *ngoài lộ trình* — sửa lỗi **mất dữ liệu** trên đường BYO key ([ADR-0011](adr/0011-local-first-execution.md)): kho khoá không đọc được nay bị từ chối ghi đè thay vì giả dạng rỗng. Nửa máy chủ; nửa giao diện tách ra theo Amendment 1, 11 giới hạn khai rõ |
+| `cong-tu-canh-minh` | T2 | 31/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: hai guard vào CI (trước đó 0 tham chiếu trong ci.yml), vá lỗ trùng dòng của chính guard này, tách suite key build/typecheck và chặn tranh thư mục dist của wrapper a11y. 16/16 eval, 5 giới hạn khai rõ |
 
 <!-- roadmap-ledger:end -->
 
