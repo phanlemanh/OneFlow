@@ -489,8 +489,14 @@ describe("writeSettingsBlob is atomic", () => {
 
         const reader = spawn(process.execPath, [
             "-e",
+            // Sample the SIZE, not the contents. Reading a 6 MB file back takes
+            // about a millisecond, which sampled far too slowly to see the
+            // truncation window reliably — the first version caught one partial
+            // sample in 19,775 and was flaky as a result. statSync is orders of
+            // magnitude cheaper, so a truncate-then-write shows its whole 0 to
+            // 6 MB sweep instead of a single lucky frame.
             `const fs=require("node:fs");const out=[];const until=Date.now()+4000;
-             while(Date.now()<until){try{out.push(fs.readFileSync(process.argv[1],"utf8").length)}catch{}}
+             while(Date.now()<until){try{out.push(fs.statSync(process.argv[1]).size)}catch{}}
              process.stdout.write(JSON.stringify(out));`,
             store(),
         ]);
@@ -529,4 +535,66 @@ describe("writeSettingsBlob is atomic", () => {
                   ],
         ).toEqual([]);
     }, 20_000);
+});
+
+describe("the run path and the round trip", () => {
+    it("run path hands every key to the plugin, coerced", async () => {
+        writeFileSync(
+            store(),
+            JSON.stringify({
+                OPENAI_API_KEY: "sk-fake",
+                PORT: 8080,
+                DEBUG: true,
+            }),
+            "utf8",
+        );
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        // Today, before this feature, PORT and DEBUG vanished here — which is
+        // why the owner chose coercion over refusing the whole store: refusing
+        // collapses to {} on this path and would take EVERY key with it.
+        await expect(loadEnvStore()).resolves.toEqual({
+            OPENAI_API_KEY: "sk-fake",
+            PORT: "8080",
+            DEBUG: "true",
+        });
+    });
+
+    it("run path stays forgiving for a genuinely broken store", async () => {
+        // The inherited invariant that must NOT break (owner decision 2 of
+        // chong-mat-khoa-byo): an unreadable store must never block a run.
+        writeFileSync(store(), "{ not json", "utf8");
+        const { loadEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        await expect(loadEnvStore()).resolves.toEqual({});
+    });
+
+    it("round trip read save read loses no key", async () => {
+        // THE measured loss: read drops keys -> the screen shows what was read
+        // -> the user saves -> the dropped keys are gone from disk. Measured
+        // 2026-08-31 on the old code: PORT, DEBUG, NESTED and NULLED vanished.
+        writeFileSync(
+            store(),
+            JSON.stringify({
+                OPENAI_API_KEY: "sk-fake",
+                PORT: 8080,
+                DEBUG: true,
+            }),
+            "utf8",
+        );
+        const { readEnvStore, saveEnvStore } = await import(
+            "@/lib/settings/env-store.server"
+        );
+        const first = await readEnvStore();
+        expect(first.state).toBe("ok");
+        if (first.state !== "ok") throw new Error("unreachable");
+
+        await saveEnvStore(first.env);
+        const second = await readEnvStore();
+        // Compare the whole map: equal key COUNTS would also hold if two keys
+        // were swapped for two others.
+        expect(second).toEqual({ state: "ok", env: first.env });
+    });
 });

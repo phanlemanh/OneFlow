@@ -1,0 +1,12 @@
+Already up to date
+Done in 146ms using pnpm v11.5.1
+Already up to date
+Done in 147ms using pnpm v11.5.1
+
+ RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 28 skipped (29)
+   Start at  22:14:48
+   Duration  108ms (transform 35ms, setup 0ms, import 32ms, tests 16ms, environment 0ms)
