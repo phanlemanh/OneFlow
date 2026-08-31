@@ -5,7 +5,7 @@ slug: cong-tu-canh-minh
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, docs]
-status: approved
+status: implemented
 design_doc: docs/superpowers/specs/2026-08-31-cong-tu-canh-minh-design.md
 approved_by: Phan Le Manh
 approved_at: 2026-08-31
