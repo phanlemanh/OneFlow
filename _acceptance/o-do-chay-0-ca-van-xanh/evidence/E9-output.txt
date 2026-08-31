@@ -1,0 +1,1 @@
+OK: trigger pull_request không lọc đường dẫn; step và job không mang if: hay needs:
