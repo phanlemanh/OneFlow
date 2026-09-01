@@ -63,6 +63,25 @@ evals:
       chứ không phải một khuôn test tự đặt.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
+  - id: E13
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.kkt_gd_env_client
+    paths:
+      - "src/lib/settings/env-client.ts"
+      - "src/lib/settings/env-client.test.ts"
+      - "src/lib/settings/__fixtures__/read-failures.ts"
+    expected: >-
+      exit 0. Ô NỀN cho cả AC-10 lẫn AC-12: bộ đọc dùng chung mà ba bề mặt đều đi qua.
+      14 ca — năm hình dạng lỗi × (báo `unreadable`, gửi 0 `PUT`), cộng đối chứng dương
+      rằng kho LÀNH vẫn gửi đúng 1 `PUT` và lượt ghi đó HỢP NHẤT (không xoá khoá khác),
+      cộng lượt ghi huỷ-diệt mang cờ + `env` rỗng và KHÔNG đọc trước.
+      NỬA ĐÀN ÁP: thiếu đối chứng dương thì một `saveEnvKeys` không bao giờ ghi cũng xanh.
+      CHIỀU ĐỎ đã chạy: thu cổng về `status === 503` → đỏ ĐÚNG 6 ca, mỗi ca nêu tên hình
+      dạng. Ca `503` và `network` vẫn xanh vì chúng đi qua hai cổng khác (JSON parse và
+      `try/catch` quanh `fetch`) — con số 6 là số ĐO ĐƯỢC, không phải số dự đoán.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
   # ---------- B. Màn Cài đặt — tấm chặn (AC-10, đôi ô) ----------
   - id: E2
     criterion: AC-10
@@ -232,6 +251,24 @@ evals:
       test, và sẽ đỏ ngay cả trên cây đúng.
       CHIỀU ĐỎ: thêm lại một `fetch("/api/settings/env")` vào `abi-node-shell.tsx` thì
       PHẢI đỏ, thông điệp nêu ĐÚNG đường dẫn tệp vi phạm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.kkt_gd_one_reader_teeth
+    paths:
+      - "scripts/settings/check-one-env-reader.sh"
+      - "scripts/settings/check-one-env-reader-teeth.sh"
+    expected: >-
+      exit 0. RĂNG của guard E11 — chứng minh guard đó đỏ được, chứ không chỉ xanh.
+      Ba ca trên BẢN SAO của cây: (1) cây thật → exit 0; (2) chèn thêm một
+      `fetch("/api/settings/env")` vào `abi-node-shell.tsx` → exit 1 VÀ thông điệp phải
+      NÊU TÊN tệp vi phạm; (3) làm rỗng `env-client.ts` → exit 2 (guard không còn gì để
+      đo thì phải nói ra, chứ không được xanh).
+      Vì sao cần: E11 là một guard tĩnh, và một guard tĩnh xanh vĩnh viễn trông y hệt
+      một guard xanh vì grep gõ sai. Ô này là chỗ duy nhất chứng minh nó biết đỏ.
+      CHIỀU ĐỎ: nới `grep` của guard để bỏ qua `src/components/**` thì ca (2) PHẢI đỏ.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- E. Cắt ngang ----------

@@ -133,6 +133,23 @@ Không áp dụng — `context: static-frame`, không phải `standalone`.
    trên: phép kiểm đó không thể tồn tại kể cả nếu có người viết ra nó.
    **Việc cho người duyệt:** hai hồ sơ đó có cần đo lại không. Song song đúng nghĩa
    với việc hồ sơ cha đặt ra về `design.gate`.
+   **KẾT QUẢ ĐO, 01/09 — một phủ định có giá trị.** Phiên `amazing-kapitsa-45dd7a`
+   đã vá cả hai wrapper (rebase trên `557f05c`, commit `086a7b8`) rồi chạy với
+   `REPORT_PATH` trỏ ra ngoài cây để không đè bằng chứng đã ký:
+   **onboarding 20/20 quét · 20/20 đúng state VÀ theme · 0 vi phạm** `critical`/`serious`;
+   **media-library y hệt, 20/20 và 20/20, 0 vi phạm.** Tức **18 trạng thái × 2 giao
+   diện, không tìm ra lỗi tương phản nào.**
+   Điều này **bác bỏ dự đoán tôi ghi ở trên**. Tôi đã suy từ một mẫu: lỗi 4.33:1
+   của hồ sơ này lộ ra ngay khi nửa sáng được quét lần đầu, nên tôi nói hai bản mẫu
+   kia "cũ hơn và lớn hơn, liệu trước là sẽ ra lỗi". Không ra. Hai bản mẫu đó tựa
+   vào cặp `bg-card`/`bg-muted` + `text-foreground` vốn đã qua sàn ở giao diện sáng;
+   cái nhuộm `bg-destructive/5` mới là chỗ token `muted-foreground` hết hiệu lực.
+   Ghi lại phủ định này thành CHỮ, vì nếu để nguyên câu dự đoán thì người sau sẽ
+   tưởng hai hồ sơ ấy còn nợ một bản vá tương phản — chúng không nợ.
+   **Cái chúng thật sự nợ vẫn còn nguyên và vẫn là việc của người duyệt:** bằng
+   chứng a11y đã ký của chúng được sinh bởi một phép đo mù trục sáng/tối. Nay biết
+   là màu xanh đó **đúng**, nhưng lúc ký thì **chưa ai biết** — câu hỏi cho cổng
+   không đổi: có cần đóng dấu lại bằng phép đo đã sửa hay không.
 
 2. **`build/bko-a11y` không được khai trong `tsconfig.json`.** Wrapper onboarding
    chạy với `NEXT_DIST_DIR=build/bko-a11y`; khi dist dir KHÔNG có trong `include`,

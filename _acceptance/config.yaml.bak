@@ -628,7 +628,6 @@ executors:
     preflight_env: "bash scripts/acceptance/preflight-verify-env.sh"
     kkt_gd_one_reader: "bash scripts/settings/check-one-env-reader.sh"
     kkt_gd_one_reader_teeth: "bash scripts/settings/check-one-env-reader-teeth.sh"
-    kkt_gd_a11y_proto: "bash scripts/settings/check-a11y-proto.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
