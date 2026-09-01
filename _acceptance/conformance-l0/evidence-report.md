@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 292d740129ec49e46dda86ecef6b6f0a51b5080e
+verified_commit: bb85560ca1337e308b1e06f5be7234dd64a0be2a
 human_signoff: Manh 2026-08-07
 ---
 
@@ -262,3 +262,7 @@ sha: 292d740129ec49e46dda86ecef6b6f0a51b5080e · suites: 7 lệnh exit 0
 Lane máy thuần chạy bởi một agent tươi tại HEAD: preflight GREEN · build+typecheck ·
 lint · vitest 708 · sdk pytest 292 · verify:plugins · gen:abi sạch. Cây sạch trước và
 sau. Không chữ ký người nào bị đụng.
+
+### Re-pin lần 7 — 2026-09-01, do dang-ky-fork-openai chạm scripts/plugins/** trong phạm vi hẹp của hồ sơ này
+run_id: repin-20260901T093702Z-3535
+sha: bb85560ca1337e308b1e06f5be7234dd64a0be2a · suites: 8 lệnh exit 0
