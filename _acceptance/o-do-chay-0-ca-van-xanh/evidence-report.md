@@ -8,7 +8,7 @@ verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 3537bb94033d402a04578419897cf2c38c3b15f4
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-01
 ---
 
 # Evidence Report: o-do-chay-0-ca-van-xanh
@@ -274,9 +274,13 @@ nó báo **FAIL** đúng như phải thế, rồi khôi phục lại **PASS**.
 Cách ly được **chứng minh, không hứa**: bản sao chỉ chứa hai thứ các ca động vào; tên ca
 lấy từ cây thật qua `--vitest-root`; kết thúc so **hash trước/sau** của hai file phạm vi.
 
-## Ngoài hợp đồng
+## Ngoài hợp đồng — owner đã quyết 01/09
 
 Chi tiết ở `review-findings.md`.
+
+| # | Phát hiện | Owner chọn |
+|---|---|---|
+| Ngoài-1 | Bộ đọc cấu hình bỏ sót giá trị dạng khối YAML mà không báo gì | **ghi Known limits** (mục 6 dưới) |
 
 ## Known limits
 

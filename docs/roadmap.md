@@ -197,6 +197,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `chong-mat-khoa-byo` | T3 | 31/08 | *ngoài lộ trình* — sửa lỗi **mất dữ liệu** trên đường BYO key ([ADR-0011](adr/0011-local-first-execution.md)): kho khoá không đọc được nay bị từ chối ghi đè thay vì giả dạng rỗng. Nửa máy chủ; nửa giao diện tách ra theo Amendment 1, 11 giới hạn khai rõ |
 | `cong-tu-canh-minh` | T2 | 31/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: hai guard vào CI (trước đó 0 tham chiếu trong ci.yml), vá lỗ trùng dòng của chính guard này, tách suite key build/typecheck và chặn tranh thư mục dist của wrapper a11y. 16/16 eval, 5 giới hạn khai rõ |
 | `kho-khoa-toan-ven` | T2 | 31/08 | *ngoài lộ trình* — đóng hai lỗ còn lại của cùng lời hứa mà chong-mat-khoa-byo mở ra: kho đọc được nhưng bị cắt bớt âm thầm (bốn khoá biến mất mà trạng thái vẫn báo lành), và kho ghi dở dang để lại file cụt. 13/13 eval, 7 giới hạn khai rõ |
+| `o-do-chay-0-ca-van-xanh` | T2 | 01/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: một ô đo lọc theo tên ca mà không ca nào khớp thì vitest thoát 0 và ô đo báo đạt vĩnh viễn. Đo trước khi thiết kế cho thấy 33/33 ô đang lành, nên đây là hàng rào chứ không phải bản sửa. 17/17 eval, 7 giới hạn khai rõ |
 
 <!-- roadmap-ledger:end -->
 

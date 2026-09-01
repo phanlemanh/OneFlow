@@ -5,10 +5,11 @@ slug: o-do-chay-0-ca-van-xanh
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci]
-status: verified
+status: signed-off
 design_doc: docs/superpowers/specs/2026-08-31-o-do-chay-0-ca-van-xanh-design.md
 approved_by: Phan Le Manh
 approved_at: 2026-09-01
+human_signoff: Phan Le Manh 2026-09-01
 ---
 
 # Acceptance Contract: o-do-chay-0-ca-van-xanh
