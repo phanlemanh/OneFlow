@@ -27,6 +27,7 @@ import {
     healthyRead,
     READ_FAILURES,
 } from "@/lib/settings/__fixtures__/read-failures";
+import type { ReadFailure } from "@/lib/settings/env-client";
 import { MediaLibraryConfigPanel } from "./add/media-library-config-panel";
 import { useNodeKeyGate } from "./base/abi-node-shell";
 
@@ -43,7 +44,7 @@ const PANEL_LABELS = {
     writeFailed: "write failed",
     storeUnreadableTitle: WSU.title,
     storeUnreadableUnchanged: WSU.unchanged,
-    storeUnreadableReason: (d: string) => `${WSU.reason} ${d}`,
+    storeUnreadableReason: (c: ReadFailure) => `${WSU.reason} ${c.code}`,
     toSettings: WSU.toSettings,
 };
 

@@ -49,11 +49,14 @@ import type {
     PluginEnvVar,
 } from "@/lib/plugins/plugin-env-manifest-schema";
 import { pluginDisplayName } from "@/lib/plugins/plugin-id";
+import type { ReadFailure } from "@/lib/settings/env-client";
 import {
     putEnvMap,
     readEnvForBrowser,
     replaceUnreadableStore,
 } from "@/lib/settings/env-client";
+import { readFailureText } from "@/lib/settings/read-failure-text";
+import { OPEN_SETTINGS_EVENT } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
 const navBtnClass =
@@ -315,7 +318,7 @@ export function SettingsDialog() {
      * over every stored key. Holding the reason in state is what lets the
      * screen say so and refuse.
      */
-    const [blocked, setBlocked] = useState<string | null>(null);
+    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
     const [confirming, setConfirming] = useState(false);
     const [replaceError, setReplaceError] = useState<string | null>(null);
     /**
@@ -378,9 +381,14 @@ export function SettingsDialog() {
         try {
             const out = await replaceUnreadableStore();
             if (!out.ok) {
-                setReplaceError(
-                    tStore("replaceFailed", { reason: out.detail }),
-                );
+                // `replaceUnreadableStore` never reads first, so it can only
+                // fail on the write; narrowing keeps the reason a plain string
+                // rather than the read-failure union.
+                const reason =
+                    out.reason === "write-failed"
+                        ? out.detail
+                        : readFailureText(tStore, out.detail);
+                setReplaceError(tStore("replaceFailed", { reason }));
                 return;
             }
             setConfirming(false);
@@ -393,6 +401,18 @@ export function SettingsDialog() {
     useEffect(() => {
         if (open) void fetchEnv();
     }, [open, fetchEnv]);
+
+    /*
+     * The blocked on-canvas surfaces have no way to repair the store, so the
+     * link they offer is their ONLY way forward. This listener is what makes
+     * that link real; without it the dispatch goes nowhere and the user sits in
+     * a card whose single control does nothing.
+     */
+    useEffect(() => {
+        const onRequest = () => setOpen(true);
+        window.addEventListener(OPEN_SETTINGS_EVENT, onRequest);
+        return () => window.removeEventListener(OPEN_SETTINGS_EVENT, onRequest);
+    }, []);
 
     const updateCustomRow = (index: number, patch: Partial<Row>) => {
         setCustomRows((prev) =>
@@ -466,7 +486,9 @@ export function SettingsDialog() {
                     </div>
                 ) : blocked ? (
                     <StoreUnreadableNotice
-                        reason={tStore("reason", { reason: blocked })}
+                        reason={tStore("reason", {
+                            reason: readFailureText(tStore, blocked),
+                        })}
                         labels={{
                             title: tStore("title"),
                             unchanged: tStore("unchanged"),

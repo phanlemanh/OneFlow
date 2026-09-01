@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import useFlow from "@/hooks/use-flow";
 import { logger } from "@/lib/logger";
 import type { MediaCard } from "@/lib/media-library/types";
+import type { ReadFailure } from "@/lib/settings/env-client";
+import { readFailureText } from "@/lib/settings/read-failure-text";
 import { BaseNodeShell } from "../base/base-node-shell";
 import { MediaCardList } from "./media-card-list";
 import { MediaLibraryConfigPanel } from "./media-library-config-panel";
@@ -292,8 +294,10 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                             writeFailed: t("writeFailed"),
                             storeUnreadableTitle: tStore("title"),
                             storeUnreadableUnchanged: tStore("unchanged"),
-                            storeUnreadableReason: (detail: string) =>
-                                tStore("reason", { reason: detail }),
+                            storeUnreadableReason: (cause: ReadFailure) =>
+                                tStore("reason", {
+                                    reason: readFailureText(tStore, cause),
+                                }),
                             toSettings: tStore("toSettings"),
                         }}
                         onSaved={() => void search()}

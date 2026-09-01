@@ -8,6 +8,7 @@ import { MediaCardList } from "@/components/workspace/nodes/add/media-card-list"
 import { MediaLibraryConfigPanel } from "@/components/workspace/nodes/add/media-library-config-panel";
 import { failureMessageKey } from "@/components/workspace/nodes/add/media-library-outcome";
 import type { MediaCard } from "@/lib/media-library/types";
+import type { ReadFailure } from "@/lib/settings/env-client";
 
 /**
  * Prototype for the `add-media-library` node.
@@ -53,8 +54,8 @@ const CONFIG_LABELS = {
     writeFailed: "Không lưu được khoá. Chưa có gì thay đổi.",
     storeUnreadableTitle: "Không đọc được kho khoá đã lưu",
     storeUnreadableUnchanged: "Chưa có gì bị thay đổi.",
-    storeUnreadableReason: (detail: string) =>
-        `Máy chủ không trả về được danh sách khoá đang lưu (${detail}).`,
+    storeUnreadableReason: (cause: ReadFailure) =>
+        `Máy chủ không trả về được danh sách khoá đang lưu (${cause.code}).`,
     toSettings: "Mở màn Cài đặt",
 };
 

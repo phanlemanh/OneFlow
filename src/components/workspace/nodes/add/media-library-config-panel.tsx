@@ -5,7 +5,8 @@ import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-no
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveEnvKeys } from "@/lib/settings/env-client";
+import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
 
 /**
  * The way out of the missing-configuration state.
@@ -33,7 +34,7 @@ export function MediaLibraryConfigPanel({
         writeFailed: string;
         storeUnreadableTitle: string;
         storeUnreadableUnchanged: string;
-        storeUnreadableReason: (detail: string) => string;
+        storeUnreadableReason: (cause: ReadFailure) => string;
         toSettings: string;
     };
     onSaved: () => void;
@@ -43,7 +44,7 @@ export function MediaLibraryConfigPanel({
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     /** Why the store could not be read, or null. Blocks the form entirely. */
-    const [blocked, setBlocked] = useState<string | null>(null);
+    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
 
     const save = async () => {
         setSaving(true);
@@ -88,11 +89,7 @@ export function MediaLibraryConfigPanel({
                     <Button
                         size="sm"
                         variant="outline"
-                        onClick={() =>
-                            window.dispatchEvent(
-                                new CustomEvent("oneflow:open-settings"),
-                            )
-                        }
+                        onClick={requestOpenSettings}
                     >
                         {labels.toSettings}
                     </Button>

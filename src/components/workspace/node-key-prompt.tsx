@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { ReadFailure } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
 /**
@@ -46,7 +48,7 @@ export type KeyPromptState =
      * `invalid` would tell the user their key is bad and invite them to type a
      * new one — which is the overwrite this whole feature exists to prevent.
      */
-    | { phase: "store-unreadable"; reason: string }
+    | { phase: "store-unreadable"; reason: ReadFailure }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -72,7 +74,7 @@ export interface NodeKeyPromptLabels {
     savedUnverified: string;
     /** Copy for the blocked state. Supplied by the caller from its own i18n namespace. */
     storeUnreadable: StoreUnreadableLabels & {
-        reason: (detail: string) => string;
+        reason: (cause: ReadFailure) => string;
         toSettings: string;
     };
 }
@@ -108,11 +110,7 @@ export function NodeKeyPrompt({
                 <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => {
-                        window.dispatchEvent(
-                            new CustomEvent("oneflow:open-settings"),
-                        );
-                    }}
+                    onClick={requestOpenSettings}
                 >
                     {labels.storeUnreadable.toSettings}
                 </Button>

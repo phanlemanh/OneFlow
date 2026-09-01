@@ -26,12 +26,19 @@ async function call<T>(
         return {
             ok: false,
             failure: {
-                code: "MISSING_CONFIG",
+                // Its own code. The node branches on the code alone, so
+                // reporting a broken store as MISSING_CONFIG made every
+                // downstream distinction moot at the server boundary.
+                code:
+                    cfg.kind === "store-unreadable"
+                        ? "STORE_UNREADABLE"
+                        : "MISSING_CONFIG",
                 message: cfg.message,
                 // An unreadable store has no list of names to hand back: the
                 // values we lack may be sitting inside the file we cannot
                 // read, so naming them would be the misleading half of the old
-                // behaviour. `message` already says which case this is.
+                // behaviour. The CODE above is what tells the two apart — the
+                // node discards `message` and renders its own copy.
                 missing: cfg.kind === "missing" ? cfg.missing : [],
             },
         };

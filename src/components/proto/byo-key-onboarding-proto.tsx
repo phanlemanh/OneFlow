@@ -11,6 +11,7 @@ import {
     NodeKeyPrompt,
     type NodeKeyPromptLabels,
 } from "@/components/workspace/node-key-prompt";
+import type { ReadFailure } from "@/lib/settings/env-client";
 
 /**
  * Prototype for the `byo-key-onboarding` design-pass session.
@@ -59,8 +60,8 @@ const KEY_LABELS: NodeKeyPromptLabels = {
     storeUnreadable: {
         title: "Không đọc được kho khoá đã lưu",
         unchanged: "Chưa có gì bị thay đổi.",
-        reason: (detail: string) =>
-            `Máy chủ không trả về được danh sách khoá đang lưu (${detail}).`,
+        reason: (cause: ReadFailure) =>
+            `Máy chủ không trả về được danh sách khoá đang lưu (${cause.code}).`,
         toSettings: "Mở màn Cài đặt",
     },
 };

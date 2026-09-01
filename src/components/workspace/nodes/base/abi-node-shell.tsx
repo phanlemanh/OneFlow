@@ -30,7 +30,8 @@ import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
-import { saveEnvKeys } from "@/lib/settings/env-client";
+import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { readFailureText } from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -68,7 +69,8 @@ function useKeyPromptLabels(): NodeKeyPromptLabels {
         storeUnreadable: {
             title: t("title"),
             unchanged: t("unchanged"),
-            reason: (detail: string) => t("reason", { reason: detail }),
+            reason: (cause: ReadFailure) =>
+                t("reason", { reason: readFailureText(t, cause) }),
             toSettings: t("toSettings"),
         },
     };
@@ -130,7 +132,7 @@ function useProviderName(feature: string): string {
 async function saveAndVerifyKey(
     envKey: string,
     value: string,
-): Promise<KeyVerdict | { storeUnreadable: string }> {
+): Promise<KeyVerdict | { storeUnreadable: ReadFailure }> {
     const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
     if (!out.ok) {
         if (out.reason === "store-unreadable") {

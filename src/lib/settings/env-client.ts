@@ -16,13 +16,33 @@ import type { PluginEnvDecl } from "@/lib/plugins/plugin-env-manifest-schema";
 
 const ENDPOINT = "/api/settings/env";
 
+/**
+ * Why a read failed, in a form the caller can translate.
+ *
+ * NOT a display string. This module is shared by three surfaces that each
+ * render into a localized `{reason}` slot, so a Vietnamese literal here reaches
+ * an English user as "The server could not return the list of stored keys
+ * (phản hồi không phải JSON)." That is the exact defect this repo already fixed
+ * one file over — add-media-library-node.tsx stopped passing the server's
+ * Vietnamese `message` through for the same reason — and a shared lib is the
+ * worst place to reintroduce it.
+ *
+ * `http` and `network` carry a locale-neutral detail (a status code, or the
+ * platform's own error text); the other two need no detail at all.
+ */
+export type ReadFailure =
+    | { code: "http"; status: number }
+    | { code: "not-json" }
+    | { code: "no-env" }
+    | { code: "network"; detail: string };
+
 export type EnvClientRead =
     | { state: "ok"; env: Record<string, string>; pluginEnv: PluginEnvDecl[] }
-    | { state: "unreadable"; reason: string };
+    | { state: "unreadable"; reason: ReadFailure };
 
 export type SaveOutcome =
     | { ok: true; verdicts: Record<string, KeyVerdict> }
-    | { ok: false; reason: "store-unreadable"; detail: string }
+    | { ok: false; reason: "store-unreadable"; detail: ReadFailure }
     | { ok: false; reason: "write-failed"; detail: string };
 
 const describeCause = (cause: unknown) =>
@@ -46,23 +66,29 @@ export async function readEnvForBrowser(): Promise<EnvClientRead> {
     try {
         response = await fetch(ENDPOINT, { cache: "no-store" });
     } catch (cause) {
-        return { state: "unreadable", reason: describeCause(cause) };
+        return {
+            state: "unreadable",
+            reason: { code: "network", detail: describeCause(cause) },
+        };
     }
 
     if (!response.ok) {
-        return { state: "unreadable", reason: `HTTP ${response.status}` };
+        return {
+            state: "unreadable",
+            reason: { code: "http", status: response.status },
+        };
     }
 
     let body: unknown;
     try {
         body = await response.json();
     } catch {
-        return { state: "unreadable", reason: "phản hồi không phải JSON" };
+        return { state: "unreadable", reason: { code: "not-json" } };
     }
 
     const env = (body as { env?: unknown })?.env;
     if (!env || typeof env !== "object" || Array.isArray(env)) {
-        return { state: "unreadable", reason: "phản hồi thiếu danh sách khoá" };
+        return { state: "unreadable", reason: { code: "no-env" } };
     }
 
     const pluginEnv =

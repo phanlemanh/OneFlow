@@ -13,12 +13,15 @@
  * declined to clean up — so the template for the mistake sits in a file this
  * work package edits.
  */
-import { cleanup, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { SettingsDialog } from "@/components/workspace/settings-dialog";
 import en from "@/i18n/messages/en.json";
 import viMsg from "@/i18n/messages/vi.json";
 import { READ_FAILURES } from "@/lib/settings/__fixtures__/read-failures";
-import { openSettings } from "./__fixtures__/settings-harness";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
+import { healthyGet, openSettings } from "./__fixtures__/settings-harness";
 
 const unreadable = READ_FAILURES[0][1];
 const KEYS = ["title", "unchanged"] as const;
@@ -50,6 +53,35 @@ describe("store-unreadable copy comes from the catalogue", () => {
             ).toBeTruthy();
         });
     }
+
+    it("the open-settings request actually opens the screen", async () => {
+        // The other half of the dead-control fix. E6 proves the blocked panels
+        // FIRE the event; this proves something LISTENS. Split across two files
+        // because they are two different defects — a dispatch with no listener
+        // and a listener with no dispatch look identical from either side
+        // alone, and the shipped bug was the first of the two.
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () => healthyGet()),
+        );
+        render(
+            <NextIntlClientProvider locale="vi" messages={viMsg}>
+                <SettingsDialog />
+            </NextIntlClientProvider>,
+        );
+        expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+        await act(async () => {
+            requestOpenSettings();
+        });
+
+        await waitFor(() =>
+            expect(
+                document.querySelector('[role="dialog"]'),
+                "requestOpenSettings() did not open the settings screen",
+            ).toBeTruthy(),
+        );
+    });
 
     it("NEGATIVE CONTROL: the vi catalogue renders the vi wording", async () => {
         // Without this, a component that always returned English would satisfy

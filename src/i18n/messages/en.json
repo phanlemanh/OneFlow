@@ -48,7 +48,13 @@
             "confirmBody": "Every stored key will be lost and cannot be recovered. After this you will have to enter each key again.",
             "confirmCancel": "Leave it alone",
             "confirmOk": "I understand — replace it",
-            "replaceFailed": "Could not replace the store ({reason}). Nothing has been changed."
+            "replaceFailed": "Could not replace the store ({reason}). Nothing has been changed.",
+            "cause": {
+                "http": "the server answered {status}",
+                "not-json": "the response was not JSON",
+                "no-env": "the response carried no key list",
+                "network": "the request did not complete ({detail})"
+            }
         }
     },
     "Index": {
@@ -1088,7 +1094,8 @@
                     "BAD_RESPONSE": "The library answered in a shape this version does not accept.",
                     "NETWORK_ERROR": "Could not reach the library.",
                     "UPSTREAM_ERROR": "The library returned an error.",
-                    "LOCAL_FAILURE": "OneFlow could not finish this on your own machine — check the app's log for the real cause."
+                    "LOCAL_FAILURE": "OneFlow could not finish this on your own machine — check the app's log for the real cause.",
+                    "STORE_UNREADABLE": "Your saved API keys could not be read, so it is not clear whether this service is configured. Nothing has been changed — open Settings."
                 },
                 "readFailed": "Could not read the saved keys, so nothing was changed — try again.",
                 "writeFailed": "Could not save the keys. Nothing was changed."
@@ -1112,7 +1119,13 @@
             "title": "Your saved API keys could not be read",
             "unchanged": "Nothing has been changed.",
             "reason": "The server could not return the list of stored keys ({reason}).",
-            "toSettings": "Open Settings"
+            "toSettings": "Open Settings",
+            "cause": {
+                "http": "the server answered {status}",
+                "not-json": "the response was not JSON",
+                "no-env": "the response carried no key list",
+                "network": "the request did not complete ({detail})"
+            }
         }
     },
     "Upload": {

@@ -48,7 +48,13 @@
             "confirmBody": "Mọi khoá đang lưu sẽ mất và không khôi phục được. Sau bước này bạn phải nhập lại từng khoá.",
             "confirmCancel": "Để nguyên",
             "confirmOk": "Tôi hiểu — thay kho",
-            "replaceFailed": "Không thay được kho khoá ({reason}). Chưa có gì bị thay đổi."
+            "replaceFailed": "Không thay được kho khoá ({reason}). Chưa có gì bị thay đổi.",
+            "cause": {
+                "http": "máy chủ trả về {status}",
+                "not-json": "phản hồi không phải JSON",
+                "no-env": "phản hồi không kèm danh sách khoá",
+                "network": "yêu cầu không hoàn tất ({detail})"
+            }
         }
     },
     "Index": {
@@ -1088,7 +1094,8 @@
                     "BAD_RESPONSE": "Kho trả về hình dạng bản này không nhận.",
                     "NETWORK_ERROR": "Không gọi được tới kho.",
                     "UPSTREAM_ERROR": "Kho trả lỗi.",
-                    "LOCAL_FAILURE": "OneFlow không hoàn tất được việc này ở phía máy của bạn — xem log ứng dụng để biết nguyên nhân thật."
+                    "LOCAL_FAILURE": "OneFlow không hoàn tất được việc này ở phía máy của bạn — xem log ứng dụng để biết nguyên nhân thật.",
+                    "STORE_UNREADABLE": "Không đọc được kho khoá đã lưu nên chưa rõ dịch vụ này đã cấu hình hay chưa. Chưa có gì bị thay đổi — hãy mở màn Cài đặt."
                 },
                 "readFailed": "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
                 "writeFailed": "Không lưu được khoá. Chưa có gì thay đổi."
@@ -1112,7 +1119,13 @@
             "title": "Không đọc được kho khoá đã lưu",
             "unchanged": "Chưa có gì bị thay đổi.",
             "reason": "Máy chủ không trả về được danh sách khoá đang lưu ({reason}).",
-            "toSettings": "Mở màn Cài đặt"
+            "toSettings": "Mở màn Cài đặt",
+            "cause": {
+                "http": "máy chủ trả về {status}",
+                "not-json": "phản hồi không phải JSON",
+                "no-env": "phản hồi không kèm danh sách khoá",
+                "network": "yêu cầu không hoàn tất ({detail})"
+            }
         }
     },
     "Upload": {

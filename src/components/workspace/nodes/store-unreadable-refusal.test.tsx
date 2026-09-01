@@ -34,6 +34,8 @@ import {
     healthyRead,
     READ_FAILURES,
 } from "@/lib/settings/__fixtures__/read-failures";
+import type { ReadFailure } from "@/lib/settings/env-client";
+import { OPEN_SETTINGS_EVENT } from "@/lib/settings/settings-events";
 import { MediaLibraryConfigPanel } from "./add/media-library-config-panel";
 import { useNodeKeyGate } from "./base/abi-node-shell";
 
@@ -51,7 +53,7 @@ const PANEL_LABELS = {
     writeFailed: "write failed",
     storeUnreadableTitle: WSU.title,
     storeUnreadableUnchanged: WSU.unchanged,
-    storeUnreadableReason: (d: string) => `${WSU.reason} ${d}`,
+    storeUnreadableReason: (c: ReadFailure) => `${WSU.reason} ${c.code}`,
     toSettings: WSU.toSettings,
 };
 
@@ -67,7 +69,7 @@ const PROMPT_LABELS: NodeKeyPromptLabels = {
     storeUnreadable: {
         title: WSU.title,
         unchanged: WSU.unchanged,
-        reason: (d: string) => `${WSU.reason} ${d}`,
+        reason: (c: ReadFailure) => `${WSU.reason} ${c.code}`,
         toSettings: WSU.toSettings,
     },
 };
@@ -166,10 +168,29 @@ describe("both on-canvas key surfaces, store unreadable", () => {
                     screen.getAllByTestId("store-unreadable-notice").length,
                     label,
                 ).toBe(1);
+                const forward = screen.getAllByRole("button", {
+                    name: WSU.toSettings,
+                });
                 expect(
-                    screen.getAllByRole("button", { name: WSU.toSettings })
-                        .length,
+                    forward.length,
                     `${label}: must offer the way forward`,
+                ).toBe(1);
+
+                // The control must DO something. Asserting only that a button
+                // with the right LABEL exists is exactly what let a dispatch
+                // with no listener ship: the label was right, this eval was
+                // green, and the user's single way out of the blocked state
+                // did nothing at all. A label is not a behaviour.
+                let asked = 0;
+                const listener = () => {
+                    asked += 1;
+                };
+                window.addEventListener(OPEN_SETTINGS_EVENT, listener);
+                forward[0].click();
+                window.removeEventListener(OPEN_SETTINGS_EVENT, listener);
+                expect(
+                    asked,
+                    `${label}: the only way forward fired nothing — dead control`,
                 ).toBe(1);
                 // Zero escape buttons. This is what makes AC-12 structural: the
                 // destructive write is not reachable from these components.
