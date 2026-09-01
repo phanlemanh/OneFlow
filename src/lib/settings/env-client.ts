@@ -1,0 +1,147 @@
+import type { KeyVerdict } from "@/lib/onboarding/key-verify";
+import type { PluginEnvDecl } from "@/lib/plugins/plugin-env-manifest-schema";
+
+/**
+ * The browser's one door to the stored BYO keys.
+ *
+ * Before this module, three surfaces each rolled their own `fetch` against the
+ * same endpoint and each got the error path wrong in a different way: the
+ * settings dialog swallowed failures into a logger and left an empty, saveable
+ * form; `abi-node-shell` never checked the response at all and sent its write
+ * anyway; the media-library panel checked, but could only say "read failed" and
+ * left the user nowhere to go. Writing that logic a fourth time is the
+ * mechanism, not an accident of any one of them — so there is one door, and
+ * `scripts/settings/check-one-env-reader.sh` keeps it that way.
+ */
+
+const ENDPOINT = "/api/settings/env";
+
+export type EnvClientRead =
+    | { state: "ok"; env: Record<string, string>; pluginEnv: PluginEnvDecl[] }
+    | { state: "unreadable"; reason: string };
+
+export type SaveOutcome =
+    | { ok: true; verdicts: Record<string, KeyVerdict> }
+    | { ok: false; reason: "store-unreadable"; detail: string }
+    | { ok: false; reason: "write-failed"; detail: string };
+
+const describeCause = (cause: unknown) =>
+    cause instanceof Error && cause.message ? cause.message : String(cause);
+
+/**
+ * Read the stored keys, or refuse.
+ *
+ * The gate is a POSITIVE assertion: `ok` requires a 200, a body that parses,
+ * and an `env` that is a plain object. Everything else is unreadable.
+ *
+ * Deliberately not `if (status === 503)`. A proxy 502 and an HTML error page
+ * never carry `ENV_STORE_UNREADABLE`, and those are two of the three cases the
+ * parent dossier ordered carried forward; a gate that tests for the code only
+ * closes when the server is polite enough to send one. Stating the success
+ * condition instead of enumerating failures also means a shape nobody has
+ * thought of yet lands on the safe side by construction.
+ */
+export async function readEnvForBrowser(): Promise<EnvClientRead> {
+    let response: Response;
+    try {
+        response = await fetch(ENDPOINT, { cache: "no-store" });
+    } catch (cause) {
+        return { state: "unreadable", reason: describeCause(cause) };
+    }
+
+    if (!response.ok) {
+        return { state: "unreadable", reason: `HTTP ${response.status}` };
+    }
+
+    let body: unknown;
+    try {
+        body = await response.json();
+    } catch {
+        return { state: "unreadable", reason: "phản hồi không phải JSON" };
+    }
+
+    const env = (body as { env?: unknown })?.env;
+    if (!env || typeof env !== "object" || Array.isArray(env)) {
+        return { state: "unreadable", reason: "phản hồi thiếu danh sách khoá" };
+    }
+
+    const pluginEnv =
+        (body as { pluginEnv?: PluginEnvDecl[] })?.pluginEnv ?? [];
+    return {
+        state: "ok",
+        env: env as Record<string, string>,
+        pluginEnv,
+    };
+}
+
+/**
+ * Merge keys into the store. Used by BOTH on-canvas surfaces.
+ *
+ * The read is load-bearing rather than a courtesy: `PUT` replaces the whole
+ * map, so writing without a trustworthy read deletes every key not named in
+ * `patch`. That is the original bug, and refusing here is what closes it.
+ */
+export async function saveEnvKeys(
+    patch: Record<string, string>,
+    verify: string[] = Object.keys(patch),
+): Promise<SaveOutcome> {
+    const read = await readEnvForBrowser();
+    if (read.state !== "ok") {
+        return { ok: false, reason: "store-unreadable", detail: read.reason };
+    }
+    return put({ env: { ...read.env, ...patch }, verify });
+}
+
+/**
+ * Replace an unreadable store with an empty, valid one.
+ *
+ * The only destructive write in the product. Nothing the node panels import can
+ * reach it, which is what makes "the panels have no escape button" structural
+ * rather than a rule somebody has to remember — and the reason this function
+ * lives beside `saveEnvKeys` instead of inside the settings component is that
+ * one place naming the endpoint is the invariant the guard checks.
+ *
+ * No read first: by definition the store cannot be read, and reading here would
+ * be asking a question of the broken answer we are about to discard.
+ */
+export async function replaceUnreadableStore(): Promise<SaveOutcome> {
+    return put({ env: {}, replaceUnreadableStore: true });
+}
+
+async function put(body: unknown): Promise<SaveOutcome> {
+    let response: Response;
+    try {
+        response = await fetch(ENDPOINT, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    } catch (cause) {
+        return {
+            ok: false,
+            reason: "write-failed",
+            detail: describeCause(cause),
+        };
+    }
+
+    if (!response.ok) {
+        return {
+            ok: false,
+            reason: "write-failed",
+            detail: `HTTP ${response.status}`,
+        };
+    }
+
+    try {
+        const saved = (await response.json()) as {
+            verdicts?: Record<string, KeyVerdict>;
+        };
+        return { ok: true, verdicts: saved.verdicts ?? {} };
+    } catch {
+        return {
+            ok: false,
+            reason: "write-failed",
+            detail: "phản hồi không phải JSON",
+        };
+    }
+}
