@@ -616,11 +616,12 @@ executors:
     # Cố ý KHÔNG gọi pnpm và KHÔNG nạp gì từ node_modules — nó phải chạy được
     # trên đúng cái cây đang hỏng mà nó chẩn đoán.
     preflight_env: "bash scripts/acceptance/preflight-verify-env.sh"
-    dkfo_readme_sync: bash scripts/plugins/check-live-docs-manifest-synced.sh readme
+    dkfo_readme_sync: bash scripts/plugins/check-readme-manifest-synced.sh sync
+    dkfo_no_stale_id: bash scripts/plugins/check-readme-manifest-synced.sh stale
+    dkfo_readme_teeth: bash scripts/plugins/check-readme-manifest-teeth.sh
     dkfo_resign_wave: bash scripts/acceptance/check-resign-wave.sh dang-ky-fork-openai origin/main
     dkfo_claude_origin_ids: bash scripts/plugins/check-live-docs-manifest-synced.sh claude
     dkfo_icon_no_new_orphan: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
-    dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
