@@ -1,89 +1,99 @@
 ## Trong hợp đồng
 
+(không có finding nào map được vào AC ở vòng này.)
+
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Teeth harness writes into the real public/plugins/ while sibling evals scan that same directory in parallel**
-  Người dùng thấy gì: Khi tính năng này được thẩm định, đôi lúc hệ thống có thể báo nhầm là nhánh code làm rơi rớt một icon plugin, dù thực tế không có vấn đề gì — gây mất công điều tra một lỗi không có thật.
-  file: `scripts/plugins/check-live-docs-manifest-teeth.sh`
+- **CLAUDE.md nói bộ răng có 8 ca / PARTIAL: n/8; script thực tế có 7**
+  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ ghi sai số lượng kịch bản kiểm tra tự động (nói 8 nhưng thực tế 7), khiến người đọc tài liệu hiểu nhầm mức độ đã được kiểm chứng — không ảnh hưởng người dùng cuối sản phẩm.
+  file: `CLAUDE.md`
   severity: high
   Đề xuất: known-limits
 
-- **New standing guards are wired only into this dossier's evals — nothing runs them again after sign-off**
-  Người dùng thấy gì: Sau khi tính năng này được duyệt xong, các rào chắn mới chống lệch tài liệu/manifest sẽ không còn được kiểm tra tự động trên các thay đổi kế tiếp, nên README hoặc danh sách plugin có thể lệch nhau trở lại mà không ai được cảnh báo.
-  file: `.github/workflows/ci.yml`
-  severity: medium
-  Đề xuất: new-contract
+- **evidence-report.md còn E9/E10/E11 cho AC-9/AC-10 đã bị rút, trỏ executor và script đã xoá**
+  Người dùng thấy gì: Báo cáo bằng chứng còn lưu kết quả cho hai tiêu chí đã bị hủy bỏ trong quá trình phát triển, khiến báo cáo chứa thông tin không còn khớp với hiện trạng — có thể gây hiểu nhầm cho người xét duyệt, nhưng quyết định cuối cùng đã là từ chối nên không ảnh hưởng người dùng.
+  file: `_acceptance/dang-ky-fork-openai/evidence-report.md`
+  severity: high
+  Đề xuất: known-limits
 
-- **E9 pins a volatile file count in `expected`; it is already stale at HEAD**
-  Người dùng thấy gì: Một phép kiểm tra tự động có thể báo sai là có vấn đề dù kho vẫn hoàn toàn sạch, chỉ vì số lượng file trong kho tăng lên một cách bình thường theo thời gian.
+- **Bằng chứng E5/E11 ghi output `OK: 8/8 ca` + `CASE orphan-them-moi: PASS`, mâu thuẫn expected của chính evals.yaml**
+  Người dùng thấy gì: Báo cáo bằng chứng lưu lại kết quả kiểm tra từ một phiên bản cũ, không còn khớp với công cụ kiểm tra hiện tại, khiến người đọc dễ hiểu nhầm mức độ đã được xác minh.
+  file: `_acceptance/dang-ky-fork-openai/evidence-report.md`
+  severity: high
+  Đề xuất: known-limits
+
+- **evals.yaml E7 khai chiều đỏ bằng một ca đã bị rút, mâu thuẫn với chính E5**
+  Người dùng thấy gì: Tài liệu mô tả tiêu chí kiểm tra vẫn viện dẫn một kịch bản thử lỗi đã bị rút bỏ như thể nó còn tồn tại, khiến người đọc tin nhầm rằng một tình huống lỗi đã được kiểm chứng dù thực tế chưa từng được kiểm.
   file: `_acceptance/dang-ky-fork-openai/evals.yaml`
   severity: medium
   Đề xuất: known-limits
 
-- **CLAUDE.md quotes a FAIL string the new guard never emits**
-  Người dùng thấy gì: Tài liệu hướng dẫn đọc đầu phiên mô tả sai một thông báo lỗi thực tế, có thể khiến người đọc bối rối khi tự tay thử tái hiện tình huống lỗi đó.
-  file: `CLAUDE.md`
-  severity: low
+- **Comment header của guard nói base có 4 icon lạc; đo thật là 3**
+  Người dùng thấy gì: Chú thích trong công cụ kiểm tra nêu sai số lượng tệp biểu tượng cũ còn sót lại từ trước, khiến người bảo trì sau này đọc nhầm quy mô nợ kỹ thuật — không ảnh hưởng đến việc kiểm tra có hoạt động đúng hay không.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
+  severity: medium
   Đề xuất: known-limits
 
-- **Adding a second CLAUDE.md line naming check-manifest-unmoved leaves the older doc guard on a `head -1` anchor**
-  Người dùng thấy gì: Nếu sau này có người đổi thứ tự các dòng hướng dẫn trong tài liệu, công cụ kiểm tra đồng bộ có thể âm thầm đo nhầm đoạn văn và bỏ lọt một lần lệch số liệu thật.
-  file: `scripts/plugins/check-manifest-doc-synced.sh`
-  severity: low
-  Đề xuất: known-limits
-
-- **`check-manifest-guard-teeth.sh` case label still says "37th" after the count moved to 35**
-  Người dùng thấy gì: Một dòng thông báo nội bộ của công cụ kiểm thử vẫn ghi số cũ, có thể gây nhầm lẫn nhẹ cho người đọc log dù kết quả kiểm tra vẫn đúng.
+- **Bộ răng manifest có sẵn in "a 37th plain string" sau khi PR này hạ 36 → 35**
+  Người dùng thấy gì: Nhãn mô tả trong một bước kiểm tra tự động không còn khớp con số sau khi thay đổi cấu hình, khiến người đọc nhật ký kiểm tra hiểu sai một chi tiết nhỏ — không ảnh hưởng đến việc lỗi có được phát hiện hay không.
   file: `scripts/plugins/check-manifest-guard-teeth.sh`
   severity: low
   Đề xuất: known-limits
 
-- **Teeth harness's positive control covers only one of the guard's three modes**
-  Người dùng thấy gì: Nếu một trong hai chế độ kiểm tra khác của rào chắn tài liệu bị hỏng hoàn toàn và luôn báo lỗi bất kể đúng sai, hệ thống kiểm thử hiện tại sẽ không phát hiện ra sự cố đó.
+- **Bộ răng chỉ có đối chứng dương cho mode `readme`; mode `claude` có ca đỏ mà không có ca xanh**
+  Người dùng thấy gì: Một nhánh của bộ kiểm tra tự động chỉ có các ca thử lỗi mà thiếu ca xác nhận trạng thái lành hoạt động đúng, nên nếu nhánh đó bị hỏng thành luôn báo lỗi, hệ thống sẽ không phát hiện ra — rủi ro chỉ ảnh hưởng độ tin cậy quy trình kiểm tra nội bộ.
   file: `scripts/plugins/check-live-docs-manifest-teeth.sh`
   severity: low
   Đề xuất: known-limits
 
-- **Teeth script mutates the real public/plugins/ tree while a sibling eval lists it — parallel suite makes dkfo_icon_no_new_orphan flaky-red**
-  Người dùng thấy gì: Việc thẩm định tính năng này đôi khi có thể báo lỗi giả về icon plugin bị lạc do một phép kiểm tra khác chạy song song ghi đè lên cùng thư mục thật, khiến người xét duyệt mất công điều tra một lỗi không có thật.
-  file: `scripts/plugins/check-live-docs-manifest-teeth.sh`
+- **CLAUDE.md documents the teeth harness as 8 cases / PARTIAL: n/8; it is 7 and prints PARTIAL: 1/7**
+  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ ghi sai số lượng kịch bản kiểm tra tự động, khiến người đọc hiểu nhầm mức độ đã được kiểm chứng — không ảnh hưởng người dùng cuối sản phẩm.
+  file: `CLAUDE.md`
+  severity: medium
+  Đề xuất: known-limits
+
+- **readme mode dedupes by plugin id, so a duplicated README entry with the wrong org passes silently**
+  Người dùng thấy gì: Nếu tài liệu danh sách plugin bị chỉnh sửa để liệt kê trùng một plugin hai lần với nguồn khác nhau, công cụ kiểm tra tự động có thể bỏ sót dòng sai và không cảnh báo — người dùng có nguy cơ bị dẫn tới một nguồn plugin không chính thức mà không có gì ngăn chặn.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
+  severity: medium
+  Đề xuất: new-contract
+
+- **Header comment claims four pre-existing orphan icons on origin/main; the mode measures three**
+  Người dùng thấy gì: Chú thích trong công cụ kiểm tra nêu sai số lượng tệp biểu tượng cũ còn sót từ trước, gây hiểu nhầm nhỏ cho người bảo trì sau này — không ảnh hưởng người dùng cuối.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
+  severity: low
+  Đề xuất: known-limits
+
+- **Evidence report records teeth output the current script cannot produce (8/8, orphan-them-moi)**
+  Người dùng thấy gì: Báo cáo bằng chứng lưu lại kết quả kiểm tra cũ, không còn khớp với công cụ kiểm tra hiện tại, khiến người đọc dễ hiểu nhầm mức độ đã được xác minh.
+  file: `_acceptance/dang-ky-fork-openai/evidence-report.md`
+  severity: low
+  Đề xuất: known-limits
+
+- **Assertion âm-tính-một-mình: E7 (chế độ `orphans`) không có chiều đỏ, và chiều đỏ nó viện dẫn đã bị rút**
+  Người dùng thấy gì: Tài liệu mô tả tiêu chí vẫn viện dẫn một kịch bản thử lỗi đã bị rút bỏ, và phần ghi chú hạn chế đã biết trong báo cáo lại bị bỏ trống — khiến hồ sơ trông đầy đủ hơn thực tế, dù bản thân giới hạn này đã được chấp nhận từ trước.
+  file: `_acceptance/dang-ky-fork-openai/evals.yaml`
   severity: high
   Đề xuất: known-limits
 
-- **check-no-tracked-backups.sh prints OK and exits 0 when git fails entirely — green on zero files scanned**
-  Người dùng thấy gì: Nếu công cụ dò file rác chạy trong một môi trường bị lỗi (ví dụ không đọc được lịch sử Git), nó vẫn báo 'sạch' thay vì báo lỗi — một lần quét thất bại có thể bị hiểu nhầm thành kho không có file rác nào.
-  file: `scripts/ci/check-no-tracked-backups.sh`
+- **Assertion âm-tính-một-mình: chế độ `claude` chỉ có ca phá, không có đối chứng dương**
+  Người dùng thấy gì: Một nhánh của bộ kiểm tra tự động thiếu ca xác nhận trạng thái lành hoạt động đúng, nên nếu nhánh đó âm thầm hỏng thành luôn báo lỗi, không có phép đo nào phát hiện ra — rủi ro chỉ ảnh hưởng độ tin cậy quy trình kiểm tra nội bộ.
+  file: `scripts/plugins/check-live-docs-manifest-teeth.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Ma trận ca thiếu một nhánh lỗi của chính hàng rào: nhánh `repo` không có ca phá**
+  Người dùng thấy gì: Bộ kiểm tra tự động cho tài liệu danh sách plugin chưa có kịch bản thử cho trường hợp tên plugin đúng nhưng đường dẫn nguồn bị sai lệch — kiểu lỗi này có thể lọt qua mà không ai phát hiện, dù các kiểu lỗi khác đã được kiểm chứng.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
   severity: medium
   Đề xuất: new-contract
 
-- **New drift guards are wired only to this one dossier's dkfo_* executors — they never run on an ordinary PR**
-  Người dùng thấy gì: Sau khi tính năng này được duyệt xong, các rào chắn mới chống lệch tài liệu/manifest sẽ không còn được kiểm tra tự động trên các thay đổi kế tiếp, nên README hoặc danh sách plugin có thể lệch nhau trở lại mà không ai được cảnh báo.
-  file: `_acceptance/config.yaml`
-  severity: medium
-  Đề xuất: new-contract
-
-- **E9's expected output pins tracked-file count 1447; HEAD measures 1451**
-  Người dùng thấy gì: Một phép kiểm tra tự động có thể báo sai là có vấn đề dù kho vẫn hoàn toàn sạch, chỉ vì số lượng file trong kho tăng lên một cách bình thường theo thời gian.
-  file: `_acceptance/dang-ky-fork-openai/evals.yaml`
+- **Tuyên số ca lớn hơn số ca thật: CLAUDE.md ghi bộ răng có 8 ca và in `PARTIAL: n/8`**
+  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ ghi sai số lượng kịch bản kiểm tra tự động, khiến người đọc hiểu nhầm mức độ đã được kiểm chứng — không ảnh hưởng người dùng cuối sản phẩm.
+  file: `CLAUDE.md`
   severity: low
   Đề xuất: known-limits
 
-- **Hình dạng 3/4 — assert "chuỗi có mặt" ở BẤT KỲ dòng nào, trong khi lời hứa là "thông điệp FAIL nêu tên file"; nhánh có neo ^FAIL: là code chết**
-  Người dùng thấy gì: Bài kiểm thử nội bộ cho công cụ dò file rác có một cách so khớp lỏng lẻo, nên nếu sau này thông báo lỗi bị viết lại chung chung hơn, bài kiểm thử có thể vẫn báo 'đạt' dù không còn kiểm tra đúng điều nó hứa.
-  file: `scripts/ci/check-no-tracked-backups.sh`
-  severity: medium
-  Đề xuất: known-limits
-
-## Chưa phân loại (triage-failed)
-
-phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ
-
-- title: Hình dạng 5 — bộ răng tuyên "8/8 ca, mọi mode đều bị phá" nhưng một trong bốn nhánh khẳng định của hàng rào readme chưa từng bị đo đỏ
-  file:line: scripts/plugins/check-live-docs-manifest-teeth.sh:95
-  severity: medium
-  detail: Mode `readme` của `check-live-docs-manifest-synced.sh` có ĐÚNG BỐN nhánh FAIL, mỗi nhánh là một khẳng định độc lập trên từng phần tử: dòng 120 `!got` — README thiếu id manifest có; dòng 121 `got.org !== org` — sai org; dòng 122 `got.repo !== id` — link trỏ sang repository khác tên id; dòng 124-125 — README có id manifest không có. Bốn ca readme trong bộ răng phủ nhánh 1 (`readme-missing`), nhánh 4 (`readme-extra`), và nhánh 2 HAI LẦN (`org-sai-chuoi-tran` dòng 108, `org-sai-muc-origin` dòng 115 — cố ý tách hai nửa luật org). Nhánh 3 (`got.repo !== id`) KHÔNG có ca nào. Không có phép phá nào chạm tới nó, nên nếu điều kiện đó bị đảo hoặc bị xoá, bộ răng vẫn in `OK: 8/8 ca` và E5/E11 vẫn xanh. Nhánh này không phải code chết — dựng lại trên bản sao cây và nó bắn thật: đổi link `oneflow-api-openai` thành `.../phanlemanh/oneflow-api-openai-fork` cho ra `FAIL: README.md links \`oneflow-api-openai\` to repository \`oneflow-api-openai-fork\`` với exit 1. Tức là có một lớp trôi tài liệu thật (link trỏ đúng org nhưng sai repo) mà hàng rào bắt được nhưng phép đo chiều đỏ chưa từng chứng minh là bắt được. Header script (dòng 5-9) tuyên "every mode of that guard gets perturbed here" và dòng chốt tuyên "1 doi chung duong + 7 phep pha, thuoc do dung o ca 7", còn evals.yaml E5 tuyên "ĐỦ TÁM ... Mỗi ca phá khẳng định hàng rào thoát KHÁC 0" — cả ba câu đọc như đã quét hết bề mặt khẳng định của hàng rào, trong khi 3/4 nhánh được đo.
-  source: measurement
-
-⚠ Cụm ngoài vùng phủ: 4/13 lỗi rơi vào file không bộ đo nào phủ (.github/workflows/ci.yml, _acceptance/dang-ky-fork-openai/evals.yaml, _acceptance/config.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 5/15 lỗi rơi vào file không bộ đo nào phủ (_acceptance/dang-ky-fork-openai/evidence-report.md, _acceptance/dang-ky-fork-openai/evals.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

@@ -5,7 +5,7 @@ slug: dang-ky-fork-openai
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [config, docs, ci]
-status: implemented
+status: verified
 approved_by: Phan Le Manh (mo pham vi AC-9/AC-10 tai Cong 2 vong 1, 2026-09-01)
 veto_state: mo
 veto_opened_at: 2026-09-01T09:10:23Z
@@ -180,3 +180,13 @@ theo hình dạng mà bộ rút không bắt được). Tách thành AC-6 và AC
   **mã đo**, mà mã đo chính là nơi lớp lỗi đó sống. Owner chọn **thu phạm vi** ở vòng 3
   theo `STOP-PATCHING-CLAUSE`. 13 finding của vòng 2 đi tiếp thành một hồ sơ cơ hội
   riêng, làm tử tế kèm nối CI.
+- **Hai chỗ trôi trong file GATED, chưa sửa — chờ người quyết ở Cổng 2.** Sửa chúng làm
+  bằng chứng ôi, mà vòng 3 đã là vòng cuối được phép:
+  - `check-live-docs-manifest-synced.sh:23` — chú thích chế độ `orphans` vẫn ghi "Four
+    such files already exist on origin/main"; đo thật là **ba**. Tôi tưởng đã sửa ở
+    vòng 2: lệnh thay thế của tôi không khớp vì chuỗi bị ngắt dòng, và tôi **không
+    khẳng định** nó đã khớp. Cùng bài học mà chính vòng này rút ra ở một chỗ khác
+    (`assert needle in s`) — ghi ra một lần không làm nó tự lan sang mọi lần gõ sau.
+  - `check-live-docs-manifest-synced.sh:116` — chế độ `readme` dựng `new Map(rows...)`
+    nên **khử trùng theo id**: một README có HAI dòng cho cùng một plugin, dòng sau
+    đúng org, thì dòng trước sai org bị nuốt lặng. Thước vẫn xanh.

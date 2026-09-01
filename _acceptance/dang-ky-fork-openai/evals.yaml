@@ -147,7 +147,9 @@ evals:
       thay mục ấy, nên nó là orphan do chính nhánh này sinh và đã xoá ở S3; đó là lý do
       con số HEAD bằng con số base chứ không lớn hơn. Đòi 0 tuyệt đối là làm CI đỏ vì ba
       lỗi có sẵn ngoài phạm vi; đòi KHÔNG-TĂNG bắt đúng lớp lỗi của nhánh này mà không
-      phạt quá khứ. Chiều đỏ: ca `orphan-them-moi` của E5.
+      phạt quá khứ. GIỚI HẠN ĐÃ KHAI: ô này là khẳng định **chưa từng đỏ**. Ca phá của nó
+      (`orphan-them-moi`) bị RÚT ở vòng 3 vì nó ghi vật thăm dò vào cây THẬT trong khi bộ
+      điều phối chạy các ô máy song song — xem Known limits của hợp đồng.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- C. Cái giá nhánh này áp lên hồ sơ khác ----------
