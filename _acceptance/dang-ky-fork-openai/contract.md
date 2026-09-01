@@ -5,7 +5,7 @@ slug: dang-ky-fork-openai
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [config, docs, ci]
-status: approved
+status: implemented
 approved_by:
 veto_state: mo
 veto_opened_at: 2026-09-01T09:10:23Z
