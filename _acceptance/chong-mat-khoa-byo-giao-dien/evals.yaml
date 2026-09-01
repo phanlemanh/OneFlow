@@ -359,12 +359,18 @@ evals:
   - id: E10
     criterion: AC-14
     executor: script
-    cmd: config:executors.design.gate
+    cmd: config:executors.script.kkt_gd_design_gate
     paths:
       - "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx"
-    capture: ["--html"]
-    require_html: true
+      - "scripts/settings/check-design-gate-proto.sh"
     expected: >-
+      exit 0, dòng cuối đọc `6/6 frames PASS the reference slop gate`.
+      Bọc TỰ CHỨA, cùng lý do với E9: lượt đầu chạy ô này qua đường chụp của bộ điều
+      phối, bản chụp không bao giờ tới nơi, gate trả `no target file given` exit 4 —
+      một lỗi ARGS đọc ra như lỗi sản phẩm. Bọc tự chụp đầu vào thì chạy tay lặp lại
+      được, và không đỏ vì lý do chẳng liên quan tới cây. Bọc cũng ĐỌC LẠI
+      `data-proto-state` như E9: thiếu vòng đó, một bản chụp âm thầm rơi về state khác
+      vẫn được chấm và con số vẫn đủ sáu.
       verdict PASS trên 6 bản chụp HTML của cùng ma trận E9 (3 state × 2 theme).
       Ô đo THAM KHẢO, không phải bằng chứng a11y: gate chạy dưới jsdom và không parse nổi
       Tailwind v4 (đo 31/08 trên bản chụp của hồ sơ cha: 188 cssRules trên 153KB CSS nội
