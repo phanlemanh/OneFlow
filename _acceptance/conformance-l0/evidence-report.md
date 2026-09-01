@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: bb85560ca1337e308b1e06f5be7234dd64a0be2a
+verified_commit: 35b24ee4cb06dd97020f13aee913777c3255d00f
 human_signoff: Manh 2026-08-07
 ---
 
@@ -266,3 +266,7 @@ sau. Không chữ ký người nào bị đụng.
 ### Re-pin lần 7 — 2026-09-01, do dang-ky-fork-openai chạm scripts/plugins/** trong phạm vi hẹp của hồ sơ này
 run_id: repin-20260901T093702Z-3535
 sha: bb85560ca1337e308b1e06f5be7234dd64a0be2a · suites: 8 lệnh exit 0
+
+### Re-pin lần 8 — 2026-09-01, do dang-ky-fork-openai chạm scripts/plugins/** thêm ở vòng sửa
+run_id: repin-20260901T151335Z-6351
+sha: 35b24ee4cb06dd97020f13aee913777c3255d00f · suites: 8 lệnh exit 0
