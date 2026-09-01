@@ -1,110 +1,56 @@
 {
- "feature_plain": "Khi kho khoá API của bạn hỏng không đọc được, màn Cài đặt và hai ô nhập khoá trên canvas sẽ NÓI RÕ điều đó và chặn mọi lối ghi đè vô tình — thay vì hiện một ô trống trông như bạn chưa từng lưu khoá nào, mà bấm Lưu một cái là mất sạch.",
- "will_do": [
+ "feature_plain": "Khi kho khoá API hỏng không đọc được, màn Cài đặt và hai ô nhập khoá trên canvas nói rõ điều đó và chặn ghi đè — thay vì hiện ô trống trông như bạn chưa từng lưu khoá nào.",
+ "decisions": [
   {
-   "id": "AC-10",
-   "p": "Sẽ thay chỗ form nhập khoá bằng một tấm báo nói rõ vì sao không đọc được và khẳng định chưa có gì bị thay đổi. Nút Lưu vẫn nằm đó nhưng bấm không được — để bạn thấy là việc lưu đang bị chặn, chứ không phải nút biến mất."
+   "id": "D1",
+   "q": "Chấp nhận rằng sàn tiếp cận chỉ dựa vào một phép đo, hay bắt dựng lại phép đo thứ hai?",
+   "why": "Phép đo tham khảo thứ hai đã hai lần hỏng theo cách chẳng liên quan tới sản phẩm, lần sau còn làm đỏ một lệnh trong checklist commit. Phép đo chính (trình duyệt thật) xanh 6/6."
   },
   {
-   "id": "AC-10",
-   "p": "Sẽ chặn như nhau cho mọi kiểu hỏng: máy chủ báo lỗi, proxy trả lỗi, trả về một trang lỗi thay vì dữ liệu, hoặc mất mạng giữa chừng. Bản hôm nay chỉ để lại ô trống lưu được ở cả năm kiểu."
+   "id": "D2",
+   "q": "Máy đã sửa 10 lỗi thật NẰM NGOÀI phạm vi bạn duyệt. Giữ, hay tách ra việc riêng?",
+   "why": "Luật của bộ công cụ nói lỗi ngoài phạm vi là việc của người, không phải của máy. Tôi đã sửa trước khi kiểm luật đó — nên bạn đang được hỏi sau khi việc đã làm, và đó là lỗi quy trình của tôi."
   },
   {
-   "id": "AC-11",
-   "p": "Sẽ cho đúng MỘT lối thoát: bấm nút thoát thì hiện hộp xác nhận nói thẳng rằng mọi khoá đang lưu sẽ mất và không khôi phục được. Xác nhận xong, kho cũ được thay bằng kho trống và màn về bình thường để bạn nhập lại."
-  },
-  {
-   "id": "AC-11",
-   "p": "Sẽ chỉ ghi đúng một lần dù bạn bấm đúp nút xác nhận, và không có lượt ghi nào lén đi trước lượt bạn đã đồng ý."
-  },
-  {
-   "id": "AC-13",
-   "p": "Sẽ hiển thị mọi câu chữ mới bằng đủ năm thứ tiếng (Anh, Nhật, Hàn, Việt, Trung) — người dùng bản tiếng Anh không gặp một cảnh báo mất khoá viết bằng tiếng Việt."
-  },
-  {
-   "id": "AC-14",
-   "p": "Sẽ đạt sàn tiếp cận ở cả giao diện sáng lẫn tối, đo bằng trình duyệt thật. Lượt đo đầu tiên đã tìm ra một lỗi tương phản thật ở giao diện sáng và nó đã được sửa."
+   "id": "D3",
+   "q": "Chạy thêm một vòng kiểm nữa, hay dừng ở đây?",
+   "why": "Hai vòng đã chạy. Vòng hai đẻ ra ĐÚNG lớp lỗi của vòng một, nên tôi đổi cách làm thay vì vá tiếp, và dừng thay vì tự chạy vòng ba."
   }
  ],
- "wont_do": [
-  {
-   "id": "AC-9",
-   "p": "Chặn câu 'thiếu khoá' khi sự thật là 'kho hỏng'. Hai chuyện này hôm nay ra cùng một câu, và câu đó dẫn bạn đi nhập lại khoá — tức dẫn thẳng vào đường mất dữ liệu."
-  },
-  {
-   "id": "AC-9",
-   "p": "Sẽ KHÔNG chặn oan bản cài đặt chạy bằng biến môi trường: nếu kho hỏng nhưng biến môi trường vẫn đủ khoá, node vẫn chạy bình thường."
-  },
-  {
-   "id": "AC-12",
-   "p": "Sẽ KHÔNG cho hai ô nhập khoá trên canvas ghi đè bất cứ thứ gì khi kho hỏng — chúng từ chối lưu và chỉ bạn sang màn Cài đặt."
-  },
-  {
-   "id": "AC-12",
-   "p": "Sẽ KHÔNG đặt nút thoát huỷ-diệt trên hai ô đó. Lối ghi đè chỉ dựng được ở màn Cài đặt, nên đây là điều đúng theo cấu trúc chứ không phải theo kỷ luật của người viết mã."
-  }
- ],
- "scope_plain": "Không giữ lại bản kho hỏng trước khi ghi đè (đã tách thành việc riêng có tên) · không dịch 76 câu tiếng Nhật đang nợ sẵn · không dọn các câu tiếng Việt ghi cứng có từ trước trong ô khoá trên canvas · nhánh bản chạy trên đám mây không có cách đo trên máy này.",
- "coverage_plain": [
-  {
-   "i": 0,
-   "p": "Bốn chỗ người dùng có thể gặp: màn Cài đặt, ô cấu hình kho ảnh trên node, ô khoá trên node, và đường chạy ngầm. Bằng chứng 'đủ': đếm được đúng 6 lời gọi tới kho khoá nằm ở đúng 3 tệp giao diện, và 2 nơi đọc cấu hình — bản kê đóng, đếm được, không phải phỏng đoán."
-  },
-  {
-   "i": 1,
-   "p": "Năm kiểu câu trả lời khi màn hỏi kho: bình thường · máy chủ báo kho hỏng · lỗi máy chủ khác · trả về thứ không dùng được · mất mạng. Bằng chứng 'đủ': đây chính là bảng nhánh có sẵn trong lớp gọi mạng của kho — không thêm được nhánh thứ sáu."
-  },
-  {
-   "i": 2,
-   "p": "Ba vai của một lượt chạm kho: đọc để hiện · ghi bình thường · ghi kèm xác nhận huỷ-diệt. Bằng chứng 'đủ': đúng ba nhánh mà máy chủ đã ship ở việc trước."
-  },
-  {
-   "i": 3,
-   "p": "Năm ngôn ngữ và hai giao diện sáng/tối áp lên MỌI ô ở trên — không phải một trục riêng, vì đổi ngôn ngữ không làm đổi chuyện gì khác."
-  }
- ],
- "gap_probe_plain": [
-  {
-   "i": 0,
-   "p": "Nặng nhất: phép đo cho hai ô khoá trên canvas ban đầu chỉ thử MỘT kiểu hỏng, trong khi tiêu chí đòi cả năm. Người viết mã có thể vá đúng kiểu đó rồi vẫn để lọt bốn kiểu còn lại, mà mọi ô đo vẫn xanh. ĐÃ SỬA: phép đo nay là bảng đầy đủ 2 chỗ × 5 kiểu = 10 khẳng định, cộng một chốt chặn cấu trúc buộc chỉ còn đúng một nơi được phép hỏi kho."
-  },
-  {
-   "i": 1,
-   "p": "Không phép đo nào chứng minh câu chữ THẬT SỰ lấy từ tệp ngôn ngữ. Có thể thêm đủ năm thứ tiếng vào tệp mà màn hình vẫn hiện câu tiếng Việt ghi cứng — và kho này đã có sẵn đúng khuôn sai đó trong chính tệp sắp sửa. ĐÃ SỬA: thêm một ô đo dựng màn bằng tiếng Anh rồi so với giá trị đọc từ tệp tiếng Anh."
-  },
-  {
-   "i": 2,
-   "p": "Sàn tiếp cận chỉ đo trên bản mẫu, không có gì buộc bản mẫu và ba màn thật dùng chung một tấm báo. Bản thật có thể có nút thiếu tên gọi mà bản mẫu vẫn sạch. ĐÃ SỬA: tấm báo tự đóng dấu nhận dạng, và mỗi màn phải có đúng một dấu đó."
-  },
-  {
-   "i": 3,
-   "p": "Phép đo cho lượt ghi huỷ-diệt đếm số lần ghi nhưng không kiểm nội dung gửi đi. Người dùng có thể chấp nhận mất khoá mà kho vẫn hỏng — tức hàng rào duy nhất không dẫn tới lối thoát nào. ĐÃ SỬA: kiểm thêm rằng nội dung gửi đi đúng là một kho rỗng hợp lệ."
-  },
-  {
-   "i": 4,
-   "p": "Nhẹ nhất: dữ liệu thử cho ca 'kho lành' ban đầu do chính bài kiểm tự viết ra theo khuôn mà bên đọc mong đợi — nên nó chỉ chứng minh hai bên tự đồng ý với nhau. ĐÃ SỬA: ca lành nay phải sinh bằng chính bộ ghi thật của ứng dụng."
-  }
- ],
+ "analyst_plain": "Bộ đo báo 11 trong 17 lỗi tìm được rơi ra ngoài vùng mà các ô đo với tới — tức bộ đo hiện tại không phải là thứ đã tìm ra chúng.",
+ "scope_plain": "Không giữ bản kho hỏng trước khi ghi đè · không dịch 76 câu tiếng Nhật đang nợ · không dọn chuỗi tiếng Việt ghi cứng có sẵn · nhánh bản chạy trên đám mây không đo được trên máy này · phép đo tham khảo design-gate không chạy vòng này.",
  "decisions_plain": [
   {
-   "id": "d-20260901T081829Z-2633",
-   "p": "Gộp ba lối tự viết ở ba màn thành MỘT chỗ duy nhất hỏi kho, và chỗ đó chỉ nói 'đọc được' khi mọi điều kiện đều đúng. Đổi lại: thêm một tệp mới và ba màn phải đổi cách gọi. Loại phương án kiểm mã lỗi tại từng chỗ — proxy và trang lỗi không bao giờ mang mã đó."
+   "id": "D1",
+   "p": "Một bộ đọc chung, cổng theo lối chỉ-nói-đọc-được-khi-mọi-điều-kiện-đúng, thay ba lối tự viết. Đổi lại một tệp mới; bù lại bốn kiểu hỏng còn lại không lọt."
   },
   {
-   "id": "d-20260901T081830Z-17646",
-   "p": "Mỗi ô đo là một tệp bài kiểm trọn vẹn, không dùng bộ lọc theo tên ca. Đổi lại: bảy tệp mới thay vì ba. Lý do: một bộ lọc gõ sai thì bài kiểm không chạy ca nào mà vẫn báo ĐẠT — kho này đã dính đúng lỗi đó."
+   "id": "D2",
+   "p": "Một ô đo = một tệp, không lọc theo tên ca. Đổi lại bảy tệp thay vì ba; bù lại không có ô đo nào báo ĐẠT khi chưa chạy ca nào."
   },
   {
-   "id": "d-20260901T081831Z-8956",
-   "p": "Nút thoát ghi thẳng một kho trống rồi đưa màn về bình thường để nhập lại từ đầu. Đổi lại: người dùng mất khoá cũ thật. Loại phương án mở lại form rồi mới ghi — mâu thuẫn với việc form đã bị thay và thêm một trạng thái nữa."
+   "id": "D3",
+   "p": "Nút thoát ghi đè kho bằng kho rỗng rồi đưa màn về bình thường. Đổi lại người dùng mất khoá cũ thật — hộp xác nhận là toàn bộ hàng rào."
   },
   {
-   "id": "d-20260901T081832Z-21631",
-   "p": "KHÔNG làm: dịch 76 câu tiếng Nhật đang nợ. Chúng vào một danh sách miễn trừ ĐÓNG BĂNG. Đổi lại: nợ cũ không co lại ở đây — nhưng cũng không lớn thêm được, và câu mới đặt nhầm chỗ vẫn bị bắt. Sẽ mở lại khi có người dịch tiếng Nhật."
+   "id": "D4",
+   "p": "KHÔNG dịch 76 câu tiếng Nhật đang nợ; đóng băng chúng thành một DANH SÁCH. Đổi lại nợ cũ không co lại ở đây, nhưng không thể lớn thêm."
   },
   {
-   "id": "d-20260901T081833Z-6878",
-   "p": "KHÔNG làm: dọn các câu tiếng Việt ghi cứng có sẵn trong ô khoá trên canvas. Đổi lại: một tệp sẽ có cả câu ghi cứng lẫn câu qua tệp ngôn ngữ — khó đọc. Loại phương án dọn cả tệp: kéo thêm ~10 câu × 5 thứ tiếng không nằm trong tiêu chí nào."
+   "id": "D5",
+   "p": "KHÔNG dọn các chuỗi tiếng Việt ghi cứng có sẵn trong ô khoá trên canvas. Đổi lại một tệp có cả hai kiểu."
+  },
+  {
+   "id": "D6",
+   "p": "Đo ô khoá trên node bằng chính cái móc mà màn thật dùng, thay vì dựng cả canvas. Đổi lại một móc nội bộ thành công khai chỉ vì phép đo."
+  },
+  {
+   "id": "D7",
+   "p": "ĐỔI HÌNH DẠNG thay vì vá lần thứ ba: lý do thất bại thành mã máy, không còn chỗ nào đặt được một câu chữ. Trình biên dịch chặn thay cho người rà soát."
+  },
+  {
+   "id": "D8",
+   "p": "KHÔNG chạy phép đo tham khảo design-gate vòng này; ghi thành giới hạn đã biết. Đổi lại sàn tiếp cận tựa hoàn toàn vào phép đo bằng trình duyệt thật."
   }
  ]
 }

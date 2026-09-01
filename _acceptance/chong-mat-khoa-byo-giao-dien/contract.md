@@ -148,6 +148,27 @@ trên máy này) — kế thừa nguyên trạng từ hợp đồng cha, không 
 - **Trục khổ màn hình** (mobile/desktop) không có AC — bản mẫu vẫn chụp hai khổ cho phiên
   design-pass, nhưng sàn axe của AC-14 chỉ đo trục sáng/tối như chữ AC viết.
 
+## Known limits (người ký nhận trước khi phát hành)
+
+- **Cuộc đua `build/**` ↔ `typecheck` là của CẢ KHO, không riêng hồ sơ này.** Ba bọc a11y
+  đều dựng dev server dưới `build/`: [`media-library:81`](../../scripts/media-library/check-a11y-proto.sh)
+  (`aml-a11y`), [`onboarding:31`](../../scripts/onboarding/check-a11y-proto.sh) (`bko-a11y`),
+  và [`settings:66`](../../scripts/settings/check-a11y-proto.sh) (`kkt-a11y`, của hồ sơ này).
+  `tsconfig.json:29` khai `"**/*.ts"` và `exclude` chỉ có `node_modules`/`desktop`, nên tsc
+  **luôn** duyệt `build/**` — bất kể có dòng khai riêng cho dist dir hay không. Suite chạy
+  SONG SONG (chính hai bọc kia ghi tiền đề đó trong chú thích của mình), nên `pnpm typecheck`
+  có thể đỏ `TS6053` khi nó duyệt trúng lúc một dev server đang tạo/dọn dist dir.
+  **Dòng khai trong `include` KHÔNG phải nguyên nhân và cũng KHÔNG phải cách chữa** — nó chỉ
+  ngăn Next ghi lại `tsconfig.json`; gỡ nó đi không làm cuộc đua biến mất. Đo hai vế trên cây
+  này (`build/kkt-probe` khai rồi thử cả vắng lẫn có, tĩnh tại) và phiên
+  `amazing-kapitsa-45dd7a` đo cùng hai vế trên `build/bko-a11y`: sạch cả bốn lượt.
+  Cả ba bọc xanh ở vòng này là do **thời điểm**, không phải do miễn nhiễm. Cách chữa thật là
+  đừng để `typecheck` và một dev server chạm `build/` cùng lúc — việc của cấu hình suite, nằm
+  ngoài hồ sơ này.
+- **E10 (`design-gate`, phép đo tham khảo) không chạy ở vòng này** — xem `evals.yaml`. Sàn
+  tiếp cận của AC-14 tựa hoàn toàn vào E9 (axe-core trong Chrome thật, 6/6 trang,
+  0 vi phạm `critical`/`serious`), đúng như chữ AC-14 vốn đã viết.
+
 ## Notes
 
 - **`executors.design.gate` KHÔNG phải cổng a11y của hồ sơ này.** Đo 31/08 trên chính các
