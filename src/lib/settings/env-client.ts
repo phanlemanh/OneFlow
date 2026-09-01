@@ -108,6 +108,21 @@ export async function replaceUnreadableStore(): Promise<SaveOutcome> {
     return put({ env: {}, replaceUnreadableStore: true });
 }
 
+/**
+ * Write a map the caller already holds in full.
+ *
+ * The settings screen edits every key at once and needs deletions to actually
+ * delete, so it cannot go through `saveEnvKeys` — that one merges onto a fresh
+ * read, which would resurrect every key the user just cleared. It is a
+ * different write, not a different endpoint: keeping it here is what lets the
+ * structural guard hold "one file names the endpoint".
+ */
+export async function putEnvMap(
+    env: Record<string, string>,
+): Promise<SaveOutcome> {
+    return put({ env });
+}
+
 async function put(body: unknown): Promise<SaveOutcome> {
     let response: Response;
     try {

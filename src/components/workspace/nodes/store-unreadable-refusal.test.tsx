@@ -26,13 +26,16 @@ import {
 import { ReactFlowProvider } from "@xyflow/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { NodeKeyPromptLabels } from "@/components/workspace/node-key-prompt";
+import { NodeKeyPrompt } from "@/components/workspace/node-key-prompt";
 import type { Task } from "@/hooks/use-task";
 import viMsg from "@/i18n/messages/vi.json";
-import { READ_FAILURES, healthyRead } from "@/lib/settings/__fixtures__/read-failures";
+import {
+    healthyRead,
+    READ_FAILURES,
+} from "@/lib/settings/__fixtures__/read-failures";
 import { MediaLibraryConfigPanel } from "./add/media-library-config-panel";
 import { useNodeKeyGate } from "./base/abi-node-shell";
-import { NodeKeyPrompt } from "@/components/workspace/node-key-prompt";
-import type { NodeKeyPromptLabels } from "@/components/workspace/node-key-prompt";
 
 const WSU = viMsg.Workspace.storeUnreadable;
 const SURFACES = ["media-library-config-panel", "abi-node-shell"] as const;
@@ -104,7 +107,9 @@ async function driveSurface(surface: string, make: () => Response) {
         }
         screen.getByRole("button", { name: PANEL_LABELS.save }).click();
         await waitFor(() =>
-            expect(screen.queryAllByTestId("store-unreadable-notice").length).toBe(1),
+            expect(
+                screen.queryAllByTestId("store-unreadable-notice").length,
+            ).toBe(1),
         );
         return fetchMock;
     }
@@ -162,14 +167,17 @@ describe("both on-canvas key surfaces, store unreadable", () => {
                     label,
                 ).toBe(1);
                 expect(
-                    screen.getAllByRole("button", { name: WSU.toSettings }).length,
+                    screen.getAllByRole("button", { name: WSU.toSettings })
+                        .length,
                     `${label}: must offer the way forward`,
                 ).toBe(1);
                 // Zero escape buttons. This is what makes AC-12 structural: the
                 // destructive write is not reachable from these components.
                 const escapes = screen
                     .queryAllByRole("button")
-                    .filter((b) => /thay kho|ghi đè/i.test(b.textContent ?? ""));
+                    .filter((b) =>
+                        /thay kho|ghi đè/i.test(b.textContent ?? ""),
+                    );
                 expect(
                     escapes.length,
                     `${label}: node panels must offer no way to overwrite`,
@@ -187,7 +195,9 @@ describe("both on-canvas key surfaces, store unreadable", () => {
         // above.
         const fetchMock = vi.fn(async (_u: string, init?: RequestInit) =>
             init?.method === "PUT"
-                ? new Response(JSON.stringify({ env: {}, verdicts: {} }), { status: 200 })
+                ? new Response(JSON.stringify({ env: {}, verdicts: {} }), {
+                      status: 200,
+                  })
                 : healthyRead(),
         );
         vi.stubGlobal("fetch", fetchMock);
@@ -202,6 +212,8 @@ describe("both on-canvas key surfaces, store unreadable", () => {
             ),
         );
         expect(document.querySelectorAll("input").length).toBeGreaterThan(0);
-        expect(screen.queryAllByTestId("store-unreadable-notice").length).toBe(0);
+        expect(screen.queryAllByTestId("store-unreadable-notice").length).toBe(
+            0,
+        );
     });
 });

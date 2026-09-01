@@ -10,7 +10,14 @@
  *
  * Same 2 x 5 matrix as E6, counted at the wire instead of at the screen.
  */
-import { act, cleanup, render, renderHook, screen, waitFor } from "@testing-library/react";
+import {
+    act,
+    cleanup,
+    render,
+    renderHook,
+    screen,
+    waitFor,
+} from "@testing-library/react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
