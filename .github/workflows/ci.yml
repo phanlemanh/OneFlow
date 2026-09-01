@@ -145,3 +145,20 @@ jobs:
 
       - name: Product map freshness
         run: node scripts/ci/check-product-map.mjs
+
+      # `vitest list` needs node_modules, and this job had none — hence the two
+      # steps above it. They go HERE rather than on `unit-tests`, which already
+      # has the dependencies, because check-gate-guards-job.sh deep-equals the
+      # five other jobs against merge-base: the cheaper placement would trip a
+      # guard this repo wrote for itself. `pnpm/action-setup` is not counted by
+      # check-action-pins.sh, which tracks actions/checkout (8) and
+      # docker/login-action (1) only.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Eval filters match real tests
+        run: node scripts/ci/check-eval-filters.mjs

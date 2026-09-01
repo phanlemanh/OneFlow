@@ -1,0 +1,2 @@
+   đã kiểm 33 ô đo lọc theo tên — 23 gọi thẳng, 10 qua bộ bọc
+✅ mọi ô đo đều khớp ít nhất một ca thử.
