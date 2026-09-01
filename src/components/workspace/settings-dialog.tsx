@@ -12,10 +12,21 @@ import {
     Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -31,7 +42,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { apiGet, apiPut } from "@/lib/api/client";
+import { apiPut } from "@/lib/api/client";
 import { openExternalUrl } from "@/lib/desktop/open-external";
 import { logger } from "@/lib/logger";
 import type {
@@ -39,6 +50,11 @@ import type {
     PluginEnvVar,
 } from "@/lib/plugins/plugin-env-manifest-schema";
 import { pluginDisplayName } from "@/lib/plugins/plugin-id";
+import {
+    readEnvForBrowser,
+    replaceUnreadableStore,
+} from "@/lib/settings/env-client";
+import { cn } from "@/lib/utils";
 
 const navBtnClass =
     "h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700 transition-all duration-200";
@@ -296,6 +312,27 @@ export function SettingsDialog() {
     const [customRows, setCustomRows] = useState<Row[]>([]);
     // Keyed by env key for declared rows, `custom:${index}` for custom rows.
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+    /**
+     * Why the store could not be read, or null when it could.
+     *
+     * This used to be a `logger.error` and nothing else: the screen rendered an
+     * empty form with a working Save, and the next save wrote that emptiness
+     * over every stored key. Holding the reason in state is what lets the
+     * screen say so and refuse.
+     */
+    const [blocked, setBlocked] = useState<string | null>(null);
+    const [confirming, setConfirming] = useState(false);
+    const [replaceError, setReplaceError] = useState<string | null>(null);
+    /**
+     * One-shot latch for the destructive write.
+     *
+     * A double click on a confirm button is the ordinary way "exactly one
+     * write" becomes two, and a `saving` boolean cannot stop it: state set
+     * inside an async callback has not settled by the time the second click
+     * dispatches. A ref has.
+     */
+    const replacing = useRef(false);
+    const tStore = useTranslations("Settings.storeUnreadable");
 
     const groups = useMemo(
         () => buildEnvCardGroups(decls, t("sharedSectionTitle")),
@@ -324,14 +361,39 @@ export function SettingsDialog() {
     const fetchEnv = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await apiGet<EnvResponse>("/api/settings/env");
-            applyEnv(data.env ?? {}, data.pluginEnv ?? []);
-        } catch (error) {
-            logger.error("Failed to load settings:", error);
+            const read = await readEnvForBrowser();
+            if (read.state !== "ok") {
+                // Every shape of failure lands here, not just the one the
+                // server labels: a proxy 502 and an HTML error page never
+                // carry the store-unreadable code.
+                setBlocked(read.reason);
+                return;
+            }
+            setBlocked(null);
+            setReplaceError(null);
+            applyEnv(read.env, read.pluginEnv);
         } finally {
             setLoading(false);
         }
     }, [applyEnv]);
+
+    const confirmReplace = useCallback(async () => {
+        if (replacing.current) return;
+        replacing.current = true;
+        try {
+            const out = await replaceUnreadableStore();
+            if (!out.ok) {
+                setReplaceError(
+                    tStore("replaceFailed", { reason: out.detail }),
+                );
+                return;
+            }
+            setConfirming(false);
+            await fetchEnv();
+        } finally {
+            replacing.current = false;
+        }
+    }, [fetchEnv, tStore]);
 
     useEffect(() => {
         if (open) void fetchEnv();
@@ -407,6 +469,28 @@ export function SettingsDialog() {
                     <div className="flex justify-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
+                ) : blocked ? (
+                    <StoreUnreadableNotice
+                        reason={tStore("reason", { reason: blocked })}
+                        labels={{
+                            title: tStore("title"),
+                            unchanged: tStore("unchanged"),
+                        }}
+                    >
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setConfirming(true)}
+                        >
+                            {tStore("escape")}
+                        </Button>
+                        {replaceError ? (
+                            <p className="pt-2 text-xs text-destructive">
+                                {replaceError}
+                            </p>
+                        ) : null}
+                    </StoreUnreadableNotice>
                 ) : (
                     <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
                         {groups.map((group) => (
@@ -523,9 +607,16 @@ export function SettingsDialog() {
                 )}
 
                 <DialogFooter>
+                    {/*
+                     * Present and disabled, never hidden. Hiding it teaches
+                     * nobody that saving is what got blocked, and it moves
+                     * every control below between renders, so keyboard focus
+                     * lands somewhere different depending on a failure the
+                     * user cannot see.
+                     */}
                     <Button
                         type="button"
-                        disabled={saving || loading}
+                        disabled={saving || loading || Boolean(blocked)}
                         onClick={save}
                     >
                         {saving ? (
@@ -535,6 +626,38 @@ export function SettingsDialog() {
                     </Button>
                 </DialogFooter>
             </DialogContent>
+
+            <AlertDialog open={confirming} onOpenChange={setConfirming}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {tStore("confirmTitle")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {tStore("confirmBody")}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>
+                            {tStore("confirmCancel")}
+                        </AlertDialogCancel>
+                        {/*
+                         * The repo's own destructive variant, not a
+                         * hand-copied class list: a hand-copied one dropped
+                         * both dark-mode branches and the focus ring, which
+                         * is exactly what the dark-theme a11y floor reads.
+                         */}
+                        <AlertDialogAction
+                            className={cn(
+                                buttonVariants({ variant: "destructive" }),
+                            )}
+                            onClick={confirmReplace}
+                        >
+                            {tStore("confirmOk")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Dialog>
     );
 }
