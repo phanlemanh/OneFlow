@@ -1,0 +1,22 @@
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E1","run_id":"minted-chong-mat-khoa-byo-giao-dien-E1-r1","exit_code":0,"cmd":"pnpm vitest run src/lib/media-library/config.server.unreadable.test.ts"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E13","run_id":"minted-chong-mat-khoa-byo-giao-dien-E13-r1","exit_code":0,"cmd":"pnpm vitest run src/lib/settings/env-client.test.ts"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E2","run_id":"minted-chong-mat-khoa-byo-giao-dien-E2-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/settings-dialog.unreadable.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E3","run_id":"minted-chong-mat-khoa-byo-giao-dien-E3-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/settings-dialog.unreadable-wire.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E4","run_id":"minted-chong-mat-khoa-byo-giao-dien-E4-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/settings-dialog.replace.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E5","run_id":"minted-chong-mat-khoa-byo-giao-dien-E5-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/settings-dialog.replace-wire.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E6","run_id":"minted-chong-mat-khoa-byo-giao-dien-E6-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E7","run_id":"minted-chong-mat-khoa-byo-giao-dien-E7-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal-wire.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E11","run_id":"minted-chong-mat-khoa-byo-giao-dien-E11-r1","exit_code":0,"cmd":"bash scripts/settings/check-one-env-reader.sh"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E14","run_id":"minted-chong-mat-khoa-byo-giao-dien-E14-r1","exit_code":0,"cmd":"bash scripts/settings/check-one-env-reader-teeth.sh"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E8","run_id":"minted-chong-mat-khoa-byo-giao-dien-E8-r1","exit_code":0,"cmd":"pnpm vitest run src/i18n/locale-parity.test.ts"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E12","run_id":"minted-chong-mat-khoa-byo-giao-dien-E12-r1","exit_code":0,"cmd":"pnpm vitest run src/components/workspace/settings-i18n-render.test.tsx"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E9","run_id":"minted-chong-mat-khoa-byo-giao-dien-E9-r1","exit_code":0,"cmd":"bash scripts/settings/check-a11y-proto.sh"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"E10","run_id":"minted-chong-mat-khoa-byo-giao-dien-E10-r1","exit_code":0,"cmd":"bash scripts/settings/check-design-gate-proto.sh"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-bash_scripts_acceptance_preflight_verify","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-bash_scripts_acceptance_preflight_verify-r1","exit_code":0,"cmd":"bash scripts/acceptance/preflight-verify-env.sh"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-build","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-build-r1","exit_code":0,"cmd":"pnpm build"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-typecheck","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-typecheck-r1","exit_code":2,"cmd":"pnpm typecheck"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-lint_check","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-lint_check-r1","exit_code":0,"cmd":"pnpm lint:check"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-test","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-test-r1","exit_code":0,"cmd":"pnpm test"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-verify_plugins","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-verify_plugins-r1","exit_code":0,"cmd":"pnpm verify:plugins"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"evalId":"SUITE-gen_abi","run_id":"minted-chong-mat-khoa-byo-giao-dien-SUITE-gen_abi-r1","exit_code":0,"cmd":"pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"}
+{"ts":"2026-09-01T14:40:00Z","sha":"991a6f1","round":1,"kind":"round-tally","verdict":"REJECT","expected":21,"returned":21,"blocked":0}

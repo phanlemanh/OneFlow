@@ -372,9 +372,21 @@ evals:
       nên nó chưa bao giờ là bằng chứng a11y.
       Hai lần thử cho nó chạy đều hỏng theo cách KHÔNG liên quan tới sản phẩm:
       (1) chạy qua đường chụp của bộ điều phối → `no target file given`, exit 4;
-      (2) bọc tự chứa có dev server riêng → dist dir tạm dưới `build/` bị chính
-      `"**/*.ts"` của `tsconfig.json` quét trúng, làm `pnpm typecheck` đỏ TS6053 —
-      tức phép đo tham khảo làm hỏng một lệnh trong checklist commit.
+      (2) bọc tự chứa có dev server riêng → `pnpm typecheck` đỏ TS6053 giữa vòng
+      verify, tức phép đo THAM KHẢO làm hỏng một lệnh trong checklist commit.
+      **Nguyên nhân đã đo lại, và KHÔNG phải cái tôi ghi lần đầu.** Lần đầu tôi viết
+      "khai một dist dir tạm dưới `build/` thì `tsconfig` quét trúng và tsc đỏ". Sai ở
+      dạng tổng quát: một `include` glob không khớp gì là vô hại, và `TS6053` là
+      lỗi tham chiếu tệp tường minh chứ không phải glob rỗng. Đo hai vế trên chính cây
+      này (thêm `build/kkt-probe/types/**/*.ts` vào `include`): dist dir **VẮNG** →
+      typecheck 0 lỗi; dist dir **CÓ**, tĩnh tại → 0 lỗi. Phiên
+      `amazing-kapitsa-45dd7a` đo cùng hai vế trên `build/bko-a11y`, cũng sạch cả hai.
+      Nguyên nhân thật là **ĐỒNG THỜI**: tsc duyệt `build/**` trong lúc một dev server
+      đang tạo/dọn dist dir bên dưới, giữa một lượt chạy suite song song.
+      **Hệ quả cho E9, phải nói ra:** `check-a11y-proto.sh` cũng dựng dev server dưới
+      `build/kkt-a11y` và cũng chạy song song với `pnpm typecheck`. Nó mang **đúng**
+      nguy cơ đó; nó xanh ở vòng này là do thời điểm, không phải do miễn nhiễm. Đây là
+      giới hạn đã biết của cả hai ô, không phải thứ vòng này đã giải.
       Giá đã vượt giá trị: nó không chứng minh được điều gì mà E9 không chứng minh
       chắc hơn, và lần thử thứ hai đã phá một suite command. Dừng ở đây thay vì đoán
       lần thứ ba. **Việc của người duyệt tại Cổng 2:** chấp nhận AC-14 tựa hoàn toàn
