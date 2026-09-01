@@ -65,7 +65,12 @@ export async function openSettings(
         </NextIntlClientProvider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: S.title }));
+    // Derive the trigger's name from the catalogue actually in use. Hardcoding
+    // the Vietnamese label made the dialog unopenable under any other locale —
+    // which is precisely what the i18n eval needs to exercise.
+    const triggerName = (locale.messages as { Settings: { title: string } })
+        .Settings.title;
+    fireEvent.click(screen.getByRole("button", { name: triggerName }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     // The dialog paints its blocked/normal body after the promise settles.
     await waitFor(() =>
