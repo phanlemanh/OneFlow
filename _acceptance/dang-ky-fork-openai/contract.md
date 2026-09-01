@@ -72,11 +72,14 @@ Then hai tập **bằng nhau** (bốn id, có `oneflow-api-openai`); và thướ
 trên vật rỗng.
 
 **AC-7 — Nhánh này không để lại icon lạc mới.**
-Given `public/plugins/` ở `origin/main` đã có sẵn bốn file `.svg` không ứng với id nào
-trong manifest,
+Given `public/plugins/` ở `origin/main` đã có sẵn **ba** file `.svg` không ứng với id
+nào trong manifest (`tongflow-modal-ffmpeg`, `-pyscenedetect`, `-sensenova-u1`),
 When so tập file lạc ở HEAD với tập lạc ở `origin/main`,
 Then HEAD **không thêm** file lạc nào. Luật phát biểu theo **delta** chứ không theo
-tuyệt đối, vì đòi 0 file lạc là làm CI đỏ vì bốn lỗi có sẵn ngoài phạm vi.
+tuyệt đối, vì đòi 0 file lạc là làm CI đỏ vì ba lỗi có sẵn ngoài phạm vi.
+Lưu ý `tongflow-api-openai.svg` **không** nằm trong ba file đó: ở base nó ứng với một
+id manifest hợp lệ, chỉ trở thành lạc SAU khi nhánh này thay mục ấy — nên nó là orphan
+do chính nhánh này sinh, và đã bị xoá ở S3.
 
 **AC-8 — Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.**
 Given tôi chạm `scripts/plugins/**`, nằm trong phạm vi hẹp của hồ sơ `conformance-l0`,

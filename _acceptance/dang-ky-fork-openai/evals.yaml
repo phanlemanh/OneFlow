@@ -132,12 +132,15 @@ evals:
       - "config/official-plugins.json"
       - "scripts/plugins/check-live-docs-manifest-synced.sh"
     expected: >-
-      exit 0 và stdout ghim số file lạc ở base và ở HEAD (`base 4 · HEAD 4 · thêm 0`).
-      Luật là DELTA: `origin/main` đã có sẵn bốn `.svg` không ứng id nào trong manifest
-      (`tongflow-modal-ffmpeg`, `-pyscenedetect`, `-sensenova-u1`, và
-      `tongflow-api-openai` do chính nhánh này để lại rồi phải dọn). Đòi 0 tuyệt đối là
-      làm CI đỏ vì ba lỗi có sẵn ngoài phạm vi; đòi KHÔNG-TĂNG bắt đúng lớp lỗi của nhánh
-      này mà không phạt quá khứ. Chiều đỏ: ca `orphan-them-moi` của E5.
+      exit 0 và stdout ghim số file lạc ở base và ở HEAD — đo 01/09 là
+      `base 3 orphan · HEAD 3 orphan · added 0`. Luật là DELTA: `origin/main` đã có sẵn
+      ba `.svg` không ứng id nào trong manifest (`tongflow-modal-ffmpeg`,
+      `-pyscenedetect`, `-sensenova-u1`). `tongflow-api-openai.svg` KHÔNG nằm trong ba
+      file đó — ở base nó ứng với một id manifest hợp lệ, chỉ hoá lạc SAU khi nhánh này
+      thay mục ấy, nên nó là orphan do chính nhánh này sinh và đã xoá ở S3; đó là lý do
+      con số HEAD bằng con số base chứ không lớn hơn. Đòi 0 tuyệt đối là làm CI đỏ vì ba
+      lỗi có sẵn ngoài phạm vi; đòi KHÔNG-TĂNG bắt đúng lớp lỗi của nhánh này mà không
+      phạt quá khứ. Chiều đỏ: ca `orphan-them-moi` của E5.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- C. Cái giá nhánh này áp lên hồ sơ khác ----------
