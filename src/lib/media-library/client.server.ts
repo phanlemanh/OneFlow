@@ -28,7 +28,11 @@ async function call<T>(
             failure: {
                 code: "MISSING_CONFIG",
                 message: cfg.message,
-                missing: cfg.missing,
+                // An unreadable store has no list of names to hand back: the
+                // values we lack may be sitting inside the file we cannot
+                // read, so naming them would be the misleading half of the old
+                // behaviour. `message` already says which case this is.
+                missing: cfg.kind === "missing" ? cfg.missing : [],
             },
         };
     }
