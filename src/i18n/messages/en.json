@@ -38,7 +38,18 @@
         "customSectionTitle": "Custom variables",
         "customSectionHint": "Variables not declared by any installed plugin.",
         "getKey": "Get key",
-        "requiredHint": "Required"
+        "requiredHint": "Required",
+        "storeUnreadable": {
+            "title": "Your saved API keys could not be read",
+            "unchanged": "Nothing has been changed.",
+            "reason": "The settings file could not be read ({reason}).",
+            "escape": "Replace the key store with an empty one…",
+            "confirmTitle": "Replace the key store with an empty one?",
+            "confirmBody": "Every stored key will be lost and cannot be recovered. After this you will have to enter each key again.",
+            "confirmCancel": "Leave it alone",
+            "confirmOk": "I understand — replace it",
+            "replaceFailed": "Could not replace the store ({reason}). Nothing has been changed."
+        }
     },
     "Index": {
         "title": "New Idea"
@@ -1096,6 +1107,12 @@
             "blocked": "Couldn't get things ready",
             "blockedReasonDownload": "Couldn't download the tools — check your connection.",
             "retry": "Retry"
+        },
+        "storeUnreadable": {
+            "title": "Your saved API keys could not be read",
+            "unchanged": "Nothing has been changed.",
+            "reason": "The server could not return the list of stored keys ({reason}).",
+            "toSettings": "Open Settings"
         }
     },
     "Upload": {

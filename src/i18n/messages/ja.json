@@ -38,7 +38,18 @@
         "customSectionTitle": "カスタム変数",
         "customSectionHint": "どのインストール済みプラグインにも宣言されていない変数。",
         "getKey": "キーを取得",
-        "requiredHint": "必須"
+        "requiredHint": "必須",
+        "storeUnreadable": {
+            "title": "保存された API キーを読み取れませんでした",
+            "unchanged": "何も変更されていません。",
+            "reason": "設定ファイルを読み取れませんでした（{reason}）。",
+            "escape": "キーストアを空のものに置き換える…",
+            "confirmTitle": "キーストアを空のものに置き換えますか？",
+            "confirmBody": "保存されているすべてのキーが失われ、復元できません。この操作の後、各キーを入力し直す必要があります。",
+            "confirmCancel": "そのままにする",
+            "confirmOk": "了解しました — 置き換える",
+            "replaceFailed": "キーストアを置き換えられませんでした（{reason}）。何も変更されていません。"
+        }
     },
     "Index": {
         "title": "新しいアイデア"
@@ -1010,6 +1021,12 @@
             "blocked": "準備できませんでした",
             "blockedReasonDownload": "ツールをダウンロードできませんでした。接続を確認してください。",
             "retry": "再試行"
+        },
+        "storeUnreadable": {
+            "title": "保存された API キーを読み取れませんでした",
+            "unchanged": "何も変更されていません。",
+            "reason": "サーバーが保存済みキーの一覧を返せませんでした（{reason}）。",
+            "toSettings": "設定を開く"
         }
     },
     "Upload": {

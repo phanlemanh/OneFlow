@@ -38,7 +38,18 @@
         "customSectionTitle": "Biến tuỳ chỉnh",
         "customSectionHint": "Các biến chưa được plugin nào khai báo.",
         "getKey": "Lấy key",
-        "requiredHint": "Bắt buộc"
+        "requiredHint": "Bắt buộc",
+        "storeUnreadable": {
+            "title": "Không đọc được kho khoá đã lưu",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "reason": "Không đọc được tệp cài đặt ({reason}).",
+            "escape": "Thay kho khoá bằng kho trống…",
+            "confirmTitle": "Thay kho khoá bằng kho trống?",
+            "confirmBody": "Mọi khoá đang lưu sẽ mất và không khôi phục được. Sau bước này bạn phải nhập lại từng khoá.",
+            "confirmCancel": "Để nguyên",
+            "confirmOk": "Tôi hiểu — thay kho",
+            "replaceFailed": "Không thay được kho khoá ({reason}). Chưa có gì bị thay đổi."
+        }
     },
     "Index": {
         "title": "Ý tưởng mới"
@@ -1096,6 +1107,12 @@
             "blocked": "Chưa chuẩn bị được",
             "blockedReasonDownload": "Không tải được công cụ về máy — kiểm tra kết nối mạng.",
             "retry": "Thử lại"
+        },
+        "storeUnreadable": {
+            "title": "Không đọc được kho khoá đã lưu",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "reason": "Máy chủ không trả về được danh sách khoá đang lưu ({reason}).",
+            "toSettings": "Mở màn Cài đặt"
         }
     },
     "Upload": {

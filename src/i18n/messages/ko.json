@@ -38,7 +38,18 @@
         "customSectionTitle": "사용자 지정 변수",
         "customSectionHint": "설치된 어떤 플러그인도 선언하지 않은 변수입니다.",
         "getKey": "키 발급",
-        "requiredHint": "필수"
+        "requiredHint": "필수",
+        "storeUnreadable": {
+            "title": "저장된 API 키를 읽을 수 없습니다",
+            "unchanged": "아무것도 변경되지 않았습니다.",
+            "reason": "설정 파일을 읽을 수 없습니다({reason}).",
+            "escape": "키 저장소를 빈 저장소로 교체…",
+            "confirmTitle": "키 저장소를 빈 저장소로 교체할까요?",
+            "confirmBody": "저장된 모든 키가 사라지며 복구할 수 없습니다. 이후 각 키를 다시 입력해야 합니다.",
+            "confirmCancel": "그대로 두기",
+            "confirmOk": "이해했습니다 — 교체합니다",
+            "replaceFailed": "키 저장소를 교체하지 못했습니다({reason}). 아무것도 변경되지 않았습니다."
+        }
     },
     "Index": {
         "title": "새 아이디어"
@@ -1096,6 +1107,12 @@
             "blocked": "준비하지 못했습니다",
             "blockedReasonDownload": "도구를 내려받지 못했습니다 — 연결을 확인하세요.",
             "retry": "다시 시도"
+        },
+        "storeUnreadable": {
+            "title": "저장된 API 키를 읽을 수 없습니다",
+            "unchanged": "아무것도 변경되지 않았습니다.",
+            "reason": "서버가 저장된 키 목록을 반환하지 못했습니다({reason}).",
+            "toSettings": "설정 열기"
         }
     },
     "Upload": {
