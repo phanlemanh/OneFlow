@@ -73,10 +73,22 @@ if [ "$MODE" = claude ]; then
         const m = JSON.parse(fs.readFileSync("config/official-plugins.json", "utf8"));
         const originIds = m.plugins.filter(e => typeof e !== "string").map(e => e.id).sort();
         const doc = fs.readFileSync("CLAUDE.md", "utf8");
-        // The bullet that talks about the manifest guard — the same anchor
-        // check-manifest-doc-synced.sh uses, so the two guards read one place.
-        const line = doc.split("\n").find(l => l.includes("check-manifest-unmoved"));
-        if (!line) { console.error("FAIL: CLAUDE.md has no bullet mentioning check-manifest-unmoved"); process.exit(1); }
+        // The bullet that talks about the manifest guard. More than one line now
+        // mentions that script by name, so the anchor is the pair: names the
+        // guard AND carries at least one backticked plugin id. Matching on the
+        // name alone would silently read whichever prose line came first.
+        const ID = /`((?:one|tong)flow-(?:modal|api)-[a-z0-9-]+)`/g;
+        const hits = doc.split("\n").filter(l =>
+            l.includes("check-manifest-unmoved") && new RegExp(ID.source).test(l));
+        if (hits.length === 0) {
+            console.error("FAIL: CLAUDE.md has no bullet that both names check-manifest-unmoved and lists plugin ids");
+            process.exit(1);
+        }
+        if (hits.length > 1) {
+            console.error(`FAIL: ${hits.length} CLAUDE.md lines name check-manifest-unmoved and list plugin ids — the anchor is ambiguous`);
+            process.exit(1);
+        }
+        const line = hits[0];
         // Backtick shape, NOT the READMEs link shape. Reusing that regex here
         // would match nothing and pass over an empty set.
         const found = [...line.matchAll(/`((?:one|tong)flow-(?:modal|api)-[a-z0-9-]+)`/g)].map(x => x[1]).sort();

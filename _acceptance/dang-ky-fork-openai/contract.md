@@ -6,7 +6,7 @@ owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [config, docs, ci]
 status: implemented
-approved_by:
+approved_by: Phan Le Manh (mo pham vi AC-9/AC-10 tai Cong 2 vong 1, 2026-09-01)
 veto_state: mo
 veto_opened_at: 2026-09-01T09:10:23Z
 design_doc: docs/superpowers/specs/2026-09-01-dang-ky-fork-openai-design.md
@@ -54,13 +54,33 @@ của `origin` nó khai.
 
 **AC-5 — Hàng rào tài liệu có răng, theo ma trận có tên ô.**
 Given một bản sao cây bị phá,
-When chạy **bảy ca có tên**: `healthy` (đối chứng dương) · `readme-missing` ·
+When chạy **tám ca có tên**: `healthy` (đối chứng dương) · `readme-missing` ·
 `readme-extra` · `org-sai-chuoi-tran` · `org-sai-muc-origin` · `claude-stale-id` ·
-`orphan-them-moi`,
-Then ca `healthy` **xanh** và sáu ca phá **đỏ**, mỗi ca nêu **đích danh id** và **tên
-file** gây lỗi — không nhận câu chung. Hai ca org là bắt buộc riêng rẽ vì luật org có
-hai nửa, và nửa `org-sai-muc-origin` chính là nửa hồ sơ này sinh ra để phục vụ. Tên ca
-lạ → thoát 2.
+`orphan-them-moi` · `khong-tuyen-qua`,
+Then ca `healthy` **xanh** và bảy ca còn lại **đỏ khi vật hỏng**, mỗi ca nêu **đích
+danh id** và **tên file** gây lỗi — và phép khớp chỉ đọc **dòng bắt đầu bằng `FAIL:`**,
+không đọc toàn bộ stdout: chế độ `readme` luôn in `README.md: 39 id extracted` ở lượt
+lành, nên khớp tên file trên dòng bất kỳ là thoả vô điều kiện, tức đo chuỗi-có-mặt cho
+một lời hứa về quan hệ. Hai ca org bắt buộc riêng rẽ vì luật org có hai nửa. Tên ca lạ
+→ thoát 2.
+
+**AC-9 — Không file rác nào bị git theo dõi. (mở phạm vi tại Cổng 2 vòng 1)**
+Given `config-patch.mjs --write` và `sed -i.bak` đều để lại file `.bak`, và một file
+như thế **đã bị commit** ở `b30a3c3` — bản sao 757 dòng của `_acceptance/config.yaml`
+với ba executor trỏ vào script đã bị đổi tên khỏi tồn tại,
+When quét tập file **git đang theo dõi** tìm khuôn `.bak/.orig/.rej/.swp/.tmp/~`,
+Then tập đó **rỗng**. Quét tập-đang-theo-dõi chứ không quét đĩa, vì `.gitignore` không
+có tác dụng gì với file đã trót được theo dõi — và đó chính là ca đã xảy ra.
+
+**AC-10 — Bộ răng không được tuyên nhiều hơn số ca đã chạy. (mở phạm vi tại Cổng 2 vòng 1)**
+Given lượt chạy `--case <tên>` chỉ thi hành một ca,
+When đọc dòng tổng kết của lượt đó,
+Then nó in `PARTIAL: 1/8` và **không** in dòng `OK:` của lượt đầy đủ. Lượt đầy đủ chỉ
+được in `OK:` khi đếm được đúng 8/8 ca đã chạy. Trước bản vá này, `--case healthy` in
+`OK: ... red for all 6 perturbations` sau khi thi hành đúng một ca — một tuyên bố xanh
+về năm ca chưa hề chạy, đúng lớp lỗi mà header của chính file đó cấm.
+
+
 
 **AC-6 — `CLAUDE.md` liệt kê đúng tập id `origin`, và phép đo chứng minh nó đã quét. (mới)**
 Given đoạn văn về hàng rào trong `CLAUDE.md` viết id dưới dạng nháy ngược, **không**

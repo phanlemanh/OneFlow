@@ -83,3 +83,8 @@ __pycache__/
 
 # Local media scratch — sample clips dropped in during development, never shipped
 /video/
+
+# Editor/tool backups. `config-patch.mjs --write` and `sed -i.bak` both leave these;
+# one was committed by accident (dang-ky-fork-openai, 2026-09-01) and shipped a shadow
+# copy of _acceptance/config.yaml whose executor refs pointed at deleted scripts.
+*.bak
