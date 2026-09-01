@@ -1,6 +1,6 @@
 {
- "generated_at": "2026-09-01T14:02:17Z",
- "generated_sha": "d951927b81ede28f40496ddb634ab2f719d1bb2b",
+ "generated_at": "2026-09-01T14:36:40Z",
+ "generated_sha": "991a6f1e0d49cd3d57828ff39d2d2bdf6ccd0c96",
  "mainBranchInfo": {
   "branch": "main",
   "source": "remote"
@@ -278,11 +278,12 @@
   {
    "id": "E10",
    "criterion": "AC-14",
-   "cmd": "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1) --jsdom .",
-   "expected": "verdict PASS trên 6 bản chụp HTML của cùng ma trận E9 (3 state × 2 theme).\nÔ đo THAM KHẢO, không phải bằng chứng a11y: gate chạy dưới jsdom và không parse nổi\nTailwind v4 (đo 31/08 trên bản chụp của hồ sơ cha: 188 cssRules trên 153KB CSS nội\ntuyến), nên mọi phần tử đọc ra là chữ đen trên nền trong suốt; toàn bộ luật của nó là\nba bộ dò slop thẩm mỹ (`cramped-padding`, `nested-cards`, `gradient-text`).\nNó ở đây để bắt slop, KHÔNG để chứng minh sàn tương phản — theo chữ AC-14, tiêu chí\nTRƯỢT khi E9 không PASS bất kể ô này xanh.\nCHIỀU ĐỎ: nhét hai thẻ card lồng nhau vào bản mẫu thì `nested-cards` PHẢI đỏ.",
+   "cmd": "bash scripts/settings/check-design-gate-proto.sh",
+   "expected": "exit 0, dòng cuối đọc `6/6 frames PASS the reference slop gate`.\nBọc TỰ CHỨA, cùng lý do với E9: lượt đầu chạy ô này qua đường chụp của bộ điều\nphối, bản chụp không bao giờ tới nơi, gate trả `no target file given` exit 4 —\nmột lỗi ARGS đọc ra như lỗi sản phẩm. Bọc tự chụp đầu vào thì chạy tay lặp lại\nđược, và không đỏ vì lý do chẳng liên quan tới cây. Bọc cũng ĐỌC LẠI\n`data-proto-state` như E9: thiếu vòng đó, một bản chụp âm thầm rơi về state khác\nvẫn được chấm và con số vẫn đủ sáu.\nverdict PASS trên 6 bản chụp HTML của cùng ma trận E9 (3 state × 2 theme).\nÔ đo THAM KHẢO, không phải bằng chứng a11y: gate chạy dưới jsdom và không parse nổi\nTailwind v4 (đo 31/08 trên bản chụp của hồ sơ cha: 188 cssRules trên 153KB CSS nội\ntuyến), nên mọi phần tử đọc ra là chữ đen trên nền trong suốt; toàn bộ luật của nó là\nba bộ dò slop thẩm mỹ (`cramped-padding`, `nested-cards`, `gradient-text`).\nNó ở đây để bắt slop, KHÔNG để chứng minh sàn tương phản — theo chữ AC-14, tiêu chí\nTRƯỢT khi E9 không PASS bất kể ô này xanh.\nCHIỀU ĐỎ: nhét hai thẻ card lồng nhau vào bản mẫu thì `nested-cards` PHẢI đỏ.",
    "executor": "script",
    "paths": [
-    "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx"
+    "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx",
+    "scripts/settings/check-design-gate-proto.sh"
    ],
    "evidence_required": [
     "run_id",
@@ -292,7 +293,7 @@
     "output",
     "artifact"
    ],
-   "ref": "config:executors.design.gate"
+   "ref": "config:executors.script.kkt_gd_design_gate"
   }
  ],
  "suiteCommands": [
@@ -311,8 +312,8 @@
  "templatePath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.5.0/skills/acceptance/references/evidence-report-template.md",
  "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
  "contractPath": "/Users/manh-macmini/dev/oneflow/.claude/worktrees/silly-snyder-11c815/_acceptance/chong-mat-khoa-byo-giao-dien/contract.md",
- "invokedAt": "2026-09-01T14:02:17Z",
- "invokedSha": "d951927b81ede28f40496ddb634ab2f719d1bb2b",
- "evalsHash": "3caf15b314e887408896a04ea07b10ced9e2b382d1a021416172e77df1c2de26",
+ "invokedAt": "2026-09-01T14:36:40Z",
+ "invokedSha": "991a6f1e0d49cd3d57828ff39d2d2bdf6ccd0c96",
+ "evalsHash": "5e9d1aefefe6209b96b381a2de7efbf741cd8391ec37f1a23d59c8453ff084f8",
  "runBaseline": false
 }

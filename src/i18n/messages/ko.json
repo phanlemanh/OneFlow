@@ -54,7 +54,8 @@
                 "not-json": "응답이 JSON이 아닙니다",
                 "no-env": "응답에 키 목록이 없습니다",
                 "network": "요청이 완료되지 않았습니다({detail})"
-            }
+            },
+            "writeFailed": "저장하지 못했습니다({reason}). 아무것도 변경되지 않았습니다."
         }
     },
     "Index": {

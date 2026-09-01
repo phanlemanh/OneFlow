@@ -31,8 +31,7 @@
         ".next/types/**/*.ts",
         "build/types/**/*.ts",
         "build/aml-a11y/types/**/*.ts",
-        "build/kkt-a11y/types/**/*.ts",
-        "build/kkt-gate/types/**/*.ts"
+        "build/kkt-a11y/types/**/*.ts"
     ],
     "exclude": ["node_modules", "desktop"]
 }

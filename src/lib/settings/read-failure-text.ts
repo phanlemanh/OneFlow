@@ -1,4 +1,4 @@
-import type { ReadFailure } from "@/lib/settings/env-client";
+import type { ReadFailure, WriteFailure } from "@/lib/settings/env-client";
 
 /**
  * Turn a read-failure code into a sentence in the reader's own language.
@@ -11,6 +11,20 @@ import type { ReadFailure } from "@/lib/settings/env-client";
  * scoped so that `t("cause.http")` resolves — both `Settings.storeUnreadable`
  * and `Workspace.storeUnreadable` carry the same four keys.
  */
+export function writeFailureText(
+    t: (key: string, values?: Record<string, string | number>) => string,
+    reason: WriteFailure,
+): string {
+    switch (reason.code) {
+        case "http":
+            return t("cause.http", { status: reason.status });
+        case "not-json":
+            return t("cause.not-json");
+        case "network":
+            return t("cause.network", { detail: reason.detail });
+    }
+}
+
 export function readFailureText(
     t: (key: string, values?: Record<string, string | number>) => string,
     reason: ReadFailure,

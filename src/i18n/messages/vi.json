@@ -54,7 +54,8 @@
                 "not-json": "phản hồi không phải JSON",
                 "no-env": "phản hồi không kèm danh sách khoá",
                 "network": "yêu cầu không hoàn tất ({detail})"
-            }
+            },
+            "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi."
         }
     },
     "Index": {

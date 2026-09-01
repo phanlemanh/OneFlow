@@ -49,7 +49,6 @@ const PANEL_LABELS = {
     keyLabel: "key",
     save: "Lưu",
     saving: "Đang lưu…",
-    readFailed: "read failed",
     writeFailed: "write failed",
     storeUnreadableTitle: WSU.title,
     storeUnreadableUnchanged: WSU.unchanged,

@@ -40,10 +40,26 @@ export type EnvClientRead =
     | { state: "ok"; env: Record<string, string>; pluginEnv: PluginEnvDecl[] }
     | { state: "unreadable"; reason: ReadFailure };
 
+/**
+ * Why a write failed. A CODE, like `ReadFailure`, for the same reason and after
+ * the same mistake twice.
+ *
+ * Round 1 of verification found a Vietnamese literal leaking out of the READ
+ * path into four other locales. It was fixed. Round 2 found the identical
+ * literal still sitting in the WRITE path, reaching users through
+ * `replaceFailed`. Repairing instances of a defect twice is the signal that the
+ * SHAPE permits it — so `detail` stops being a `string` here at all, and there
+ * is nowhere left in this module's public surface to put a sentence.
+ */
+export type WriteFailure =
+    | { code: "http"; status: number }
+    | { code: "not-json" }
+    | { code: "network"; detail: string };
+
 export type SaveOutcome =
     | { ok: true; verdicts: Record<string, KeyVerdict> }
     | { ok: false; reason: "store-unreadable"; detail: ReadFailure }
-    | { ok: false; reason: "write-failed"; detail: string };
+    | { ok: false; reason: "write-failed"; detail: WriteFailure };
 
 const describeCause = (cause: unknown) =>
     cause instanceof Error && cause.message ? cause.message : String(cause);
@@ -161,15 +177,28 @@ async function put(body: unknown): Promise<SaveOutcome> {
         return {
             ok: false,
             reason: "write-failed",
-            detail: describeCause(cause),
+            detail: { code: "network", detail: describeCause(cause) },
         };
     }
 
     if (!response.ok) {
+        // 409 is the server saying "the store is unreadable, and I wrote
+        // nothing". Reporting that as a generic write failure is how the node
+        // ends up telling the user their KEY is invalid and inviting a retype —
+        // the exact trap this dossier exists to close. The server already said
+        // precisely what happened; discarding it here undoes the whole feature
+        // on the race where the store breaks between the read and the write.
+        if (response.status === 409) {
+            return {
+                ok: false,
+                reason: "store-unreadable",
+                detail: { code: "http", status: 409 },
+            };
+        }
         return {
             ok: false,
             reason: "write-failed",
-            detail: `HTTP ${response.status}`,
+            detail: { code: "http", status: response.status },
         };
     }
 
@@ -182,7 +211,7 @@ async function put(body: unknown): Promise<SaveOutcome> {
         return {
             ok: false,
             reason: "write-failed",
-            detail: "phản hồi không phải JSON",
+            detail: { code: "not-json" },
         };
     }
 }

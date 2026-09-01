@@ -54,7 +54,8 @@
                 "not-json": "the response was not JSON",
                 "no-env": "the response carried no key list",
                 "network": "the request did not complete ({detail})"
-            }
+            },
+            "writeFailed": "Could not save ({reason}). Nothing has been changed."
         }
     },
     "Index": {

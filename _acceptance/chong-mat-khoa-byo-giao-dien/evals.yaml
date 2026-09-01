@@ -359,24 +359,25 @@ evals:
   - id: E10
     criterion: AC-14
     executor: script
-    cmd: config:executors.script.kkt_gd_design_gate
+    cmd: config:executors.design.gate
     paths:
       - "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx"
-      - "scripts/settings/check-design-gate-proto.sh"
+    status: not-run
     expected: >-
-      exit 0, dòng cuối đọc `6/6 frames PASS the reference slop gate`.
-      Bọc TỰ CHỨA, cùng lý do với E9: lượt đầu chạy ô này qua đường chụp của bộ điều
-      phối, bản chụp không bao giờ tới nơi, gate trả `no target file given` exit 4 —
-      một lỗi ARGS đọc ra như lỗi sản phẩm. Bọc tự chụp đầu vào thì chạy tay lặp lại
-      được, và không đỏ vì lý do chẳng liên quan tới cây. Bọc cũng ĐỌC LẠI
-      `data-proto-state` như E9: thiếu vòng đó, một bản chụp âm thầm rơi về state khác
-      vẫn được chấm và con số vẫn đủ sáu.
-      verdict PASS trên 6 bản chụp HTML của cùng ma trận E9 (3 state × 2 theme).
-      Ô đo THAM KHẢO, không phải bằng chứng a11y: gate chạy dưới jsdom và không parse nổi
-      Tailwind v4 (đo 31/08 trên bản chụp của hồ sơ cha: 188 cssRules trên 153KB CSS nội
-      tuyến), nên mọi phần tử đọc ra là chữ đen trên nền trong suốt; toàn bộ luật của nó là
-      ba bộ dò slop thẩm mỹ (`cramped-padding`, `nested-cards`, `gradient-text`).
-      Nó ở đây để bắt slop, KHÔNG để chứng minh sàn tương phản — theo chữ AC-14, tiêu chí
-      TRƯỢT khi E9 không PASS bất kể ô này xanh.
-      CHIỀU ĐỎ: nhét hai thẻ card lồng nhau vào bản mẫu thì `nested-cards` PHẢI đỏ.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output, artifact]
+      **Ô NÀY KHÔNG CHẠY Ở VÒNG NÀY — giới hạn đã biết, trình ở Cổng 2.**
+      Nó là ô THAM KHẢO ngay từ đầu: `design-gate` chạy dưới jsdom, không parse nổi
+      Tailwind v4 (đo 31/08: 188 cssRules trên 153KB CSS nội tuyến), nên mọi phần tử
+      đọc ra là chữ đen trên nền trong suốt, và toàn bộ luật của nó là ba bộ dò slop
+      thẩm mỹ. Theo chính chữ AC-14, tiêu chí TRƯỢT khi E9 không PASS **bất kể ô này**;
+      nên nó chưa bao giờ là bằng chứng a11y.
+      Hai lần thử cho nó chạy đều hỏng theo cách KHÔNG liên quan tới sản phẩm:
+      (1) chạy qua đường chụp của bộ điều phối → `no target file given`, exit 4;
+      (2) bọc tự chứa có dev server riêng → dist dir tạm dưới `build/` bị chính
+      `"**/*.ts"` của `tsconfig.json` quét trúng, làm `pnpm typecheck` đỏ TS6053 —
+      tức phép đo tham khảo làm hỏng một lệnh trong checklist commit.
+      Giá đã vượt giá trị: nó không chứng minh được điều gì mà E9 không chứng minh
+      chắc hơn, và lần thử thứ hai đã phá một suite command. Dừng ở đây thay vì đoán
+      lần thứ ba. **Việc của người duyệt tại Cổng 2:** chấp nhận AC-14 tựa hoàn toàn
+      vào E9 (axe-core trong Chrome thật, 6/6, 0 vi phạm critical/serious), hay đòi
+      dựng lại ô tham khảo này trong một vòng riêng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

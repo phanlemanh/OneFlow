@@ -30,8 +30,15 @@ import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
-import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
-import { readFailureText } from "@/lib/settings/read-failure-text";
+import {
+    type ReadFailure,
+    saveEnvKeys,
+    type WriteFailure,
+} from "@/lib/settings/env-client";
+import {
+    readFailureText,
+    writeFailureText,
+} from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -132,13 +139,21 @@ function useProviderName(feature: string): string {
 async function saveAndVerifyKey(
     envKey: string,
     value: string,
-): Promise<KeyVerdict | { storeUnreadable: ReadFailure }> {
+): Promise<
+    | KeyVerdict
+    | { storeUnreadable: ReadFailure }
+    | { writeFailed: WriteFailure }
+> {
     const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
     if (!out.ok) {
         if (out.reason === "store-unreadable") {
             return { storeUnreadable: out.detail };
         }
-        throw new Error(`Không lưu được khoá (${out.detail}).`);
+        // A failed WRITE is not a statement about the key. Throwing here landed
+        // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
+        // which invites the user to type a new key because the disk was full or
+        // the connection dropped.
+        return { writeFailed: out.detail };
     }
     return (
         out.verdicts[envKey] ?? {
@@ -163,6 +178,11 @@ interface NodeKeyGate {
  * failed; the settings dialog is never part of this sequence.
  */
 export function useNodeKeyGate(): NodeKeyGate {
+    const tStore = useTranslations("Workspace.storeUnreadable");
+    const writeFailedText = useCallback(
+        (cause: WriteFailure) => writeFailureText(tStore, cause),
+        [tStore],
+    );
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
     const [value, setValue] = useState("");
@@ -206,7 +226,12 @@ export function useNodeKeyGate(): NodeKeyGate {
         setState({ phase: "verifying" });
         try {
             const verdict = await saveAndVerifyKey(envKey, value);
-            if ("storeUnreadable" in verdict) {
+            if ("writeFailed" in verdict) {
+                setState({
+                    phase: "saved-unverified",
+                    reason: writeFailedText(verdict.writeFailed),
+                });
+            } else if ("storeUnreadable" in verdict) {
                 // Not a statement about the key. Saying "invalid" here would
                 // invite the user to type a new one, into a store that cannot
                 // be read.

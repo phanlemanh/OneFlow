@@ -53,6 +53,22 @@ else
     echo "ok   case 'a second non-test caller' named the offending file"
 fi
 
+# Case 1b — the same violation written with SINGLE quotes. The needle used to
+# match only double-quoted literals, so this form walked straight past a guard
+# that then printed "exactly one non-test caller".
+T1B="$(fresh_tree case1b)"
+printf "\nconst leak = await fetch('/api/settings/env');\n" \
+    >> "$T1B/src/components/workspace/nodes/base/abi-node-shell.tsx"
+expect_exit 1 "a single-quoted caller is rejected" "$T1B"
+
+# Case 1c — PROSE must not trip the guard. Widening the needle to the bare path
+# flagged the route file documenting its own handlers and a design comment in a
+# prototype; a guard that is red on correct code gets deleted.
+T1C="$(fresh_tree case1c)"
+printf '\n// see /api/settings/env for the shape\n' \
+    >> "$T1C/src/components/workspace/nodes/base/abi-node-shell.tsx"
+expect_exit 0 "a prose mention does NOT trip the guard" "$T1C"
+
 # Case 2 — the reader stops naming the endpoint, so there is nothing to find.
 T2="$(fresh_tree case2)"
 : > "$T2/src/lib/settings/env-client.ts"

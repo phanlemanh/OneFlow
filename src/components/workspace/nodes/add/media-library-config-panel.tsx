@@ -30,7 +30,6 @@ export function MediaLibraryConfigPanel({
         keyLabel: string;
         save: string;
         saving: string;
-        readFailed: string;
         writeFailed: string;
         storeUnreadableTitle: string;
         storeUnreadableUnchanged: string;
@@ -79,7 +78,6 @@ export function MediaLibraryConfigPanel({
         return (
             <div className="w-full nodrag">
                 <StoreUnreadableNotice
-                    headingLevel={3}
                     reason={labels.storeUnreadableReason(blocked)}
                     labels={{
                         title: labels.storeUnreadableTitle,

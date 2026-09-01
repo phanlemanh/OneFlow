@@ -290,7 +290,6 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                             keyLabel: t("keyLabel"),
                             save: t("saveConfig"),
                             saving: t("savingConfig"),
-                            readFailed: t("readFailed"),
                             writeFailed: t("writeFailed"),
                             storeUnreadableTitle: tStore("title"),
                             storeUnreadableUnchanged: tStore("unchanged"),

@@ -55,7 +55,10 @@ import {
     readEnvForBrowser,
     replaceUnreadableStore,
 } from "@/lib/settings/env-client";
-import { readFailureText } from "@/lib/settings/read-failure-text";
+import {
+    readFailureText,
+    writeFailureText,
+} from "@/lib/settings/read-failure-text";
 import { OPEN_SETTINGS_EVENT } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
@@ -386,7 +389,7 @@ export function SettingsDialog() {
                 // rather than the read-failure union.
                 const reason =
                     out.reason === "write-failed"
-                        ? out.detail
+                        ? writeFailureText(tStore, out.detail)
                         : readFailureText(tStore, out.detail);
                 setReplaceError(tStore("replaceFailed", { reason }));
                 return;
@@ -446,6 +449,18 @@ export function SettingsDialog() {
             const out = await putEnvMap(env);
             if (!out.ok) {
                 logger.error("Failed to save settings:", out.detail);
+                if (out.reason === "store-unreadable") {
+                    // The store broke between opening the screen and saving.
+                    // `blocked` was captured at fetch time, so without this the
+                    // screen would keep offering a Save that can never land.
+                    setBlocked(out.detail);
+                } else {
+                    toast.error(
+                        tStore("writeFailed", {
+                            reason: writeFailureText(tStore, out.detail),
+                        }),
+                    );
+                }
                 return;
             }
             applyEnv(env, decls);

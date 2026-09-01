@@ -160,14 +160,20 @@ function BlockedPanel({
         >
             <header className="flex items-center gap-2">
                 {icon}
-                <h2 id={id} className="text-sm font-medium text-foreground">
+                {/*
+                 * A label, NOT a heading. The shipped node shells render no
+                 * heading at all, so an h2 here would give the prototype an
+                 * outline the product does not have — and the a11y sweep only
+                 * ever scans the prototype. Measuring a structure nobody ships
+                 * is the shape of error this whole dossier is about.
+                 */}
+                <span id={id} className="text-sm font-medium text-foreground">
                     {title}
-                </h2>
+                </span>
             </header>
             <StoreUnreadableNotice
                 reason={COPY.reasonPanel}
                 labels={NOTICE_LABELS}
-                headingLevel={3}
             >
                 {/*
                  * A link to settings, and nothing else. The destructive write

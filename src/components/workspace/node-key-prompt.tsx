@@ -103,7 +103,6 @@ export function NodeKeyPrompt({
     if (state.phase === "store-unreadable") {
         return (
             <StoreUnreadableNotice
-                headingLevel={3}
                 reason={labels.storeUnreadable.reason(state.reason)}
                 labels={labels.storeUnreadable}
             >

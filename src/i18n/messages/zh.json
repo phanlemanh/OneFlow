@@ -54,7 +54,8 @@
                 "not-json": "响应不是 JSON",
                 "no-env": "响应未包含密钥列表",
                 "network": "请求未完成（{detail}）"
-            }
+            },
+            "writeFailed": "无法保存（{reason}）。尚未更改任何内容。"
         }
     },
     "Index": {
