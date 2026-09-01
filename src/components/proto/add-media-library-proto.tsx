@@ -51,6 +51,11 @@ const CONFIG_LABELS = {
     saving: "Đang lưu…",
     readFailed: "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
     writeFailed: "Không lưu được khoá. Chưa có gì thay đổi.",
+    storeUnreadableTitle: "Không đọc được kho khoá đã lưu",
+    storeUnreadableUnchanged: "Chưa có gì bị thay đổi.",
+    storeUnreadableReason: (detail: string) =>
+        `Máy chủ không trả về được danh sách khoá đang lưu (${detail}).`,
+    toSettings: "Mở màn Cài đặt",
 };
 
 const THUMB =

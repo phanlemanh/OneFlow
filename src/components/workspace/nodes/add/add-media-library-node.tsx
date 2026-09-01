@@ -128,6 +128,7 @@ async function readFailure(
 
 const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.addMediaLibrary");
+    const tStore = useTranslations("Workspace.storeUnreadable");
     const id = useNodeId();
     const expands = useFlow((s) => s.expands);
 
@@ -289,6 +290,11 @@ const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
                             saving: t("savingConfig"),
                             readFailed: t("readFailed"),
                             writeFailed: t("writeFailed"),
+                            storeUnreadableTitle: tStore("title"),
+                            storeUnreadableUnchanged: tStore("unchanged"),
+                            storeUnreadableReason: (detail: string) =>
+                                tStore("reason", { reason: detail }),
+                            toSettings: tStore("toSettings"),
                         }}
                         onSaved={() => void search()}
                     />
