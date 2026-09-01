@@ -146,10 +146,18 @@ Không áp dụng — `context: static-frame`, không phải `standalone`.
    cái nhuộm `bg-destructive/5` mới là chỗ token `muted-foreground` hết hiệu lực.
    Ghi lại phủ định này thành CHỮ, vì nếu để nguyên câu dự đoán thì người sau sẽ
    tưởng hai hồ sơ ấy còn nợ một bản vá tương phản — chúng không nợ.
-   **Cái chúng thật sự nợ vẫn còn nguyên và vẫn là việc của người duyệt:** bằng
-   chứng a11y đã ký của chúng được sinh bởi một phép đo mù trục sáng/tối. Nay biết
-   là màu xanh đó **đúng**, nhưng lúc ký thì **chưa ai biết** — câu hỏi cho cổng
-   không đổi: có cần đóng dấu lại bằng phép đo đã sửa hay không.
+   **Cái chúng thật sự nợ:** bằng chứng a11y đã ký của chúng được sinh bởi một phép
+   đo mù trục sáng/tối. Nay biết màu xanh đó **đúng**, nhưng lúc ký thì **chưa ai
+   biết** — trạng thái chính xác là **"đúng do may, sau đó được xác nhận, KHÔNG được
+   ký lại"**. Đừng viết thành "đã kiểm chứng lúc ký" (không phải), cũng đừng viết
+   thành nợ còn treo (không còn).
+   **Đã định đoạt, theo lời phiên `amazing-kapitsa-45dd7a` chuyển lại (01/09):** owner
+   quyết **chấp nhận delta, KHÔNG đóng dấu lại** — hai chữ ký Cổng 2 giữ nguyên,
+   không tệp bằng chứng nào bị ghi lại, không mở việc theo sau; delta chỉ nằm trong
+   thân commit `086a7b8`, cố ý.
+   **Vẫn trình ở Cổng 2 của hồ sơ NÀY.** Quyết định trên đến qua một phiên máy chuyển
+   lời, không phải trực tiếp từ người duyệt hồ sơ này; và finding này là finding của
+   hồ sơ này. Người duyệt xác nhận hoặc lật lại ở đó — chi phí bằng một chữ.
 
 2. **`build/bko-a11y` không được khai trong `tsconfig.json`.** Wrapper onboarding
    chạy với `NEXT_DIST_DIR=build/bko-a11y`; khi dist dir KHÔNG có trong `include`,
