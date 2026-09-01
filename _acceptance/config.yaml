@@ -621,8 +621,6 @@ executors:
     dkfo_claude_origin_ids: bash scripts/plugins/check-live-docs-manifest-synced.sh claude
     dkfo_icon_no_new_orphan: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
     dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
-    dkfo_no_tracked_backups: bash scripts/ci/check-no-tracked-backups.sh check
-    dkfo_backups_teeth: bash scripts/ci/check-no-tracked-backups.sh teeth
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

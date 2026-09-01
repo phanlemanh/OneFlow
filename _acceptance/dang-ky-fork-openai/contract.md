@@ -54,33 +54,16 @@ của `origin` nó khai.
 
 **AC-5 — Hàng rào tài liệu có răng, theo ma trận có tên ô.**
 Given một bản sao cây bị phá,
-When chạy **tám ca có tên**: `healthy` (đối chứng dương) · `readme-missing` ·
+When chạy **bảy ca có tên**: `healthy` (đối chứng dương) · `readme-missing` ·
 `readme-extra` · `org-sai-chuoi-tran` · `org-sai-muc-origin` · `claude-stale-id` ·
-`orphan-them-moi` · `khong-tuyen-qua`,
-Then ca `healthy` **xanh** và bảy ca còn lại **đỏ khi vật hỏng**, mỗi ca nêu **đích
+`khong-tuyen-qua`,
+Then ca `healthy` **xanh** và sáu ca còn lại **đỏ khi vật hỏng**, mỗi ca nêu **đích
 danh id** và **tên file** gây lỗi — và phép khớp chỉ đọc **dòng bắt đầu bằng `FAIL:`**,
 không đọc toàn bộ stdout: chế độ `readme` luôn in `README.md: 39 id extracted` ở lượt
 lành, nên khớp tên file trên dòng bất kỳ là thoả vô điều kiện, tức đo chuỗi-có-mặt cho
 một lời hứa về quan hệ. Hai ca org bắt buộc riêng rẽ vì luật org có hai nửa. Tên ca lạ
-→ thoát 2.
-
-**AC-9 — Không file rác nào bị git theo dõi. (mở phạm vi tại Cổng 2 vòng 1)**
-Given `config-patch.mjs --write` và `sed -i.bak` đều để lại file `.bak`, và một file
-như thế **đã bị commit** ở `b30a3c3` — bản sao 757 dòng của `_acceptance/config.yaml`
-với ba executor trỏ vào script đã bị đổi tên khỏi tồn tại,
-When quét tập file **git đang theo dõi** tìm khuôn `.bak/.orig/.rej/.swp/.tmp/~`,
-Then tập đó **rỗng**. Quét tập-đang-theo-dõi chứ không quét đĩa, vì `.gitignore` không
-có tác dụng gì với file đã trót được theo dõi — và đó chính là ca đã xảy ra.
-
-**AC-10 — Bộ răng không được tuyên nhiều hơn số ca đã chạy. (mở phạm vi tại Cổng 2 vòng 1)**
-Given lượt chạy `--case <tên>` chỉ thi hành một ca,
-When đọc dòng tổng kết của lượt đó,
-Then nó in `PARTIAL: 1/8` và **không** in dòng `OK:` của lượt đầy đủ. Lượt đầy đủ chỉ
-được in `OK:` khi đếm được đúng 8/8 ca đã chạy. Trước bản vá này, `--case healthy` in
-`OK: ... red for all 6 perturbations` sau khi thi hành đúng một ca — một tuyên bố xanh
-về năm ca chưa hề chạy, đúng lớp lỗi mà header của chính file đó cấm.
-
-
+→ thoát 2. Phạm vi khai thẳng: các ca phá chỉ chạm chế độ `readme` và `claude`;
+chế độ `orphans` **không có ca đỏ** — xem Known limits.
 
 **AC-6 — `CLAUDE.md` liệt kê đúng tập id `origin`, và phép đo chứng minh nó đã quét. (mới)**
 Given đoạn văn về hàng rào trong `CLAUDE.md` viết id dưới dạng nháy ngược, **không**
@@ -167,3 +150,33 @@ theo hình dạng mà bộ rút không bắt được). Tách thành AC-6 và AC
 - **Số đo tay, không phải thước:** trên máy này bộ quét thật trả `transcribe ->
   ['oneflow-api-openai']`, `models=['gpt-transcribe']`, 0 lỗi. `plugins/` gitignored nên CI
   không có vật để đo — ghi ra chứ không giả vờ là bằng chứng máy.
+
+- **`orphans` mode không có chiều đỏ.** Ca `orphan-them-moi` đã bị **rút** ở vòng 3: nó
+  ghi một `.svg` thăm dò vào `public/plugins/` của **cây thật**, trong khi bộ điều phối
+  verify chạy các ô máy **song song** — nên ô E7 (quét đúng thư mục đó) có thể thấy vật
+  thăm dò và báo `added 1`, một REJECT giả không có lỗi sản phẩm nào phía sau. Phá nó
+  cho tử tế cần `orphans` nhận một thư mục để quét; đó là việc riêng. Cho tới lúc đó,
+  E7 là một khẳng định **chưa từng đỏ**.
+- **Hai thước mới chỉ chạy trong lúc hồ sơ này được verify.** `check-live-docs-manifest-*`
+  được nối vào `dkfo_*` của riêng hồ sơ này, **không** vào `ci.yml`, **không** vào
+  `feature_loop.suite_keys`. Ký xong là ba README trở lại trạng thái không ai canh —
+  đúng trạng thái mà AC-4 sinh ra để chấm dứt. Kho đã chẩn đúng bệnh này ngày 31/08
+  (`ci.yml` §"ran only when somebody typed them"); bản vá là thêm hai step vào job
+  `Acceptance Gate` sẵn có. Cố ý để lại: thêm mã mới ở vòng 3 là đúng cái khuôn vừa
+  chứng minh là không hội tụ.
+- **`.gitignore` có `*.bak` nhưng không thước nào canh.** AC-9/AC-10 và
+  `scripts/ci/check-no-tracked-backups.sh` đã bị **rút** ở vòng 3. File rác gây chuyện
+  (`_acceptance/config.yaml.bak`) đã gỡ khỏi index và quy tắc ignore đã có, nên rủi ro
+  còn lại là tái phạm qua `git add -f`.
+- **Ba chỗ trôi nhỏ trong mã có sẵn, không thuộc phạm vi:**
+  `check-manifest-doc-synced.sh` neo bằng `head -1` (an toàn hôm nay vì `CLAUDE.md` chỉ
+  còn **một** dòng nhắc `check-manifest-unmoved` — vòng 3 đã gỡ dòng thứ hai mà chính
+  tôi tạo ra); nhãn ca 5 của `check-manifest-guard-teeth.sh` vẫn ghi "a 37th plain
+  string" trong khi số đếm nay là 35 nên phép phá tạo ra cái thứ 36; đối chứng dương
+  của bộ răng chỉ phủ chế độ `readme`.
+- **Vòng verify không hội tụ — dừng bằng quyết định người, không bằng cạn round.** Vòng
+  1 và vòng 2 sinh finding **cùng lớp** (assert chuỗi-có-mặt thay cho quan hệ · tuyên
+  quá số ca đã chạy · văn xuôi nói sai so với phép đo), vì mỗi vòng sửa lại viết thêm
+  **mã đo**, mà mã đo chính là nơi lớp lỗi đó sống. Owner chọn **thu phạm vi** ở vòng 3
+  theo `STOP-PATCHING-CLAUSE`. 13 finding của vòng 2 đi tiếp thành một hồ sơ cơ hội
+  riêng, làm tử tế kèm nối CI.

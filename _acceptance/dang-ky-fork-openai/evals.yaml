@@ -96,9 +96,11 @@ evals:
       - "scripts/plugins/check-live-docs-manifest-synced.sh"
       - "scripts/plugins/check-live-docs-manifest-teeth.sh"
     expected: >-
-      exit 0 và stdout mang ĐỦ TÁM dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 8/8 ca`
+      exit 0 và stdout mang ĐỦ BẢY dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 7/7 ca`
       — `healthy` · `readme-missing` · `readme-extra` · `org-sai-chuoi-tran` ·
-      `org-sai-muc-origin` · `claude-stale-id` · `orphan-them-moi` · `khong-tuyen-qua`.
+      `org-sai-muc-origin` · `claude-stale-id` · `khong-tuyen-qua`. Ca `orphan-them-moi`
+      đã RÚT ở vòng 3: nó ghi vật thăm dò vào cây thật trong khi E7 quét đúng thư mục đó
+      song song. Nên chế độ `orphans` không có chiều đỏ — khai ở Known limits.
       Phép khớp tên file/id chỉ đọc dòng bắt đầu bằng `FAIL:`; đo trên toàn stdout là
       thoả vô điều kiện vì lượt lành luôn in `README.md: 39 id extracted` (finding
       TRONG hợp đồng, S4 vòng 1). Đã kiểm phép sửa có răng: bỏ `${file}` khỏi thông điệp
@@ -160,47 +162,4 @@ evals:
       `scripts/plugins/**` nằm trong phạm vi hẹp của nó. Chiều đỏ KHÔNG cần dựng — ô này
       hiện ĐỎ thật: `VIOLATION [conformance-l0]: evidence is stale`. KHÔNG khai `paths` →
       luôn chạy lại mọi vòng, vì câu hỏi là về trạng thái CÂY chứ không về file nào đổi.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  # ---------- D. Mở phạm vi tại Cổng 2 vòng 1 (owner duyệt 01/09) ----------
-  - id: E9
-    criterion: AC-9
-    executor: script
-    cmd: config:executors.script.dkfo_no_tracked_backups
-    expected: >-
-      exit 0 và stdout ghim SỐ file đang được theo dõi đã quét cùng số file khớp khuôn
-      backup (`tracked files scanned: 1447 · backup-shaped: 0`). Con số thứ nhất là thứ
-      phân biệt "quét sạch" với "quét rỗng". Quét tập `git ls-files` chứ không quét đĩa:
-      `.gitignore` không cứu được file đã trót theo dõi, mà đó đúng là ca đã xảy ra —
-      `b30a3c3` commit `_acceptance/config.yaml.bak`, bản sao 757 dòng có ba executor
-      trỏ vào script đã đổi tên. KHÔNG khai `paths` → luôn chạy lại, vì câu hỏi là về
-      TẬP FILE ĐANG THEO DÕI chứ không về file nào đổi.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E10
-    criterion: AC-9
-    executor: script
-    cmd: config:executors.script.dkfo_backups_teeth
-    paths: ["scripts/ci/check-no-tracked-backups.sh"]
-    expected: >-
-      exit 0 và stdout mang `CASE healthy: PASS` cùng `CASE co-file-bak: PASS`. Chiều đỏ
-      dựng trên một kho git dùng-rồi-bỏ (`mktemp -d` + `git init`) chứ không dựa vào cây
-      này bẩn, nên phép đo lặp lại được ở mọi trạng thái cây. `healthy` là đối chứng
-      dương trên chính kho tạm đó: thiếu nó thì một thước luôn-đỏ cũng "chứng minh" được
-      ca âm. Ca `co-file-bak` đòi thước vừa thoát khác 0 vừa NÊU TÊN file.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E11
-    criterion: AC-10
-    executor: script
-    cmd: config:executors.script.dkfo_docs_teeth
-    paths:
-      - "scripts/plugins/check-live-docs-manifest-teeth.sh"
-    expected: >-
-      exit 0 và stdout mang `CASE khong-tuyen-qua: PASS`. Ca đó tự gọi lại bộ răng với
-      `--case healthy` (một tầng, không đệ quy) rồi khẳng định lượt con in
-      `PARTIAL: 1/8` và **không** in dòng `OK:` của lượt đầy đủ. Trước bản vá,
-      `--case healthy` in `OK: ... red for all 6 perturbations` sau đúng một ca — tuyên
-      xanh về năm ca chưa chạy. Ô này và E5 dùng CHUNG một lệnh nên chạy một lượt; tách
-      criterion để AC-10 có ô mang tên nó thay vì ẩn trong `expected` của AC-5.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]

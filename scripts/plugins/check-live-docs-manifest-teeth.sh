@@ -3,9 +3,17 @@
 #
 # A guard that has never been red is indistinguishable from a guard that never
 # ran: a broken fixture, a failed copy and a bare exit 127 all print the same
-# green. So every mode of that guard gets perturbed here, and `healthy` proves
-# the same fixture passes unperturbed -- without it, an always-red guard would
-# "pass" every perturbation case.
+# green. So the guard gets perturbed here, and `healthy` proves the same fixture
+# passes unperturbed -- without it, an always-red guard would "pass" every
+# perturbation case.
+#
+# SCOPE, stated so nobody reads more into the summary than it earns: these cases
+# perturb the `readme` and `claude` modes only. `orphans` mode has NO red case.
+# It had one, and the case wrote a probe .svg into the real public/plugins/ --
+# which the verify workflow runs concurrently with the `orphans` eval that lists
+# that same directory, so the probe could redden a sibling cell with no product
+# defect behind it. Perturbing it honestly needs the mode to accept a directory
+# to scan; that is follow-up work, not a thing to bolt on here.
 #
 # Each case asserts two things, never just the exit code: the guard exits
 # non-zero, AND its message names the offending id and the offending file. A
@@ -26,15 +34,11 @@ ONLY=""
 [ "${1:-}" = "--case" ] && ONLY="${2:-}"
 
 WORK="$(mktemp -d)"
-PROBE="$ROOT/public/plugins/zzz-teeth-probe.svg"
-# The orphans mode reads the base ref through git, so its case cannot run in a
-# detached copy -- it perturbs the real tree for the length of one guard call
-# and the trap takes the file back out on every exit path.
-trap 'rm -rf "$WORK"; rm -f "$PROBE"' EXIT
+trap 'rm -rf "$WORK"' EXIT
 
 FAILED=0
-KNOWN="healthy readme-missing readme-extra org-sai-chuoi-tran org-sai-muc-origin claude-stale-id orphan-them-moi khong-tuyen-qua"
-TOTAL=8
+KNOWN="healthy readme-missing readme-extra org-sai-chuoi-tran org-sai-muc-origin claude-stale-id khong-tuyen-qua"
+TOTAL=7
 RAN=0
 
 if [ -n "$ONLY" ] && ! printf '%s\n' $KNOWN | grep -qx "$ONLY"; then
@@ -119,22 +123,6 @@ T="$(fresh_tree)"
 sed -i.bak 's#`oneflow-api-openai`#`oneflow-api-openai`, `tongflow-api-openai`#' "$T/CLAUDE.md"
 assert_case claude-stale-id red claude "tongflow-api-openai" "CLAUDE.md"
 
-# --- a new orphan icon appears (runs against the real tree; see trap) ---
-if [ -z "$ONLY" ] || [ "$ONLY" = orphan-them-moi ]; then
-    RAN=$((RAN + 1))
-    printf '<svg/>\n' > "$PROBE"
-    out="$(bash "$ROOT/$GUARD_REL" orphans 2>&1)"; rc=$?
-    rm -f "$PROBE"
-    if [ "$rc" -eq 0 ]; then
-        echo "CASE orphan-them-moi: FAIL — guard stayed green with a new orphan icon"; FAILED=1
-    elif ! printf '%s\n' "$out" | grep -qF "zzz-teeth-probe"; then
-        echo "CASE orphan-them-moi: FAIL — guard went red but never named the orphan"
-        printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1
-    else
-        echo "CASE orphan-them-moi: PASS"
-    fi
-fi
-
 # --- the harness must not claim more than it ran (self-invocation, one level) ---
 if [ -z "$ONLY" ] || [ "$ONLY" = khong-tuyen-qua ]; then
     RAN=$((RAN + 1))
@@ -156,4 +144,4 @@ if [ -n "$ONLY" ]; then
     exit 0
 fi
 [ "$RAN" -eq "$TOTAL" ] || { echo "FAIL: chi $RAN/$TOTAL ca chay ma khong khai --case" >&2; exit 1; }
-echo "OK: $RAN/$TOTAL ca — 1 doi chung duong + 7 phep pha, thuoc do dung o ca 7 va khong tuyen qua so ca da chay"
+echo "OK: $RAN/$TOTAL ca — 1 doi chung duong + 6 phep pha (readme + claude modes), va khong tuyen qua so ca da chay"
