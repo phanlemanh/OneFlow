@@ -5,6 +5,12 @@ vi.mock("server-only", () => ({}));
 const store = vi.hoisted(() => ({ env: {} as Record<string, string> }));
 vi.mock("@/lib/settings/env-store.server", () => ({
     loadEnvStore: async () => ({ ...store.env }),
+    // `resolveConfig` reads through `readEnvStore` so it can tell an unreadable
+    // store from an unconfigured one. This fake always reports a healthy store,
+    // which is the condition every case in this file is about; the unreadable
+    // paths have their own suite in config.server.unreadable.test.ts, on a real
+    // temp dir rather than a fake.
+    readEnvStore: async () => ({ state: "ok", env: { ...store.env } }),
 }));
 
 import { resolveConfig } from "./config.server";
@@ -20,7 +26,7 @@ describe("resolveConfig — names what is missing (E1)", () => {
         store.env = { MEDIA_LIBRARY_API_KEY: "k" };
         const result = await resolveConfig();
         expect(result.ok).toBe(false);
-        if (result.ok) return;
+        if (result.ok || result.kind !== "missing") return;
         expect(result.missing).toEqual(["MEDIA_LIBRARY_URL"]);
         expect(result.message).toContain("MEDIA_LIBRARY_URL");
     });
@@ -28,7 +34,7 @@ describe("resolveConfig — names what is missing (E1)", () => {
     it("names BOTH variables when both are missing", async () => {
         const result = await resolveConfig();
         expect(result.ok).toBe(false);
-        if (result.ok) return;
+        if (result.ok || result.kind !== "missing") return;
         expect(result.missing).toEqual([
             "MEDIA_LIBRARY_URL",
             "MEDIA_LIBRARY_API_KEY",
@@ -57,7 +63,7 @@ describe("resolveConfig — names what is missing (E1)", () => {
         store.env = { MEDIA_LIBRARY_URL: "   ", MEDIA_LIBRARY_API_KEY: "k" };
         const result = await resolveConfig();
         expect(result.ok).toBe(false);
-        if (result.ok) return;
+        if (result.ok || result.kind !== "missing") return;
         expect(result.missing).toEqual(["MEDIA_LIBRARY_URL"]);
     });
 });

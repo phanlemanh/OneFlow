@@ -11,7 +11,7 @@ flowchart TD
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>30 việc"]
+  GB --> DG["Đã giao<br/>31 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -37,6 +37,7 @@ flowchart TD
 - Cache L4 — LRU eviction theo dung lượng, purge, reuse API, telemetry % partial (`cache-l4-eviction`)
 - chống đọc sai êm ru — bộ đọc phải TỪ CHỐI thay vì phát ra nội dung sai (`chong-doc-sai-em-ru`)
 - Chống mất khoá BYO — kho khoá từ chối ghi đè khi không đọc được, thay vì giả dạng rỗng (`chong-mat-khoa-byo`)
+- Chống mất khoá BYO — nửa giao diện: màn Cài đặt và hai ô nhập khoá nói rõ kho hỏng và chặn ghi đè (`chong-mat-khoa-byo-giao-dien`)
 - CI actions bump — actions/checkout 4→7, docker/login-action 3→4 (`ci-actions-bump`)
 - CI-a — vitest vào CI + gỡ ghim SDK cứng của guard overlay (khử mìn hạ tầng verify) (`ci-vitest-sdk-pin`)
 - slot dán chữ/khung giá/logo/safe-zone lên ảnh & video (Phase 1.2) (`compose-overlay`)

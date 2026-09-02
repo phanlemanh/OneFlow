@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F2 — Lối thoát huỷ-diệt: 6 bước, đúng một PUT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --color-paper: #f7f7f8; --color-ink: #1a0033; }
+    body {
+      font-family: 'Geist', system-ui, sans-serif;
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2.5rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 1200 1056" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#e100e1"/>
+        </marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#0068cc"/>
+        </marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ================= HEADER ================= -->
+      <text x="40" y="40" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">F2 · SƠ ĐỒ TRÌNH TỰ · CỔNG 1</text>
+      <text x="40" y="76" fill="#1a0033" font-size="28" font-family="'Lora', 'Instrument Serif', serif">Lối thoát huỷ-diệt: 6 bước, đúng một PUT</text>
+      <text x="40" y="100" fill="#4f4a63" font-size="12" font-family="'Geist', sans-serif">Quyết định D3 — nút thoát = ghi đè kho rỗng · AC-11 · ô đo E4 / E5</text>
+
+      <!-- ================= LIFELINES ================= -->
+      <line x1="176" y1="204" x2="176" y2="920" stroke="rgba(26,0,51,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="520" y1="204" x2="520" y2="920" stroke="rgba(26,0,51,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="864" y1="204" x2="864" y2="920" stroke="rgba(26,0,51,0.22)" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- ================= ALT FRAME ================= -->
+      <rect x="152" y="548" width="736" height="356" rx="4" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <rect x="152" y="548" width="40" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <text x="172" y="560" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ALT</text>
+      <text x="164" y="584" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.04em">[người dùng XÁC NHẬN]</text>
+      <line x1="160" y1="812" x2="880" y2="812" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="164" y="840" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.04em">[người dùng bấm "Để nguyên"]</text>
+
+      <!-- ================= ACTIVATION BARS ================= -->
+      <rect x="516" y="240" width="8" height="644" fill="rgba(26,0,51,0.06)" stroke="#4f4a63" stroke-width="0.8"/>
+      <rect x="860" y="280" width="8" height="40" fill="rgba(26,0,51,0.06)" stroke="#4f4a63" stroke-width="0.8"/>
+      <rect x="860" y="656" width="8" height="40" fill="rgba(26,0,51,0.06)" stroke="#4f4a63" stroke-width="0.8"/>
+      <rect x="860" y="736" width="8" height="40" fill="rgba(26,0,51,0.06)" stroke="#4f4a63" stroke-width="0.8"/>
+
+      <!-- ================= MESSAGES ================= -->
+      <!-- bối cảnh -->
+      <line x1="176" y1="240" x2="512" y2="240" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="524" y1="280" x2="856" y2="280" stroke="#0068cc" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <line x1="860" y1="320" x2="528" y2="320" stroke="#4f4a63" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <!-- bước 1: tấm chặn (self) -->
+      <path d="M 524 384 H 552 A 8 8 0 0 1 560 392 V 408 A 8 8 0 0 1 552 416 H 528" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- bước 2: bấm thoát -->
+      <line x1="176" y1="456" x2="512" y2="456" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- bước 3: hộp xác nhận (self) -->
+      <path d="M 524 488 H 552 A 8 8 0 0 1 560 496 V 512 A 8 8 0 0 1 552 520 H 528" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- bước 4: xác nhận -->
+      <line x1="176" y1="616" x2="512" y2="616" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- bước 5: PUT mang cờ (trọng tâm) -->
+      <line x1="524" y1="656" x2="856" y2="656" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <line x1="860" y1="696" x2="528" y2="696" stroke="#4f4a63" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <!-- bước 6: refetch -->
+      <line x1="524" y1="736" x2="856" y2="736" stroke="#0068cc" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+      <line x1="860" y1="776" x2="528" y2="776" stroke="#4f4a63" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <!-- nhánh huỷ -->
+      <line x1="176" y1="872" x2="512" y2="872" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- ================= MESSAGE LABELS ================= -->
+      <text x="40" y="232" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">BỐI CẢNH</text>
+
+      <rect x="296" y="216" width="104" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="348" y="228" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MỞ MÀN CÀI ĐẶT</text>
+
+      <rect x="620" y="256" width="144" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="268" fill="#0068cc" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GET /API/SETTINGS/ENV</text>
+
+      <rect x="596" y="296" width="192" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="308" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">LỖI ĐỌC · 1 TRONG 5 HÌNH DẠNG</text>
+
+      <text x="40" y="364" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">6 BƯỚC NỐI TIẾP</text>
+
+      <!-- bước 1 -->
+      <rect x="576" y="384" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="584" y="396" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+      <text x="600" y="396" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">TẤM CHẶN · NÚT LƯU TẮT</text>
+      <text x="600" y="412" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">form khoá bị thay, 0 ô nhập</text>
+
+      <!-- bước 2 -->
+      <rect x="276" y="432" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="284" y="444" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+      <rect x="300" y="432" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="348" y="444" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">BẤM NÚT THOÁT</text>
+
+      <!-- bước 3 -->
+      <rect x="576" y="488" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="584" y="500" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+      <text x="600" y="500" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">HỘP XÁC NHẬN · role=alertdialog</text>
+      <text x="600" y="518" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">"mọi khoá đang lưu sẽ mất và không khôi phục được"</text>
+
+      <!-- bước 4 -->
+      <rect x="292" y="592" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="300" y="604" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+      <rect x="316" y="592" width="64" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="348" y="604" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">XÁC NHẬN</text>
+
+      <!-- bước 5 -->
+      <rect x="528" y="632" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(225,0,225,0.50)" stroke-width="0.8"/>
+      <text x="536" y="644" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+      <rect x="552" y="632" width="280" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="644" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">1× PUT {env:{}, replaceUnreadableStore:true}</text>
+
+      <rect x="590" y="672" width="204" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="684" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">200 · KHO ĐÃ THAY BẰNG KHO RỖNG</text>
+
+      <!-- bước 6 -->
+      <rect x="620" y="712" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="628" y="724" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">6</text>
+      <rect x="644" y="712" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="724" fill="#0068cc" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">GET · REFETCH</text>
+
+      <rect x="596" y="752" width="192" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="692" y="764" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">200 · FORM BÌNH THƯỜNG, TRỐNG</text>
+
+      <!-- nhánh huỷ -->
+      <rect x="300" y="848" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="348" y="860" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">BẤM ĐỂ NGUYÊN</text>
+      <text x="536" y="876" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">0 PUT · quay về tấm chặn</text>
+
+      <!-- ================= BẤT BIẾN 1 — dấu ngoặc đo ================= -->
+      <line x1="944" y1="280" x2="944" y2="624" stroke="rgba(26,0,51,0.40)" stroke-width="1"/>
+      <line x1="940" y1="280" x2="952" y2="280" stroke="rgba(26,0,51,0.40)" stroke-width="1"/>
+      <line x1="940" y1="624" x2="952" y2="624" stroke="rgba(26,0,51,0.40)" stroke-width="1"/>
+      <text x="964" y="440" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">BẤT BIẾN 1</text>
+      <text x="964" y="460" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">KHÔNG MỘT PUT NÀO</text>
+      <text x="964" y="476" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">RỜI TRÌNH DUYỆT</text>
+      <text x="964" y="492" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">TRONG KHOẢNG NÀY</text>
+      <text x="964" y="512" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">0 PUT KHÔNG CỜ</text>
+
+      <!-- ================= BẤT BIẾN 2 — callout ================= -->
+      <circle cx="896" cy="656" r="2" fill="#1a0033"/>
+      <path d="M 896 656 H 944" fill="none" stroke="rgba(26,0,51,0.40)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="956" y="652" fill="#1a0033" font-size="14" font-style="italic" font-family="'Lora', 'Instrument Serif', serif">bất biến 2 — bấm đúp nút</text>
+      <text x="956" y="670" fill="#1a0033" font-size="14" font-style="italic" font-family="'Lora', 'Instrument Serif', serif">xác nhận vẫn ra đúng một PUT</text>
+      <text x="956" y="690" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">chốt một-chuyến (useRef)</text>
+
+      <!-- ================= ACTORS ================= -->
+      <rect x="88" y="128" width="176" height="76" rx="6" fill="#f7f7f8"/>
+      <rect x="88" y="128" width="176" height="76" rx="6" fill="rgba(79,74,99,0.10)" stroke="#66607a" stroke-width="1"/>
+      <rect x="100" y="140" width="56" height="16" rx="2" fill="transparent" stroke="rgba(102,96,122,0.50)" stroke-width="0.8"/>
+      <text x="128" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">NGƯỜI</text>
+      <text x="176" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Người dùng</text>
+      <text x="176" y="196" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">chủ khoá BYO</text>
+
+      <rect x="432" y="128" width="176" height="76" rx="6" fill="#f7f7f8"/>
+      <rect x="432" y="128" width="176" height="76" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <rect x="444" y="140" width="40" height="16" rx="2" fill="transparent" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="464" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">UI</text>
+      <text x="520" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Trình duyệt</text>
+      <text x="520" y="196" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">settings-dialog</text>
+
+      <rect x="776" y="128" width="176" height="76" rx="6" fill="#f7f7f8"/>
+      <rect x="776" y="128" width="176" height="76" rx="6" fill="rgba(26,0,51,0.05)" stroke="#4f4a63" stroke-width="1"/>
+      <rect x="788" y="140" width="40" height="16" rx="2" fill="transparent" stroke="rgba(79,74,99,0.40)" stroke-width="0.8"/>
+      <text x="808" y="152" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">API</text>
+      <text x="864" y="180" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Máy chủ</text>
+      <text x="864" y="196" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">/api/settings/env</text>
+
+      <!-- ================= LEGEND ================= -->
+      <line x1="40" y1="960" x2="1160" y2="960" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="978" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">CHÚ GIẢI</text>
+
+      <line x1="40" y1="1000" x2="68" y2="1000" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <text x="76" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Lời gọi</text>
+
+      <line x1="180" y1="1000" x2="208" y2="1000" stroke="#4f4a63" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow)"/>
+      <text x="216" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Hồi đáp</text>
+
+      <line x1="320" y1="1000" x2="348" y2="1000" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="356" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Lượt ghi huỷ-diệt (mang cờ)</text>
+
+      <rect x="560" y="994" width="14" height="12" rx="2" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <text x="582" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Khung rẽ nhánh ALT</text>
+
+      <rect x="736" y="992" width="16" height="16" rx="2" fill="#f7f7f8" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="744" y="1004" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">n</text>
+      <text x="760" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Bước thứ n trong 6</text>
+
+      <rect x="924" y="994" width="4" height="12" fill="rgba(26,0,51,0.06)" stroke="#4f4a63" stroke-width="0.8"/>
+      <text x="940" y="1003" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Đang giữ quyền xử lý</text>
+
+      <text x="40" y="1032" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">_acceptance/chong-mat-khoa-byo-giao-dien · quyết định D3 · 01/09/2026</text>
+    </svg>
+  </div>
+</body>
+</html>

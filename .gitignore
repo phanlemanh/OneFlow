@@ -83,3 +83,6 @@ __pycache__/
 
 # Local media scratch — sample clips dropped in during development, never shipped
 /video/
+
+# Editor/tool backups — config-patch.mjs leaves one beside the file it edits.
+*.bak
