@@ -1,113 +1,118 @@
+# Review findings — round 3 (4d8dd32)
+
 ## Trong hợp đồng
 
-### Locale-parity guard freezes a COUNT, not a set — one swap keeps it green
-- file: `src/i18n/locale-parity.test.ts:26`
+### Hình dạng #3 — năm hình dạng lỗi bị thu về MỘT BIT, quan hệ (hình dạng → lý do) không được ghim ở bất kỳ đâu
+- file: `src/lib/settings/env-client.test.ts:44`
+- severity: medium
+- nguồn: measurement
+
+Vòng lặp 5 ca của E13 chỉ khẳng định `expect(read.state).toBe("unreadable")` (dòng 44) — một bit boolean. Nó KHÔNG khẳng định `read.reason.code` (`http`/`not-json`/`no-env`/`network`) hay `status`, tức cả cây phân loại `ReadFailure` mà `env-client.ts` gọi là load-bearing và `read-failure-text.ts` (tệp mới, 4 nhánh) dịch ra câu chữ đều KHÔNG có phép đo nào. Hệ quả nối tiếp ở lớp UI: AC-10 hứa form bị thay bằng "tấm NÊU LÝ DO và câu chưa có gì bị thay đổi", và `expected` của E2 viết rõ "role=alert chứa LÝ DO đọc được VÀ câu ...", nhưng `settings-dialog.unreadable.test.tsx:41-43` chỉ assert `notices()[0].textContent` chứa `SU.unchanged` — không assert chuỗi lý do, cũng không assert `role="alert"`. Không tệp nào (grep `reason`/`cause` toàn bộ 7 tệp test mới) đọc lại chuỗi lý do đã render; ở E6/E7 hàm `storeUnreadableReason` còn do chính test cấp và đầu ra của nó không bao giờ bị assert. Vì vậy 5 ca của E2, 10 ca của E6 và 5 ca của E13 đang khẳng định CÙNG MỘT mệnh đề: một reader gán mọi lỗi thành `{code:"network"}`, hoặc một tấm chặn render lý do rỗng, vẫn xanh toàn bộ ma trận — trong khi lý do chính là thứ duy nhất phân biệt năm hình dạng đó.
+
+### Hình dạng #3 — nửa sau của AC-13 ("không khoá nào để nguyên tiếng Anh") đo bằng sự CÓ MẶT của khoá, không đo quan hệ giá trị
+- file: `src/i18n/locale-parity.test.ts:157`
+- severity: medium
+- nguồn: measurement
+
+AC-13 hứa hai vế: (1) mỗi khoá có mặt ở đủ 5 locale, và (2) "không khoá nào để nguyên tiếng Anh trong bốn tệp còn lại". `locale-parity.test.ts` chỉ làm phẳng thành TẬP KHOÁ (`flatten` → `Set`) rồi so tập (dòng 157 và 166); không có một khẳng định nào so `messages[locale][k]` với `en[k]`. Vế (2) do đó không có phép đo: copy-paste nguyên văn tiếng Anh vào ja/ko/zh cho toàn bộ 22 khoá mới vẫn xanh tuyệt đối, và `expected` của E8 trong evals.yaml cũng chỉ mô tả ba khẳng định về tập khoá nên khoảng trống này không được khai ra ở Cổng 2. (Đo hiện trạng: hôm nay chưa khoá mới nào trùng giá trị en, nên đây là lỗ hổng của phép đo chứ chưa phải hồi quy.)
+
+### Nhánh thoát sớm nuốt trọn assertion — ca đo "names what is missing" xanh khi trả về sai `kind`
+- file: `src/lib/media-library/config.server.test.ts:29`
 - severity: low
-- AC: AC-13
-- source: bugs
-- detail: `JA_DEBT_COUNT = 76` is asserted with `toBe`, and the comment claims it is "checked in BOTH directions" so the debt "can shrink; it can never silently grow". But `jaDebt` is recomputed from the current files each run, so translating one existing debt key while adding one new untranslated key leaves the count at exactly 76 and the suite passes — a new untranslated string ships green.
+- nguồn: measurement
 
-  The second test closes this only for `Settings.storeUnreadable.*` / `Workspace.storeUnreadable.*`; every other namespace is unguarded. Freezing the actual key list (a sorted array compared with `toEqual`) rather than its length would make the claim true.
-- rationale: AC-13 tuyên bố nguyên văn rằng allowlist đóng băng khiến "khoá mới đặt nhầm namespace vẫn bị bắt"; finding chứng minh guard chỉ so đếm nên một hoán đổi (dịch một khoá nợ cũ, thêm một khoá mới chưa dịch) vẫn giữ nguyên số đếm và lọt qua — trực tiếp phủ nhận đúng mệnh đề Then đó.
+Ba ca sửa từ `if (result.ok) return;` thành `if (result.ok || result.kind !== "missing") return;` (dòng 29, 37, 66). Đúng lúc `resolveConfig` hồi quy sang trả `kind: "store-unreadable"` cho ca thiếu cấu hình — chính chiều lỗi đối xứng mà E1 gọi tên là "NỬA ĐÀN ÁP" — thì ba ca này thoát trước mọi `expect`, chỉ còn lại `expect(result.ok).toBe(false)`, và báo PASS. Sửa đúng hình dạng là `expect(result.kind).toBe("missing")` rồi mới narrow, thay vì `return`.
 
-## Ngoài hợp đồng — người quyết ở Gate 2
+## Ngoài hợp đồng
 
-Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
+<a id="ngoai-1"></a>
+### Destructive store wipe is authorized by a client-side read failure, and the server never re-checks the store is really unreadable
+- file: `src/lib/settings/env-client.ts:149`
+- severity: high
+- nguồn: conventions
 
-- **env-client.ts vi phạm chính invariant nó tự khai: literal tiếng Việt trong shared lib rò ra 4 locale**
-  Người dùng thấy gì: Trong một số ít trường hợp phản hồi máy chủ hỏng bất thường, người dùng dùng giao diện tiếng Anh, Nhật, Hàn hoặc Trung có thể thấy một câu tiếng Việt lẫn vào thông báo lỗi khi lưu cài đặt.
-  file: `src/lib/settings/env-client.ts`
-  severity: high
-  Đề xuất: known-limits
+`replaceUnreadableStore()` sends `PUT {env: {}, replaceUnreadableStore: true}`, and `src/app/api/settings/env/route.ts:113-125` only uses that flag to SKIP the 409 refusal — it never verifies that `readEnvStore()` actually returned `unreadable` before calling `saveEnvStore({})`. The only thing gating the flag is `readEnvForBrowser()`, which classifies EVERY non-200 as `unreadable` (env-client.ts:88-93): a 401/403 from the cloud shell's middleware, a proxy 502, an HTML error page, a dropped connection. So the sequence "GET fails transiently -> settings screen shows 'your saved API keys could not be read' -> user clicks the only offered control -> PUT succeeds" erases a perfectly healthy key store. The server is the boundary here and it accepts a client's assertion about server-side state without validating it; the guarantee 'the store really was broken' exists only in the browser. Minimum fix: make the route recompute `readEnvStore()` and reject `replaceUnreadableStore: true` with 409 when the store reads `ok`/`absent`; and give the blocked settings state a Retry before the destroy button.
 
-- **Client bỏ mất mã 409 ENV_STORE_UNREADABLE của server, đẩy ngược người dùng vào đúng cái bẫy feature này định gỡ**
-  Người dùng thấy gì: Nếu kho khoá bị hỏng đúng lúc người dùng bấm Lưu, hệ thống có thể báo nhầm rằng khoá họ nhập sai và mời họ gõ lại, trong khi khoá vẫn đúng và vấn đề thực ra nằm ở kho lưu trữ.
-  file: `src/lib/settings/env-client.ts`
-  severity: medium
-  Đề xuất: known-limits
+<a id="ngoai-2"></a>
+### Settings screen dropped the shared API client, losing the 401 sign-in seam and the request timeout
+- file: `src/components/workspace/settings-dialog.tsx:365`
+- severity: high
+- nguồn: conventions
 
-- **settings-dialog save() nuốt lỗi ghi: chỉ logger.error, không có toast/inline error nào cho người dùng**
-  Người dùng thấy gì: Khi lưu Cài đặt thất bại (mất mạng, lỗi máy chủ), màn hình không báo gì cả — người dùng tưởng đã lưu thành công trong khi thực tế các thay đổi bị mất.
-  file: `src/components/workspace/settings-dialog.tsx`
-  severity: medium
-  Đề xuất: new-contract
+The dialog previously went through `apiGet`/`apiPut` (`src/lib/api/client.ts`), which is the repo's one client-side HTTP wrapper and carries two behaviours this diff silently removes: (1) the documented embedding-shell seam — on 401 it dispatches the cancelable `tf:unauthorized` event so the desktop/cloud shell can raise its sign-in dialog (client.ts:159-175); (2) a 30s AbortController timeout. `readEnvForBrowser`/`put` in env-client.ts use bare `fetch` with neither. Consequences: an expired session in the cloud shell now renders 'Your saved API keys could not be read (the server answered 401)' plus a 'Replace the key store with an empty one…' button instead of a re-auth prompt; and a hung request never settles, so `fetchEnv`'s `finally { setLoading(false) }` never runs and the dialog spins forever with no way out. `src/lib/api/client.ts` is still the pattern used by plugins-dialog and every `src/lib/api/*` module, so this is a one-file departure from the existing pattern, not a repo-wide change.
 
-- **Bằng chứng a11y về thứ bậc heading được đo trên prototype có cấu trúc khác hàng thật**
-  Người dùng thấy gì: Bằng chứng về khả năng tiếp cận (đúng thứ bậc tiêu đề cho người dùng đọc màn hình) mới được đo trên bản mẫu, chưa được xác nhận trên đúng giao diện thật người dùng nhìn thấy.
-  file: `src/components/workspace/node-key-prompt.tsx`
-  severity: medium
-  Đề xuất: known-limits
+<a id="ngoai-3"></a>
+### A failed write is reported to the user as "key saved"
+- file: `src/components/workspace/nodes/base/abi-node-shell.tsx:231`
+- severity: high
+- nguồn: conventions
 
-- **Label readFailed đã chết sau refactor nhưng vẫn bắt buộc trong type, vẫn truyền, vẫn dịch 5 locale**
-  Người dùng thấy gì: Không ảnh hưởng người dùng — đây là một nhãn nội bộ không còn được dùng ở đâu trong sản phẩm, không gây ra thông báo sai nào trên thực tế.
-  file: `src/components/workspace/nodes/add/media-library-config-panel.tsx`
-  severity: low
-  Đề xuất: wont-fix
+When `saveEnvKeys` comes back `{ok: false, reason: "write-failed"}` (HTTP 500, non-JSON response, network drop — nothing was persisted), `useNodeKeyGate.save` sets `phase: "saved-unverified"`. `node-key-prompt.tsx:171-179` renders that phase with a green check and the label `savedUnverified` = "Đã lưu khoá — chưa kiểm tra được" ("Key saved — could not verify"). The user is told their key was stored when it was not, so they close the prompt and the node fails again later with no explanation. This directly contradicts the invariant the rest of the change is built on (never misstate what happened to the store), and the code comment above it acknowledges the write is not a statement about the key while still choosing a phase that asserts a successful save. No test covers this mapping — `store-unreadable-refusal*.test.tsx` supply a `writeFailed` label but never drive the write-failure path. It needs its own phase (e.g. `write-failed`) with neutral copy and no success affordance.
 
-- **Guard one-env-reader chỉ khớp literal nháy kép, teeth cũng chỉ thử một dạng**
-  Người dùng thấy gì: Đây là công cụ kiểm tra nội bộ dùng lúc phát triển, không ảnh hưởng trực tiếp người dùng cuối; rủi ro là một cách viết mã khác trong tương lai né được vòng kiểm tra mà không bị phát hiện.
-  file: `scripts/settings/check-one-env-reader.sh`
-  severity: low
-  Đề xuất: known-limits
+<a id="ngoai-4"></a>
+### `pluginEnv` is blind-cast while `env` is positively validated, and the catch that used to absorb the mismatch is gone
+- file: `src/lib/settings/env-client.ts:110`
+- severity: medium
+- nguồn: conventions
 
-- **Settings save failure is swallowed into logger.error — no user feedback at all**
-  Người dùng thấy gì: Khi lưu Cài đặt thất bại (mất mạng, lỗi máy chủ), màn hình không báo gì cả — người dùng tưởng đã lưu thành công trong khi thực tế các thay đổi bị mất.
-  file: `src/components/workspace/settings-dialog.tsx`
-  severity: medium
-  Đề xuất: new-contract
+`readEnvForBrowser` states its gate as a positive assertion for `env` (200 + parses + plain object) but then does `const pluginEnv = (body as {pluginEnv?: PluginEnvDecl[]})?.pluginEnv ?? []` with no shape check. `settings-dialog.tsx:365-378` no longer wraps `fetchEnv` in try/catch (the old `apiGet` version did), so a body whose `pluginEnv` is not an array throws inside `applyEnv` at `nextDecls.flatMap(...)` (settings-dialog.tsx:345) AFTER `setBlocked(null)` has already run. The `finally` clears `loading`, and the screen renders the normal form with empty/stale rows and an enabled Save — which is exactly the empty-form-overwrites-the-store path this whole change exists to close. Apply the same positive gate to `pluginEnv` (`Array.isArray`) as to `env`, or treat a bad shape as `no-env`.
 
-- **A failed WRITE is rendered on the node as "key is invalid", inviting a retype**
-  Người dùng thấy gì: Nếu việc lưu khoá thất bại đúng lúc kho khoá bị hỏng, người dùng bị báo nhầm là khoá của họ không hợp lệ và bị mời nhập lại, dù khoá không có vấn đề gì.
-  file: `src/components/workspace/nodes/base/abi-node-shell.tsx`
-  severity: medium
-  Đề xuất: known-limits
+<a id="ngoai-5"></a>
+### STORE_UNREADABLE in the media-library node offers no way forward, unlike the other two surfaces
+- file: `src/components/workspace/nodes/add/add-media-library-node.tsx:152`
+- severity: low
+- nguồn: conventions
 
-- **Untranslated Vietnamese literal in `put()` leaks into localized copy**
-  Người dùng thấy gì: Trong một số ít trường hợp phản hồi máy chủ hỏng bất thường, người dùng dùng giao diện tiếng Anh, Nhật, Hàn hoặc Trung có thể thấy một câu tiếng Việt lẫn vào thông báo lỗi khi lưu cài đặt.
-  file: `src/lib/settings/env-client.ts`
-  severity: low
-  Đề xuất: known-limits
+`search()` routes only `MISSING_CONFIG` to the config panel; the new `STORE_UNREADABLE` code falls into the generic `{kind: "failure"}` branch, which renders the `failure.STORE_UNREADABLE` sentence and nothing else. The sentence ends with "open Settings", but this surface renders no `StoreUnreadableNotice` and no `requestOpenSettings()` control — while the key prompt and the config panel both do. Same condition, three surfaces, two different affordances; the escape-hatch consistency the change argues for is not reached on the search path.
 
-- **New STORE_UNREADABLE code missing from both media-library route STATUS maps → answered as 502**
-  Người dùng thấy gì: Khi kho khoá bị hỏng, chức năng tìm kiếm hoặc nhập thư viện media có thể báo nhầm đây là lỗi từ dịch vụ bên ngoài, khiến người dùng đi kiểm tra sai chỗ thay vì được biết đúng nguyên nhân.
-  file: `src/app/api/media-library/search/route.ts`
-  severity: low
-  Đề xuất: known-limits
+<a id="ngoai-6"></a>
+### `Workspace.nodes.addMediaLibrary.readFailed` is now dead in all five locales
+- file: `src/i18n/messages/en.json:1104`
+- severity: low
+- nguồn: conventions
 
-- **Hình dạng 5 — tuyên quét LỚP nhưng chỉ có điểm-case: E12 chỉ ghim 2/8 khoá của MỘT namespace, bỏ trắng cả hai bề mặt node**
-  Người dùng thấy gì: Một số câu chữ hiển thị trên node có thể vẫn sót tiếng Việt chưa dịch khi đổi sang ngôn ngữ khác mà không bị phát hiện trước khi phát hành, vì phép kiểm tra tự động hiện chỉ soát một phần nhỏ số câu liên quan.
-  file: `src/components/workspace/settings-i18n-render.test.tsx`
-  severity: high
-  Đề xuất: known-limits
+`MediaLibraryConfigPanel` dropped the `readFailed` label (the read/refuse decision moved into `saveEnvKeys`), but the key stays in en/ja/ko/vi/zh. `src/i18n/locale-parity.test.ts` only checks presence-parity across locales and en-superset, so an unused key can never go red — the string will drift and be translated forever. Delete it from all five files with the code that stopped using it.
 
-- **Hình dạng 2 — fixture nhãn VIẾT TAY đúng khuôn bên đọc: hàng "abi-node-shell" của ma trận 2×5 không bao giờ dựng abi-node-shell**
-  Người dùng thấy gì: Chưa có bằng chứng tự động xác nhận đầy đủ rằng ô nhập khoá trên node thực sự từ chối lưu đúng như thiết kế khi kho khoá hỏng; phép kiểm tra hiện tại có thể báo đạt dù mối nối thật trên sản phẩm bị sai.
-  file: `src/components/workspace/nodes/store-unreadable-refusal.test.tsx`
-  severity: high
-  Đề xuất: known-limits
+<a id="ngoai-7"></a>
+### A failed key WRITE is shown to the user as "key saved"
+- file: `src/components/workspace/nodes/base/abi-node-shell.tsx:229`
+- severity: high
+- nguồn: bugs
 
-- **Hình dạng 3 — assert "chuỗi có mặt" trong khi lời hứa là QUAN HỆ: `toContain("bg-destructive")` không phân biệt được biến thể thật với class chép tay**
-  Người dùng thấy gì: Chưa có bằng chứng đầy đủ rằng nút cảnh báo vẫn giữ đủ các kiểu hiển thị cần thiết (bao gồm viền focus cho người dùng bàn phím) ở giao diện tối.
-  file: `src/components/workspace/settings-dialog.replace.test.tsx`
-  severity: medium
-  Đề xuất: known-limits
+`saveAndVerifyKey` now returns `{ writeFailed }` for every non-409 PUT failure (network drop, HTTP 500 from `saveEnvStore` throwing, etc.), and `useNodeKeyGate.save` maps that to `setState({ phase: "saved-unverified", ... })`.
 
-- **Hình dạng 4 — khẳng định bị vô hiệu hoá bằng early-return: `kind` không được ghim, ba ca báo PASS sau khi kiểm đúng một điều**
-  Người dùng thấy gì: Nếu tính năng phân biệt 'kho hỏng' và 'chưa cấu hình khoá' bị lỗi trong tương lai, hệ thống kiểm tra tự động hiện tại có thể không phát hiện ra, khiến lỗi cũ có nguy cơ quay lại mà không ai biết trước khi phát hành.
-  file: `src/lib/media-library/config.server.test.ts`
-  severity: medium
-  Đề xuất: known-limits
+`node-key-prompt.tsx` renders `saved-unverified` as a green ✓ plus `labels.savedUnverified` — in production that literal is "Đã lưu khoá — chưa kiểm tra được" ("Key saved — could not verify"). So on a write that demonstrably never landed, the user is told the key WAS stored and only the verification was skipped. They close the prompt, re-run the node, and it fails again for the same missing key with no indication the save was the problem.
 
-- **Hình dạng 4 — khẳng định âm-tính dựa trên regex viết tay, không có đối chứng dương rằng regex khớp được gì**
-  Người dùng thấy gì: Chưa có bằng chứng chắc chắn rằng hai bảng cấu hình trên node thực sự không có nút thoát khi kho khoá hỏng; cách dò tên nút hiện tại có thể bỏ sót nếu chữ trên nút đổi khác đi.
-  file: `src/components/workspace/nodes/store-unreadable-refusal.test.tsx`
-  severity: medium
-  Đề xuất: known-limits
+The commit comment explains why the old `throw` → `phase: "invalid"` was wrong (it blames the key), but the replacement over-corrects into an affirmative false success. `saved-unverified` is only truthful for the one sub-case where the PUT returned 2xx and the body was unparseable (`put()`'s `not-json` branch); the `http`/`network` sub-cases need their own "not saved" state. Nothing in the new test suite covers the write-failure path (`store-unreadable-refusal.test.tsx` drives only read failures), which is why this shipped.
 
-- **Hình dạng 4 — "về trạng thái bình thường" chỉ đo sự VẮNG MẶT của tấm chặn, không có vế dương mà chính evals.yaml đòi**
-  Người dùng thấy gì: Phép kiểm tra tự động cho việc 'màn hình trở lại bình thường sau khi thay kho khoá' hiện chỉ xác nhận không còn cảnh báo, chứ chưa xác nhận ô nhập khoá đã thực sự hiện trở lại, nên một màn hình trống trơn cũng có thể bị coi là đạt.
-  file: `src/components/workspace/settings-dialog.replace.test.tsx`
-  severity: medium
-  Đề xuất: known-limits
+<a id="ngoai-8"></a>
+### A successful write whose response body will not parse is reported as "nothing has been changed"
+- file: `src/lib/settings/env-client.ts:214`
+- severity: medium
+- nguồn: bugs
 
-⚠ Cụm ngoài vùng phủ: 11/17 lỗi rơi vào file không bộ đo nào phủ (src/components/workspace/node-key-prompt.tsx, src/components/workspace/nodes/add/media-library-config-panel.tsx, scripts/settings/check-one-env-reader.sh, src/app/api/media-library/search/route.ts, src/i18n/locale-parity.test.ts, src/components/workspace/settings-i18n-render.test.tsx, src/components/workspace/nodes/store-unreadable-refusal.test.tsx, src/components/workspace/settings-dialog.replace.test.tsx, src/lib/media-library/config.server.test.ts) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+In `put()`, the `response.json()` parse is attempted only after `response.ok` is true — i.e. the server already committed the write via `saveEnvStore(env)`. If the body cannot be parsed (a proxy rewriting a 200, a truncated response), `put()` returns `{ ok: false, reason: "write-failed", detail: { code: "not-json" } }`.
+
+The settings dialog then toasts `Settings.storeUnreadable.writeFailed`, whose copy in all five locales is "Could not save ({reason}). Nothing has been changed." — a factual claim that is false: the keys were written. A user who trusts it will retype or re-enter keys against a store that already changed, and the whole point of this feature is that misleading copy after a partial failure is what drives key loss.
+
+`ok`-but-unparseable is a distinct outcome from a failed write and needs its own arm (write landed, verdicts unknown), the same way `409` already gets its own arm above it.
+
+<a id="ngoai-9"></a>
+### `pluginEnv` is cast unchecked and `fetchEnv` lost its catch — a throw re-opens the empty-saveable-form bug
+- file: `src/lib/settings/env-client.ts:110`
+- severity: medium
+- nguồn: bugs
+
+`readEnvForBrowser` validates `env` with a deliberate positive assertion (object, not array) but takes `pluginEnv` on an unchecked cast: `(body as { pluginEnv?: PluginEnvDecl[] })?.pluginEnv ?? []`. Any non-array truthy value passes through as `EnvClientRead.pluginEnv`.
+
+At the same time `settings-dialog.tsx` `fetchEnv` dropped its `catch` (only `try { ... } finally { setLoading(false) }` remains). The call order inside the try is `setBlocked(null)` → `setReplaceError(null)` → `applyEnv(read.env, read.pluginEnv)`, and `applyEnv` immediately does `nextDecls.flatMap(...)`. A non-array `pluginEnv` throws there, after `blocked` has already been cleared: the rejection is unhandled, `finally` clears `loading`, and the dialog renders the normal form with stale/empty values and an ENABLED Save button — the precise failure mode ("empty form with a working Save, and the next save wrote that emptiness over every stored key") this whole change set exists to eliminate.
+
+Same class of defect as the one the module's own comment calls out for `env`; the fix is to validate `pluginEnv` as an array in the reader (falling back to `[]`), and/or restore a catch in `fetchEnv` that sets `blocked`.
+
+<a id="ngoai-10"></a>
+### Hình dạng #5 — E12 tuyên quét LỚP "copy đến từ catalogue" nhưng chỉ có 2 điểm-case trên 22 khoá mới
+- file: `src/components/workspace/settings-i18n-render.test.tsx:27`
+- severity: medium
+- nguồn: measurement
+
+`const KEYS = ["title", "unchanged"]` (dòng 27) là toàn bộ ma trận của ô đo tự mô tả là "the wire between the message catalogue and the screen". Gói việc này thêm 22 khoá hiển thị mới (`Settings.storeUnreadable.*` 11 khoá + `Workspace.storeUnreadable.*` 11 khoá, đếm trên en.json), trong đó `escape`, `confirmTitle`, `confirmBody`, `confirmCancel`, `confirmOk`, `replaceFailed`, `writeFailed`, `cause.*` KHÔNG có ca nào. Chính lập luận mở đầu tệp — "E8 chỉ đọc JSON, E2/E4/E6 chỉ assert literal tiếng Việt, nên một nhãn ghi cứng tiếng Việt làm cả hai xanh" — áp nguyên vẹn cho 20 khoá còn lại: `settings-dialog.replace.test.tsx` tìm nút xác nhận bằng `SU.confirmOk` lấy từ vi.json, nên copy huỷ-diệt ghi cứng tiếng Việt vẫn xanh mọi ô. Nặng hơn ở namespace `Workspace.storeUnreadable`: hai bề mặt node chỉ được dựng trong E6/E7 với props nhãn do chính test viết tay (`store-unreadable-refusal.test.tsx:48-75`), nên dây nối call-site → `useTranslations` của `abi-node-shell`/`add-media-library-node` không có phép đo nào chạm tới.

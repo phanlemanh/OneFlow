@@ -213,6 +213,21 @@ human_signoff:
 
 ## Ngoài hợp đồng
 
+Chi tiết ở `review-findings.md`. Owner định đoạt từng mục ở Cổng 2.
+
+| # | Phát hiện | Owner chọn |
+|---|---|---|
+| Ngoài-1 | Destructive store wipe is authorized by a client-side read failure, and the server never re-checks the store is really unreadable (high) | |
+| Ngoài-2 | Settings screen dropped the shared API client, losing the 401 sign-in seam and the request timeout (high) | |
+| Ngoài-3 | A failed write is reported to the user as "key saved" (high) | |
+| Ngoài-4 | `pluginEnv` is blind-cast while `env` is positively validated, and the catch that used to absorb the mismatch is gone (medium) | |
+| Ngoài-5 | STORE_UNREADABLE in the media-library node offers no way forward, unlike the other two surfaces (low) | |
+| Ngoài-6 | `Workspace.nodes.addMediaLibrary.readFailed` is now dead in all five locales (low) | |
+| Ngoài-7 | A failed key WRITE is shown to the user as "key saved" (high) | |
+| Ngoài-8 | A successful write whose response body will not parse is reported as "nothing has been changed" (medium) | |
+| Ngoài-9 | `pluginEnv` is cast unchecked and `fetchEnv` lost its catch — a throw re-opens the empty-saveable-form bug (medium) | |
+| Ngoài-10 | Hình dạng #5 — E12 tuyên quét LỚP "copy đến từ catalogue" nhưng chỉ có 2 điểm-case trên 22 khoá mới (medium) | |
+
 ## Analyst
 
 carried từ round trước — baseline không đo lại round này
