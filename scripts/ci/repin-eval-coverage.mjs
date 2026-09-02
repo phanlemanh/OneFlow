@@ -193,17 +193,27 @@ function modeWrite(slug, sha, runId, suites) {
     // fabricated provenance the dossier exists to close. Required, and refused when it
     // describes a red lane, because the ritual says a red lane stops the event.
     if (!suites)
-        die("write can <suites_json> tuong minh — khong co mac dinh, vi mot mang toan 0 CHINH LA bang chung lan xanh ma hai ben doc chap nhan");
+        die(
+            "write can <suites_json> tuong minh — khong co mac dinh, vi mot mang toan 0 CHINH LA bang chung lan xanh ma hai ben doc chap nhan",
+        );
     let arr;
     try {
         arr = JSON.parse(suites);
     } catch {
         die(`suites_json khong phai JSON hop le: ${suites}`);
     }
-    if (!Array.isArray(arr) || arr.length === 0 || !arr.every((n) => Number.isInteger(n)))
-        die(`suites_json phai la mang so nguyen khong rong, nhan duoc: ${suites}`);
+    if (
+        !Array.isArray(arr) ||
+        arr.length === 0 ||
+        !arr.every((n) => Number.isInteger(n))
+    )
+        die(
+            `suites_json phai la mang so nguyen khong rong, nhan duoc: ${suites}`,
+        );
     if (arr.some((n) => n !== 0))
-        die(`lan co suite thoat khac 0 (${arr.join(",")}) — nghi thuc DUNG o day: khac phuc nguyen nhan roi phong lan MOI, khong ghi dong repin`);
+        die(
+            `lan co suite thoat khac 0 (${arr.join(",")}) — nghi thuc DUNG o day: khac phuc nguyen nhan roi phong lan MOI, khong ghi dong repin`,
+        );
     const prev = verifiedCommit(slug);
     if (!prev)
         die(
@@ -216,12 +226,16 @@ function modeWrite(slug, sha, runId, suites) {
     // have swallowed anything: a line that is valid, computable, and permanently
     // vacuous. It happens whenever evidence-report is updated BEFORE this is called.
     if (prev === sha)
-        die(`prev_sha == sha (${sha.slice(0, 12)}) — verified_commit da duoc doi TRUOC khi goi write; dong repin nhu vay khong bao gio ket luan duoc gi`);
+        die(
+            `prev_sha == sha (${sha.slice(0, 12)}) — verified_commit da duoc doi TRUOC khi goi write; dong repin nhu vay khong bao gio ket luan duoc gi`,
+        );
     // `=== null`, not `!`: `merge-base --is-ancestor` prints NOTHING on success, so
     // gitOk returns "" -- and `!""` is true, which would make this refuse every honest
     // write. Only `null` means the command failed.
     if (gitOk("merge-base", "--is-ancestor", prev, sha) === null)
-        die(`verified_commit cu (${prev.slice(0, 12)}) khong phai to tien cua ${sha.slice(0, 12)} — hai sha khong nam tren mot duong lich su`);
+        die(
+            `verified_commit cu (${prev.slice(0, 12)}) khong phai to tien cua ${sha.slice(0, 12)} — hai sha khong nam tren mot duong lich su`,
+        );
     const line = JSON.stringify({
         ts: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
         kind: "repin",
@@ -377,7 +391,10 @@ function modeNewlines(base) {
 const isMain = (() => {
     if (!process.argv[1]) return false;
     try {
-        return import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href;
+        return (
+            import.meta.url ===
+            pathToFileURL(realpathSync(process.argv[1])).href
+        );
     } catch {
         return false;
     }
@@ -397,7 +414,10 @@ if (isMain) {
         process.exit(2);
     }
     table[mode]();
-} else if (process.argv[1] && /repin-eval-coverage\.mjs$/.test(process.argv[1])) {
+} else if (
+    process.argv[1] &&
+    /repin-eval-coverage\.mjs$/.test(process.argv[1])
+) {
     // Invoked as a program but not recognised as the entry point: say so rather than
     // exit 0 in silence. A guard that can become a no-op without a word is worse than a
     // guard that is absent, because its green is read as a measurement.
