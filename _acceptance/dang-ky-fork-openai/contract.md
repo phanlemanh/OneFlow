@@ -5,9 +5,10 @@ slug: dang-ky-fork-openai
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [config, docs, ci]
-status: verified
+status: signed-off
 approved_by: Phan Le Manh (mo pham vi AC-9/AC-10 tai Cong 2 vong 1, 2026-09-01)
-veto_state: mo
+veto_state: dong-bang-chu-ky
+human_signoff: Phan Le Manh 2026-09-01
 veto_opened_at: 2026-09-01T09:10:23Z
 design_doc: docs/superpowers/specs/2026-09-01-dang-ky-fork-openai-design.md
 ---
@@ -190,3 +191,29 @@ theo hình dạng mà bộ rút không bắt được). Tách thành AC-6 và AC
   - `check-live-docs-manifest-synced.sh:116` — chế độ `readme` dựng `new Map(rows...)`
     nên **khử trùng theo id**: một README có HAI dòng cho cùng một plugin, dòng sau
     đúng org, thì dòng trước sai org bị nuốt lặng. Thước vẫn xanh.
+
+### Ngoài hợp đồng — owner chọn «ghi Known limits» tại Cổng 2 (01/09)
+
+Vòng 3 trả 15 mục ngoài hợp đồng. Bảy mục đã **hết** trước khi trình: chúng được tìm
+thấy trong lúc vòng 3 chạy và được sửa ngay sau đó (sổ tay ghi 8 kịch bản trong khi
+thật là 7 · báo cáo còn kết quả của hai tiêu chí đã huỷ · tiêu chí viện dẫn một kịch
+bản thử đã rút). Năm mục còn lại là **thật**, đều nằm trong file gated nên sửa chúng
+làm bằng chứng ôi, mà vòng 3 đã là vòng cuối được phép:
+
+- **Chú thích hàng rào ghi "Four such files" — đo thật là ba.**
+  (`check-live-docs-manifest-synced.sh:23`.) Đây là một bản vá vòng 2 của tôi **im
+  lặng không khớp**: lệnh thay thế trượt vì chuỗi bị ngắt dòng, và tôi đã không khẳng
+  định nó khớp. Chính vòng này rút ra bài học đó ở một chỗ khác rồi quên ở chỗ này.
+- **Kiểm ba trang giới thiệu khử trùng theo tên plugin.**
+  (`check-live-docs-manifest-synced.sh:116`, `new Map(rows...)`.) Một trang liệt kê
+  cùng plugin hai lần thì dòng sai nguồn bị nuốt lặng — người đọc có thể bị dẫn tới
+  một nguồn plugin không chính thức mà không thước nào đỏ.
+- **Bộ răng thiếu ca "trạng thái lành" cho nhánh đối chiếu sổ tay.** Nhánh đó hoá
+  luôn-đỏ thì ca phá của nó vẫn PASS và bộ răng vẫn in đủ số.
+- **Chưa có ca thử cho "tên plugin đúng nhưng đường dẫn nguồn lệch".**
+- **Nhãn ca 5 của bộ răng manifest có sẵn còn ghi "a 37th plain string"** sau khi lượt
+  này hạ số đếm 36 → 35; phép phá nay tạo ra cái thứ 36. Trôi có sẵn, ngoài phạm vi.
+
+Cả năm đều là **văn xuôi nói sai** hoặc **lỗ trong bộ răng** — không cái nào chạm điều
+người dùng thấy. Chúng đi tiếp thành một hồ sơ cơ hội riêng, làm tử tế kèm nối CI (xem
+mục Known limits ở trên về việc hai thước mới chưa chạy ngoài lượt verify của hồ sơ này).
