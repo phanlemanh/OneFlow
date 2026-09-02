@@ -145,14 +145,19 @@ evals:
       - "scripts/plugins/check-live-docs-manifest-synced.sh"
       - "scripts/plugins/check-live-docs-manifest-teeth.sh"
     expected: >-
-      exit 0 và stdout mang ĐỦ TÁM dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 8/8 ca`
-      — bảy ca cũ cộng ca mới `readme-trung-sai-org`. Ca mới chèn vào bản sao một README
-      một dòng thứ hai cho một plugin đã có, org sai, rồi đòi thước thoát KHÁC 0 và
-      thông điệp `FAIL:` nêu đích danh id lẫn tên file. Lượt `--case` lẻ vẫn in
-      `PARTIAL: n/8` và KHÔNG in dòng `OK:` — tính chất đó do ca `khong-tuyen-qua` giữ,
-      và con số 8 trong nó phải đổi theo. Thông điệp `FAIL:` của ca mới phải nêu đích
-      danh **id**, **tên file** VÀ **org sai** — ba thứ, vì hai thứ đầu cũng xuất hiện
-      trong ca `readme-missing` nên chúng không phân biệt được hai lỗi.
+      exit 0 và stdout mang ĐỦ CHÍN dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 9/9 ca`
+      — bảy ca cũ cộng HAI ca mới. `readme-trung-sai-org` chèn vào bản sao một README một
+      dòng thứ hai cho plugin ĐÃ CÓ trong manifest (nên tập id và số đếm KHÔNG đổi), org
+      sai, rồi đòi thước thoát KHÁC 0 và thông điệp `FAIL:` nêu ĐỦ BA thứ — **id**, **tên
+      file**, **org sai** — vì hai thứ đầu cũng xuất hiện trong ca `readme-missing` nên
+      chúng không phân biệt được hai lỗi. `readme-trung-org-dung` liệt kê hai lần với org
+      ĐÚNG và phải **XANH**: đo 01/09 cho thấy mỗi README đã nêu ba plugin hai lần một
+      cách hợp lệ (danh mục + ví dụ Quickstart), nên một lệnh cấm trùng sẽ làm CI đỏ trên
+      tài liệu đúng. Lượt `--case` lẻ in `PARTIAL: n/9`, không in `OK:`.
+
+      Chiều đỏ của ca mới được chứng minh trên VẬT HỎNG LẤY TỪ LỊCH SỬ (`git show
+      <commit trước bản vá>`), không trên bản mô phỏng gõ tay: bản gõ tay của tôi giữ
+      dòng ĐẦU trong khi lỗi thật giữ dòng CUỐI, và ca vẫn "PASS" trên bản sai đó.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- D. Cái giá nhánh này áp lên hồ sơ khác ----------

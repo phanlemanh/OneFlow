@@ -36,9 +36,15 @@ BASE="${2:-origin/main}"
 READMES="README.md docs/README_ZH.md docs/README_JA.md"
 
 case "$MODE" in
-readme|claude|orphans) ;;
+readme|claude) [ "$#" -le 1 ] || { echo "FAIL: mode $MODE nhan dung 1 doi so, thua: ${*:2}" >&2; exit 2; } ;;
+orphans)       [ "$#" -le 2 ] || { echo "FAIL: mode orphans nhan toi da 2 doi so, thua: ${*:3}" >&2; exit 2; } ;;
 *) echo "usage: $(basename "$0") readme|claude|orphans [base-ref]" >&2; exit 2 ;;
 esac
+# Rejecting extra arguments is not pedantry. check-gate-guards-job.sh appends a junk
+# flag to every extracted command and requires the command to refuse it -- otherwise
+# its green half cannot tell "the guard caught the drift" from "any command is
+# broken". A guard that silently ignores a typo'd flag is a guard whose green means
+# nothing.
 
 if [ "$MODE" = orphans ]; then
     cd "$ROOT"
@@ -113,14 +119,32 @@ READMES="$READMES" node -e '
         const text = fs.readFileSync(file, "utf8");
         const rows = [...text.matchAll(
             /^- \[((?:one|tong)flow-(?:modal|api)-[a-z0-9-]+)\]\(https:\/\/github\.com\/([^\/]+)\/([a-z0-9-]+)\)/gm)];
-        const seen = new Map(rows.map(r => [r[1], { org: r[2], repo: r[3] }]));
-        console.log(`${file}: ${seen.size} id extracted · manifest: ${want.size}`);
-        for (const [id, org] of want) {
-            const got = seen.get(id);
-            if (!got) { console.error(`FAIL: ${file} does not list \`${id}\`, which the manifest registers`); bad++; continue; }
-            if (got.org !== org) { console.error(`FAIL: ${file} points \`${id}\` at org \`${got.org}\`; the manifest puts it under \`${org}\``); bad++; }
-            if (got.repo !== id) { console.error(`FAIL: ${file} links \`${id}\` to repository \`${got.repo}\``); bad++; }
+        // Do NOT build a Map keyed by id. That silently keeps the LAST row for a
+        // repeated plugin and drops the earlier one, so a README listing the same
+        // plugin twice -- second row correct, first row pointing at the wrong org --
+        // passes. That is the guard lying about the very thing it guards.
+        //
+        // But a repeat is NOT itself an error: measured 2026-09-01, each README
+        // legitimately names three plugins twice, once in the Official-plugins
+        // catalogue and once in the Quickstart install example. Banning repeats
+        // would turn CI red on correct documentation.
+        //
+        // So: keep EVERY row, check the org on EVERY row, and compare id SETS.
+        const seen = new Map();
+        for (const r of rows) {
+            const [, id, org, repo] = r;
+            // Record the row BEFORE any early exit: the extra-id pass below reads
+            // `seen`, so skipping an unknown id here makes that pass blind to it.
+            if (!seen.has(id)) seen.set(id, { org, repo });
+            const want_org = want.get(id);
+            if (want_org === undefined) continue;      // reported by the extra-id pass
+            if (org !== want_org)
+                { console.error(`FAIL: ${file} points \`${id}\` at org \`${org}\`; the manifest puts it under \`${want_org}\``); bad++; }
+            if (repo !== id)
+                { console.error(`FAIL: ${file} links \`${id}\` to repository \`${repo}\``); bad++; }
         }
+        for (const id of want.keys())
+            if (!seen.has(id)) { console.error(`FAIL: ${file} does not list \`${id}\`, which the manifest registers`); bad++; }
         for (const id of seen.keys())
             if (!want.has(id)) { console.error(`FAIL: ${file} lists \`${id}\`, which is not in the manifest`); bad++; }
     }

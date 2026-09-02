@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # cong-tu-canh-minh — guards for AC-6..AC-9 and AC-13.
 #
-# Usage: check-gate-guards-job.sh <shape|no-softening|teeth|job-count|reachable|suite-keys|a11y-dist-dir>
+# Usage: check-gate-guards-job.sh <shape|no-softening|teeth|exit-propagates|job-count|reachable|suite-keys|a11y-dist-dir>
 #
 # The acceptance gate's own two drift guards had ZERO references in
 # .github/workflows/ci.yml (measured 31/08), so they only ran when somebody
@@ -18,7 +18,7 @@ cd "$(git rev-parse --show-toplevel)"
 repo_root=$(pwd)
 
 WF=.github/workflows/ci.yml
-MODE="${1:?usage: check-gate-guards-job.sh <shape|no-softening|teeth|job-count|reachable|suite-keys|a11y-dist-dir>}"
+MODE="${1:?usage: check-gate-guards-job.sh <shape|no-softening|teeth|exit-propagates|job-count|reachable|suite-keys|a11y-dist-dir>}"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 
@@ -33,7 +33,32 @@ job_block() {
 
 # The two guard commands this package wires in. Named once so every mode agrees
 # on what it is looking for.
-GUARD_NEEDLES=(check-roadmap-fresh.sh check-product-map.mjs check-eval-filters.mjs)
+# Needles are matched against the `run:` lines of the acceptance-gate job. A needle
+# must resolve to exactly ONE row, so the live-docs guard carries its mode in the
+# needle: three steps run the same script with different modes.
+GUARD_NEEDLES=(
+    check-roadmap-fresh.sh
+    check-product-map.mjs
+    check-eval-filters.mjs
+    "check-live-docs-manifest-synced.sh readme"
+    "check-live-docs-manifest-synced.sh claude"
+    "check-live-docs-manifest-synced.sh orphans"
+    check-live-docs-manifest-teeth.sh
+)
+
+# Needles whose GREEN half runs (on the real repo, which has git history) but whose
+# RED half cannot be produced in the throwaway probe tree. Named here rather than
+# quietly absent: a silent exclusion is the exact class this file exists to catch.
+# Format: "<needle>|<reason>".
+TEETH_SKIP=(
+    "check-live-docs-manifest-synced.sh orphans|doc base ref qua git show; cay tham do la thu muc mktemp khong co .git"
+    "check-live-docs-manifest-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
+)
+teeth_skipped() {
+    local n="$1" e
+    for e in "${TEETH_SKIP[@]}"; do [ "${e%%|*}" = "$n" ] && return 0; done
+    return 1
+}
 
 case "$MODE" in
 shape)
@@ -225,6 +250,12 @@ teeth)
     done
     cp -R scripts "$probe/t/scripts"
     cp -R _acceptance/config.yaml "$probe/t/_acceptance/config.yaml"
+    # The live-docs guard reads these; without them its red half would fail because
+    # a file is missing, not because drift was caught — a red that proves nothing.
+    mkdir -p "$probe/t/config"
+    cp README.md CLAUDE.md "$probe/t/"
+    cp docs/README_ZH.md docs/README_JA.md "$probe/t/docs/"
+    cp config/official-plugins.json "$probe/t/config/"
     # node_modules so the eval-filter guard fails on a BROKEN FILTER rather than
     # on a missing tool. Without it that guard went "red" for the wrong reason
     # and this mode credited a red that proved nothing — the vague-red trap the
@@ -251,9 +282,26 @@ c = root / "_acceptance" / "config.yaml"
 t = c.read_text(encoding="utf-8")
 assert "-t 'seam'" in t, "fixture anchor moved"
 c.write_text(t.replace("-t 'seam'", "-t 'ten ca khong ton tai'", 1), encoding="utf-8")
+# Drop one README entry the manifest registers -> `readme` mode must go red.
+r2 = root / "docs" / "README_ZH.md"
+t2 = r2.read_text(encoding="utf-8")
+anchor = "- [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini)"
+assert anchor in t2, "fixture anchor moved: README_ZH gemini row"
+r2.write_text("".join(l for l in t2.splitlines(keepends=True) if not l.startswith(anchor)), encoding="utf-8")
+# Name an id CLAUDE.md has no manifest origin entry for -> `claude` mode must go red.
+cm = root / "CLAUDE.md"
+t3 = cm.read_text(encoding="utf-8")
+assert "`oneflow-api-openai`" in t3, "fixture anchor moved: CLAUDE.md origin id list"
+cm.write_text(t3.replace("`oneflow-api-openai`", "`oneflow-api-openai`, `tongflow-api-openai`", 1), encoding="utf-8")
 PERTURB
 
-    for cmd in "${cmds[@]}"; do
+    red_cmds=()
+    for i in "${!cmds[@]}"; do
+        if teeth_skipped "${GUARD_NEEDLES[$i]}"; then continue; fi
+        red_cmds+=("${cmds[$i]}")
+    done
+
+    for cmd in "${red_cmds[@]}"; do
         # The probe tree holds the CONFIG and the docs the guards read, but not
         # the source tree — symlinking src breaks vitest's module resolution
         # and hard-linking it just moves the failure to config/. So the
@@ -288,7 +336,74 @@ PERTURB
 
     cleanup
     trap - EXIT
-    echo "OK: ${#cmds[@]} lệnh (rút từ $WF) xanh trên cây lành và đỏ trên cây đã phá; cờ rác bị từ chối"
+
+    # Counts as a MEASUREMENT, not a remark. Without the invariant, "forgot to write
+    # a perturbation for a needle" and "deliberately skipped it" print the same green.
+    ke=${#cmds[@]}; pha=${#red_cmds[@]}; bo=${#TEETH_SKIP[@]}
+    echo "KÊ=$ke · PHÁ=$pha · BỎ QUA=$bo"
+    for e in "${TEETH_SKIP[@]}"; do echo "  bỏ qua: ${e%%|*} — ${e#*|}"; done
+    [ "$ke" -eq "$((pha + bo))" ] \
+        || fail "kê $ke needle nhưng phá $pha + bỏ qua $bo = $((pha + bo)) — một needle không có phép phá và cũng không được khai bỏ qua"
+    echo "OK: $ke lệnh (rút từ $WF) xanh trên cây lành; $pha đỏ trên cây đã phá; $bo bỏ qua CÓ TÊN; cờ rác bị từ chối"
+    ;;
+
+exit-propagates)
+    # AC-2 of noi-thuoc-tai-lieu-vao-ci. The half `no-softening` cannot reach.
+    #
+    # `no-softening` scans for three literal strings (continue-on-error, || true,
+    # set +e). That is string-presence standing in for a relation. ci.yml declares
+    # no `shell:`, so `run:` executes under `bash -e` WITHOUT `pipefail` (measured
+    # 2026-09-01) — `… synced.sh readme | tee /tmp/out` therefore swallows the exit
+    # code while containing none of the three strings, and the scan still prints OK.
+    #
+    # So measure the relation: swap the script each extracted command invokes for a
+    # stub that exits 1, run the command string UNCHANGED, and require a non-zero
+    # exit. A step whose failure cannot reach the job is a step that never guards.
+    block=$(job_block)
+    [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF"
+
+    stub_root=$(mktemp -d)
+    cleanup_stub() { rm -rf "$stub_root"; }
+    trap cleanup_stub EXIT
+
+    checked=0
+    for needle in "${GUARD_NEEDLES[@]}"; do
+        cmd=$(printf '%s\n' "$block" | sed -n "s|^[[:space:]]*run:[[:space:]]*\(.*${needle}.*\)$|\1|p" | tail -1)
+        [ -n "$cmd" ] || fail "không rút được lệnh chạy $needle ra từ $WF"
+
+        # The script the command invokes: first token that looks like a repo path.
+        target=$(printf '%s\n' "$cmd" | tr ' ' '\n' | grep -m1 -E '^scripts/.*\.(sh|mjs|js)$')
+        [ -n "$target" ] || fail "không tìm được script mà lệnh này gọi: $cmd"
+
+        rm -rf "$stub_root/t"; mkdir -p "$stub_root/t/$(dirname "$target")"
+        # Copy the whole repo shallowly so relative paths still resolve, then blind
+        # the ONE script under test. Symlink the rest; only the stub is real.
+        for entry in *; do
+            [ "$entry" = "$(printf '%s' "$target" | cut -d/ -f1)" ] && continue
+            ln -s "$repo_root/$entry" "$stub_root/t/$entry" 2>/dev/null || true
+        done
+        cp -R "$repo_root/$(printf '%s' "$target" | cut -d/ -f1)" "$stub_root/t/" 2>/dev/null || true
+        printf '#!/usr/bin/env bash\nexit 1\n' > "$stub_root/t/$target"
+        chmod +x "$stub_root/t/$target"
+
+        # `bash -e -c`, NOT eval: this file runs under `set -euo pipefail`, and an
+        # inherited pipefail turns `stub | tee` into a non-zero exit -- the measurement
+        # would then repair the very defect it hunts. GitHub runs `run:` as
+        # `bash -e {0}` with NO pipefail, so the probe must use the same options.
+        set +e
+        (cd "$stub_root/t" && bash -e -c "$cmd") >/tmp/cggj-prop.log 2>&1
+        rc=$?
+        set -e
+        [ "$rc" -ne 0 ] \
+            || fail "step chạy '$needle' KHÔNG truyền được mã thoát: script bị thay bằng stub exit 1 mà lệnh vẫn thoát 0 — '$cmd'"
+        checked=$((checked + 1))
+    done
+
+    cleanup_stub
+    trap - EXIT
+    [ "$checked" -eq "${#GUARD_NEEDLES[@]}" ] \
+        || fail "chỉ kiểm $checked / ${#GUARD_NEEDLES[@]} needle"
+    echo "OK: cả $checked lệnh trong job đều truyền mã thoát khác 0 khi script chúng gọi hỏng"
     ;;
 
 suite-keys)

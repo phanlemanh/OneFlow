@@ -146,6 +146,24 @@ jobs:
       - name: Product map freshness
         run: node scripts/ci/check-product-map.mjs
 
+      # Four steps, not one. The teeth mode of check-gate-guards-job.sh extracts the
+      # command for each needle with `tail -1`, so a single combined `a && b && c`
+      # line makes every needle resolve to the same row and only the last one is
+      # ever proven. One step per mode keeps each needle addressable.
+      - name: READMEs match the plugin manifest
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh readme
+      - name: CLAUDE.md lists the manifest origin ids
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh claude
+      - name: No new orphan plugin icon
+        # `origin/main`, not a `${{ }}` expression: the teeth mode of
+        # check-gate-guards-job.sh EXTRACTS this exact string and RUNS it in a shell,
+        # where a GitHub expression is not a value but a brace-expansion accident. The
+        # cost is that a PR targeting some other base compares its icon set against
+        # main, which is the comparison we actually want anyway.
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
+      - name: Live-docs guard still has teeth
+        run: bash scripts/plugins/check-live-docs-manifest-teeth.sh
+
       # `vitest list` needs node_modules, and this job had none — hence the two
       # steps above it. They go HERE rather than on `unit-tests`, which already
       # has the dependencies, because check-gate-guards-job.sh deep-equals the

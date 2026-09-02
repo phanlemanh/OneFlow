@@ -31,14 +31,18 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 GUARD_REL="scripts/plugins/check-live-docs-manifest-synced.sh"
 ONLY=""
-[ "${1:-}" = "--case" ] && ONLY="${2:-}"
+case "${1:-}" in
+"")       ;;
+--case)   ONLY="${2:-}"; [ "$#" -le 2 ] || { echo "FAIL: thua doi so: ${*:3}" >&2; exit 2; } ;;
+*)        echo "FAIL: doi so la '${1}' — chi nhan '--case <ten>'" >&2; exit 2 ;;
+esac
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 FAILED=0
-KNOWN="healthy readme-missing readme-extra org-sai-chuoi-tran org-sai-muc-origin claude-stale-id khong-tuyen-qua"
-TOTAL=7
+KNOWN="healthy readme-missing readme-extra org-sai-chuoi-tran org-sai-muc-origin claude-stale-id readme-trung-org-dung readme-trung-sai-org khong-tuyen-qua"
+TOTAL=9
 RAN=0
 
 if [ -n "$ONLY" ] && ! printf '%s\n' $KNOWN | grep -qx "$ONLY"; then
@@ -118,6 +122,25 @@ T="$(fresh_tree)"
 sed -i.bak 's#\[oneflow-api-openai\](https://github.com/phanlemanh/#[oneflow-api-openai](https://github.com/tong-io/#' "$T/README.md"
 assert_case org-sai-muc-origin red readme "oneflow-api-openai" "README.md"
 
+# --- a plugin listed TWICE with the correct org is legitimate and must stay green.
+# Measured 2026-09-01: each README already names three plugins twice, once in the
+# Official-plugins catalogue and once in the Quickstart install example. A rule that
+# banned repeats would turn CI red on correct documentation, so this case is the
+# guard rail against over-correcting the case below it.
+T="$(fresh_tree)"
+awk '/^- \[tongflow-api-deepseek\]/ && !d { print; print; d=1; next } { print }' \
+    "$T/README.md" > "$T/_r" && mv "$T/_r" "$T/README.md"
+assert_case readme-trung-org-dung green readme
+
+# --- the hole this round closes: listed twice, one row pointing at the wrong org.
+# The id is ALREADY in the manifest and the id SET is unchanged, so a guard that
+# only compares counts stays green -- the failure must come from the org, and the
+# message must name the org to prove it did.
+T="$(fresh_tree)"
+awk '/^- \[tongflow-api-deepseek\]\(https:\/\/github.com\/tong-io\// && !d { print "- [tongflow-api-deepseek](https://github.com/ke-gia-mao/tongflow-api-deepseek) - x"; d=1 } { print }' \
+    "$T/README.md" > "$T/_r" && mv "$T/_r" "$T/README.md"
+assert_case readme-trung-sai-org red readme "tongflow-api-deepseek" "README.md" "ke-gia-mao"
+
 # --- CLAUDE.md names an id the manifest has no origin entry for ---
 T="$(fresh_tree)"
 sed -i.bak 's#`oneflow-api-openai`#`oneflow-api-openai`, `tongflow-api-openai`#' "$T/CLAUDE.md"
@@ -144,4 +167,4 @@ if [ -n "$ONLY" ]; then
     exit 0
 fi
 [ "$RAN" -eq "$TOTAL" ] || { echo "FAIL: chi $RAN/$TOTAL ca chay ma khong khai --case" >&2; exit 1; }
-echo "OK: $RAN/$TOTAL ca — 1 doi chung duong + 6 phep pha (readme + claude modes), va khong tuyen qua so ca da chay"
+echo "OK: $RAN/$TOTAL ca — 2 doi chung duong + 6 phep pha (readme + claude modes) + 1 ca tu soi harness"

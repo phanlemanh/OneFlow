@@ -5,7 +5,7 @@ slug: noi-thuoc-tai-lieu-vao-ci
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, config]
-status: approved
+status: implemented
 approved_by:
 veto_state: mo
 veto_opened_at: 2026-09-02T01:48:14Z
@@ -79,17 +79,32 @@ When chạy chế độ `readme`,
 Then nó **đỏ**, và thông điệp `FAIL:` nêu đích danh **id**, **tên file**, và **org sai**.
 Ba điều kiện của fixture là bắt buộc: nếu id trùng làm số đếm nhảy 39 → 40 thì thước có
 thể đỏ vì *lệch số đếm* chứ không vì *sai org*, và lỗ thật vẫn nguyên trong khi hồ sơ
-tuyên đã đóng. Đối chứng: cùng plugin liệt kê hai lần với org **đúng** cũng phải đỏ (mục
-trùng là lỗi ở cả hai chiều) — khai rõ để phân biệt "bắt trùng" với "bắt sai org". Trước bản vá, bộ đọc dựng
+tuyên đã đóng.
+
+**Đối chứng dương, và nó đi NGƯỢC đề nghị của phản biện:** cùng plugin liệt kê hai lần
+với org **đúng** phải **XANH**. Phản biện đề nghị coi mọi mục trùng là lỗi; đo 01/09 bác
+điều đó — mỗi README **đã** nêu ba plugin hai lần một cách hợp lệ, một lần ở danh mục
+*Official plugins* và một lần ở ví dụ *Quickstart → Install plugins*. Cấm trùng là làm CI
+đỏ trên tài liệu **đúng**. Nên luật là: **giữ mọi dòng, kiểm org TỪNG dòng, so tập id
+bằng tập phân biệt** — không khử trùng (mất dòng sai), không cấm trùng (cấm cách viết
+hợp lệ). Trước bản vá, bộ đọc dựng
 `new Map(rows...)` nên khử trùng theo id: dòng sai org bị nuốt lặng và thước vẫn xanh
 — thước nói dối về đúng thứ nó canh, và nối một thước như vậy vào CI là nhân bản lời
 nói dối lên mọi PR.
 
-**AC-7 — Bộ răng của thước có ca cho lỗ đó.**
+**AC-7 — Bộ răng của thước có ca cho lỗ đó, và một ca giữ nó khỏi sửa quá tay.**
 Given bộ răng đang có 7 ca,
 When chạy đầy đủ,
-Then có **8** dòng `CASE <tên>: PASS`, gồm ca mới cho mục-trùng-sai-org, và dòng chốt
-đếm đúng `8/8`. Lượt `--case` lẻ vẫn in `PARTIAL: n/8` và không in dòng `OK:`.
+Then có **9** dòng `CASE <tên>: PASS` và dòng chốt đếm đúng `9/9` — hai ca mới là
+`readme-trung-sai-org` (phải ĐỎ, thông điệp nêu **id**, **tên file**, **org sai**) và
+`readme-trung-org-dung` (phải **XANH**, giữ bản vá khỏi biến thành lệnh cấm trùng).
+Lượt `--case` lẻ vẫn in `PARTIAL: n/9` và không in dòng `OK:`.
+
+**Ca `readme-trung-sai-org` phải được chứng minh trên VẬT HỎNG LẤY TỪ LỊCH SỬ** — bản
+guard ở commit trước bản vá, lấy bằng `git show` — chứ không phải trên một bản mô phỏng
+gõ tay. Đo 01/09: bản gõ tay của tôi giữ dòng **đầu**, còn lỗi thật giữ dòng **cuối**;
+hai hành vi ngược nhau, và ca vẫn "PASS" trên bản mô phỏng sai. Trên vật hỏng thật nó
+đỏ đúng như phải thế.
 
 **AC-9 — Bốn step không làm guard đếm-checkout của kho khác đỏ.**
 Given `scripts/ci/check-action-pins.sh` khẳng định `EXPECTED_CHECKOUT_SITES=8`, và
