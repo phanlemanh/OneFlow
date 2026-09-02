@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 4d8dd32cf734bcc668e1d465850d97f88be737bb
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-02
 ---
 
 # Evidence Report: chong-mat-khoa-byo-giao-dien
@@ -211,22 +211,71 @@ human_signoff:
 
 ## Known limits
 
-## Ngoài hợp đồng
+1. **Thước đo yếu hơn chữ nó tự nhận — ba mục, đều TRONG hợp đồng.** (a) Năm hình dạng
+   lỗi đọc bị thu về MỘT BIT ở tầng khẳng định, nên quan hệ (hình dạng → lý do hiển thị)
+   không được đo — một bản vá trả cùng một lý do cho cả năm vẫn xanh. (b) Nửa sau của
+   AC-13 («không khoá nào để nguyên tiếng Anh») đo bằng sự CÓ MẶT của khoá thay vì quan
+   hệ giữa chuỗi hiển thị và tệp thông điệp. (c) Một nhánh thoát sớm trong
+   `config.server.test.ts` nuốt trọn assertion của ca «names what is missing»: trả về sai
+   `kind` thì ca `return` sớm và vitest báo PASS với 0 khẳng định chạy. Verdict PASS đứng,
+   nhưng nó đứng trên ba ô yếu hơn mô tả của chúng.
+
+2. **`pluginEnv` bị cast mù trong khi `env` được kiểm dương, và `fetchEnv` mất `try/catch`**
+   (Ngoài-4, Ngoài-9). `readEnvForBrowser` khẳng định dương cho `env` rồi
+   `(body as {pluginEnv?: …}).pluginEnv ?? []` không kiểm hình dạng; `settings-dialog.tsx`
+   không còn bọc `fetchEnv`. Một thân trả về có `pluginEnv` không phải mảng sẽ ném TRONG
+   `applyEnv`, SAU khi `setBlocked(null)` đã chạy — màn hiện form bình thường với ô rỗng và
+   nút Lưu bấm được, tức mở LẠI chính đường form-rỗng-ghi-đè mà hồ sơ này đóng.
+
+3. **Lượt ghi THÀNH CÔNG mà thân trả về không parse được thì báo là «chưa đổi gì»**
+   (Ngoài-8). Đối xứng với Ngoài-3/7 và cùng gốc: `put()` không phân biệt được «2xx nhưng
+   thân lạ» với «không tới nơi».
+
+4. **E12 tuyên quét LỚP «copy đến từ catalogue» nhưng chỉ có hai điểm-case** (Ngoài-10).
+   Nó ghim quan hệ cho hai khoá của tấm chặn, không cho mọi nhãn — nhãn thứ ba ghi cứng
+   vẫn lọt.
+
+5. **Node media-library ở trạng thái `STORE_UNREADABLE` không có lối đi tiếp** (Ngoài-5).
+   `search()` chỉ định tuyến `MISSING_CONFIG` sang panel cấu hình; mã mới rơi vào nhánh
+   chung, render một câu kết thúc bằng «mở Cài đặt» mà không có nút mở Cài đặt. Cùng một
+   điều kiện, ba bề mặt, hai kiểu lối thoát.
+
+6. **`Workspace.nodes.addMediaLibrary.readFailed` nay là khoá chết ở cả năm locale**
+   (Ngoài-6). `locale-parity.test.ts` chỉ đo parity nên một khoá không dùng không bao giờ
+   đỏ được — nó sẽ được dịch mãi.
+
+7. **Cuộc đua `build/**` ↔ typecheck: đã đóng, nhưng cách đóng nằm ngoài phạm vi Cổng 1.**
+   Hai sửa hạ tầng repo-wide (`tsconfig.json` exclude, và gộp `executors.test.build_typecheck`
+   trong `feature_loop.suite_keys`) hạ cánh trong hồ sơ T2 này. Chi tiết ở `contract.md`
+   §Known limits và `decisions.jsonl`.
+
+8. **Bộ tổng hợp của kit không ghi được bằng chứng ở cả ba vòng** (`runLogWriteFailed: true`),
+   và ở vòng 3 nó để mục «Ngoài hợp đồng» RỖNG dù triage giữ 10 mục — mà `pre-merge-check.sh`
+   đọc thân rỗng là lời khai «không có gì», nên vòng này suýt đi tiếp KHÔNG mời ký. Báo cáo,
+   run-log và bảng Ngoài đều do phiên điều phối ghi tay nguyên văn. Cổng KHÔNG fail-open ở
+   chỗ này (nó phân biệt vắng ≠ rỗng có chủ đích); chỗ hỏng là bộ tổng hợp.
+
+9. **`t1-escape` của cổng thì fail-open THẬT, và đó là lớp khác.** Nó chỉ báo vi phạm khi
+   `gate_touched -eq 0`, mà mọi PR chạm `_acceptance/` đều làm nó tắt — kể cả PR này. Đo
+   bởi phiên `amazing-kapitsa-45dd7a`: một commit CHỈ sửa `_acceptance/config.yaml` biến
+   cổng từ «merge blocked» thành «clean».
+
+## Ngoài hợp đồng — owner đã quyết 02/09
 
 Chi tiết ở `review-findings.md`. Owner định đoạt từng mục ở Cổng 2.
 
 | # | Phát hiện | Owner chọn |
 |---|---|---|
-| Ngoài-1 | Destructive store wipe is authorized by a client-side read failure, and the server never re-checks the store is really unreadable (high) | |
-| Ngoài-2 | Settings screen dropped the shared API client, losing the 401 sign-in seam and the request timeout (high) | |
-| Ngoài-3 | A failed write is reported to the user as "key saved" (high) | |
-| Ngoài-4 | `pluginEnv` is blind-cast while `env` is positively validated, and the catch that used to absorb the mismatch is gone (medium) | |
-| Ngoài-5 | STORE_UNREADABLE in the media-library node offers no way forward, unlike the other two surfaces (low) | |
-| Ngoài-6 | `Workspace.nodes.addMediaLibrary.readFailed` is now dead in all five locales (low) | |
-| Ngoài-7 | A failed key WRITE is shown to the user as "key saved" (high) | |
-| Ngoài-8 | A successful write whose response body will not parse is reported as "nothing has been changed" (medium) | |
-| Ngoài-9 | `pluginEnv` is cast unchecked and `fetchEnv` lost its catch — a throw re-opens the empty-saveable-form bug (medium) | |
-| Ngoài-10 | Hình dạng #5 — E12 tuyên quét LỚP "copy đến từ catalogue" nhưng chỉ có 2 điểm-case trên 22 khoá mới (medium) | |
+| Ngoài-1 | Destructive store wipe is authorized by a client-side read failure, and the server never re-checks the store is really unreadable (high) |  **mở hợp đồng mới** → `_acceptance/khong-noi-sai-ve-kho-khoa/` |
+| Ngoài-2 | Settings screen dropped the shared API client, losing the 401 sign-in seam and the request timeout (high) |  **mở hợp đồng mới** → `_acceptance/khong-noi-sai-ve-kho-khoa/` |
+| Ngoài-3 | A failed write is reported to the user as "key saved" (high) |  **mở hợp đồng mới** → `_acceptance/khong-noi-sai-ve-kho-khoa/` |
+| Ngoài-4 | `pluginEnv` is blind-cast while `env` is positively validated, and the catch that used to absorb the mismatch is gone (medium) |  **ghi Known limits** (mục 2 trên) |
+| Ngoài-5 | STORE_UNREADABLE in the media-library node offers no way forward, unlike the other two surfaces (low) |  **ghi Known limits** (mục 5 trên) |
+| Ngoài-6 | `Workspace.nodes.addMediaLibrary.readFailed` is now dead in all five locales (low) |  **ghi Known limits** (mục 6 trên) |
+| Ngoài-7 | A failed key WRITE is shown to the user as "key saved" (high) |  **mở hợp đồng mới** → `_acceptance/khong-noi-sai-ve-kho-khoa/` |
+| Ngoài-8 | A successful write whose response body will not parse is reported as "nothing has been changed" (medium) |  **ghi Known limits** (mục 3 trên) |
+| Ngoài-9 | `pluginEnv` is cast unchecked and `fetchEnv` lost its catch — a throw re-opens the empty-saveable-form bug (medium) |  **ghi Known limits** (mục 2 trên) |
+| Ngoài-10 | Hình dạng #5 — E12 tuyên quét LỚP "copy đến từ catalogue" nhưng chỉ có 2 điểm-case trên 22 khoá mới (medium) |  **ghi Known limits** (mục 4 trên) |
 
 ## Analyst
 
