@@ -5,9 +5,10 @@ slug: noi-thuoc-tai-lieu-vao-ci
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, config]
-status: verified
+status: signed-off
 approved_by:
-veto_state: mo
+veto_state: dong-bang-chu-ky
+human_signoff: Phan Le Manh 2026-09-02
 veto_opened_at: 2026-09-02T01:48:14Z
 design_doc: docs/superpowers/specs/2026-09-01-noi-thuoc-tai-lieu-vao-ci-design.md
 ---

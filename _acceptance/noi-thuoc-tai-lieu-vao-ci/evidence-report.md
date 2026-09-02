@@ -8,7 +8,7 @@ verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau B
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 40381e72771cdcab36472d5fb44dd354b898b655
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-02
 ---
 
 # Evidence Report: noi-thuoc-tai-lieu-vao-ci
