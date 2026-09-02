@@ -150,21 +150,30 @@ trên máy này) — kế thừa nguyên trạng từ hợp đồng cha, không 
 
 ## Known limits (người ký nhận trước khi phát hành)
 
-- **Cuộc đua `build/**` ↔ `typecheck` là của CẢ KHO, không riêng hồ sơ này.** Ba bọc a11y
-  đều dựng dev server dưới `build/`: [`media-library:81`](../../scripts/media-library/check-a11y-proto.sh)
-  (`aml-a11y`), [`onboarding:31`](../../scripts/onboarding/check-a11y-proto.sh) (`bko-a11y`),
-  và [`settings:66`](../../scripts/settings/check-a11y-proto.sh) (`kkt-a11y`, của hồ sơ này).
-  `tsconfig.json:29` khai `"**/*.ts"` và `exclude` chỉ có `node_modules`/`desktop`, nên tsc
-  **luôn** duyệt `build/**` — bất kể có dòng khai riêng cho dist dir hay không. Suite chạy
-  SONG SONG (chính hai bọc kia ghi tiền đề đó trong chú thích của mình), nên `pnpm typecheck`
-  có thể đỏ `TS6053` khi nó duyệt trúng lúc một dev server đang tạo/dọn dist dir.
-  **Dòng khai trong `include` KHÔNG phải nguyên nhân và cũng KHÔNG phải cách chữa** — nó chỉ
-  ngăn Next ghi lại `tsconfig.json`; gỡ nó đi không làm cuộc đua biến mất. Đo hai vế trên cây
-  này (`build/kkt-probe` khai rồi thử cả vắng lẫn có, tĩnh tại) và phiên
-  `amazing-kapitsa-45dd7a` đo cùng hai vế trên `build/bko-a11y`: sạch cả bốn lượt.
-  Cả ba bọc xanh ở vòng này là do **thời điểm**, không phải do miễn nhiễm. Cách chữa thật là
-  đừng để `typecheck` và một dev server chạm `build/` cùng lúc — việc của cấu hình suite, nằm
-  ngoài hồ sơ này.
+- **Cuộc đua `build/**` ↔ `typecheck` — ĐÃ ĐÓNG ở vòng 2 (02/09), không còn là giới hạn.**
+  Chẩn đoán cũ đúng phần cơ chế: ba bọc a11y đều dựng dev server dưới `build/`
+  ([`media-library:81`](../../scripts/media-library/check-a11y-proto.sh) `aml-a11y`,
+  [`onboarding:31`](../../scripts/onboarding/check-a11y-proto.sh) `bko-a11y`,
+  [`settings:66`](../../scripts/settings/check-a11y-proto.sh) `kkt-a11y`), và `tsconfig.json`
+  khai `"**/*.ts"` với `exclude` chỉ có `node_modules`/`desktop`, nên tsc **luôn** duyệt
+  `build/**`. Nhưng kết luận «cách chữa là việc của cấu hình suite, nằm ngoài hồ sơ này» sai
+  một nhịp: hai tính chất đang giằng nhau tách rời được ngay trong chính `tsconfig.json`.
+  **Cách chữa:** thêm `"build"` vào `exclude`, **GIỮ NGUYÊN** các dòng `build/*/types/**`
+  trong `include` — chúng tồn tại chỉ để Next thấy entry của mình đã có sẵn và không ghi đè
+  file (KNOWN COST ghi ở `next.config.ts:33`). Next đọc mảng `include`, tsc đọc `exclude`;
+  hai bên không còn tranh nhau một thư mục.
+  **Đo trên cây này, 02/09.** Trước: `tsc --noEmit --listFiles` đọc **10 tệp** dưới `build/`,
+  gồm đúng hai tệp làm đỏ vòng 1 (`build/kkt-gate/types/app/proto/[slug]/page.ts` và
+  `validator.ts`). Sau: **0 tệp**; `pnpm typecheck` exit 0; `pnpm lint:check` exit 0 (biome
+  nhận chú thích JSONC trong `tsconfig.json`). Dựng thật một dev server
+  `NEXT_DIST_DIR=build/kkt-a11y` và phục vụ được trang proto: `tsconfig.json` **không đổi một
+  byte** — sha khớp trước/sau, nên tính chất «Next im lặng» vẫn còn nguyên. Vùng phủ route
+  type không mất gì: **37 tệp** `.next/types/**` vẫn nằm trong chương trình, kể cả
+  `app/proto/[slug]/page.ts` — nay đọc từ `.next` do `pnpm build` sinh, thay vì từ một dist
+  dir tạm đang bị ghi dở.
+  **Phạm vi — người duyệt nhận ở Cổng 2:** đây là một sửa cấu hình CẢ KHO nằm trong hồ sơ T2
+  này (`tsconfig.json` không thuộc `t3_paths`, nên bậc rủi ro không đổi). Hai bọc kia
+  (`aml-a11y`, `bko-a11y`) hưởng cùng miễn dịch mà không phải sửa gì.
 - **E10 (`design-gate`, phép đo tham khảo) không chạy ở vòng này** — xem `evals.yaml`. Sàn
   tiếp cận của AC-14 tựa hoàn toàn vào E9 (axe-core trong Chrome thật, 6/6 trang,
   0 vi phạm `critical`/`serious`), đúng như chữ AC-14 vốn đã viết.

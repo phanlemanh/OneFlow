@@ -33,5 +33,14 @@
         "build/aml-a11y/types/**/*.ts",
         "build/kkt-a11y/types/**/*.ts"
     ],
-    "exclude": ["node_modules", "desktop"]
+    // "build" is EXCLUDED even though `include` still names
+    // build/*/types/**: those include entries exist only so Next finds its
+    // own entry present and leaves tsconfig.json alone (see
+    // scripts/settings/check-a11y-proto.sh and next.config.ts KNOWN COST).
+    // Keeping them made tsc walk the transient a11y/gate dist dirs while a
+    // dev server was still writing route types into them — TS6053, measured
+    // on chong-mat-khoa-byo-giao-dien S4 round 1. Excluding the directory
+    // keeps Next quiet AND keeps tsc out; route types still come from
+    // .next/types, which `pnpm build` writes (next.config.ts distDir).
+    "exclude": ["node_modules", "desktop", "build"]
 }
