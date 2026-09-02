@@ -8,7 +8,7 @@ verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: ae09815e2a9e4002d3b0046b02ec4f7eb48b089c
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-01
 ---
 
 # Evidence Report: dang-ky-fork-openai
