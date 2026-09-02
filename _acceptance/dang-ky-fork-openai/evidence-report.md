@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf
+verified_commit: 0110e2a557c1e5524d7e5a91db39023da23b5df8
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -209,3 +209,7 @@ gốc hỏng nằm trong lịch sử git nếu cần đối chiếu.
 ### Re-pin lần 2 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci chạm ci.yml, scripts/ci/**, scripts/plugins/** và package.json
 run_id: repin-20260902T093055Z-6608
 sha: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf · suites: 8 lệnh exit 0
+
+### Re-pin lần 3 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci rút chế độ exit-propagates và khôi phục dòng in số id
+run_id: repin-20260902T102111Z-4002
+sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8 · suites: 8 lệnh exit 0 (làn chạy TUẦN TỰ, không tung bầy — vòng trước BLOCKED vì agent chết)
