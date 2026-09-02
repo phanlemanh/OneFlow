@@ -198,6 +198,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `cong-tu-canh-minh` | T2 | 31/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: hai guard vào CI (trước đó 0 tham chiếu trong ci.yml), vá lỗ trùng dòng của chính guard này, tách suite key build/typecheck và chặn tranh thư mục dist của wrapper a11y. 16/16 eval, 5 giới hạn khai rõ |
 | `kho-khoa-toan-ven` | T2 | 31/08 | *ngoài lộ trình* — đóng hai lỗ còn lại của cùng lời hứa mà chong-mat-khoa-byo mở ra: kho đọc được nhưng bị cắt bớt âm thầm (bốn khoá biến mất mà trạng thái vẫn báo lành), và kho ghi dở dang để lại file cụt. 13/13 eval, 7 giới hạn khai rõ |
 | `o-do-chay-0-ca-van-xanh` | T2 | 01/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: một ô đo lọc theo tên ca mà không ca nào khớp thì vitest thoát 0 và ô đo báo đạt vĩnh viễn. Đo trước khi thiết kế cho thấy 33/33 ô đang lành, nên đây là hàng rào chứ không phải bản sửa. 17/17 eval, 7 giới hạn khai rõ |
+| `chong-mat-khoa-byo-giao-dien` | T2 | 02/09 | *ngoài lộ trình* — nửa giao diện của chong-mat-khoa-byo: màn Cài đặt và hai bề mặt trên canvas nói rõ kho khoá hỏng và từ chối ghi đè, đo trên **năm** hình dạng lỗi đọc chứ không một. Một bộ đọc dùng chung thay ba lối tự viết (6 lời gọi ở 3 tệp co về 1 tệp, có guard cấu trúc canh). 13/13 eval, 9 giới hạn khai rõ; bốn phát hiện HIGH đi hồ sơ mới khong-noi-sai-ve-kho-khoa |
 
 <!-- roadmap-ledger:end -->
 
