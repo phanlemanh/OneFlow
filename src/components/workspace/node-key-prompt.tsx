@@ -1,9 +1,15 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Loader2 } from "lucide-react";
+import {
+    type StoreUnreadableLabels,
+    StoreUnreadableNotice,
+} from "@/components/settings/store-unreadable-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { ReadFailure } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,6 +41,14 @@ export type KeyPromptState =
      * broken (S4 round 1 finding).
      */
     | { phase: "saved-unverified"; reason: string }
+    /**
+     * The key store itself could not be read, so this node must not write to
+     * it. Distinct from every phase above: those are all statements about a
+     * KEY, and this one is a statement about the STORE. Rendering it as
+     * `invalid` would tell the user their key is bad and invite them to type a
+     * new one — which is the overwrite this whole feature exists to prevent.
+     */
+    | { phase: "store-unreadable"; reason: ReadFailure }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -58,6 +72,11 @@ export interface NodeKeyPromptLabels {
     invalid: string;
     verified: string;
     savedUnverified: string;
+    /** Copy for the blocked state. Supplied by the caller from its own i18n namespace. */
+    storeUnreadable: StoreUnreadableLabels & {
+        reason: (cause: ReadFailure) => string;
+        toSettings: string;
+    };
 }
 
 export function NodeKeyPrompt({
@@ -71,6 +90,32 @@ export function NodeKeyPrompt({
 }: NodeKeyPromptProps) {
     const inputId = `node-key-${envKey}`;
     const busy = state.phase === "verifying";
+
+    /*
+     * The blocked state returns EARLY, and that early return is the design.
+     * Rendering the input and the save button alongside a warning would leave
+     * the user a control that cannot work; worse, it would leave this surface
+     * holding a write path. The way forward from here is the settings screen,
+     * which is the only place that can replace a broken store — and there is
+     * deliberately no escape button here, because the function that builds
+     * that request is not reachable from this component.
+     */
+    if (state.phase === "store-unreadable") {
+        return (
+            <StoreUnreadableNotice
+                reason={labels.storeUnreadable.reason(state.reason)}
+                labels={labels.storeUnreadable}
+            >
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={requestOpenSettings}
+                >
+                    {labels.storeUnreadable.toSettings}
+                </Button>
+            </StoreUnreadableNotice>
+        );
+    }
 
     return (
         <section

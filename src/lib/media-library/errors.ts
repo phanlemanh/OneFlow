@@ -27,6 +27,14 @@
  */
 export const MEDIA_LIBRARY_ERROR_CODES = [
     "MISSING_CONFIG",
+    /**
+     * The key store could not be read, so we cannot tell whether the values are
+     * configured. Distinct from MISSING_CONFIG on purpose: collapsing the two
+     * put the user in front of a "you have not configured this" panel with no
+     * fields and a live Save button, which is the misleading half of the bug
+     * `chong-mat-khoa-byo-giao-dien` exists to remove.
+     */
+    "STORE_UNREADABLE",
     "AUTH_REJECTED",
     "MISSING_SCOPE",
     "BAD_REQUEST",

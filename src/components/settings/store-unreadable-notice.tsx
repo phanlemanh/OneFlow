@@ -40,9 +40,15 @@ export function StoreUnreadableNotice({
     reason: string;
     labels: StoreUnreadableLabels;
     /**
-     * Where this card sits in the page outline. The settings screen shows it
-     * directly under the screen title, so it is an h2 there; inside a node
-     * panel it sits under the panel's own h2, so it is an h3.
+     * Where this card sits in the page outline.
+     *
+     * Both current callers leave it at 2: the settings screen shows the card
+     * directly under the screen title, and the node surfaces render no heading
+     * of their own (measured 2026-09-01 across base-node-shell, abi-node-shell,
+     * add-media-library-node, media-library-config-panel and node-key-prompt —
+     * zero headings between them), so there the card is also the first heading
+     * under the page. The prop stays because a future caller may sit deeper,
+     * but a value of 3 has to be earned by a real h2 above it.
      *
      * Not cosmetic. Hardcoded to h3, the settings screen rendered h1 -> h3 and
      * skipped a level — measured on the running prototype, both settings
