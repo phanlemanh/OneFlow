@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e0eb0a92d5ca672e2af4f372bbdede9260727d74
+verified_commit: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -205,3 +205,7 @@ lọt qua ba vòng verify, một hội đồng review và một chữ ký ngư�
 sha trong run-log có tồn tại hay không; nó lộ ra vì người review đi `git cat-file`
 từng giá trị. Sửa bản ghi về sự thật là khôi phục, không phải viết lại lịch sử — bản
 gốc hỏng nằm trong lịch sử git nếu cần đối chiếu.
+
+### Re-pin lần 2 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci chạm ci.yml, scripts/ci/**, scripts/plugins/** và package.json
+run_id: repin-20260902T093055Z-6608
+sha: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf · suites: 8 lệnh exit 0

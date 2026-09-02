@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e0eb0a92d5ca672e2af4f372bbdede9260727d74
+verified_commit: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf
 human_signoff: Manh 2026-08-07
 ---
 
@@ -274,3 +274,7 @@ sha: 35b24ee4cb06dd97020f13aee913777c3255d00f · suites: 8 lệnh exit 0
 ### Re-pin lần 9 — 2026-09-01, do noi-thuoc-tai-lieu-vao-ci chạm .github/workflows/ci.yml và scripts/plugins/**
 run_id: repin-20260902T020812Z-5668
 sha: e0eb0a92d5ca672e2af4f372bbdede9260727d74 · suites: 8 lệnh exit 0
+
+### Re-pin lần 10 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci chạm ci.yml, scripts/ci/**, scripts/plugins/** và package.json
+run_id: repin-20260902T093055Z-6608
+sha: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf · suites: 8 lệnh exit 0
