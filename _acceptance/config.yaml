@@ -623,7 +623,7 @@ executors:
     dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
     ntlc_resign_wave: bash scripts/acceptance/check-resign-wave.sh noi-thuoc-tai-lieu-vao-ci origin/main
     ntlc_no_new_checkout: bash scripts/ci/check-gate-guards-job.sh job-count && bash scripts/ci/check-action-pins.sh
-    rkce_plan: bash scripts/ci/check-repin-eval-coverage.sh plan
+    rkce_plan: bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-them-mot-file
     rkce_check: bash scripts/ci/check-repin-eval-coverage.sh check
     rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
     rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main

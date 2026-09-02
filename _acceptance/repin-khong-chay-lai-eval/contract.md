@@ -5,7 +5,7 @@ slug: repin-khong-chay-lai-eval
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, acceptance]
-status: approved
+status: implemented
 approved_by:
 gate1_skipped: true
 veto_state: mo
@@ -95,11 +95,14 @@ phải "cả hai chấp nhận" trên kho dùng-rồi-bỏ. Đối chứng dươ
 
 **AC-8 — Hàng rào có răng, ma trận ca có tên.**
 Given một kho git dùng-rồi-bỏ,
-When chạy `teeth` với các ca `healthy` · `nuot-eval` · `da-chay-lai` · `ong-ba` ·
-`khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` · `write-thieu-verified-commit`,
+When chạy `teeth` với **mười** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
+`ong-ba` · `khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` ·
+`write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file`,
 Then mỗi ca in `CASE <tên>: PASS`, ca đỏ nêu đích danh id eval, và dòng chốt **đếm đúng
-số ca đã chạy**. `da-chay-lai` là đối chứng phân biệt "bắt được việc nuốt" với "đỏ mọi
-thứ". Lượt `--case` lẻ in `PARTIAL: n/8`, không in `OK:`; tên ca lạ → thoát 2.
+số ca đã chạy**. Sáu ca là **đối chứng dương** (mong xanh) — `da-chay-lai` phân biệt "bắt
+được việc nuốt" với "đỏ mọi thứ"; `khong-khai-paths` phân biệt "hạng mục không kết luận
+được" với "nuốt"; hai ca `plan` phân biệt một bộ giao đúng với một bộ giao trả **cả tập**.
+Lượt `--case` lẻ in `PARTIAL: n/10`, không in `OK:`; tên ca lạ → thoát 2.
 
 **AC-9 — Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.**
 Given chạm vùng gated làm **3** hồ sơ hoá ôi (đo 02/09 bằng mô phỏng ở ba thư mục),

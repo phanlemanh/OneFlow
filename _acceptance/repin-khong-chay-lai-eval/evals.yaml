@@ -136,16 +136,19 @@ evals:
     cmd: config:executors.script.rkce_teeth
     paths: ["scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0 và ĐỦ TÁM dòng `CASE <tên>: PASS` cùng chốt `OK: 8/8 ca` — `healthy` (đối
-      chứng dương, và cũng chứng minh `write` ghi được `prev_sha` đúng bằng
+      exit 0 và ĐỦ MƯỜI dòng `CASE <tên>: PASS` cùng chốt `OK: 10/10 ca` — `healthy`
+      (đối chứng dương, và cũng chứng minh `write` ghi `prev_sha` đúng bằng
       `verified_commit` cũ) · `nuot-eval` (đỏ, nêu đích danh slug + `run_id` + id eval) ·
-      `da-chay-lai` (XANH — đối chứng phân biệt "bắt được việc nuốt" với "đỏ mọi thứ") ·
-      `ong-ba` (dòng cũ không `prev_sha` → xanh và được đếm) · `khong-khai-paths` (eval
-      không khai `paths` → LUÔN tính là chạm) · `paths-thu-muc-tran` · `paths-glob` ·
-      `write-thieu-verified-commit`. Mọi ca dựng trên kho git dùng-rồi-bỏ (`mktemp -d` +
+      `da-chay-lai` (XANH — phân biệt "bắt được việc nuốt" với "đỏ mọi thứ") · `ong-ba`
+      (dòng cũ không `prev_sha` → xanh và được đếm) · `khong-khai-paths` (eval không khai
+      `paths` → vào hạng mục KHÔNG KẾT LUẬN ĐƯỢC, không vào "bị nuốt") ·
+      `paths-thu-muc-tran` · `paths-glob` · `write-thieu-verified-commit` ·
+      `plan-tap-id` · `plan-them-mot-file`. Đã kiểm răng của bộ răng: thước no-op → 4 ca
+      phá đỏ; bộ giao trả CẢ TẬP → ba đối chứng dương (`da-chay-lai`, `khong-khai-paths`,
+      `plan-tap-id`) đỏ. Mọi ca dựng trên kho git dùng-rồi-bỏ (`mktemp -d` +
       `git init`), KHÔNG chạm cây thật — vòng trước một ca ghi vật thăm dò vào cây thật
       và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/8` và
-      KHÔNG in `OK:`; tên ca lạ → thoát 2.
+      KHÔNG in `OK:` (đo: `PARTIAL: 1/10`); tên ca lạ → thoát 2.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9
