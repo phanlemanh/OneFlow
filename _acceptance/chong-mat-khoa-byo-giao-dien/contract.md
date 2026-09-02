@@ -5,7 +5,7 @@ slug: chong-mat-khoa-byo-giao-dien
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [web]
-status: implemented
+status: verified
 approved_by: Phan Le Manh
 approved_at: 2026-09-01T10:40:00Z
 design_doc: docs/superpowers/specs/2026-09-01-chong-mat-khoa-byo-giao-dien-design.md
