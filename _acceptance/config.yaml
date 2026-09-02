@@ -683,6 +683,22 @@ risk_tiers:
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
+    # Hai bộ đo a11y của bề mặt /proto — cùng lớp measuring-stick với
+    # pre-merge-check.sh ở trên: chúng ĐO sản phẩm chứ không phải sản phẩm, nên
+    # sửa chúng không được phép làm stale bằng chứng đã ký của feature khác.
+    # Khai ĐƯỜNG DẪN CHÍNH XÁC, không phải glob `scripts/**/check-a11y-proto.sh`:
+    # một bộ đo mới ở thư mục khác phải tự qua cổng, y như lý lẽ đã ghi cho
+    # scripts/acceptance/ ở phần executors.
+    - "scripts/media-library/check-a11y-proto.sh"
+    - "scripts/onboarding/check-a11y-proto.sh"
+    # Prototype CHỈ tồn tại để được đo (render ở /proto/<slug> cho design-pass và
+    # quét a11y); nó không nằm trên đường đi nào của người dùng. `data-proto-state`
+    # là một chỗ bám cho bộ đo, giống hệt add-media-library-proto.tsx đã có.
+    - "src/components/proto/byo-key-onboarding-proto.tsx"
+    # KHÔNG khai tsconfig.json — CỐ Ý, đừng "bổ sung cho đủ". Khai nó là miễn trừ
+    # vĩnh viễn MỌI thay đổi tsconfig về sau, kể cả tắt `strict`, trong khi cái cần
+    # miễn ở đây chỉ là một dòng thêm dist dir vào `include`. Owner chốt 01/09:
+    # chừa lại, xử lý trên diff nhỏ sau khi nhánh phụ thuộc merge.
   # Contract chokepoints & wire/persistence shape — always T3 (full gate).
   t3_paths:
     - "config/tongflow.abi.json"
