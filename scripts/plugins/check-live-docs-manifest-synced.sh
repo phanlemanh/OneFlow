@@ -20,7 +20,7 @@
 #            exit 0 over an empty set -- green on nothing measured.
 #
 #   orphans  a public/plugins/*.svg whose stem is not a manifest id must not GROW
-#            against a base ref. Four such files already exist on origin/main;
+#            against a base ref. Three such files already exist on origin/main;
 #            demanding zero would turn CI red over pre-existing debt that belongs
 #            to nobody's current change.
 #
