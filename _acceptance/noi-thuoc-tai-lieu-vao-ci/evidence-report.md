@@ -50,110 +50,101 @@ Cả hai lượt đều ghi trong run-log.
 - **Vòng 3** — PASS. `STOP-PATCHING-CLAUSE` kích hoạt; owner chọn **thu phạm vi**: rút
   hẳn `exit-propagates`. Bốn step CI vẫn được bốn chế độ CÓ SẴN chứng minh.
 
-### E1 — AC-1
+## Evidence
 
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.gate_guards_job_shape`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
+- eval: E1
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.gate_guards_job_shape
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    OK: cả hai guard nằm trong job acceptance-gate; fetch-depth 0, Node 24, hai trigger còn nguyên
+    OK: không có continue-on-error / || true / set +e trong job acceptance-gate
 
-```
-OK: cả hai guard nằm trong job acceptance-gate; fetch-depth 0, Node 24, hai trigger còn nguyên
-```
+- eval: E2
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.gate_guards_job_shape
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    OK: không có continue-on-error / || true / set +e trong job acceptance-gate
 
-### E2 — AC-2
+- eval: E3
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.gate_guards_job_reachable
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    OK: trigger pull_request không lọc đường dẫn; step và job không mang if: hay needs:
 
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.gate_guards_job_shape`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
+- eval: E4
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.gate_guards_job_teeth
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    KÊ=7 · PHÁ=5 · BỎ QUA=2
+    OK: 7 lệnh (rút từ .github/workflows/ci.yml) xanh trên cây lành; 5 đỏ trên cây đã phá; 2 bỏ qua CÓ TÊN; cờ rác bị từ chối
 
-```
-OK: không có continue-on-error / || true / set +e trong job acceptance-gate
-```
+- eval: E5
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.gate_guards_job_teeth
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    bỏ qua: check-live-docs-manifest-synced.sh orphans — doc base ref qua git show; cay tham do la thu muc mktemp khong co .git
+    bỏ qua: check-live-docs-manifest-teeth.sh — ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron
 
-### E3 — AC-3
+- eval: E6
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.dkfo_readme_sync
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    README.md: 39 id extracted · manifest: 39
+    docs/README_ZH.md: 39 id extracted · manifest: 39
+    docs/README_JA.md: 39 id extracted · manifest: 39
+    OK: 3 READMEs each list exactly the 39 plugins the manifest registers, every org matching its entry shape
 
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.gate_guards_job_reachable`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
+- eval: E7
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.dkfo_docs_teeth
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    OK: 9/9 ca — 2 doi chung duong + 6 phep pha (readme + claude modes) + 1 ca tu soi harness
 
-```
-OK: trigger pull_request không lọc đường dẫn; step và job không mang if: hay needs:
-```
+- eval: E8
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.ntlc_resign_wave
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 40381e72771cdcab36472d5fb44dd354b898b655
+  output: |
+    OK: no feature other than noi-thuoc-tai-lieu-vao-ci carries stale evidence — the re-sign wave has cleared
 
-### E4 — AC-4
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.gate_guards_job_teeth`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
-
-```
-OK: 7 lệnh (rút từ .github/workflows/ci.yml) xanh trên cây lành; 5 đỏ trên cây đã phá; 2 bỏ qua CÓ TÊN; cờ rác bị từ chối
-```
-
-### E5 — AC-5
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.gate_guards_job_teeth`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
-
-```
-bỏ qua: …orphans — đọc base ref qua git show; cây thăm dò là mktemp không có .git · bỏ qua: …teeth.sh — vế đỏ của nó CHÍNH LÀ nó
-```
-
-### E6 — AC-6
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.dkfo_readme_sync`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
-
-```
-README.md: 39 id extracted · manifest: 39 (×3 file) · OK: 3 READMEs each list exactly the 39 plugins the manifest registers
-```
-
-### E7 — AC-7
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.dkfo_docs_teeth`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
-
-```
-OK: 9/9 ca — 2 doi chung duong + 6 phep pha (readme + claude modes) + 1 ca tu soi harness
-```
-
-### E8 — AC-8
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.ntlc_resign_wave`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `40381e72771cdcab36472d5fb44dd354b898b655`
-
-```
-OK: no feature other than noi-thuoc-tai-lieu-vao-ci carries stale evidence — the re-sign wave has cleared
-```
-
-### E9 — AC-9
-
-- run_id: `seq-verify-20260902T102400Z-r3`
-- verifier: `config:executors.script.ntlc_no_new_checkout`
-- exit_code: `0`
-- verified_at: `2026-09-02T10:22:31Z`
-- sha: `0110e2a557c1e5524d7e5a91db39023da23b5df8`
-
-```
-OK: năm job còn lại deep-equal với merge-base · action pins: at or above the contracted floor at every site
-```
+- eval: E9
+  run_id: seq-verify-20260902T102400Z-r3
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.ntlc_no_new_checkout
+  verified_at: 2026-09-02T17:24:00+07:00
+  sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+  output: |
+    OK: năm job còn lại deep-equal với merge-base 1d66bc25
+    action pins: at or above the contracted floor at every site
