@@ -623,6 +623,14 @@ executors:
     dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
     ntlc_resign_wave: bash scripts/acceptance/check-resign-wave.sh noi-thuoc-tai-lieu-vao-ci origin/main
     ntlc_no_new_checkout: bash scripts/ci/check-gate-guards-job.sh job-count && bash scripts/ci/check-action-pins.sh
+    rkce_plan: bash scripts/ci/check-repin-eval-coverage.sh plan
+    rkce_check: bash scripts/ci/check-repin-eval-coverage.sh check
+    rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
+    rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main
+    rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
+    rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main
+    rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
+    rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
