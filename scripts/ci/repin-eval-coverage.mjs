@@ -17,8 +17,15 @@
 // sha / suites_exit, so an extra `prev_sha` key is backward compatible.
 
 import { execFileSync } from "node:child_process";
-import { appendFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
+import {
+    appendFileSync,
+    existsSync,
+    readdirSync,
+    readFileSync,
+    realpathSync,
+} from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const ROOT = process.env.RKCE_ROOT || process.cwd();
 const ACC = join(ROOT, "_acceptance");
@@ -178,7 +185,25 @@ export function touchedEvals(evals, changed) {
 // ---------- modes ----------
 function modeWrite(slug, sha, runId, suites) {
     if (!slug || !sha || !runId)
-        die("write can <slug> <sha> <run_id> [suites_json]");
+        die("write can <slug> <sha> <run_id> <suites_json>");
+    // `suites_exit` is not metadata. pre-merge-check.sh rejects a re-pin whose array
+    // holds a nonzero element -- "a red lane cannot back a signature" -- so an all-zero
+    // array IS the proof both readers accept. An optional argument with a helpful
+    // default lets this tool MINT that proof instead of recording it: the same class of
+    // fabricated provenance the dossier exists to close. Required, and refused when it
+    // describes a red lane, because the ritual says a red lane stops the event.
+    if (!suites)
+        die("write can <suites_json> tuong minh — khong co mac dinh, vi mot mang toan 0 CHINH LA bang chung lan xanh ma hai ben doc chap nhan");
+    let arr;
+    try {
+        arr = JSON.parse(suites);
+    } catch {
+        die(`suites_json khong phai JSON hop le: ${suites}`);
+    }
+    if (!Array.isArray(arr) || arr.length === 0 || !arr.every((n) => Number.isInteger(n)))
+        die(`suites_json phai la mang so nguyen khong rong, nhan duoc: ${suites}`);
+    if (arr.some((n) => n !== 0))
+        die(`lan co suite thoat khac 0 (${arr.join(",")}) — nghi thuc DUNG o day: khac phuc nguyen nhan roi phong lan MOI, khong ghi dong repin`);
     const prev = verifiedCommit(slug);
     if (!prev)
         die(
@@ -187,13 +212,23 @@ function modeWrite(slug, sha, runId, suites) {
     if (!gitOk("cat-file", "-t", prev))
         die(`verified_commit cua ${slug} (${prev}) khong phan giai duoc`);
     if (!gitOk("cat-file", "-t", sha)) die(`sha ${sha} khong phan giai duoc`);
+    // prev === sha makes `git diff prev..sha` empty, so the pin can never be found to
+    // have swallowed anything: a line that is valid, computable, and permanently
+    // vacuous. It happens whenever evidence-report is updated BEFORE this is called.
+    if (prev === sha)
+        die(`prev_sha == sha (${sha.slice(0, 12)}) — verified_commit da duoc doi TRUOC khi goi write; dong repin nhu vay khong bao gio ket luan duoc gi`);
+    // `=== null`, not `!`: `merge-base --is-ancestor` prints NOTHING on success, so
+    // gitOk returns "" -- and `!""` is true, which would make this refuse every honest
+    // write. Only `null` means the command failed.
+    if (gitOk("merge-base", "--is-ancestor", prev, sha) === null)
+        die(`verified_commit cu (${prev.slice(0, 12)}) khong phai to tien cua ${sha.slice(0, 12)} — hai sha khong nam tren mot duong lich su`);
     const line = JSON.stringify({
         ts: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
         kind: "repin",
         run_id: runId,
         sha,
         prev_sha: prev,
-        suites_exit: JSON.parse(suites || "[0,0,0,0,0,0,0,0]"),
+        suites_exit: arr,
     });
     appendFileSync(join(ACC, slug, "run-log.jsonl"), `${line}\n`);
     console.log(
@@ -330,8 +365,23 @@ function modeNewlines(base) {
 // Run the CLI only when this file IS the entry point. Without the guard, any module
 // that imports pathMatches (the paths-law mode does) executes the dispatcher, prints
 // usage and exits 2 -- the importer never gets to run its own assertions.
-const isMain =
-    process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+// pathToFileURL, not string concatenation: `import.meta.url` is percent-encoded, so a
+// checkout path containing a space (or `#`, or non-ASCII) made the raw comparison false.
+// The dispatcher then never ran and EVERY mode exited 0 having printed nothing -- an
+// unknown mode included. Green on nothing, at the entry point of the guard itself.
+// Compare REALPATHS. Two things diverge otherwise: `import.meta.url` is percent-encoded
+// while argv[1] is raw (a space in the checkout path breaks it), and on macOS
+// `import.meta.url` resolves symlinks while argv[1] keeps what was typed -- /tmp is a
+// symlink to /private/tmp, so every invocation under /tmp missed. Either way the
+// dispatcher silently did not run and every mode exited 0 having printed nothing.
+const isMain = (() => {
+    if (!process.argv[1]) return false;
+    try {
+        return import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href;
+    } catch {
+        return false;
+    }
+})();
 const [, , mode, ...rest] = process.argv;
 const table = {
     write: () => modeWrite(...rest),
@@ -347,4 +397,12 @@ if (isMain) {
         process.exit(2);
     }
     table[mode]();
+} else if (process.argv[1] && /repin-eval-coverage\.mjs$/.test(process.argv[1])) {
+    // Invoked as a program but not recognised as the entry point: say so rather than
+    // exit 0 in silence. A guard that can become a no-op without a word is worse than a
+    // guard that is absent, because its green is read as a measurement.
+    console.error(
+        `FAIL: chay nhu chuong trinh nhung khong nhan ra la diem vao (argv[1]=${process.argv[1]}) — tu choi thoat 0 trong im lang`,
+    );
+    process.exit(2);
 }

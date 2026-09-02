@@ -140,8 +140,8 @@ teeth)
     --case) ONLY="${2:-}"; [ "$#" -le 2 ] || fail "thua doi so: ${*:3}" ;;
     *) fail "doi so la '${1}' — chi nhan '--case <ten>'" ;;
     esac
-    KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file"
-    TOTAL=10
+    KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la"
+    TOTAL=14
     RAN=0
     FAILED=0
     if [ -n "$ONLY" ] && ! printf '%s\n' $KNOWN | grep -qx "$ONLY"; then
@@ -201,7 +201,7 @@ teeth)
     if run healthy; then
         fx '    paths: ["src/**"]
 '
-        out="$(core "$d" write demo "$NEW" R9)"; rc=$?
+        out="$(core "$d" write demo "$NEW" R9 '[0,0,0]')"; rc=$?
         want healthy green "$out" "$rc" "prev_sha=${OLD:0:12}"
     fi
 
@@ -262,7 +262,10 @@ teeth)
         fx '    paths: ["src/**"]
 '
         : > "$d/_acceptance/demo/evidence-report.md"
-        out="$(core "$d" write demo "$NEW" R9)"; rc=$?
+        # Valid suites on purpose: the suites refusal fires FIRST, so omitting them here
+        # would make this case pass on the wrong message and stop measuring the check it
+        # is named after.
+        out="$(core "$d" write demo "$NEW" R9 '[0]')"; rc=$?
         want write-thieu-verified-commit red "$out" "$rc" "verified_commit" "demo"
     fi
 
@@ -288,13 +291,57 @@ teeth)
         want plan-them-mot-file green "$out" "$rc" "BI CHAM (2): E1,E2" "KHONG CHAM (0)"
     fi
 
+    # 11-13. `write` must RECORD evidence, never MINT it. `suites_exit` is the datum
+    # pre-merge-check reads to conclude the lane was green, so an optional argument with
+    # an all-zero default would let this tool manufacture that conclusion -- the same
+    # class of fabricated provenance that put 37 invented shas into signed run-logs
+    # earlier in this branch's history.
+    if run write-thieu-suites; then
+        fx '    paths: ["src/**"]
+'
+        out="$(core "$d" write demo "$NEW" R9)"; rc=$?
+        want write-thieu-suites red "$out" "$rc" "suites_json" "khong co mac dinh"
+    fi
+    if run write-lan-do; then
+        fx '    paths: ["src/**"]
+'
+        out="$(core "$d" write demo "$NEW" R9 '[0,1,0]')"; rc=$?
+        want write-lan-do red "$out" "$rc" "thoat khac 0" "khong ghi dong repin"
+    fi
+    # A pin whose prev equals its sha has an empty diff, so it can never be found to
+    # have swallowed anything: valid, computable, and permanently vacuous.
+    if run write-prev-bang-sha; then
+        fx '    paths: ["src/**"]
+'
+        out="$(core "$d" write demo "$OLD" R9 '[0]')"; rc=$?
+        want write-prev-bang-sha red "$out" "$rc" "prev_sha == sha"
+    fi
+
+    # 14. The entry point must not become a silent no-op. `import.meta.url` is
+    # percent-encoded AND symlink-resolved; argv[1] is neither, so a checkout under a
+    # path with a space -- or under /tmp, which is a symlink on macOS -- made every mode
+    # exit 0 printing nothing, unknown modes included.
+    if run diem-vao-duong-dan-la; then
+        RAN=$((RAN + 1))
+        sp="$W/co dau cach"; mkdir -p "$sp"; cp "$CORE" "$sp/"
+        out="$(node "$sp/repin-eval-coverage.mjs" mode-khong-ton-tai 2>&1)"; rc=$?
+        if [ "$rc" -eq 0 ]; then
+            echo "CASE diem-vao-duong-dan-la: FAIL — mode la ma van thoat 0"; FAILED=1
+        elif ! printf '%s\n' "$out" | grep -qF "usage:"; then
+            echo "CASE diem-vao-duong-dan-la: FAIL — khong in usage, nen dispatcher khong chay"
+            printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1
+        else
+            echo "CASE diem-vao-duong-dan-la: PASS"
+        fi
+    fi
+
     [ "$FAILED" -eq 0 ] || { echo "FAIL: it nhat mot ca khong xu su nhu doi hoi" >&2; exit 1; }
     if [ -n "$ONLY" ]; then
         echo "PARTIAL: $RAN/$TOTAL ca da chay — khong tuyen gi ve $((TOTAL - RAN)) ca chua chay"
         exit 0
     fi
     [ "$RAN" -eq "$TOTAL" ] || fail "chi $RAN/$TOTAL ca chay ma khong khai --case"
-    echo "OK: $RAN/$TOTAL ca — 6 doi chung duong + 4 phep pha"
+    echo "OK: $RAN/$TOTAL ca — 6 doi chung duong + 8 phep pha"
     ;;
 
 *)

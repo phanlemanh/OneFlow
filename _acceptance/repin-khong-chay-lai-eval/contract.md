@@ -95,14 +95,39 @@ phải "cả hai chấp nhận" trên kho dùng-rồi-bỏ. Đối chứng dươ
 
 **AC-8 — Hàng rào có răng, ma trận ca có tên.**
 Given một kho git dùng-rồi-bỏ,
-When chạy `teeth` với **mười** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
+When chạy `teeth` với **mười bốn** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
 `ong-ba` · `khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` ·
-`write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file`,
+`write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file` ·
+`write-thieu-suites` · `write-lan-do` · `write-prev-bang-sha` · `diem-vao-duong-dan-la`,
 Then mỗi ca in `CASE <tên>: PASS`, ca đỏ nêu đích danh id eval, và dòng chốt **đếm đúng
 số ca đã chạy**. Sáu ca là **đối chứng dương** (mong xanh) — `da-chay-lai` phân biệt "bắt
 được việc nuốt" với "đỏ mọi thứ"; `khong-khai-paths` phân biệt "hạng mục không kết luận
 được" với "nuốt"; hai ca `plan` phân biệt một bộ giao đúng với một bộ giao trả **cả tập**.
-Lượt `--case` lẻ in `PARTIAL: n/10`, không in `OK:`; tên ca lạ → thoát 2.
+Lượt `--case` lẻ in `PARTIAL: n/14`, không in `OK:`; tên ca lạ → thoát 2.
+
+**AC-10 — `write` TỪ CHỐI ba dạng đầu vào bịa, thay vì ghi một dòng repin đẹp mặt.**
+Given chính chế độ `write` là thứ duy nhất sinh ra dòng repin mới, nên một dòng nó ghi ra
+được cả hai bên đọc — lưới trước-merge và hàng rào này — coi là **bằng chứng một lượt lane
+xanh**,
+When gọi `write` mà (a) không truyền `suites_json`, (b) truyền một mảng có phần tử khác 0,
+hoặc (c) `prev_sha` bằng đúng `sha` sắp ghim,
+Then nó thoát khác 0 và nêu lý do, KHÔNG ghi dòng nào. Ba phép từ chối, ba lỗ khác nhau:
+(a) một mặc định `[0,0,0,0]` biến chữ "lane đã xanh" thành thứ máy tự khai — không ai
+chạy lane mà dòng vẫn nói đã chạy; (b) nghi thức re-pin nói rõ lane đỏ thì **dừng**, nên
+ghi dòng cho một lane đỏ là ký mù đúng nghĩa; (c) `prev_sha == sha` nghĩa là
+`verified_commit` đã bị đổi TRƯỚC khi gọi `write`, và dòng sinh ra khi ấy có delta rỗng —
+`plan` không bao giờ tìm ra eval nào bị chạm, nên hàng rào **xanh vì không nhìn thấy gì**,
+đúng cái hình dạng vòng này tồn tại để diệt.
+
+**AC-11 — Điểm vào không bao giờ im lặng thoát 0.**
+Given lõi vừa là thư viện (`teeth` gọi `pathMatches` qua `--input-type=module`) vừa là
+chương trình, nên nó phải tự nhận ra mình đang chạy ở vai nào,
+When chạy nó như chương trình từ một đường dẫn có dấu cách và nằm dưới một symlink (trên
+macOS `/tmp` là symlink tới `/private/tmp`) với một mode không tồn tại,
+Then nó in `usage:` và thoát khác 0. Phép so cũ dùng `import.meta.url` với `process.argv[1]`
+nguyên văn: `import.meta.url` đã phân giải symlink còn `argv[1]` giữ chuỗi người gõ, nên hai
+bên lệch nhau và nhánh "chạy như chương trình" **không chạy gì cả** — thoát 0, không in gì.
+Một hàng rào thoát 0 mà không đo gì là ca xấu nhất trong ba vòng của phiên này.
 
 **AC-9 — Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.**
 Given chạm vùng gated làm **3** hồ sơ hoá ôi (đo 02/09 bằng mô phỏng ở ba thư mục),

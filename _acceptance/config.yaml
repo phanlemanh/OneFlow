@@ -631,6 +631,8 @@ executors:
     rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main
     rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
     rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers
+    rkce_write_refusals: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-suites && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-lan-do && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-prev-bang-sha
+    rkce_entrypoint: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diem-vao-duong-dan-la
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
