@@ -3,10 +3,10 @@ schema_version: 1
 slug: noi-thuoc-tai-lieu-vao-ci
 feature: Hai thước tài-liệu-sống ↔ manifest chỉ chạy trong lượt verify của hồ sơ đẻ ra chúng
 owner: Manh
-stage: discovery
-decision:
-decided_by:
-decided_at:
+stage: decided
+decision: build
+decided_by: Phan Le Manh
+decided_at: 2026-09-01T17:20:00Z
 prototype:
   base_commit:
   disposition:
