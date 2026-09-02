@@ -7,6 +7,7 @@ risk_tier: T2
 surfaces: [ci, config]
 status: signed-off
 approved_by:
+gate1_skipped: true
 veto_state: dong-bang-chu-ky
 human_signoff: Phan Le Manh 2026-09-02
 veto_opened_at: 2026-09-02T01:48:14Z
@@ -202,3 +203,12 @@ không giấu.
 - **Hai chỗ trôi kế thừa, chưa sửa:** đối chứng dương của bộ răng chỉ phủ chế độ `readme`;
   nhãn ca 5 của bộ răng manifest có sẵn còn ghi "a 37th plain string" sau khi số đếm hạ
   36→35.
+- **`gate1_skipped: true` là giá trị GẦN ĐÚNG NHẤT, không phải mô tả chính xác.** Hồ sơ
+  này qua Cổng 1 bằng ngả **chốt phạm vi** của kit: hạng T2, gap-probe không còn P0,
+  Coverage không có `[GIẢ ĐỊNH]` — nên máy đi tiếp với `approved_by` **cố ý rỗng** và
+  cửa veto MỞ suốt tới Cổng 2. Đó **không phải** "người dùng chủ động bỏ qua Cổng 1",
+  là chữ mà `pre-merge-check.sh:1105` gán cho cờ này. Nhưng cổng chỉ nhận hai giá trị,
+  và giá trị kia (`approved_by` có tên) sẽ khẳng định một chữ ký Cổng 1 **chưa từng
+  tồn tại**. Chọn cờ này là chọn cái méo ít hơn, và ghi ra đây để người đọc sổ sau
+  không hiểu thành owner đã vẫy tay cho qua. Kit thiếu một giá trị thứ ba cho ngả
+  chốt-phạm-vi — đáng một hồ sơ riêng.
