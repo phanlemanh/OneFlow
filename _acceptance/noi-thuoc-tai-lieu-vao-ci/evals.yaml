@@ -1,0 +1,189 @@
+schema_version: 1
+feature_slug: noi-thuoc-tai-lieu-vao-ci
+
+# T2, tám tiêu chí. KHÔNG criterion nào (cross-layer): mọi When/Then chạy ở lớp
+# cấu hình CI, shell script và văn xuôi tài liệu.
+#
+# BA ĐIỀU VỀ CÁCH ĐO:
+#
+# 1. NĂM ô đầu dùng THƯỚC ĐÃ CÓ SẴN — `scripts/ci/check-gate-guards-job.sh`, bộ đo
+#    CI-wiring mà `cong-tu-canh-minh` dựng ngày 31/08 cho ba guard trước. Bốn chế độ
+#    của nó lặp theo mảng `GUARD_NEEDLES`, nên thêm hai needle là chúng phủ luôn.
+#    Đây KHÔNG phải phép đo mới; chiều đỏ của chúng do feature ấy chứng minh, và
+#    chính chế độ `teeth` mang sẵn một lượt "guard-of-the-guard" (cắm cờ rác vào
+#    lệnh rút được, đòi vế xanh phải từ chối).
+#
+# 2. Việc MỚI duy nhất trong bộ đo cũ là khối phá cây của chế độ `teeth`: nó viết
+#    cứng cho ba guard trước. Thêm hai needle thì phải thêm hai phép phá, và phải
+#    chép thêm ba README + CLAUDE.md + manifest vào cây thăm dò.
+#
+# 3. HAI lệnh KHÔNG phá được trong cây thăm dò (`orphans` cần `git show`; bộ răng thì
+#    vế đỏ của nó chính là nó). Chúng vẫn vào CI và vẫn được shape/no-softening/
+#    reachable phủ, nhưng phải HIỆN TÊN trong đầu ra chế độ teeth — E5 đo đúng điều
+#    đó. Bỏ qua im lặng là lớp lỗi mà chính bộ đo ấy tồn tại để chặn.
+
+evals:
+  # ---------- A. Bốn step có mặt, không mềm, và thật sự chạy ----------
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.gate_guards_job_shape
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-gate-guards-job.sh"
+    expected: >-
+      exit 0. Chế độ `shape` đọc khối job `acceptance-gate` THEO THỤT ĐẦU DÒNG rồi đòi
+      mỗi needle trong `GUARD_NEEDLES` có một step chạy nó — đọc theo thụt dòng nên đổi
+      tên step không giấu được. Sau vòng này mảng phải chứa cả ba chế độ của thước mới
+      (`readme` · `claude` · `orphans`) lẫn bộ răng của nó; needle nào thiếu step thì
+      thông điệp nêu ĐÍCH DANH needle đó. Khoá này chạy kèm `no-softening` (E2) trong
+      cùng một lệnh, đúng như `cong-tu-canh-minh` đã ghép.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.ntlc_exit_propagates
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-gate-guards-job.sh"
+    expected: >-
+      exit 0 và stdout ghim, cho TỪNG chuỗi rút từ `ci.yml`, một dòng xác nhận chuỗi ấy
+      đã thoát KHÁC 0 khi script nó gọi bị thay bằng stub `exit 1` trong bản sao cây.
+      Đây là PHÉP ĐO MỚI, và nó thay một phép quét chuỗi: bản đầu của hợp đồng đo AC-2
+      bằng ba chuỗi cấm (`continue-on-error`, `|| true`, `set +e`). Đo 01/09 cho thấy
+      `ci.yml` không khai `shell:` nên `run:` chạy `bash -e` KHÔNG có `pipefail` — vậy
+      `… readme | tee /tmp/out` nuốt mã thoát mà không chứa chuỗi cấm nào, và phép quét
+      cũ vẫn in `OK`. Chiều đỏ của chính phép đo mới: một chuỗi có `| tee` phải làm chế
+      độ này ĐỎ nêu đích danh chuỗi đó; ba chuỗi cấm giữ lại làm quét bổ trợ.
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-gate-guards-job.sh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.gate_guards_job_reachable
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-gate-guards-job.sh"
+    expected: >-
+      exit 0. Đây là nửa mà E1/E2/E4 KHÔNG phủ: cả ba đọc NỘI DUNG khối job, nên một
+      `if: github.ref == 'refs/heads/main'` cắm lên step mới sẽ để cả ba xanh trong khi
+      thước không bao giờ chạy trên pull request — đúng trạng thái 0-tham-chiếu mà hồ sơ
+      này đi đóng. Chế độ `reachable` hỏi step có bị chặn khỏi PR không.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Lệnh rút từ YAML thật sự biết đỏ ----------
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.gate_guards_job_teeth
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-gate-guards-job.sh"
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+    expected: >-
+      exit 0 và stdout in ra TỪNG chuỗi lệnh đã rút từ `ci.yml` (dòng `lệnh dưới phép
+      thử (rút từ …)`), rồi kết bằng ba con số literal `KÊ=7 · PHÁ=5 · BỎ QUA=2`. Vế
+      XANH chạy trên KHO THẬT cho CẢ BỐN chuỗi mới — kể cả `orphans` (kho thật có
+      `.git`) và bộ răng. Bản đầu của hợp đồng để `orphans` vào CI với 0 lượt thực thi
+      trong toàn hồ sơ; một chuỗi sai cú pháp phải chết ở đây, không phải trên `main`.
+      Với hai needle phá được, vế XANH
+      chạy chúng trên kho thật (phải exit 0) và vế ĐỎ chạy CÙNG chuỗi ấy trên bản sao
+      đã bị xoá một mục README và cắm một id lạ vào `CLAUDE.md` (phải exit khác 0).
+      Assert trên chuỗi RÚT ĐƯỢC, không trên tên script trong YAML: đọc YAML là đo chỉ
+      dẫn, chạy lệnh mới là đo hành vi. Chế độ này còn tự mang một lượt guard-of-the-
+      guard — cắm cờ rác vào lệnh rút được và đòi vế xanh từ chối — nên một lệnh
+      luôn-hỏng không lọt được thành "guard bắt lỗi".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.gate_guards_job_teeth
+    paths:
+      - "scripts/ci/check-gate-guards-job.sh"
+    expected: >-
+      exit 0 và stdout NÊU ĐÍCH DANH hai lệnh nằm ngoài phép phá kèm lý do từng cái:
+      chế độ `orphans` gọi `git show <base>:…` mà cây thăm dò là thư mục `mktemp`
+      không có `.git`; bộ răng thì vế đỏ của nó chính là nó, phá nó để chứng minh nó
+      biết đỏ là vòng tròn. Đầu ra phải phân biệt được **số lệnh đã phá** với **số
+      lệnh đã kê**, và chính chế độ ấy THOÁT KHÁC 0 khi `kê ≠ phá + |bỏ qua|` — bất
+      biến đếm là phép đo, không phải lời bình; thiếu nó thì "quên viết phép phá cho một
+      needle" và "cố ý bỏ qua" cho cùng một đầu ra xanh. Ô này và E4
+      dùng chung lệnh; tách criterion vì "bỏ qua có tên" là một lời hứa riêng, và bỏ
+      qua im lặng chính là lớp lỗi bộ đo ấy tồn tại để chặn.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Lỗ khiến thước nói dối về đúng thứ nó canh ----------
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.dkfo_readme_sync
+    paths:
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+      - "README.md"
+      - "docs/README_ZH.md"
+      - "docs/README_JA.md"
+      - "config/official-plugins.json"
+    expected: >-
+      exit 0 trên cây lành, và stdout vẫn ghim số id rút được trên TỪNG README (39).
+      Bản vá bỏ `new Map(rows...)` — cấu trúc khử trùng theo id — nên hai dòng cùng một
+      plugin không còn nuốt nhau. Chiều đỏ ở ca mới của bộ răng (E7), và FIXTURE phải
+      đúng ba điều: id trùng ĐÃ CÓ trong manifest · tập id và số đếm KHÔNG đổi · chỉ org
+      khác. Thiếu điều thứ hai thì thước có thể đỏ vì lệch số đếm (39→40) chứ không vì
+      sai org, ca vẫn PASS, và lỗ thật vẫn nguyên trong khi hồ sơ tuyên đã đóng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.dkfo_docs_teeth
+    paths:
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+      - "scripts/plugins/check-live-docs-manifest-teeth.sh"
+    expected: >-
+      exit 0 và stdout mang ĐỦ TÁM dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 8/8 ca`
+      — bảy ca cũ cộng ca mới `readme-trung-sai-org`. Ca mới chèn vào bản sao một README
+      một dòng thứ hai cho một plugin đã có, org sai, rồi đòi thước thoát KHÁC 0 và
+      thông điệp `FAIL:` nêu đích danh id lẫn tên file. Lượt `--case` lẻ vẫn in
+      `PARTIAL: n/8` và KHÔNG in dòng `OK:` — tính chất đó do ca `khong-tuyen-qua` giữ,
+      và con số 8 trong nó phải đổi theo. Thông điệp `FAIL:` của ca mới phải nêu đích
+      danh **id**, **tên file** VÀ **org sai** — ba thứ, vì hai thứ đầu cũng xuất hiện
+      trong ca `readme-missing` nên chúng không phân biệt được hai lỗi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Cái giá nhánh này áp lên hồ sơ khác ----------
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.ntlc_resign_wave
+    expected: >-
+      exit 0 — không hồ sơ đã ký NÀO KHÁC còn mang bằng chứng có trước code của nhánh
+      này. Đo 01/09 bằng mô phỏng: chạm `.github/workflows/ci.yml` làm ĐÚNG HAI hồ sơ
+      hoá ôi — `conformance-l0` và `dang-ky-fork-openai` — nên vòng này kèm một sự kiện
+      re-pin (một lượt lane, hai chữ ký), và lane ấy phải là việc CUỐI CÙNG trước lượt
+      verify. KHÔNG khai `paths` → luôn chạy lại, vì câu hỏi là về trạng thái CÂY.
+      Gói bằng chứng phải kèm `run_id` của CHÍNH lượt lane re-pin (8 suite), không chỉ mã
+      thoát của phép kiểm sóng: sóng xanh chỉ nói dòng ghim đã trỏ commit mới, nó không
+      nói lane đã thật sự chạy.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.ntlc_no_new_checkout
+    paths:
+      - ".github/workflows/ci.yml"
+      - "scripts/ci/check-action-pins.sh"
+    expected: >-
+      exit 0 cho CẢ HAI lệnh ghép. `job-count` khẳng định gói này thêm STEP chứ không
+      thêm JOB; `check-action-pins.sh` khẳng định số điểm dùng `actions/checkout` vẫn là
+      8. Không ô nào khác chạy hai thứ này SAU khi `ci.yml` bị sửa, mà `ci.yml` chính là
+      vật `conformance-l0` canh — một step mới lỡ kèm `actions/setup-node`/`checkout`
+      riêng là đủ làm một guard không liên quan đỏ trên `main`, đúng cái bẫy mà CLAUDE.md
+      ghi cho hàng rào manifest. Chiều đỏ do `cong-tu-canh-minh` chứng minh cho
+      `job-count`; với `check-action-pins.sh` là guard có sẵn đã có răng riêng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
