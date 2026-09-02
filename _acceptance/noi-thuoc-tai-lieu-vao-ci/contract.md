@@ -31,14 +31,25 @@ giữ `fetch-depth: 0` mà chế độ `orphans` cần.
 
 **AC-2 — Không gì nuốt mã thoát của chúng.**
 Given cùng khối job đó,
-When với TỪNG chuỗi lệnh rút từ `ci.yml`, thay chính script mà chuỗi ấy gọi bằng một
-stub `exit 1` trong một bản sao cây, rồi chạy **nguyên chuỗi đó**,
-Then mỗi lượt **exit khác 0**. Đo QUAN HỆ chứ không quét chuỗi cấm: `ci.yml` không khai
-`shell:` nên `run:` chạy `bash -e` **không có `pipefail`** (đo 01/09), vậy
-`… synced.sh readme | tee /tmp/out` nuốt mã thoát mà **không** chứa `continue-on-error`,
-`|| true` hay `set +e` — ba chuỗi ấy giữ lại làm phép quét bổ trợ, không làm phép đo
-chính. Một thước không thể đỏ còn tệ hơn không có thước: nó báo cáo một sự an toàn nó
-không cung cấp.
+When quét từng dòng của khối job,
+Then không dòng nào mang `continue-on-error`, `|| true`, hay `set +e`. Một thước không
+thể đỏ còn tệ hơn không có thước: nó báo cáo một sự an toàn nó không cung cấp.
+
+**Điểm mù khai thẳng, và nó là điểm mù CÓ THẬT.** Đây là phép quét ba chuỗi, không phải
+phép đo quan hệ. `ci.yml` không khai `shell:` nên `run:` chạy `bash -e` **không có
+`pipefail`** (đo 01/09) — vậy `… synced.sh readme | tee /tmp/out` **nuốt mã thoát** mà
+không chứa chuỗi cấm nào, và tiêu chí này vẫn xanh.
+
+Vòng 1 và vòng 2 của hồ sơ này đã thử đóng điểm mù ấy bằng một chế độ tự viết
+(`exit-propagates`: thay script bằng stub rồi chạy chuỗi rút được). **Rút ở vòng 3.** Nó
+rỗng ba lần theo ba cơ chế khác nhau — thiếu đối chứng dương · thừa kế `pipefail` từ
+`set -euo pipefail` của chính file đo · và một bất biến đếm **hằng-đúng** (mỗi needle
+tăng đúng một trong hai biến nên `kê == đo + bỏ qua` không bao giờ sai được). Ba cơ chế
+khác nhau, cùng một lớp lỗi, hai vòng liên tiếp: theo `STOP-PATCHING-CLAUSE` đó là dấu
+hiệu khuôn giải sai, và owner chọn thu phạm vi (02/09).
+
+Ghi ra thay vì lấp: một điểm mù có tên đọc được là dữ liệu; một chế độ tự-viết-liên-tục-
+rỗng là một thước biết nói dối — đúng thứ hồ sơ này đi chữa.
 
 **AC-3 — Bốn step CHẠY trên pull request, không chỉ có mặt trong file.**
 Given `if:` có thể làm một step im lặng không chạy trên PR,
@@ -173,3 +184,20 @@ chỉ đo được sau khi PR chạy thật. Đó là ô CHƯA ĐO của Cổng 
 không giấu.
 
 ## Notes
+
+- **Điểm mù của AC-2, đã khai trong chính tiêu chí:** phép quét ba chuỗi cấm không bắt
+  được một step nuốt mã thoát qua đường ống (`| tee`), vì `run:` chạy `bash -e` không có
+  `pipefail`. Chế độ tự viết để đóng lỗ ấy bị rút ở vòng 3 sau ba lần rỗng.
+- **`orphans` vẫn là khẳng định chưa từng đỏ** (kế thừa từ `dang-ky-fork-openai`): ca phá
+  của nó cần chế độ ấy nhận một thư mục để quét.
+- **Cách rút lệnh chưa khẳng định "đúng MỘT dòng".** `teeth` dùng `… | tail -1`, `shape`
+  dùng `grep -q`. Chú thích trong `ci.yml` nêu rõ vì sao bốn step phải tách rời — một
+  dòng gộp `a && b` làm mọi needle giải về cùng một dòng — nhưng tính chất ấy chỉ sống
+  trong văn xuôi. Bản vá là một dòng mỗi chỗ rút (`n=$(… | wc -l); [ "$n" -eq 1 ] || fail`).
+- **`pnpm build` nay mang gán biến môi trường kiểu POSIX** (`NODE_OPTIONS=… next build`),
+  không chạy trên `cmd.exe`/PowerShell. Đo trước khi sửa: lệnh ấy chỉ được gọi ở
+  `ci.yml` (ubuntu) và máy dev; `desktop-release.yml` không gọi nó. Có lập trình viên
+  Windows chạy cục bộ thì phải đổi sang `cross-env`.
+- **Hai chỗ trôi kế thừa, chưa sửa:** đối chứng dương của bộ răng chỉ phủ chế độ `readme`;
+  nhãn ca 5 của bộ răng manifest có sẵn còn ghi "a 37th plain string" sau khi số đếm hạ
+  36→35.

@@ -131,6 +131,13 @@ READMES="$READMES" node -e '
         //
         // So: keep EVERY row, check the org on EVERY row, and compare id SETS.
         const seen = new Map();
+        // The header rule of this file: every mode prints the counts it worked from,
+        // because a printed count is the only thing separating "scanned and found
+        // nothing wrong" from "scanned nothing". A rewrite dropped this line and the
+        // mode spent one round contradicting its own header, the signed evidence that
+        // records this exact output, and the teeth script whose ^FAIL: grep is
+        // justified by it. Restored 2026-09-02.
+        console.log(`${file}: ${new Set(rows.map(r => r[1])).size} id extracted · manifest: ${want.size}`);
         for (const r of rows) {
             const [, id, org, repo] = r;
             // Record the row BEFORE any early exit: the extra-id pass below reads

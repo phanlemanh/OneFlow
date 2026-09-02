@@ -1,124 +1,93 @@
-# Review Findings: noi-thuoc-tai-lieu-vao-ci — round 1
-
 ## Trong hợp đồng
 
-- **exit-propagates asserts only "exit != 0" with no positive control — 2 of 7 needles pass vacuously**
-  file: `scripts/ci/check-gate-guards-job.sh:397`
-  severity: high
-  AC: AC-2
-  source: bugs
-  detail: The new `exit-propagates` mode builds a probe tree (`for entry in *` + `cp -R scripts`), replaces one script with an `exit 1` stub, runs the extracted `run:` string, and passes if `rc != 0`. There is no green half proving the command exits 0 in that same tree unstubbed, so any command that already fails in the probe tree passes the check without measuring anything.
-
-  Two of the seven needles are in exactly that state today (reproduced on this tree by rebuilding the identical probe tree and running the commands WITHOUT the stub):
-
-    rc=1 :: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
-            FAIL: cannot read config/official-plugins.json at origin/main
-    rc=1 :: node scripts/ci/check-eval-filters.mjs
-            Cannot find module '/@fs/.../add-media-library-node.test.tsx'
-
-  The `orphans` needle fails because `for entry in *` does not glob dotfiles, so `.git` is never linked into `$stub_root/t` and `git show origin/main:...` cannot resolve. The eval-filters needle fails because vitest cannot resolve `src/**` from the probe tree.
-
-  The sibling `teeth` mode in the same file handles both cases explicitly — it appends `--vitest-root "$repo_root"` for check-eval-filters.mjs and names `check-live-docs-manifest-synced.sh orphans` in TEETH_SKIP with a stated reason — and its header comment states the rule: "a red-only assertion cannot tell 'the guard caught the drift' from 'the command is simply broken'." `exit-propagates` does neither, and its summary line (`OK: cả 7 lệnh trong job đều truyền mã thoát khác 0 …`, line 405) over-claims: the relation is proven for 5 of 7. Fix by adding an unstubbed control run per needle (require rc==0 before crediting the stubbed rc!=0), plus a named skip list like TEETH_SKIP for needles the probe tree cannot host.
-
-  rationale: AC-2 tự đặt đúng tiêu chuẩn bị vi phạm ở đây ("Một thước không thể đỏ còn tệ hơn không có thước: nó báo cáo một sự an toàn nó không cung cấp"); finding chứng minh 2/7 needle của chính phép đo AC-2 (exit-propagates) đỏ ngay cả không bị stub, nên không chứng minh được quan hệ mà AC-2 yêu cầu.
-
-- **Assertion âm-tính-một-mình: chế độ `exit-propagates` không có đối chứng dương — 2/7 lệnh đã thoát khác 0 trong cây thăm dò kể cả khi KHÔNG bị stub**
-  file: `scripts/ci/check-gate-guards-job.sh:397`
-  severity: high
-  AC: AC-2
-  source: measurement
-  detail: Vòng lặp ở dòng 369-400 dựng cây thăm dò (symlink mọi mục top-level, chép `scripts/`, ghi đè MỘT script bằng stub `exit 1`) rồi khẳng định DUY NHẤT một điều: `[ "$rc" -ne 0 ]`. Không có lượt chạy đối chứng nào với script THẬT trong CÙNG cây ấy, và không ghim thông điệp/nguồn gốc của mã thoát — nên "khác 0" không chứng minh được mã thoát đến từ stub.
-
-  Đo thật (dựng lại đúng cây thăm dò của chế độ này, chạy lệnh rút được mà KHÔNG stub):
-    rc=0  bash scripts/roadmap/check-roadmap-fresh.sh
-    rc=0  node scripts/ci/check-product-map.mjs
-    rc=1  node scripts/ci/check-eval-filters.mjs        <- xanh (rc=0) trên kho thật
-    rc=0  ... check-live-docs-manifest-synced.sh readme
-    rc=0  ... check-live-docs-manifest-synced.sh claude
-    rc=1  ... check-live-docs-manifest-synced.sh orphans origin/main  -> "FAIL: cannot read config/official-plugins.json at origin/main"
-    rc=0  ... check-live-docs-manifest-teeth.sh
-
-  Vậy với hai needle (`check-eval-filters.mjs` và `synced.sh orphans`), vế đỏ của chế độ này là ĐỎ VÌ MÔI TRƯỜNG (cây mktemp không có `.git`; thiếu ngữ cảnh của eval-filter), không vì stub — nhưng chế độ vẫn in `OK: cả 7 lệnh trong job đều truyền mã thoát khác 0` (dòng 406) và `checked` vẫn đếm đủ 7. Đúng lớp lỗi mà chính file này khai ở chế độ `teeth`: `TEETH_SKIP` (dòng ~57) nêu đích danh `orphans` bị bỏ qua VÌ "cay tham do la thu muc mktemp khong co .git", còn `teeth` bắt buộc có vế xanh trên cây lành trước khi tin vế đỏ (dòng 222-234). Chế độ mới lặng lẽ gộp cả `orphans` vào mà không khai bỏ qua và không có vế xanh tương ứng. Đây là phép đo chịu lực của E2/AC-2 (`ntlc_exit_propagates`), tức lời hứa "không gì nuốt mã thoát" đang được chứng minh bằng 5/7 lệnh có nghĩa và 2/7 lệnh vô nghĩa mà đầu ra không phân biệt được.
-
-  rationale: Bản dịch của cùng finding về exit-propagates; trực tiếp làm thất bại lời hứa "mỗi lượt exit khác 0" (vì quan hệ nhân-quả với stub không được chứng minh) mà AC-2 đặt ra.
-
-- **Đo CHỈ DẪN thay vì ĐẦU RA: chế độ `shape` grep needle trên toàn khối job, nên một dòng COMMENT (hoặc tên step) cũng thoả "có step chạy nó"**
-  file: `scripts/ci/check-gate-guards-job.sh:72`
+- **exit-propagates skips needles dynamically while its sibling teeth mode requires skips to be declared up front**
+  file: `scripts/ci/check-gate-guards-job.sh:425`
   severity: medium
-  AC: AC-1
+  source: conventions
+  AC: AC-2
+  The new `exit-propagates` mode runs a green half per needle and, when the command is already non-zero in the probe tree, pushes the needle onto `prop_skipped` (line 425) and continues; the mode then exits 0 as long as `checked > 0` (line 447). The sibling `teeth` mode in the same file takes the opposite stance on purpose — TEETH_SKIP is a STATIC list whose comment reads "Named here rather than quietly absent: a silent exclusion is the exact class this file exists to catch" — and its `ke == pha + bo` invariant is computed against that declared list. Failure scenario: a later change makes six of the seven guard commands fail inside the shallow symlinked probe tree (e.g. a guard starts reading a path that is copied rather than symlinked). `exit-propagates` then measures exit-code propagation for one step, prints `KÊ=7 · ĐO=1 · BỎ QUA=6` and `OK: 1 / 7 …`, exits 0, and CI stays green — the mode has stopped guarding six of the seven steps with no red anywhere. Either make an undeclared green-half failure a `fail` (with an explicit static allow-list mirroring TEETH_SKIP), or floor `checked` at the number of needles minus the declared skips.
+  Rationale: AC-2 requires stub-and-execute proof of nonzero exit for TỪNG (every) command line extracted from ci.yml; silently dropping needles into an undeclared runtime skip bucket means not every command line gets that proof.
+
+- **exit-propagates aborts with no message when the script-path grep finds nothing (fail branch is dead code)**
+  file: `scripts/ci/check-gate-guards-job.sh:380`
+  severity: medium
+  source: bugs
+  AC: AC-2
+  `target=$(printf '%s\n' "$cmd" | tr ' ' '\n' | grep -m1 -E '^scripts/.*\.(sh|mjs|js)$')` runs under the file's `set -euo pipefail`. For a simple assignment, the command's exit status is the status of the command substitution, so when grep matches nothing (exit 1) `set -e` kills the whole script immediately. Line 381's `[ -n "$target" ] || fail "không tìm được script mà lệnh này gọi: $cmd"` is therefore unreachable. The mode exits 1 printing NOTHING, which in a CI log is indistinguishable from a genuine exit-code-propagation failure and gives the reader no way to tell which needle broke. This triggers the moment a `run:` line stops matching the narrow `^scripts/…` shape — an absolute path, `$GITHUB_WORKSPACE/scripts/…`, a `pnpm <script>` wrapper, or a guard moved outside `scripts/`. Verified with a minimal repro: the equivalent snippet exits 1 and never reaches the fail branch. Fix: `target=$(… || true)` before the emptiness test, or `if ! target=$(…); then fail …; fi`.
+  Rationale: When this crash fires, the script dies immediately under set -e and stops checking remaining needles, so AC-2's promise of a nonzero-exit proof for TỪNG (every) extracted command line is not actually delivered for the needles never reached.
+
+- **exit-propagates can pass while measuring almost nothing — skips are generated at runtime, not declared**
+  file: `scripts/ci/check-gate-guards-job.sh:447`
+  severity: medium
+  source: bugs
+  AC: AC-2
+  A needle whose UNSTUBBED green half exits non-zero in the probe tree is appended to `prop_skipped` at runtime (line 424-427) and dropped from the measurement. The only floor afterwards is `[ "$checked" -gt 0 ]` (line 447). The `ke == checked + bo` invariant on line 445 is vacuous by construction: every needle lands in exactly one of the two buckets, so it can never fail. So 6 of 7 needles can silently fall out — missing `node_modules` (check-eval-filters), an unfetched `origin/main` (the orphans needle), or any future guard the symlink probe tree cannot host — and the mode still exits 0 printing `OK: 1 / 7 …`. CI stays green on a measurement that proved the exit-code relation for one step. This is precisely the class the mode's own header says it exists to forbid, and the sibling `teeth` mode gets it right: its `bo` comes from the hardcoded `TEETH_SKIP` array (line ~52), so 'forgot to write a perturbation' and 'deliberately skipped' produce different output. Fix: require skipped needles to appear in a declared list, or fail when `checked < ke` unless the needle is pre-declared.
+  Rationale: This directly undermines AC-2's requirement that the stub-based exit-code proof cover every extracted command line, since the only floor left (checked > 0) lets most needles fall out unproven while the mode still reports success.
+
+- **Hình dạng 5 — bất biến đếm `KÊ = PHÁ + BỎ QUA` của chế độ teeth là hằng đúng, không thể bắt "quên viết phép phá"**
+  file: `scripts/ci/check-gate-guards-job.sh:349`
+  severity: medium
   source: measurement
-  detail: Comment ngay trên `GUARD_NEEDLES` (dòng 35-37, mới thêm ở diff này) tuyên: "Needles are matched against the `run:` lines of the acceptance-gate job", và E1 của `noi-thuoc-tai-lieu-vao-ci` phát biểu lời hứa là "đòi mỗi needle trong `GUARD_NEEDLES` có một step CHẠY nó". Nhưng assert thực tế là `printf '%s\n' "$block" | grep -q "$needle"` — khớp bất kỳ dòng nào trong khối, kể cả comment và `- name:`. Hai chế độ khác (`teeth`, `exit-propagates`) mới thật sự rút từ `run:` bằng `sed -n "s|^[[:space:]]*run:...`.
+  AC: AC-5
+  `red_cmds` (dòng 302–306) được dựng bằng cách lọc BỎ đúng những needle nằm trong `TEETH_SKIP` (dòng 53) ra khỏi `cmds`. Do đó `pha = ke - |TEETH_SKIP ∩ GUARD_NEEDLES|` và `bo = ${#TEETH_SKIP[@]}`, nên `[ "$ke" -eq "$((pha + bo))" ]` ở dòng 349 luôn đúng theo cấu tạo (chạy thật: `KÊ=7 · PHÁ=5 · BỎ QUA=2`, và 5 là 7−2 chứ không phải một phép đếm độc lập). Nó chỉ đỏ được trong một ca duy nhất: một mục `TEETH_SKIP` không khớp needle nào.
 
-  Đo xác nhận: chép `.github/workflows/ci.yml`, XOÁ hẳn step
-    `- name: READMEs match the plugin manifest` / `run: bash scripts/plugins/check-live-docs-manifest-synced.sh readme`
-  và thay bằng một dòng comment `# TODO: re-enable bash scripts/plugins/check-live-docs-manifest-synced.sh readme` — logic của `shape` vẫn tìm thấy needle và VẪN XANH (chỉ dòng 35 của khối là comment). Tức ô đo AC-1 đang đo văn bản chỉ dẫn trong YAML chứ không đo step chạy được.
+  `_acceptance/noi-thuoc-tai-lieu-vao-ci/evals.yaml:102` (E5/AC-5) lại đặt toàn bộ tiêu chí lên bất biến này: "bất biến đếm là phép đo, không phải lời bình; thiếu nó thì 'quên viết phép phá cho một needle' và 'cố ý bỏ qua' cho cùng một đầu ra xanh". Nó không đo được điều đó: một needle bị quên viết phép phá vẫn nằm nguyên trong `red_cmds`, `pha` không đổi, bất biến vẫn xanh — thứ bắt được ca ấy là vòng lặp chạy đỏ ở dòng 322–336, không phải phép đếm. Ma trận "số assert = số phần tử" mà E5 tuyên bố có, thực chất không được bất biến nào canh.
+  Rationale: AC-5 explicitly requires the teeth mode's count invariant to make "quên viết phép phá cho một needle" and "cố ý bỏ qua" produce different outputs, but the invariant is a tautology by construction (pha = ke − |TEETH_SKIP|) and can never distinguish the two, so AC-5's stated Then fails.
 
-  Phụ trợ cùng chỗ: `shape` chỉ lặp trên chính mảng `GUARD_NEEDLES` — không có phép đo nào ghim rằng mảng ấy PHẢI chứa bốn lệnh mới. Xoá đồng thời một needle khỏi mảng và step tương ứng khỏi `ci.yml` thì `shape`/`teeth`/`exit-propagates` đều xanh (bất biến `KÊ = PHÁ + BỎ QUA` chỉ đỏ nếu `TEETH_SKIP` không được cắt theo).
+- **Hình dạng 5 — chế độ `exit-propagates` tự loại needle lúc chạy, phép đếm không thể đỏ, và không in dòng xác nhận TỪNG lệnh như eval đòi**
+  file: `scripts/ci/check-gate-guards-job.sh:445`
+  severity: medium
+  source: measurement
+  AC: AC-2
+  Trong vòng lặp qua 7 needle, mỗi lượt hoặc tăng `checked` (dòng 441) hoặc đẩy vào `prop_skipped` rồi `continue` (dòng 425). Vì vậy `ke == checked + bo` ở dòng 445 tăng đúng một trong hai biến mỗi vòng — nó KHÔNG BAO GIỜ đỏ được. Rào chắn duy nhất còn lại là `[ "$checked" -gt 0 ]` (dòng 447): nếu 6/7 needle đỏ sẵn trong cây thăm dò (thiếu node_modules, thiếu `.git`, vv — đúng hai lớp sự cố mà chú thích dòng 431–436 kể là ĐÃ xảy ra), chế độ vẫn in `OK` và vẫn xanh trong khi chỉ đo 1 phần tử.
 
-  rationale: AC-1 đòi phép đo phải xác nhận CÓ STEP CHẠY hai thước (đọc theo thụt đầu dòng, không theo tên, "để đổi tên không giấu được"); finding chứng minh chế độ shape (cơ chế đo AC-1) chỉ khớp chuỗi văn bản bất kỳ trong khối, kể cả comment thay cho step thật — nên không thật sự đo được điều AC-1 yêu cầu.
+  `_acceptance/noi-thuoc-tai-lieu-vao-ci/evals.yaml:59` (E2/AC-2) hứa: "stdout ghim, cho TỪNG chuỗi rút từ ci.yml, một dòng xác nhận chuỗi ấy đã thoát KHÁC 0…". Đầu ra thật chỉ có hai dòng tổng: `KÊ=7 · ĐO=7 · BỎ QUA=0` + một dòng OK — không có dòng nào cho từng chuỗi, và tập phần tử được đo là do lúc chạy quyết định chứ không phải ma trận viết trước.
+  Rationale: AC-2 requires a nonzero-exit proof for TỪNG (every) command line extracted from ci.yml; the checked==checked+skipped invariant can never go red and no per-command confirmation line is printed, so AC-2's Then is not actually verified for all commands.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Nhánh bị chính cổng của repo chặn merge — job acceptance-gate sẽ ĐỎ**
-  Người dùng thấy gì: Nhánh này có thể bị hệ thống kiểm tra tự động chặn không cho gộp vào cho tới khi hồ sơ nghiệm thu được người phụ trách ký duyệt chính thức.
-  file: `_acceptance/noi-thuoc-tai-lieu-vao-ci/contract.md`
-  severity: high
-  Đề xuất: known-limits
-
-- **Bằng chứng đã ký của dang-ky-fork-openai không còn tái lập được tại chính verified_commit của nó**
-  Người dùng thấy gì: Báo cáo nghiệm thu đã được duyệt trước đó của một tính năng khác hiện đang nêu một kết quả kiểm tra không còn đúng với thực tế, khiến người đọc báo cáo dễ tin nhầm vào một trạng thái đã cũ.
-  file: `_acceptance/dang-ky-fork-openai/evals.yaml`
-  severity: medium
-  Đề xuất: new-contract
-
-- **CLAUDE.md ghi sai số ca của bộ răng live-docs (7 vs 9) ngay trong hằng-số-ràng-buộc mới**
-  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ hiện ghi sai số lượng ca kiểm tra của một bộ thử, có thể khiến người sau này chỉnh sai con số khi bổ sung kiểm tra mới.
-  file: `CLAUDE.md`
-  severity: medium
-  Đề xuất: known-limits
-
-- **18 dòng run-log vòng 3 mang sha không tồn tại và evals_hash bị cắt ngắn**
-  Người dùng thấy gì: Một số dòng nhật ký của báo cáo đã duyệt (thuộc tính năng khác) ghi mã phiên bản không có thật, khiến không thể xác minh lại chính xác bản mã đã được kiểm tra khi đó.
-  file: `_acceptance/dang-ky-fork-openai/run-log.jsonl`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Header của guard mới còn giữ con số orphan sai (4) mà hồ sơ đã tự sửa thành 3**
-  Người dùng thấy gì: Một dòng chú thích trong mã nguồn ghi sai số lượng tệp biểu tượng còn tồn đọng; đây chỉ là ghi chú, không ảnh hưởng đến việc kiểm tra thực tế.
-  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
-  severity: low
-  Đề xuất: known-limits
-
-- **exit-propagates ghi log chẩn đoán vào đường /tmp cố định rồi không ai đọc**
-  Người dùng thấy gì: Khi bước kiểm tra tự động này báo lỗi, người vận hành không được hướng dẫn nơi xem chi tiết, gây khó khăn khi truy tìm nguyên nhân.
+- **Needle → run-line extraction never asserts the "exactly ONE row" invariant ci.yml relies on**
+  Người dùng thấy gì: Nếu sau này có người gộp các bước kiểm tra CI lại cho gọn hơn, công cụ đang bảo vệ pipeline có thể âm thầm ngừng xác nhận một vài bước trong khi bảng tổng kết vẫn báo mọi thứ đã được kiểm tra đầy đủ.
   file: `scripts/ci/check-gate-guards-job.sh`
-  severity: low
-  Đề xuất: known-limits
-
-- **CLAUDE.md advertises 7 teeth cases / PARTIAL: n/7; the script has 9 and prints PARTIAL: n/9**
-  Người dùng thấy gì: Tài liệu hướng dẫn nội bộ hiện ghi sai số lượng ca kiểm tra của một bộ thử, có thể khiến người sau này chỉnh sai con số khi bổ sung kiểm tra mới.
-  file: `CLAUDE.md`
   severity: medium
   Đề xuất: known-limits
 
-- **orphans-mode header comment says four pre-existing orphan icons; the measurement reports three**
-  Người dùng thấy gì: Một dòng chú thích trong mã nguồn ghi sai số lượng tệp biểu tượng còn tồn đọng; đây chỉ là ghi chú, không ảnh hưởng đến việc kiểm tra thực tế.
+- **readme mode dropped its per-file count print, contradicting the guard's own invariant and the signed evidence**
+  Người dùng thấy gì: Khi công cụ đối chiếu danh sách plugin trong README với danh mục chính thức chạy thành công, nó không còn in ra số lượng plugin đã đọc được từ mỗi file README như trước, khiến người xem báo cáo khó tự xác minh công cụ có thực sự quét đủ nội dung hay chỉ báo "ổn" một cách hình thức.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
+  severity: medium
+  Đề xuất: new-contract
+
+- **`pnpm build` now carries a POSIX-only inline env assignment**
+  Người dùng thấy gì: Lệnh build của dự án hiện dùng cú pháp chỉ chạy được trên máy Mac/Linux; nếu ai đó chạy lệnh build trên máy Windows, lệnh sẽ báo lỗi và không build được.
+  file: `package.json`
+  severity: low
+  Đề xuất: known-limits
+
+- **The diagnostic log named in the exit-propagates failure message is deleted by the EXIT trap before it can be read**
+  Người dùng thấy gì: Khi công cụ kiểm tra CI phát hiện lỗi và báo "xem file log để biết chi tiết", file log đó thực ra đã bị xoá trước khi ai kịp mở ra xem, nên người xử lý sự cố không biết chính xác lệnh nào gây lỗi.
+  file: `scripts/ci/check-gate-guards-job.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **orphans mode swallows git ls-tree failure and can blame the branch for pre-existing orphan icons**
+  Người dùng thấy gì: Công cụ kiểm tra icon plugin "mồ côi" có thể đổ oan cho một nhánh code, báo rằng nhánh đó vừa thêm icon thừa, trong khi thực ra icon ấy đã tồn tại từ trước và nhánh này không hề đụng tới.
   file: `scripts/plugins/check-live-docs-manifest-synced.sh`
   severity: low
   Đề xuất: known-limits
 
-- **Assert "chuỗi có mặt" thay cho QUAN HỆ: E4/E6 ghim "39 id rút được TRÊN TỪNG README" trong khi thước chỉ in con số lấy từ MANIFEST, không phải từ phép rút**
-  Người dùng thấy gì: Báo cáo kiểm tra README của một tính năng khác có thể hiển thị đúng con số dự kiến một cách trùng hợp, ngay cả khi phép trích xuất dữ liệu bị lỗi và thực chất không đếm được gì, khiến người đọc tin nhầm là đã kiểm tra kỹ.
-  file: `_acceptance/dang-ky-fork-openai/evals.yaml`
-  severity: medium
+- **build script hard-sets NODE_OPTIONS, discarding any inherited value**
+  Người dùng thấy gì: Lệnh build đặt cứng giới hạn bộ nhớ cho quá trình build, nên nếu máy build cần một cấu hình bộ nhớ khác thì cấu hình đó sẽ bị lệnh build ghi đè và bỏ qua.
+  file: `package.json`
+  severity: low
+  Đề xuất: known-limits
+
+- **Hình dạng 3 — assert "chuỗi 39 có mặt" thay cho QUAN HỆ: dòng đếm id rút-từ-README đã bị xoá khỏi thước, hai eval vẫn đòi nó**
+  Người dùng thấy gì: Khi mọi thứ hợp lệ, công cụ đối chiếu README với danh mục plugin chính thức không còn hiển thị số lượng id đã đọc được từ mỗi README, khiến người xem báo cáo khó tự kiểm tra công cụ có thực sự quét đúng nội dung hay không.
+  file: `scripts/plugins/check-live-docs-manifest-synced.sh`
+  severity: high
   Đề xuất: new-contract
 
-- **Assert "chuỗi có mặt" thay cho QUAN HỆ: E5 ghim literal `OK: 7/7 ca` trong khi bộ răng ở HEAD chạy 9 ca và in `OK: 9/9 ca`**
-  Người dùng thấy gì: Báo cáo nghiệm thu đã duyệt của một tính năng khác đang khẳng định một kết quả kiểm tra cụ thể mà hệ thống hiện tại không còn tạo ra nữa, khiến bằng chứng đã ký không còn phản ánh đúng hành vi thực tế.
-  file: `_acceptance/dang-ky-fork-openai/evals.yaml`
-  severity: medium
-  Đề xuất: new-contract
-
-⚠ Cụm ngoài vùng phủ: 7/13 lỗi rơi vào file không bộ đo nào phủ (_acceptance/noi-thuoc-tai-lieu-vao-ci/contract.md, _acceptance/dang-ky-fork-openai/evals.yaml, CLAUDE.md, _acceptance/dang-ky-fork-openai/run-log.jsonl) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 2/12 lỗi rơi vào file không bộ đo nào phủ (package.json) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

@@ -622,7 +622,6 @@ executors:
     dkfo_icon_no_new_orphan: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
     dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
     ntlc_resign_wave: bash scripts/acceptance/check-resign-wave.sh noi-thuoc-tai-lieu-vao-ci origin/main
-    ntlc_exit_propagates: bash scripts/ci/check-gate-guards-job.sh exit-propagates
     ntlc_no_new_checkout: bash scripts/ci/check-gate-guards-job.sh job-count && bash scripts/ci/check-action-pins.sh
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
