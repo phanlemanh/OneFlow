@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: ddea746f4269130b59797ea4236f2ec9a44a6c61
+verified_commit: 3c859a4998c875a1032d76ee6529b263474d3b20
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -217,3 +217,7 @@ sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8 · suites: 8 lệnh exit 0 (làn c
 ### Re-pin lần 4 — 2026-09-02, do repin-khong-chay-lai-eval chạm scripts/ci/**
 run_id: repin-20260902T162209Z-29839
 sha: ddea746f4269130b59797ea4236f2ec9a44a6c61 · suites: 8 lệnh exit 0 (làn tuần tự; dòng repin ghi bằng chế độ `write`, mang `prev_sha`)
+
+### Re-pin lần 5 — 2026-09-02, do nhánh thêm hai phép từ chối cho `write` và một guard điểm vào
+run_id: rkce-repin-20260902T221339Z
+sha: 3c859a4998c875a1032d76ee6529b263474d3b20 · suites: 8 lệnh exit 0
