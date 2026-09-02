@@ -53,8 +53,13 @@ glob của mục** — và cả bốn hình dạng phải có ca **chạm** lẫ
 **AC-4 — Bộ hoạch định trả về ĐÚNG TẬP id, không phải một con số.**
 Given một hồ sơ fixture có tên với tập eval biết trước và một cặp sha biết trước,
 When chạy chế độ `plan`,
-Then nó in **tập id bị chạm** và **tập id không bị chạm** — hai tập, so bằng phép so
-tập chứ không phải chuỗi-có-mặt. Thêm một file vào diff phải làm **đúng một** id chuyển
+Then nó in **BA tập id**: bị chạm · không bị chạm · **không kết luận được** (eval không
+khai `paths`) — so bằng phép so tập chứ không phải chuỗi-có-mặt. Ba chứ không hai: đo
+02/09 cho thấy **145/502** eval trong hồ sơ đã ký không khai `paths`, và luật an toàn
+"không khai thì luôn bị chạm" — đúng khi một vòng verify quyết chạy lại gì — làm hàng
+rào này nuốt cả 145 ô ấy ở **mọi** lần ghim, vĩnh viễn. Một phán quyết luôn nổ thì không
+nói gì. Gộp chúng vào "bị chạm" là một phán quyết sai; gộp vào "không chạm" là một loại
+trừ im lặng; hạng mục có tên kèm số là **dữ liệu**. Thêm một file vào diff phải làm **đúng một** id chuyển
 từ tập sau sang tập trước. Chỉ đếm số thì một bộ giao trả về *cả tập* cũng in đúng con
 số ấy.
 
@@ -62,16 +67,21 @@ số ấy.
 Given một dòng repin có `prev_sha`, và giữa hai sha có file chạm `paths` của eval X,
 When chạy chế độ `check` mà run-log **không** có bản ghi chạy lại X mang cùng `run_id`,
 Then hàng rào **đỏ** và nêu đích danh slug, `run_id`, và từng id eval bị nuốt.
-Hình dạng và đường dẫn của "bản ghi chạy lại" là dòng `{"kind":"eval","run_id":…,
-"eval":…}` trong chính `run-log.jsonl` của hồ sơ — khai ở đây **trước khi viết mã**, vì
-một bộ đọc tra sai chỗ vẫn làm mọi fixture tự dựng xanh.
+
+"Đã chạy lại" nghĩa là run-log của hồ sơ có một dòng `{"kind":"eval","eval":<id>,
+"sha":<X>}` với `X` **bằng sha của lần ghim hoặc là hậu duệ của nó** — KHÔNG phải "cùng
+`run_id` với lần ghim". Luật chặt hơn ấy không thoả được một cách trung thực cho một lần
+ghim đã xảy ra: cách duy nhất làm nó xanh là ghi một lượt chạy dưới một `run_id` cũ, tức
+bịa xuất xứ. Câu hỏi thật sự là "ô này đã được đo lại SAU thay đổi chưa", và câu ấy trả
+lời được bằng cách chạy nó thật bây giờ. Hình dạng và đường dẫn khai ở đây **trước khi
+viết mã**, vì một bộ đọc tra sai chỗ vẫn làm mọi fixture tự dựng xanh.
 
 **AC-6 — `check` in NĂM con số độc lập, và số "tính được" phải > 0 trên kho thật.**
 Given trên kho hôm nay cả 33 dòng repin đều thiếu `prev_sha`, nên nhánh chính của hàng
 rào **chưa từng chạy trên dữ liệu thật**,
 When chạy `check` sau khi vòng này ghi ít nhất một dòng repin bằng chế độ `write`,
-Then đầu ra ghim **năm** số: hồ sơ đã quét · dòng repin đọc được · **dòng tính được
-(> 0)** · dòng ông bà · eval bị nuốt. Bốn số đầu tiên tôi định in đều thoả bởi một
+Then đầu ra ghim **sáu** số: hồ sơ đã quét · dòng repin đọc được · **dòng tính được
+(> 0)** · dòng ông bà · eval bị nuốt · **eval không kết luận được**. Bốn số đầu tiên tôi định in đều thoả bởi một
 script chỉ đếm dòng rồi xếp tất cả vào nhánh ông bà — con số thứ ba là thứ phân biệt
 "phát hiện `prev_sha` chạy đúng" với "phát hiện `prev_sha` là no-op".
 
