@@ -68,9 +68,13 @@ shape)
     block=$(job_block)
     [ -n "$block" ] || fail "no 'acceptance-gate:' job in $WF"
 
+    # Only `run:` lines count. Grepping the whole block measures INSTRUCTIONS, not
+    # output: replacing a step with `# TODO: bat lai bash …synced.sh readme` left this
+    # mode green while nothing ran (reproduced 2026-09-02). The sibling teeth and
+    # exit-propagates modes already extract from `run:` lines only; shape did not.
     for needle in "${GUARD_NEEDLES[@]}"; do
-        printf '%s\n' "$block" | grep -q "$needle" \
-            || fail "job acceptance-gate không có step nào chạy $needle"
+        printf '%s\n' "$block" | sed -n 's|^[[:space:]]*run:[[:space:]]*||p' | grep -q -- "$needle" \
+            || fail "job acceptance-gate không có dòng run: nào chạy $needle"
     done
 
     # fetch-depth: 0 is not decoration — check-roadmap-fresh.sh reads history,
@@ -367,6 +371,7 @@ exit-propagates)
     trap cleanup_stub EXIT
 
     checked=0
+    prop_skipped=()
     for needle in "${GUARD_NEEDLES[@]}"; do
         cmd=$(printf '%s\n' "$block" | sed -n "s|^[[:space:]]*run:[[:space:]]*\(.*${needle}.*\)$|\1|p" | tail -1)
         [ -n "$cmd" ] || fail "không rút được lệnh chạy $needle ra từ $WF"
@@ -375,14 +380,27 @@ exit-propagates)
         target=$(printf '%s\n' "$cmd" | tr ' ' '\n' | grep -m1 -E '^scripts/.*\.(sh|mjs|js)$')
         [ -n "$target" ] || fail "không tìm được script mà lệnh này gọi: $cmd"
 
+        # Same command patch the teeth mode uses: vitest cannot resolve src/** from
+        # a detached tree, so point it back at the real sources.
+        run_cmd="$cmd"
+        case "$cmd" in
+        *check-eval-filters.mjs*) run_cmd="$cmd --vitest-root \"$repo_root\"" ;;
+        esac
+
         rm -rf "$stub_root/t"; mkdir -p "$stub_root/t/$(dirname "$target")"
         # Copy the whole repo shallowly so relative paths still resolve, then blind
         # the ONE script under test. Symlink the rest; only the stub is real.
+        # `*` does not glob dotfiles, so `.git` never reached the probe and the
+        # orphans needle failed on `git show origin/main:` — a red that measures
+        # nothing. Link dotfiles too.
+        shopt -s dotglob
         for entry in *; do
+            [ "$entry" = "." ] || [ "$entry" = ".." ] && continue
             [ "$entry" = "$(printf '%s' "$target" | cut -d/ -f1)" ] && continue
             ln -s "$repo_root/$entry" "$stub_root/t/$entry" 2>/dev/null || true
         done
         cp -R "$repo_root/$(printf '%s' "$target" | cut -d/ -f1)" "$stub_root/t/" 2>/dev/null || true
+        shopt -u dotglob
         printf '#!/usr/bin/env bash\nexit 1\n' > "$stub_root/t/$target"
         chmod +x "$stub_root/t/$target"
 
@@ -390,20 +408,44 @@ exit-propagates)
         # inherited pipefail turns `stub | tee` into a non-zero exit -- the measurement
         # would then repair the very defect it hunts. GitHub runs `run:` as
         # `bash -e {0}` with NO pipefail, so the probe must use the same options.
+        prop_log="$stub_root/prop-$checked.log"
+
+        # GREEN HALF first, in the SAME probe tree, UNSTUBBED. Without it a
+        # red-only assertion cannot tell "the exit code propagated" from "the
+        # command is simply broken in this tree" — and two needles were in exactly
+        # that state (orphans could not reach .git; check-eval-filters could not
+        # resolve src/**). That is the rule the sibling `teeth` mode states in its
+        # own header, and this mode shipped violating it.
+        cp "$repo_root/$target" "$stub_root/t/$target"
         set +e
-        (cd "$stub_root/t" && bash -e -c "$cmd") >/tmp/cggj-prop.log 2>&1
+        (cd "$stub_root/t" && bash -e -c "$run_cmd") >"$prop_log.green" 2>&1
+        green=$?
+        set -e
+        if [ "$green" -ne 0 ]; then
+            prop_skipped+=("$needle|đỏ sẵn trong cây thăm dò khi CHƯA cắm stub (exit $green) — không đo được việc truyền mã thoát ở đây")
+            continue
+        fi
+
+        printf '#!/usr/bin/env bash\nexit 1\n' > "$stub_root/t/$target"
+        chmod +x "$stub_root/t/$target"
+        set +e
+        (cd "$stub_root/t" && bash -e -c "$run_cmd") >"$prop_log" 2>&1
         rc=$?
         set -e
         [ "$rc" -ne 0 ] \
-            || fail "step chạy '$needle' KHÔNG truyền được mã thoát: script bị thay bằng stub exit 1 mà lệnh vẫn thoát 0 — '$cmd'"
+            || fail "step chạy '$needle' KHÔNG truyền được mã thoát: script bị thay bằng stub exit 1 mà lệnh vẫn thoát 0 — '$cmd'. Xem $prop_log"
         checked=$((checked + 1))
     done
 
     cleanup_stub
     trap - EXIT
-    [ "$checked" -eq "${#GUARD_NEEDLES[@]}" ] \
-        || fail "chỉ kiểm $checked / ${#GUARD_NEEDLES[@]} needle"
-    echo "OK: cả $checked lệnh trong job đều truyền mã thoát khác 0 khi script chúng gọi hỏng"
+    ke=${#GUARD_NEEDLES[@]}; bo=${#prop_skipped[@]}
+    echo "KÊ=$ke · ĐO=$checked · BỎ QUA=$bo"
+    [ "$bo" -eq 0 ] || for e in "${prop_skipped[@]}"; do echo "  bỏ qua: ${e%%|*} — ${e#*|}"; done
+    [ "$ke" -eq "$((checked + bo))" ] \
+        || fail "kê $ke needle nhưng đo $checked + bỏ qua $bo = $((checked + bo))"
+    [ "$checked" -gt 0 ] || fail "không needle nào đo được — phép đo này rỗng"
+    echo "OK: $checked / $ke lệnh trong job truyền mã thoát khác 0 khi script chúng gọi hỏng; $bo bỏ qua CÓ TÊN"
     ;;
 
 suite-keys)

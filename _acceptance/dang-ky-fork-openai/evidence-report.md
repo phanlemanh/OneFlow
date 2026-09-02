@@ -175,3 +175,33 @@ Round 3: E1-E8 đều PASS — ca `orphan-them-moi` (E5/E7) đã rút vì gây �
 ### Re-pin lần 1 — 2026-09-01, do noi-thuoc-tai-lieu-vao-ci chạm .github/workflows/ci.yml và scripts/plugins/**
 run_id: repin-20260902T020812Z-5668
 sha: e0eb0a92d5ca672e2af4f372bbdede9260727d74 · suites: 8 lệnh exit 0
+
+## Sửa đổi sau chữ ký — 2026-09-02
+
+Owner cho phép sửa bản ghi (Cổng 2 của `noi-thuoc-tai-lieu-vao-ci`, 02/09). Chữ ký
+người KHÔNG bị đụng; verdict PASS và mọi kết quả ô đo giữ nguyên. Hai sửa đổi:
+
+**1. Số ca của bộ răng: bằng chứng ghi `OK: 7/7 ca`, lệnh đó nay in `OK: 9/9 ca`.**
+Hồ sơ [`noi-thuoc-tai-lieu-vao-ci`](../noi-thuoc-tai-lieu-vao-ci/contract.md) thêm hai
+ca vào `check-live-docs-manifest-teeth.sh` (`readme-trung-org-dung`,
+`readme-trung-sai-org`) ở commit `e0eb0a9`. Bảy ca cũ vẫn còn nguyên và vẫn PASS — số
+đếm tăng, không có ca nào mất.
+
+Điều này lọt lưới vì một **lỗ cấu trúc trong nghi thức re-pin**, không phải sơ suất
+riêng lẻ: E5 khai `paths` gồm đúng file bị sửa, nhưng re-pin chỉ chạy lại **suite**,
+không chạy lại **eval**. `check-resign-wave` so `sha` nên vẫn xanh. Một hồ sơ đã ký có
+thể tuyên một đầu ra mà lệnh của nó không còn sinh ra, và không thước nào đỏ. Lỗ này
+đi tiếp thành một hồ sơ cơ hội riêng.
+
+**2. Sổ chạy vòng 3 mang một `sha` không phân giải được — đã sửa về giá trị thật.**
+18 dòng ghi `ae09815e2a9e` + 28 số 0. Đó không phải commit; nó là tiền tố 12 ký tự
+được độn số 0 khi tôi gõ lại `invokedSha` vào lời gọi workflow thay vì chép nguyên
+40-hex từ `s4-args.json` (bản máy sinh, vốn LUÔN đúng). `evals_hash` cũng bị cắt
+64 → 16 hex ở cùng nhóm dòng. Cả hai đã sửa về giá trị trong `s4-args.json`;
+`git cat-file -t` nay phân giải được mọi sha trong sổ.
+
+Đây là **dữ liệu bịa trong bản ghi kiểm toán**, không phải một phép đo hỏng — nên nó
+lọt qua ba vòng verify, một hội đồng review và một chữ ký người. Không thước nào kiểm
+sha trong run-log có tồn tại hay không; nó lộ ra vì người review đi `git cat-file`
+từng giá trị. Sửa bản ghi về sự thật là khôi phục, không phải viết lại lịch sử — bản
+gốc hỏng nằm trong lịch sử git nếu cần đối chiếu.
