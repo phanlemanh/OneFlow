@@ -7,8 +7,8 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 292d740129ec49e46dda86ecef6b6f0a51b5080e
-human_signoff: Manh 2026-08-07
+verified_commit: fe711ecd5cf7821f582dcc11d7ff7818cfb7162f
+human_signoff:
 ---
 
 # Evidence Report: conformance-l0
@@ -34,231 +34,266 @@ human_signoff: Manh 2026-08-07
 ## Evidence
 
 - eval: E1
-  run_id: conformance-l0-E1-20260807T013210Z
+  run_id: minted-conformance-l0-E1-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-07T01:32:10Z
+  verified_at: 2026-09-02T22:48:40Z
   output: |
-    ................                                               [100%]
-    16 passed in 0.03s
+    ................................................................        [100%]
+    16 passed in 0.26s
     (one run of tests/test_engine_batch.py serves E1, E2, E4, E5 and E13)
 
 - eval: E2
-  run_id: conformance-l0-E2-20260807T013210Z
+  run_id: minted-conformance-l0-E2-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-07T01:32:10Z
+  verified_at: 2026-09-02T22:48:40Z
   output: |
-    ................                                               [100%]
-    16 passed in 0.03s
+    16 passed in 0.26s
 
 - eval: E3
-  run_id: conformance-l0-E3-20260807T013224Z
+  run_id: minted-conformance-l0-E3-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest
-  verified_at: 2026-08-07T01:32:24Z
+  verified_at: 2026-09-02T22:48:41Z
   output: |
-    ........................................................................ [ 37%]
-    ........................................................................ [ 74%]
-    .................................................                        [100%]
-    193 passed in 4.39s
+    ........................................................................ [ 98%]
+    ....                                                                     [100%]
+    292 passed in 14.66s
 
 - eval: E14
-  run_id: conformance-l0-E14-20260807T013214Z
+  run_id: minted-conformance-l0-E14-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-07T01:32:14Z
+  verified_at: 2026-09-02T22:48:42Z
   output: |
-    .......                                                        [100%]
-    7 passed in 0.03s
+    ........                                                                 [100%]
+    8 passed in 0.24s
+    (one run of tests/conformance serves E14 and E6)
 
 - eval: E4
-  run_id: conformance-l0-E4-20260807T013210Z
+  run_id: minted-conformance-l0-E4-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-07T01:32:10Z
+  verified_at: 2026-09-02T22:48:40Z
   output: |
-    ................                                               [100%]
-    16 passed in 0.03s
+    16 passed in 0.26s
 
 - eval: E5
-  run_id: conformance-l0-E5-20260807T013210Z
+  run_id: minted-conformance-l0-E5-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-07T01:32:10Z
+  verified_at: 2026-09-02T22:48:40Z
   output: |
-    ................                                               [100%]
-    16 passed in 0.03s
+    16 passed in 0.26s
 
 - eval: E6
-  run_id: conformance-l0-E6-20260807T013214Z
+  run_id: minted-conformance-l0-E6-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_conformance
-  verified_at: 2026-08-07T01:32:14Z
+  verified_at: 2026-09-02T22:48:42Z
   output: |
-    .......                                                        [100%]
-    7 passed in 0.03s
-    (the four fixtures plus the compose-overlay conformance cases a later feature
-    added to the same directory)
+    ........                                                                 [100%]
+    8 passed in 0.24s
 
 - eval: E7
-  run_id: conformance-l0-E7-20260807T013236Z
+  run_id: minted-conformance-l0-E7-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_conformance
-  verified_at: 2026-08-07T01:32:36Z
+  verified_at: 2026-09-02T22:48:47Z
   output: |
-    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
-    Test Files  1 passed (1)
-         Tests  12 passed (12)
+         Tests  13 passed (13)
+      Start at  22:48:47
+      Duration  185ms (transform 75ms, setup 0ms, import 94ms, tests 4ms, environment 0ms)
 
 - eval: E8
-  run_id: conformance-l0-E8-20260807T013250Z
+  run_id: minted-conformance-l0-E8-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.conformance_discriminating
-  verified_at: 2026-08-07T01:32:50Z
+  verified_at: 2026-09-02T22:48:50Z
   output: |
-    ==> baseline: the suite must be GREEN
-        green
-    ==> perturbation (a): drop one item from the fan-out
-        went RED as required
-    ==> perturbation (b): add a business field on the Python side only
-        went RED as required
-    ==> perturbation (c): corrupt a fixture and run the TypeScript half
-        went RED as required
     ==> revert: both halves must be GREEN again
         green
     OK: the conformance suite discriminates on all three perturbation kinds
 
 - eval: E9
-  run_id: conformance-l0-E9-20260807T013218Z
+  run_id: minted-conformance-l0-E9-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-07T01:32:18Z
+  verified_at: 2026-09-02T22:48:43Z
   output: |
-    .......                                                        [100%]
-    7 passed in 0.72s
+    .......                                                                  [100%]
+    7 passed in 1.13s
+    (one run of tests/test_plugin_rev.py serves E9 and E10)
 
 - eval: E15
-  run_id: conformance-l0-E15-20260807T013305Z
+  run_id: minted-conformance-l0-E15-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.plugin_rev_joined_path
-  verified_at: 2026-08-07T01:33:05Z
+  verified_at: 2026-09-02T22:48:52Z
   output: |
-    OK: TypeScript install -> Python scan preserved pluginRev
-    90ada928bd2e852dd85acab44a5c3f35e5aee068
+    Already up to date
+    Done in 164ms using pnpm v11.5.1
+    OK: TypeScript install -> Python scan preserved pluginRev 305a69612d49762e11be787bde4d407e657689a4
 
 - eval: E10
-  run_id: conformance-l0-E10-20260807T013218Z
+  run_id: minted-conformance-l0-E10-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_plugin_rev
-  verified_at: 2026-08-07T01:32:18Z
+  verified_at: 2026-09-02T22:48:43Z
   output: |
-    .......                                                        [100%]
-    7 passed in 0.72s
+    7 passed in 1.13s
 
 - eval: E11
-  run_id: conformance-l0-E11-20260807T013237Z
+  run_id: minted-conformance-l0-E11-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_plugin_rev
-  verified_at: 2026-08-07T01:32:37Z
+  verified_at: 2026-09-02T22:48:48Z
   output: |
-    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
-    Test Files  1 passed (1)
-         Tests  3 passed (3)
+          Tests  3 passed (3)
+       Start at  22:48:48
+       Duration  138ms (transform 19ms, setup 0ms, import 61ms, tests 4ms, environment 0ms)
 
 - eval: E12
-  run_id: conformance-l0-E12-20260807T013238Z
+  run_id: minted-conformance-l0-E12-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.unit_node_cached
-  verified_at: 2026-08-07T01:32:38Z
+  verified_at: 2026-09-02T22:48:49Z
   output: |
-    RUN  v4.1.10 /Users/manh-macmini/dev/oneflow
-    Test Files  1 passed (1)
          Tests  11 passed (11)
+      Start at  22:48:49
+      Duration  126ms (transform 23ms, setup 0ms, import 31ms, tests 26ms, environment 0ms)
 
 - eval: E13
-  run_id: conformance-l0-E13-20260807T013210Z
+  run_id: minted-conformance-l0-E13-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.sdk_pytest_batch
-  verified_at: 2026-08-07T01:32:10Z
+  verified_at: 2026-09-02T22:48:40Z
   output: |
-    ................                                               [100%]
-    16 passed in 0.03s
+    16 passed in 0.26s
+
+### Lệnh suite (hồi quy)
+
+- cmd: bash scripts/acceptance/preflight-verify-env.sh
+  run_id: minted-conformance-l0-SUITE-bash_scripts_acceptance_preflight_verify-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:48:39Z
+
+- cmd: pnpm build && pnpm typecheck
+  run_id: minted-conformance-l0-SUITE-build_typecheck-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:48:53Z
+
+- cmd: pnpm lint:check
+  run_id: minted-conformance-l0-SUITE-lint_check-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:48:55Z
+
+- cmd: pnpm test
+  run_id: minted-conformance-l0-SUITE-test-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:48:57Z
+
+- cmd: pnpm verify:plugins
+  run_id: minted-conformance-l0-SUITE-verify_plugins-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:49:10Z
+
+- cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
+  run_id: minted-conformance-l0-SUITE-gen_abi-r2
+  exit_code: 0
+  verified_at: 2026-09-02T22:49:12Z
+
+## Known limits
+
+1. **Vòng này là verify LẠI, không phải một vòng phát triển.** Mã của
+   `conformance-l0` không đổi kể từ chữ ký 07/08; vòng chạy vì hồ sơ
+   `chong-mat-khoa-byo-giao-dien` sửa `src/app/api/media-library/route.test.ts`,
+   nằm trong `paths` của E12 (`src/app/api/**`). Ô E12 xanh 11/11.
+
+2. **`paths` của E12 khai quá rộng so với điều nó đo.** Nó đo `node_cached` đi qua
+   ba tầng, nhưng khai cả `src/app/api/**` — nên BẤT KỲ PR nào chạm bất kỳ route
+   nào, vì bất kỳ lý do gì, đều làm hồ sơ này ôi. Vòng verify này làm mới
+   `verified_commit` nhưng KHÔNG thu cái glob đó lại; PR kế tiếp chạm route sẽ đỏ
+   y hệt. Thu nó là việc của một hồ sơ riêng, không phải một lượt sửa lén trong
+   lúc gỡ CI.
+
+3. **Bộ tổng hợp của kit trả `runLogWriteFailed: true`** (lần thứ tư trong ngày):
+   báo cáo và 23 dòng run-log tính xong nhưng không ghi được, phiên điều phối ghi
+   tay. Nó cũng kể SAI lý do vòng chạy — viết «sau khi fork plugin OpenAI —
+   dang-ky-fork-openai», không liên quan; câu đó đã sửa lại theo lý do thật.
+
+## Ngoài hợp đồng — đã định đoạt ở hồ sơ khác
+
+Mười finding dưới đây là về mã của `chong-mat-khoa-byo-giao-dien`, không phải về
+`conformance-l0` — lớp review của vòng này đọc diff của cả nhánh nên gặp lại chúng.
+Cả mười **đã được owner định đoạt ở Cổng 2 ngày 02/09** trong hồ sơ đó; chi tiết và
+lựa chọn từng mục ở
+[`../chong-mat-khoa-byo-giao-dien/evidence-report.md`](../chong-mat-khoa-byo-giao-dien/evidence-report.md).
+Không xử lại ở đây.
+
+| # | Phát hiện | Owner chọn |
+|---|---|---|
+| Ngoài-1 | Write failure is rendered as "key saved" in the node key prompt (high) | **đã quyết ở hồ sơ kia** |
+| Ngoài-2 | env-client hand-rolls fetch, bypassing the repo's shared API client (timeout + shell 401 seam) (medium) | **đã quyết ở hồ sơ kia** |
+| Ngoài-3 | New STORE_UNREADABLE code was not added to the media-library route STATUS maps (medium) | **đã quyết ở hồ sơ kia** |
+| Ngoài-4 | Orphaned i18n key readFailed left in all five locale files (low) | **đã quyết ở hồ sơ kia** |
+| Ngoài-5 | Failed key write is reported to the user as "key saved" (high) | **đã quyết ở hồ sơ kia** |
+| Ngoài-6 | Destructive "replace key store" is offered for transient read failures and is honoured even on a healthy store (medium) | **đã quyết ở hồ sơ kia** |
+| Ngoài-7 | STORE_UNREADABLE is missing from the media-library route status maps, so a local fault answers 502 (low) | **đã quyết ở hồ sơ kia** |
+| Ngoài-8 | Hình dạng 2 — bề mặt `abi-node-shell` trong E6 là bản LẮP TAY trong test (hook thật + `NodeKeyPrompt` + `PROMPT_LABELS` do test tự viết), không phải bề mặt sản phẩm (medium) | **đã quyết ở hồ sơ kia** |
+| Ngoài-9 | Hình dạng 4 — ca răng 1c ("prose không được làm guard đỏ") là assert âm-tính rỗng: needle không thể khớp văn xuôi, nên ca xanh kể cả khi bộ lọc bỏ-dòng-chú-thích bị xoá (medium) | **đã quyết ở hồ sơ kia** |
+| Ngoài-10 | Hình dạng 5 — E12 tuyên "copy đến từ catalogue" cho cả tấm chặn nhưng chỉ ghim 2/15 khoá; toàn bộ copy hộp xác nhận huỷ-diệt chỉ được đo bằng literal tiếng Việt ghi cứng trong E4 (medium) | **đã quyết ở hồ sơ kia** |
 
 ## Analyst
 
-No A/B baseline was taken: establishing one requires moving the working tree to the
-diffBase, which this re-verification round is explicitly forbidden to do (no git
-operations of any kind). Every eval therefore carries `baseline: n-a`, and no claim
-is made here about which evals discriminate.
+carried tu round trước — baseline không đo lại round này. evals.yaml của
+conformance-l0 không đổi kể từ lần đo baseline gần nhất (P2), nên vòng này không
+di chuyển working tree sang diffBase và mọi eval máy ở trên mang `baseline: n-a`.
+Không có eval nào để liệt vào danh sách không-phân-biệt round này vì không có
+phép đo baseline nào chạy.
 
-This feature was the most exposed of the four to the branch's edits — it owns
-`sdk/tongflow/engine/runner.py`, `sdk/tests/conformance/**` and
-`src/lib/plugins/**`, and the branch added plugin work in all three areas. Nothing
-regressed. Worth noting that E8 is not a bare pass: its mutation guard drove the
-suite red on all three perturbation kinds and green again on revert at this HEAD, so
-the conformance suite is still discriminating rather than merely still exiting 0 —
-which is the property most likely to rot when fixtures are added around it, and a
-later feature did add compose-overlay cases into `sdk/tests/conformance`.
+none — round này không đo baseline nên không có eval nào được xếp là
+non-discriminating.
 
-No judgment executors appear in this feature's evals.yaml, so nothing here is left
-unscored for a judge.
+Sáu lệnh suite (preflight, build+typecheck, lint:check, test, verify:plugins,
+gen:abi diff) đều xanh trên HEAD hiện tại; đây là các regression-guard tiêu
+chuẩn chạy mỗi vòng, không gắn AC nào, nên không liệt vào Analyst.
 
 ## Variance
 
-none — every eval in this feature is deterministic (no `runs` declared, no executor
-crossing a provider or LLM).
+none — mọi eval trong feature này đều deterministic (không khai `runs` > 1,
+không executor nào băng qua provider hay LLM).
 
 ## Iterations
 
 Round 1 (re-verification after upstream code change): all fifteen evals clean at
 a788985.
+Round 2 (verify lại vì hồ sơ chong-mat-khoa-byo-giao-dien chạm phạm vi ôi của E12): toàn bộ
+mười lăm eval máy + sáu lệnh suite (preflight-verify-env, build+typecheck,
+lint:check, test, verify:plugins, gen:abi diff) xanh sạch tại fe711ecd — lệnh
+suite thứ bảy (sdk pytest) trùng byte-với-byte lệnh của E3 nên workflow gộp lại;
+bằng chứng của nó nằm dưới E3. Không có
+thay đổi nào trong evals.yaml so với round trước nên baseline không đo lại (xem
+Analyst).
 
 ## Gate 2 checklist (human)
 
 - [ ] Read the table + spot-check 1-2 evidence blocks
 - [ ] No judgment items in this feature — nothing to override
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
-
-### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
-run_id: repin-conformance-l0-20260827T101500Z
-sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 9 lệnh exit 0
-
-### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
-run_id: repin-conformance-l0-20260828T053000Z
-sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 9 lệnh exit 0
-
-### Re-pin lần 3 — 2026-08-28, do nhánh `draft/chong-doc-sai-em-ru` sửa `sdk/tongflow/text/normalize_vi.py` và `sdk/tests/test_normalize_vi.py`: hồ sơ này khai `sdk/**` trong `paths` của một eval, nên thay đổi đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` (PR #83) vào nhánh — trước merge cả hai cổng đều xanh, đúng lý do "cổng chạy trên cây đã merge main mới là cổng thật". Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh, preflight GREEN, mọi lệnh exit 0
-run_id: repin-conformance-l0-20260828T124500Z
-sha: 9caa25568b35132ab0387e09e5aa0b503c8a8deb · suites: 9 lệnh exit 0
-
-### Re-pin lần 4 — 2026-08-29, do nhánh `feat/add-media-library` thêm ba route API dưới `src/app/api/media-library/`: hồ sơ này khai `src/app/api/**` trong `paths` của một eval, nên ba file đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` vào nhánh — trên chính `main` thì cổng sạch, staleness sinh ra từ nhánh chứ không phải từ `main`. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0. Lane chạy LẠI ở mốc cuối sau khi hai file `scripts/acceptance/` bỏ dở trong worktree được commit — một ghim chỉ được dời sau một lane đã thật sự chạy tại đúng mốc đó
-run_id: repin-conformance-l0-20260829T025815Z
-sha: 1406d9686404e9924c19797908b00bc2f40d524a · suites: 9 lệnh exit 0
-
-### Re-pin lần 5 — 2026-08-29, do nhánh `feat/add-media-library` đi tiếp tới chữ ký Cổng 2: sau lần re-pin 4 nhánh còn commit thêm bảy lượt (hai lỗi nặng của vòng 7, khai thư mục dist trong `tsconfig.json`, bỏ bước khôi phục phá dữ liệu khỏi guard a11y, và bộ hồ sơ nghiệm thu). Hồ sơ này khai `src/**` và `sdk/**` trong `paths`, nên các commit đó rơi vào vùng soi staleness. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN ở mọi agent kiểm nó, mọi lệnh exit 0. Ghim dời **sau** khi mọi commit ngoài `_acceptance/**` đã xong — đúng bài học lần 4: ghim trước rồi commit tiếp là tự huỷ ghim vừa lấy. Hai lệnh pytest đỏ ở lượt đầu là **lỗi gọi của người dựng lane**, không phải hồ sơ đỏ: exit 4 là mã *usage error* của pytest (target không tồn tại) chứ không phải mã test trượt — target thật là `tests/test_engine_batch.py` và `tests/conformance`, sai vì bản liệt kê config bị cắt ở 110 ký tự rồi bị coi là nguồn. Sửa target, chạy lại: 9/9 exit 0.
-run_id: repin-conformance-l0-20260829T134252Z
-sha: 31968535286d7800678c5f9af0e2aa0a33c4c54a · suites: 9 lệnh exit 0
-
-### Re-pin lần 6 — 2026-08-31, do `chong-mat-khoa-byo` chạm `src/app/api/**` mà hồ sơ này khai trong `paths`
-run_id: repin-20260831T022203Z-2767
-sha: 292d740129ec49e46dda86ecef6b6f0a51b5080e · suites: 7 lệnh exit 0
-
-Lane máy thuần chạy bởi một agent tươi tại HEAD: preflight GREEN · build+typecheck ·
-lint · vitest 708 · sdk pytest 292 · verify:plugins · gen:abi sạch. Cây sạch trước và
-sau. Không chữ ký người nào bị đụng.
