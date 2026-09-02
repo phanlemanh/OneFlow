@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: ae09815e2a9e4002d3b0046b02ec4f7eb48b089c
+verified_commit: e0eb0a92d5ca672e2af4f372bbdede9260727d74
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -171,3 +171,7 @@ none — không có eval nào mang `runs > 1` ở round này; toàn bộ tám ev
 Round 1: E8 failed — hồ sơ đã ký của một feature khác mang bằng chứng có trước code của nhánh này (trước re-pin). Returned to implementation.
 Round 2: E8 failed lại — vòng sửa chạm thêm `scripts/plugins/**` sau khi đã ghim, làm mốc pin cũ hết hiệu lực. Returned to implementation.
 Round 3: E1-E8 đều PASS — ca `orphan-them-moi` (E5/E7) đã rút vì gây đua trên cây thật khi chạy song song; re-pin lần 8 tại 35b24ee đóng lại E8. Toàn bộ lệnh suite (build/typecheck/lint/test/sdk pytest/verify:plugins/gen:abi/preflight) xanh.
+
+### Re-pin lần 1 — 2026-09-01, do noi-thuoc-tai-lieu-vao-ci chạm .github/workflows/ci.yml và scripts/plugins/**
+run_id: repin-20260902T020812Z-5668
+sha: e0eb0a92d5ca672e2af4f372bbdede9260727d74 · suites: 8 lệnh exit 0
