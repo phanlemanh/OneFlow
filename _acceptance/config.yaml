@@ -695,10 +695,15 @@ risk_tiers:
     # quét a11y); nó không nằm trên đường đi nào của người dùng. `data-proto-state`
     # là một chỗ bám cho bộ đo, giống hệt add-media-library-proto.tsx đã có.
     - "src/components/proto/byo-key-onboarding-proto.tsx"
-    # KHÔNG khai tsconfig.json — CỐ Ý, đừng "bổ sung cho đủ". Khai nó là miễn trừ
-    # vĩnh viễn MỌI thay đổi tsconfig về sau, kể cả tắt `strict`, trong khi cái cần
-    # miễn ở đây chỉ là một dòng thêm dist dir vào `include`. Owner chốt 01/09:
-    # chừa lại, xử lý trên diff nhỏ sau khi nhánh phụ thuộc merge.
+    # tsconfig.json — owner chốt 02/09, ĐẢO quyết định 01/09 (hôm trước cố ý chừa).
+    # Ghi lại cái giá cho người đọc sau, vì nó không hiển nhiên: đây là miễn trừ
+    # theo TỆP chứ không theo thay đổi. Cổng không có cơ chế "chỉ miễn lần này",
+    # nên từ đây MỌI sửa tsconfig đều lọt — kể cả tắt `strict`, đổi `target`, nới
+    # `paths`, hay bỏ một đường trong `exclude`. Thứ thực sự cần miễn chỉ là một
+    # dòng thêm dist dir vào `include`, và dòng đó tồn tại để chặn Next ghi đè
+    # chính tệp này (xem scripts/onboarding/check-a11y-proto.sh).
+    # Nói gọn: phạm vi dòng khai này BẢO VỆ hẹp hơn nhiều phạm vi nó CHO QUA.
+    - "tsconfig.json"
   # Contract chokepoints & wire/persistence shape — always T3 (full gate).
   t3_paths:
     - "config/tongflow.abi.json"
