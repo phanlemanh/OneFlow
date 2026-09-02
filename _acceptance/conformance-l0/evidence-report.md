@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 0110e2a557c1e5524d7e5a91db39023da23b5df8
+verified_commit: ddea746f4269130b59797ea4236f2ec9a44a6c61
 human_signoff: Manh 2026-08-07
 ---
 
@@ -282,3 +282,7 @@ sha: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf · suites: 8 lệnh exit 0
 ### Re-pin lần 11 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci rút chế độ exit-propagates và khôi phục dòng in số id
 run_id: repin-20260902T102111Z-4002
 sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8 · suites: 8 lệnh exit 0 (làn chạy TUẦN TỰ, không tung bầy — vòng trước BLOCKED vì agent chết)
+
+### Re-pin lần 12 — 2026-09-02, do repin-khong-chay-lai-eval chạm scripts/ci/**
+run_id: repin-20260902T162209Z-29839
+sha: ddea746f4269130b59797ea4236f2ec9a44a6c61 · suites: 8 lệnh exit 0 (làn tuần tự; dòng repin ghi bằng chế độ `write`, mang `prev_sha`)

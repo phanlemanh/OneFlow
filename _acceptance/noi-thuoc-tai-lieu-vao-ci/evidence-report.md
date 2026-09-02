@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 40381e72771cdcab36472d5fb44dd354b898b655
+verified_commit: ddea746f4269130b59797ea4236f2ec9a44a6c61
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -148,3 +148,7 @@ Cả hai lượt đều ghi trong run-log.
   output: |
     OK: năm job còn lại deep-equal với merge-base 1d66bc25
     action pins: at or above the contracted floor at every site
+
+### Re-pin lần 1 — 2026-09-02, do repin-khong-chay-lai-eval chạm scripts/ci/**
+run_id: repin-20260902T162209Z-29839
+sha: ddea746f4269130b59797ea4236f2ec9a44a6c61 · suites: 8 lệnh exit 0 (làn tuần tự; dòng repin ghi bằng chế độ `write`, mang `prev_sha`)
