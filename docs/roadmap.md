@@ -200,6 +200,8 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `o-do-chay-0-ca-van-xanh` | T2 | 01/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: một ô đo lọc theo tên ca mà không ca nào khớp thì vitest thoát 0 và ô đo báo đạt vĩnh viễn. Đo trước khi thiết kế cho thấy 33/33 ô đang lành, nên đây là hàng rào chứ không phải bản sửa. 17/17 eval, 7 giới hạn khai rõ |
 | `dang-ky-fork-openai` | T2 | 01/09 | *ngoài lộ trình* — cứu đường phiên âm: OpenAI khai tử cả bốn model phiên âm (tắt 26/02/2027), fork plugin sang `phanlemanh/oneflow-api-openai` theo ADR-0007 và dựng hàng rào ba README ↔ manifest, chỗ CLAUDE.md tự thú là trôi lặng. 8/8 eval, 5 giới hạn khai rõ |
 
+| `noi-thuoc-tai-lieu-vao-ci` | T2 | 02/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: hai thước tài-liệu-sống ↔ manifest sinh ra ở vòng trước chưa hề chạy trong CI, nên ba README và khối bullet của CLAUDE.md trôi khỏi manifest mà không ai biết. 9/9 eval, 6 giới hạn khai rõ |
+
 <!-- roadmap-ledger:end -->
 
 **Đọc được gì từ tỉ lệ này:** 14/23 hạng mục đã ký là năng lực sản phẩm, 9/23 là hạ tầng quy
