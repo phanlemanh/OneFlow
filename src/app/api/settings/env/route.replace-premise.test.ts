@@ -17,7 +17,8 @@ vi.mock("server-only", () => ({}));
  * Full matrix over axis A (the store's real state) with the flag ON. The count
  * is pinned so a collapsed matrix cannot pass for a full one.
  */
-const CASES = 3;
+const AXIS_A = ["ok", "absent", "unreadable"] as const;
+const CASES = AXIS_A.length;
 
 let dir: string;
 
@@ -64,6 +65,16 @@ const readBack = async () => {
 };
 
 describe(`premise of replaceUnreadableStore (${CASES} cases + race)`, () => {
+    it(`covers all ${CASES} states of the store`, () => {
+        // The pin was interpolated into the describe title and asserted
+        // nowhere, so deleting the `absent` case left the suite green and the
+        // title still claiming a full matrix. Every sibling suite in this
+        // dossier pins its count for the same reason.
+        expect(AXIS_A.length, "the store-state axis must stay full").toBe(
+            CASES,
+        );
+    });
+
     it("case ok: refuses, writes nothing, store byte-identical", async () => {
         await seedHealthyStore({ A: "1", B: "2" });
         const before = sha();

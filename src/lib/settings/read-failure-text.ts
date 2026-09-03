@@ -1,3 +1,4 @@
+import { DEFAULT_TIMEOUT_MS } from "@/lib/api/client";
 import type {
     ReadFailure,
     UnavailableReason,
@@ -60,6 +61,12 @@ export function unavailableReasonText(
     t: (key: string, values?: Record<string, string | number>) => string,
     reason: UnavailableReason,
 ): string {
-    if (reason.code === "timeout") return t("cause.timeout");
+    if (reason.code === "timeout") {
+        // The number comes from the ceiling itself. Spelled into the copy it
+        // was a second source of truth in ten places across five locales, and
+        // changing the constant would have made every one of them say
+        // something false with nothing to catch it.
+        return t("cause.timeout", { seconds: DEFAULT_TIMEOUT_MS / 1000 });
+    }
     return readFailureText(t, reason);
 }

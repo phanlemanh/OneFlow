@@ -54,7 +54,7 @@
                 "not-json": "the response was not JSON",
                 "no-env": "the response carried no key list",
                 "network": "the request did not complete ({detail})",
-                "timeout": "the request timed out after 30 seconds"
+                "timeout": "the request timed out after {seconds} seconds"
             },
             "writeFailed": "Could not save ({reason}). Nothing has been changed.",
             "retry": "Try again"
@@ -1139,7 +1139,7 @@
                 "not-json": "the response was not JSON",
                 "no-env": "the response carried no key list",
                 "network": "the request did not complete ({detail})",
-                "timeout": "the request timed out after 30 seconds"
+                "timeout": "the request timed out after {seconds} seconds"
             },
             "retry": "Try again"
         },

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { type KeyVerdict, verifyKey } from "@/lib/onboarding/key-verify";
 import { loadPluginEnvDecls } from "@/lib/plugins/plugin-env-manifests.server";
+import { ENV_STORE_REPLACE_REFUSED } from "@/lib/settings/env-codes";
 import {
     ENV_STORE_UNREADABLE,
     type EnvStore,
@@ -142,7 +143,7 @@ export async function PUT(request: NextRequest) {
     if (replaceUnreadable && current.state !== "unreadable") {
         return NextResponse.json(
             {
-                code: "ENV_STORE_REPLACE_REFUSED",
+                code: ENV_STORE_REPLACE_REFUSED,
                 state: current.state,
                 error: "Kho khoá vẫn đọc được; lệnh thay kho bị từ chối, chưa ghi gì.",
             },

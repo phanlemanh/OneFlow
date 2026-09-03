@@ -26,9 +26,11 @@ import enMsg from "@/i18n/messages/en.json";
 import viMsg from "@/i18n/messages/vi.json";
 import { healthyRead } from "@/lib/settings/__fixtures__/read-failures";
 import { openSettings } from "./__fixtures__/settings-harness";
-import { NodeKeyPrompt } from "./node-key-prompt";
 import { MediaLibraryConfigPanel } from "./nodes/add/media-library-config-panel";
-import { useNodeKeyGate } from "./nodes/base/abi-node-shell";
+import {
+    NodeKeyGateSurface,
+    useNodeKeyGate,
+} from "./nodes/base/abi-node-shell";
 
 const MESSAGES = { en: enMsg, vi: viMsg } as const;
 
@@ -62,17 +64,6 @@ const PANEL_LABELS = {
     writeFailed: "write failed",
 };
 
-const PROMPT_LABELS = {
-    needsKey: "needs",
-    describe: (p: string) => p,
-    placeholder: "ph",
-    save: "Lưu khoá",
-    verifying: "…",
-    invalid: "invalid",
-    verified: "verified",
-    savedUnverified: "saved",
-};
-
 const wrap = (ui: React.ReactNode, locale: keyof typeof MESSAGES = "vi") => (
     <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]}>
         <ReactFlowProvider>{ui}</ReactFlowProvider>
@@ -80,31 +71,24 @@ const wrap = (ui: React.ReactNode, locale: keyof typeof MESSAGES = "vi") => (
 );
 
 /**
- * The node prompt is presentational; this is the gate that feeds it.
+ * Mount what SHIPS.
  *
- * The gate handle escapes through a module variable rather than through a
- * second `renderHook`. Two hook calls are two independent gates: driving one
- * leaves the other in its initial state, and the surface renders nothing while
- * the assertions look like they are about a surface.
+ * This used to build its own `<NodeKeyPrompt …>` and hand it `onRetry` — and
+ * the real node never passed one, so every blocked card there had no control
+ * on it while this matrix reported green. A stand-in surface proves things
+ * about the stand-in. `NodeKeyGateSurface` is the component the shell renders,
+ * so the only thing this file supplies is the gate and a provider name.
+ *
+ * The gate handle escapes through a module variable rather than a second
+ * `renderHook`: two hook calls are two independent gates, and driving one
+ * leaves the other in its initial state.
  */
 let gate: ReturnType<typeof useNodeKeyGate> | null = null;
 
 function KeyGateSurface() {
     const g = useNodeKeyGate();
     gate = g;
-    if (!g.envKey) return null;
-    return (
-        <NodeKeyPrompt
-            envKey={g.envKey}
-            providerName="OpenAI"
-            state={g.state}
-            labels={PROMPT_LABELS}
-            value={g.value}
-            onChange={g.setValue}
-            onSave={g.save}
-            onRetry={() => {}}
-        />
-    );
+    return <NodeKeyGateSurface gate={g} providerName="OpenAI" />;
 }
 
 async function mount(

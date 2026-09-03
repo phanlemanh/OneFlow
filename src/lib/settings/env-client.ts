@@ -1,6 +1,10 @@
 import { DEFAULT_TIMEOUT_MS, notifyUnauthorized } from "@/lib/api/client";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import type { PluginEnvDecl } from "@/lib/plugins/plugin-env-manifest-schema";
+import {
+    ENV_STORE_REPLACE_REFUSED,
+    ENV_STORE_UNREADABLE,
+} from "@/lib/settings/env-codes";
 
 /**
  * The browser's one door to the stored BYO keys.
@@ -116,7 +120,13 @@ export type SaveOutcome =
      * caller's honest response is to re-read, not to report a fault that does
      * not exist while the user's keys sit intact behind an error card.
      */
-    | { ok: false; reason: "replace-refused" };
+    | { ok: false; reason: "replace-refused" }
+    /**
+     * The session expired mid-save. Nothing was written, and nothing here is a
+     * statement about the key — the surfaces render this as the quiet card,
+     * the same one the read half produces for a 401.
+     */
+    | { ok: false; reason: "unauthenticated" };
 
 /**
  * Every request from this module, with a ceiling.
@@ -126,14 +136,41 @@ export type SaveOutcome =
  * hung request never settles, and the surfaces that await it have no state to
  * move to — the settings screen spins and a node sits mid-verification.
  */
+interface Fetched {
+    response: Response;
+    /** Parsed body, or undefined when the payload was not JSON. */
+    body: unknown;
+    parsed: boolean;
+}
+
 async function fetchWithCeiling(
     input: string,
     init: RequestInit = {},
-): Promise<Response> {
+): Promise<Fetched> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
     try {
-        return await fetch(input, { ...init, signal: controller.signal });
+        const response = await fetch(input, {
+            ...init,
+            signal: controller.signal,
+        });
+        /*
+         * The body is read INSIDE the ceiling, and that is the whole point of
+         * this shape. Clearing the timer right after `fetch` resolves disarms
+         * it the moment HEADERS arrive, leaving `response.json()` unbounded —
+         * so a proxy that sends headers and then stalls the body produces
+         * exactly the hang the ceiling was introduced to stop, while every
+         * timeout test still passes because they stall the headers.
+         */
+        try {
+            return { response, body: await response.json(), parsed: true };
+        } catch (cause) {
+            // An abort DURING the body read is our ceiling firing, not a
+            // malformed payload. Swallowing it here would report a stalled
+            // proxy as "the response was not JSON".
+            if (isAbort(cause)) throw cause;
+            return { response, body: undefined, parsed: false };
+        }
     } finally {
         clearTimeout(timer);
     }
@@ -160,9 +197,9 @@ const describeCause = (cause: unknown) =>
  * thought of yet lands on the safe side by construction.
  */
 export async function readEnvForBrowser(): Promise<EnvClientRead> {
-    let response: Response;
+    let got: Fetched;
     try {
-        response = await fetchWithCeiling(ENDPOINT, { cache: "no-store" });
+        got = await fetchWithCeiling(ENDPOINT, { cache: "no-store" });
     } catch (cause) {
         return {
             state: "unavailable",
@@ -172,6 +209,8 @@ export async function readEnvForBrowser(): Promise<EnvClientRead> {
         };
     }
 
+    const { response, body, parsed } = got;
+
     // Not authenticated is not a broken store. The shell gets told so it can
     // raise sign-in; 403 deliberately does not reach here — that is
     // authenticated-and-refused, and re-auth would be the wrong offer.
@@ -180,10 +219,7 @@ export async function readEnvForBrowser(): Promise<EnvClientRead> {
         return { state: "unauthenticated" };
     }
 
-    let body: unknown;
-    try {
-        body = await response.json();
-    } catch {
+    if (!parsed) {
         return response.ok
             ? { state: "unavailable", reason: { code: "not-json" } }
             : {
@@ -198,7 +234,7 @@ export async function readEnvForBrowser(): Promise<EnvClientRead> {
     // hiccup came to offer a destructive fix.
     if (
         response.status === 503 &&
-        (body as { code?: string })?.code === "ENV_STORE_UNREADABLE"
+        (body as { code?: string })?.code === ENV_STORE_UNREADABLE
     ) {
         return {
             state: "store-unreadable",
@@ -277,9 +313,9 @@ export async function putEnvMap(
 }
 
 async function put(body: unknown): Promise<SaveOutcome> {
-    let response: Response;
+    let got: Fetched;
     try {
-        response = await fetchWithCeiling(ENDPOINT, {
+        got = await fetchWithCeiling(ENDPOINT, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
@@ -297,6 +333,19 @@ async function put(body: unknown): Promise<SaveOutcome> {
         };
     }
 
+    const { response, body: answer, parsed } = got;
+
+    // An expired session is not a failed write, and it is not a statement
+    // about the key. Without this arm a save during an expired session read
+    // "Could not save (the server answered 401)" with no way to sign in, and
+    // on a node it landed in the writeFailed path — which tells the user the
+    // key WAS stored. The read half of this module has classified 401 since
+    // the taxonomy landed; the write half stopped at the module boundary.
+    if (response.status === 401) {
+        notifyUnauthorized();
+        return { ok: false, reason: "unauthenticated" };
+    }
+
     if (!response.ok) {
         // 409 is the server saying "the store is unreadable, and I wrote
         // nothing". Reporting that as a generic write failure is how the node
@@ -309,10 +358,10 @@ async function put(body: unknown): Promise<SaveOutcome> {
             // One says the store is broken; the other says it is FINE and our
             // request was based on a stale reading. Collapsing them reports a
             // healthy store as a corrupt one.
-            const body = (await response.json().catch(() => ({}))) as {
-                code?: string;
-            };
-            if (body.code === "ENV_STORE_REPLACE_REFUSED") {
+            if (
+                (answer as { code?: string } | undefined)?.code ===
+                ENV_STORE_REPLACE_REFUSED
+            ) {
                 return { ok: false, reason: "replace-refused" };
             }
             return {
@@ -331,16 +380,13 @@ async function put(body: unknown): Promise<SaveOutcome> {
         };
     }
 
-    try {
-        const saved = (await response.json()) as {
-            verdicts?: Record<string, KeyVerdict>;
-        };
-        return { ok: true, verdicts: saved.verdicts ?? {} };
-    } catch {
+    if (!parsed) {
         return {
             ok: false,
             reason: "write-failed",
             detail: { code: "not-json" },
         };
     }
+    const saved = answer as { verdicts?: Record<string, KeyVerdict> };
+    return { ok: true, verdicts: saved?.verdicts ?? {} };
 }

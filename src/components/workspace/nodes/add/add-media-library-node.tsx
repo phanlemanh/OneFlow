@@ -128,7 +128,6 @@ async function readFailure(
 
 const AddMediaLibraryNode = ({ selected, data }: NodeProps) => {
     const t = useTranslations("Workspace.nodes.addMediaLibrary");
-    const _tStore = useTranslations("Workspace.storeUnreadable");
     const id = useNodeId();
     const expands = useFlow((s) => s.expands);
 

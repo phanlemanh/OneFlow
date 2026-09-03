@@ -187,6 +187,49 @@ describe("30s ceiling on both directions", () => {
         );
     });
 
+    it("headers that arrive and a body that never does still time out", async () => {
+        /*
+         * The hole the ceiling had. Clearing the timer as soon as `fetch`
+         * resolves disarms it the moment HEADERS arrive, leaving the body read
+         * unbounded — and every other case in this file stalls the headers, so
+         * all of them passed while a proxy that answers and then stalls hung
+         * forever. Found by review, not by this suite.
+         */
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async (_url: string, init?: RequestInit) => {
+                // Headers now; body never — the way a real Response behaves,
+                // including rejecting the body read when the signal aborts.
+                return {
+                    status: 200,
+                    ok: true,
+                    json: () =>
+                        new Promise((_resolve, reject) => {
+                            init?.signal?.addEventListener("abort", () => {
+                                reject(
+                                    Object.assign(new Error("aborted"), {
+                                        name: "AbortError",
+                                    }),
+                                );
+                            });
+                        }),
+                } as unknown as Response;
+            }),
+        );
+
+        const pending = readEnvForBrowser();
+        await vi.advanceTimersByTimeAsync(CEILING + 1);
+        const got = await pending;
+
+        expect(got.state, "a stalled body must still be unavailable").toBe(
+            "unavailable",
+        );
+        expect(
+            (got as { reason: { code: string } }).reason.code,
+            "and it must be named a timeout, not a malformed payload",
+        ).toBe("timeout");
+    });
+
     it("just under the ceiling neither has fired", async () => {
         let readSettled = false;
         void readEnvForBrowser().then(() => {

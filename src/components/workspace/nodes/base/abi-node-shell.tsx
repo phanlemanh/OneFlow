@@ -32,6 +32,7 @@ import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import {
     type EnvReadFailure,
+    readEnvForBrowser,
     saveEnvKeys,
     type WriteFailure,
 } from "@/lib/settings/env-client";
@@ -147,6 +148,12 @@ async function saveAndVerifyKey(
         // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
         // which invites the user to type a new key because the disk was full or
         // the connection dropped.
+        // An expired session is a statement about the SESSION, so it travels
+        // as a read failure and renders the quiet card with a retry — not as
+        // `saved-unverified`, which tells the user the key was stored.
+        if (out.reason === "unauthenticated") {
+            return { readFailed: { state: "unauthenticated" } };
+        }
         // `replace-refused` cannot reach here: only the destructive replace
         // asks for it, and this path never does. Narrowing rather than casting
         // keeps that a compiler-checked claim.
@@ -164,13 +171,54 @@ async function saveAndVerifyKey(
     );
 }
 
-interface NodeKeyGate {
+/**
+ * The ONE place the key prompt is mounted.
+ *
+ * Exported so the evals mount what ships. Before this existed, the suite built
+ * its own `<NodeKeyPrompt …>` and passed `onRetry` itself — measuring a wiring
+ * the real node did not have, and reporting green while every blocked card on
+ * a node had no control on it at all. A stand-in surface proves things about
+ * the stand-in.
+ */
+export function NodeKeyGateSurface({
+    gate,
+    providerName,
+}: {
+    gate: NodeKeyGate;
+    providerName: string;
+}) {
+    const labels = useKeyPromptLabels();
+    if (!gate.envKey) return null;
+    return (
+        <NodeKeyPrompt
+            envKey={gate.envKey}
+            providerName={providerName}
+            state={gate.state}
+            labels={labels}
+            value={gate.value}
+            onChange={gate.setValue}
+            onSave={gate.save}
+            onRetry={gate.retry}
+        />
+    );
+}
+
+export interface NodeKeyGate {
     envKey: string | null;
     state: KeyPromptState;
     value: string;
     setValue: (value: string) => void;
     noteTask: (task: Task) => void;
     save: () => Promise<void>;
+    /**
+     * Read the store again from a blocked card.
+     *
+     * Part of the gate, not a prop the mount site may forget. A card that
+     * states a transient failure and offers nothing to press leaves the user
+     * with no way out at all — there is no destructive control on a node, and
+     * the link to Settings only makes sense when the store is really broken.
+     */
+    retry: () => Promise<void>;
 }
 
 /**
@@ -255,7 +303,18 @@ export function useNodeKeyGate(): NodeKeyGate {
         }
     }, [envKey, value]);
 
-    return { envKey, state, value, setValue, noteTask, save };
+    const retry = useCallback(async () => {
+        const read = await readEnvForBrowser();
+        // A healthy read means the obstacle is gone: hand the form back rather
+        // than leaving a card that is no longer true on screen.
+        setState(
+            read.state === "ok"
+                ? { phase: "needs-key" }
+                : { phase: "read-failed", read },
+        );
+    }, []);
+
+    return { envKey, state, value, setValue, noteTask, save, retry };
 }
 
 export interface AbiNodeShellProps<F extends NodeSlot> {
@@ -321,7 +380,6 @@ export function AbiNodeShell<F extends NodeSlot>({
     transformPrompts,
 }: AbiNodeShellProps<F>) {
     const keyGate = useNodeKeyGate();
-    const keyPromptLabels = useKeyPromptLabels();
     const providerName = useProviderName(feature);
     const { noteTask } = keyGate;
 
@@ -369,17 +427,7 @@ export function AbiNodeShell<F extends NodeSlot>({
             setMissingPluginOpen={exec.setMissingPluginOpen}
         >
             {children}
-            {keyGate.envKey ? (
-                <NodeKeyPrompt
-                    envKey={keyGate.envKey}
-                    providerName={providerName}
-                    state={keyGate.state}
-                    labels={keyPromptLabels}
-                    value={keyGate.value}
-                    onChange={keyGate.setValue}
-                    onSave={keyGate.save}
-                />
-            ) : null}
+            <NodeKeyGateSurface gate={keyGate} providerName={providerName} />
             {autoHandles && (
                 <AbiHandles feature={feature} sourceSpec={sourceSpec} />
             )}

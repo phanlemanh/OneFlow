@@ -2,6 +2,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it } from "vitest";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
 import en from "@/i18n/messages/en.json";
 import vi from "@/i18n/messages/vi.json";
@@ -28,37 +29,85 @@ const MESSAGES = { en, vi } as const;
 const STATES = ["unauthenticated", "unavailable"] as const;
 const KEYS = ["title", "unchanged", "retry"] as const;
 
+/**
+ * Render the SHIPPING card through a real NextIntl provider.
+ *
+ * The earlier version built its own `<button>{m.retry}</button>` from a string
+ * it had looked up itself, then asserted it could find that string — a test
+ * asserting about the test. The relation that matters (state -> catalogue
+ * group -> key -> locale) lives inside `ReadStateNotice`, and that component
+ * was never rendered, so pointing `unavailable` at the `storeUnreadable` group
+ * left all six cases green.
+ */
 function show(locale: keyof typeof MESSAGES, state: (typeof STATES)[number]) {
-    const m = MESSAGES[locale].Settings[state];
     render(
         <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]}>
-            <StoreUnreadableNotice
-                tone="quiet"
-                reason="x"
-                labels={{ title: m.title, unchanged: m.unchanged }}
-                testId={`${state}-notice`}
-            >
-                <button type="button">{m.retry}</button>
-            </StoreUnreadableNotice>
+            <ReadStateNotice
+                read={
+                    state === "unauthenticated"
+                        ? { state }
+                        : { state, reason: { code: "timeout" } }
+                }
+                t={catalogueT(locale)}
+                onRetry={() => {}}
+            />
         </NextIntlClientProvider>,
     );
-    return m;
+    return MESSAGES[locale].Settings[state];
+}
+
+/**
+ * The `Settings` translator, resolved the same way a surface resolves it.
+ *
+ * Not a hook, despite serving the same role: it is a plain lookup, built by
+ * hand rather than via `useTranslations` because this file renders
+ * the card directly instead of through a surface component; it walks the same
+ * catalogue the provider was given, so a wrong key still throws.
+ */
+function catalogueT(locale: keyof typeof MESSAGES) {
+    const ns = MESSAGES[locale].Settings as unknown as Record<string, unknown>;
+    return (key: string, values?: Record<string, string | number>) => {
+        const hit = key
+            .split(".")
+            .reduce<unknown>(
+                (node, part) =>
+                    (node as Record<string, unknown> | undefined)?.[part],
+                ns,
+            );
+        if (typeof hit !== "string") {
+            throw new Error(`missing catalogue key Settings.${key}`);
+        }
+        return Object.entries(values ?? {}).reduce(
+            (out, [k, v]) => out.replaceAll(`{${k}}`, String(v)),
+            hit,
+        );
+    };
 }
 
 describe("copy comes from the catalogue, per locale", () => {
     for (const state of STATES) {
         for (const key of KEYS) {
-            it(`${state}.${key}: en renders en and differs from vi`, () => {
-                const m = show("en", state);
-                expect(
-                    screen.getByText(m[key]),
-                    `key Settings.${state}.${key} must render its en value`,
-                ).toBeTruthy();
-                expect(
-                    m[key],
-                    `key Settings.${state}.${key} must differ between en and vi`,
-                ).not.toBe(MESSAGES.vi.Settings[state][key]);
-            });
+            for (const locale of ["en", "vi"] as const) {
+                it(`${locale} ${state}.${key}: the card renders that key`, () => {
+                    const m = show(locale, state);
+                    // The card must produce the value of the state's OWN key
+                    // in the locale it was given. Both locales run, because
+                    // "en renders en" alone is satisfied by a hardcoded
+                    // English string.
+                    expect(
+                        screen.queryAllByText(m[key]).length,
+                        `${locale}: card must render Settings.${state}.${key}`,
+                    ).toBeGreaterThan(0);
+                    // And it must NOT be the store-broken group's value: that
+                    // is the substitution this dossier exists to prevent.
+                    expect(
+                        screen.queryAllByText(
+                            MESSAGES[locale].Settings.storeUnreadable.title,
+                        ).length,
+                        `${locale}: ${state} must not borrow storeUnreadable.title`,
+                    ).toBe(0);
+                });
+            }
         }
     }
 

@@ -5,8 +5,8 @@
 // outside this repo subscribes to — asserting it against a stub would only
 // prove the stub was called.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiClient } from "@/lib/api/client";
-import { readEnvForBrowser } from "./env-client";
+import { apiClient, notifyUnauthorized } from "@/lib/api/client";
+import { putEnvMap, readEnvForBrowser } from "./env-client";
 
 /**
  * The shell sign-in seam, and the line it must not cross.
@@ -75,18 +75,52 @@ describe("shell seam fires on 401 only", () => {
         );
     });
 
-    it("a shell that handles it can cancel the event", async () => {
+    it("a shell that cancels the event makes the helper report handled", async () => {
+        // `defaultPrevented` is set by jsdom for any cancelable event, so
+        // asserting it only re-checks `cancelable`, which the first case
+        // already pins. The claim that matters is the RETURN VALUE: callers
+        // branch on it to suppress their own error toast, and
+        // `dispatchEvent(...); return false` would keep every case here green
+        // while every embedding shell gained a duplicate toast.
         const handler = (e: Event) => e.preventDefault();
         window.addEventListener("tf:unauthorized", handler);
         try {
-            respond(401);
-            await readEnvForBrowser();
             expect(
-                fired[0].defaultPrevented,
-                "401: a shell must be able to claim the event",
+                notifyUnauthorized(),
+                "a claimed event must report handled",
             ).toBe(true);
         } finally {
             window.removeEventListener("tf:unauthorized", handler);
         }
+    });
+
+    it("a 401 on the WRITE path classifies and fires the seam too", async () => {
+        // The taxonomy stopped at the module boundary: the reader classified
+        // 401 and the writer did not, so an expired session mid-save read
+        // "Could not save (the server answered 401)" with no sign-in prompt —
+        // and on a node it landed in the write-failed path, which tells the
+        // user the key WAS stored.
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () => new Response("{}", { status: 401 })),
+        );
+        const out = await putEnvMap({ OPENAI_API_KEY: "sk-1" });
+
+        expect(out.ok, "write 401: expected a failure outcome").toBe(false);
+        expect(
+            (out as { reason: string }).reason,
+            "write 401: an expired session is not a failed write",
+        ).toBe("unauthenticated");
+        expect(fired.length, "write 401: expected 1 dispatch").toBe(1);
+    });
+
+    it("nobody listening means the caller still owns the error", async () => {
+        // The other half of the same relation. Without this, a helper that
+        // always returns true would pass the case above and silence the error
+        // message in a shell that never showed a sign-in prompt.
+        expect(
+            notifyUnauthorized(),
+            "an unclaimed event must report NOT handled",
+        ).toBe(false);
     });
 });

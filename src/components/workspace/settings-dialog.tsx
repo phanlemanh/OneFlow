@@ -395,6 +395,13 @@ export function SettingsDialog() {
                 // `replaceUnreadableStore` never reads first, so it can only
                 // fail on the write; narrowing keeps the reason a plain string
                 // rather than the read-failure union.
+                if (out.reason === "unauthenticated") {
+                    // The session expired mid-wipe. Nothing was written, and
+                    // the truthful card is the quiet one, not a replace error.
+                    setConfirming(false);
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
                 const reason =
                     out.reason === "write-failed"
                         ? writeFailureText(tStore, out.detail)
@@ -463,7 +470,11 @@ export function SettingsDialog() {
             const out = await putEnvMap(env);
             if (!out.ok) {
                 logger.error("Failed to save settings:", out);
-                if (out.reason === "read-failed") {
+                if (out.reason === "unauthenticated") {
+                    // Same card the read half shows for a 401, and the sign-in
+                    // seam has already fired inside the client.
+                    setBlocked({ state: "unauthenticated" });
+                } else if (out.reason === "read-failed") {
                     // The store broke between opening the screen and saving.
                     // `blocked` was captured at fetch time, so without this the
                     // screen would keep offering a Save that can never land.

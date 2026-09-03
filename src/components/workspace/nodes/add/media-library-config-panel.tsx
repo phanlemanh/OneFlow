@@ -61,6 +61,12 @@ export function MediaLibraryConfigPanel({
             if (key.trim()) patch.MEDIA_LIBRARY_API_KEY = key.trim();
             const out = await saveEnvKeys(patch);
             if (!out.ok) {
+                if (out.reason === "unauthenticated") {
+                    // Same quiet card as a 401 on the read. Nothing was
+                    // written, and nothing here is about the key.
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
                 if (out.reason === "read-failed") {
                     // Not "we could not read" and then a form to try again in:
                     // this panel has no way to repair a broken store, so it
