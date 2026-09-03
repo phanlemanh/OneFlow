@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 57c10c950893239c57559730ecdba193e75b0aab
+verified_commit: d1331546558e3ba13f3e77ef557f1393a44cffa9
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -373,3 +373,7 @@ sha: 5b440efdc75859cc700b7564e76b42e6a3e73fd9 · suites: 8 lệnh exit 0
 ### Re-pin lần 18 — 2026-09-04, do thêm `scripts/acceptance/check-eval-key-dupes.sh` và sửa `scripts/ci/repin-eval-coverage.mjs` cho hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi` — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
 run_id: repin-hang-rao-doc-nham-loi-20260903T220954Z
 sha: 57c10c950893239c57559730ecdba193e75b0aab · suites: 7 lệnh exit 0
+
+### Re-pin lần 19 — 2026-09-04, do sửa `modePlan` của `scripts/ci/repin-eval-coverage.mjs` (AC-12, owner nâng phạm vi ở Cổng 2 vòng 1) và bộ răng lên 30 ca — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T231351Z
+sha: d1331546558e3ba13f3e77ef557f1393a44cffa9 · suites: 7 lệnh exit 0
