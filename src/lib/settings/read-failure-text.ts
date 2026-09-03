@@ -22,6 +22,8 @@ export function writeFailureText(
             return t("cause.not-json");
         case "network":
             return t("cause.network", { detail: reason.detail });
+        case "timeout":
+            return t("cause.timeout");
     }
 }
 

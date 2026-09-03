@@ -53,7 +53,8 @@
                 "http": "máy chủ trả về {status}",
                 "not-json": "phản hồi không phải JSON",
                 "no-env": "phản hồi không kèm danh sách khoá",
-                "network": "yêu cầu không hoàn tất ({detail})"
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá 30 giây không có trả lời"
             },
             "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi."
         }
@@ -1125,7 +1126,8 @@
                 "http": "máy chủ trả về {status}",
                 "not-json": "phản hồi không phải JSON",
                 "no-env": "phản hồi không kèm danh sách khoá",
-                "network": "yêu cầu không hoàn tất ({detail})"
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá 30 giây không có trả lời"
             }
         }
     },
