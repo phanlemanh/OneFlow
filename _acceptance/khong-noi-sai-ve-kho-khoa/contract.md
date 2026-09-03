@@ -55,11 +55,15 @@ Thiết kế đầy đủ: [`design doc`](../../docs/superpowers/specs/2026-09-0
   cấm* (RFC 9110), bắn seam đăng-nhập-lại cho nó là nói sai.
 
 - AC-4: Given `fetch` không bao giờ resolve, When quá **30 000 ms**, Then lượt đọc ra
-  `unavailable` với `reason.code: "timeout"` **và** lượt ghi (`put()`) cũng kết thúc
-  bằng cách **ném** `Error` mang `code: "timeout"` (giữ đường throw để nhánh
-  `writeFailed` hiện có bắt) — không màn nào quay vòng vĩnh viễn, và node key prompt
-  với fetch treo rời phase `verifying` mà **không** vào `verified`. Hằng số dùng
-  chung với `apiClient`.
+  `unavailable` với `reason.code: "timeout"` **và** lượt ghi (`put()`) **trả về**
+  `{ ok: false, reason: "write-failed", detail: { code: "timeout" } }` — thêm một
+  nhánh vào union `WriteFailure` hiện có, **không** thêm đường ném. Ba caller đọc
+  `out.ok` rồi rẽ nhánh và chạy đúng không sửa dòng nào; một `throw` mới sẽ rơi vào
+  `catch` của [`abi-node-shell:253`](../../src/components/workspace/nodes/base/abi-node-shell.tsx)
+  và hiện ra thành `phase: "invalid"` — «khoá của bạn hỏng, gõ lại đi» — đúng cái bẫy
+  hồ sơ trước đã gỡ. Kết quả người dùng thấy: không màn nào quay vòng vĩnh viễn, và
+  node key prompt với fetch treo rời phase `verifying` mà **không** vào `verified`.
+  Hằng số dùng chung với `apiClient`.
 
 - AC-5: Given ba bề mặt (màn Cài đặt · node key prompt · media-library panel) × bốn
   state — **12 ô**, số ghim thành hằng — When render, Then: nút phá huỷ («Thay kho

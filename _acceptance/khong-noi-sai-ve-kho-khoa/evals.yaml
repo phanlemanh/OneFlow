@@ -70,14 +70,16 @@ evals:
     expected: >-
       exit 0. `vi.useFakeTimers()`, `fetch` trả Promise không bao giờ resolve: (a)
       `readEnvForBrowser` sau 30 001 ms → `unavailable`, `reason.code: "timeout"`; (b)
-      `put()` (qua `saveEnvKeys`) sau 30 001 ms → NÉM Error có `code: "timeout"`, promise
-      ĐÃ settle (reject); (c) tại 29 999 ms cả hai vẫn pending (trần đúng số, không sớm);
+      `put()` (qua `saveEnvKeys`) sau 30 001 ms → TRẢ VỀ `{ok: false, reason:
+      "write-failed", detail: {code: "timeout"}}`, promise ĐÃ settle (resolve, KHÔNG
+      reject — thêm throw sẽ rơi vào catch của abi-node-shell:253 thành phase
+      "invalid"); (c) tại 29 999 ms cả hai vẫn pending (trần đúng số, không sớm);
       (d) render `abi-node-shell` với fetch treo, nhập khoá, 30 001 ms → phase ≠ `verifying`
       VÀ ≠ `verified` (KHÔNG khẳng định về `saved-unverified` — Ngoài-3/7 đã descope). Hằng dùng chung:
       khẳng định giá trị import từ client.ts, không literal 30000 trong env-client.
       CHIỀU ĐỎ: gỡ AbortController khỏi `put()` → (b) treo, đỏ theo timeout của test
-      (5 s) nêu «put never settled»; đổi throw thành return → (d) đỏ «phase verified after
-      timeout».
+      (5 s) nêu «put never settled»; đổi return thành throw → (d) đỏ «phase invalid after
+      timeout» (khoá bị đổ oan), không phải «verified».
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
