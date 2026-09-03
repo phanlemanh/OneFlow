@@ -5,7 +5,7 @@ slug: hang-rao-doc-nham-loi-thanh-khong-co-gi
 risk_tier: T2
 surfaces: []
 design_doc: docs/superpowers/specs/2026-09-03-hang-rao-doc-nham-loi-design.md
-status: approved
+status: implemented
 owner: phanlemanh@gmail.com
 approved_by:
 approved_at:
