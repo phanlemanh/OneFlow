@@ -26,7 +26,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # the cases, `so-khop-total` checks that the numbers written into evals.yaml still name
 # this suite. Deriving TOTAL rather than typing it removes the only way the two can
 # disagree.
-KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file"
+KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file diff-that-bai shallow-do-loi"
 TOTAL=$(printf '%s\n' $KNOWN | wc -w | tr -d ' ')
 
 case "$MODE" in
@@ -482,6 +482,37 @@ $(cat "$d/_acceptance/demo/run-log.jsonl")"
         # base used to return. That collision is the thing being separated.
         out="$(core "$d" newlines "$OLD")"; rc=$?
         want base-thieu-file green "$out" "$rc" "dong run-log moi so" "OK: moi dong repin moi deu mang prev_sha"
+    fi
+
+    # 24. `git diff prev..sha` failing is a git error, not "no files changed". The fixture
+    # makes it fail HONESTLY: `sha` is a blob hash, so `cat-file -t` answers "blob" and
+    # both validity probes above pass, then `diff blob..commit` fails. Before the fix that
+    # failure became an empty file list, the pin counted as MEASURED with an empty
+    # touched-set, and no later reader could ever discover what it swallowed.
+    if run diff-that-bai; then
+        fx '    paths: ["src/**"]
+'
+        blob="$(git -C "$d" hash-object -w "$d/src/a.ts")"
+        # DECLARED EXCEPTION to the fixture law: `write` refuses a non-commit sha, and it
+        # is right to. This case measures the READER on a line that already exists, so it
+        # builds that one shape by hand -- same standing as the ong-ba line.
+        repin_line "$d" "$blob" ",\"prev_sha\":\"$OLD\""
+        out="$(core "$d" check)"; rc=$?
+        want diff-that-bai red "$out" "$rc" "$OLD" "$blob"
+    fi
+
+    # 25. The shallow-clone probe FAILING is not the same as it answering "false". Removing
+    # .git makes every git call fail; asserting the probe's own message AND the absence of
+    # the tally is what proves the mode stopped THERE instead of sailing on and dying
+    # somewhere later for an unrelated reason.
+    if run shallow-do-loi; then
+        fx '    paths: ["src/**"]
+'
+        repin_written "$d" "$NEW"
+        rm -rf "$d/.git"
+        out="$(core "$d" check)"; rc=$?
+        want shallow-do-loi red "$out" "$rc" "khong do duoc kho co phai clone nong" \
+            "KHONG:ho so da ky:"
     fi
 
     # 19-20. the size-invariant's own two directions. Its red half already fired on real

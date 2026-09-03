@@ -48,6 +48,17 @@ const gitOk = (...a) => {
     }
 };
 
+// The must-variant. Used where the surrounding code has ALREADY established that the
+// objects resolve, so a failure here is a real git error and not a state the guard is
+// prepared for. `gitOk() || ""` at those points read the error as "nothing changed",
+// which made the pin count as measured with an empty touched-set -- the one shape no
+// later reader can ever detect as a miss.
+const gitMust = (why, ...a) => {
+    const out = gitOk(...a);
+    if (out === null) die(`${why} (lenh: git ${a.join(" ")})`);
+    return out;
+};
+
 // ---------- the paths-matching law, written down once ----------
 //
 // A `paths` entry matches a changed file when ANY of:
@@ -359,7 +370,15 @@ function modeCheck(argv = []) {
     // not because the line is malformed -- so every computable line would silently
     // become "grandfathered" and the guard would report a clean sweep having measured
     // nothing. CI checkouts default to depth 1.
-    if (gitOk("rev-parse", "--is-shallow-repository") === "true")
+    // THREE states, and only two were handled. `gitOk` returns null when the probe itself
+    // failed; null !== "true", so the mode sailed on ASSUMING a full clone -- the one
+    // assumption that makes every grandfathered line look legitimate.
+    const shallow = gitOk("rev-parse", "--is-shallow-repository");
+    if (shallow === null)
+        die(
+            "khong do duoc kho co phai clone nong hay khong (lenh git that bai) — tu choi ket luan thay vi gia dinh kho day du",
+        );
+    if (shallow === "true")
         die(
             "kho la ban clone nong (shallow) — moi sha cu deu khong phan giai duoc nen dong repin nao cung roi vao hang ong ba va hang rao xanh ma khong do gi; fetch day du roi chay lai",
         );
@@ -426,8 +445,14 @@ function modeCheck(argv = []) {
                 continue;
             }
             computable++;
-            const changed = (
-                gitOk("diff", "--name-only", `${o.prev_sha}..${o.sha}`) || ""
+            // Both shas passed `cat-file -t` just above, so a failure here is a real git
+            // error -- and `|| ""` read it as "no file changed", which made this pin count
+            // as MEASURED with an empty touched-set.
+            const changed = gitMust(
+                `khong so duoc hai moc cua mot dong repin: prev_sha=${o.prev_sha} sha=${o.sha}`,
+                "diff",
+                "--name-only",
+                `${o.prev_sha}..${o.sha}`,
             )
                 .split("\n")
                 .filter(Boolean);
