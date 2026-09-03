@@ -40,3 +40,28 @@ export function readFailureText(
             return t("cause.network", { detail: reason.detail });
     }
 }
+
+/**
+ * The detail a surface can still render while it only knows how to talk about
+ * `ReadFailure`.
+ *
+ * Bridging shim for the step that introduced the four read states before the
+ * surfaces learned to tell them apart. It is deliberately lossy — every state
+ * collapses back to an http/network-shaped detail — and it exists so ONE step
+ * changes the type and the NEXT changes the behaviour, instead of one step
+ * doing both and nobody being able to review either.
+ */
+export function legacyReadDetail(read: {
+    state: string;
+    reason?: { code: string; status?: number; detail?: string };
+}):
+    | { code: "http"; status: number }
+    | { code: "network"; detail: string }
+    | { code: "not-json" }
+    | { code: "no-env" } {
+    if (read.state === "unauthenticated") return { code: "http", status: 401 };
+    const r = read.reason;
+    if (!r) return { code: "http", status: 0 };
+    if (r.code === "timeout") return { code: "network", detail: "timeout" };
+    return r as never;
+}

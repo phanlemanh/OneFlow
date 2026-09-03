@@ -56,6 +56,7 @@ import {
     replaceUnreadableStore,
 } from "@/lib/settings/env-client";
 import {
+    legacyReadDetail,
     readFailureText,
     writeFailureText,
 } from "@/lib/settings/read-failure-text";
@@ -367,7 +368,7 @@ export function SettingsDialog() {
                 // Every shape of failure lands here, not just the one the
                 // server labels: a proxy 502 and an HTML error page never
                 // carry the store-unreadable code.
-                setBlocked(read.reason);
+                setBlocked(legacyReadDetail(read));
                 return;
             }
             setBlocked(null);
@@ -390,7 +391,7 @@ export function SettingsDialog() {
                 const reason =
                     out.reason === "write-failed"
                         ? writeFailureText(tStore, out.detail)
-                        : readFailureText(tStore, out.detail);
+                        : readFailureText(tStore, legacyReadDetail(out.read));
                 setReplaceError(tStore("replaceFailed", { reason }));
                 return;
             }
@@ -448,12 +449,12 @@ export function SettingsDialog() {
         try {
             const out = await putEnvMap(env);
             if (!out.ok) {
-                logger.error("Failed to save settings:", out.detail);
-                if (out.reason === "store-unreadable") {
+                logger.error("Failed to save settings:", out);
+                if (out.reason === "read-failed") {
                     // The store broke between opening the screen and saving.
                     // `blocked` was captured at fetch time, so without this the
                     // screen would keep offering a Save that can never land.
-                    setBlocked(out.detail);
+                    setBlocked(legacyReadDetail(out.read));
                 } else {
                     toast.error(
                         tStore("writeFailed", {

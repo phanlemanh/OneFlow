@@ -1,3 +1,4 @@
+import { notifyUnauthorized } from "@/lib/api/client";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import type { PluginEnvDecl } from "@/lib/plugins/plugin-env-manifest-schema";
 
@@ -36,9 +37,44 @@ export type ReadFailure =
     | { code: "no-env" }
     | { code: "network"; detail: string };
 
+/**
+ * Why a read did not produce a usable map, when the STORE is not the reason.
+ *
+ * A separate union from `ReadFailure` on purpose: these are conditions of the
+ * connection, the session or the proxy, and none of them says anything about
+ * the bytes on disk. Sharing one type is how they came to share one name.
+ */
+export type UnavailableReason =
+    | { code: "http"; status: number }
+    | { code: "not-json" }
+    | { code: "no-env" }
+    | { code: "network"; detail: string }
+    | { code: "timeout" };
+
+export type EnvReadState =
+    | "ok"
+    | "store-unreadable"
+    | "unauthenticated"
+    | "unavailable";
+
+/**
+ * Positive in BOTH directions.
+ *
+ * The previous shape asserted `ok` positively and let the COMPLEMENT fall into
+ * `unreadable`. That reads as caution and behaves as the opposite: every
+ * condition nobody had thought of — a proxy 502, an expired session, a dropped
+ * connection — inherited the heaviest name available, and the settings screen
+ * offers to WIPE THE KEY STORE under that name.
+ *
+ * So both heavy conclusions now need their own positive signal, and whatever is
+ * left lands on a neutral one. `unavailable` is the honest name for "we could
+ * not find out", and nothing destructive is offered under it.
+ */
 export type EnvClientRead =
     | { state: "ok"; env: Record<string, string>; pluginEnv: PluginEnvDecl[] }
-    | { state: "unreadable"; reason: ReadFailure };
+    | { state: "store-unreadable"; reason: ReadFailure }
+    | { state: "unauthenticated" }
+    | { state: "unavailable"; reason: UnavailableReason };
 
 /**
  * Why a write failed. A CODE, like `ReadFailure`, for the same reason and after
@@ -56,9 +92,20 @@ export type WriteFailure =
     | { code: "not-json" }
     | { code: "network"; detail: string };
 
+/** Every read outcome except the good one. */
+export type EnvReadFailure = Exclude<EnvClientRead, { state: "ok" }>;
+
+/**
+ * A refused write carries the READ that refused it, not a flattened reason.
+ *
+ * The earlier shape reported every refusal as `store-unreadable`, which was
+ * true when there was only one way to fail a read. With four states, flattening
+ * is how a surface ends up telling the user their key store is corrupt because
+ * their session expired.
+ */
 export type SaveOutcome =
     | { ok: true; verdicts: Record<string, KeyVerdict> }
-    | { ok: false; reason: "store-unreadable"; detail: ReadFailure }
+    | { ok: false; reason: "read-failed"; read: EnvReadFailure }
     | { ok: false; reason: "write-failed"; detail: WriteFailure };
 
 const describeCause = (cause: unknown) =>
@@ -83,28 +130,55 @@ export async function readEnvForBrowser(): Promise<EnvClientRead> {
         response = await fetch(ENDPOINT, { cache: "no-store" });
     } catch (cause) {
         return {
-            state: "unreadable",
+            state: "unavailable",
             reason: { code: "network", detail: describeCause(cause) },
         };
     }
 
-    if (!response.ok) {
-        return {
-            state: "unreadable",
-            reason: { code: "http", status: response.status },
-        };
+    // Not authenticated is not a broken store. The shell gets told so it can
+    // raise sign-in; 403 deliberately does not reach here — that is
+    // authenticated-and-refused, and re-auth would be the wrong offer.
+    if (response.status === 401) {
+        notifyUnauthorized();
+        return { state: "unauthenticated" };
     }
 
     let body: unknown;
     try {
         body = await response.json();
     } catch {
-        return { state: "unreadable", reason: { code: "not-json" } };
+        return response.ok
+            ? { state: "unavailable", reason: { code: "not-json" } }
+            : {
+                  state: "unavailable",
+                  reason: { code: "http", status: response.status },
+              };
+    }
+
+    // The positive signal for the heavy conclusion: the store says its own name.
+    // 503 alone is not enough — a proxy sends 503 too and has never heard of
+    // this store, and treating that as "your keys are corrupt" is how a network
+    // hiccup came to offer a destructive fix.
+    if (
+        response.status === 503 &&
+        (body as { code?: string })?.code === "ENV_STORE_UNREADABLE"
+    ) {
+        return {
+            state: "store-unreadable",
+            reason: { code: "http", status: 503 },
+        };
+    }
+
+    if (!response.ok) {
+        return {
+            state: "unavailable",
+            reason: { code: "http", status: response.status },
+        };
     }
 
     const env = (body as { env?: unknown })?.env;
     if (!env || typeof env !== "object" || Array.isArray(env)) {
-        return { state: "unreadable", reason: { code: "no-env" } };
+        return { state: "unavailable", reason: { code: "no-env" } };
     }
 
     const pluginEnv =
@@ -129,7 +203,7 @@ export async function saveEnvKeys(
 ): Promise<SaveOutcome> {
     const read = await readEnvForBrowser();
     if (read.state !== "ok") {
-        return { ok: false, reason: "store-unreadable", detail: read.reason };
+        return { ok: false, reason: "read-failed", read };
     }
     return put({ env: { ...read.env, ...patch }, verify });
 }
@@ -191,8 +265,11 @@ async function put(body: unknown): Promise<SaveOutcome> {
         if (response.status === 409) {
             return {
                 ok: false,
-                reason: "store-unreadable",
-                detail: { code: "http", status: 409 },
+                reason: "read-failed",
+                read: {
+                    state: "store-unreadable",
+                    reason: { code: "http", status: 409 },
+                },
             };
         }
         return {

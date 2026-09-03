@@ -36,6 +36,7 @@ import {
     type WriteFailure,
 } from "@/lib/settings/env-client";
 import {
+    legacyReadDetail,
     readFailureText,
     writeFailureText,
 } from "@/lib/settings/read-failure-text";
@@ -146,8 +147,8 @@ async function saveAndVerifyKey(
 > {
     const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
     if (!out.ok) {
-        if (out.reason === "store-unreadable") {
-            return { storeUnreadable: out.detail };
+        if (out.reason === "read-failed") {
+            return { storeUnreadable: legacyReadDetail(out.read) };
         }
         // A failed WRITE is not a statement about the key. Throwing here landed
         // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —

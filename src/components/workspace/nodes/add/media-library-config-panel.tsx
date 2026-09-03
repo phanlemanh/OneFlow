@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { legacyReadDetail } from "@/lib/settings/read-failure-text";
 import { requestOpenSettings } from "@/lib/settings/settings-events";
 
 /**
@@ -58,11 +59,11 @@ export function MediaLibraryConfigPanel({
             if (key.trim()) patch.MEDIA_LIBRARY_API_KEY = key.trim();
             const out = await saveEnvKeys(patch);
             if (!out.ok) {
-                if (out.reason === "store-unreadable") {
+                if (out.reason === "read-failed") {
                     // Not "we could not read" and then a form to try again in:
                     // this panel has no way to repair a broken store, so it
                     // says so and points at the screen that does.
-                    setBlocked(out.detail);
+                    setBlocked(legacyReadDetail(out.read));
                     return;
                 }
                 setError(labels.writeFailed);

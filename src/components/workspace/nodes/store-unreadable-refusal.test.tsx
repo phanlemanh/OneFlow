@@ -154,7 +154,12 @@ afterEach(() => {
 
 describe("both on-canvas key surfaces, store unreadable", () => {
     it("the matrix is 2 surfaces x 5 shapes", () => {
-        expect(EXPECTED_CASES).toBe(10);
+        expect(
+            EXPECTED_CASES,
+            // 2 surfaces x 8 read shapes. Was 10 (x5): khong-noi-sai-ve-kho-khoa
+            // added 401, 403 and a code-less 503 to the shared fixture, and this
+            // pin is what noticed. Growing coverage still has to be declared.
+        ).toBe(16);
     });
 
     for (const surface of SURFACES) {
