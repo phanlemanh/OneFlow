@@ -180,7 +180,7 @@ evals:
     cmd: config:executors.script.rkce_teeth
     paths: ["scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0 và ĐỦ HAI MỐT dòng `CASE <tên>: PASS` cùng chốt `OK: 21/21 ca` — `healthy`
+      exit 0 và ĐỦ HAI CHÍN dòng `CASE <tên>: PASS` cùng chốt `OK: 29/29 ca` — `healthy`
       (đối chứng dương, và cũng chứng minh `write` ghi `prev_sha` đúng bằng
       `verified_commit` cũ) · `nuot-eval` (đỏ, nêu đích danh slug + `run_id` + id eval) ·
       `da-chay-lai` (XANH — phân biệt "bắt được việc nuốt" với "đỏ mọi thứ") · `ong-ba`
@@ -190,7 +190,7 @@ evals:
       `plan-tap-id` · `plan-them-mot-file` · `write-thieu-suites` · `write-lan-do` ·
       `write-prev-bang-sha` · `diem-vao-duong-dan-la` · `write-giu-dong-cu` ·
       `chay-lai-do` · `log-hong` · `newlines-thieu-prev` · `so-khop-lech` ·
-      `so-khop-rong` · `san-tinh-duoc`. Dòng chốt nay ĐẾM lúc chạy (`want` tự cộng
+      `so-khop-rong` · `san-tinh-duoc` · `base-khong-phan-giai` · `base-thieu-file` · `diff-that-bai` · `shallow-do-loi` · `tu-quy-chieu-khai` · `tu-quy-chieu-quen-khai` · `tu-quy-chieu-dem-giam` · `paths-e5e6-hoan-nguyen` (tam ca cuoi them 04/09 boi ho so `hang-rao-doc-nham-loi-thanh-khong-co-gi`). Dòng chốt nay ĐẾM lúc chạy (`want` tự cộng
       theo vế xanh/đỏ được yêu cầu) thay vì mang một chuỗi viết tay: vòng 3 bắt được nó
       khai «7 đối chứng dương + 11 phép phá» trong khi thực tế là 6 + 12, và `TOTAL`
       không thể bắt vì `TOTAL` nói có bao nhiêu ca chứ không nói ca thuộc loại nào.
@@ -198,8 +198,8 @@ evals:
       phá đỏ; bộ giao trả CẢ TẬP → ba đối chứng dương (`da-chay-lai`, `khong-khai-paths`,
       `plan-tap-id`) đỏ. Mọi ca dựng trên kho git dùng-rồi-bỏ (`mktemp -d` +
       `git init`), KHÔNG chạm cây thật — vòng trước một ca ghi vật thăm dò vào cây thật
-      và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/21` và
-      KHÔNG in `OK:` (đo 02/09: `PARTIAL: 1/21`); tên ca lạ → thoát 2. `healthy` truyền
+      và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/29` và
+      KHÔNG in `OK:` (đo 02/09: `PARTIAL: 1/29`); tên ca lạ → thoát 2. `healthy` truyền
       `suites_json` tường minh `[0,0,0]` — trước vòng 2 nó gọi `write` KHÔNG truyền, tức
       ca đối chứng dương đang ban phước cho đúng đường bịa mà AC-10 cấm.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
@@ -224,7 +224,7 @@ evals:
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
       exit 0 cho cả BA lượt — `write-thieu-suites`, `write-lan-do`, `write-prev-bang-sha` —
-      mỗi lượt in `CASE <tên>: PASS` rồi `PARTIAL: 1/21`. Mỗi ca đòi `write` thoát khác 0,
+      mỗi lượt in `CASE <tên>: PASS` rồi `PARTIAL: 1/29`. Mỗi ca đòi `write` thoát khác 0,
       in đúng lý do của nó, và run-log KHÔNG thêm dòng nào. Đã kiểm răng 02/09 bằng cách
       thay từng phép từ chối trong lõi bằng `if (false)`: ca tương ứng đỏ (`write-thieu-suites`
       → "dau ra khong neu 'khong co mac dinh'"; `write-prev-bang-sha` → "mong do, nhung
@@ -238,7 +238,7 @@ evals:
     cmd: config:executors.script.rkce_entrypoint
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0, in `CASE diem-vao-duong-dan-la: PASS` rồi `PARTIAL: 1/21`. Ca chép lõi sang
+      exit 0, in `CASE diem-vao-duong-dan-la: PASS` rồi `PARTIAL: 1/29`. Ca chép lõi sang
       một thư mục CÓ DẤU CÁCH dưới `mktemp -d` (tức dưới `/tmp`, vốn là symlink tới
       `/private/tmp` trên macOS) rồi gọi một mode không tồn tại; đòi `usage:` trên stderr và
       mã thoát khác 0. Đối chứng đã chạy: bản dùng `import.meta.url === argv[1]` nguyên văn
@@ -253,7 +253,7 @@ evals:
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
       exit 0 cho cả HAI lượt — `write-giu-dong-cu` và `log-hong` — mỗi lượt in `CASE <tên>:
-      PASS` rồi `PARTIAL: 1/21`. Ca thứ nhất dựng run-log giữ một dòng repin hợp lệ và
+      PASS` rồi `PARTIAL: 1/29`. Ca thứ nhất dựng run-log giữ một dòng repin hợp lệ và
       KHÔNG kết thúc bằng `\n`, gọi `write`, rồi đòi `check` đọc được **hai** dòng repin
       (`dong repin: 2`) và nhận ra dòng mới `R9` — trước khi vá, hai dòng hàn làm một và
       `check` in `dong repin: 0 … OK` thoát 0. Ca thứ hai thêm một dòng cụt và đòi `check`
@@ -269,7 +269,7 @@ evals:
     cmd: config:executors.script.rkce_exit_code
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0, in `CASE chay-lai-do: PASS` rồi `PARTIAL: 1/21`. Ca dựng một pin tính được có
+      exit 0, in `CASE chay-lai-do: PASS` rồi `PARTIAL: 1/29`. Ca dựng một pin tính được có
       chạm E1, thêm dòng chạy lại `exit_code: 1`, và đòi `check` ĐỎ với thông điệp `DA chay
       lai nhung DO` nêu đích danh `E1`. Đối chứng dương là ca `da-chay-lai` (cùng fixture,
       `exit_code: 0` → xanh, `eval bi nuot: 0`) — cặp hai chiều trên cùng một vật, nên vế

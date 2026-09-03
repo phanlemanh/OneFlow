@@ -507,7 +507,8 @@ function modeCheck(argv = []) {
             // so those compensations are checkable rather than promised.
             const missing = hit.filter(
                 (id) =>
-                    !selfRef.has(`${slug}/${id}`) && !reMeasuredSince(id, o.sha),
+                    !selfRef.has(`${slug}/${id}`) &&
+                    !reMeasuredSince(id, o.sha),
             );
             // Two named outcomes, not one. "Never re-run" and "re-run and failed" are
             // different defects and a reader who is told only the first will patch the
