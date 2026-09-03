@@ -17,10 +17,17 @@
 # behaviour). The fixture below owns its own repo, its own config and its own
 # base, so the answer is the same on every branch and every machine.
 #
-# THE TWO HALVES run against ONE fixture, in order, so the deciding variable is
-# visibly the artifacts and nothing else:
-#   B (should-fire)     PR changes only scripts/acceptance/<guard>.sh  → VIOLATION
-#   A (should-NOT-fire) same PR plus an _acceptance/ artifact touch    → no VIOLATION
+# THREE HALVES. B and A share ONE fixture and run in order, so between them the
+# deciding variable is visibly the artifacts and nothing else. C owns a SECOND
+# fixture, because the thing it must be able to see is invisible under the
+# shared one (see its own comment):
+#   B (should-fire)     PR changes only scripts/acceptance/<guard>.sh   → VIOLATION
+#   C (should-fire)     same, plus a TOP-LEVEL _acceptance/ file        → VIOLATION
+#   A (should-NOT-fire) same, plus an _acceptance/<slug>/ artifact      → no VIOLATION
+#
+# B vs A alone cannot separate "any _acceptance/ change opens the door" from
+# "a dossier artifact opens the door" — they differ in two variables at once.
+# C is what makes the pair discriminating.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
@@ -91,24 +98,69 @@ fi
 # gate printed `1 violation — merge blocked`; after a commit that changed
 # NOTHING but _acceptance/config.yaml it printed `clean`, and four ungated
 # product files belonging to another branch stopped being flagged.
-( cd "$d" && printf '\n# touched by half C\n' >> _acceptance/config.yaml \
-  && git add -A && git commit -q -m "carry a top-level _acceptance file, not a dossier artifact" )
-if ! in_diff "$GUARD_REL"; then
+#
+# OWN FIXTURE, deliberately: `$dC`'s config drops `_acceptance/**` from
+# t1_skip_globs. Under the shared fixture a config.yaml that fell through to
+# classification would be graded T1 and never printed, so the second assertion
+# below could not fail no matter what the code did.
+dC="$WORK/fxc"
+mkdir -p "$dC"
+# fixtures.sh declares no `local` (it says so itself, in mk_fixture's own note),
+# so mk_fixture ASSIGNS the global `d`. Building a second fixture therefore
+# silently repoints half A at this fixture unless `d` is put back — which is
+# exactly what happened the first time this half was written: half A failed with
+# «Invalid symmetric difference» because `$base` no longer belonged to `$d`.
+dSaved="$d"
+mk_fixture "$dC" fx narrow
+grep -v '"_acceptance/\*\*"' "$dC/_acceptance/config.yaml" > "$dC/_acceptance/config.yaml.tmp"
+mv "$dC/_acceptance/config.yaml.tmp" "$dC/_acceptance/config.yaml"
+if grep -q '_acceptance/\*\*' "$dC/_acceptance/config.yaml"; then
+  echo "FAIL anti-vacuous [half C] could not drop _acceptance/** from the fixture config — the second assertion would be unfalsifiable"
+  exit 1
+fi
+vcC="$(git -C "$dC" rev-parse HEAD)"
+write_report "$dC" fx "$vcC"
+( cd "$dC" && git add -A && git commit -q -m report )
+baseC="$(git -C "$dC" rev-parse HEAD)"
+mkdir -p "$dC/scripts/acceptance"
+printf '#!/usr/bin/env bash\necho guard\n' > "$dC/$GUARD_REL"
+( cd "$dC" && printf '\n# touched by half C\n' >> _acceptance/config.yaml \
+  && git add -A && git commit -q -m "guard change plus a top-level _acceptance file, no dossier artifact" )
+in_diff_c() { git -C "$dC" diff --name-only "$baseC...HEAD" | grep -qx "$1"; }
+run_gate_c() { bash "$GATE" "$dC" --base "$baseC" 2>&1 || true; }
+d="$dSaved"   # hand `d` back to half A before it runs — see the note above
+if ! in_diff_c "$GUARD_REL"; then
   echo "  FAIL [half C] the guard change fell out of the diff — half C would pass vacuously"
   fails=$((fails+1))
-elif ! in_diff _acceptance/config.yaml; then
+elif ! in_diff_c _acceptance/config.yaml; then
   echo "  FAIL anti-vacuous [half C] _acceptance/config.yaml is not in the diff — the half tests nothing"
   fails=$((fails+1))
 else
-  outC="$(run_gate)"
+  outC="$(run_gate_c)"
   if ! printf '%s\n' "$outC" | grep -q 'pre-merge-check:'; then
     echo "  FAIL [half C] the gate produced no summary line — it did not run"
     fails=$((fails+1))
-  elif printf '%s\n' "$outC" | grep -q "$ESCAPE"; then
-    echo "  ok   [half C] a top-level _acceptance/ file does not count as carrying artifacts"
-  else
+  elif ! printf '%s\n' "$outC" | grep -q "$ESCAPE"; then
     echo "  FAIL [half C] touching only _acceptance/config.yaml switched the backstop OFF — declaring t1_skip_globs, the very thing the violation message tells you to do, exempts the PR that declares it"
     fails=$((fails+1))
+  else
+    # SECOND half of the promise, and the reason this assertion is not just
+    # `grep ESCAPE`: the code makes a TWO-part claim — a top-level file must not
+    # ARM the backstop (asserted above), and it must still be `continue`d past
+    # tier classification so it never lands in the violation's `Changed:` list.
+    # Grepping only for the violation string leaves the second arm untested:
+    # deleting `_acceptance/*|*/_acceptance/*) continue ;;` outright kept this
+    # guard fully green (measured 2026-09-03, S4 review of this very change).
+    # `$dC` is a fixture whose t1_skip_globs does NOT exempt `_acceptance/**`,
+    # so a config.yaml that fell through to classification WOULD be printed;
+    # under the shared fixture it would be graded T1 and silently hidden.
+    changedC="$(printf '%s\n' "$outC" | sed -n "/$ESCAPE/,/^[a-zA-Z]/p")"
+    if printf '%s\n' "$changedC" | grep -q '_acceptance/config.yaml'; then
+      echo "  FAIL [half C] _acceptance/config.yaml reached tier classification and was named in the violation — the top-level arm no longer skips it"
+      fails=$((fails+1))
+    else
+      echo "  ok   [half C] a top-level _acceptance/ file neither arms the backstop nor reaches classification"
+    fi
   fi
 fi
 

@@ -989,23 +989,26 @@ DIFF_GATE_TOUCHED=0; DIFF_T3_HITS=""; DIFF_NONT1_HITS=""
 if [ "$DIFF_READY" -eq 1 ]; then
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    # «Mang artifact» = mang artifact CỦA MỘT HỒ SƠ, tức `_acceptance/<slug>/…`,
-    # chứ không phải một tệp bất kỳ dưới `_acceptance/`. Hai mẫu, không phải một:
+    # "Carrying artifacts" means carrying a DOSSIER artifact — a file under
+    # some `_acceptance/<slug>/` — not any file under `_acceptance/`. Two
+    # patterns, not one:
     #
-    #   `_acceptance/*/*`  hồ sơ  -> PR này đã tái nghiệm thu, backstop nghỉ
-    #   `_acceptance/*`    cấp 1  -> config.yaml, README.md: KHÔNG phải bằng chứng
+    #   `_acceptance/*/*`  dossier   -> this PR re-verified; backstop stands down
+    #   `_acceptance/*`    top level  -> config.yaml, README.md: NOT evidence
     #
-    # Cả hai vẫn `continue` — không tệp nào dưới `_acceptance/` bị đem đi phân
-    # hạng — nhưng chỉ mẫu đầu mới tắt được backstop.
+    # Both still `continue`, so no file under `_acceptance/` is ever carried
+    # into tier classification — that half of the behaviour is unchanged. Only
+    # the first pattern may disarm the backstop.
     #
-    # Trước 03/09 chỉ có một mẫu, và nó fail-open: thông điệp vi phạm bảo
-    # «declare T1 honestly (t1_skip_globs)», mà `t1_skip_globs` sống trong
-    # `_acceptance/config.yaml` — nên làm ĐÚNG điều cổng gợi ý sẽ tắt cổng cho
-    # chính PR đang làm điều đó. Đo trên PR #93 (02/09): trước commit khai T1
-    # cổng in «1 violation — merge blocked»; sau một commit không đổi gì ngoài
-    # `_acceptance/config.yaml`, cổng in «clean» và bốn tệp sản phẩm chưa qua
-    # cổng của một nhánh khác thôi bị gắn cờ. Nửa C của
-    # `check-t1-escape-path.sh` canh đúng chỗ này.
+    # Before 2026-09-03 there was a single pattern, and it failed OPEN: the
+    # violation message says `declare T1 honestly (t1_skip_globs)`, and
+    # t1_skip_globs lives in `_acceptance/config.yaml` — so doing exactly what
+    # the gate suggests switched the gate off for the very PR doing it.
+    # Measured on PR #93 (2026-09-02): before the declaring commit the gate
+    # printed `1 violation — merge blocked`; after a commit that changed
+    # nothing but `_acceptance/config.yaml` it printed `clean`, and four
+    # ungated product files from another branch stopped being flagged.
+    # Halves C and D of `check-t1-escape-path.sh` pin both patterns.
     case "$f" in
       _acceptance/*/*|*/_acceptance/*/*) DIFF_GATE_TOUCHED=1; continue ;;
       _acceptance/*|*/_acceptance/*) continue ;;
@@ -1778,8 +1781,11 @@ fi
 # matching t3_paths — or falling outside t1_skip_globs — require the PR to
 # carry _acceptance/<slug>/ artifacts. (Under the stale-evidence rule every
 # gated PR re-verifies, so its diff always includes gate artifacts.) There is
-# no path→slug mapping, so "carries artifacts" means any _acceptance/ change;
-# the per-slug checks above judge their quality.
+# no path→slug mapping, so "carries artifacts" means at least one file under
+# some _acceptance/<slug>/ — a top-level file such as _acceptance/config.yaml
+# or _acceptance/README.md does NOT count; the per-slug checks above judge the
+# quality of what is carried. See the two-pattern case block near the diff
+# classification for why the distinction exists.
 # Reuses the shared diff computed once above the feature loop (same
 # BASE_SHA...HEAD range) instead of a second `git diff` here. Both variable
 # sets are filled from that single query, so $DIFF_FILES and the scope
