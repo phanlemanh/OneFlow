@@ -5,7 +5,7 @@ slug: khong-noi-sai-ve-kho-khoa
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [web, api]
-status: approved
+status: implemented
 approved_by: Phan Le Manh
 approved_at: 2026-09-03
 design_doc: docs/superpowers/specs/2026-09-03-khong-noi-sai-ve-kho-khoa-design.md
