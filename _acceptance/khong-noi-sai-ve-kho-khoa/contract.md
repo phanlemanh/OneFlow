@@ -5,7 +5,7 @@ slug: khong-noi-sai-ve-kho-khoa
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [web, api]
-status: verified
+status: signed-off
 approved_by: Phan Le Manh
 approved_at: 2026-09-03
 design_doc: docs/superpowers/specs/2026-09-03-khong-noi-sai-ve-kho-khoa-design.md
@@ -145,6 +145,30 @@ Không có dòng `[GIẢ ĐỊNH]` hay `[CE chưa kiểm chứng]`.
 - **403 có copy riêng** («bị cấm» thay vì «không tới được»). Đúng RFC 9110 nhưng chưa
   có ca thật ở cloud shell — Later.
 - Đổi `apiClient` sang trả kết quả có cấu trúc thay vì throw+toast. Ngoài đề.
+
+## Known limits (người ký nhận trước khi phát hành)
+
+Owner chốt tại Cổng 2 ngày 04/09/2026. Mỗi mục dưới đây là điều sản phẩm CHƯA
+làm được và đã được nhận trước khi phát hành, không phải điều còn phải sửa.
+
+- **Nút «Thử lại» trên bảng cấu hình thư viện media không cùng nghĩa với hai bề
+  mặt kia.** Ở màn Cài đặt và trên node, nút đó đọc lại kho khoá; ở bảng này nó
+  chạy lại lượt lưu — tức đọc lại rồi ghi nếu đọc được. **Đo tại Cổng 2:** bấm
+  nút khi thẻ đang chặn gửi đi `GET, GET, GET` — không lượt ghi nào rời trình
+  duyệt, nên AC-5 giữ được. Cái lệch là tên gọi của control, không phải hành vi
+  bị cấm.
+- **Một lượt thay-kho thất bại vì lý do hiếm có thể hiện câu báo lỗi mạng chung
+  chung kèm một tên trạng thái nội bộ chưa dịch.** Nhánh đó không đến được từ
+  đường đi bình thường.
+- **Dòng chữ đỏ báo lỗi thay-kho có thể còn sót lại dưới thẻ trung tính.** Sau
+  một lần thay-kho hỏng rồi phiên hết hạn ngay sau, người dùng thấy hai lời
+  giải thích chồng nhau về hai sự cố khác nhau.
+- **Một chú thích trong mã và một con số trong công cụ kiểm tra nội bộ đã lệch
+  thực tế.** Không ai ngoài đội phát triển nhìn thấy.
+- **Bốn khoảng trống của bộ kiểm tra tự động** — màn Cài đặt lúc bị chặn, trần
+  thời gian dùng chung, trần cho lượt ghi, và tình huống tranh chấp giữa đọc và
+  ghi. Đây là chỗ phép đo chưa chứng minh được điều nó mang tên, không phải lỗi
+  người dùng gặp.
 
 ## Notes
 
