@@ -35,7 +35,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E1-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/app/api/settings/env/route.replace-premise.test.ts
+  verifier: config:executors.test.knsk_route_replace_premise
   verified_at: 2026-09-03T17:22:59+07:00
   output: |
     Tests  6 passed (6)
@@ -46,7 +46,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E2-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/lib/settings/env-client.taxonomy.test.ts
+  verifier: config:executors.test.knsk_env_client_taxonomy
   verified_at: 2026-09-03T17:23:04+07:00
   output: |
     Tests  11 passed (11)
@@ -57,7 +57,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E3-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/lib/settings/env-client.seam.test.ts
+  verifier: config:executors.test.knsk_env_client_seam
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  7 passed (7)
@@ -68,7 +68,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E4-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/lib/settings/env-client.timeout.test.ts
+  verifier: config:executors.test.knsk_env_client_timeout
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  7 passed (7)
@@ -79,7 +79,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E5-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/components/workspace/store-read-states.test.tsx
+  verifier: config:executors.test.knsk_surfaces_matrix
   verified_at: 2026-09-03T17:23:02+07:00
   output: |
     Tests  17 passed (17)
@@ -90,7 +90,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E6-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/components/workspace/store-read-states-retry.test.tsx
+  verifier: config:executors.test.knsk_retry_wire
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  6 passed (6)
@@ -101,7 +101,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E7-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/components/workspace/settings-dialog.replace-refused.test.tsx
+  verifier: config:executors.test.knsk_replace_refused_wire
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  4 passed (4)
@@ -112,7 +112,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E8-r3
   exit_code: 0
   baseline: n-a
-  verifier: scripts/settings/check-unauthorized-seam.sh
+  verifier: config:executors.script.knsk_seam_guard
   verified_at: 2026-09-03T17:23:04+07:00
   output: |
     src/lib/api/client.ts
@@ -123,7 +123,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E9-r3
   exit_code: 0
   baseline: n-a
-  verifier: scripts/settings/check-unauthorized-seam-teeth.sh
+  verifier: config:executors.script.knsk_seam_guard_teeth
   verified_at: 2026-09-03T17:23:05+07:00
   output: |
     ok   case 'a third caller in a component' exited 1
@@ -134,7 +134,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E10-r3
   exit_code: 0
   baseline: n-a
-  verifier: scripts/settings/check-one-env-reader.sh
+  verifier: config:executors.script.kkt_gd_one_reader
   verified_at: 2026-09-03T17:23:05+07:00
   output: |
     OK: the key endpoint has exactly one non-test caller (src/lib/settings/env-client.ts)
@@ -143,7 +143,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E11-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/components/workspace/store-read-states-i18n.test.tsx
+  verifier: config:executors.test.knsk_i18n_render
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  20 passed (20)
@@ -154,7 +154,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E12-r3
   exit_code: 0
   baseline: n-a
-  verifier: src/i18n/locale-parity.test.ts
+  verifier: config:executors.test.kkt_gd_locale_parity
   verified_at: 2026-09-03T17:23:03+07:00
   output: |
     Tests  10 passed (10)
@@ -165,7 +165,7 @@ human_signoff: Phan Le Manh 2026-09-04
   run_id: minted-khong-noi-sai-ve-kho-khoa-E13-r3
   exit_code: 0
   baseline: n-a
-  verifier: scripts/settings/check-a11y-read-states.sh
+  verifier: config:executors.script.knsk_a11y_proto
   verified_at: 2026-09-03T17:23:10+07:00
   output: |
     "verdict": "PASS"
