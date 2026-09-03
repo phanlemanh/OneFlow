@@ -11,7 +11,7 @@ flowchart TD
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>32 việc"]
+  GB --> DG["Đã giao<br/>33 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -58,6 +58,7 @@ _chưa có_
 - Ô đo chạy 0 ca thử mà vẫn báo đạt — hàng rào ở chốt CI (`o-do-chay-0-ca-van-xanh`)
 - Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
 - Per-plugin origin in the official manifest (`per-plugin-origin`)
+- Làm độ trôi eval sau re-pin tính được và bắt được (`repin-khong-chay-lai-eval`)
 - pnpm 11 build-script approvals — move to pnpm-workspace.yaml (allowBuilds) and unblock the verify toolchain (`pnpm-build-approvals`)
 - Guard chống trôi docs/roadmap.md — ba kiểm A/B/C, răng tách theo case, nối pnpm roadmap:check (`roadmap-drift-guard`)
 - The plugin scanner reports the reason it already has, instead of blaming entry.py (`scan-scope-diagnostics`)

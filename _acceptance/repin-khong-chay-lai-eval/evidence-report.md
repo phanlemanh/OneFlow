@@ -8,7 +8,7 @@ verified_by: phiên VERIFY tuần tự (CLASSIFIER-FALLBACK sau BLOCKED vòng 3)
 enforcement_mode: strict
 bypass_used: false
 verified_commit: e68cdd61b0e7108753431434216e4343e0117e77
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-03
 ---
 
 # Evidence Report: repin-khong-chay-lai-eval

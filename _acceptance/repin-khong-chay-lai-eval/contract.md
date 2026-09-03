@@ -5,7 +5,7 @@ slug: repin-khong-chay-lai-eval
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, acceptance]
-status: verified
+status: signed-off
 approved_by:
 gate1_skipped: true
 veto_state: mo
@@ -254,3 +254,8 @@ Ngưỡng thứ nhất là **ô CHƯA ĐO** của Cổng Giá trị: vòng này 
 không làm "tự chạy lại". Khai ở đây thay vì để Cổng Giá trị đọc một bảng trống.
 
 ## Notes
+
+- **Known limit (chốt tại Cổng Bằng chứng 03/09):** lệnh dựng ứng dụng gán biến môi
+  trường nội dòng nên cần vỏ lệnh kiểu Unix; người đóng góp dùng Windows làm đúng danh
+  sách kiểm bắt buộc sẽ không dựng được, trong khi lượt kiểm tự động chạy trên Linux
+  vẫn báo ổn. Chấp nhận và ghi lại thay vì sửa ở vòng này.
