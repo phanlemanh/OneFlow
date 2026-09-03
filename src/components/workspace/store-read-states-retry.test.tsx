@@ -21,15 +21,36 @@ import {
     screen,
     waitFor,
 } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { SettingsDialog } from "@/components/workspace/settings-dialog";
+import type { Task } from "@/hooks/use-task";
 import viMsg from "@/i18n/messages/vi.json";
+import { MediaLibraryConfigPanel } from "./nodes/add/media-library-config-panel";
+import {
+    type NodeKeyGate,
+    NodeKeyGateSurface,
+    useNodeKeyGate,
+} from "./nodes/base/abi-node-shell";
 
 const S = viMsg.Settings;
 
 const RETRY = new RegExp(`^${S.unavailable.retry}$`);
+
+const PANEL_LABELS = {
+    urlLabel: "url",
+    keyLabel: "key",
+    save: "Lưu",
+    saving: "Đang lưu…",
+    writeFailed: "write failed",
+};
+
+const wrap = (ui: React.ReactNode) => (
+    <NextIntlClientProvider locale="vi" messages={viMsg}>
+        <ReactFlowProvider>{ui}</ReactFlowProvider>
+    </NextIntlClientProvider>
+);
 
 /** Open the dialog with a GET responder under the test's control. */
 async function openWith(get: () => Promise<Response> | Response) {
@@ -190,38 +211,105 @@ describe("retry reads again", () => {
         ).toBe(0);
     });
 
-    it("all three surfaces carry a retry that is a live control", async () => {
-        // The matrix suite counts the button on all three surfaces; this
-        // asserts the control is wired on all three, which is the half a count
-        // cannot see. The canvas surfaces hand their retry in as a prop, so
-        // what is measured here is that the shared card actually calls it.
-        for (const state of ["unauthenticated", "unavailable"] as const) {
-            let fired = 0;
-            const { unmount } = render(
-                <NextIntlClientProvider locale="vi" messages={viMsg}>
-                    <ReadStateNotice
-                        read={
-                            state === "unauthenticated"
-                                ? { state }
-                                : { state, reason: { code: "timeout" } }
-                        }
-                        // Echo the key back so the assertion names the exact
-                        // key the card asked for, not a translated string.
-                        t={((k: string) => k) as never}
-                        onRetry={() => {
-                            fired += 1;
-                        }}
-                    />
-                </NextIntlClientProvider>,
+    it("all three surfaces: one click, exactly one further read", async () => {
+        /*
+         * The claim is about THREE SURFACES, so it mounts three surfaces. The
+         * earlier version rendered `ReadStateNotice` twice with its own
+         * `onRetry` and counted its own variable — a class claim backed by a
+         * point case, and the last link (`gate.retry` actually re-reading) was
+         * touched by nothing at all.
+         */
+        for (const surface of ["settings", "node", "ml-panel"] as const) {
+            const seen: string[] = [];
+            const fetchMock = vi.fn(async (_u: string, init?: RequestInit) => {
+                seen.push(init?.method ?? "GET");
+                return init?.method === "PUT"
+                    ? new Response("{}", { status: 500 })
+                    : new Response("{}", { status: 500 });
+            });
+            vi.stubGlobal("fetch", fetchMock);
+
+            if (surface === "settings") {
+                render(
+                    <NextIntlClientProvider locale="vi" messages={viMsg}>
+                        <SettingsDialog />
+                    </NextIntlClientProvider>,
+                );
+                fireEvent.click(screen.getByRole("button", { name: S.title }));
+            } else if (surface === "node") {
+                let gate: NodeKeyGate | null = null;
+                const Surface = () => {
+                    const g = useNodeKeyGate();
+                    gate = g;
+                    return (
+                        <NodeKeyGateSurface gate={g} providerName="OpenAI" />
+                    );
+                };
+                render(wrap(<Surface />));
+                await act(async () => {
+                    gate?.noteTask({
+                        id: "t1",
+                        status: "FAILED",
+                        error: "missing OPENAI_API_KEY",
+                    } as unknown as Task);
+                });
+                await act(async () => {
+                    gate?.setValue("sk-test");
+                });
+                await act(async () => {
+                    await gate?.save();
+                });
+            } else {
+                render(
+                    wrap(
+                        <MediaLibraryConfigPanel
+                            missing={["MEDIA_LIBRARY_URL"]}
+                            message="missing"
+                            labels={PANEL_LABELS}
+                            onSaved={() => {}}
+                        />,
+                    ),
+                );
+                const input = document.querySelector("input");
+                if (input) {
+                    const setter = Object.getOwnPropertyDescriptor(
+                        window.HTMLInputElement.prototype,
+                        "value",
+                    )?.set;
+                    setter?.call(input, "https://x.test");
+                    input.dispatchEvent(new Event("input", { bubbles: true }));
+                }
+                await act(async () => {
+                    screen
+                        .getByRole("button", { name: PANEL_LABELS.save })
+                        .click();
+                });
+            }
+
+            await waitFor(() =>
+                expect(
+                    screen.queryAllByTestId("unavailable-notice").length,
+                    `${surface}: expected the blocked card`,
+                ).toBe(1),
             );
-            fireEvent.click(
-                screen.getByRole("button", { name: `${state}.retry` }),
+
+            const before = seen.length;
+            await act(async () => {
+                fireEvent.click(screen.getByRole("button", { name: RETRY }));
+            });
+            await waitFor(() =>
+                expect(
+                    seen.length - before,
+                    `${surface}: one click must produce exactly one read`,
+                ).toBeGreaterThan(0),
             );
             expect(
-                fired,
-                `${state}: the shared card must call the surface's retry`,
+                seen.slice(before).filter((m) => m === "GET").length,
+                `${surface}: retry must re-READ, exactly once`,
             ).toBe(1);
-            unmount();
+
+            cleanup();
+            vi.unstubAllGlobals();
         }
     });
 

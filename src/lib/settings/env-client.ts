@@ -358,19 +358,31 @@ async function put(body: unknown): Promise<SaveOutcome> {
             // One says the store is broken; the other says it is FINE and our
             // request was based on a stale reading. Collapsing them reports a
             // healthy store as a corrupt one.
-            if (
-                (answer as { code?: string } | undefined)?.code ===
-                ENV_STORE_REPLACE_REFUSED
-            ) {
+            const code = (answer as { code?: string } | undefined)?.code;
+            if (code === ENV_STORE_REPLACE_REFUSED) {
                 return { ok: false, reason: "replace-refused" };
+            }
+            // POSITIVE SIGNAL, same rule as the read path. A 409 alone is not
+            // evidence the store is broken — a proxy, a CDN or an auth gateway
+            // sends 409 too and has never heard of this store — and concluding
+            // it anyway puts the destructive red card and the erase-the-store
+            // button in front of a user whose store is fine. That combination
+            // is the entire defect this dossier removes; the read half was
+            // hardened for it and the write half was not.
+            if (code === ENV_STORE_UNREADABLE) {
+                return {
+                    ok: false,
+                    reason: "read-failed",
+                    read: {
+                        state: "store-unreadable",
+                        reason: { code: "http", status: 409 },
+                    },
+                };
             }
             return {
                 ok: false,
-                reason: "read-failed",
-                read: {
-                    state: "store-unreadable",
-                    reason: { code: "http", status: 409 },
-                },
+                reason: "write-failed",
+                detail: { code: "http", status: 409 },
             };
         }
         return {

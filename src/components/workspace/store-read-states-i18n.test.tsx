@@ -26,6 +26,46 @@ import vi from "@/i18n/messages/vi.json";
 afterEach(cleanup);
 
 const MESSAGES = { en, vi } as const;
+
+/**
+ * A catalogue where every value is unique.
+ *
+ * The real one is not: `unchanged` and `retry` read identically across all
+ * three groups in every locale ("Nothing has been changed.", "Try again"), so
+ * asserting the rendered string proves only that A string is present — a card
+ * pointed at the WRONG group renders exactly the same words. Four of six cases
+ * were vacuous for that reason.
+ *
+ * Probe values make the relation visible: if the card reads
+ * `unauthenticated.retry`, only `U-retry` can appear. The real catalogue still
+ * gets its own case below, because a probe cannot catch a missing key.
+ */
+const GROUPS = ["storeUnreadable", "unauthenticated", "unavailable"] as const;
+const PROBE_KEYS = ["title", "unchanged", "retry", "reason"] as const;
+
+const probe = () => {
+    const settings: Record<string, Record<string, string>> = {};
+    for (const g of GROUPS) {
+        settings[g] = {};
+        for (const k of PROBE_KEYS) settings[g][k] = `${g}::${k}`;
+        // The cause sentence lives under storeUnreadable for every group —
+        // a 502 reads the same whichever headline sits above it.
+        for (const c of ["http", "not-json", "no-env", "network", "timeout"]) {
+            settings[g][`cause.${c}`] = `${g}::cause.${c}`;
+        }
+    }
+    return settings;
+};
+
+const PROBE = probe();
+const probeT = (key: string) => {
+    const [group, ...rest] = key.split(".");
+    const hit = PROBE[group]?.[rest.join(".")];
+    if (typeof hit !== "string" || hit === "") {
+        throw new Error(`probe catalogue has no Settings.${key}`);
+    }
+    return hit;
+};
 const STATES = ["unauthenticated", "unavailable"] as const;
 const KEYS = ["title", "unchanged", "retry"] as const;
 
@@ -146,4 +186,40 @@ describe("copy comes from the catalogue, per locale", () => {
             "the marker must be on the rendered root",
         ).toBeTruthy();
     });
+
+    for (const state of STATES) {
+        for (const key of ["title", "unchanged", "retry"] as const) {
+            it(`${state}.${key} comes from ${state}, not from a sibling group`, () => {
+                // The discriminating half. With the real catalogue this case
+                // is satisfied by any group, because `unchanged` and `retry`
+                // are word-for-word identical across all three.
+                render(
+                    <ReadStateNotice
+                        read={
+                            state === "unauthenticated"
+                                ? { state }
+                                : { state, reason: { code: "timeout" } }
+                        }
+                        t={probeT as never}
+                        onRetry={() => {}}
+                    />,
+                );
+                const group =
+                    state === "unauthenticated"
+                        ? "unauthenticated"
+                        : "unavailable";
+                expect(
+                    screen.queryAllByText(`${group}::${key}`).length,
+                    `${state}: must read Settings.${group}.${key}`,
+                ).toBe(1);
+                for (const other of GROUPS) {
+                    if (other === group) continue;
+                    expect(
+                        screen.queryAllByText(`${other}::${key}`).length,
+                        `${state}: must NOT read Settings.${other}.${key}`,
+                    ).toBe(0);
+                }
+            });
+        }
+    }
 });

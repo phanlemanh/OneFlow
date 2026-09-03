@@ -74,9 +74,13 @@ export function MediaLibraryConfigPanel({
                     setBlocked(out.read);
                     return;
                 }
+                // A write failure is not a read failure: the card goes away
+                // and the form comes back with an error beside it.
+                setBlocked(null);
                 setError(labels.writeFailed);
                 return;
             }
+            setBlocked(null);
             onSaved();
         } finally {
             setSaving(false);
@@ -91,10 +95,12 @@ export function MediaLibraryConfigPanel({
                     t={t}
                     retrying={saving}
                     onRetry={() => {
-                        // Clearing first is what makes the retry visible: the
-                        // form returns, and a second failure paints a fresh
-                        // card rather than leaving the old one to look stale.
-                        setBlocked(null);
+                        // The card STAYS. Clearing `blocked` first unmounted
+                        // it, so the `retrying` flag above never took effect
+                        // and a second click started a second save; it also
+                        // took away the "nothing has been changed" sentence at
+                        // the moment the user acted on it. `save()` replaces
+                        // or clears the card when it settles.
                         void save();
                     }}
                 >

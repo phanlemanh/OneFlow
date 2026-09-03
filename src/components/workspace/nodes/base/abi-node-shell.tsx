@@ -199,6 +199,7 @@ export function NodeKeyGateSurface({
             onChange={gate.setValue}
             onSave={gate.save}
             onRetry={gate.retry}
+            retrying={gate.retrying}
         />
     );
 }
@@ -210,6 +211,8 @@ export interface NodeKeyGate {
     setValue: (value: string) => void;
     noteTask: (task: Task) => void;
     save: () => Promise<void>;
+    /** A retry is in flight. The card disables its button while this is true. */
+    retrying: boolean;
     /**
      * Read the store again from a blocked card.
      *
@@ -233,6 +236,7 @@ export function useNodeKeyGate(): NodeKeyGate {
     );
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
+    const [retrying, setRetrying] = useState(false);
     const [value, setValue] = useState("");
     const nodeId = useNodeId();
     const reactFlow = useReactFlow();
@@ -304,7 +308,14 @@ export function useNodeKeyGate(): NodeKeyGate {
     }, [envKey, value]);
 
     const retry = useCallback(async () => {
+        // Mark in flight BEFORE awaiting. A boolean set after the await has not
+        // settled when the second click dispatches, and N clicks then fire N
+        // concurrent reads whose last arrival wins — which is the shape the
+        // retry contract says is closed, and it held only on the settings
+        // screen because only that surface passed a busy flag.
+        setRetrying(true);
         const read = await readEnvForBrowser();
+        setRetrying(false);
         // A healthy read means the obstacle is gone: hand the form back rather
         // than leaving a card that is no longer true on screen.
         setState(
@@ -314,7 +325,7 @@ export function useNodeKeyGate(): NodeKeyGate {
         );
     }, []);
 
-    return { envKey, state, value, setValue, noteTask, save, retry };
+    return { envKey, state, value, setValue, noteTask, save, retry, retrying };
 }
 
 export interface AbiNodeShellProps<F extends NodeSlot> {

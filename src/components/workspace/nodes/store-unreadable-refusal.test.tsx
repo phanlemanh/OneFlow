@@ -15,19 +15,10 @@
  * way the shell opens it — with a FAILED task naming an env key — because that
  * is what tells it WHICH key is being asked for.
  */
-import {
-    act,
-    cleanup,
-    render,
-    renderHook,
-    screen,
-    waitFor,
-} from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { NodeKeyPromptLabels } from "@/components/workspace/node-key-prompt";
-import { NodeKeyPrompt } from "@/components/workspace/node-key-prompt";
 import type { Task } from "@/hooks/use-task";
 import viMsg from "@/i18n/messages/vi.json";
 import {
@@ -38,7 +29,11 @@ import {
 import type { ReadFailure } from "@/lib/settings/env-client";
 import { OPEN_SETTINGS_EVENT } from "@/lib/settings/settings-events";
 import { MediaLibraryConfigPanel } from "./add/media-library-config-panel";
-import { useNodeKeyGate } from "./base/abi-node-shell";
+import {
+    type NodeKeyGate,
+    NodeKeyGateSurface,
+    useNodeKeyGate,
+} from "./base/abi-node-shell";
 
 const WSU = viMsg.Workspace.storeUnreadable;
 const SURFACES = ["media-library-config-panel", "abi-node-shell"] as const;
@@ -55,17 +50,6 @@ const PANEL_LABELS = {
     storeUnreadableUnchanged: WSU.unchanged,
     storeUnreadableReason: (c: ReadFailure) => `${WSU.reason} ${c.code}`,
     toSettings: WSU.toSettings,
-};
-
-const PROMPT_LABELS: NodeKeyPromptLabels = {
-    needsKey: "needs",
-    describe: () => "describe",
-    placeholder: "ph",
-    save: "Lưu",
-    verifying: "…",
-    invalid: "invalid",
-    verified: "verified",
-    savedUnverified: "saved",
 };
 
 const wrap = (ui: React.ReactNode) => (
@@ -116,36 +100,37 @@ async function driveSurface(
         return fetchMock;
     }
 
-    const { result } = renderHook(() => useNodeKeyGate(), {
-        wrapper: ({ children }) => wrap(children),
-    });
+    /*
+     * Mount what SHIPS. This used to render its own `<NodeKeyPrompt …>` with
+     * `onRetry={() => {}}`, and the retry button only renders when that prop
+     * is present — so eight of this suite's sixteen cells asserted "every
+     * blocked card offers a retry" about a prop the harness had just supplied
+     * itself, and stayed green while the real node offered nothing. The
+     * production shell's own comment names that trap; this file still had it.
+     */
+    let gate: NodeKeyGate | null = null;
+    const Surface = () => {
+        const g = useNodeKeyGate();
+        gate = g;
+        return <NodeKeyGateSurface gate={g} providerName="OpenAI" />;
+    };
+    render(wrap(<Surface />));
+
     // Open the gate exactly as the shell does: a failed run naming the key.
     await act(async () => {
-        result.current.noteTask({
+        gate?.noteTask({
             id: "t1",
             status: "FAILED",
             error: "missing OPENAI_API_KEY",
         } as unknown as Task);
     });
-    await waitFor(() => expect(result.current.envKey).toBe("OPENAI_API_KEY"));
+    await waitFor(() => expect(gate?.envKey).toBe("OPENAI_API_KEY"));
     await act(async () => {
-        result.current.setValue("sk-test");
+        gate?.setValue("sk-test");
     });
     await act(async () => {
-        await result.current.save();
+        await gate?.save();
     });
-    render(
-        wrap(
-            <NodeKeyPrompt
-                envKey="OPENAI_API_KEY"
-                providerName="OpenAI"
-                state={result.current.state}
-                labels={PROMPT_LABELS}
-                value=""
-                onRetry={() => {}}
-            />,
-        ),
-    );
     return fetchMock;
 }
 

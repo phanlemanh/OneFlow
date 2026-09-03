@@ -1,6 +1,7 @@
 "use client";
 
-import { LogIn, RotateCw, ShieldAlert, WifiOff } from "lucide-react";
+import { RotateCw, ShieldAlert, WifiOff } from "lucide-react";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -95,6 +96,41 @@ function Frame({
     );
 }
 
+/**
+ * The proto's catalogue, in the shape `ReadStateNotice` asks for.
+ *
+ * The two blocked scenes go through the SHIPPING mapping — state to tone to
+ * key group — rather than picking a tone here. That mapping is what decides
+ * colour, and colour is what the a11y floor measures: a proto that chose
+ * `tone="quiet"` by hand kept the floor green no matter what the real table
+ * said, which is the one thing the floor exists to rule out.
+ */
+const PROTO_COPY: Record<string, Record<string, string>> = {
+    storeUnreadable: {
+        title: COPY.unreadable.title,
+        unchanged: COPY.unchanged,
+        retry: COPY.retry,
+        reason: COPY.unreadable.reason,
+        "cause.http": COPY.unreadable.reason,
+    },
+    unauthenticated: {
+        title: COPY.unauthenticated.title,
+        unchanged: COPY.unchanged,
+        retry: COPY.retry,
+    },
+    unavailable: {
+        title: COPY.unavailable.title,
+        unchanged: COPY.unchanged,
+        retry: COPY.retry,
+        reason: COPY.unavailable.reason,
+    },
+};
+
+const protoT = (key: string) => {
+    const [group, ...rest] = key.split(".");
+    return PROTO_COPY[group]?.[rest.join(".")] ?? key;
+};
+
 function RetryButton() {
     return (
         <Button type="button">
@@ -105,19 +141,13 @@ function RetryButton() {
 }
 
 /**
- * Direction B — the non-destructive register. Same structure as
- * `StoreUnreadableNotice` (section/role=alert, header, reason, reassurance,
- * action slot) on the repo's neutral surface tokens. This is what a `tone`
- * prop on the shipped component would render; it is NOT a second component
- * to ship.
- */
-/**
- * The quiet card, rendered by the SHIPPING component.
+ * Direction B, for the divergence scene ONLY.
  *
- * This was a hand-copy while the component had no `tone`. It no longer is:
- * the a11y floor is measured on this prototype, and a floor measured on a
- * hand-copy proves nothing about the screen a user sees. The wrapper survives
- * only to keep the scenes below reading in this file's own vocabulary.
+ * Every blocked STATE scene now renders `ReadStateNotice`, which is what
+ * chooses the tone in production; this wrapper survives only for the
+ * side-by-side that exists to compare the two directions, where showing the
+ * quiet register next to the red one IS the content. The a11y floor measures
+ * the state scenes, so it measures the real mapping.
  */
 function QuietNotice({
     icon,
@@ -194,60 +224,49 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
         case "settings-unauthenticated":
             return (
                 <Frame state={state} title={COPY.settingsTitle}>
-                    <QuietNotice
-                        icon={LogIn}
-                        testId="unauthenticated-notice"
-                        title={COPY.unauthenticated.title}
-                        reason={COPY.unauthenticated.reason}
-                    >
-                        <RetryButton />
-                    </QuietNotice>
+                    <ReadStateNotice
+                        read={{ state: "unauthenticated" }}
+                        t={protoT as never}
+                        onRetry={() => {}}
+                    />
                     <SettingsChrome blocked />
                 </Frame>
             );
         case "settings-unavailable":
             return (
                 <Frame state={state} title={COPY.settingsTitle}>
-                    <QuietNotice
-                        icon={WifiOff}
-                        testId="unavailable-notice"
-                        title={COPY.unavailable.title}
-                        reason={COPY.unavailable.reason}
-                    >
-                        <RetryButton />
-                    </QuietNotice>
+                    <ReadStateNotice
+                        read={{
+                            state: "unavailable",
+                            reason: { code: "timeout" },
+                        }}
+                        t={protoT as never}
+                        onRetry={() => {}}
+                    />
                     <SettingsChrome blocked />
                 </Frame>
             );
         case "panel-unauthenticated":
             return (
                 <Frame state={state} title={COPY.panelTitle}>
-                    <QuietNotice
-                        icon={LogIn}
-                        testId="unauthenticated-notice"
-                        title={COPY.unauthenticated.title}
-                        reason={COPY.unauthenticated.reason}
-                    >
-                        <RetryButton />
-                    </QuietNotice>
+                    <ReadStateNotice
+                        read={{ state: "unauthenticated" }}
+                        t={protoT as never}
+                        onRetry={() => {}}
+                    />
                 </Frame>
             );
         case "panel-unavailable":
             return (
                 <Frame state={state} title={COPY.panelTitle}>
-                    <QuietNotice
-                        icon={WifiOff}
-                        testId="unavailable-notice"
-                        title={COPY.unavailable.title}
-                        reason={COPY.unavailable.reason}
-                    >
-                        <div className="flex flex-wrap gap-2">
-                            <RetryButton />
-                            <Button type="button" variant="ghost">
-                                {COPY.toSettings}
-                            </Button>
-                        </div>
-                    </QuietNotice>
+                    <ReadStateNotice
+                        read={{
+                            state: "unavailable",
+                            reason: { code: "timeout" },
+                        }}
+                        t={protoT as never}
+                        onRetry={() => {}}
+                    />
                 </Frame>
             );
         case "divergence":

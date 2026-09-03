@@ -133,6 +133,19 @@ for state in "${STATES[@]}"; do
             continue
         fi
 
+        # And the TONE the shipping mapping actually chose. The marker above
+        # only proves the presentational shell was used; the shell takes the
+        # tone as a prop, so a prototype that picked `quiet` by hand kept this
+        # floor green no matter what `ReadStateNotice` decided — and the tone
+        # is the colour, which is what axe measures. Both new states are
+        # transient failures and neither may be painted destructive.
+        if ! grep -q 'data-notice-tone="quiet"' "$snap"; then
+            got_tone=$(grep -o 'data-notice-tone="[^"]*"' "$snap" | head -1)
+            echo "FAIL: $url painted ${got_tone:-<no tone marker>}, expected quiet"
+            MISSING=$((MISSING + 1))
+            continue
+        fi
+
         # The ROOT class after scripts ran, not the proto route's wrapper div.
         root=$(grep -o '<html[^>]*>' "$snap" | head -1)
         case "$root" in

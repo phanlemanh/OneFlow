@@ -181,4 +181,32 @@ describe("a refused wipe re-reads", () => {
             "the failure must be visible to the user",
         ).toBe(1);
     });
+
+    it("a 409 with NO code at all is not evidence of a broken store", async () => {
+        // The positive-signal rule, on the write path. A proxy, a CDN or an
+        // auth gateway sends 409 too and has never heard of this store;
+        // concluding "corrupt" from the status alone puts the destructive card
+        // and the erase button in front of a user whose keys are fine. The
+        // read half was hardened for exactly this and the write half was not.
+        const seen: string[] = [];
+        stubSequence(
+            [UNREADABLE, ["PUT", 409, { error: "conflict" }], UNREADABLE],
+            seen,
+        );
+
+        await open();
+        await confirmReplace();
+
+        await waitFor(() =>
+            expect(
+                screen.queryAllByText(/Không thay được kho|Could not replace/i)
+                    .length,
+                "a code-less 409 is a write failure, reported as one",
+            ).toBe(1),
+        );
+        expect(seen, "and it must not trigger a re-read either").toEqual([
+            "GET",
+            "PUT",
+        ]);
+    });
 });

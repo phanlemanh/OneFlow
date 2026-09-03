@@ -66,6 +66,8 @@ export interface NodeKeyPromptProps {
     onSave?: () => void;
     /** Ask the surface to read again. Rendered in every non-ok read state. */
     onRetry?: () => void;
+    /** That read is in flight; the card disables its button. */
+    retrying?: boolean;
 }
 
 export interface NodeKeyPromptLabels {
@@ -88,6 +90,7 @@ export function NodeKeyPrompt({
     onChange,
     onSave,
     onRetry,
+    retrying = false,
 }: NodeKeyPromptProps) {
     const t = useTranslations("Workspace");
     const inputId = `node-key-${envKey}`;
@@ -104,7 +107,12 @@ export function NodeKeyPrompt({
      */
     if (state.phase === "read-failed") {
         return (
-            <ReadStateNotice read={state.read} t={t} onRetry={onRetry}>
+            <ReadStateNotice
+                read={state.read}
+                t={t}
+                onRetry={onRetry}
+                retrying={retrying}
+            >
                 {/*
                  * The link to Settings appears ONLY when the store is really
                  * broken, because Settings is the only place that can repair

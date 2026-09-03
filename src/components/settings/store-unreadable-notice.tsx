@@ -126,6 +126,14 @@ export function StoreUnreadableNotice({
              * measurement proves nothing about the real screens.
              */
             data-proto-component="store-unreadable-notice"
+            /*
+             * The tone that was actually chosen, on the DOM. The a11y floor is
+             * measured in a real browser and colour is what it measures; a
+             * marker that only says "this component rendered" cannot tell a
+             * quiet card from a destructive one, so a mapping that painted a
+             * transient failure red would have kept the floor green.
+             */
+            data-notice-tone={tone}
             className={cn(
                 "space-y-2 rounded-md border p-4",
                 TONE[tone].frame,
