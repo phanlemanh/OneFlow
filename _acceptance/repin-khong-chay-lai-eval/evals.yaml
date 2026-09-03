@@ -97,7 +97,6 @@ evals:
     cmd: config:executors.script.rkce_check
     paths:
       - "scripts/ci/check-repin-eval-coverage.sh"
-      - "_acceptance"
     expected: >-
       exit 0 trên kho thật. `check` đọc mọi hồ sơ đã ký; với mỗi dòng repin CÓ `prev_sha`
       thì tính `git diff prev_sha..sha`, giao với `paths` từng eval theo luật ở AC-3, rồi
@@ -106,7 +105,15 @@ evals:
       `run-log.jsonl` của hồ sơ — `exit_code: 0`, không phải "có dòng eval là được"
       (xem AC-13). Hình dạng và đường dẫn ấy khai ở đây TRƯỚC
       khi viết mã: một bộ đọc tra sai chỗ vẫn làm mọi fixture tự dựng xanh, và bằng chứng
-      vẫn nói "chạy trên kho thật, exit 0". Chiều đỏ ở ca `nuot-eval` của E8.
+      vẫn nói "chạy trên kho thật, exit 0". Chiều đỏ ở ca `nuot-eval` của E8. PHẠM VI `paths` thu
+      hẹp 03/09 sau chữ ký (owner chốt): bỏ mục thư mục trần `_acceptance`, chỉ giữ mã
+      của hàng rào. Lý do là một BẾ TẮC TỰ-QUY-CHIẾU: ô này CHẠY chính `check`, mà mọi
+      lần ghim đều ghi vào `_acceptance/**` — kể cả dòng ghim của nó — nên lần ghim nào
+      cũng «chạm» ô này, và `check` chỉ xanh được khi ô này đã có dòng xanh tại sha ấy.
+      CÁI GIÁ, khai thẳng: kết luận của `check` CÓ phụ thuộc nội dung hồ sơ, nên từ nay
+      một lần ghim chỉ đụng hồ sơ sẽ không còn buộc chạy lại ô này. Đó là đánh đổi có
+      chủ ý, không phải sơ suất — lối kia (miễn trừ ô tự-quy-chiếu ngay trong luật hàng
+      rào) là đổi mã sản phẩm sau chữ ký và đã để lại cho một hồ sơ riêng.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
@@ -116,7 +123,6 @@ evals:
     paths:
       - "scripts/ci/check-repin-eval-coverage.sh"
       - "scripts/ci/repin-eval-coverage.mjs"
-      - "_acceptance"
     expected: >-
       exit 0 và stdout ghim TÁM số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
       tính được (phải > 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại

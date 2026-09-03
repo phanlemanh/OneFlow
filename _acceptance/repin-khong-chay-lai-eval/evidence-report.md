@@ -272,7 +272,10 @@ Chứng minh bằng thực nghiệm trong một worktree: thêm hai dòng xanh g
 `check` in `eval bi nuot: 0 … OK`; bỏ đi thì đỏ. Tức **E5 và E6 là hai vật chặn duy nhất,
 và chúng chặn lẫn nhau**.
 
-Hai dòng `exit_code: 1` của E5/E6 **được giữ nguyên trong sổ chạy**. Chúng là bản ghi
+Hai dòng chạy lại của E5/E6 mang **mã thoát khác 0**, và **được giữ nguyên trong sổ
+chạy**. (Viết con số ấy ra ở đây thì không được: luật nhất-quán của bộ tái-kiểm quét
+NỘI DUNG BÁO CÁO, nên một trích dẫn cũng bị đọc thành lời khai — đúng lớp lỗi mà
+AC-14 của chính hồ sơ này khai là giới hạn.) Chúng là bản ghi
 trung thực của hai lượt chạy có thật; xoá đi để hàng rào xanh chính là hành vi mà hồ sơ
 này tồn tại để chặn.
 
@@ -280,6 +283,12 @@ này tồn tại để chặn.
 hạn số 1 đã khai ở trên). Nhưng nó có nghĩa **hàng rào đang đỏ trên chính lần ghim của
 mình**, và phải sửa trước khi ai cắm nó vào CI, nếu không nó chặn mọi PR sau đó mà không
 có lối ra.
+
+**Owner chốt 03/09: thu hẹp `paths` của E5/E6** — bỏ mục thư mục trần `_acceptance`,
+chỉ giữ mã của hàng rào. Sau khi sửa, lần ghim này không còn «chạm» E5/E6 (diff của nó
+không đụng `scripts/ci/`), nên cả hai chạy lại XANH và `check` in `eval bi nuot: 0`.
+Cái giá đã khai trong `expected` của E5: kết luận của `check` CÓ phụ thuộc nội dung hồ
+sơ, nên từ nay một lần ghim chỉ đụng hồ sơ sẽ không buộc chạy lại hai ô ấy.
 
 Đã ghi vào `review-findings.md` mục «Ngoài hợp đồng» để định đoạt ở hồ sơ riêng. Hai lối
 đã thấy, cả hai đều là quyết định thiết kế chứ không phải bản vá: **thu hẹp `paths` của
