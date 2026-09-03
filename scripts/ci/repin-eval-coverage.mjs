@@ -333,14 +333,27 @@ function modeCheck(argv = []) {
     // legitimate 0, and the floor is the caller's claim about ITS repo, not a universal.
     let minComputable = null;
     for (let i = 0; i < argv.length; i++) {
-        if (argv[i] !== "--min-computable") continue;
-        const raw = argv[i + 1];
+        const tok = argv[i];
+        let raw;
+        if (tok === "--min-computable") {
+            raw = argv[++i];
+        } else if (tok.startsWith("--min-computable=")) {
+            raw = tok.slice("--min-computable=".length);
+        } else {
+            // `continue` here is how the floor became a no-op: `--min-computable=999`,
+            // `--min-computables 999` and a bare typo all fell through and the mode
+            // exited 0 having enforced nothing. An argument the tool does not
+            // understand is not an argument it may ignore -- that is the same
+            // green-on-nothing shape the flag exists to close.
+            die(
+                `doi so la '${tok}' — chi nhan '--min-computable N' hoac '--min-computable=N'`,
+            );
+        }
         if (raw === undefined || !/^\d+$/.test(raw))
             die(
                 `--min-computable can mot so nguyen khong am, nhan duoc: ${raw ?? "(khong co)"}`,
             );
         minComputable = Number(raw);
-        i++;
     }
     // On a shallow clone `git cat-file -t <old sha>` fails because the object is absent,
     // not because the line is malformed -- so every computable line would silently

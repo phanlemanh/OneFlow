@@ -30,8 +30,12 @@ evals:
       nêu đích danh hồ sơ — chứ không lặng lẽ ghi một dòng repin thiếu `prev_sha`. Đây
       là AC chịu lực nhất của hồ sơ: nghi thức ghim nằm trong kit mà kho không sở hữu,
       nên nếu kho chỉ ĐỌC thì không dòng repin mới nào có `prev_sha` và hàng rào trơ
-      vĩnh viễn. Đối chứng dương nằm ở ca `healthy` của E8: `write` trên hồ sơ đủ dữ
-      liệu phải ghi được dòng có `prev_sha` đúng bằng `verified_commit` cũ.
+      vĩnh viễn. Đối chứng dương nay do CHÍNH ô này chạy, không đi mượn: lệnh gồm
+      hai lượt — `teeth --case healthy` (`write` trên hồ sơ đủ dữ liệu phải ghi được
+      dòng có `prev_sha` đúng bằng `verified_commit` cũ) rồi `teeth --case
+      write-thieu-verified-commit`. Bản vòng 4 chỉ chạy nửa ĐỎ và mượn nửa xanh của E8,
+      nên gỡ hẳn `prev_sha` khỏi bộ ghi — tức xoá trọn AC-1 — vẫn để E1 xanh; đã tái
+      hiện 03/09 trên bản sao.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2
@@ -109,7 +113,7 @@ evals:
       - "scripts/ci/repin-eval-coverage.mjs"
       - "_acceptance"
     expected: >-
-      exit 0 và stdout ghim BẢY số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
+      exit 0 và stdout ghim TÁM số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
       tính được (phải > 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại
       không rõ kết quả (cộng hạng không kết luận được). Sàn ấy nay được ÉP chứ
       không chỉ được in: lệnh chạy `check --min-computable 1`, và vòng 3 đã bắt được đúng
@@ -232,7 +236,7 @@ evals:
       `check` in `dong repin: 0 … OK` thoát 0. Ca thứ hai thêm một dòng cụt và đòi `check`
       DỪNG nêu `khong doc duoc` + tên hồ sơ. Đã kiểm răng 02/09: gỡ chốt xuống dòng →
       `write-giu-dong-cu` đỏ ("dau ra khong neu 'dong repin: 2'"); gỡ phép từ chối →
-      `log-hong` đỏ. Đối chứng dương là 16 ca xanh còn lại của E8, chứng minh cửa mới không
+      `log-hong` đỏ. Đối chứng dương là các ca xanh còn lại của E8, chứng minh cửa mới không
       đơn giản đỏ mọi thứ.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
@@ -257,8 +261,14 @@ evals:
     paths: ["scripts/ci/check-repin-eval-coverage.sh", "_acceptance/repin-khong-chay-lai-eval/evals.yaml"]
     expected: >-
       exit 0 cho cả BA lượt. Lượt một chạy `so-khop-total` trên chính hồ sơ này: nó quét
-      mọi `PARTIAL: n/N` và `OK: n/N ca` trong `evals.yaml`, đòi từng `N` bằng số ca của
-      bộ răng, và in ba số — số con số quét được · số lệch · số ca hiện có. Hai lượt sau
+      mọi `PARTIAL: n/N` và `OK: n/N ca` trong **hai** file mô tả bộ răng ấy —
+      `evals.yaml` và `s4-args.json` — đòi từng `N` bằng số ca thật, và in bốn số: file
+      đã quét · con số tìm được · số lệch · số ca hiện có. PHẠM VI khai thẳng, vì nó là
+      chỗ đã sai hai lần: một file duy nhất là QUÁ HẸP (`s4-args.json` nằm trong cây với
+      bảy con số cũ trong khi phép quét báo sạch), còn cả thư mục thì QUÁ RỘNG —
+      `evidence-report.md` và `opportunity.md` mang `OK: n/N ca` nói về bộ đo KHÁC, và
+      đo 03/09 nó đẻ ra 14 lệch giả. Mẫu chỉ nêu HÌNH DẠNG, nên danh sách file mới là
+      thứ nêu CHỦ THỂ. Số viết bằng CHỮ ("mười bốn ca") vẫn ngoài tầm — xem Known limits. Hai lượt sau
       là hai chiều đỏ trên fixture: `so-khop-lech` (một con số 99 giả trong fixture → đỏ, nêu cả 99
       lẫn số thật) và `so-khop-rong` (không con số nào → đỏ với chữ `dang do KHONG GI`).
       Ca thứ ba ấy là phần chịu lực: một bộ quét không khớp gì sẽ in một lượt sạch, đúng

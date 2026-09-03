@@ -627,7 +627,7 @@ executors:
     rkce_check: bash scripts/ci/check-repin-eval-coverage.sh check
     rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
     rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main
-    rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
+    rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case healthy && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
     rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main && bash scripts/ci/check-repin-eval-coverage.sh teeth --case newlines-thieu-prev
     rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
     rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers

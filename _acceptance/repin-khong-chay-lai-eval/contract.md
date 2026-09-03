@@ -76,12 +76,15 @@ bịa xuất xứ. Câu hỏi thật sự là "ô này đã được đo lại S
 lời được bằng cách chạy nó thật bây giờ. Hình dạng và đường dẫn khai ở đây **trước khi
 viết mã**, vì một bộ đọc tra sai chỗ vẫn làm mọi fixture tự dựng xanh.
 
-**AC-6 — `check` in NĂM con số độc lập, và số "tính được" phải > 0 trên kho thật.**
+**AC-6 — `check` in TÁM con số độc lập, và số "tính được" phải > 0 trên kho thật.**
 Given trên kho hôm nay cả 33 dòng repin đều thiếu `prev_sha`, nên nhánh chính của hàng
 rào **chưa từng chạy trên dữ liệu thật**,
 When chạy `check` sau khi vòng này ghi ít nhất một dòng repin bằng chế độ `write`,
-Then đầu ra ghim **sáu** số: hồ sơ đã quét · dòng repin đọc được · **dòng tính được
-(> 0)** · dòng ông bà · eval bị nuốt · **eval không kết luận được**. Bốn số đầu tiên tôi định in đều thoả bởi một
+Then đầu ra ghim **tám** số: hồ sơ đã quét · dòng repin đọc được · **dòng tính được
+(> 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại không rõ kết quả ·
+**eval không kết luận được**. (Tiêu đề và thân AC này từng nói NĂM rồi sáu trong khi lệnh
+in tám — không ô đo nào so con số ấy, nên cả ba đều sai được cùng lúc; số từ viết bằng CHỮ
+nằm ngoài tầm của AC-14, xem Known limits.) Bốn số đầu tiên tôi định in đều thoả bởi một
 script chỉ đếm dòng rồi xếp tất cả vào nhánh ông bà — con số thứ ba là thứ phân biệt
 "phát hiện `prev_sha` chạy đúng" với "phát hiện `prev_sha` là no-op".
 
@@ -95,7 +98,7 @@ phải "cả hai chấp nhận" trên kho dùng-rồi-bỏ. Đối chứng dươ
 
 **AC-8 — Hàng rào có răng, ma trận ca có tên.**
 Given một kho git dùng-rồi-bỏ,
-When chạy `teeth` với **mười bốn** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
+When chạy `teeth` với **hai mươi mốt** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
 `ong-ba` · `khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` ·
 `write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file` ·
 `write-thieu-suites` · `write-lan-do` · `write-prev-bang-sha` · `diem-vao-duong-dan-la` ·
@@ -152,7 +155,11 @@ vắng trông y hệt nhau; (b) ghi có **chốt xuống dòng**, vì `appendFil
 không kết thúc bằng `\n` hàn dòng mới vào dòng cũ và **cả hai** biến mất khỏi mọi bên
 đọc trong kho (`pre-merge-check.sh`, `recheck-evidence.cjs` cùng `JSON.parse` những dòng
 ấy); (c) sau khi ghi thì **đọc lại và tự đối chiếu** — số dòng đọc được phải tăng đúng 1
-và số dòng hỏng phải không đổi, nếu không thì DỪNG. Đo trước khi siết: 1669 dòng
+và số dòng hỏng phải không đổi, nếu không thì DỪNG. Khoản (c) là **đai an toàn, KHÔNG
+có ô đo nào đòi nó**: một khi (b) đã tại chỗ thì (c) đúng theo cấu trúc và không
+fixture nào làm nó nổ được — thay `if` của nó bằng `if (false)` vẫn để cả 21 ca xanh
+(đo 03/09). Nó tồn tại để bắt một lỗi TƯƠNG LAI trong bộ ghi, và điều đó được khai
+thẳng ở đây thay vì để một ô đo nhận công. Đo trước khi siết: 1669 dòng
 run-log trong kho, **0** không đọc được — nên phép từ chối chỉ nổ khi có hư hỏng thật.
 Tái hiện được lỗ này trước khi vá: `check` in `dong repin: 0 … OK` và thoát 0 sau khi
 chính bộ ghi vừa phá mất dòng xuất xứ duy nhất.

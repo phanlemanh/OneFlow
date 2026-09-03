@@ -149,29 +149,43 @@ so-khop-total)
     #
     # `ho_so` defaults to this dossier; the teeth case passes a fixture directory.
     ho_so="${1:-$ROOT/_acceptance/repin-khong-chay-lai-eval}"
-    f="$ho_so/evals.yaml"
-    [ -f "$f" ] || fail "khong thay $f"
+    [ -d "$ho_so" ] || fail "khong thay thu muc $ho_so"
+    # The files that describe THIS teeth suite's commands: the eval definitions and the
+    # generated args the verify round is driven from. One hard-coded filename was too
+    # narrow -- `s4-args.json` sat in-tree with seven stale numbers while the scan
+    # reported clean. But the whole directory is too WIDE: `evidence-report.md` and
+    # `opportunity.md` legitimately carry `OK: n/N ca` about OTHER suites (other
+    # dossiers' teeth, eval tallies), and measured 2026-09-03 that produced 14 false
+    # mismatches. The pattern names a shape, not a subject, so the file list is what
+    # supplies the subject.
+    files=()
+    for f in "$ho_so/evals.yaml" "$ho_so/s4-args.json"; do
+        [ -f "$f" ] && files+=("$f")
+    done
+    [ "${#files[@]}" -gt 0 ] || fail "khong co file nao doc duoc trong $ho_so"
     found=0; bad=0
-    while IFS= read -r n; do
-        found=$((found + 1))
-        [ "$n" = "$TOTAL" ] && continue
-        echo "FAIL: $f khai mot con so $n cho bo rang, nhung bo rang co $TOTAL ca" >&2
-        bad=$((bad + 1))
-    done < <(grep -oE '(PARTIAL: [0-9n]+/[0-9]+|OK: [0-9]+/[0-9]+ ca)' "$f" | grep -oE '/[0-9]+' | tr -d '/')
-    echo "so nam trong evals.yaml noi ve bo rang: $found | lech: $bad | bo rang hien co: $TOTAL ca"
+    for f in "${files[@]}"; do
+        while IFS= read -r n; do
+            found=$((found + 1))
+            [ "$n" = "$TOTAL" ] && continue
+            echo "FAIL: ${f##*/} khai mot con so $n cho bo rang, nhung bo rang co $TOTAL ca" >&2
+            bad=$((bad + 1))
+        done < <(grep -ohE '(PARTIAL: [0-9n]+/[0-9]+|OK: [0-9]+/[0-9]+ ca)' "$f" | grep -oE '/[0-9]+' | tr -d '/')
+    done
+    echo "file da quet: ${#files[@]} | so noi ve bo rang: $found | lech: $bad | bo rang hien co: $TOTAL ca"
     # A scanner that matched NOTHING prints a clean sweep otherwise -- the exact shape
     # this dossier exists to close. Zero matches means the prose stopped naming the
     # suite, or the pattern stopped matching it; either way nothing is being measured.
-    [ "$found" -gt 0 ] || fail "khong tim thay con so nao noi ve bo rang trong $f — phep quet nay dang do KHONG GI, chu khong phai dang bao sach"
+    [ "$found" -gt 0 ] || fail "khong tim thay con so nao noi ve bo rang trong $ho_so — phep quet nay dang do KHONG GI, chu khong phai dang bao sach"
     [ "$bad" -eq 0 ] || exit 1
-    echo "OK: moi con so trong evals.yaml deu khop bo rang $TOTAL ca"
+    echo "OK: moi con so trong ho so deu khop bo rang $TOTAL ca"
     ;;
 
 teeth)
     ONLY=""
     case "${1:-}" in
     "") ;;
-    --case) ONLY="${2:-}"; [ "$#" -le 2 ] || fail "thua doi so: ${*:3}" ;;
+    --case) ONLY="${2:-}"; [ -n "$ONLY" ] || fail "--case can mot ten ca"; [ "$#" -le 2 ] || fail "thua doi so: ${*:3}" ;;
     *) fail "doi so la '${1}' — chi nhan '--case <ten>'" ;;
     esac
     RAN=0
@@ -194,7 +208,11 @@ teeth)
         git -C "$d" init -q 2>/dev/null || git init -q "$d"
         git -C "$d" config user.email t@t; git -C "$d" config user.name t
         printf 'status: signed-off\n' > "$d/_acceptance/demo/contract.md"
-        printf -- "evals:\n  - id: E1\n%s  - id: E2\n    paths: [\"src/never\"]\n" "$evpaths" > "$d/_acceptance/demo/evals.yaml"
+        # E3 deliberately declares NO `paths`. AC-4's load-bearing claim is that `plan`
+        # returns THREE sets, and the third one stayed permanently empty in every fixture
+        # -- so folding "unknown" into "untouched" (the silent exclusion AC-4 forbids)
+        # left both plan cases green.
+        printf -- "evals:\n  - id: E1\n%s  - id: E2\n    paths: [\"src/never\"]\n  - id: E3\n" "$evpaths" > "$d/_acceptance/demo/evals.yaml"
         printf 'x\n' > "$d/src/a.ts"
         printf -- '- eval: E1\n' > "$d/_acceptance/demo/evidence-report.md"
         : > "$d/_acceptance/demo/run-log.jsonl"
@@ -319,7 +337,7 @@ teeth)
         fx '    paths: ["src/**"]
 '
         out="$(core "$d" plan demo "$OLD" "$NEW")"; rc=$?
-        want plan-tap-id green "$out" "$rc" "BI CHAM (1): E1" "KHONG CHAM (1): E2"
+        want plan-tap-id green "$out" "$rc" "BI CHAM (1): E1" "KHONG CHAM (1): E2" "KHONG KET LUAN DUOC (1, khong khai paths): E3"
     fi
     if run plan-them-mot-file; then
         fx '    paths: ["src/**"]
@@ -330,7 +348,7 @@ teeth)
         git -C "$d" commit --quiet --message three
         NEW2="$(git -C "$d" rev-parse HEAD)"
         out="$(core "$d" plan demo "$OLD" "$NEW2")"; rc=$?
-        want plan-them-mot-file green "$out" "$rc" "BI CHAM (2): E1,E2" "KHONG CHAM (0)"
+        want plan-them-mot-file green "$out" "$rc" "BI CHAM (2): E1,E2" "KHONG CHAM (0)" "KHONG KET LUAN DUOC (1, khong khai paths): E3"
     fi
 
     # 11-13. `write` must RECORD evidence, never MINT it. `suites_exit` is the datum
@@ -463,7 +481,7 @@ teeth)
     ;;
 
 *)
-    echo "usage: $(basename "$0") <write|plan|check|newlines|paths-law|readers|teeth> [...]" >&2
+    echo "usage: $(basename "$0") <write|plan|check|newlines|paths-law|readers|so-khop-total|teeth> [...]" >&2
     exit 2
     ;;
 esac
