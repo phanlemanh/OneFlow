@@ -186,12 +186,25 @@ function evalsOf(slug) {
     for (const raw of readFileSync(p, "utf8").split("\n")) {
         const id = raw.match(/^\s*-\s+id:\s*(\S+)/);
         if (id) {
-            cur = { id: id[1], paths: [] };
+            cur = { id: id[1], paths: [], selfRef: false };
             out.push(cur);
             inPaths = false;
             continue;
         }
         if (!cur) continue;
+        // Declared, never inferred. Recognising a self-referential eval by sniffing the
+        // guard's own name out of its `cmd` matches a string SHAPE instead of a declared
+        // SUBJECT, and its direction of forgetting is backwards: renaming the script would
+        // silently EXEMPT it. Here, forgetting the key leaves the eval in the must-rerun
+        // set -- i.e. red.
+        // Exactly four spaces, not `\s*`: every eval item in this repo puts its fields at
+        // that indent, while `expected: >-` bodies sit at six. An occurrence inside prose
+        // therefore does not exempt anything, and an unrecognised indent fails CLOSED.
+        if (/^ {4}self_referential:\s*true\s*$/.test(raw)) {
+            cur.selfRef = true;
+            inPaths = false;
+            continue;
+        }
         const inline = raw.match(/^\s*paths:\s*\[(.*)\]/);
         if (inline) {
             cur.paths = inline[1]
@@ -342,14 +355,26 @@ function modeCheck(argv = []) {
     // 0, which is the same green-on-nothing shape the whole dossier exists to close.
     // It is a FLAG, not a hard rule inside the mode: a repo with no re-pins yet has a
     // legitimate 0, and the floor is the caller's claim about ITS repo, not a universal.
+    // `--min-selfref N`: the same shape, for the exemption bucket below. An exemption
+    // that prints a number nobody asserts is not distinguishable from a measurement
+    // somebody forgot -- a run printing `tu-quy-chieu: 0` because the reader looks at the
+    // wrong key would otherwise be just as green as a correct one.
     let minComputable = null;
+    let minSelfRef = null;
     for (let i = 0; i < argv.length; i++) {
         const tok = argv[i];
         let raw;
+        let which = "--min-computable";
         if (tok === "--min-computable") {
             raw = argv[++i];
         } else if (tok.startsWith("--min-computable=")) {
             raw = tok.slice("--min-computable=".length);
+        } else if (tok === "--min-selfref") {
+            which = "--min-selfref";
+            raw = argv[++i];
+        } else if (tok.startsWith("--min-selfref=")) {
+            which = "--min-selfref";
+            raw = tok.slice("--min-selfref=".length);
         } else {
             // `continue` here is how the floor became a no-op: `--min-computable=999`,
             // `--min-computables 999` and a bare typo all fell through and the mode
@@ -357,14 +382,15 @@ function modeCheck(argv = []) {
             // understand is not an argument it may ignore -- that is the same
             // green-on-nothing shape the flag exists to close.
             die(
-                `doi so la '${tok}' — chi nhan '--min-computable N' hoac '--min-computable=N'`,
+                `doi so la '${tok}' — chi nhan '--min-computable N|=N' hoac '--min-selfref N|=N'`,
             );
         }
         if (raw === undefined || !/^\d+$/.test(raw))
             die(
-                `--min-computable can mot so nguyen khong am, nhan duoc: ${raw ?? "(khong co)"}`,
+                `${which} can mot so nguyen khong am, nhan duoc: ${raw ?? "(khong co)"}`,
             );
-        minComputable = Number(raw);
+        if (which === "--min-selfref") minSelfRef = Number(raw);
+        else minComputable = Number(raw);
     }
     // On a shallow clone `git cat-file -t <old sha>` fails because the object is absent,
     // not because the line is malformed -- so every computable line would silently
@@ -390,6 +416,17 @@ function modeCheck(argv = []) {
     const redRerun = [];
     const mootRerun = [];
     const inconclusive = new Set();
+    // Built from EVERY dossier, not only the signed ones. A declaration in a dossier that
+    // has not reached signature yet exempts nothing today, but it is an exemption in
+    // waiting -- and the entire point of this bucket is that no exemption is invisible.
+    // Counting only signed dossiers also makes the number un-assertable from inside the
+    // very round that introduces one: the dossier declaring the flag is `implemented` at
+    // verify time, so its own declarations would vanish from the count that is supposed
+    // to prove they exist.
+    const selfRef = new Set();
+    for (const slug of existsSync(ACC) ? readdirSync(ACC) : [])
+        for (const e of evalsOf(slug))
+            if (e.selfRef) selfRef.add(`${slug}/${e.id}`);
     for (const slug of slugs) {
         const log = readLogOrDie(slug);
         const evals = evalsOf(slug);
@@ -458,7 +495,20 @@ function modeCheck(argv = []) {
                 .filter(Boolean);
             const { hit, unknown } = touchedEvals(evals, changed);
             unknown.forEach((id) => inconclusive.add(`${slug}/${id}`));
-            const missing = hit.filter((id) => !reMeasuredSince(id, o.sha));
+            // The exemption is TOTAL, and deliberately not narrowable to "only when the
+            // touch came from _acceptance/**": a change to the guard's own code rebuilds
+            // the same circle -- to get a green line you must run `check`, and `check` is
+            // red precisely because that eval has no green line yet.
+            // The trade, stated plainly rather than buried: this guard never forces a
+            // re-run of its own measurement after a pin. Two named compensations -- the
+            // eval still runs in EVERY verify round of its owning dossier, and a change to
+            // the guard code staleness-invalidates that dossier's evidence, which forces a
+            // fresh verify round. The named bucket below keeps the exempt set countable,
+            // so those compensations are checkable rather than promised.
+            const missing = hit.filter(
+                (id) =>
+                    !selfRef.has(`${slug}/${id}`) && !reMeasuredSince(id, o.sha),
+            );
             // Two named outcomes, not one. "Never re-run" and "re-run and failed" are
             // different defects and a reader who is told only the first will patch the
             // wrong thing.
@@ -477,8 +527,11 @@ function modeCheck(argv = []) {
                 mootRerun.push({ slug, run_id: o.run_id, evals: moot });
         }
     }
+    // The exempt set is NAMED, not just counted: a bucket with a number and no members is
+    // where everything broken drifts to without any number moving.
+    const selfRefList = [...selfRef].sort();
     console.log(
-        `ho so da ky: ${slugs.length} | dong repin: ${repins} | tinh duoc: ${computable} | ong ba: ${grandfathered} | eval bi nuot: ${swallowed.length} | chay lai nhung DO: ${redRerun.length} | chay lai khong ro ket qua: ${mootRerun.length} | khong ket luan duoc (khong khai paths): ${inconclusive.size}`,
+        `ho so da ky: ${slugs.length} | dong repin: ${repins} | tinh duoc: ${computable} | ong ba: ${grandfathered} | tu-quy-chieu: ${selfRefList.length} (${selfRefList.join(",") || "rong"}) | eval bi nuot: ${swallowed.length} | chay lai nhung DO: ${redRerun.length} | chay lai khong ro ket qua: ${mootRerun.length} | khong ket luan duoc (khong khai paths): ${inconclusive.size}`,
     );
     for (const s of redRerun) {
         console.error(
@@ -502,6 +555,10 @@ function modeCheck(argv = []) {
     if (minComputable !== null && computable < minComputable)
         die(
             `dong tinh duoc = ${computable}, duoi san ${minComputable} ma nguoi goi doi — moi dong repin deu roi vao hang ong ba hoac khong co dong nao, nen luot xanh nay KHONG chung minh duoc phan phat hien prev_sha da chay`,
+        );
+    if (minSelfRef !== null && selfRefList.length < minSelfRef)
+        die(
+            `tu-quy-chieu = ${selfRefList.length}, duoi san ${minSelfRef} ma nguoi goi doi — hoac mot dong khai bi go, hoac bo doc dang tra sai khoa; luot xanh nay KHONG chung minh hang mien tru con dung tap nao`,
         );
     console.log("OK: khong re-pin nao nuot mot eval bi cham");
 }

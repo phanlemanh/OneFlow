@@ -26,7 +26,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # the cases, `so-khop-total` checks that the numbers written into evals.yaml still name
 # this suite. Deriving TOTAL rather than typing it removes the only way the two can
 # disagree.
-KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file diff-that-bai shallow-do-loi"
+KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file diff-that-bai shallow-do-loi tu-quy-chieu-khai tu-quy-chieu-quen-khai tu-quy-chieu-dem-giam paths-e5e6-hoan-nguyen"
 TOTAL=$(printf '%s\n' $KNOWN | wc -w | tr -d ' ')
 
 case "$MODE" in
@@ -513,6 +513,61 @@ $(cat "$d/_acceptance/demo/run-log.jsonl")"
         out="$(core "$d" check)"; rc=$?
         want shallow-do-loi red "$out" "$rc" "khong do duoc kho co phai clone nong" \
             "KHONG:ho so da ky:"
+    fi
+
+    # 26. An eval that RUNS `check` is excluded from the must-rerun set only when it SAYS
+    # SO. The fixture's cmd deliberately does not contain the guard's name: a "guess it
+    # from the command string" implementation -- matching a string shape instead of a
+    # declared subject, the very disease this dossier names -- fails right here.
+    if run tu-quy-chieu-khai; then
+        fx '    paths: ["src/**"]
+    self_referential: true
+    cmd: echo hi
+'
+        repin_written "$d" "$NEW"
+        out="$(core "$d" check)"; rc=$?
+        want tu-quy-chieu-khai green "$out" "$rc" "tu-quy-chieu: 1" "demo/E1"
+    fi
+
+    # 27. The direction of forgetting, which is the whole reason declaring beat guessing:
+    # same fixture, declaration removed -> RED. A guess-from-cmd mechanism would go GREEN
+    # here, which is the wrong direction for a thing people forget.
+    if run tu-quy-chieu-quen-khai; then
+        fx '    paths: ["src/**"]
+    cmd: echo hi
+'
+        repin_written "$d" "$NEW"
+        out="$(core "$d" check)"; rc=$?
+        want tu-quy-chieu-quen-khai red "$out" "$rc" "demo" "E1" "tu-quy-chieu: 0"
+    fi
+
+    # 28. The bucket must carry a number that MOVES. A count printed but never asserted is
+    # the green-on-nothing shape this dossier exists to close, so the floor runs in both
+    # directions on one fixture.
+    if run tu-quy-chieu-dem-giam; then
+        fx '    paths: ["src/**"]
+    self_referential: true
+    cmd: echo hi
+'
+        repin_written "$d" "$NEW"
+        out="$(core "$d" check --min-selfref 1)"; rc=$?
+        [ "$rc" -eq 0 ] || { echo "CASE tu-quy-chieu-dem-giam: FAIL — san 1 phai xanh khi co dung 1 o khai"; printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1; }
+        out="$(core "$d" check --min-selfref 2)"; rc=$?
+        want tu-quy-chieu-dem-giam red "$out" "$rc" "tu-quy-chieu = 1" "duoi san 2"
+    fi
+
+    # 29. Asserted on the REAL repo, not a fixture, on purpose: the 2026-09-03 narrowing of
+    # E5/E6 bought quiet by selling coverage. Without the revert, case 26 is green on a
+    # repo that has been blinded -- the deadlock hidden, not gone.
+    if run paths-e5e6-hoan-nguyen; then
+        RAN=$((RAN + 1)); N_GREEN=$((N_GREEN + 1)); miss=0
+        for id in E5 E6; do
+            awk -v want="  - id: $id" '$0 == want {f=1; next} /^  - id:/ {f=0} f' \
+                "$ROOT/_acceptance/repin-khong-chay-lai-eval/evals.yaml" \
+                | grep -qE '^[[:space:]]+-[[:space:]]+"_acceptance"[[:space:]]*$' \
+                || { echo "CASE paths-e5e6-hoan-nguyen: FAIL — $id chua hoan nguyen muc _acceptance trong paths"; miss=1; }
+        done
+        if [ "$miss" -eq 0 ]; then echo "CASE paths-e5e6-hoan-nguyen: PASS"; else FAILED=1; fi
     fi
 
     # 19-20. the size-invariant's own two directions. Its red half already fired on real

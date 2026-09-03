@@ -97,6 +97,8 @@ evals:
     cmd: config:executors.script.rkce_check
     paths:
       - "scripts/ci/check-repin-eval-coverage.sh"
+      - "_acceptance"
+    self_referential: true
     expected: >-
       exit 0 trên kho thật. `check` đọc mọi hồ sơ đã ký; với mỗi dòng repin CÓ `prev_sha`
       thì tính `git diff prev_sha..sha`, giao với `paths` từng eval theo luật ở AC-3, rồi
@@ -114,6 +116,10 @@ evals:
       một lần ghim chỉ đụng hồ sơ sẽ không còn buộc chạy lại ô này. Đó là đánh đổi có
       chủ ý, không phải sơ suất — lối kia (miễn trừ ô tự-quy-chiếu ngay trong luật hàng
       rào) là đổi mã sản phẩm sau chữ ký và đã để lại cho một hồ sơ riêng.
+      HOÀN NGUYÊN 04/09 (hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi`, AC-10): mục
+      `_acceptance` trở lại, và bế tắc tự-quy-chiếu nay được xử bằng cờ khai
+      `self_referential: true` ngay trên ô đo. Phép thu hẹp 03/09 mua yên tĩnh bằng cách
+      bán độ phủ thật; không hoàn nguyên thì bế tắc chỉ đang bị giấu, không phải đã hết.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E6
@@ -123,6 +129,8 @@ evals:
     paths:
       - "scripts/ci/check-repin-eval-coverage.sh"
       - "scripts/ci/repin-eval-coverage.mjs"
+      - "_acceptance"
+    self_referential: true
     expected: >-
       exit 0 và stdout ghim TÁM số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
       tính được (phải > 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại
@@ -141,6 +149,10 @@ evals:
       khi chế độ `write` đã ghi ít nhất một dòng thật trên nhánh này — tức nó buộc AC-1
       phải hoạt động chứ không chỉ tồn tại. Dùng chung lệnh với E5; tách criterion vì
       "in đủ năm số, số thứ ba > 0" là lời hứa riêng với người đọc log CI.
+      HOÀN NGUYÊN 04/09 (hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi`, AC-10): mục
+      `_acceptance` trở lại, và bế tắc tự-quy-chiếu nay được xử bằng cờ khai
+      `self_referential: true` ngay trên ô đo. Phép thu hẹp 03/09 mua yên tĩnh bằng cách
+      bán độ phủ thật; không hoàn nguyên thì bế tắc chỉ đang bị giấu, không phải đã hết.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E7
