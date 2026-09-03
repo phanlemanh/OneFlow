@@ -87,7 +87,7 @@ STATES=(missing-config idle searching results thin-shelf unranked importing impo
 
 URLS=()
 for state in "${STATES[@]}"; do
-    URLS+=("$BASE/proto/add-media-library?state=$state")
+    URLS+=("$BASE/proto/add-media-library?state=$state&theme=light")
     URLS+=("$BASE/proto/add-media-library?state=$state&theme=dark")
 done
 
@@ -127,34 +127,52 @@ node scripts/a11y-scan.mjs "${URLS[@]}" --fail-on critical,serious --json "$REPO
 # scans of the LIGHT page, every check would still pass, and the guard would
 # print "20/20 rendered the state they were asked for". Contrast violations in
 # dark mode are exactly the failure this eval cites as its reason to exist.
+#
+# And reading it from `curl` was not enough either — that was the third gap,
+# measured 2026-09-01. `src/app/layout.tsx` adds `.dark` to <html> from a boot
+# script when localStorage has no theme AND the OS prefers dark, which is the
+# state of every headless browser. The SERVED html still differs between the
+# two URLs (the route wraps the dark half in a div), so grepping the curl body
+# for `class="dark"` found it on one and not the other, printed "10 light + 10
+# dark", and passed — while the browser axe drove painted DARK both times. Ten
+# states were scanned twice in dark and never once in light, which is why a
+# light-only contrast bug could sit here indefinitely.
+#
+# `ui-capture --html` serialises documentElement.outerHTML AFTER scripts run,
+# so the root class it records is the one that actually decided the pixels.
+# It costs a second Chrome launch per page; correctness is worth it.
+SNAP="$(mktemp -d)"
+trap 'rm -rf "$SNAP"; cleanup' EXIT
 MISSING=0
 RENDERED=()
 for state in "${STATES[@]}"; do
-    for suffix in "" "&theme=dark"; do
-        url="$BASE/proto/add-media-library?state=$state$suffix"
-        html=$(curl -s -m 60 "$url")
-        got=$(printf '%s' "$html" \
-            | grep -o 'data-proto-state="[^"]*"' \
-            | head -1 \
-            | sed 's/.*="\(.*\)"/\1/')
+    for want in light dark; do
+        url="$BASE/proto/add-media-library?state=$state&theme=$want"
+        snap="$SNAP/$state--$want.html"
+        if ! node scripts/ui-capture.mjs "$url" "$SNAP/$state--$want.png" \
+                --html "$snap" --wait 900 >/dev/null 2>&1; then
+            echo "FAIL: could not render $url"
+            MISSING=$((MISSING + 1))
+            continue
+        fi
+
+        got=$(grep -o 'data-proto-state="[^"]*"' "$snap" \
+            | head -1 | sed 's/.*="\(.*\)"/\1/')
         if [ "$got" != "$state" ]; then
             echo "FAIL: $url rendered state '${got:-<none>}', asked for '$state'"
             MISSING=$((MISSING + 1))
             continue
         fi
 
-        # `src/app/proto/[slug]/page.tsx` wraps the body in <div class="dark">
-        # for theme=dark and in nothing at all otherwise, so the wrapper's
-        # presence is the observable difference between the two halves.
-        if printf '%s' "$html" | grep -q 'class="dark"'; then
-            theme=dark
-        else
-            theme=light
-        fi
-        want=light
-        [ -n "$suffix" ] && want=dark
+        # The ROOT class after scripts ran — not the route's own wrapper div.
+        # The wrapper is what the server sends; the root class is what painted.
+        root=$(grep -o '<html[^>]*>' "$snap" | head -1)
+        case "$root" in
+            *dark*) theme=dark ;;
+            *) theme=light ;;
+        esac
         if [ "$theme" != "$want" ]; then
-            echo "FAIL: $url drew the $theme theme, asked for $want"
+            echo "FAIL: $url painted the $theme theme, asked for $want (root: $root)"
             MISSING=$((MISSING + 1))
             continue
         fi
@@ -170,6 +188,14 @@ LIGHT_COUNT=$(printf '%s\n' "${RENDERED[@]}" | grep -c ':light$' || true)
 if [ "$DARK_COUNT" -ne "${#STATES[@]}" ] || [ "$LIGHT_COUNT" -ne "${#STATES[@]}" ]; then
     echo "FAIL: ${LIGHT_COUNT} light + ${DARK_COUNT} dark, expected ${#STATES[@]} of each"
     exit 5
+fi
+
+# DISTINCT, not just present: ten rows all reading `idle:light` plus ten all
+# reading `idle:dark` would satisfy both counts above.
+DISTINCT=$(printf '%s\n' "${RENDERED[@]}" | sort -u | wc -l | tr -d ' ')
+if [ "$DISTINCT" -ne "$EXPECTED" ]; then
+    echo "FAIL: $DISTINCT distinct (state, theme) pairs, expected $EXPECTED"
+    exit 6
 fi
 
 if [ "$MISSING" -ne 0 ]; then

@@ -110,6 +110,18 @@ const ALL_STATES = [
     ...Object.keys(KEY_STATES),
 ];
 
+/**
+ * `data-proto-state` is how a scanner can tell WHICH state a page actually drew.
+ *
+ * The a11y guard for this prototype used to assert nothing beyond the scan
+ * exiting 0: it built twenty URLs and read neither the state nor the theme back
+ * off any of them. A misspelled or deleted state still answers 200 and still
+ * gets scanned, so twenty visits to the same screen read as full coverage.
+ * Stamping the resolved state on the root lets the guard assert twenty DISTINCT
+ * (state, theme) pairs instead of twenty successful fetches. An unrecognised
+ * state reports itself as `unknown:<name>` rather than quietly looking like the
+ * default frame.
+ */
 export function ByoKeyOnboardingProto({ state }: { state: string }) {
     const strip = STRIP_STATES[state];
     const key = KEY_STATES[state];
@@ -117,7 +129,10 @@ export function ByoKeyOnboardingProto({ state }: { state: string }) {
     const known = Boolean(strip) || Boolean(key) || showResult;
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div
+            data-proto-state={known ? state : `unknown:${state}`}
+            className="min-h-screen bg-gray-50 dark:bg-gray-900"
+        >
             <h1 className="sr-only">
                 Bản dựng onboarding — byo-key-onboarding
             </h1>
