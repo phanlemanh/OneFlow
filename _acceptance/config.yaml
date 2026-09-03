@@ -635,6 +635,8 @@ executors:
     rkce_entrypoint: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diem-vao-duong-dan-la
     rkce_gateway: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-giu-dong-cu && bash scripts/ci/check-repin-eval-coverage.sh teeth --case log-hong
     rkce_exit_code: bash scripts/ci/check-repin-eval-coverage.sh teeth --case chay-lai-do
+    rkce_check_min: bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case san-tinh-duoc
+    rkce_so_khop_total: bash scripts/ci/check-repin-eval-coverage.sh so-khop-total && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-lech && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-rong
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

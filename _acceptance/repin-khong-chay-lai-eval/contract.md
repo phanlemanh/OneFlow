@@ -99,12 +99,17 @@ When chạy `teeth` với **mười bốn** ca có tên — `healthy` · `nuot-e
 `ong-ba` · `khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` ·
 `write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file` ·
 `write-thieu-suites` · `write-lan-do` · `write-prev-bang-sha` · `diem-vao-duong-dan-la` ·
-`write-giu-dong-cu` · `chay-lai-do` · `log-hong` · `newlines-thieu-prev`,
+`write-giu-dong-cu` · `chay-lai-do` · `log-hong` · `newlines-thieu-prev` ·
+`so-khop-lech` · `so-khop-rong` · `san-tinh-duoc`,
 Then mỗi ca in `CASE <tên>: PASS`, ca đỏ nêu đích danh id eval, và dòng chốt **đếm đúng
 số ca đã chạy**. Sáu ca là **đối chứng dương** (mong xanh) — `da-chay-lai` phân biệt "bắt
 được việc nuốt" với "đỏ mọi thứ"; `khong-khai-paths` phân biệt "hạng mục không kết luận
 được" với "nuốt"; hai ca `plan` phân biệt một bộ giao đúng với một bộ giao trả **cả tập**.
-Lượt `--case` lẻ in `PARTIAL: n/18`, không in `OK:`; tên ca lạ → thoát 2. Và các ca
+Lượt `--case` lẻ in `PARTIAL: n/21`, không in `OK:`; tên ca lạ → thoát 2. Dòng chốt
+ĐẾM lúc chạy thay vì mang một chuỗi viết tay, và `TOTAL` đếm từ danh sách `KNOWN` thay
+vì được gõ tay — vòng 3 bắt được dòng chốt khai «7 đối chứng dương + 11 phép phá» trong
+khi thực tế là 6 + 12, và `TOTAL=18` không thể bắt vì nó nói CÓ BAO NHIÊU ca chứ không
+nói ca THUỘC LOẠI NÀO. Và các ca
 ĐỌC không còn chấm trên một dòng repin do chính bộ răng `printf` ra: chúng gọi chế độ
 `write` thật (`repin_written`), nên bộ ghi và bộ đọc được chứng minh là đồng ý về MỘT
 vật, thay vì về hai niềm tin độc lập — vòng 2 cho thấy niềm tin ấy sai được theo cách
@@ -164,6 +169,18 @@ hàng rào đỏ. Không có luật này thì chạy lại rồi TRƯỢT vẫn 
 mà nó tồn tại để bắt lại thành ca nó ban phước. Đo 02/09: cả 63 dòng `kind=eval` thật
 trong kho đều mang `exit_code: 0`, nên phép siết không tốn gì trên dữ liệu thật.
 
+**AC-14 — Con số nói về bộ răng phải suy ra từ bộ răng.**
+Given `expected` của mỗi ô đo là thứ người chấm đối chiếu đầu ra thật với, nên một con
+số trong đó mà lệnh không bao giờ in ra được biến phép chấm thành phép đoán,
+When bộ răng đổi số ca,
+Then mọi `PARTIAL: n/N` và `OK: n/N ca` trong `evals.yaml` phải mang đúng `N` ấy, kiểm
+bằng một chế độ riêng; và chế độ ấy **TỪ CHỐI khi quét được KHÔNG con số nào**, vì một
+bộ quét không khớp gì sẽ in một lượt sạch — đúng hình dạng «xanh trên không có gì».
+Không phải luật giả định: lần chạy ĐẦU TIÊN của chế độ này trên kho thật đã ĐỎ, bắt hai
+`PARTIAL: 1/14` còn sót sau khi bộ răng lên 18 ca. Cùng lớp với AC-8: ở đó là thành
+phần dòng chốt, ở đây là con số trong văn bản hợp đồng đo — cả hai đều là số viết tay
+không có gì buộc vào vật chúng mô tả.
+
 **AC-9 — Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.**
 Given chạm vùng gated làm **3** hồ sơ hoá ôi (đo 02/09 bằng mô phỏng ở ba thư mục),
 When chạy `check-resign-wave.sh repin-khong-chay-lai-eval origin/main`,
@@ -196,7 +213,7 @@ B-không-chạy-lại → AC-5 · B-không-prev_sha → AC-6 (đếm ông bà **
 nằm trong kit, kho chỉ đọc, nên không dòng repin mới nào có `prev_sha` và hàng rào
 **trơ vĩnh viễn** — số ông bà 33→34→35, số tính được đứng 0, và câu "co lại theo thời
 gian" mà tôi viết vào cả design lẫn AC sai **từ ngày merge**. AC-1 và AC-2 sinh ra từ
-lỗ đó; AC-6 mang thêm điều kiện `> 0` để chính ô đo không thoả được bằng một script trơ.
+lỗ đó; AC-6 mang thêm điều kiện `> 0` để chính ô đo không thoả được bằng một script trơ. Từ vòng 4, điều kiện ấy được **ÉP** bằng cờ `--min-computable 1` chứ không chỉ được in — vòng 3 bắt được bản cũ in số 0 rồi thoát 0.
 
 **Ô cắt, có lý do:** A-văn-bản-đầu-ra × B-khác-nội-dung — so đầu ra đã ghi với một lượt
 chạy tươi đòi **chạy lại** eval, mà việc này cố ý không tự chạy lại (xem Out of scope).

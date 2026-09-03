@@ -324,7 +324,24 @@ function modePlan(slug, prev, sha) {
     );
 }
 
-function modeCheck() {
+function modeCheck(argv = []) {
+    // `--min-computable N`: the floor the caller demands from the number this mode
+    // prints. Printing it is not asserting it -- round 3 found that E6's load-bearing
+    // claim ("dong tinh duoc phai > 0") was satisfied by a run that printed 0 and exited
+    // 0, which is the same green-on-nothing shape the whole dossier exists to close.
+    // It is a FLAG, not a hard rule inside the mode: a repo with no re-pins yet has a
+    // legitimate 0, and the floor is the caller's claim about ITS repo, not a universal.
+    let minComputable = null;
+    for (let i = 0; i < argv.length; i++) {
+        if (argv[i] !== "--min-computable") continue;
+        const raw = argv[i + 1];
+        if (raw === undefined || !/^\d+$/.test(raw))
+            die(
+                `--min-computable can mot so nguyen khong am, nhan duoc: ${raw ?? "(khong co)"}`,
+            );
+        minComputable = Number(raw);
+        i++;
+    }
     // On a shallow clone `git cat-file -t <old sha>` fails because the object is absent,
     // not because the line is malformed -- so every computable line would silently
     // become "grandfathered" and the guard would report a clean sweep having measured
@@ -444,6 +461,10 @@ function modeCheck() {
     }
     if (swallowed.length || redRerun.length || mootRerun.length)
         process.exit(1);
+    if (minComputable !== null && computable < minComputable)
+        die(
+            `dong tinh duoc = ${computable}, duoi san ${minComputable} ma nguoi goi doi — moi dong repin deu roi vao hang ong ba hoac khong co dong nao, nen luot xanh nay KHONG chung minh duoc phan phat hien prev_sha da chay`,
+        );
     console.log("OK: khong re-pin nao nuot mot eval bi cham");
 }
 
@@ -523,13 +544,13 @@ const [, , mode, ...rest] = process.argv;
 const table = {
     write: () => modeWrite(...rest),
     plan: () => modePlan(...rest),
-    check: () => modeCheck(),
+    check: () => modeCheck(rest),
     newlines: () => modeNewlines(rest[0]),
 };
 if (isMain) {
     if (!table[mode]) {
         console.error(
-            "usage: repin-eval-coverage.mjs <write|plan|check|newlines> [...]",
+            "usage: repin-eval-coverage.mjs <write|plan|check [--min-computable N]|newlines> [...]",
         );
         process.exit(2);
     }

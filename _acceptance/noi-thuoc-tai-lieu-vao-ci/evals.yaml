@@ -44,9 +44,6 @@ evals:
     criterion: AC-2
     executor: script
     cmd: config:executors.script.gate_guards_job_shape
-    paths:
-      - ".github/workflows/ci.yml"
-      - "scripts/ci/check-gate-guards-job.sh"
     expected: >-
       exit 0 và stdout mang dòng `OK: không có continue-on-error / || true / set +e`.
       Ô này và E1 dùng CHUNG một lệnh (khoá `gate_guards_job_shape` ghép hai chế độ) nên
@@ -59,18 +56,6 @@ evals:
       ống sang `tee` nuốt mã thoát mà không chứa chuỗi cấm nào và ô này vẫn xanh. Chế độ
       tự viết để đóng lỗ ấy (`exit-propagates`) đã RÚT ở vòng 3: nó rỗng ba lần theo ba
       cơ chế khác nhau, cái cuối là một bất biến đếm hằng-đúng. Xem Known limits.
-    paths:
-      - ".github/workflows/ci.yml"
-      - "scripts/ci/check-gate-guards-job.sh"
-    expected: >-
-      exit 0 và stdout ghim, cho TỪNG chuỗi rút từ `ci.yml`, một dòng xác nhận chuỗi ấy
-      đã thoát KHÁC 0 khi script nó gọi bị thay bằng stub `exit 1` trong bản sao cây.
-      Đây là PHÉP ĐO MỚI, và nó thay một phép quét chuỗi: bản đầu của hợp đồng đo AC-2
-      bằng ba chuỗi cấm (`continue-on-error`, `|| true`, `set +e`). Đo 01/09 cho thấy
-      `ci.yml` không khai `shell:` nên `run:` chạy `bash -e` KHÔNG có `pipefail` — vậy
-      `… readme | tee /tmp/out` nuốt mã thoát mà không chứa chuỗi cấm nào, và phép quét
-      cũ vẫn in `OK`. Chiều đỏ của chính phép đo mới: một chuỗi có `| tee` phải làm chế
-      độ này ĐỎ nêu đích danh chuỗi đó; ba chuỗi cấm giữ lại làm quét bổ trợ.
     paths:
       - ".github/workflows/ci.yml"
       - "scripts/ci/check-gate-guards-job.sh"

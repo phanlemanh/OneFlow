@@ -1,7 +1,7 @@
 schema_version: 1
 feature_slug: repin-khong-chay-lai-eval
 
-# T2, mười ba tiêu chí. KHÔNG criterion nào (cross-layer): mọi When/Then chạy ở lớp script,
+# T2, mười bốn tiêu chí. KHÔNG criterion nào (cross-layer): mọi When/Then chạy ở lớp script,
 # sổ chạy JSONL và cấu hình.
 #
 # BA LUẬT ĐO CỦA VÒNG NÀY — cả ba rút từ lỗi CÓ THẬT của ba vòng trước trong phiên:
@@ -103,14 +103,21 @@ evals:
   - id: E6
     criterion: AC-6
     executor: script
-    cmd: config:executors.script.rkce_check
+    cmd: config:executors.script.rkce_check_min
     paths:
       - "scripts/ci/check-repin-eval-coverage.sh"
+      - "scripts/ci/repin-eval-coverage.mjs"
       - "_acceptance"
     expected: >-
       exit 0 và stdout ghim BẢY số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
       tính được (phải > 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại
-      không rõ kết quả (cộng hạng không kết luận được). Chế độ này cũng TỪ CHỐI chạy trên
+      không rõ kết quả (cộng hạng không kết luận được). Sàn ấy nay được ÉP chứ
+      không chỉ được in: lệnh chạy `check --min-computable 1`, và vòng 3 đã bắt được đúng
+      chỗ hở này — bản cũ in số 0 rồi thoát 0, tức lời hứa chịu lực nhất của ô đo được
+      thoả bởi một lượt chạy không chứng minh gì. Chiều đỏ là ca `san-tinh-duoc`: một
+      fixture chỉ có dòng ông bà thì `check` trần XANH (đúng — kho chưa re-pin lần nào có
+      quyền bằng 0) còn `--min-computable 1` phải ĐỎ nêu `tinh duoc = 0`; sàn là lời khai
+      của người gọi về KHO CỦA HỌ, không phải luật phổ quát nhét vào trong chế độ. Chế độ này cũng TỪ CHỐI chạy trên
       clone nông: ở đó mọi sha cũ đều không phân giải được nên dòng nào cũng rơi vào hạng
       ông bà và hàng rào xanh mà không đo gì — checkout mặc định của CI là depth 1. Con số thứ ba là ô đo thật sự:
       bốn số kia đều thoả bởi một script chỉ đếm dòng rồi xếp TẤT CẢ vào nhánh ông bà
@@ -146,7 +153,7 @@ evals:
     cmd: config:executors.script.rkce_teeth
     paths: ["scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0 và ĐỦ MƯỜI TÁM dòng `CASE <tên>: PASS` cùng chốt `OK: 18/18 ca` — `healthy`
+      exit 0 và ĐỦ HAI MỐT dòng `CASE <tên>: PASS` cùng chốt `OK: 21/21 ca` — `healthy`
       (đối chứng dương, và cũng chứng minh `write` ghi `prev_sha` đúng bằng
       `verified_commit` cũ) · `nuot-eval` (đỏ, nêu đích danh slug + `run_id` + id eval) ·
       `da-chay-lai` (XANH — phân biệt "bắt được việc nuốt" với "đỏ mọi thứ") · `ong-ba`
@@ -155,12 +162,17 @@ evals:
       `paths-thu-muc-tran` · `paths-glob` · `write-thieu-verified-commit` ·
       `plan-tap-id` · `plan-them-mot-file` · `write-thieu-suites` · `write-lan-do` ·
       `write-prev-bang-sha` · `diem-vao-duong-dan-la` · `write-giu-dong-cu` ·
-      `chay-lai-do` · `log-hong` · `newlines-thieu-prev`. Đã kiểm răng của bộ răng: thước no-op → 4 ca
+      `chay-lai-do` · `log-hong` · `newlines-thieu-prev` · `so-khop-lech` ·
+      `so-khop-rong` · `san-tinh-duoc`. Dòng chốt nay ĐẾM lúc chạy (`want` tự cộng
+      theo vế xanh/đỏ được yêu cầu) thay vì mang một chuỗi viết tay: vòng 3 bắt được nó
+      khai «7 đối chứng dương + 11 phép phá» trong khi thực tế là 6 + 12, và `TOTAL`
+      không thể bắt vì `TOTAL` nói có bao nhiêu ca chứ không nói ca thuộc loại nào.
+      `TOTAL` cũng thôi được gõ tay — nó ĐẾM từ danh sách `KNOWN`. Đã kiểm răng của bộ răng: thước no-op → 4 ca
       phá đỏ; bộ giao trả CẢ TẬP → ba đối chứng dương (`da-chay-lai`, `khong-khai-paths`,
       `plan-tap-id`) đỏ. Mọi ca dựng trên kho git dùng-rồi-bỏ (`mktemp -d` +
       `git init`), KHÔNG chạm cây thật — vòng trước một ca ghi vật thăm dò vào cây thật
-      và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/18` và
-      KHÔNG in `OK:` (đo 02/09: `PARTIAL: 1/18`); tên ca lạ → thoát 2. `healthy` truyền
+      và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/21` và
+      KHÔNG in `OK:` (đo 02/09: `PARTIAL: 1/21`); tên ca lạ → thoát 2. `healthy` truyền
       `suites_json` tường minh `[0,0,0]` — trước vòng 2 nó gọi `write` KHÔNG truyền, tức
       ca đối chứng dương đang ban phước cho đúng đường bịa mà AC-10 cấm.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
@@ -185,7 +197,7 @@ evals:
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
       exit 0 cho cả BA lượt — `write-thieu-suites`, `write-lan-do`, `write-prev-bang-sha` —
-      mỗi lượt in `CASE <tên>: PASS` rồi `PARTIAL: 1/14`. Mỗi ca đòi `write` thoát khác 0,
+      mỗi lượt in `CASE <tên>: PASS` rồi `PARTIAL: 1/21`. Mỗi ca đòi `write` thoát khác 0,
       in đúng lý do của nó, và run-log KHÔNG thêm dòng nào. Đã kiểm răng 02/09 bằng cách
       thay từng phép từ chối trong lõi bằng `if (false)`: ca tương ứng đỏ (`write-thieu-suites`
       → "dau ra khong neu 'khong co mac dinh'"; `write-prev-bang-sha` → "mong do, nhung
@@ -199,7 +211,7 @@ evals:
     cmd: config:executors.script.rkce_entrypoint
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0, in `CASE diem-vao-duong-dan-la: PASS` rồi `PARTIAL: 1/14`. Ca chép lõi sang
+      exit 0, in `CASE diem-vao-duong-dan-la: PASS` rồi `PARTIAL: 1/21`. Ca chép lõi sang
       một thư mục CÓ DẤU CÁCH dưới `mktemp -d` (tức dưới `/tmp`, vốn là symlink tới
       `/private/tmp` trên macOS) rồi gọi một mode không tồn tại; đòi `usage:` trên stderr và
       mã thoát khác 0. Đối chứng đã chạy: bản dùng `import.meta.url === argv[1]` nguyên văn
@@ -214,7 +226,7 @@ evals:
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
       exit 0 cho cả HAI lượt — `write-giu-dong-cu` và `log-hong` — mỗi lượt in `CASE <tên>:
-      PASS` rồi `PARTIAL: 1/18`. Ca thứ nhất dựng run-log giữ một dòng repin hợp lệ và
+      PASS` rồi `PARTIAL: 1/21`. Ca thứ nhất dựng run-log giữ một dòng repin hợp lệ và
       KHÔNG kết thúc bằng `\n`, gọi `write`, rồi đòi `check` đọc được **hai** dòng repin
       (`dong repin: 2`) và nhận ra dòng mới `R9` — trước khi vá, hai dòng hàn làm một và
       `check` in `dong repin: 0 … OK` thoát 0. Ca thứ hai thêm một dòng cụt và đòi `check`
@@ -230,10 +242,32 @@ evals:
     cmd: config:executors.script.rkce_exit_code
     paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
     expected: >-
-      exit 0, in `CASE chay-lai-do: PASS` rồi `PARTIAL: 1/18`. Ca dựng một pin tính được có
+      exit 0, in `CASE chay-lai-do: PASS` rồi `PARTIAL: 1/21`. Ca dựng một pin tính được có
       chạm E1, thêm dòng chạy lại `exit_code: 1`, và đòi `check` ĐỎ với thông điệp `DA chay
       lai nhung DO` nêu đích danh `E1`. Đối chứng dương là ca `da-chay-lai` (cùng fixture,
       `exit_code: 0` → xanh, `eval bi nuot: 0`) — cặp hai chiều trên cùng một vật, nên vế
       xanh không thể đến từ "hàng rào không nhìn thấy gì". Đã kiểm răng 02/09: đổi điều kiện
       `o.exit_code === 0` thành `true` → ca này "mong do, nhung thoat 0".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.rkce_so_khop_total
+    paths: ["scripts/ci/check-repin-eval-coverage.sh", "_acceptance/repin-khong-chay-lai-eval/evals.yaml"]
+    expected: >-
+      exit 0 cho cả BA lượt. Lượt một chạy `so-khop-total` trên chính hồ sơ này: nó quét
+      mọi `PARTIAL: n/N` và `OK: n/N ca` trong `evals.yaml`, đòi từng `N` bằng số ca của
+      bộ răng, và in ba số — số con số quét được · số lệch · số ca hiện có. Hai lượt sau
+      là hai chiều đỏ trên fixture: `so-khop-lech` (một con số 99 giả trong fixture → đỏ, nêu cả 99
+      lẫn số thật) và `so-khop-rong` (không con số nào → đỏ với chữ `dang do KHONG GI`).
+      Ca thứ ba ấy là phần chịu lực: một bộ quét không khớp gì sẽ in một lượt sạch, đúng
+      hình dạng «xanh trên không có gì» mà hồ sơ này tồn tại để diệt. ĐO KHAI SINH có
+      thật, không dựng: lần chạy ĐẦU TIÊN của chế độ này trên kho thật đã ĐỎ, bắt hai chỗ
+      còn ghi 14 sau khi bộ răng lên 18 ca — hai `expected` mà lệnh không bao giờ thoả
+      được, tức người chấm đang tung đồng xu chứ không đo. GIỚI HẠN của chính chế độ này,
+      khai thẳng: nó quét theo MẪU nên không phân biệt được một con số đang KHẲNG ĐỊNH
+      với một con số đang được TRÍCH DẪN làm phản ví dụ — viết `1/99` trong văn xuôi sẽ
+      làm nó đỏ. Cái giá là văn xuôi phải nói số bằng chữ; đổi lại không con số nào nói
+      về bộ răng mà thoát khỏi phép kiểm.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]

@@ -3,7 +3,7 @@
 # touched. Dispatcher + the three modes that need a shell (fixtures, worktrees, teeth);
 # the reading/­judging logic lives in the sibling repin-eval-coverage.mjs.
 #
-# Usage: check-repin-eval-coverage.sh <write|plan|check|newlines|paths-law|readers|teeth> [...]
+# Usage: check-repin-eval-coverage.sh <write|plan|check|newlines|paths-law|readers|so-khop-total|teeth> [...]
 #
 # Every mode prints the counts it worked from. A printed count is the only thing that
 # separates "scanned and found nothing wrong" from "scanned nothing" -- and the counts
@@ -21,6 +21,13 @@ shift || true
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
 [ -f "$CORE" ] || fail "thieu $CORE"
+
+# The case list, and the suite size DERIVED from it. Two modes read these: `teeth` runs
+# the cases, `so-khop-total` checks that the numbers written into evals.yaml still name
+# this suite. Deriving TOTAL rather than typing it removes the only way the two can
+# disagree.
+KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc"
+TOTAL=$(printf '%s\n' $KNOWN | wc -w | tr -d ' ')
 
 case "$MODE" in
 write | plan | check | newlines)
@@ -133,6 +140,33 @@ readers)
     echo "OK: them prev_sha khong doi ket luan cua ben doc; phep so chung minh duoc no thay khac biet"
     ;;
 
+so-khop-total)
+    # AC-14. Every `PARTIAL: n/N` and `OK: n/N ca` written into an evals.yaml names the
+    # size of THIS teeth suite. Round 3 found two of them still saying 14 after the suite
+    # grew to 18 -- an `expected` that the command can never satisfy, which makes the
+    # verifier's judgement a coin flip rather than a measurement. Nothing tied prose to
+    # the suite, so this mode does.
+    #
+    # `ho_so` defaults to this dossier; the teeth case passes a fixture directory.
+    ho_so="${1:-$ROOT/_acceptance/repin-khong-chay-lai-eval}"
+    f="$ho_so/evals.yaml"
+    [ -f "$f" ] || fail "khong thay $f"
+    found=0; bad=0
+    while IFS= read -r n; do
+        found=$((found + 1))
+        [ "$n" = "$TOTAL" ] && continue
+        echo "FAIL: $f khai mot con so $n cho bo rang, nhung bo rang co $TOTAL ca" >&2
+        bad=$((bad + 1))
+    done < <(grep -oE '(PARTIAL: [0-9n]+/[0-9]+|OK: [0-9]+/[0-9]+ ca)' "$f" | grep -oE '/[0-9]+' | tr -d '/')
+    echo "so nam trong evals.yaml noi ve bo rang: $found | lech: $bad | bo rang hien co: $TOTAL ca"
+    # A scanner that matched NOTHING prints a clean sweep otherwise -- the exact shape
+    # this dossier exists to close. Zero matches means the prose stopped naming the
+    # suite, or the pattern stopped matching it; either way nothing is being measured.
+    [ "$found" -gt 0 ] || fail "khong tim thay con so nao noi ve bo rang trong $f — phep quet nay dang do KHONG GI, chu khong phai dang bao sach"
+    [ "$bad" -eq 0 ] || exit 1
+    echo "OK: moi con so trong evals.yaml deu khop bo rang $TOTAL ca"
+    ;;
+
 teeth)
     ONLY=""
     case "${1:-}" in
@@ -140,9 +174,9 @@ teeth)
     --case) ONLY="${2:-}"; [ "$#" -le 2 ] || fail "thua doi so: ${*:3}" ;;
     *) fail "doi so la '${1}' — chi nhan '--case <ten>'" ;;
     esac
-    KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev"
-    TOTAL=18
     RAN=0
+    N_GREEN=0
+    N_RED=0
     FAILED=0
     if [ -n "$ONLY" ] && ! printf '%s\n' $KNOWN | grep -qx "$ONLY"; then
         echo "unknown case: $ONLY (known: $KNOWN)" >&2
@@ -187,6 +221,9 @@ teeth)
     want() { # want <name> <green|red> <output> <rc> [needles...]
         local name="$1" expect="$2" out="$3" rc="$4"; shift 4
         RAN=$((RAN + 1))
+        # Tally by what was actually asked for, so the closing line REPORTS the run
+        # instead of asserting a constant somebody has to remember to update.
+        if [ "$expect" = green ]; then N_GREEN=$((N_GREEN + 1)); else N_RED=$((N_RED + 1)); fi
         if [ "$expect" = green ] && [ "$rc" -ne 0 ]; then
             echo "CASE $name: FAIL — mong xanh, thoat $rc"; printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1; return
         fi
@@ -327,17 +364,9 @@ teeth)
     # path with a space -- or under /tmp, which is a symlink on macOS -- made every mode
     # exit 0 printing nothing, unknown modes included.
     if run diem-vao-duong-dan-la; then
-        RAN=$((RAN + 1))
         sp="$W/co dau cach"; mkdir -p "$sp"; cp "$CORE" "$sp/"
         out="$(node "$sp/repin-eval-coverage.mjs" mode-khong-ton-tai 2>&1)"; rc=$?
-        if [ "$rc" -eq 0 ]; then
-            echo "CASE diem-vao-duong-dan-la: FAIL — mode la ma van thoat 0"; FAILED=1
-        elif ! printf '%s\n' "$out" | grep -qF "usage:"; then
-            echo "CASE diem-vao-duong-dan-la: FAIL — khong in usage, nen dispatcher khong chay"
-            printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1
-        else
-            echo "CASE diem-vao-duong-dan-la: PASS"
-        fi
+        want diem-vao-duong-dan-la red "$out" "$rc" "usage:"
     fi
 
     # 15. the writer must not eat the line already there. A run-log whose last byte is
@@ -387,13 +416,50 @@ teeth)
         want newlines-thieu-prev red "$out" "$rc" "thieu prev_sha" "demo"
     fi
 
+    # 19-20. the size-invariant's own two directions. Its red half already fired on real
+    # data the first time it ran -- two `PARTIAL: 1/14` left behind when the suite grew to
+    # 18 -- but a mode measured only on the repo's current state stops measuring the
+    # moment that state is fixed. These run it on fixtures instead.
+    if run so-khop-lech; then
+        fx '    paths: ["src/**"]
+'
+        printf 'evals:\n  - id: E1\n    expected: >-\n      in `PARTIAL: 1/99` roi thoi\n' \
+            > "$d/_acceptance/demo/evals.yaml"
+        out="$(bash "${BASH_SOURCE[0]}" so-khop-total "$d/_acceptance/demo" 2>&1)"; rc=$?
+        want so-khop-lech red "$out" "$rc" "99" "$TOTAL"
+    fi
+
+    # The refusal that separates "scanned and found nothing wrong" from "scanned
+    # nothing". Without it a pattern that stops matching turns the guard green forever.
+    if run so-khop-rong; then
+        fx '    paths: ["src/**"]
+'
+        printf 'evals:\n  - id: E1\n    expected: khong noi gi ve bo rang\n' \
+            > "$d/_acceptance/demo/evals.yaml"
+        out="$(bash "${BASH_SOURCE[0]}" so-khop-total "$d/_acceptance/demo" 2>&1)"; rc=$?
+        want so-khop-rong red "$out" "$rc" "dang do KHONG GI"
+    fi
+
+    # 21. the floor E6 claims must be a REFUSAL, not a printed number. A fixture whose
+    # only repin line is grandfathered has `tinh duoc: 0`; plain `check` is legitimately
+    # green there, and `--min-computable 1` must not be.
+    if run san-tinh-duoc; then
+        fx '    paths: ["src/**"]
+'
+        repin_line "$d" "$NEW" ""
+        out="$(core "$d" check)"; rc=$?
+        [ "$rc" -eq 0 ] || { echo "CASE san-tinh-duoc: FAIL — check tran phai xanh tren fixture ong ba"; FAILED=1; }
+        out="$(core "$d" check --min-computable 1)"; rc=$?
+        want san-tinh-duoc red "$out" "$rc" "tinh duoc = 0" "duoi san 1"
+    fi
+
     [ "$FAILED" -eq 0 ] || { echo "FAIL: it nhat mot ca khong xu su nhu doi hoi" >&2; exit 1; }
     if [ -n "$ONLY" ]; then
         echo "PARTIAL: $RAN/$TOTAL ca da chay — khong tuyen gi ve $((TOTAL - RAN)) ca chua chay"
         exit 0
     fi
     [ "$RAN" -eq "$TOTAL" ] || fail "chi $RAN/$TOTAL ca chay ma khong khai --case"
-    echo "OK: $RAN/$TOTAL ca — 7 doi chung duong + 11 phep pha"
+    echo "OK: $RAN/$TOTAL ca — $N_GREEN doi chung duong + $N_RED phep pha"
     ;;
 
 *)
