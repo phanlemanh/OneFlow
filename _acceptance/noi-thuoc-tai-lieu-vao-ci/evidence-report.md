@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 71449d00fb483e1ef48b95a7da0e4adbb156fb45
+verified_commit: c1fae946b9185354407bcf5b080748cadac35488
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -177,3 +177,7 @@ Phát hiện bởi hội đồng soi ở S4 vòng 3 của `repin-khong-chay-lai-
 `measurement`, mức HIGH). Cùng lớp với AC-14 của hồ sơ ấy: một lời khai không có gì
 buộc vào vật nó mô tả. Chưa có hàng rào nào bắt khoá YAML trùng trên toàn kho — đã ghi
 vào Known limits của hồ sơ đang chạy.
+
+### Re-pin lần 4 — 2026-09-03, do nhánh buộc mọi con số viết tay vào vật nó mô tả
+run_id: rkce-repin-20260903T054659Z
+sha: c1fae946b9185354407bcf5b080748cadac35488 · suites: 8 lệnh exit 0
