@@ -1,4 +1,4 @@
-import { notifyUnauthorized } from "@/lib/api/client";
+import { DEFAULT_TIMEOUT_MS, notifyUnauthorized } from "@/lib/api/client";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import type { PluginEnvDecl } from "@/lib/plugins/plugin-env-manifest-schema";
 
@@ -90,7 +90,8 @@ export type EnvClientRead =
 export type WriteFailure =
     | { code: "http"; status: number }
     | { code: "not-json" }
-    | { code: "network"; detail: string };
+    | { code: "network"; detail: string }
+    | { code: "timeout" };
 
 /** Every read outcome except the good one. */
 export type EnvReadFailure = Exclude<EnvClientRead, { state: "ok" }>;
@@ -107,6 +108,31 @@ export type SaveOutcome =
     | { ok: true; verdicts: Record<string, KeyVerdict> }
     | { ok: false; reason: "read-failed"; read: EnvReadFailure }
     | { ok: false; reason: "write-failed"; detail: WriteFailure };
+
+/**
+ * Every request from this module, with a ceiling.
+ *
+ * Shared with `apiClient` rather than picking a second number: two ceilings
+ * that drift apart are two behaviours the user experiences as one. Without it a
+ * hung request never settles, and the surfaces that await it have no state to
+ * move to — the settings screen spins and a node sits mid-verification.
+ */
+async function fetchWithCeiling(
+    input: string,
+    init: RequestInit = {},
+): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+    try {
+        return await fetch(input, { ...init, signal: controller.signal });
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+/** An abort is our own ceiling firing, not the network refusing. */
+const isAbort = (cause: unknown) =>
+    cause instanceof Error && cause.name === "AbortError";
 
 const describeCause = (cause: unknown) =>
     cause instanceof Error && cause.message ? cause.message : String(cause);
@@ -127,11 +153,13 @@ const describeCause = (cause: unknown) =>
 export async function readEnvForBrowser(): Promise<EnvClientRead> {
     let response: Response;
     try {
-        response = await fetch(ENDPOINT, { cache: "no-store" });
+        response = await fetchWithCeiling(ENDPOINT, { cache: "no-store" });
     } catch (cause) {
         return {
             state: "unavailable",
-            reason: { code: "network", detail: describeCause(cause) },
+            reason: isAbort(cause)
+                ? { code: "timeout" }
+                : { code: "network", detail: describeCause(cause) },
         };
     }
 
@@ -242,16 +270,21 @@ export async function putEnvMap(
 async function put(body: unknown): Promise<SaveOutcome> {
     let response: Response;
     try {
-        response = await fetch(ENDPOINT, {
+        response = await fetchWithCeiling(ENDPOINT, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
         });
     } catch (cause) {
+        // RETURN, never throw. Three callers read `out.ok` and branch; a throw
+        // reaches `abi-node-shell`'s catch as `phase: "invalid"` and tells the
+        // user their key is bad because the network stalled.
         return {
             ok: false,
             reason: "write-failed",
-            detail: { code: "network", detail: describeCause(cause) },
+            detail: isAbort(cause)
+                ? { code: "timeout" }
+                : { code: "network", detail: describeCause(cause) },
         };
     }
 
