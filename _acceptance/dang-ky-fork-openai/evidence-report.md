@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c1fae946b9185354407bcf5b080748cadac35488
+verified_commit: e68cdd61b0e7108753431434216e4343e0117e77
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -229,3 +229,7 @@ sha: 71449d00fb483e1ef48b95a7da0e4adbb156fb45 · suites: 8 lệnh exit 0
 ### Re-pin lần 7 — 2026-09-03, do nhánh buộc mọi con số viết tay vào vật nó mô tả
 run_id: rkce-repin-20260903T054659Z
 sha: c1fae946b9185354407bcf5b080748cadac35488 · suites: 8 lệnh exit 0
+
+### Re-pin lần 8 — 2026-09-03, do vòng soi xác nhận bác một phép sửa và nhánh sửa lại
+run_id: rkce-repin-20260903T065011Z
+sha: e68cdd61b0e7108753431434216e4343e0117e77 · suites: 8 lệnh exit 0

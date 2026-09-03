@@ -1,18 +1,17 @@
 ---
 schema_version: 2
 feature_slug: repin-khong-chay-lai-eval
-verdict: REJECT
+verdict: PASS
 failed_evals: []
-verified_by: fresh-context verification subagent
+reason:
+verified_by: phiên VERIFY tuần tự (CLASSIFIER-FALLBACK sau BLOCKED vòng 3) + 3 lớp soi chỉ-đọc + 1 lượt soi xác nhận đối kháng
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c69d43458a7564b81648b9c60b8d5c24da069b8f
+verified_commit: e68cdd61b0e7108753431434216e4343e0117e77
 human_signoff:
 ---
 
 # Evidence Report: repin-khong-chay-lai-eval
-
-**Lệnh fail không gắn eval:** `pnpm typecheck` thoát 2 (`error TS6053: File '.next/types/cache-life.d.ts' not found` và `error TS6053: File '.next/types/validator.ts' not found` — cả hai file nằm trong program vì khớp include pattern `.next/types/**/*.ts` trong `tsconfig.json`, nhưng thư mục `.next/types` chưa được sinh trước khi typecheck chạy trong vòng này). Đây là một lệnh suite hồi quy, không gắn AC/eval nào của hợp đồng `repin-khong-chay-lai-eval` (cả chín eval E1–E9 đều PASS, xem bảng và Evidence dưới). Vì mọi lệnh suite phải xanh để round được PASS, riêng thất bại này đã buộc verdict tổng của round REJECT.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -25,159 +24,230 @@ human_signoff:
 | E7 | AC-7 | script | PASS |
 | E8 | AC-8 | script | PASS |
 | E9 | AC-9 | script | PASS |
+| E10 | AC-10 | script | PASS |
+| E11 | AC-11 | script | PASS |
+| E12 | AC-12 | script | PASS |
+| E13 | AC-13 | script | PASS |
+| E14 | AC-14 | script | PASS |
+
+**Lệnh máy:** 8/8 exit 0 tại `e68cdd61b0e7` (preflight · build · typecheck · lint · test ·
+sdk pytest · verify:plugins · gen:abi sạch), chạy **TUẦN TỰ**.
+
+**Vì sao tuần tự.** Vòng 3 trả `BLOCKED`: `pnpm build` chết trong tay một agent
+(`agent bi skip/chet`) và `pnpm typecheck` thoát 2 — cả hai xanh khi chạy lại một mình.
+41 agent song song không phải "cùng phép đo, nhanh hơn": `pnpm build` mất 2,1 phút khi
+đơn độc và 6:14 dưới tải, nên ở đâu đó giữa hai mốc nó vượt trần công cụ. Fan-out đổi
+KẾT QUẢ, không chỉ đổi tốc độ. Vòng 4 và 5 chạy mọi lệnh lần lượt; **0 lệnh bị công cụ
+giết**. Lớp soi vẫn dùng agent, nhưng chỉ-đọc — không lệnh nặng nào.
+
+**Hàng rào tự bắt lần ghim của chính vòng này.** Sự kiện re-pin `rkce-repin-20260903T065011Z` có diff chạm
+`scripts/ci/**`, và `check` báo nó nuốt 4 ô đo: `conformance-l0/E15` và
+`dang-ky-fork-openai/E2,E3,E6`. Cả bốn đã chạy lại THẬT, exit 0, ghi dòng eval mang
+`exit_code` — `eval bi nuot` 2 → 0. Đây là lần thứ hai trong đời hồ sơ này nó bắt được
+một lần ghim thật, không phải fixture.
+
+## Known limits
+
+- **Hàng rào chưa vào CI.** `check-repin-eval-coverage.sh` không có step nào trong
+  `.github/workflows/ci.yml`; nó chạy khi có người gõ. Cùng đúng lỗ mà
+  `noi-thuoc-tai-lieu-vao-ci` vừa đóng cho hai thước khác — và hồ sơ ấy đã chứng minh
+  một thước không cắm điện thì trôi mà không ai biết.
+- **Số viết bằng CHỮ ngoài tầm AC-14.** `so-khop-total` quét chữ số (`PARTIAL: n/N`,
+  `OK: n/N ca`) trong hai file. Một câu như "mười bốn ca có tên" trôi tự do; nó ĐÃ trôi
+  thật ở vòng 4 và phải sửa tay.
+- **Phạm vi quét là danh sách file, không phải luật.** Mẫu chỉ nêu hình dạng nên một
+  file mới trong hồ sơ mang `OK: n/N ca` sẽ không được soi cho đến khi ai đó thêm tên nó
+  vào `files=()`. Mở ra cả thư mục đã thử và đẻ 14 lệch giả (03/09).
+- **Khoá YAML trùng không có hàng rào nào bắt.** `yaml.safe_load` giữ khoá cuối, im lặng.
+  Đã tìm thấy một ca thật trong hồ sơ ĐÃ KÝ `noi-thuoc-tai-lieu-vao-ci` (E2 có `expected`
+  hai lần, `paths` ba lần), sửa ở nhánh này kèm khối «Sửa đổi sau chữ ký», nhưng không có
+  gì chặn ca tiếp theo.
+- **AC-12 khoản (c) là đai an toàn không ai đo.** Phép tự đối chiếu sau khi ghi đúng theo
+  cấu trúc một khi chốt xuống dòng đã tại chỗ; thay `if` của nó bằng `if (false)` vẫn để
+  21/21 xanh. Giữ lại để bắt một lỗi TƯƠNG LAI của bộ ghi, và khai thẳng thay vì để một ô
+  đo nhận công.
+- **`--min-computable` là lời khai của người gọi, không phải luật.** Sàn nói về KHO NÀY
+  hôm nay; một kho chưa re-pin lần nào có 0 hợp lệ. Không có gì buộc người gọi phải đặt
+  sàn — `rkce_check_min` đặt 1, một lệnh khác có thể quên.
+- **`pnpm build` cần shell POSIX.** `NODE_OPTIONS=...` nội dòng trong `package.json`
+  hỏng trên cmd/PowerShell. CI chạy Linux nên xanh; người đóng góp dùng Windows sẽ vấp
+  đúng lệnh mà checklist bắt chạy.
+
+## Ngoài hợp đồng
+
+- `docs/roadmap.md`: gỡ một dòng trống cắt đôi bảng sổ cái — dòng cuối đang render thành
+  chữ thường trên GitHub trong khi guard vẫn xanh (nó khớp theo dòng).
+- `CLAUDE.md`: gỡ một dòng trống cắt danh sách hằng-số-ràng-buộc.
+- `scripts/plugins/check-manifest-guard-teeth.sh`: nhãn ca nói "a 37th plain string"
+  trong khi guard ghim 35; nay nhãn ĐỌC số ghim từ chính guard thay vì nhắc lại.
+- `PRODUCT-MAP.md` + `docs/roadmap.md`: ghi `noi-thuoc-tai-lieu-vao-ci` vào hai sổ sau
+  khi nó chuyển signed-off — cả hai cổng đang ĐỎ trên HEAD vì nợ sổ sách này.
+- `_acceptance/noi-thuoc-tai-lieu-vao-ci/evals.yaml`: gỡ khoá `expected`/`paths` trùng
+  (xem Known limits), kèm khối «Sửa đổi sau chữ ký» trong báo cáo đã ký của hồ sơ ấy.
+
+## Iterations
+
+- **Vòng 1** — REJECT. Gap-probe + hội đồng ra 2 HIGH: `write` bịa bằng chứng (thiếu
+  `suites_json` thì mặc định `[0,0,0,0]`, tức dòng repin tự khai "lane đã xanh"), và
+  điểm vào im lặng thoát 0 dưới symlink. Owner mở phạm vi cho cả hai.
+- **Vòng 2** — REJECT, 11/11 ô đo xanh. 13 finding, 3 HIGH, tất cả cùng MỘT gốc: run-log
+  bị coi như JSONL lỏng, mỗi chế độ mang dung sai riêng. `STOP-PATCHING-CLAUSE` kích
+  hoạt; owner chọn **đổi hình dạng** — một CỬA duy nhất cho mọi lượt đọc/ghi.
+- **Vòng 3** — BLOCKED vì tải máy (xem trên). 14 finding vẫn thật; 4 cái tự kiểm được
+  đều đúng, và 3 trong 4 là con số viết tay trôi khỏi vật nó mô tả.
+- **Vòng 4** — 14/14 ô đo xanh, 15 finding từ 3 lớp soi. **Hai HIGH do chính vòng 4 đẻ
+  ra**: cờ `--min-computable` bỏ qua âm thầm mọi đối số lạ (nên cái sàn chống
+  "xanh-trên-không-có-gì" tự nó thành không-có-gì), và E1 mượn nửa xanh của E8.
+- **Vòng 5** — lượt soi xác nhận đối kháng **BÁC một trong ba phép sửa**: ca `healthy`
+  mới thêm khớp chuỗi `prev_sha=<12 ký tự>` trên **stdout**, mà `console.log` in ra từ
+  biến cục bộ ngay cả khi khoá ấy không vào log — đo THÔNG ĐIỆP chứ không đo VẬT. Gỡ
+  `prev_sha` khỏi bộ ghi vẫn để E1 xanh. Sửa: đòi `"prev_sha":"<40 hex>"` có mặt trong
+  chính run-log. PASS.
+
+## Analyst
+
+Bốn vòng có findings vẽ một đường rõ: vòng 1–2 tìm lỗi trong **hành vi** của hàng rào
+(phá dữ liệu, chấp nhận lần chạy đỏ, chấp nhận bằng chứng bịa). Vòng 3–5 tìm lỗi trong
+**lời khai về** hàng rào — số viết tay, chiều đo đi mượn, phạm vi tự xưng quá rộng, đối
+chứng khớp trên thông điệp thay vì trên vật. Hành vi đứng yên ba vòng liên tiếp; cái còn
+trôi là lớp văn bản mô tả nó, và lớp ấy mới có đúng MỘT hàng rào (AC-14), sinh ra ở vòng
+4 và đã đỏ thật hai lần.
+
+Bài học đắt nhất, ghi lại vì nó suýt lọt: **"chạy lại 14/14 xanh" không bao giờ đủ để
+tuyên một phép sửa đã sống.** Ba phép sửa của vòng 4 đều có ô đo xanh; một trong ba không
+sửa gì cả. Chỉ phá thứ thật rồi xem ô đo có đỏ mới đủ — và đó chính là việc lượt soi xác
+nhận làm.
+
+## Variance
+
+Không đo lặp. Ô đo của hồ sơ này tất định (script trên kho git dùng-rồi-bỏ), trừ
+`readers` vốn dựng worktree — chế độ ấy từng chập chờn hai lần ngày 02/09 và đã chốt bằng
+`worktree prune` + chọn dòng repin ĐƯỢC một section `### Re-pin` trích dẫn.
 
 ## Evidence
 
 - eval: E1
-  run_id: minted-repin-khong-chay-lai-eval-E1-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_write_teeth
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:51:40Z
   output: |
-    CASE write-thieu-verified-commit: PASS
-    PARTIAL: 1/10 ca da chay — khong tuyen gi ve 9 ca chua chay
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
 - eval: E2
-  run_id: minted-repin-khong-chay-lai-eval-E2-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_newlines_have_prev
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:51:41Z
   output: |
-    dong run-log moi so origin/main: 121 | dong repin moi thieu prev_sha: 0
-    OK: moi dong repin moi deu mang prev_sha
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
 - eval: E3
-  run_id: minted-repin-khong-chay-lai-eval-E3-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_paths_law
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:51:41Z
   output: |
-    ok   tien-to-sao     src/*.ts       vs src/a/b.ts                   -> khong khop (mong: khong khop)
-    ma tran: 8 dong = 4 hinh dang x 2 chieu | sai: 0
     OK: luat khop paths dung o ca bon hinh dang, ca hai chieu
 
 - eval: E4
-  run_id: minted-repin-khong-chay-lai-eval-E4-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_plan
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:51:41Z
   output: |
-    CASE plan-tap-id: PASS
-    PARTIAL: 1/10 ca da chay — khong tuyen gi ve 9 ca chua chay
-    CASE plan-them-mot-file: PASS
-    PARTIAL: 1/10 ca da chay — khong tuyen gi ve 9 ca chua chay
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
 - eval: E5
-  run_id: minted-repin-khong-chay-lai-eval-E5-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_check
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:51:42Z
   output: |
-    ho so da ky: 32 | dong repin: 36 | tinh duoc: 11 | ong ba: 25 | eval bi nuot: 0 | khong ket luan duoc (khong khai paths): 2
     OK: khong re-pin nao nuot mot eval bi cham
 
 - eval: E6
-  run_id: minted-repin-khong-chay-lai-eval-E6-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
-  verifier: config:executors.script.rkce_check
-  verified_at: 2026-09-02T16:22:09Z
+  verifier: config:executors.script.rkce_check_min
+  verified_at: 2026-09-03T06:51:43Z
   output: |
-    ho so da ky: 32 | dong repin: 36 | tinh duoc: 11 | ong ba: 25 | eval bi nuot: 0 | khong ket luan duoc (khong khai paths): 2
-    OK: khong re-pin nao nuot mot eval bi cham
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
 - eval: E7
-  run_id: minted-repin-khong-chay-lai-eval-E7-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_readers_bytewise
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:52:09Z
   output: |
-    hai luot pre-merge-check giong nhau tung byte | violation moi luot: 1
-    doi chung duong: go khoa 'sha' LAM doi dau ra
     OK: them prev_sha khong doi ket luan cua ben doc; phep so chung minh duoc no thay khac biet
 
 - eval: E8
-  run_id: minted-repin-khong-chay-lai-eval-E8-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_teeth
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:52:13Z
   output: |
-    CASE plan-tap-id: PASS
-    CASE plan-them-mot-file: PASS
-    OK: 10/10 ca — 6 doi chung duong + 4 phep pha
+    OK: 21/21 ca — 6 doi chung duong + 15 phep pha
 
 - eval: E9
-  run_id: minted-repin-khong-chay-lai-eval-E9-r1
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.rkce_resign_wave
-  verified_at: 2026-09-02T16:22:09Z
+  verified_at: 2026-09-03T06:52:21Z
   output: |
     OK: no feature other than repin-khong-chay-lai-eval carries stale evidence — the re-sign wave has cleared
 
-### Lệnh suite (hồi quy)
-
-- cmd: bash scripts/acceptance/preflight-verify-env.sh
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-bash_scripts_acceptance_preflight_verify-r1
+- eval: E10
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
+  baseline: n-a
+  verifier: config:executors.script.rkce_write_refusals
+  verified_at: 2026-09-03T06:52:22Z
+  output: |
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
-- cmd: pnpm build
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-build-r1
+- eval: E11
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
+  baseline: n-a
+  verifier: config:executors.script.rkce_entrypoint
+  verified_at: 2026-09-03T06:52:22Z
+  output: |
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
-- cmd: pnpm typecheck
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-typecheck-r1
-  exit_code: 2
-  verified_at: 2026-09-02T16:22:09Z
-
-- cmd: pnpm lint:check
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-lint_check-r1
+- eval: E12
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
+  baseline: n-a
+  verifier: config:executors.script.rkce_gateway
+  verified_at: 2026-09-03T06:52:22Z
+  output: |
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
-- cmd: pnpm test
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-test-r1
+- eval: E13
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
+  baseline: n-a
+  verifier: config:executors.script.rkce_exit_code
+  verified_at: 2026-09-03T06:52:22Z
+  output: |
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
 
-- cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r1
+- eval: E14
+  run_id: seq-verify-20260903T065140Z-r5
   exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
-
-- cmd: pnpm verify:plugins
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-verify_plugins-r1
-  exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
-
-- cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
-  run_id: minted-repin-khong-chay-lai-eval-SUITE-gen_abi-r1
-  exit_code: 0
-  verified_at: 2026-09-02T16:22:09Z
-
-## Known limits
-
-## Ngoài hợp đồng
-
-## Analyst
-
-carried tu round truoc — baseline khong do lai round nay.
-
-none — round này không đo lại baseline (mọi eval E1–E9 ghi `baseline: n-a`), nên không có eval nào để phân loại phân-biệt/không-phân-biệt.
-
-## Variance
-
-none — every multi-run eval is uniform (không eval nào của round này khai `runs` > 1).
-
-## Iterations
-
-Round 1: cả chín eval E1–E9 PASS, nhưng lệnh suite `pnpm typecheck` thoát 2 (TS6053 — thiếu `.next/types/cache-life.d.ts` và `.next/types/validator.ts` do `.next` chưa được sinh trước khi chạy typecheck trong vòng này). Verdict tổng REJECT vì lệnh suite hồi quy đỏ, dù không eval nào của hợp đồng bị fail. Trả về implementation để sinh `.next/types` (chạy `pnpm build`/`next build` trước `pnpm typecheck`, hoặc sửa lại thứ tự lệnh trong pipeline verify) rồi verify lại.
+  baseline: n-a
+  verifier: config:executors.script.rkce_so_khop_total
+  verified_at: 2026-09-03T06:52:23Z
+  output: |
+    PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
