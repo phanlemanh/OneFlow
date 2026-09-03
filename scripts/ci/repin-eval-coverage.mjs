@@ -84,16 +84,73 @@ const readLines = (p) =>
               .split("\n")
               .filter((l) => l.trim())
         : [];
-const parseJsonl = (p) =>
-    readLines(p)
-        .map((l) => {
-            try {
-                return JSON.parse(l);
-            } catch {
-                return null;
-            }
-        })
-        .filter(Boolean);
+// ---------- the run-log gateway: one door in, one door out ----------
+//
+// Round 2 produced three separate HIGH findings that shared a single root: the run-log
+// was treated as loose JSONL, each mode carrying its own private tolerance for data it
+// could not read. `parseJsonl` mapped a broken line to null and filtered it away;
+// `modeNewlines` did `catch { continue }`; the writer appended assuming a trailing
+// newline it never checked. Each hole alone is small. Together they let `write` fuse its
+// new line onto an existing one and `check` then report `dong repin: 0 ... OK` with
+// exit 0 -- the guard destroying provenance and calling the result clean.
+//
+// So the log is no longer loose JSONL. Every read and every write goes through here,
+// and the rule is the one this dossier keeps restating: a thing that cannot be measured
+// must be LOUD, never absent.
+
+const LOG_OF = (slug) => join(ACC, slug, "run-log.jsonl");
+
+// Returns what it actually managed to read, INCLUDING the count it could not. Callers
+// choose what to do with `unreadable`; none of them may ignore it silently.
+function readLog(slug) {
+    const p = LOG_OF(slug);
+    const lines = readLines(p);
+    const objs = [];
+    let unreadable = 0;
+    for (const l of lines) {
+        try {
+            objs.push(JSON.parse(l));
+        } catch {
+            unreadable++;
+        }
+    }
+    return { objs, unreadable, total: lines.length };
+}
+
+// Measured 2026-09-02 across the whole repo: 1669 run-log lines, 0 unparseable. So
+// refusing is not a theoretical strictness that would redden CI on legacy data -- it is
+// a refusal that fires only on damage, which is exactly when a guard must not conclude.
+function readLogOrDie(slug) {
+    const r = readLog(slug);
+    if (r.unreadable)
+        die(
+            `run-log cua ${slug} co ${r.unreadable}/${r.total} dong khong doc duoc — hang rao KHONG KET LUAN GI ve ho so nay thay vi bo qua chung, vi mot dong repin hong va mot dong repin vang trong nhau y het`,
+        );
+    return r.objs;
+}
+
+// The writer's own newline guard, plus a round-trip check that it did not eat anything.
+// appendFileSync onto a file whose last byte is not "\n" concatenates the new object
+// onto the previous line; both then vanish from every reader in the repo
+// (pre-merge-check.sh and recheck-evidence.cjs JSON.parse the same lines).
+function appendLog(slug, obj) {
+    const p = LOG_OF(slug);
+    const before = readLog(slug);
+    const raw = existsSync(p) ? readFileSync(p, "utf8") : "";
+    const lead = raw.length && !raw.endsWith("\n") ? "\n" : "";
+    appendFileSync(p, `${lead}${JSON.stringify(obj)}\n`);
+    // Prove it, do not assume it. The writer is the only thing in this repo that can
+    // damage a signed dossier's provenance, so it re-reads and refuses to claim success
+    // unless the log grew by exactly one readable line and nothing became unreadable.
+    const after = readLog(slug);
+    if (
+        after.unreadable !== before.unreadable ||
+        after.objs.length !== before.objs.length + 1
+    )
+        die(
+            `ghi vao run-log cua ${slug} lam hong so: truoc ${before.objs.length} doc duoc/${before.unreadable} hong, sau ${after.objs.length}/${after.unreadable} — dang le +1 va +0`,
+        );
+}
 
 function signedSlugs() {
     if (!existsSync(ACC)) return [];
@@ -236,7 +293,7 @@ function modeWrite(slug, sha, runId, suites) {
         die(
             `verified_commit cu (${prev.slice(0, 12)}) khong phai to tien cua ${sha.slice(0, 12)} — hai sha khong nam tren mot duong lich su`,
         );
-    const line = JSON.stringify({
+    appendLog(slug, {
         ts: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
         kind: "repin",
         run_id: runId,
@@ -244,7 +301,6 @@ function modeWrite(slug, sha, runId, suites) {
         prev_sha: prev,
         suites_exit: arr,
     });
-    appendFileSync(join(ACC, slug, "run-log.jsonl"), `${line}\n`);
     console.log(
         `ghi 1 dong repin cho ${slug}: prev_sha=${prev.slice(0, 12)} -> sha=${sha.slice(0, 12)}`,
     );
@@ -269,14 +325,24 @@ function modePlan(slug, prev, sha) {
 }
 
 function modeCheck() {
+    // On a shallow clone `git cat-file -t <old sha>` fails because the object is absent,
+    // not because the line is malformed -- so every computable line would silently
+    // become "grandfathered" and the guard would report a clean sweep having measured
+    // nothing. CI checkouts default to depth 1.
+    if (gitOk("rev-parse", "--is-shallow-repository") === "true")
+        die(
+            "kho la ban clone nong (shallow) — moi sha cu deu khong phan giai duoc nen dong repin nao cung roi vao hang ong ba va hang rao xanh ma khong do gi; fetch day du roi chay lai",
+        );
     const slugs = signedSlugs();
     let repins = 0,
         computable = 0,
         grandfathered = 0;
     const swallowed = [];
+    const redRerun = [];
+    const mootRerun = [];
     const inconclusive = new Set();
     for (const slug of slugs) {
-        const log = parseJsonl(join(ACC, slug, "run-log.jsonl"));
+        const log = readLogOrDie(slug);
         const evals = evalsOf(slug);
         // "Was this eval re-measured after the change?" -- NOT "was it re-run inside
         // that same re-pin event". The stricter same-run_id rule cannot be satisfied
@@ -285,19 +351,39 @@ function modeCheck() {
         // instead for an eval line whose sha IS the repin's sha or a descendant of it
         // measures the property that actually matters and can be satisfied by really
         // running the eval now.
+        // `exit_code === 0`, not merely "an eval line exists". Without it, re-running a
+        // touched eval and having it FAIL satisfies the guard -- the loudest case it
+        // exists to catch becomes the case it blesses. A red re-run is not coverage; it
+        // is the finding.
+        // THREE states, because three exist. `exit_code: 0` is coverage; a nonzero
+        // number is a failed re-run; missing or null is neither -- `null` is the shape
+        // the tool-kill rule prescribes for a command the harness killed, so a line can
+        // legitimately exist while proving nothing. Measured 2026-09-02: all 63 real
+        // eval lines in this repo carry `exit_code: 0`, so the strictness costs nothing
+        // on real data and only fires on lines that cannot support a claim.
         const ranAt = new Map();
+        const redAt = new Map();
+        const mootAt = new Map();
         for (const o of log) {
-            if (o.kind === "eval" && o.eval && o.sha) {
-                if (!ranAt.has(o.eval)) ranAt.set(o.eval, []);
-                ranAt.get(o.eval).push(o.sha);
-            }
+            if (o.kind !== "eval" || !o.eval || !o.sha) continue;
+            const bag =
+                o.exit_code === 0
+                    ? ranAt
+                    : typeof o.exit_code === "number"
+                      ? redAt
+                      : mootAt;
+            if (!bag.has(o.eval)) bag.set(o.eval, []);
+            bag.get(o.eval).push(o.sha);
         }
-        const reMeasuredSince = (id, sha) =>
-            (ranAt.get(id) || []).some(
+        const sinceIn = (bag, id, sha) =>
+            (bag.get(id) || []).some(
                 (s) =>
                     s === sha ||
                     gitOk("merge-base", "--is-ancestor", sha, s) !== null,
             );
+        const reMeasuredSince = (id, sha) => sinceIn(ranAt, id, sha);
+        const reMeasuredRed = (id, sha) => sinceIn(redAt, id, sha);
+        const reMeasuredMoot = (id, sha) => sinceIn(mootAt, id, sha);
         for (const o of log) {
             if (o.kind !== "repin") continue;
             repins++;
@@ -318,28 +404,54 @@ function modeCheck() {
             const { hit, unknown } = touchedEvals(evals, changed);
             unknown.forEach((id) => inconclusive.add(`${slug}/${id}`));
             const missing = hit.filter((id) => !reMeasuredSince(id, o.sha));
-            if (missing.length)
-                swallowed.push({ slug, run_id: o.run_id, evals: missing });
+            // Two named outcomes, not one. "Never re-run" and "re-run and failed" are
+            // different defects and a reader who is told only the first will patch the
+            // wrong thing.
+            const red = missing.filter((id) => reMeasuredRed(id, o.sha));
+            const moot = missing.filter(
+                (id) => !reMeasuredRed(id, o.sha) && reMeasuredMoot(id, o.sha),
+            );
+            const never = missing.filter(
+                (id) => !reMeasuredRed(id, o.sha) && !reMeasuredMoot(id, o.sha),
+            );
+            if (never.length)
+                swallowed.push({ slug, run_id: o.run_id, evals: never });
+            if (red.length)
+                redRerun.push({ slug, run_id: o.run_id, evals: red });
+            if (moot.length)
+                mootRerun.push({ slug, run_id: o.run_id, evals: moot });
         }
     }
     console.log(
-        `ho so da ky: ${slugs.length} | dong repin: ${repins} | tinh duoc: ${computable} | ong ba: ${grandfathered} | eval bi nuot: ${swallowed.length} | khong ket luan duoc (khong khai paths): ${inconclusive.size}`,
+        `ho so da ky: ${slugs.length} | dong repin: ${repins} | tinh duoc: ${computable} | ong ba: ${grandfathered} | eval bi nuot: ${swallowed.length} | chay lai nhung DO: ${redRerun.length} | chay lai khong ro ket qua: ${mootRerun.length} | khong ket luan duoc (khong khai paths): ${inconclusive.size}`,
     );
+    for (const s of redRerun) {
+        console.error(
+            `FAIL: ${s.slug} - re-pin ${s.run_id} co ${s.evals.length} eval bi cham DA chay lai nhung DO: ${s.evals.join(",")}`,
+        );
+    }
     if (swallowed.length) {
         for (const s of swallowed) {
             console.error(
                 `FAIL: ${s.slug} - re-pin ${s.run_id} nuot ${s.evals.length} eval bi cham ma khong chay lai: ${s.evals.join(",")}`,
             );
         }
-        process.exit(1);
     }
+    for (const s of mootRerun) {
+        console.error(
+            `FAIL: ${s.slug} - re-pin ${s.run_id} co ${s.evals.length} eval bi cham co dong chay lai NHUNG khong co exit_code (vd bi cong cu giet): ${s.evals.join(",")}`,
+        );
+    }
+    if (swallowed.length || redRerun.length || mootRerun.length)
+        process.exit(1);
     console.log("OK: khong re-pin nao nuot mot eval bi cham");
 }
 
 function modeNewlines(base) {
     const b = base || "origin/main";
     let bad = 0,
-        fresh = 0;
+        fresh = 0,
+        unreadable = 0;
     const slugs = existsSync(ACC)
         ? readdirSync(ACC).filter((s) =>
               existsSync(join(ACC, s, "run-log.jsonl")),
@@ -359,6 +471,10 @@ function modeNewlines(base) {
             try {
                 o = JSON.parse(l);
             } catch {
+                // Counted, never skipped. A new line that cannot be parsed is a line
+                // whose `prev_sha` nobody can vouch for -- indistinguishable from one
+                // that never had it, which is the very thing this mode measures.
+                unreadable++;
                 continue;
             }
             if (o.kind === "repin" && !o.prev_sha) {
@@ -370,8 +486,12 @@ function modeNewlines(base) {
         }
     }
     console.log(
-        `dong run-log moi so ${b}: ${fresh} | dong repin moi thieu prev_sha: ${bad}`,
+        `dong run-log moi so ${b}: ${fresh} | dong repin moi thieu prev_sha: ${bad} | dong moi khong doc duoc: ${unreadable}`,
     );
+    if (unreadable)
+        die(
+            `${unreadable} dong run-log MOI khong doc duoc — khong ket luan duoc gi ve prev_sha cua chung`,
+        );
     if (bad) process.exit(1);
     console.log("OK: moi dong repin moi deu mang prev_sha");
 }

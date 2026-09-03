@@ -98,12 +98,18 @@ Given một kho git dùng-rồi-bỏ,
 When chạy `teeth` với **mười bốn** ca có tên — `healthy` · `nuot-eval` · `da-chay-lai` ·
 `ong-ba` · `khong-khai-paths` · `paths-thu-muc-tran` · `paths-glob` ·
 `write-thieu-verified-commit` · `plan-tap-id` · `plan-them-mot-file` ·
-`write-thieu-suites` · `write-lan-do` · `write-prev-bang-sha` · `diem-vao-duong-dan-la`,
+`write-thieu-suites` · `write-lan-do` · `write-prev-bang-sha` · `diem-vao-duong-dan-la` ·
+`write-giu-dong-cu` · `chay-lai-do` · `log-hong` · `newlines-thieu-prev`,
 Then mỗi ca in `CASE <tên>: PASS`, ca đỏ nêu đích danh id eval, và dòng chốt **đếm đúng
 số ca đã chạy**. Sáu ca là **đối chứng dương** (mong xanh) — `da-chay-lai` phân biệt "bắt
 được việc nuốt" với "đỏ mọi thứ"; `khong-khai-paths` phân biệt "hạng mục không kết luận
 được" với "nuốt"; hai ca `plan` phân biệt một bộ giao đúng với một bộ giao trả **cả tập**.
-Lượt `--case` lẻ in `PARTIAL: n/14`, không in `OK:`; tên ca lạ → thoát 2.
+Lượt `--case` lẻ in `PARTIAL: n/18`, không in `OK:`; tên ca lạ → thoát 2. Và các ca
+ĐỌC không còn chấm trên một dòng repin do chính bộ răng `printf` ra: chúng gọi chế độ
+`write` thật (`repin_written`), nên bộ ghi và bộ đọc được chứng minh là đồng ý về MỘT
+vật, thay vì về hai niềm tin độc lập — vòng 2 cho thấy niềm tin ấy sai được theo cách
+phá dữ liệu. `repin_line` viết tay chỉ còn sống cho hình dạng bộ ghi KHÔNG tạo ra được
+theo thiết kế: dòng ông bà không `prev_sha`.
 
 **AC-10 — `write` TỪ CHỐI ba dạng đầu vào bịa, thay vì ghi một dòng repin đẹp mặt.**
 Given chính chế độ `write` là thứ duy nhất sinh ra dòng repin mới, nên một dòng nó ghi ra
@@ -128,6 +134,35 @@ Then nó in `usage:` và thoát khác 0. Phép so cũ dùng `import.meta.url` v�
 nguyên văn: `import.meta.url` đã phân giải symlink còn `argv[1]` giữ chuỗi người gõ, nên hai
 bên lệch nhau và nhánh "chạy như chương trình" **không chạy gì cả** — thoát 0, không in gì.
 Một hàng rào thoát 0 mà không đo gì là ca xấu nhất trong ba vòng của phiên này.
+
+**AC-12 — Run-log có ĐÚNG MỘT cửa; không bên đọc hay ghi nào tự khoan lỗ.**
+Given vòng 2 đẻ ra ba lỗ HIGH riêng biệt cùng một gốc — mỗi chế độ tự mang dung sai
+riêng cho dữ liệu nó không đọc được: `parseJsonl` biến dòng hỏng thành `null` rồi lọc
+đi, `newlines` làm `catch { continue }`, và bộ ghi `appendFileSync` giả định một dấu
+xuống dòng nó chưa bao giờ kiểm,
+When mọi chế độ đọc hoặc ghi run-log,
+Then chúng đi qua một cửa duy nhất, và cửa ấy: (a) **đếm** dòng không đọc được rồi
+**DỪNG** nêu đích danh hồ sơ, chứ không lọc bỏ — một dòng repin hỏng và một dòng repin
+vắng trông y hệt nhau; (b) ghi có **chốt xuống dòng**, vì `appendFileSync` lên một file
+không kết thúc bằng `\n` hàn dòng mới vào dòng cũ và **cả hai** biến mất khỏi mọi bên
+đọc trong kho (`pre-merge-check.sh`, `recheck-evidence.cjs` cùng `JSON.parse` những dòng
+ấy); (c) sau khi ghi thì **đọc lại và tự đối chiếu** — số dòng đọc được phải tăng đúng 1
+và số dòng hỏng phải không đổi, nếu không thì DỪNG. Đo trước khi siết: 1669 dòng
+run-log trong kho, **0** không đọc được — nên phép từ chối chỉ nổ khi có hư hỏng thật.
+Tái hiện được lỗ này trước khi vá: `check` in `dong repin: 0 … OK` và thoát 0 sau khi
+chính bộ ghi vừa phá mất dòng xuất xứ duy nhất.
+
+**AC-13 — Một lần chạy lại ĐỎ không phải là độ phủ.**
+Given bộ đếm cũ dựng bảng "đã chạy lại" từ `o.kind === "eval" && o.eval && o.sha` mà
+không hề đọc `exit_code`,
+When một eval bị pin chạm được chạy lại,
+Then chỉ `exit_code === 0` mới tính là phủ; một số khác 0 vào hạng **«chạy lại nhưng
+ĐỎ»**, còn thiếu/`null` vào hạng **«chạy lại không rõ kết quả»** (`null` chính là hình
+dạng mà luật tool-kill quy định cho lệnh bị công cụ giết — dòng tồn tại nhưng không
+chứng minh gì). Cả ba hạng có tên riêng trong dòng tổng kết và hai hạng sau đều làm
+hàng rào đỏ. Không có luật này thì chạy lại rồi TRƯỢT vẫn thoả hàng rào — ca ồn ào nhất
+mà nó tồn tại để bắt lại thành ca nó ban phước. Đo 02/09: cả 63 dòng `kind=eval` thật
+trong kho đều mang `exit_code: 0`, nên phép siết không tốn gì trên dữ liệu thật.
 
 **AC-9 — Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.**
 Given chạm vùng gated làm **3** hồ sơ hoá ôi (đo 02/09 bằng mô phỏng ở ba thư mục),

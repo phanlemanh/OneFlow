@@ -628,11 +628,13 @@ executors:
     rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
     rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main
     rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
-    rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main
+    rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main && bash scripts/ci/check-repin-eval-coverage.sh teeth --case newlines-thieu-prev
     rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
     rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers
     rkce_write_refusals: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-suites && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-lan-do && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-prev-bang-sha
     rkce_entrypoint: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diem-vao-duong-dan-la
+    rkce_gateway: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-giu-dong-cu && bash scripts/ci/check-repin-eval-coverage.sh teeth --case log-hong
+    rkce_exit_code: bash scripts/ci/check-repin-eval-coverage.sh teeth --case chay-lai-do
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).

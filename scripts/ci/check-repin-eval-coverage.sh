@@ -140,8 +140,8 @@ teeth)
     --case) ONLY="${2:-}"; [ "$#" -le 2 ] || fail "thua doi so: ${*:3}" ;;
     *) fail "doi so la '${1}' — chi nhan '--case <ten>'" ;;
     esac
-    KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la"
-    TOTAL=14
+    KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev"
+    TOTAL=18
     RAN=0
     FAILED=0
     if [ -n "$ONLY" ] && ! printf '%s\n' $KNOWN | grep -qx "$ONLY"; then
@@ -177,6 +177,11 @@ teeth)
     }
     fx() { d="$(fixture "$1")"; OLD="$(cat "$W/OLD")"; NEW="$(cat "$W/NEW")"; }
     repin_line() { printf '{"ts":"t","kind":"repin","run_id":"R1","sha":"%s"%s,"suites_exit":[0]}\n' "$2" "$3" >> "$1/_acceptance/demo/run-log.jsonl"; }
+    # Round-trip: the line the read cases judge is produced by the WRITER, under run_id
+    # R1, so writer and reader are proven to agree on one artifact instead of on two
+    # independent beliefs about its shape. `repin_line` survives only for the one shape
+    # the writer cannot make by design -- a legacy line with no prev_sha.
+    repin_written() { core "$1" write demo "$2" R1 '[0]' >/dev/null; }
     core() { ( RKCE_ROOT="$1" node "$CORE" "${@:2}" ) 2>&1; }
 
     want() { # want <name> <green|red> <output> <rc> [needles...]
@@ -209,7 +214,7 @@ teeth)
     if run nuot-eval; then
         fx '    paths: ["src/**"]
 '
-        repin_line "$d" "$NEW" ",\"prev_sha\":\"$OLD\""
+        repin_written "$d" "$NEW"
         out="$(core "$d" check)"; rc=$?
         want nuot-eval red "$out" "$rc" "demo" "R1" "E1"
     fi
@@ -218,8 +223,8 @@ teeth)
     if run da-chay-lai; then
         fx '    paths: ["src/**"]
 '
-        repin_line "$d" "$NEW" ",\"prev_sha\":\"$OLD\""
-        printf '{"ts":"t","kind":"eval","run_id":"R2","eval":"E1","sha":"%s"}\n' "$NEW" >> "$d/_acceptance/demo/run-log.jsonl"
+        repin_written "$d" "$NEW"
+        printf '{"ts":"t","kind":"eval","run_id":"R2","eval":"E1","sha":"%s","exit_code":0}\n' "$NEW" >> "$d/_acceptance/demo/run-log.jsonl"
         out="$(core "$d" check)"; rc=$?
         want da-chay-lai green "$out" "$rc" "eval bi nuot: 0"
     fi
@@ -236,7 +241,7 @@ teeth)
     # 5. an eval with no `paths` cannot be judged -- named bucket, not a verdict.
     if run khong-khai-paths; then
         fx ''
-        repin_line "$d" "$NEW" ",\"prev_sha\":\"$OLD\""
+        repin_written "$d" "$NEW"
         out="$(core "$d" check)"; rc=$?
         want khong-khai-paths green "$out" "$rc" "khong ket luan duoc" "eval bi nuot: 0"
     fi
@@ -245,14 +250,14 @@ teeth)
     if run paths-thu-muc-tran; then
         fx '    paths: ["src"]
 '
-        repin_line "$d" "$NEW" ",\"prev_sha\":\"$OLD\""
+        repin_written "$d" "$NEW"
         out="$(core "$d" check)"; rc=$?
         want paths-thu-muc-tran red "$out" "$rc" "E1"
     fi
     if run paths-glob; then
         fx '    paths: ["src/*.ts"]
 '
-        repin_line "$d" "$NEW" ",\"prev_sha\":\"$OLD\""
+        repin_written "$d" "$NEW"
         out="$(core "$d" check)"; rc=$?
         want paths-glob red "$out" "$rc" "E1"
     fi
@@ -335,13 +340,60 @@ teeth)
         fi
     fi
 
+    # 15. the writer must not eat the line already there. A run-log whose last byte is
+    # not a newline made appendFileSync fuse the two objects into one unparseable line;
+    # both then vanished and `check` reported `dong repin: 0 ... OK` with exit 0.
+    if run write-giu-dong-cu; then
+        fx '    paths: ["src/**"]
+'
+        printf '{"ts":"t","kind":"repin","run_id":"R0","sha":"%s","prev_sha":"%s","suites_exit":[0]}' "$OLD" "$OLD" \
+            > "$d/_acceptance/demo/run-log.jsonl"
+        core "$d" write demo "$NEW" R9 '[0]' >/dev/null
+        out="$(core "$d" check)"; rc=$?
+        want write-giu-dong-cu red "$out" "$rc" "dong repin: 2" "R9"
+    fi
+
+    # 16. a re-run that FAILED is not coverage. Before this, any eval line at the pin's
+    # sha satisfied the guard, so the loudest case became the blessed one.
+    if run chay-lai-do; then
+        fx '    paths: ["src/**"]
+'
+        repin_written "$d" "$NEW"
+        printf '{"ts":"t","kind":"eval","run_id":"R1","eval":"E1","sha":"%s","exit_code":1}\n' "$NEW" \
+            >> "$d/_acceptance/demo/run-log.jsonl"
+        out="$(core "$d" check)"; rc=$?
+        want chay-lai-do red "$out" "$rc" "DA chay lai nhung DO" "E1"
+    fi
+
+    # 17. a line nobody can parse must stop the verdict, not be filtered away.
+    if run log-hong; then
+        fx '    paths: ["src/**"]
+'
+        repin_written "$d" "$NEW"
+        printf '{"kind":"eval", CAT CUT\n' >> "$d/_acceptance/demo/run-log.jsonl"
+        out="$(core "$d" check)"; rc=$?
+        want log-hong red "$out" "$rc" "khong doc duoc" "demo"
+    fi
+
+    # 18. the red direction `newlines` never had. Its expected text claimed the red case
+    # lived in `ong-ba`, but that case exercises `check`. An assertion whose only
+    # direction is green measures nothing. Base is $OLD, where run-log.jsonl does not
+    # exist yet -- so every line in it counts as new, which is what this mode judges.
+    if run newlines-thieu-prev; then
+        fx '    paths: ["src/**"]
+'
+        repin_line "$d" "$NEW" ""
+        out="$(core "$d" newlines "$OLD")"; rc=$?
+        want newlines-thieu-prev red "$out" "$rc" "thieu prev_sha" "demo"
+    fi
+
     [ "$FAILED" -eq 0 ] || { echo "FAIL: it nhat mot ca khong xu su nhu doi hoi" >&2; exit 1; }
     if [ -n "$ONLY" ]; then
         echo "PARTIAL: $RAN/$TOTAL ca da chay — khong tuyen gi ve $((TOTAL - RAN)) ca chua chay"
         exit 0
     fi
     [ "$RAN" -eq "$TOTAL" ] || fail "chi $RAN/$TOTAL ca chay ma khong khai --case"
-    echo "OK: $RAN/$TOTAL ca — 6 doi chung duong + 8 phep pha"
+    echo "OK: $RAN/$TOTAL ca — 7 doi chung duong + 11 phep pha"
     ;;
 
 *)
