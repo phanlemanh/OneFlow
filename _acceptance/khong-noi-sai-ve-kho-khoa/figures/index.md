@@ -30,7 +30,7 @@ Kê từ artifact cuối S1: 7 entry sổ quyết định chờ seal · 0 lệch
 
 ### H3 — `h3-phan-loai-va-be-mat.html` · loại: sankey/luồng ba tầng
 - Tầng 1 (10 tín hiệu): 200+env · 503+code · 401 · 403 · 500 · 502-html · not-json · env-sai-hình · mạng rớt · quá trần.
-- Tầng 2 (4 state): ok · store-unreadable · unauthenticated · unavailable. Chỉ 503+code → store-unreadable; chỉ 401 → unauthenticated; 200+env → ok; sáu còn lại → unavailable. Đánh dấu «dương cả hai chiều».
+- Tầng 2 (4 state): ok · store-unreadable · unauthenticated · unavailable. Chỉ 503+code → store-unreadable; chỉ 401 → unauthenticated; 200+env → ok; bảy còn lại → unavailable (403 · 500 · 502-html · not-json · env-sai-hình · mạng rớt · quá trần). Đánh dấu «dương cả hai chiều».
 - Tầng 3 (3 bề mặt × hành động): Cài đặt / node key prompt / ML panel — ô duy nhất có nút phá huỷ: Cài đặt × store-unreadable; Thử lại ở mọi ô không-ok; PUT = 0 ở mọi ô không-ok. Ghi chú nhỏ: 401 → bắn `tf:unauthorized` (403 không).
 - AC liên quan: AC-2, AC-3, AC-5, AC-6.
 
