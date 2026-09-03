@@ -97,7 +97,7 @@ function Frame({
 
 function RetryButton() {
     return (
-        <Button type="button" variant="outline" size="sm">
+        <Button type="button">
             <RotateCw aria-hidden="true" className="h-4 w-4" />
             {COPY.retry}
         </Button>
@@ -179,8 +179,8 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                             <RetryButton />
                             <Button
                                 type="button"
-                                variant="destructive"
-                                size="sm"
+                                variant="outline"
+                                className="text-destructive"
                             >
                                 {COPY.escape}
                             </Button>
@@ -237,7 +237,7 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                     >
                         <div className="flex flex-wrap gap-2">
                             <RetryButton />
-                            <Button type="button" variant="ghost" size="sm">
+                            <Button type="button" variant="ghost">
                                 {COPY.toSettings}
                             </Button>
                         </div>
