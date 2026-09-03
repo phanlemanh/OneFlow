@@ -147,6 +147,12 @@ async function saveAndVerifyKey(
         // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
         // which invites the user to type a new key because the disk was full or
         // the connection dropped.
+        // `replace-refused` cannot reach here: only the destructive replace
+        // asks for it, and this path never does. Narrowing rather than casting
+        // keeps that a compiler-checked claim.
+        if (out.reason === "replace-refused") {
+            return { writeFailed: { code: "http", status: 409 } };
+        }
         return { writeFailed: out.detail };
     }
     return (

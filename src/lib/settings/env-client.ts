@@ -107,7 +107,16 @@ export type EnvReadFailure = Exclude<EnvClientRead, { state: "ok" }>;
 export type SaveOutcome =
     | { ok: true; verdicts: Record<string, KeyVerdict> }
     | { ok: false; reason: "read-failed"; read: EnvReadFailure }
-    | { ok: false; reason: "write-failed"; detail: WriteFailure };
+    | { ok: false; reason: "write-failed"; detail: WriteFailure }
+    /**
+     * The server checked our premise and found it false: we asked to replace
+     * an unreadable store, and the store reads fine. Nothing was written.
+     *
+     * Its own arm rather than a write failure, because nothing failed. The
+     * caller's honest response is to re-read, not to report a fault that does
+     * not exist while the user's keys sit intact behind an error card.
+     */
+    | { ok: false; reason: "replace-refused" };
 
 /**
  * Every request from this module, with a ceiling.
@@ -296,6 +305,16 @@ async function put(body: unknown): Promise<SaveOutcome> {
         // precisely what happened; discarding it here undoes the whole feature
         // on the race where the store breaks between the read and the write.
         if (response.status === 409) {
+            // Two different 409s, and telling them apart is the whole point.
+            // One says the store is broken; the other says it is FINE and our
+            // request was based on a stale reading. Collapsing them reports a
+            // healthy store as a corrupt one.
+            const body = (await response.json().catch(() => ({}))) as {
+                code?: string;
+            };
+            if (body.code === "ENV_STORE_REPLACE_REFUSED") {
+                return { ok: false, reason: "replace-refused" };
+            }
             return {
                 ok: false,
                 reason: "read-failed",

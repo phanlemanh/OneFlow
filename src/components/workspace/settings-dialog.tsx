@@ -383,6 +383,14 @@ export function SettingsDialog() {
         replacing.current = true;
         try {
             const out = await replaceUnreadableStore();
+            if (!out.ok && out.reason === "replace-refused") {
+                // The server just told us our premise was wrong: the store
+                // reads fine and nothing was written. Re-check the premise
+                // rather than reporting a fault that does not exist.
+                setConfirming(false);
+                await fetchEnv();
+                return;
+            }
             if (!out.ok) {
                 // `replaceUnreadableStore` never reads first, so it can only
                 // fail on the write; narrowing keeps the reason a plain string
@@ -460,12 +468,17 @@ export function SettingsDialog() {
                     // `blocked` was captured at fetch time, so without this the
                     // screen would keep offering a Save that can never land.
                     setBlocked(out.read);
-                } else {
+                } else if (out.reason === "write-failed") {
                     toast.error(
                         tStore("writeFailed", {
                             reason: writeFailureText(tStore, out.detail),
                         }),
                     );
+                } else {
+                    // A merge-save never claims the store is unreadable, so the
+                    // server has no premise to refuse. Re-reading is still the
+                    // truthful response if it ever does.
+                    await fetchEnv();
                 }
                 return;
             }
