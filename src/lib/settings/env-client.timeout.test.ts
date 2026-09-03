@@ -1,4 +1,13 @@
+// @vitest-environment jsdom
+import { act, renderHook } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
+import { NextIntlClientProvider } from "next-intl";
+import { createElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useNodeKeyGate } from "@/components/workspace/nodes/base/abi-node-shell";
+import type { Task } from "@/hooks/use-task";
+import viMsg from "@/i18n/messages/vi.json";
+import { DEFAULT_TIMEOUT_MS } from "@/lib/api/client";
 import { readEnvForBrowser, saveEnvKeys } from "./env-client";
 
 /**
@@ -17,6 +26,21 @@ import { readEnvForBrowser, saveEnvKeys } from "./env-client";
  * shape of the failure is part of the contract, not an implementation detail.
  */
 const CEILING = 30_000;
+
+/*
+ * JSX would force this file to `.tsx`, and the eval that runs it names the
+ * `.ts` path. `createElement` keeps the measurement where its contract says it
+ * is rather than renaming the contract to suit the test.
+ */
+const wrap = ({ children }: { children: React.ReactNode }) =>
+    createElement(
+        // Cast because the catalogue's inferred literal type is narrower than
+        // the provider's index-signature parameter; the VALUE passed is the
+        // real catalogue either way, and children go in positionally.
+        NextIntlClientProvider as React.ComponentType<Record<string, unknown>>,
+        { locale: "vi", messages: viMsg },
+        createElement(ReactFlowProvider, null, children),
+    );
 
 beforeEach(() => {
     vi.useFakeTimers();
@@ -114,6 +138,53 @@ describe("30s ceiling on both directions", () => {
             (got as { detail: { code: string } }).detail.code,
             "write: expected timeout code",
         ).toBe("timeout");
+    });
+
+    it("the shared ceiling is imported, not written twice", async () => {
+        // Two ceilings that drift apart are two behaviours the user
+        // experiences as one. The number lives in the API client; this asserts
+        // env-client spends it rather than picking its own.
+        expect(DEFAULT_TIMEOUT_MS, "the ceiling must be the shared one").toBe(
+            CEILING,
+        );
+    });
+
+    it("a node past the ceiling never calls the key bad", async () => {
+        // The whole reason the write needed a ceiling. Without one the node sits
+        // in `verifying` forever; with a THROWN timeout it lands in
+        // abi-node-shell's catch as `invalid` — "your key does not work" —
+        // because the network stalled. Neither is a true statement about the
+        // key, so the assertion is on both at once.
+        const { result } = renderHook(() => useNodeKeyGate(), {
+            wrapper: wrap,
+        });
+        await act(async () => {
+            result.current.noteTask({
+                id: "t1",
+                status: "FAILED",
+                error: "missing OPENAI_API_KEY",
+            } as unknown as Task);
+        });
+        await act(async () => {
+            result.current.setValue("sk-test");
+        });
+        const saving = result.current.save();
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(CEILING + 1);
+            await saving;
+        });
+
+        const phase = result.current.state.phase;
+        expect(
+            phase,
+            "a stalled read must not leave the node spinning",
+        ).not.toBe("verifying");
+        expect(phase, "a stalled read is not a verdict on the key").not.toBe(
+            "verified",
+        );
+        expect(phase, "a stalled read must not call the key invalid").not.toBe(
+            "invalid",
+        );
     });
 
     it("just under the ceiling neither has fired", async () => {

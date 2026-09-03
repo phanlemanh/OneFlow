@@ -23,6 +23,7 @@ import {
 } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { SettingsDialog } from "@/components/workspace/settings-dialog";
 import viMsg from "@/i18n/messages/vi.json";
 
@@ -73,6 +74,64 @@ describe("retry reads again", () => {
                 f.mock.calls.length - before,
                 "retry: expected exactly 1 further read",
             ).toBe(1),
+        );
+    });
+
+    it("two clicks while the read is in flight still read once", async () => {
+        // A `busy` boolean set inside an async callback has not settled by the
+        // time the second click dispatches, which is how "exactly one request"
+        // becomes two. The button must be disabled from the same tick the read
+        // starts, so this asserts the count AND the disabled attribute.
+        // Typed through an object so TS does not narrow it to `null`: the
+        // assignment happens inside the fetch closure, which the compiler
+        // cannot see running before the release below.
+        const hold: { release?: (r: Response) => void } = {};
+        let first = true;
+        const fetchMock = vi.fn(async (_u: string, init?: RequestInit) => {
+            if (init?.method === "PUT") {
+                return new Response("{}", { status: 200 });
+            }
+            if (first) {
+                first = false;
+                return new Response("{}", { status: 500 });
+            }
+            return new Promise<Response>((resolve) => {
+                hold.release = resolve;
+            });
+        });
+        vi.stubGlobal("fetch", fetchMock);
+
+        render(
+            <NextIntlClientProvider locale="vi" messages={viMsg}>
+                <SettingsDialog />
+            </NextIntlClientProvider>,
+        );
+        fireEvent.click(screen.getByRole("button", { name: S.title }));
+        await waitFor(() =>
+            expect(screen.queryAllByTestId("unavailable-notice").length).toBe(
+                1,
+            ),
+        );
+
+        const before = fetchMock.mock.calls.length;
+        const btn = screen.getByRole("button", { name: RETRY });
+        await act(async () => {
+            fireEvent.click(btn);
+        });
+        fireEvent.click(btn);
+
+        expect(
+            fetchMock.mock.calls.length - before,
+            "retry: expected 1 read, a second click must not start another",
+        ).toBe(1);
+        expect(
+            (screen.getByRole("button", { name: RETRY }) as HTMLButtonElement)
+                .disabled,
+            "retry: the button must be disabled while the read is in flight",
+        ).toBe(true);
+
+        hold.release?.(
+            new Response(JSON.stringify({ env: {}, pluginEnv: [] })),
         );
     });
 
@@ -129,6 +188,41 @@ describe("retry reads again", () => {
             screen.queryAllByTestId("unavailable-notice").length,
             "retry: the stale card must be gone",
         ).toBe(0);
+    });
+
+    it("all three surfaces carry a retry that is a live control", async () => {
+        // The matrix suite counts the button on all three surfaces; this
+        // asserts the control is wired on all three, which is the half a count
+        // cannot see. The canvas surfaces hand their retry in as a prop, so
+        // what is measured here is that the shared card actually calls it.
+        for (const state of ["unauthenticated", "unavailable"] as const) {
+            let fired = 0;
+            const { unmount } = render(
+                <NextIntlClientProvider locale="vi" messages={viMsg}>
+                    <ReadStateNotice
+                        read={
+                            state === "unauthenticated"
+                                ? { state }
+                                : { state, reason: { code: "timeout" } }
+                        }
+                        // Echo the key back so the assertion names the exact
+                        // key the card asked for, not a translated string.
+                        t={((k: string) => k) as never}
+                        onRetry={() => {
+                            fired += 1;
+                        }}
+                    />
+                </NextIntlClientProvider>,
+            );
+            fireEvent.click(
+                screen.getByRole("button", { name: `${state}.retry` }),
+            );
+            expect(
+                fired,
+                `${state}: the shared card must call the surface's retry`,
+            ).toBe(1);
+            unmount();
+        }
     });
 
     it("a retry never offers the destructive button", async () => {

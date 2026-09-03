@@ -514,7 +514,14 @@ export function SettingsDialog() {
                     <DialogDescription>{t("description")}</DialogDescription>
                 </DialogHeader>
 
-                {loading ? (
+                {/*
+                 * `!blocked` matters. A retry sets `loading`, and swapping the
+                 * whole card for a spinner takes away the sentence that makes
+                 * the card safe — "nothing has been changed" — at the exact
+                 * moment the user acted on it. Keeping the card and disabling
+                 * its button says the same thing and stays put.
+                 */}
+                {loading && !blocked ? (
                     <div className="flex justify-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>

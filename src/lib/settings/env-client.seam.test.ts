@@ -5,6 +5,7 @@
 // outside this repo subscribes to — asserting it against a stub would only
 // prove the stub was called.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { apiClient } from "@/lib/api/client";
 import { readEnvForBrowser } from "./env-client";
 
 /**
@@ -60,6 +61,18 @@ describe("shell seam fires on 401 only", () => {
         respond(503, JSON.stringify({ code: "ENV_STORE_UNREADABLE" }));
         await readEnvForBrowser();
         expect(fired.length, "503: expected 0 dispatches").toBe(0);
+    });
+
+    it("the OTHER caller fires the same seam — one definition, two callers", async () => {
+        // The structural half. Both sides of the app must reach the shell
+        // through the same helper; a second inline dispatch would satisfy
+        // every behavioural case above and still put the event name and the
+        // `cancelable` contract in two places.
+        respond(401);
+        await apiClient("/api/anything").catch(() => {});
+        expect(fired.length, "apiClient 401: expected exactly 1 dispatch").toBe(
+            1,
+        );
     });
 
     it("a shell that handles it can cancel the event", async () => {
