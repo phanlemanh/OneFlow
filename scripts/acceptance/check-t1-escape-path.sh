@@ -77,6 +77,41 @@ else
   fails=$((fails+1))
 fi
 
+# ── Half C — should FIRE (the fail-open the other two halves cannot see) ────
+# B and A differ by TWO things at once: whether artifacts are present, and
+# whether those artifacts are a DOSSIER. So the pair pins "any _acceptance/
+# change opens the door" and "a dossier artifact opens the door" equally well,
+# and cannot tell the two apart. This half varies only the second: a top-level
+# _acceptance/ file that is evidence for no slug at all.
+#
+# It matters because the violation message tells you to `declare T1 honestly
+# (t1_skip_globs)` — and t1_skip_globs lives in _acceptance/config.yaml, so
+# doing exactly what the gate suggests used to switch the gate off for the very
+# PR doing it. Measured 2026-09-02 on PR #93: before the declaring commit the
+# gate printed `1 violation — merge blocked`; after a commit that changed
+# NOTHING but _acceptance/config.yaml it printed `clean`, and four ungated
+# product files belonging to another branch stopped being flagged.
+( cd "$d" && printf '\n# touched by half C\n' >> _acceptance/config.yaml \
+  && git add -A && git commit -q -m "carry a top-level _acceptance file, not a dossier artifact" )
+if ! in_diff "$GUARD_REL"; then
+  echo "  FAIL [half C] the guard change fell out of the diff — half C would pass vacuously"
+  fails=$((fails+1))
+elif ! in_diff _acceptance/config.yaml; then
+  echo "  FAIL anti-vacuous [half C] _acceptance/config.yaml is not in the diff — the half tests nothing"
+  fails=$((fails+1))
+else
+  outC="$(run_gate)"
+  if ! printf '%s\n' "$outC" | grep -q 'pre-merge-check:'; then
+    echo "  FAIL [half C] the gate produced no summary line — it did not run"
+    fails=$((fails+1))
+  elif printf '%s\n' "$outC" | grep -q "$ESCAPE"; then
+    echo "  ok   [half C] a top-level _acceptance/ file does not count as carrying artifacts"
+  else
+    echo "  FAIL [half C] touching only _acceptance/config.yaml switched the backstop OFF — declaring t1_skip_globs, the very thing the violation message tells you to do, exempts the PR that declares it"
+    fails=$((fails+1))
+  fi
+fi
+
 # ── Half A — must NOT fire ──────────────────────────────────────────────────
 # Same PR, one artifact added. `_acceptance/**` is excluded from every staleness
 # set, so this changes nothing except whether the PR carries gate artifacts.

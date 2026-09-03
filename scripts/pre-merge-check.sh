@@ -989,7 +989,27 @@ DIFF_GATE_TOUCHED=0; DIFF_T3_HITS=""; DIFF_NONT1_HITS=""
 if [ "$DIFF_READY" -eq 1 ]; then
   while IFS= read -r f; do
     [ -n "$f" ] || continue
-    case "$f" in _acceptance/*|*/_acceptance/*) DIFF_GATE_TOUCHED=1; continue ;; esac
+    # «Mang artifact» = mang artifact CỦA MỘT HỒ SƠ, tức `_acceptance/<slug>/…`,
+    # chứ không phải một tệp bất kỳ dưới `_acceptance/`. Hai mẫu, không phải một:
+    #
+    #   `_acceptance/*/*`  hồ sơ  -> PR này đã tái nghiệm thu, backstop nghỉ
+    #   `_acceptance/*`    cấp 1  -> config.yaml, README.md: KHÔNG phải bằng chứng
+    #
+    # Cả hai vẫn `continue` — không tệp nào dưới `_acceptance/` bị đem đi phân
+    # hạng — nhưng chỉ mẫu đầu mới tắt được backstop.
+    #
+    # Trước 03/09 chỉ có một mẫu, và nó fail-open: thông điệp vi phạm bảo
+    # «declare T1 honestly (t1_skip_globs)», mà `t1_skip_globs` sống trong
+    # `_acceptance/config.yaml` — nên làm ĐÚNG điều cổng gợi ý sẽ tắt cổng cho
+    # chính PR đang làm điều đó. Đo trên PR #93 (02/09): trước commit khai T1
+    # cổng in «1 violation — merge blocked»; sau một commit không đổi gì ngoài
+    # `_acceptance/config.yaml`, cổng in «clean» và bốn tệp sản phẩm chưa qua
+    # cổng của một nhánh khác thôi bị gắn cờ. Nửa C của
+    # `check-t1-escape-path.sh` canh đúng chỗ này.
+    case "$f" in
+      _acceptance/*/*|*/_acceptance/*/*) DIFF_GATE_TOUCHED=1; continue ;;
+      _acceptance/*|*/_acceptance/*) continue ;;
+    esac
     if [ -n "$T3_PATHS" ] && match_globs "$f" "$T3_PATHS"; then
       DIFF_T3_HITS="${DIFF_T3_HITS}${f}"$'\n'
     elif ! match_globs "$f" "$T1_GLOBS"; then
