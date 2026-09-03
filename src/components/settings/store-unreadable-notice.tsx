@@ -1,5 +1,6 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import { ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,25 @@ import { cn } from "@/lib/utils";
  * could write would be a fourth road to the failure it exists to describe.
  */
 
+export type NoticeTone = "destructive" | "quiet";
+
+const TONE = {
+    destructive: {
+        frame: "border-destructive/50 bg-destructive/5",
+        icon: "text-destructive",
+    },
+    /**
+     * A transient failure is not a broken store. Red says "danger, something is
+     * wrong with your data"; a 30-second timeout and an expired session are
+     * neither. Colour has to carry the same taxonomy the words carry — this
+     * dossier's invariant applied to the visual channel.
+     */
+    quiet: {
+        frame: "border-border bg-muted/40",
+        icon: "text-muted-foreground",
+    },
+} as const;
+
 export interface StoreUnreadableLabels {
     /** Headline, e.g. "Không đọc được kho khoá đã lưu". */
     title: string;
@@ -32,6 +52,9 @@ export interface StoreUnreadableLabels {
 export function StoreUnreadableNotice({
     reason,
     labels,
+    tone = "destructive",
+    icon: Icon = ShieldAlert,
+    testId = "store-unreadable-notice",
     headingLevel = 2,
     className,
     children,
@@ -39,6 +62,19 @@ export function StoreUnreadableNotice({
     /** Machine-derived cause, already turned into a sentence by the caller. */
     reason: string;
     labels: StoreUnreadableLabels;
+    /**
+     * How loud the card is. Defaults to `destructive` so the caller that
+     * already exists keeps its exact appearance; the two read states added by
+     * this dossier pass `quiet`.
+     */
+    tone?: NoticeTone;
+    /** The glyph beside the headline. Never decides the tone — the tone does. */
+    icon?: LucideIcon;
+    /**
+     * Distinguishes the four cards a surface may render. Defaults to the value
+     * the previous dossier's evals already pin, so those keep passing.
+     */
+    testId?: string;
     /**
      * Where this card sits in the page outline.
      *
@@ -77,16 +113,23 @@ export function StoreUnreadableNotice({
              * to protect. Each surface's eval asserts exactly one of these, so
              * a hand-copied card fails by absence rather than by review.
              */
-            data-testid="store-unreadable-notice"
+            data-testid={testId}
+            /*
+             * One marker for prototype and shipping surfaces alike. The a11y
+             * floor is measured on the prototype; without a shared marker that
+             * measurement proves nothing about the real screens.
+             */
+            data-proto-component="store-unreadable-notice"
             className={cn(
-                "space-y-2 rounded-md border border-destructive/50 bg-destructive/5 p-4",
+                "space-y-2 rounded-md border p-4",
+                TONE[tone].frame,
                 className,
             )}
         >
             <header className="flex items-center gap-2">
-                <ShieldAlert
+                <Icon
                     aria-hidden="true"
-                    className="h-4 w-4 shrink-0 text-destructive"
+                    className={cn("h-4 w-4 shrink-0", TONE[tone].icon)}
                 />
                 <Heading className="text-sm font-medium text-foreground">
                     {labels.title}

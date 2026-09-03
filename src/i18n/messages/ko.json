@@ -57,6 +57,17 @@
                 "timeout": "요청이 30초 후 시간 초과되었습니다"
             },
             "writeFailed": "저장하지 못했습니다({reason}). 아무것도 변경되지 않았습니다."
+        },
+        "unauthenticated": {
+            "title": "세션이 만료되었습니다",
+            "unchanged": "변경된 내용이 없습니다.",
+            "retry": "다시 시도"
+        },
+        "unavailable": {
+            "title": "키 서버에 연결할 수 없습니다",
+            "unchanged": "변경된 내용이 없습니다.",
+            "retry": "다시 시도",
+            "reason": "요청에 응답이 없었습니다({code})."
         }
     },
     "Index": {
@@ -1129,6 +1140,17 @@
                 "network": "요청이 완료되지 않았습니다({detail})",
                 "timeout": "요청이 30초 후 시간 초과되었습니다"
             }
+        },
+        "unauthenticated": {
+            "title": "세션이 만료되었습니다",
+            "unchanged": "변경된 내용이 없습니다.",
+            "retry": "다시 시도"
+        },
+        "unavailable": {
+            "title": "키 서버에 연결할 수 없습니다",
+            "unchanged": "변경된 내용이 없습니다.",
+            "retry": "다시 시도",
+            "reason": "요청에 응답이 없었습니다({code})."
         }
     },
     "Upload": {

@@ -57,6 +57,17 @@
                 "timeout": "リクエストが30秒でタイムアウトしました"
             },
             "writeFailed": "保存できませんでした（{reason}）。何も変更されていません。"
+        },
+        "unauthenticated": {
+            "title": "セッションの有効期限が切れました",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行"
+        },
+        "unavailable": {
+            "title": "キーサーバーに接続できません",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行",
+            "reason": "リクエストに応答がありませんでした（{code}）。"
         }
     },
     "Index": {
@@ -1043,6 +1054,17 @@
                 "network": "リクエストが完了しませんでした（{detail}）",
                 "timeout": "リクエストが30秒でタイムアウトしました"
             }
+        },
+        "unauthenticated": {
+            "title": "セッションの有効期限が切れました",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行"
+        },
+        "unavailable": {
+            "title": "キーサーバーに接続できません",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行",
+            "reason": "リクエストに応答がありませんでした（{code}）。"
         }
     },
     "Upload": {

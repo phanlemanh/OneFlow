@@ -57,6 +57,17 @@
                 "timeout": "yêu cầu quá 30 giây không có trả lời"
             },
             "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi."
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
         }
     },
     "Index": {
@@ -1129,6 +1140,17 @@
                 "network": "yêu cầu không hoàn tất ({detail})",
                 "timeout": "yêu cầu quá 30 giây không có trả lời"
             }
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
         }
     },
     "Upload": {
