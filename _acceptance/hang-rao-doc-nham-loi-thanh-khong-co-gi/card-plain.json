@@ -1,40 +1,18 @@
 {
-  "feature_plain": "Ba hàng rào của cổng nghiệm thu thôi đọc nhầm \"tôi không lấy được dữ liệu\" thành \"không có gì sai\" — và khi một phép kiểm không thể tự chấm chính nó, việc miễn trừ ấy được khai ra và đếm được, thay vì lặng lẽ.",
-  "scope_plain": "Chỉ sửa MỘT tệp hàng rào (4 trong 9 chỗ đọc git) và thêm MỘT hàng rào mới cho khoá trùng; hai hàng rào còn lại, phép đếm hằng-đúng, và bộ quét thiếu ngữ cảnh đều để lại cho vòng sau.",
-  "will_do": [
-    { "id": "AC-6", "p": "Sẽ có một hàng rào bắt được tệp khai ô đo có cùng một khoá hai lần — thứ đã khiến một hồ sơ đã ký mô tả một phép đo không hề chạy." }
-  ],
-  "wont_do": [
-    { "id": "AC-1", "p": "Chặn phép so dòng mới khi mốc so sánh không đọc được, thay vì coi toàn bộ lịch sử là mới và đổ 25 lỗi lên các hồ sơ không liên quan." },
-    { "id": "AC-2", "p": "Sẽ KHÔNG chặn quá tay: một tệp chưa tồn tại ở mốc so sánh vẫn phải đọc là chưa tồn tại, không phải là lỗi." },
-    { "id": "AC-3", "p": "Chặn phần kiểm chính khi phép so hai mốc thất bại, thay vì đọc thất bại ấy thành \"không có gì đổi\" rồi tính lần ghim là đã đo." },
-    { "id": "AC-4", "p": "Hạng miễn trừ cho dữ liệu lịch sử giữ nguyên, nhưng số lượng phải in ra — một hạng không đếm được là chỗ mọi thứ hỏng trôi vào mà không con số nào đổi." },
-    { "id": "AC-5", "p": "Chặn khi phép dò \"kho có bị cắt bớt không\" thất bại, thay vì mặc định là kho đầy đủ." },
-    { "id": "AC-7", "p": "Hàng rào khoá trùng phải nêu đích danh hồ sơ, khoá và số dòng — và KHÔNG được dùng chính bộ đọc đang nuốt khoá để bắt lỗi nuốt khoá." },
-    { "id": "AC-8", "p": "Phép kiểm nào tự chấm chính nó thì phải KHAI ra, không để máy đoán từ tên lệnh — và cái giá của việc miễn trừ được viết thẳng kèm hai phép bù có tên." },
-    { "id": "AC-9", "p": "Ô được miễn trừ không biến mất: nó vào một hạng có tên, có số, in cạnh các số khác." },
-    { "id": "AC-10", "p": "Quên khai thì hàng rào ĐỎ chứ không xanh — và để chứng minh bế tắc đã hết thật, phải trả lại phạm vi canh mà bản vá tạm hôm qua đã cắt đi." },
-    { "id": "AC-11", "p": "Sẽ KHÔNG để hồ sơ đã ký nào khác mang bằng chứng cũ hơn mã: thêm tệp vào vùng này làm bằng chứng của nhiều hồ sơ hoá ôi, nên phải ghim lại trước khi chấm." }
-  ],
-  "coverage_plain": [
-    { "i": 0, "p": "Nguồn dữ liệu ngoài mà hàng rào đọc — tham chiếu git, nội dung git, tệp khai ô đo, trạng thái kho. Đếm được: 9 chỗ đọc git và 34 tệp khai." },
-    { "i": 1, "p": "Cách hỏng — lệnh lỗi, rỗng hợp lệ, mất mát âm thầm, và loại không thể thoả được. Cả bốn đã xảy ra thật, có số đo, không phải giả định." },
-    { "i": 2, "p": "Hướng phép hỏng chỉ về — xanh sai, đỏ sai, hay từ chối lớn tiếng. Đây là trục quyết định mọi lựa chọn cơ chế trong vòng này." }
-  ],
-  "gap_probe_plain": [
-    { "i": 0, "p": "Phép miễn trừ mà chính vòng này dựng lên lại mở một lỗ mới: ba ô duy nhất tự chấm hàng rào đã được miễn, nên hàng rào không bao giờ buộc chạy lại phép đo của mình. Đã thử thu hẹp và thấy nó dựng lại đúng vòng tròn — nên chọn khai thẳng cái đánh đổi kèm hai phép bù có tên." },
-    { "i": 1, "p": "Hạng mới cho ô tự-chấm không ghim con số nào, nên một bản in ra số không vẫn đạt. Nay đòi số tối thiểu, nêu đích danh tập, và có chiều đỏ." },
-    { "i": 2, "p": "Phép chặn mốc-không-đọc-được chưa đòi bằng chứng rằng nó chặn TRƯỚC khi đọc tệp — một bản quét hết rồi mới dừng vẫn đạt. Nay đòi thêm hai dấu hiệu đo được." },
-    { "i": 3, "p": "Bảng ngưỡng hứa \"ba hàng rào hết chỗ đọc nhầm\" trong khi phạm vi chỉ chạm một tệp. Nay nói đúng 4 trên 9 chỗ, và ghi rõ ngưỡng gốc đã bị sửa phạm vi thay vì im lặng thừa kế." },
-    { "i": 4, "p": "Fixture kiểm thử dựng dòng ghim bằng tay theo hình dạng mà bộ đọc giả định — hai niềm tin độc lập. Nay có luật buộc mọi ca gọi chính bộ ghi thật." }
-  ],
+  "feature_plain": "Khi một phép kiểm của cổng nghiệm thu không lấy được dữ liệu nó cần, nó nói thẳng \"tôi không đo được\" và dừng, thay vì im lặng kết luận \"không có gì sai\" — và phép miễn trừ cho những ô tự chấm chính mình nay được khai ra và đếm được.",
+  "scope_plain": "Chỉ chạm một tệp hàng rào và thêm một hàng rào mới bắt tệp khai ô đo có khoá lặp; hai hàng rào còn lại, phép đếm luôn-đúng, và bộ quét thiếu ngữ cảnh để lại cho vòng sau.",
+  "analyst_plain": "Vòng này không đo lại mốc nền, nên không ô đo nào bị xếp vào diện không phân biệt được.",
   "decisions_plain": [
-    { "id": "d-20260903T083429Z-24284", "p": "KHÔNG làm phần mô tả giao diện — việc này không chạm màn hình nào; đổi lại người duyệt gặp cấu trúc lần đầu trong mã." },
-    { "id": "d-20260903T083429Z-26757", "p": "KHÔNG dựng bản bấm được để duyệt — không có giao diện để bấm." },
-    { "id": "d-20260903T083429Z-24952", "p": "Chọn đặt một chốt ở đầu mỗi chế độ thay vì bọc lại cả chín chỗ đọc; đổi lại một chỗ đọc mới thêm sau này sẽ không tự được bảo vệ." },
-    { "id": "d-20260903T083429Z-27268", "p": "Chọn khai tường minh thay vì đoán từ tên lệnh, vì quên khai thì hàng rào đỏ chứ không xanh; đổi lại tác giả phải nhớ khai." },
-    { "id": "d-20260903T083429Z-24170", "p": "KHÔNG làm hai nhóm còn lại ở vòng này — một cái là dòng kiểm ở hàng rào khác, cái kia chưa có lời giải rõ và sẽ kéo cả hợp đồng theo nhịp phần mơ hồ nhất." },
-    { "id": "d-20260903T083429Z-6068", "p": "KHÔNG chạm tệp lõi mượn từ bộ kit, dù nó là một trong ba chỗ của nhóm bị cắt." },
-    { "id": "d-20260903T083429Z-21722", "p": "Trả lại phạm vi canh mà bản vá tạm hôm qua cắt đi là một phần của tiêu chí, không phải việc dọn dẹp — không trả lại thì bế tắc chỉ đang bị giấu." }
+    { "id": "d-20260903T104429Z-24284", "p": "KHÔNG làm phần mô tả giao diện — việc này không chạm màn hình nào; đổi lại người duyệt gặp cấu trúc lần đầu ngay trong mã." },
+    { "id": "d-20260903T104429Z-26757", "p": "KHÔNG dựng bản bấm được để duyệt — không có giao diện nào để bấm." },
+    { "id": "d-20260903T104429Z-24952", "p": "Chọn đặt một chốt ở đầu mỗi chế độ thay vì bọc lại cả chín chỗ đọc dữ liệu; đổi lại một chỗ đọc thêm sau này sẽ không tự được bảo vệ." },
+    { "id": "d-20260903T104429Z-27268", "p": "Chọn bắt tác giả khai thẳng ô nào tự chấm chính mình, thay vì để máy đoán từ tên lệnh — quên khai thì hàng rào đỏ chứ không xanh; đổi lại tác giả phải nhớ khai." },
+    { "id": "d-20260903T104429Z-24170", "p": "KHÔNG làm hai nhóm còn lại ở vòng này — một cái thuộc hàng rào khác, cái kia chưa có lời giải rõ và sẽ kéo cả hợp đồng theo nhịp phần mơ hồ nhất." },
+    { "id": "d-20260903T104429Z-6068", "p": "KHÔNG chạm tệp lõi mượn từ bộ công cụ, dù nó là một trong ba chỗ của nhóm đã cắt." },
+    { "id": "d-20260903T104429Z-21722", "p": "Coi việc trả lại vùng phủ đã bị thu hẹp hôm qua là một phần của tiêu chí, không phải việc dọn dẹp — không trả lại thì bế tắc chỉ đang bị giấu." },
+    { "id": "d-20260903T213609Z-31519", "p": "Siết lệnh của một ô đo trước khi chốt phạm vi: lệnh cũ không khẳng định con số nào, nên một bản in ra số không vẫn đạt." },
+    { "id": "d-20260903T215222Z-1758", "p": "Cho một ô đo chạy trọn bộ ca kiểm thay vì một ca lẻ — nếu không, ca chống báo động giả sẽ không bao giờ được chạy." },
+    { "id": "d-20260903T215606Z-32613", "p": "Đếm phép miễn trừ theo LỜI KHAI trên mọi hồ sơ, thay vì hạ ngưỡng cho khớp con số đo được; đổi lại hạng này kể cả miễn trừ chưa có hiệu lực, nên mỗi cái đều được in đích danh." },
+    { "id": "d-20260903T221657Z-18152", "p": "Sửa tay hai chỗ trong tệp tham số của lượt kiểm và khai to: tắt phép đo mốc nền theo quyết định trước đây của chủ kho, và gỡ dấu thừa khiến một lệnh kiểm hỏng vì cú pháp chứ không phải vì sản phẩm." }
   ]
 }
