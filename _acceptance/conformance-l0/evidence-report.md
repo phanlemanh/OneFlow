@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: fe711ecd5cf7821f582dcc11d7ff7818cfb7162f
+verified_commit: fa3a3ef2ee2faa3ed7ace6ff3b3f59a0710817ff
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -297,3 +297,13 @@ Analyst).
 - [ ] Read the table + spot-check 1-2 evidence blocks
 - [ ] No judgment items in this feature — nothing to override
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-09-04, do hồ sơ `khong-noi-sai-ve-kho-khoa` chạm `src/app/api/settings/env/route.ts`, rơi vào glob `src/app/api/**` mà E12 khai quá rộng — đúng điều mục 2 của báo cáo này đã dự đoán ngày 02/09. Glob VẪN chưa thu lại; việc đó là hồ sơ riêng
+
+run_id: repin-conformance-l0-20260903T215029Z
+sha: fa3a3ef2ee2faa3ed7ace6ff3b3f59a0710817ff · suites: 15 lệnh exit 0
+
+Chạy lại **toàn bộ 15 ô đo của chính hồ sơ này** tại HEAD, không phải làn máy
+4 suite: mã dưới `paths` của E12 đã đổi thật, nên câu cần trả lời là «bằng
+chứng của hồ sơ NÀY còn đứng không», và chỉ ô đo của nó trả lời được. E12 —
+ô mang cái glob rộng — xanh 11/11, y như lần ký. Không đụng chữ ký người.
