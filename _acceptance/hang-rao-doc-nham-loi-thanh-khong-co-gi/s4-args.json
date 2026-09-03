@@ -1,12 +1,12 @@
 {
- "generated_at": "2026-09-03T22:14:55Z",
- "generated_sha": "03ea8f4ccf7949042aa56db8adf8a54a4f923c8e",
+ "generated_at": "2026-09-03T23:15:33Z",
+ "generated_sha": "8654dcecf2d836e771045c1c96f8af4feb2d63fc",
  "mainBranchInfo": {
   "branch": "main",
   "source": "remote"
  },
  "slug": "hang-rao-doc-nham-loi-thanh-khong-co-gi",
- "round": 1,
+ "round": 2,
  "riskTier": "T2",
  "evals": [
   {
@@ -215,6 +215,25 @@
     "output"
    ],
    "ref": "config:executors.script.hrdn_resign_wave"
+  },
+  {
+   "id": "E12",
+   "criterion": "AC-12",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-diff-that-bai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id",
+   "expected": "exit 0 cho HAI lượt. Lượt một: ca `plan-diff-that-bai` — chạy `plan` với một tham\nchiếu KHÔNG phân giải được, đòi thoát KHÁC 0, thông điệp nêu NGUYÊN VĂN cặp tham\nchiếu, **và** KHÔNG in dòng `BI CHAM (0): (rong)` — thiếu vế sau thì một bản dừng ở\ncuối vẫn xanh trong khi vẫn kịp bảo người vận hành «không cần chạy lại gì». Lượt\nhai: ca `plan-tap-id` (đã có từ trước) vẫn XANH — đối chứng dương chứng minh phép\ntừ chối không viết quá tay thành \"mọi lượt plan đều lỗi\". Đo 04/09 trước khi sửa:\n`plan repin-khong-chay-lai-eval deadbeefdeadbeef HEAD` in `0 file doi` ·\n`BI CHAM (0): (rong)` rồi thoát 0 — chiều đỏ đã chạy được trên kho thật.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_plan_diff_must"
   }
  ],
  "suiteCommands": [
@@ -232,8 +251,24 @@
  "templatePath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.7.0/skills/acceptance/references/evidence-report-template.md",
  "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
  "contractPath": "/Users/manh-macmini/dev/oneflow/_acceptance/hang-rao-doc-nham-loi-thanh-khong-co-gi/contract.md",
- "invokedAt": "2026-09-03T22:14:55Z",
- "invokedSha": "03ea8f4ccf7949042aa56db8adf8a54a4f923c8e",
- "evalsHash": "963b2b90d916caecd98448b847d52f244730cbc70fcecd826872bf516c281f7d",
- "runBaseline": false
+ "invokedAt": "2026-09-03T23:15:33Z",
+ "invokedSha": "8654dcecf2d836e771045c1c96f8af4feb2d63fc",
+ "evalsHash": "067fca6cbde4ef4386550c695088291a5f779fe11d0d40580b65dcf4f6eb35aa",
+ "runBaseline": false,
+ "carriedEvals": [
+  {
+   "id": "E6",
+   "runId": "minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E6-r1",
+   "fromRound": 1,
+   "verifiedAt": "2026-09-03T22:14:55Z",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth"
+  },
+  {
+   "id": "E7",
+   "runId": "minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E7-r1",
+   "fromRound": 1,
+   "verifiedAt": "2026-09-03T22:14:55Z",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-neu-dich-danh"
+  }
+ ]
 }

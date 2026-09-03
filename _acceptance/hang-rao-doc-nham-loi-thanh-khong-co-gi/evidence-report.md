@@ -1,16 +1,19 @@
 ---
 schema_version: 2
 feature_slug: hang-rao-doc-nham-loi-thanh-khong-co-gi
-verdict: PASS
+verdict: PENDING-JUDGMENT
+triage_failed: true
 failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 03ea8f4ccf7949042aa56db8adf8a54a4f923c8e
+verified_commit: 8654dcecf2d836e771045c1c96f8af4feb2d63fc
 human_signoff:
 ---
 
 # Evidence Report: hang-rao-doc-nham-loi-thanh-khong-co-gi
+
+⚠ phân loại phạm vi KHÔNG chạy được — không lỗi nào được máy tự sửa, danh sách đầy đủ nằm trong review-findings.md, người xem lại toàn bộ trước khi ký.
 
 | Eval | Criterion | Executor | Verdict |
 |---|---|---|---|
@@ -25,203 +28,210 @@ human_signoff:
 | E9 | AC-9 | script | PASS |
 | E10 | AC-10 | script | PASS |
 | E11 | AC-11 | script | PASS |
+| E12 | AC-12 | script | PASS |
 
 ## Evidence
 
 - eval: E1
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E1-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E1-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_base_ref
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     CASE base-khong-phan-giai: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E2
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E2-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E2-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_base_absent
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     CASE base-thieu-file: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E3
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E3-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E3-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_diff_must
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     CASE diff-that-bai: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E4
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E4-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E4-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_check_counts
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     OK: khong re-pin nao nuot mot eval bi cham
     CASE ong-ba: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E5
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E5-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E5-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_shallow_probe
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     CASE shallow-do-loi: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E6
   run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E6-r1
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.script.hrdn_dupkey
-  verified_at: 2026-09-04T05:35:00Z
-  output: |
-    CASE khoa-trung-neu-dich-danh: PASS
-    CASE khoa-trong-khoi-van: PASS
-    OK: 3/3 ca
+  verified_at: 2026-09-03T22:14:55Z
+  carried_from_round: 1
+  note: carry-forward tu round 1 — delta khong cham paths cua eval
 
 - eval: E7
   run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E7-r1
   exit_code: 0
-  baseline: n-a
   verifier: config:executors.script.hrdn_dupkey_msg
-  verified_at: 2026-09-04T05:35:00Z
-  output: |
-    CASE khoa-trung-neu-dich-danh: PASS
-    PARTIAL: 1/3 ca da chay — khong tuyen gi ve 2 ca chua chay
+  verified_at: 2026-09-03T22:14:55Z
+  carried_from_round: 1
+  note: carry-forward tu round 1 — delta khong cham paths cua eval
 
 - eval: E8
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E8-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E8-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_selfref_declared
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     CASE tu-quy-chieu-khai: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E9
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E9-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E9-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_selfref_bucket
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
-    OK: khong re-pin nao nuot mot eval bi cham
     CASE tu-quy-chieu-dem-giam: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E10
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E10-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E10-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_selfref_forget
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
     CASE paths-e5e6-hoan-nguyen: PASS
-    PARTIAL: 1/29 ca da chay — khong tuyen gi ve 28 ca chua chay
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 - eval: E11
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E11-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E11-r2
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hrdn_resign_wave
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
   output: |
     OK: no feature other than hang-rao-doc-nham-loi-thanh-khong-co-gi carries stale evidence — the re-sign wave has cleared
+
+- eval: E12
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E12-r2
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.script.hrdn_plan_diff_must
+  verified_at: 2026-09-04T06:30:00Z
+  output: |
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
+    CASE plan-tap-id: PASS
+    PARTIAL: 1/30 ca da chay — khong tuyen gi ve 29 ca chua chay
 
 ### Lệnh suite (hồi quy)
 
 - cmd: bash scripts/acceptance/preflight-verify-env.sh
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-bash_scripts_acceptance_preflight_verify-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-bash_scripts_acceptance_preflight_verify-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: pnpm build && pnpm typecheck
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-build_typecheck-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-build_typecheck-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: pnpm lint:check
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-lint_check-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-lint_check-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: pnpm test
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-test-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-test-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: pnpm verify:plugins
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-verify_plugins-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-verify_plugins-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 - cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
-  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-gen_abi-r1
+  run_id: minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-SUITE-gen_abi-r2
   exit_code: 0
-  verified_at: 2026-09-04T05:35:00Z
+  verified_at: 2026-09-04T06:30:00Z
 
 ## Known limits
 
-- **Đường đo dòng 1 của hợp đồng khai «4/9 điểm gọi `gitOk` chuyển sang từ-chối»; vòng này
-  làm được 3.** Ma trận trong design doc kê `diff --name-only ×2 (dòng 311, 430)` đều thuộc
-  diện **sửa**; vòng này sửa dòng 430 (`modeCheck`) và bỏ dòng 311 (`modePlan`). AC-3 chỉ nói
-  về `check` nên E3 xanh đúng luật — nhưng con số 4/9 thì chưa đạt. Điểm còn lại chính là
-  finding HIGH `repin-eval-coverage.mjs:335` dưới đây, đã chạy được chiều đỏ.
+- **Ngoài‑7 của vòng 1 vẫn mở:** chế độ lập kế hoạch ghim báo «kế hoạch sạch» cho một hồ sơ
+  KHÔNG tồn tại. Owner chỉ đích danh Ngoài‑6 ở Cổng 2 vòng 1, nên lỗ này cố ý để lại.
+- **Hai hàng rào mới chưa được cắm vào CI** — chúng chỉ chạy trong vòng verify của chính hồ
+  sơ sở hữu, tức các hồi quy do PR sau gây ra sẽ không có ai bắt. Thiết kế đã khai «cắm hàng
+  rào vào CI» nằm ngoài phạm vi vòng này (mục Ngoài phạm vi), nên đây là hạn chế đã biết,
+  không phải sót.
 
 ## Ngoài hợp đồng
 
-**12 finding, TẤT CẢ được phân loại `inContract: false`** — lỗi thật nhưng ngoài phạm vi
-đã chốt ở Cổng 1, nên máy KHÔNG sửa chúng ở vòng này. Người quyết ở Cổng 2.
+> ⚠ **Phân loại phạm vi KHÔNG chạy trọn** (`triage_failed: true`). Không lỗi nào bị máy tự
+> sửa ở vòng này, và danh sách dưới đây có thể chưa đủ — người xem lại toàn bộ trong
+> `review-findings.md` trước khi ký. Cảnh báo này KHÔNG thay thế danh sách; các lỗi đã
+> phân được ngăn vẫn phải hiện để người quyết.
 
-- **[HIGH] `scripts/ci/repin-eval-coverage.mjs:208`** — evalsOf: prose inside `expected: >-` hijacks an eval's `paths`, turning a swallowed eval into a green sweep
-- **[HIGH] `scripts/ci/repin-eval-coverage.mjs:335`** — modePlan reads a failed `git diff` as "nothing changed" and tells the operator to re-run no eval
-- **[HIGH] `PRODUCT-MAP.md:28`** — PRODUCT-MAP.md is out of sync with the new dossier's status — the acceptance-gate CI step is red at HEAD
-- **[HIGH] `_acceptance/dang-ky-fork-openai/evals.yaml:99`** — Hình dạng 3 — assert chuỗi hằng `OK: 7/7 ca` thay cho quan hệ «mọi ca của bộ răng đều chạy và đạt»; nay đã mục (bộ răng in 9/9)
-- **[MEDIUM] `scripts/ci/check-gate-guards-job.sh:349`** — Bất biến KÊ = PHÁ + BỎ QUA không thể đỏ vì lý do mà thông điệp của nó nêu
-- **[MEDIUM] `scripts/ci/repin-eval-coverage.mjs:338`** — modePlan reports a clean plan for a dossier that does not exist
-- **[MEDIUM] `scripts/ci/check-gate-guards-job.sh:347`** — teeth invariant `KÊ == PHÁ + BỎ QUA` cannot detect the case its comment claims it detects
-- **[MEDIUM] `scripts/ci/check-gate-guards-job.sh:349`** — Hình dạng 3 (biến thể) — bất biến đếm `kê = phá + bỏ qua` HẰNG-ĐÚNG theo cấu tạo, nhưng E5/AC-5 khai nó là phép đo phân biệt «quên viết phép phá» với «cố ý bỏ qua»
-- **[LOW] `package.json:24`** — `build` nhúng biến môi trường inline — vỡ trên shell không POSIX, và là script duy nhất trong package.json làm vậy
-- **[LOW] `scripts/ci/check-gate-guards-job.sh:91`** — Thông điệp OK và chú thích của mode `shape` vẫn nói 'hai guard' trong khi đã kiểm bảy needle
-- **[LOW] `scripts/plugins/check-live-docs-manifest-teeth.sh:10`** — Mode `orphans` không có chiều đỏ ở bất kỳ đâu, và bỏ qua icon .png mà runtime vẫn phân giải
-- **[LOW] `scripts/acceptance/check-eval-key-dupes.sh:99`** — Hình dạng 2 — ca «hồ sơ đã thật sự xảy ra» dựng fixture GÕ TAY đúng khuôn bộ đọc, không rút vật hỏng THẬT từ lịch sử git
+**9 finding, tất cả phân loại `inContract: false`** — lỗi thật nhưng ngoài phạm vi đã chốt.
 
-**Cờ vùng phủ (`coverageCluster`):** 8/12 finding rơi NGOÀI vùng phủ của bộ đo, trải trên
-`scripts/ci/check-gate-guards-job.sh` · `package.json` · `scripts/plugins/check-live-docs-manifest-teeth.sh` · `PRODUCT-MAP.md` · `_acceptance/dang-ky-fork-openai/evals.yaml`.
-Dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+- **[HIGH] `PRODUCT-MAP.md:28`** — PRODUCT-MAP.md drift: CI's `check-product-map.mjs` step is red on HEAD
+- **[HIGH] `scripts/ci/repin-eval-coverage.mjs:1`** — New guards have zero CI references — the exact gap the sibling commit in this diff just closed
+- **[HIGH] `PRODUCT-MAP.md:28`** — PRODUCT-MAP.md drift breaks the acceptance-gate CI job at HEAD
+- **[HIGH] `scripts/ci/check-repin-eval-coverage.sh:299`** — Hình dạng 2 — fixture eval-line viết tay đúng khuôn bên đọc, không round-trip qua writer thật (46/130 dòng thật vô hình)
+- **[MEDIUM] `package.json:24`** — `build` script uses a POSIX-only env prefix; no cross-env, breaks `pnpm build` on Windows
+- **[MEDIUM] `scripts/ci/repin-eval-coverage.mjs:392`** — `plan` and `newlines` swallow unknown flags and exit 0, contradicting the file's own stated law
+- **[MEDIUM] `scripts/acceptance/check-eval-key-dupes.sh:76`** — check-eval-key-dupes.sh reports a clean sweep when awk fails to read a file
+- **[MEDIUM] `_acceptance/dang-ky-fork-openai/evals.yaml:99`** — Hình dạng 5 — thước canh cỡ bộ răng tuyên theo LỚP nhưng chỉ quét một điểm-case; số 7/7 trong hồ sơ ĐÃ KÝ đã trôi thành không bao giờ thoả được
+- **[LOW] `scripts/ci/check-gate-guards-job.sh:349`** — Hình dạng 5 (biến thể) — bất biến đếm `kê == phá + bỏ qua` đúng-do-cấu-trúc, không thể đỏ vì lý do nó tuyên là bắt được
 
-> Mục này do main loop điền từ trường `triaged` của kết quả workflow. Bộ tổng hợp trả
-> mục RỖNG dù có 12 finding — cùng lỗi đã ghi trong sổ phiên trước; tin vào mục rỗng ấy
-> thì cổng đọc bằng chứng thành «xanh-sạch» và BỎ mời người ký.
+**Cờ vùng phủ:** 5/9 finding rơi NGOÀI vùng phủ của bộ đo, trải trên `PRODUCT-MAP.md` · `package.json` · `_acceptance/dang-ky-fork-openai/evals.yaml` · `scripts/ci/check-gate-guards-job.sh`.
+
+> Mục này do main loop điền từ trường `triaged`; bộ tổng hợp trả mục RỖNG dù có 9 finding
+> — lần thứ hai liên tiếp, cùng lỗi đã ghi trong sổ.
 
 ## Analyst
 
 carried tu round truoc — baseline khong do lai round nay
 
-none — round nay khong do baseline (P2: evals.yaml khong doi tu lan baseline cuoi), nen khong co eval nao duoc xep vao dien khong-phan-biet o round nay.
+none — mọi eval round này mang baseline: n-a (không đo lại); không có eval nào được xếp vào diện không-phân-biệt round này.
 
 ## Variance
 
-none — every multi-run eval is uniform (khong co eval nao khai runs > 1 round nay)
+none — không có eval nào chạy nhiều lần (runs > 1) trong vòng này; không có mục nào mang pass_rate lệch.
 
 ## Iterations
 
-Round 1: toan bo 11 eval (E1-E11) PASS ngay lan chay dau, khong co variance; cac lenh suite (preflight/build/typecheck/lint/test/sdk pytest/verify:plugins/gen:abi) deu xanh. Verdict: PASS.
+Round 1 (2026-09-03): E1-E12 chạy xanh nhưng gặp bế tắc tự quy chiếu giữa `paths` của E5/E6 chặn re-pin — owner chốt thu hẹp `paths` (commit 152d724), verdict PENDING-JUDGMENT chờ owner quyết.
+
+Round 2 (2026-09-04): 12 eval + 7 lệnh suite (build/typecheck/lint/test/sdk pytest/verify:plugins/gen:abi) đều xanh; E6/E7 carry-forward từ round 1 vì delta round này không chạm `paths` của chúng. Bước phân loại phạm vi (scope-triage) không chạy được round này nên máy không tự sửa gì trong 9 finding được review-findings.md nêu ra — verdict giữ PENDING-JUDGMENT, người xem lại toàn bộ trước khi ký.
