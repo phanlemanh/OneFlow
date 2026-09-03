@@ -26,7 +26,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # the cases, `so-khop-total` checks that the numbers written into evals.yaml still name
 # this suite. Deriving TOTAL rather than typing it removes the only way the two can
 # disagree.
-KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc"
+KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file"
 TOTAL=$(printf '%s\n' $KNOWN | wc -w | tr -d ' ')
 
 case "$MODE" in
@@ -250,8 +250,16 @@ teeth)
         fi
         local n
         for n in "$@"; do
-            printf '%s\n' "$out" | grep -qF -- "$n" \
-                || { echo "CASE $name: FAIL — dau ra khong neu '$n'"; printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1; return; }
+            # A needle prefixed with KHONG: asserts ABSENCE. base-khong-phan-giai's
+            # load-bearing claim is not "it exits nonzero" but "it stopped BEFORE reading
+            # any file", and the only observable difference is what the run did NOT print.
+            if [ "${n#KHONG:}" != "$n" ]; then
+                printf '%s\n' "$out" | grep -qF -- "${n#KHONG:}" \
+                    && { echo "CASE $name: FAIL — dau ra CO '${n#KHONG:}' ma le ra khong duoc co"; printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1; return; }
+            else
+                printf '%s\n' "$out" | grep -qF -- "$n" \
+                    || { echo "CASE $name: FAIL — dau ra khong neu '$n'"; printf '%s\n' "$out" | sed 's/^/    /'; FAILED=1; return; }
+            fi
         done
         echo "CASE $name: PASS"
     }
@@ -441,6 +449,39 @@ $(cat "$d/_acceptance/demo/run-log.jsonl")"
         repin_line "$d" "$NEW" ""
         out="$(core "$d" newlines "$OLD")"; rc=$?
         want newlines-thieu-prev red "$out" "$rc" "thieu prev_sha" "demo"
+    fi
+
+    # 22. An unresolvable base is a REFUSAL, not "every line is new". `gitOk("show",
+    # base:path)` returns null for two states that are not alike -- the file was absent at
+    # that base (data) and the base does not resolve (damage) -- and `|| ""` erased the
+    # difference. Measured 2026-09-03 with a nonexistent branch: 1674 history lines classed
+    # as new and 25 false FAILs, each blaming a dossier with nothing to do with the run.
+    if run base-khong-phan-giai; then
+        fx '    paths: ["src/**"]
+'
+        repin_written "$d" "$NEW"
+        out="$(core "$d" newlines refs/heads/khong-ton-tai)"; rc=$?
+        # The two KHONG: needles are the whole point. Without them a version that scans
+        # everything and only refuses at the end still passes: it prints the false FAILs
+        # and the tally FIRST, which is exactly the state this case exists to end.
+        want base-khong-phan-giai red "$out" "$rc" \
+            "refs/heads/khong-ton-tai" \
+            "KHONG:FAIL: demo" \
+            "KHONG:dong run-log moi so"
+    fi
+
+    # 23. The positive control WITHOUT which the refusal above could be written as "any
+    # empty show is an error" and still pass case 22. A dossier whose run-log does not
+    # exist at a RESOLVABLE base is data, not damage: every line counts as new.
+    if run base-thieu-file; then
+        fx '    paths: ["src/**"]
+'
+        repin_written "$d" "$NEW"
+        # OLD is the first commit: the run-log file existed but empty there, and `git show
+        # OLD:...` on an empty blob returns "" -- the same empty string an unresolvable
+        # base used to return. That collision is the thing being separated.
+        out="$(core "$d" newlines "$OLD")"; rc=$?
+        want base-thieu-file green "$out" "$rc" "dong run-log moi so" "OK: moi dong repin moi deu mang prev_sha"
     fi
 
     # 19-20. the size-invariant's own two directions. Its red half already fired on real

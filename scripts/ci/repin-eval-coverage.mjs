@@ -483,6 +483,18 @@ function modeCheck(argv = []) {
 
 function modeNewlines(base) {
     const b = base || "origin/main";
+    // The precondition, checked BEFORE a single file is read. `gitOk("show", b + ":" +
+    // rel)` returns null for two states that are not alike -- the file was absent at that
+    // base (data) and the base does not resolve (damage) -- and `|| ""` below erases the
+    // difference. Measured 2026-09-03 against a nonexistent branch: 1674 history lines
+    // classed as new and 25 false FAILs, each naming an unrelated dossier; the only way
+    // to know it was a false alarm was to read this file.
+    // Here, not per-file: after this line `|| ""` genuinely means "absent at that base",
+    // which is the reading the base-thieu-file case keeps true.
+    if (gitOk("rev-parse", "--verify", `${b}^{commit}`) === null)
+        die(
+            `moc so sanh '${b}' khong phan giai duoc — khong doc tep nao; kiem tra ten nhanh/ref roi chay lai`,
+        );
     let bad = 0,
         fresh = 0,
         unreadable = 0;
