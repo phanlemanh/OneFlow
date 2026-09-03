@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 3c859a4998c875a1032d76ee6529b263474d3b20
+verified_commit: 71449d00fb483e1ef48b95a7da0e4adbb156fb45
 human_signoff: Manh 2026-08-07
 ---
 
@@ -290,3 +290,7 @@ sha: ddea746f4269130b59797ea4236f2ec9a44a6c61 · suites: 8 lệnh exit 0 (làn t
 ### Re-pin lần 13 — 2026-09-02, do nhánh thêm hai phép từ chối cho `write` và một guard điểm vào
 run_id: rkce-repin-20260902T221339Z
 sha: 3c859a4998c875a1032d76ee6529b263474d3b20 · suites: 8 lệnh exit 0
+
+### Re-pin lần 14 — 2026-09-03, do nhánh gom mọi lượt đọc/ghi run-log về một cửa
+run_id: rkce-repin-20260903T023014Z
+sha: 71449d00fb483e1ef48b95a7da0e4adbb156fb45 · suites: 8 lệnh exit 0
