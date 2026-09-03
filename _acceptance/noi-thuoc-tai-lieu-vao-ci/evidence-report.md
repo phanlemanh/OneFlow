@@ -160,3 +160,20 @@ sha: 3c859a4998c875a1032d76ee6529b263474d3b20 · suites: 8 lệnh exit 0
 ### Re-pin lần 3 — 2026-09-03, do nhánh gom mọi lượt đọc/ghi run-log về một cửa
 run_id: rkce-repin-20260903T023014Z
 sha: 71449d00fb483e1ef48b95a7da0e4adbb156fb45 · suites: 8 lệnh exit 0
+
+## Sửa đổi sau chữ ký — 2026-09-03
+
+`evals.yaml` của hồ sơ này có khoá **trùng** trong khối `E2`: `expected:` hai lần và
+`paths:` ba lần. YAML giữ khoá CUỐI, nên phép đo mà bằng chứng đã ký mô tả là
+`exit-propagates` — chế độ đã **RÚT ở vòng 3** của chính hồ sơ này. Bản `expected` đầu
+tiên mới là bản đúng, và nó nói thẳng điều đó ("Chế độ tự viết để đóng lỗ ấy đã RÚT ở
+vòng 3"), nhưng không bên đọc nào thấy được nó.
+
+Sửa: giữ bản `expected` đầu, bỏ bản sau; gộp ba khối `paths` trùng về một. **Không đổi
+lệnh, không đổi kết quả đo, không đụng chữ ký.** Cái đổi là văn bản mà người chấm đối
+chiếu với đầu ra — trước sửa nó mô tả một phép đo không chạy.
+
+Phát hiện bởi hội đồng soi ở S4 vòng 3 của `repin-khong-chay-lai-eval` (finding
+`measurement`, mức HIGH). Cùng lớp với AC-14 của hồ sơ ấy: một lời khai không có gì
+buộc vào vật nó mô tả. Chưa có hàng rào nào bắt khoá YAML trùng trên toàn kho — đã ghi
+vào Known limits của hồ sơ đang chạy.
