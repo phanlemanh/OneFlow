@@ -200,6 +200,8 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `o-do-chay-0-ca-van-xanh` | T2 | 01/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: một ô đo lọc theo tên ca mà không ca nào khớp thì vitest thoát 0 và ô đo báo đạt vĩnh viễn. Đo trước khi thiết kế cho thấy 33/33 ô đang lành, nên đây là hàng rào chứ không phải bản sửa. 17/17 eval, 7 giới hạn khai rõ |
 | `chong-mat-khoa-byo-giao-dien` | T2 | 02/09 | *ngoài lộ trình* — nửa giao diện của chong-mat-khoa-byo: màn Cài đặt và hai bề mặt trên canvas nói rõ kho khoá hỏng và từ chối ghi đè, đo trên **năm** hình dạng lỗi đọc chứ không một. Một bộ đọc dùng chung thay ba lối tự viết (6 lời gọi ở 3 tệp co về 1 tệp, có guard cấu trúc canh). 13/13 eval, 9 giới hạn khai rõ; bốn phát hiện HIGH đi hồ sơ mới khong-noi-sai-ve-kho-khoa |
 
+| `khong-noi-sai-ve-kho-khoa` | T3 | 04/09 | *ngoài lộ trình* — bốn phát hiện HIGH của hội đồng chong-mat-khoa-byo-giao-dien, khoanh lại theo **bất biến** thay vì theo bề mặt: máy chủ kiểm tiền đề của lệnh thay-kho trước khi thi hành (kho lành thì từ chối, không ghi một byte), và giao diện phân loại lỗi đọc **dương cả hai chiều** trên chín tín hiệu dây — phiên hết hạn và proxy 502 thôi bị gọi là kho hỏng, nên tấm thẻ đỏ kèm nút xoá kho chỉ còn ở đúng một ô trong mười hai. Thêm trần 30 giây cho cả đọc lẫn ghi. 13/13 eval qua ba vòng, 5 giới hạn khai rõ; hai việc đi hồ sơ mới |
+
 <!-- roadmap-ledger:end -->
 
 **Đọc được gì từ tỉ lệ này:** 14/23 hạng mục đã ký là năng lực sản phẩm, 9/23 là hạ tầng quy
