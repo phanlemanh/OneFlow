@@ -1,0 +1,46 @@
+{
+  "feature_plain": "Khi không đọc được khoá API đã lưu, sản phẩm nói đúng chuyện gì đã xảy ra — và chỉ mời xoá kho khoá khi kho thật sự hỏng.",
+
+  "wont_do": [
+    { "id": "AC-1", "p": "Chặn lệnh xoá kho khoá khi kho vẫn đọc được bình thường — máy chủ tự kiểm lại trước khi làm, và không ghi gì nếu lý do không đúng." }
+  ],
+
+  "will_do": [
+    { "id": "AC-2", "p": "Sẽ phân biệt «kho khoá hỏng» với «chưa đăng nhập» và «không tới được máy chủ», thay vì gọi mọi sự cố là kho hỏng." },
+    { "id": "AC-3", "p": "Sẽ báo cho vỏ ứng dụng khi phiên hết hạn, để nó mở lại màn đăng nhập thay vì để người dùng tưởng khoá bị mất." },
+    { "id": "AC-4", "p": "Sẽ dừng chờ sau 30 giây thay vì quay vòng vô tận — cả lúc đọc lẫn lúc lưu khoá." },
+    { "id": "AC-5", "p": "Sẽ chỉ hiện nút xoá kho khoá ở đúng một chỗ: màn Cài đặt, khi kho thật sự hỏng. Hai bảng khoá trên canvas không bao giờ có nút đó." },
+    { "id": "AC-6", "p": "Sẽ cho người dùng một nút Thử lại ở mọi sự cố đọc — hôm nay họ không có đường nào ngoài đóng màn." },
+    { "id": "AC-7", "p": "Sẽ tự đọc lại và hiện khoá trở lại nếu máy chủ từ chối lệnh xoá vì kho vẫn lành, thay vì báo một lỗi khó hiểu." },
+    { "id": "AC-8", "p": "Sẽ có chốt tự động chặn việc viết lại cách xử lý đăng nhập ở nơi thứ ba — chính thói quen đó đẻ ra lỗi này." },
+    { "id": "AC-9", "p": "Sẽ hiện đúng ngôn ngữ của người dùng ở cả năm thứ tiếng, và đạt sàn tiếp cận trên nền sáng lẫn nền tối." }
+  ],
+
+  "coverage_plain": [
+    { "i": 0, "p": "Đã soát đủ ba tình trạng kho khoá ở máy chủ: đọc được, chưa có, và hỏng. Bằng chứng đủ: kiểu dữ liệu chỉ cho phép đúng ba giá trị đó." },
+    { "i": 1, "p": "Đã soát mười kiểu trả lời mà trình duyệt có thể nhận. Bằng chứng đủ: chuẩn HTTP cho lớp mã lỗi, cộng năm kiểu đã đo ở vòng trước và hai kiểu mới chính là hai lỗi nặng lần này." },
+    { "i": 2, "p": "Đã soát ba loại thao tác: đọc khoá, lưu thêm khoá, và xoá kho. Bằng chứng đủ: bộ đọc dùng chung chỉ có đúng ba việc, không có việc thứ tư." },
+    { "i": 3, "p": "Đã soát cả ba nơi người dùng gặp khoá API: màn Cài đặt và hai bảng trên canvas. Bằng chứng đủ: chốt tự động đếm được đúng ba nơi." },
+    { "i": 4, "p": "Bốn điều áp cho mọi ô: không lượt lưu nào rời đi khi đang lỗi; kho bị sửa giữa chừng vẫn ra kết cục đúng; năm thứ tiếng; và mỗi phép đo phải chứng minh được nó biết báo đỏ." }
+  ],
+
+  "gap_probe_plain": [
+    { "i": 0, "p": "Chưa nói rõ lượt lưu khoá thất bại vì hết giờ thì báo lỗi kiểu nào — nên có thể lọt thành «đã lưu» trong khi khoá chưa hề tới nơi. Đã chốt cách báo, và thêm một phép đo dựng thẳng bảng khoá trên canvas để chứng minh nó không kẹt và không báo thành công." },
+    { "i": 1, "p": "Phép đo cấm dùng chữ «kho hỏng» cho hai tình huống mới lại đi kiểm nhầm cụm từ, và không ghim ngôn ngữ — nên người dùng tiếng Việt vẫn có thể thấy «không đọc được kho khoá» khi chỉ là hết phiên. Đã đổi sang so thẳng với bản dịch của đúng tình huống đó, ghim cả tiếng Anh lẫn tiếng Việt." },
+    { "i": 2, "p": "Ba tài liệu đếm số kiểu trả lời khác nhau (mười, chín, chín) nên người duyệt không kiểm được là đã soát đủ. Đã thống nhất: mười kiểu, chín đo ở một phép đo và kiểu hết giờ đo ở phép đo khác." },
+    { "i": 3, "p": "Chốt tự động đếm số tệp thay vì số lần, nên vẫn xanh khi cách xử lý đăng nhập bị viết hai lần trong cùng một tệp. Đã đổi sang đếm số lần, và thêm một ca thử để chứng minh chốt biết báo đỏ." },
+    { "i": 4, "p": "Bản mẫu dùng để đo sàn tiếp cận không có gì chứng minh nó dựng đúng tấm thông báo thật — bản mẫu đạt mà màn thật vẫn có thể trượt. Đã thêm một dấu nhận dạng trên tấm thông báo thật để phép đo đọc lại được." }
+  ],
+
+  "scope_plain": "Hai việc cố ý để lại: lệnh lưu khoá vẫn ghi đè trọn kho (một lượt lưu rỗng vẫn xoá được kho lành — tách thành việc riêng kế tiếp), và lượt lưu thất bại vẫn hiện dấu tích xanh «đã lưu» (vẫn là lỗi nặng, cần hồ sơ riêng vì phải sửa cả chữ ở năm thứ tiếng).",
+
+  "decisions_plain": [
+    { "id": "d-20260903T063359Z-28140", "p": "Chọn cách chữa hẹp: máy chủ kiểm lại lý do trước khi xoá, thay vì đổi hẳn cách lưu khoá. Đổi lại: đường xoá kho bằng một lượt lưu rỗng vẫn còn, được ghi thành hạn chế có tên và một việc kế tiếp." },
+    { "id": "d-20260903T063359Z-9094", "p": "Làm trọn cả ba mảnh của lỗi mất-đường-đăng-nhập: phân biệt phiên hết hạn, báo cho vỏ ứng dụng, và trần 30 giây. Đổi lại: phép đo chỉ chứng minh được tín hiệu đã phát, không chứng minh vỏ ứng dụng đáp lại — người nghe nằm ngoài kho mã." },
+    { "id": "d-20260903T063359Z-12464", "p": "Gom cách báo phiên hết hạn về một chỗ dùng chung cho cả hai bên gọi, thay vì chép sang chỗ thứ hai. Đổi lại: đụng thêm một tệp và cần một chốt tự động canh, nhưng tránh đúng thói quen đã đẻ ra lỗi này." },
+    { "id": "d-20260903T063359Z-11545", "p": "Coi «bị cấm» khác «chưa đăng nhập» — chỉ trường hợp chưa đăng nhập mới gọi vỏ ứng dụng mở màn đăng nhập. Đổi lại: trường hợp bị cấm tạm dùng chung lời nhắn với sự cố mạng, để dành chữ riêng cho lần sau." },
+    { "id": "d-20260903T063359Z-25605", "p": "KHÔNG làm phần «lưu thất bại nhưng hiện tích xanh» trong vòng này. Đổi lại: rủi ro nói sai ở lượt lưu vẫn còn trong sản phẩm cho tới hồ sơ kế." },
+    { "id": "d-20260903T063359Z-11458", "p": "KHÔNG khai đường đo giá trị — việc này đi ra từ vòng trước chứ không từ cổng đánh giá cơ hội, nên không có ngưỡng nào để đo. Đổi lại: sau khi giao sẽ không có phiên nghiệm thu bằng số." },
+    { "id": "d-20260903T064830Z-20690", "p": "Dựng bản bấm được cho hai tình huống mới và bày hai hướng màu sắc cạnh nhau để anh chọn. Đổi lại: hướng máy khuyên cần thêm một tuỳ chọn kiểu cho tấm thông báo — nếu anh chọn hướng còn lại thì không cần." }
+  ]
+}
