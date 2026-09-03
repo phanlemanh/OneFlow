@@ -111,35 +111,37 @@ function RetryButton() {
  * prop on the shipped component would render; it is NOT a second component
  * to ship.
  */
+/**
+ * The quiet card, rendered by the SHIPPING component.
+ *
+ * This was a hand-copy while the component had no `tone`. It no longer is:
+ * the a11y floor is measured on this prototype, and a floor measured on a
+ * hand-copy proves nothing about the screen a user sees. The wrapper survives
+ * only to keep the scenes below reading in this file's own vocabulary.
+ */
 function QuietNotice({
-    icon: Icon,
+    icon,
     title,
     reason,
+    testId,
     children,
 }: {
     icon: typeof WifiOff;
     title: string;
     reason: string;
+    testId?: string;
     children?: React.ReactNode;
 }) {
     return (
-        <section
-            role="alert"
-            className="space-y-2 rounded-md border border-border bg-muted/40 p-4"
+        <StoreUnreadableNotice
+            tone="quiet"
+            icon={icon}
+            testId={testId}
+            reason={reason}
+            labels={{ title, unchanged: COPY.unchanged }}
         >
-            <header className="flex items-center gap-2">
-                <Icon
-                    aria-hidden="true"
-                    className="h-4 w-4 shrink-0 text-muted-foreground"
-                />
-                <h2 className="text-sm font-medium text-foreground">{title}</h2>
-            </header>
-            <p className="text-xs text-foreground">{reason}</p>
-            <p className="text-sm font-medium text-foreground">
-                {COPY.unchanged}
-            </p>
-            {children ? <div className="pt-1">{children}</div> : null}
-        </section>
+            {children}
+        </StoreUnreadableNotice>
     );
 }
 
@@ -194,6 +196,7 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                 <Frame state={state} title={COPY.settingsTitle}>
                     <QuietNotice
                         icon={LogIn}
+                        testId="unauthenticated-notice"
                         title={COPY.unauthenticated.title}
                         reason={COPY.unauthenticated.reason}
                     >
@@ -207,6 +210,7 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                 <Frame state={state} title={COPY.settingsTitle}>
                     <QuietNotice
                         icon={WifiOff}
+                        testId="unavailable-notice"
                         title={COPY.unavailable.title}
                         reason={COPY.unavailable.reason}
                     >
@@ -220,6 +224,7 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                 <Frame state={state} title={COPY.panelTitle}>
                     <QuietNotice
                         icon={LogIn}
+                        testId="unauthenticated-notice"
                         title={COPY.unauthenticated.title}
                         reason={COPY.unauthenticated.reason}
                     >
@@ -232,6 +237,7 @@ export function KhongNoiSaiVeKhoKhoaProto({ state }: { state: string }) {
                 <Frame state={state} title={COPY.panelTitle}>
                     <QuietNotice
                         icon={WifiOff}
+                        testId="unavailable-notice"
                         title={COPY.unavailable.title}
                         reason={COPY.unavailable.reason}
                     >
