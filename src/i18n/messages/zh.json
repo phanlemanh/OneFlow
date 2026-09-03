@@ -56,7 +56,8 @@
                 "network": "请求未完成（{detail}）",
                 "timeout": "请求在 30 秒后超时"
             },
-            "writeFailed": "无法保存（{reason}）。尚未更改任何内容。"
+            "writeFailed": "无法保存（{reason}）。尚未更改任何内容。",
+            "retry": "重试"
         },
         "unauthenticated": {
             "title": "登录会话已过期",
@@ -1139,7 +1140,8 @@
                 "no-env": "响应未包含密钥列表",
                 "network": "请求未完成（{detail}）",
                 "timeout": "请求在 30 秒后超时"
-            }
+            },
+            "retry": "重试"
         },
         "unauthenticated": {
             "title": "登录会话已过期",

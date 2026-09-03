@@ -59,8 +59,14 @@ export function StoreUnreadableNotice({
     className,
     children,
 }: {
-    /** Machine-derived cause, already turned into a sentence by the caller. */
-    reason: string;
+    /**
+     * Machine-derived cause, already turned into a sentence by the caller.
+     *
+     * `null` renders NO line rather than an empty one. An expired session has
+     * no cause worth a second sentence, and an empty paragraph inside a
+     * `role="alert"` is a node a screen reader walks into and finds nothing in.
+     */
+    reason: string | null;
     labels: StoreUnreadableLabels;
     /**
      * How loud the card is. Defaults to `destructive` so the caller that
@@ -147,7 +153,9 @@ export function StoreUnreadableNotice({
              * the reassurance below is the load-bearing sentence and is the
              * larger, heavier one. Nothing here invents a hex.
              */}
-            <p className="text-xs text-foreground">{reason}</p>
+            {reason === null ? null : (
+                <p className="text-xs text-foreground">{reason}</p>
+            )}
             <p className="text-sm font-medium text-foreground">
                 {labels.unchanged}
             </p>

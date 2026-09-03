@@ -14,7 +14,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -49,14 +49,13 @@ import type {
     PluginEnvVar,
 } from "@/lib/plugins/plugin-env-manifest-schema";
 import { pluginDisplayName } from "@/lib/plugins/plugin-id";
-import type { ReadFailure } from "@/lib/settings/env-client";
+import type { EnvReadFailure } from "@/lib/settings/env-client";
 import {
     putEnvMap,
     readEnvForBrowser,
     replaceUnreadableStore,
 } from "@/lib/settings/env-client";
 import {
-    legacyReadDetail,
     readFailureText,
     writeFailureText,
 } from "@/lib/settings/read-failure-text";
@@ -322,7 +321,7 @@ export function SettingsDialog() {
      * over every stored key. Holding the reason in state is what lets the
      * screen say so and refuse.
      */
-    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
     const [confirming, setConfirming] = useState(false);
     const [replaceError, setReplaceError] = useState<string | null>(null);
     /**
@@ -368,7 +367,7 @@ export function SettingsDialog() {
                 // Every shape of failure lands here, not just the one the
                 // server labels: a proxy 502 and an HTML error page never
                 // carry the store-unreadable code.
-                setBlocked(legacyReadDetail(read));
+                setBlocked(read);
                 return;
             }
             setBlocked(null);
@@ -391,7 +390,13 @@ export function SettingsDialog() {
                 const reason =
                     out.reason === "write-failed"
                         ? writeFailureText(tStore, out.detail)
-                        : readFailureText(tStore, legacyReadDetail(out.read));
+                        : readFailureText(tStore, {
+                              // `replaceUnreadableStore` never reads, so this
+                              // arm is unreachable; keep it honest rather than
+                              // inventing a cause.
+                              code: "network",
+                              detail: out.read.state,
+                          });
                 setReplaceError(tStore("replaceFailed", { reason }));
                 return;
             }
@@ -454,7 +459,7 @@ export function SettingsDialog() {
                     // The store broke between opening the screen and saving.
                     // `blocked` was captured at fetch time, so without this the
                     // screen would keep offering a Save that can never land.
-                    setBlocked(legacyReadDetail(out.read));
+                    setBlocked(out.read);
                 } else {
                     toast.error(
                         tStore("writeFailed", {
@@ -501,29 +506,34 @@ export function SettingsDialog() {
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                 ) : blocked ? (
-                    <StoreUnreadableNotice
-                        reason={tStore("reason", {
-                            reason: readFailureText(tStore, blocked),
-                        })}
-                        labels={{
-                            title: tStore("title"),
-                            unchanged: tStore("unchanged"),
-                        }}
+                    <ReadStateNotice
+                        read={blocked}
+                        t={t}
+                        retrying={loading}
+                        onRetry={() => void fetchEnv()}
                     >
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setConfirming(true)}
-                        >
-                            {tStore("escape")}
-                        </Button>
+                        {/*
+                         * The destructive way out exists ONLY for a store that
+                         * is really unreadable. Offering it for an expired
+                         * session or a proxy 502 was the defect: the store is
+                         * fine, and the button erases it.
+                         */}
+                        {blocked.state === "store-unreadable" ? (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setConfirming(true)}
+                            >
+                                {tStore("escape")}
+                            </Button>
+                        ) : null}
                         {replaceError ? (
                             <p className="pt-2 text-xs text-destructive">
                                 {replaceError}
                             </p>
                         ) : null}
-                    </StoreUnreadableNotice>
+                    </ReadStateNotice>
                 ) : (
                     <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
                         {groups.map((group) => (

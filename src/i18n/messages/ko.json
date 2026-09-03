@@ -56,7 +56,8 @@
                 "network": "요청이 완료되지 않았습니다({detail})",
                 "timeout": "요청이 30초 후 시간 초과되었습니다"
             },
-            "writeFailed": "저장하지 못했습니다({reason}). 아무것도 변경되지 않았습니다."
+            "writeFailed": "저장하지 못했습니다({reason}). 아무것도 변경되지 않았습니다.",
+            "retry": "다시 시도"
         },
         "unauthenticated": {
             "title": "세션이 만료되었습니다",
@@ -1139,7 +1140,8 @@
                 "no-env": "응답에 키 목록이 없습니다",
                 "network": "요청이 완료되지 않았습니다({detail})",
                 "timeout": "요청이 30초 후 시간 초과되었습니다"
-            }
+            },
+            "retry": "다시 시도"
         },
         "unauthenticated": {
             "title": "세션이 만료되었습니다",

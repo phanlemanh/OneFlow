@@ -31,15 +31,11 @@ import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import {
-    type ReadFailure,
+    type EnvReadFailure,
     saveEnvKeys,
     type WriteFailure,
 } from "@/lib/settings/env-client";
-import {
-    legacyReadDetail,
-    readFailureText,
-    writeFailureText,
-} from "@/lib/settings/read-failure-text";
+import { writeFailureText } from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -67,21 +63,17 @@ const KEY_PROMPT_BASE = {
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-} satisfies Omit<NodeKeyPromptLabels, "storeUnreadable">;
+} satisfies NodeKeyPromptLabels;
 
-/** Blocked-store copy, from the catalogue rather than from a literal. */
+/*
+ * The blocked-store copy used to be threaded through here as four more label
+ * props. It is not, any more: the card now reads its own namespace, because
+ * three states x four strings threaded through two prop bags is the drift
+ * vector this dossier exists to remove. Everything ABOVE stays a prop — those
+ * strings differ per surface; the read-state copy does not.
+ */
 function useKeyPromptLabels(): NodeKeyPromptLabels {
-    const t = useTranslations("Workspace.storeUnreadable");
-    return {
-        ...KEY_PROMPT_BASE,
-        storeUnreadable: {
-            title: t("title"),
-            unchanged: t("unchanged"),
-            reason: (cause: ReadFailure) =>
-                t("reason", { reason: readFailureText(t, cause) }),
-            toSettings: t("toSettings"),
-        },
-    };
+    return KEY_PROMPT_BASE;
 }
 
 /** Failure messages that mean "a key is missing or was rejected". */
@@ -141,14 +133,15 @@ async function saveAndVerifyKey(
     envKey: string,
     value: string,
 ): Promise<
-    | KeyVerdict
-    | { storeUnreadable: ReadFailure }
-    | { writeFailed: WriteFailure }
+    KeyVerdict | { readFailed: EnvReadFailure } | { writeFailed: WriteFailure }
 > {
     const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
     if (!out.ok) {
         if (out.reason === "read-failed") {
-            return { storeUnreadable: legacyReadDetail(out.read) };
+            // The whole union travels. Collapsing it to one shape here is how
+            // an expired session reached the node as "your key store is
+            // broken" — and the card for that offers to erase the store.
+            return { readFailed: out.read };
         }
         // A failed WRITE is not a statement about the key. Throwing here landed
         // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
@@ -232,14 +225,11 @@ export function useNodeKeyGate(): NodeKeyGate {
                     phase: "saved-unverified",
                     reason: writeFailedText(verdict.writeFailed),
                 });
-            } else if ("storeUnreadable" in verdict) {
+            } else if ("readFailed" in verdict) {
                 // Not a statement about the key. Saying "invalid" here would
-                // invite the user to type a new one, into a store that cannot
-                // be read.
-                setState({
-                    phase: "store-unreadable",
-                    reason: verdict.storeUnreadable,
-                });
+                // invite the user to type a new one, into a store that may not
+                // be readable at all.
+                setState({ phase: "read-failed", read: verdict.readFailed });
             } else if (verdict.works) {
                 setState({ phase: "verified" });
             } else if (verdict.checked) {

@@ -69,6 +69,29 @@ export const READ_FAILURES: ReadonlyArray<readonly [string, () => Response]> = [
     ],
 ];
 
+/**
+ * Which of the three failure states each shape lands on.
+ *
+ * Lives beside the shapes so the suites that predate the taxonomy read the
+ * same table as the ones that introduced it. Two of these rows are the whole
+ * point of the second dossier: `401` is an expired session, and `503-no-code`
+ * is a proxy that never heard of this store. Both used to arrive as "your key
+ * store is broken", and one of those cards offers to erase it.
+ */
+export const EXPECTED_STATE: Record<
+    string,
+    "store-unreadable" | "unauthenticated" | "unavailable"
+> = {
+    "503": "store-unreadable",
+    "500": "unavailable",
+    "502-html": "unavailable",
+    shape: "unavailable",
+    network: "unavailable",
+    "401": "unauthenticated",
+    "403": "unavailable",
+    "503-no-code": "unavailable",
+};
+
 /** A healthy read. The positive control every refusal test needs. */
 export const healthyRead = (
     env: Record<string, string> = { OPENAI_API_KEY: "sk-1" },

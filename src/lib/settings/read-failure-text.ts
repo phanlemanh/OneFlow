@@ -1,4 +1,8 @@
-import type { ReadFailure, WriteFailure } from "@/lib/settings/env-client";
+import type {
+    ReadFailure,
+    UnavailableReason,
+    WriteFailure,
+} from "@/lib/settings/env-client";
 
 /**
  * Turn a read-failure code into a sentence in the reader's own language.
@@ -44,26 +48,18 @@ export function readFailureText(
 }
 
 /**
- * The detail a surface can still render while it only knows how to talk about
- * `ReadFailure`.
+ * The same sentence for the wider union.
  *
- * Bridging shim for the step that introduced the four read states before the
- * surfaces learned to tell them apart. It is deliberately lossy — every state
- * collapses back to an http/network-shaped detail — and it exists so ONE step
- * changes the type and the NEXT changes the behaviour, instead of one step
- * doing both and nobody being able to review either.
+ * `UnavailableReason` is `ReadFailure` plus `timeout`, and it deliberately does
+ * NOT share a type with it: one is a claim about the bytes on disk, the other
+ * about the connection. They share the `cause.*` copy because the CAUSE reads
+ * the same either way — a 502 is a 502 — while the headline above it differs,
+ * which is where the two claims actually part company.
  */
-export function legacyReadDetail(read: {
-    state: string;
-    reason?: { code: string; status?: number; detail?: string };
-}):
-    | { code: "http"; status: number }
-    | { code: "network"; detail: string }
-    | { code: "not-json" }
-    | { code: "no-env" } {
-    if (read.state === "unauthenticated") return { code: "http", status: 401 };
-    const r = read.reason;
-    if (!r) return { code: "http", status: 0 };
-    if (r.code === "timeout") return { code: "network", detail: "timeout" };
-    return r as never;
+export function unavailableReasonText(
+    t: (key: string, values?: Record<string, string | number>) => string,
+    reason: UnavailableReason,
+): string {
+    if (reason.code === "timeout") return t("cause.timeout");
+    return readFailureText(t, reason);
 }

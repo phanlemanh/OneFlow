@@ -9,7 +9,10 @@
  */
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { READ_FAILURES } from "@/lib/settings/__fixtures__/read-failures";
+import {
+    EXPECTED_STATE,
+    READ_FAILURES,
+} from "@/lib/settings/__fixtures__/read-failures";
 import {
     healthyGet,
     inputCount,
@@ -35,10 +38,20 @@ describe("settings screen, store unreadable — all five shapes", () => {
                 `shape ${name}: key form must be replaced`,
             ).toBe(0);
 
-            // (b) one shared card, carrying the reassurance the criterion names
-            expect(notices().length, `shape ${name}`).toBe(1);
+            // (b) one shared card, carrying the reassurance the criterion
+            // names. WHICH card depends on the shape: khong-noi-sai-ve-kho-khoa
+            // split the single "store unreadable" verdict into three, because
+            // an expired session and a proxy 502 say nothing about the bytes on
+            // disk. The reassurance is the half that survives unchanged — it is
+            // true of all three.
+            const want = EXPECTED_STATE[name];
+            const card = screen.queryAllByTestId(`${want}-notice`);
             expect(
-                notices()[0].textContent,
+                card.length,
+                `shape ${name}: expected the ${want} card`,
+            ).toBe(1);
+            expect(
+                card[0].textContent,
                 `shape ${name}: must promise nothing was changed`,
             ).toContain(SU.unchanged);
 
@@ -49,10 +62,17 @@ describe("settings screen, store unreadable — all five shapes", () => {
                 `shape ${name}: Save must be present but not clickable`,
             ).toBe(true);
 
-            // (d) exactly one way out
+            // (d) exactly one way out, and WHICH way out is the claim.
+            // The destructive escape belongs to a genuinely broken store and
+            // to nothing else; every other shape gets a retry instead, because
+            // there is nothing here to repair.
             expect(
-                screen.getAllByRole("button", { name: SU.escape }).length,
-                `shape ${name}: exactly one escape`,
+                screen.queryAllByRole("button", { name: SU.escape }).length,
+                `shape ${name}: the wipe button belongs to store-unreadable only`,
+            ).toBe(want === "store-unreadable" ? 1 : 0);
+            expect(
+                screen.queryAllByRole("button", { name: SU.retry }).length,
+                `shape ${name}: every blocked card offers a retry`,
             ).toBe(1);
         });
     }

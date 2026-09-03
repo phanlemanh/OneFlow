@@ -1,12 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
-import { legacyReadDetail } from "@/lib/settings/read-failure-text";
+import { type EnvReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
 import { requestOpenSettings } from "@/lib/settings/settings-events";
 
 /**
@@ -32,10 +32,6 @@ export function MediaLibraryConfigPanel({
         save: string;
         saving: string;
         writeFailed: string;
-        storeUnreadableTitle: string;
-        storeUnreadableUnchanged: string;
-        storeUnreadableReason: (cause: ReadFailure) => string;
-        toSettings: string;
     };
     onSaved: () => void;
 }) {
@@ -43,8 +39,14 @@ export function MediaLibraryConfigPanel({
     const [key, setKey] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
-    /** Why the store could not be read, or null. Blocks the form entirely. */
-    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
+    /**
+     * How the read failed, or null. Blocks the form entirely.
+     *
+     * The whole union, not one shape: only `store-unreadable` describes a
+     * broken store, and only it should wear the destructive card.
+     */
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
+    const t = useTranslations("Workspace");
 
     const save = async () => {
         setSaving(true);
@@ -63,7 +65,7 @@ export function MediaLibraryConfigPanel({
                     // Not "we could not read" and then a form to try again in:
                     // this panel has no way to repair a broken store, so it
                     // says so and points at the screen that does.
-                    setBlocked(legacyReadDetail(out.read));
+                    setBlocked(out.read);
                     return;
                 }
                 setError(labels.writeFailed);
@@ -78,21 +80,28 @@ export function MediaLibraryConfigPanel({
     if (blocked) {
         return (
             <div className="w-full nodrag">
-                <StoreUnreadableNotice
-                    reason={labels.storeUnreadableReason(blocked)}
-                    labels={{
-                        title: labels.storeUnreadableTitle,
-                        unchanged: labels.storeUnreadableUnchanged,
+                <ReadStateNotice
+                    read={blocked}
+                    t={t}
+                    retrying={saving}
+                    onRetry={() => {
+                        // Clearing first is what makes the retry visible: the
+                        // form returns, and a second failure paints a fresh
+                        // card rather than leaving the old one to look stale.
+                        setBlocked(null);
+                        void save();
                     }}
                 >
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={requestOpenSettings}
-                    >
-                        {labels.toSettings}
-                    </Button>
-                </StoreUnreadableNotice>
+                    {blocked.state === "store-unreadable" ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={requestOpenSettings}
+                        >
+                            {t("storeUnreadable.toSettings")}
+                        </Button>
+                    ) : null}
+                </ReadStateNotice>
             </div>
         );
     }

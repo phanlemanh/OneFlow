@@ -1,14 +1,12 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Loader2 } from "lucide-react";
-import {
-    type StoreUnreadableLabels,
-    StoreUnreadableNotice,
-} from "@/components/settings/store-unreadable-notice";
+import { useTranslations } from "next-intl";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { ReadFailure } from "@/lib/settings/env-client";
+import type { EnvReadFailure } from "@/lib/settings/env-client";
 import { requestOpenSettings } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
@@ -42,13 +40,18 @@ export type KeyPromptState =
      */
     | { phase: "saved-unverified"; reason: string }
     /**
-     * The key store itself could not be read, so this node must not write to
-     * it. Distinct from every phase above: those are all statements about a
-     * KEY, and this one is a statement about the STORE. Rendering it as
-     * `invalid` would tell the user their key is bad and invite them to type a
-     * new one — which is the overwrite this whole feature exists to prevent.
+     * The read did not produce a usable map, so this node must not write.
+     * Distinct from every phase above: those are all statements about a KEY,
+     * and this one is about the READ. Rendering it as `invalid` would tell the
+     * user their key is bad and invite them to type a new one — the overwrite
+     * this whole feature exists to prevent.
+     *
+     * It carries the WHOLE union rather than one shape. Only one of the three
+     * read failures means the store is broken, and only that one earns the
+     * destructive card; the phase was named `store-unreadable` while it
+     * covered all three, and the name was the bug.
      */
-    | { phase: "store-unreadable"; reason: ReadFailure }
+    | { phase: "read-failed"; read: EnvReadFailure }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -61,6 +64,8 @@ export interface NodeKeyPromptProps {
     value?: string;
     onChange?: (value: string) => void;
     onSave?: () => void;
+    /** Ask the surface to read again. Rendered in every non-ok read state. */
+    onRetry?: () => void;
 }
 
 export interface NodeKeyPromptLabels {
@@ -72,11 +77,6 @@ export interface NodeKeyPromptLabels {
     invalid: string;
     verified: string;
     savedUnverified: string;
-    /** Copy for the blocked state. Supplied by the caller from its own i18n namespace. */
-    storeUnreadable: StoreUnreadableLabels & {
-        reason: (cause: ReadFailure) => string;
-        toSettings: string;
-    };
 }
 
 export function NodeKeyPrompt({
@@ -87,7 +87,9 @@ export function NodeKeyPrompt({
     value = "",
     onChange,
     onSave,
+    onRetry,
 }: NodeKeyPromptProps) {
+    const t = useTranslations("Workspace");
     const inputId = `node-key-${envKey}`;
     const busy = state.phase === "verifying";
 
@@ -100,20 +102,25 @@ export function NodeKeyPrompt({
      * deliberately no escape button here, because the function that builds
      * that request is not reachable from this component.
      */
-    if (state.phase === "store-unreadable") {
+    if (state.phase === "read-failed") {
         return (
-            <StoreUnreadableNotice
-                reason={labels.storeUnreadable.reason(state.reason)}
-                labels={labels.storeUnreadable}
-            >
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={requestOpenSettings}
-                >
-                    {labels.storeUnreadable.toSettings}
-                </Button>
-            </StoreUnreadableNotice>
+            <ReadStateNotice read={state.read} t={t} onRetry={onRetry}>
+                {/*
+                 * The link to Settings appears ONLY when the store is really
+                 * broken, because Settings is the only place that can repair
+                 * one — and sending a user there for an expired session or a
+                 * dropped connection is advice that cannot help them.
+                 */}
+                {state.read.state === "store-unreadable" ? (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={requestOpenSettings}
+                    >
+                        {t("storeUnreadable.toSettings")}
+                    </Button>
+                ) : null}
+            </ReadStateNotice>
         );
     }
 
