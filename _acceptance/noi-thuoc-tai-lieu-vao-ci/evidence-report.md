@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 5b440efdc75859cc700b7564e76b42e6a3e73fd9
+verified_commit: 57c10c950893239c57559730ecdba193e75b0aab
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -189,3 +189,7 @@ sha: e68cdd61b0e7108753431434216e4343e0117e77 · suites: 8 lệnh exit 0
 ### Re-pin lần 6 — 2026-09-03, do hợp nhất `origin/main` (33 commit) vào nhánh
 run_id: merge-repin-20260903T074652Z
 sha: 5b440efdc75859cc700b7564e76b42e6a3e73fd9 · suites: 8 lệnh exit 0
+
+### Re-pin lần 7 — 2026-09-04, do thêm `scripts/acceptance/check-eval-key-dupes.sh` và sửa `scripts/ci/repin-eval-coverage.mjs` cho hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi` — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T220954Z
+sha: 57c10c950893239c57559730ecdba193e75b0aab · suites: 7 lệnh exit 0
