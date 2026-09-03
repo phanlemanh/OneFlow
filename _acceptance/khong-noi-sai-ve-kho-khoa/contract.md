@@ -38,10 +38,10 @@ Thiết kế đầy đủ: [`design doc`](../../docs/superpowers/specs/2026-09-0
   sống. Đua: kho đọc ra `unreadable` ở lượt GET rồi được sửa trước lượt PUT → PUT rơi
   vào nhánh 409; không cần luật riêng.
 
-- AC-2: Given `readEnvForBrowser` nhận một trong **chín** tín hiệu — 200 kèm `env`
+- AC-2: Given `readEnvForBrowser` nhận một trong **mười** tín hiệu — 200 kèm `env`
   object · 503 kèm `code: ENV_STORE_UNREADABLE` · 401 · 403 · 500 · 502 thân HTML ·
-  200 thân không-JSON · 200 `env` sai hình · `fetch` ném · quá trần — When phân
-  loại, Then ra đúng **bốn** state: `ok` **chỉ** từ tín hiệu 1; `store-unreadable`
+  200 thân không-JSON · 200 `env` sai hình · `fetch` ném · quá trần (chín đầu đo ở
+  E2, quá trần đo ở E4; tổng ghim = 10) — When phân loại, Then ra đúng **bốn** state: `ok` **chỉ** từ tín hiệu 1; `store-unreadable`
   **chỉ** từ tín hiệu 2; `unauthenticated` **chỉ** từ 401; **mọi** tín hiệu còn lại
   → `unavailable` với `reason.code` nêu tên tín hiệu. Cả hai kết luận nặng đều phải có
   căn cứ dương; phần bù rơi vào tên trung tính.
@@ -54,8 +54,10 @@ Thiết kế đầy đủ: [`design doc`](../../docs/superpowers/specs/2026-09-0
 
 - AC-4: Given `fetch` không bao giờ resolve, When quá **30 000 ms**, Then lượt đọc ra
   `unavailable` với `reason.code: "timeout"` **và** lượt ghi (`put()`) cũng kết thúc
-  với cùng phân loại — không màn nào quay vòng vĩnh viễn, không node nào kẹt ở
-  trạng thái đang-kiểm. Hằng số dùng chung với `apiClient`.
+  bằng cách **ném** `Error` mang `code: "timeout"` (giữ đường throw để nhánh
+  `writeFailed` hiện có bắt) — không màn nào quay vòng vĩnh viễn, và node key prompt
+  với fetch treo rời phase `verifying` mà **không** vào `verified`. Hằng số dùng
+  chung với `apiClient`.
 
 - AC-5: Given ba bề mặt (màn Cài đặt · node key prompt · media-library panel) × bốn
   state — **12 ô**, số ghim thành hằng — When render, Then: nút phá huỷ («Thay kho
@@ -149,5 +151,11 @@ Không có dòng `[GIẢ ĐỊNH]` hay `[CE chưa kiểm chứng]`.
   `build` đã ở `exclude` (bài học `chong-mat-khoa-byo-giao-dien` vòng 2–3).
   KHÔNG sửa `check-a11y-proto.sh` của hồ sơ trước — tệp đó nằm trong `paths` E9 của
   hồ sơ đã ký; chạm vào là làm nó ôi.
+- **`StoreUnreadableNotice` phát `data-proto-component="store-unreadable-notice"`** trên
+  root — mỏ neo để wrapper a11y chứng minh bản mẫu mount component THẬT, không phải
+  markup chép tay (gap-probe F5).
+- **Known limit nhỏ, khai trước:** E7 mock body 409 viết tay; hằng
+  `ENV_STORE_REPLACE_REFUSED` được ghim ở E1 phía server, hai bên không round-trip qua
+  một fixture chung.
 - **Hằng `EnvReadState` và `data-testid` theo state** là hợp đồng giữa
   `StoreUnreadableNotice` và ba bề mặt; đổi tên state là đổi cả 12 ô AC-5.

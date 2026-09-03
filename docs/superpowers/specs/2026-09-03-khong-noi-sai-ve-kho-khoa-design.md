@@ -131,7 +131,11 @@ thuộc `t3_paths`).
 ### 4. Trần 30s cho **cả** đọc lẫn ghi
 
 `AbortController` + `setTimeout(30_000)` bọc cả `readEnvForBrowser` lẫn `put()`.
-Abort → `unavailable` với `reason.code = "timeout"`. Phát hiện gốc nêu
+Đọc: abort → `unavailable` với `reason.code = "timeout"`. **Ghi: abort → `put()` NÉM**
+`Error` mang `code: "timeout"` — giữ nguyên đường throw để nhánh `writeFailed` hiện có
+của ba caller bắt được; một `put()` *trả* giá trị thay vì ném sẽ đi lọt qua mọi
+`try/catch` đang có và biến một lượt ghi chưa hề hạ cánh thành «thành công» (gap-probe
+F1). Cách lượt ghi hỏng *hiện ra* vẫn là Ngoài-3/7, ngoài hồ sơ này. Phát hiện gốc nêu
 `saveEnvKeys` treo ở `verifying` mãi — nên trần chỉ ở đường đọc là nửa vời.
 Hằng số dùng chung với `apiClient` (đang là `30000`).
 
@@ -229,7 +233,7 @@ Ba lớp, và chỗ mỏng nói trước:
 | Lớp | Xanh | **Đỏ** (chiều bắt buộc) |
 |---|---|---|
 | Server | kho lành (temp dir thật, ghi bằng `saveEnvStore`) + PUT `{env:{}, replaceUnreadableStore:true}` → 409 `ENV_STORE_REPLACE_REFUSED` **và** sha tệp kho không đổi; kho `absent` + cờ → 409; kho `unreadable` + cờ → 200 và kho rỗng (đường hợp lệ vẫn sống) | gỡ nhánh mới → ca kho-lành đỏ, thông điệp nêu **số khoá còn lại** (0 thay vì N), không chỉ mã HTTP |
-| Client taxonomy | ma trận toàn phần **9 tín hiệu** (200-ok · 503+code · 401 · 403 · 500 · 502-html · not-json · network · timeout) → đúng `state`, mỗi ca thông điệp nêu tên tín hiệu | thu về `if (!ok) unreadable` cũ → đúng **7** ca đỏ (mọi ca trừ 200 và 503+code) |
+| Client taxonomy | **mười** tín hiệu, ma trận toàn phần **9** ở E2 (200-ok · 503+code · 401 · 403 · 500 · 502-html · not-json · no-env · network) + quá trần ở E4 → đúng `state`, mỗi ca thông điệp nêu tên tín hiệu | thu về `if (!ok) unreadable` cũ → đúng **7** ca đỏ (mọi ca trừ 200 và 503+code) |
 | Ba bề mặt | 3 bề mặt × 4 trạng thái = **12 ca**, số ghim thành hằng: `state` đúng · số nút phá huỷ (1 ở đúng một ô, 0 ở 11 ô) · số nút Thử lại (0 ở `ok`, 1 ở còn lại) · `PUT` = 0 | gỡ điều kiện bề-mặt-là-Cài-đặt khỏi nút phá huỷ → 2 ca đỏ (canvas × kho-hỏng), thông điệp nêu bề mặt + trạng thái |
 | 409 → đọc lại | mock PUT 409 `REPLACE_REFUSED` rồi GET 200 → form với khoá, 0 tấm chặn, đúng 1 GET sau PUT | bỏ lượt đọc lại → đỏ, nêu số GET đếm được |
 | Seam | 401 → đúng 1 `CustomEvent("tf:unauthorized")` trên `window`, `cancelable: true`; 403 → 0 sự kiện | gỡ lời gọi → 0 sự kiện ở 401, đỏ nêu «expected 1 dispatch, got 0» |
