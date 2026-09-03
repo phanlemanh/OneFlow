@@ -128,6 +128,28 @@ export async function PUT(request: NextRequest) {
         );
     }
 
+    // The flag is a CLAIM about SERVER state, made by a caller that cannot see
+    // it. So the server checks the claim before acting on it.
+    //
+    // Accepting it unverified is how a transient failure on the browser side —
+    // an expired session, a proxy 502, a dropped connection — turns into an
+    // empty PUT that erases a store nothing was ever wrong with. The read above
+    // is already in hand; this costs no extra round trip.
+    //
+    // `absent` refuses too. "Replacing nothing with nothing is harmless" is
+    // true about the bytes and false about the premise, and it is the premise
+    // this branch exists to defend.
+    if (replaceUnreadable && current.state !== "unreadable") {
+        return NextResponse.json(
+            {
+                code: "ENV_STORE_REPLACE_REFUSED",
+                state: current.state,
+                error: "Kho khoá vẫn đọc được; lệnh thay kho bị từ chối, chưa ghi gì.",
+            },
+            { status: 409 },
+        );
+    }
+
     const previous = current.state === "ok" ? current.env : {};
     await saveEnvStore(env);
     const verdicts = await verifyChangedKeys(previous, env, requested);
