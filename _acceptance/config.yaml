@@ -652,7 +652,7 @@ executors:
     hrdn_diff_must: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diff-that-bai
     hrdn_check_counts: bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case ong-ba
     hrdn_shallow_probe: bash scripts/ci/check-repin-eval-coverage.sh teeth --case shallow-do-loi
-    hrdn_dupkey: bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-co-that
+    hrdn_dupkey: bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth
     hrdn_dupkey_msg: bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-neu-dich-danh
     hrdn_selfref_declared: bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-khai
     # E9 doi hang tu-quy-chieu >= 5 VA co chieu do. `--min-computable 1` khong
