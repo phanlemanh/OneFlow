@@ -6,6 +6,12 @@ vi.mock("server-only", () => ({}));
 const store = vi.hoisted(() => ({ env: {} as Record<string, string> }));
 vi.mock("@/lib/settings/env-store.server", () => ({
     loadEnvStore: async () => ({ ...store.env }),
+    // `resolveConfig` reads through `readEnvStore` so it can tell an unreadable
+    // store from an unconfigured one. This fake always reports a healthy store,
+    // which is the condition every case in this file is about; the unreadable
+    // paths have their own suite in config.server.unreadable.test.ts, on a real
+    // temp dir rather than a fake.
+    readEnvStore: async () => ({ state: "ok", env: { ...store.env } }),
 }));
 
 const saved = vi.hoisted(() => ({

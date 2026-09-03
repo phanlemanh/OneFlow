@@ -7,6 +7,7 @@
  */
 
 import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import {
@@ -29,6 +30,15 @@ import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
+import {
+    type ReadFailure,
+    saveEnvKeys,
+    type WriteFailure,
+} from "@/lib/settings/env-client";
+import {
+    readFailureText,
+    writeFailureText,
+} from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -38,8 +48,15 @@ import { BaseNodeShell } from "./base-node-shell";
 /* Inline key prompt                                                   */
 /* ------------------------------------------------------------------ */
 
-/** UI copy is Vietnamese, matching the repo locale. */
-const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
+/**
+ * UI copy is Vietnamese, matching the repo locale.
+ *
+ * The blocked-store copy is the exception and comes from the message catalogue
+ * instead — see `useKeyPromptLabels`. This file's remaining hardcoded strings
+ * are pre-existing i18n debt that `chong-mat-khoa-byo-giao-dien` explicitly
+ * declined to clean up; only strings that dossier ADDS go through next-intl.
+ */
+const KEY_PROMPT_BASE = {
     needsKey: "Bước này cần một khoá API",
     describe: (providerName) =>
         `Nhập khoá của ${providerName}. Khoá được lưu trên máy bạn và được thử ngay sau khi lưu.`,
@@ -49,7 +66,22 @@ const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-};
+} satisfies Omit<NodeKeyPromptLabels, "storeUnreadable">;
+
+/** Blocked-store copy, from the catalogue rather than from a literal. */
+function useKeyPromptLabels(): NodeKeyPromptLabels {
+    const t = useTranslations("Workspace.storeUnreadable");
+    return {
+        ...KEY_PROMPT_BASE,
+        storeUnreadable: {
+            title: t("title"),
+            unchanged: t("unchanged"),
+            reason: (cause: ReadFailure) =>
+                t("reason", { reason: readFailureText(t, cause) }),
+            toSettings: t("toSettings"),
+        },
+    };
+}
 
 /** Failure messages that mean "a key is missing or was rejected". */
 const KEY_FAILURE_PATTERN =
@@ -96,35 +128,35 @@ function useProviderName(feature: string): string {
 }
 
 /**
- * Merges one key into the stored env map and returns the server's verdict for
- * it. The verdict is what the server got back from the provider — the UI never
- * declares success on its own.
+ * Merge one key into the store and return the server's verdict for it.
+ *
+ * Routed through `saveEnvKeys` rather than a local pair of fetches. The local
+ * version never checked whether the read succeeded, so an unreadable store
+ * produced `current.env === undefined` and it sent the PUT anyway — the server
+ * refused with a 409, but the request still left the browser, which is exactly
+ * what AC-12 forbids.
  */
 async function saveAndVerifyKey(
     envKey: string,
     value: string,
-): Promise<KeyVerdict> {
-    const loaded = await fetch("/api/settings/env", { cache: "no-store" });
-    const current = (await loaded.json()) as { env?: Record<string, string> };
-    const res = await fetch("/api/settings/env", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            env: { ...(current.env ?? {}), [envKey]: value },
-            // Explicit: probe THIS key even when its value is unchanged. A
-            // re-save of the same string used to come back with no verdict at
-            // all, which the UI could only render as "invalid" (S4 round 1
-            // finding) — the change-detection optimisation stays for the bulk
-            // settings dialog, but a key the user just typed is always asked.
-            verify: [envKey],
-        }),
-    });
-    if (!res.ok) throw new Error(`Không lưu được khoá (HTTP ${res.status}).`);
-    const saved = (await res.json()) as {
-        verdicts?: Record<string, KeyVerdict>;
-    };
+): Promise<
+    | KeyVerdict
+    | { storeUnreadable: ReadFailure }
+    | { writeFailed: WriteFailure }
+> {
+    const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
+    if (!out.ok) {
+        if (out.reason === "store-unreadable") {
+            return { storeUnreadable: out.detail };
+        }
+        // A failed WRITE is not a statement about the key. Throwing here landed
+        // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
+        // which invites the user to type a new key because the disk was full or
+        // the connection dropped.
+        return { writeFailed: out.detail };
+    }
     return (
-        saved.verdicts?.[envKey] ?? {
+        out.verdicts[envKey] ?? {
             works: false,
             checked: false,
             detail: "Máy chủ không trả về kết quả kiểm tra khoá.",
@@ -145,7 +177,12 @@ interface NodeKeyGate {
  * Needs-key state for one node. The prompt opens in place, on the node that
  * failed; the settings dialog is never part of this sequence.
  */
-function useNodeKeyGate(): NodeKeyGate {
+export function useNodeKeyGate(): NodeKeyGate {
+    const tStore = useTranslations("Workspace.storeUnreadable");
+    const writeFailedText = useCallback(
+        (cause: WriteFailure) => writeFailureText(tStore, cause),
+        [tStore],
+    );
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
     const [value, setValue] = useState("");
@@ -189,7 +226,20 @@ function useNodeKeyGate(): NodeKeyGate {
         setState({ phase: "verifying" });
         try {
             const verdict = await saveAndVerifyKey(envKey, value);
-            if (verdict.works) {
+            if ("writeFailed" in verdict) {
+                setState({
+                    phase: "saved-unverified",
+                    reason: writeFailedText(verdict.writeFailed),
+                });
+            } else if ("storeUnreadable" in verdict) {
+                // Not a statement about the key. Saying "invalid" here would
+                // invite the user to type a new one, into a store that cannot
+                // be read.
+                setState({
+                    phase: "store-unreadable",
+                    reason: verdict.storeUnreadable,
+                });
+            } else if (verdict.works) {
                 setState({ phase: "verified" });
             } else if (verdict.checked) {
                 // The provider was asked and said no — genuinely unusable.
@@ -274,6 +324,7 @@ export function AbiNodeShell<F extends NodeSlot>({
     transformPrompts,
 }: AbiNodeShellProps<F>) {
     const keyGate = useNodeKeyGate();
+    const keyPromptLabels = useKeyPromptLabels();
     const providerName = useProviderName(feature);
     const { noteTask } = keyGate;
 
@@ -326,7 +377,7 @@ export function AbiNodeShell<F extends NodeSlot>({
                     envKey={keyGate.envKey}
                     providerName={providerName}
                     state={keyGate.state}
-                    labels={KEY_PROMPT_LABELS}
+                    labels={keyPromptLabels}
                     value={keyGate.value}
                     onChange={keyGate.setValue}
                     onSave={keyGate.save}

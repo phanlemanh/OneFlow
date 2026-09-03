@@ -303,6 +303,16 @@ executors:
     unit_kkt_round_trip: "bash scripts/settings/run-one-test.sh 'round trip'"
     unit_kkt_empty_key_put: "bash scripts/settings/run-one-test.sh 'empty key through PUT'"
     unit_kkt_no_regression: "pnpm vitest run src/lib/settings/env-store.server.test.ts src/app/api/settings/env/route.unreadable.test.ts src/app/api/settings/env/route.test.ts"
+    kkt_gd_resolve_config: "pnpm vitest run src/lib/media-library/config.server.unreadable.test.ts"
+    kkt_gd_settings_ui: "pnpm vitest run src/components/workspace/settings-dialog.unreadable.test.tsx"
+    kkt_gd_settings_wire: "pnpm vitest run src/components/workspace/settings-dialog.unreadable-wire.test.tsx"
+    kkt_gd_replace_ui: "pnpm vitest run src/components/workspace/settings-dialog.replace.test.tsx"
+    kkt_gd_replace_wire: "pnpm vitest run src/components/workspace/settings-dialog.replace-wire.test.tsx"
+    kkt_gd_panels_ui: "pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal.test.tsx"
+    kkt_gd_panels_wire: "pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal-wire.test.tsx"
+    kkt_gd_locale_parity: "pnpm vitest run src/i18n/locale-parity.test.ts"
+    kkt_gd_i18n_render: "pnpm vitest run src/components/workspace/settings-i18n-render.test.tsx"
+    kkt_gd_env_client: "pnpm vitest run src/lib/settings/env-client.test.ts"
   script:
     verify_plugins: "pnpm verify:plugins"
     # --- cong-tu-canh-minh (31/08) ---
@@ -637,6 +647,10 @@ executors:
     rkce_exit_code: bash scripts/ci/check-repin-eval-coverage.sh teeth --case chay-lai-do
     rkce_check_min: bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case san-tinh-duoc
     rkce_so_khop_total: bash scripts/ci/check-repin-eval-coverage.sh so-khop-total && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-lech && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-rong
+    kkt_gd_one_reader: "bash scripts/settings/check-one-env-reader.sh"
+    kkt_gd_one_reader_teeth: "bash scripts/settings/check-one-env-reader-teeth.sh"
+    kkt_gd_a11y_proto: "bash scripts/settings/check-a11y-proto.sh"
+    kkt_gd_design_gate: "bash scripts/settings/check-design-gate-proto.sh"
   design:
     # PORTABLE $HOME+glob (not hardcoded home/version): survives plugin upgrades and
     # multi-machine use (lesson: artifact-platform 2026-07-03 path ping-pong).
@@ -704,6 +718,27 @@ risk_tiers:
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
+    # Hai bộ đo a11y của bề mặt /proto — cùng lớp measuring-stick với
+    # pre-merge-check.sh ở trên: chúng ĐO sản phẩm chứ không phải sản phẩm, nên
+    # sửa chúng không được phép làm stale bằng chứng đã ký của feature khác.
+    # Khai ĐƯỜNG DẪN CHÍNH XÁC, không phải glob `scripts/**/check-a11y-proto.sh`:
+    # một bộ đo mới ở thư mục khác phải tự qua cổng, y như lý lẽ đã ghi cho
+    # scripts/acceptance/ ở phần executors.
+    - "scripts/media-library/check-a11y-proto.sh"
+    - "scripts/onboarding/check-a11y-proto.sh"
+    # Prototype CHỈ tồn tại để được đo (render ở /proto/<slug> cho design-pass và
+    # quét a11y); nó không nằm trên đường đi nào của người dùng. `data-proto-state`
+    # là một chỗ bám cho bộ đo, giống hệt add-media-library-proto.tsx đã có.
+    - "src/components/proto/byo-key-onboarding-proto.tsx"
+    # tsconfig.json — owner chốt 02/09, ĐẢO quyết định 01/09 (hôm trước cố ý chừa).
+    # Ghi lại cái giá cho người đọc sau, vì nó không hiển nhiên: đây là miễn trừ
+    # theo TỆP chứ không theo thay đổi. Cổng không có cơ chế "chỉ miễn lần này",
+    # nên từ đây MỌI sửa tsconfig đều lọt — kể cả tắt `strict`, đổi `target`, nới
+    # `paths`, hay bỏ một đường trong `exclude`. Thứ thực sự cần miễn chỉ là một
+    # dòng thêm dist dir vào `include`, và dòng đó tồn tại để chặn Next ghi đè
+    # chính tệp này (xem scripts/onboarding/check-a11y-proto.sh).
+    # Nói gọn: phạm vi dòng khai này BẢO VỆ hẹp hơn nhiều phạm vi nó CHO QUA.
+    - "tsconfig.json"
   # Contract chokepoints & wire/persistence shape — always T3 (full gate).
   t3_paths:
     - "config/tongflow.abi.json"
@@ -734,12 +769,18 @@ feature_loop:
     # các lệnh máy SONG SONG nên thứ tự này không phải thứ tự thi hành — bản
     # thân ô preflight phát biểu cách phân loại các ô còn lại.
     - executors.script.preflight_env
-    # Tach doi tu build_typecheck (cong-tu-canh-minh, 31/08). Mot luot build bi
-    # cong cu giet (exit 144, do 322s) truoc day nuot luon tin hieu typecheck
-    # di cung (24s). executors.test.build_typecheck VAN CON trong executors:
-    # bay ho so da ky tham chieu no.
-    - executors.test.build
-    - executors.test.typecheck
+    # GOP LAI 02/09 sau khi tach doi 31/08 (cong-tu-canh-minh). Ly do tach: mot
+    # luot build bi cong cu giet (exit 144, do 322s) nuot luon tin hieu
+    # typecheck di cung (24s). Ly do gop lai: tach doi dat `pnpm build` va
+    # `pnpm typecheck` vao LAN SONG SONG, mo lai dung cuoc dua ma khoa gop von
+    # ton tai de chan — `next build` ghi `.next/types` trong luc tsc doc no
+    # (xem chu thich cua chinh khoa do trong `executors:`). Do hai vong lien
+    # tiep cua chong-mat-khoa-byo-giao-dien: r1 TS6053 duoi `build/**` (chua
+    # bang tsconfig exclude), r2 TS6053 duoi `.next/types/**` — cung LOP loi,
+    # doi thu muc. Ly do tach nay da het hieu luc: TOOL-KILL-RULE (tran timeout
+    # >= 600000ms + truong `killedByTool`) chinh la thu che ca bi cong cu giet,
+    # va no chua ton tai hoi 31/08.
+    - executors.test.build_typecheck
     - executors.test.lint
     - executors.test.unit
     - executors.test.sdk_pytest

@@ -8,6 +8,7 @@ import { MediaCardList } from "@/components/workspace/nodes/add/media-card-list"
 import { MediaLibraryConfigPanel } from "@/components/workspace/nodes/add/media-library-config-panel";
 import { failureMessageKey } from "@/components/workspace/nodes/add/media-library-outcome";
 import type { MediaCard } from "@/lib/media-library/types";
+import type { ReadFailure } from "@/lib/settings/env-client";
 
 /**
  * Prototype for the `add-media-library` node.
@@ -49,8 +50,12 @@ const CONFIG_LABELS = {
     keyLabel: "Khoá có scope search",
     save: "Lưu rồi tìm lại",
     saving: "Đang lưu…",
-    readFailed: "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
     writeFailed: "Không lưu được khoá. Chưa có gì thay đổi.",
+    storeUnreadableTitle: "Không đọc được kho khoá đã lưu",
+    storeUnreadableUnchanged: "Chưa có gì bị thay đổi.",
+    storeUnreadableReason: (cause: ReadFailure) =>
+        `Máy chủ không trả về được danh sách khoá đang lưu (${cause.code}).`,
+    toSettings: "Mở màn Cài đặt",
 };
 
 const THUMB =

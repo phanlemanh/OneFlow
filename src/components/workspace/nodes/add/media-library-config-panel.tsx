@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
 
 /**
  * The way out of the missing-configuration state.
@@ -27,8 +30,11 @@ export function MediaLibraryConfigPanel({
         keyLabel: string;
         save: string;
         saving: string;
-        readFailed: string;
         writeFailed: string;
+        storeUnreadableTitle: string;
+        storeUnreadableUnchanged: string;
+        storeUnreadableReason: (cause: ReadFailure) => string;
+        toSettings: string;
     };
     onSaved: () => void;
 }) {
@@ -36,56 +42,59 @@ export function MediaLibraryConfigPanel({
     const [key, setKey] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
+    /** Why the store could not be read, or null. Blocks the form entirely. */
+    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
 
     const save = async () => {
         setSaving(true);
         setError("");
         try {
-            // PUT /api/settings/env REPLACES the whole map, so this read is
-            // load-bearing: merging onto `undefined` would silently delete every
-            // other stored BYO key. Refuse to write unless the read really
-            // produced a map.
-            const current = await fetch("/api/settings/env", {
-                cache: "no-store",
-            });
-            if (!current.ok) {
-                throw new Error(labels.readFailed);
-            }
-            const payload = (await current.json()) as {
-                env?: Record<string, string>;
-            };
-            if (
-                !payload.env ||
-                typeof payload.env !== "object" ||
-                Array.isArray(payload.env)
-            ) {
-                throw new Error(labels.readFailed);
-            }
-
-            const next = { ...payload.env };
-            if (url.trim()) next.MEDIA_LIBRARY_URL = url.trim();
-            if (key.trim()) next.MEDIA_LIBRARY_API_KEY = key.trim();
-
-            const saved = await fetch("/api/settings/env", {
-                method: "PUT",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ env: next }),
-            });
-            if (!saved.ok) {
-                throw new Error(labels.writeFailed);
+            // One shared writer, which reads first and refuses when that read
+            // did not produce a usable map. The panel used to do its own
+            // read-then-write pair; PUT replaces the whole map, so merging onto
+            // an untrustworthy read is how other keys got deleted.
+            const patch: Record<string, string> = {};
+            if (url.trim()) patch.MEDIA_LIBRARY_URL = url.trim();
+            if (key.trim()) patch.MEDIA_LIBRARY_API_KEY = key.trim();
+            const out = await saveEnvKeys(patch);
+            if (!out.ok) {
+                if (out.reason === "store-unreadable") {
+                    // Not "we could not read" and then a form to try again in:
+                    // this panel has no way to repair a broken store, so it
+                    // says so and points at the screen that does.
+                    setBlocked(out.detail);
+                    return;
+                }
+                setError(labels.writeFailed);
+                return;
             }
             onSaved();
-        } catch (cause) {
-            // A product sentence, not a raw `Error: 500` in front of the user.
-            setError(
-                cause instanceof Error && cause.message
-                    ? cause.message
-                    : labels.writeFailed,
-            );
         } finally {
             setSaving(false);
         }
     };
+
+    if (blocked) {
+        return (
+            <div className="w-full nodrag">
+                <StoreUnreadableNotice
+                    reason={labels.storeUnreadableReason(blocked)}
+                    labels={{
+                        title: labels.storeUnreadableTitle,
+                        unchanged: labels.storeUnreadableUnchanged,
+                    }}
+                >
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={requestOpenSettings}
+                    >
+                        {labels.toSettings}
+                    </Button>
+                </StoreUnreadableNotice>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full space-y-3 rounded-lg border border-dashed border-muted-foreground/40 p-3 nodrag">

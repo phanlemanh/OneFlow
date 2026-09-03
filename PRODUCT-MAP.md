@@ -11,7 +11,7 @@ flowchart TD
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>33 việc"]
+  GB --> DG["Đã giao<br/>34 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -27,14 +27,11 @@ flowchart TD
 - Chốt chặn có thể đang bỏ qua kiểm bằng chứng lỗi thời cho hồ sơ khai thiếu paths (`staleness-ho-so-thieu-paths`)
 - Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài (`timeline-view`)
 
-## Đang làm
-
-_chưa có_
-
 ## Đã giao
 
-- Nối hai thước tài-liệu-sống ↔ manifest vào CI (`noi-thuoc-tai-lieu-vao-ci`)
 - Node nạp-từ-kho — tìm trong media-library và nạp một asset về kho file thành file_key (`add-media-library`)
+- Cứu đường phiên âm: fork oneflow-api-openai sau khi OpenAI khai tử cả bốn model (`dang-ky-fork-openai`)
+- Nối hai thước tài-liệu-sống ↔ manifest vào CI (`noi-thuoc-tai-lieu-vao-ci`)
 - BYO-key onboarding — first run reaches a real result before asking for a key (`byo-key-onboarding`)
 - Cache L1 — node_fingerprint() and digest_form(), pure key computation (`cache-l1-fingerprint`)
 - Cache L2 — on-disk node cache, tier A only (`cache-l2-store`)
@@ -42,12 +39,12 @@ _chưa có_
 - Cache L4 — LRU eviction theo dung lượng, purge, reuse API, telemetry % partial (`cache-l4-eviction`)
 - chống đọc sai êm ru — bộ đọc phải TỪ CHỐI thay vì phát ra nội dung sai (`chong-doc-sai-em-ru`)
 - Chống mất khoá BYO — kho khoá từ chối ghi đè khi không đọc được, thay vì giả dạng rỗng (`chong-mat-khoa-byo`)
+- Chống mất khoá BYO — nửa giao diện: màn Cài đặt và hai ô nhập khoá nói rõ kho hỏng và chặn ghi đè (`chong-mat-khoa-byo-giao-dien`)
 - CI actions bump — actions/checkout 4→7, docker/login-action 3→4 (`ci-actions-bump`)
 - CI-a — vitest vào CI + gỡ ghim SDK cứng của guard overlay (khử mìn hạ tầng verify) (`ci-vitest-sdk-pin`)
 - slot dán chữ/khung giá/logo/safe-zone lên ảnh & video (Phase 1.2) (`compose-overlay`)
 - Conformance L0 — pluginRev, node_cached contract, TS↔Python conformance suite (`conformance-l0`)
 - Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng (`cong-tu-canh-minh`)
-- Đăng ký fork oneflow-api-openai vào manifest chính thức (`dang-ky-fork-openai`)
 - Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)

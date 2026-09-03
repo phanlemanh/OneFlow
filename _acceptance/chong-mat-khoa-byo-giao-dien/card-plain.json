@@ -1,0 +1,56 @@
+{
+ "feature_plain": "Khi kho khoá API hỏng không đọc được, màn Cài đặt và hai ô nhập khoá trên canvas nói rõ điều đó và chặn ghi đè — thay vì hiện ô trống trông như bạn chưa từng lưu khoá nào.",
+ "decisions": [
+  {
+   "id": "D1",
+   "q": "Chấp nhận rằng sàn tiếp cận chỉ dựa vào một phép đo, hay bắt dựng lại phép đo thứ hai?",
+   "why": "Phép đo tham khảo thứ hai đã hai lần hỏng theo cách chẳng liên quan tới sản phẩm, lần sau còn làm đỏ một lệnh trong checklist commit. Phép đo chính (trình duyệt thật) xanh 6/6."
+  },
+  {
+   "id": "D2",
+   "q": "Máy đã sửa 10 lỗi thật NẰM NGOÀI phạm vi bạn duyệt. Giữ, hay tách ra việc riêng?",
+   "why": "Luật của bộ công cụ nói lỗi ngoài phạm vi là việc của người, không phải của máy. Tôi đã sửa trước khi kiểm luật đó — nên bạn đang được hỏi sau khi việc đã làm, và đó là lỗi quy trình của tôi."
+  },
+  {
+   "id": "D3",
+   "q": "Chạy thêm một vòng kiểm nữa, hay dừng ở đây?",
+   "why": "Hai vòng đã chạy. Vòng hai đẻ ra ĐÚNG lớp lỗi của vòng một, nên tôi đổi cách làm thay vì vá tiếp, và dừng thay vì tự chạy vòng ba."
+  }
+ ],
+ "analyst_plain": "Bộ đo báo 11 trong 17 lỗi tìm được rơi ra ngoài vùng mà các ô đo với tới — tức bộ đo hiện tại không phải là thứ đã tìm ra chúng.",
+ "scope_plain": "Không giữ bản kho hỏng trước khi ghi đè · không dịch 76 câu tiếng Nhật đang nợ · không dọn chuỗi tiếng Việt ghi cứng có sẵn · nhánh bản chạy trên đám mây không đo được trên máy này · phép đo tham khảo design-gate không chạy vòng này.",
+ "decisions_plain": [
+  {
+   "id": "D1",
+   "p": "Một bộ đọc chung, cổng theo lối chỉ-nói-đọc-được-khi-mọi-điều-kiện-đúng, thay ba lối tự viết. Đổi lại một tệp mới; bù lại bốn kiểu hỏng còn lại không lọt."
+  },
+  {
+   "id": "D2",
+   "p": "Một ô đo = một tệp, không lọc theo tên ca. Đổi lại bảy tệp thay vì ba; bù lại không có ô đo nào báo ĐẠT khi chưa chạy ca nào."
+  },
+  {
+   "id": "D3",
+   "p": "Nút thoát ghi đè kho bằng kho rỗng rồi đưa màn về bình thường. Đổi lại người dùng mất khoá cũ thật — hộp xác nhận là toàn bộ hàng rào."
+  },
+  {
+   "id": "D4",
+   "p": "KHÔNG dịch 76 câu tiếng Nhật đang nợ; đóng băng chúng thành một DANH SÁCH. Đổi lại nợ cũ không co lại ở đây, nhưng không thể lớn thêm."
+  },
+  {
+   "id": "D5",
+   "p": "KHÔNG dọn các chuỗi tiếng Việt ghi cứng có sẵn trong ô khoá trên canvas. Đổi lại một tệp có cả hai kiểu."
+  },
+  {
+   "id": "D6",
+   "p": "Đo ô khoá trên node bằng chính cái móc mà màn thật dùng, thay vì dựng cả canvas. Đổi lại một móc nội bộ thành công khai chỉ vì phép đo."
+  },
+  {
+   "id": "D7",
+   "p": "ĐỔI HÌNH DẠNG thay vì vá lần thứ ba: lý do thất bại thành mã máy, không còn chỗ nào đặt được một câu chữ. Trình biên dịch chặn thay cho người rà soát."
+  },
+  {
+   "id": "D8",
+   "p": "KHÔNG chạy phép đo tham khảo design-gate vòng này; ghi thành giới hạn đã biết. Đổi lại sàn tiếp cận tựa hoàn toàn vào phép đo bằng trình duyệt thật."
+  }
+ ]
+}
