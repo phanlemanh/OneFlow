@@ -35,7 +35,12 @@ evals:
       dòng có `prev_sha` đúng bằng `verified_commit` cũ) rồi `teeth --case
       write-thieu-verified-commit`. Bản vòng 4 chỉ chạy nửa ĐỎ và mượn nửa xanh của E8,
       nên gỡ hẳn `prev_sha` khỏi bộ ghi — tức xoá trọn AC-1 — vẫn để E1 xanh; đã tái
-      hiện 03/09 trên bản sao.
+      hiện 03/09 trên bản sao. Và bản sửa ĐẦU của vòng 5 vẫn hỏng theo cùng lối: ca
+      `healthy` khớp chuỗi `prev_sha=<12 ký tự>` trên **stdout**, mà `console.log` in ra
+      từ biến cục bộ ngay cả khi khoá ấy không bao giờ vào log — đo THÔNG ĐIỆP chứ không
+      đo VẬT. Nay ca ấy đòi thêm `"prev_sha":"<40 hex>"` có mặt trong chính run-log;
+      kiểm răng 03/09: gỡ `prev_sha` khỏi `appendLog` → E1 thoát 1, và đầu ra đỏ in
+      đúng dòng stdout lừa mắt bên cạnh khoá vắng mặt.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E2

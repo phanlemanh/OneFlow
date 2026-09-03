@@ -14,7 +14,7 @@
       "criterion": "AC-1",
       "executor": "script",
       "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case healthy && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit",
-      "expected": "exit 0 và stdout `CASE write-thieu-verified-commit: PASS`. Ca này chạy chế độ `write` trên một hồ sơ fixture KHÔNG có `verified_commit` và đòi nó thoát KHÁC 0 nêu đích danh hồ sơ — chứ không lặng lẽ ghi một dòng repin thiếu `prev_sha`. Đây là AC chịu lực nhất của hồ sơ: nghi thức ghim nằm trong kit mà kho không sở hữu, nên nếu kho chỉ ĐỌC thì không dòng repin mới nào có `prev_sha` và hàng rào trơ vĩnh viễn. Đối chứng dương nay do CHÍNH ô này chạy, không đi mượn: lệnh gồm hai lượt — `teeth --case healthy` (`write` trên hồ sơ đủ dữ liệu phải ghi được dòng có `prev_sha` đúng bằng `verified_commit` cũ) rồi `teeth --case write-thieu-verified-commit`. Bản vòng 4 chỉ chạy nửa ĐỎ và mượn nửa xanh của E8, nên gỡ hẳn `prev_sha` khỏi bộ ghi — tức xoá trọn AC-1 — vẫn để E1 xanh; đã tái hiện 03/09 trên bản sao.",
+      "expected": "exit 0 và stdout `CASE write-thieu-verified-commit: PASS`. Ca này chạy chế độ `write` trên một hồ sơ fixture KHÔNG có `verified_commit` và đòi nó thoát KHÁC 0 nêu đích danh hồ sơ — chứ không lặng lẽ ghi một dòng repin thiếu `prev_sha`. Đây là AC chịu lực nhất của hồ sơ: nghi thức ghim nằm trong kit mà kho không sở hữu, nên nếu kho chỉ ĐỌC thì không dòng repin mới nào có `prev_sha` và hàng rào trơ vĩnh viễn. Đối chứng dương nay do CHÍNH ô này chạy, không đi mượn: lệnh gồm hai lượt — `teeth --case healthy` (`write` trên hồ sơ đủ dữ liệu phải ghi được dòng có `prev_sha` đúng bằng `verified_commit` cũ) rồi `teeth --case write-thieu-verified-commit`. Bản vòng 4 chỉ chạy nửa ĐỎ và mượn nửa xanh của E8, nên gỡ hẳn `prev_sha` khỏi bộ ghi — tức xoá trọn AC-1 — vẫn để E1 xanh; đã tái hiện 03/09 trên bản sao. Và bản sửa ĐẦU của vòng 5 vẫn hỏng theo cùng lối: ca `healthy` khớp chuỗi `prev_sha=<12 ký tự>` trên **stdout**, mà `console.log` in ra từ biến cục bộ ngay cả khi khoá ấy không bao giờ vào log — đo THÔNG ĐIỆP chứ không đo VẬT. Nay ca ấy đòi thêm `\"prev_sha\":\"<40 hex>\"` có mặt trong chính run-log; kiểm răng 03/09: gỡ `prev_sha` khỏi `appendLog` → E1 thoát 1, và đầu ra đỏ in đúng dòng stdout lừa mắt bên cạnh khoá vắng mặt.",
       "evidence_required": [
         "run_id",
         "exit_code",
@@ -224,6 +224,6 @@
   "contractPath": "/Users/manh-macmini/dev/oneflow/_acceptance/repin-khong-chay-lai-eval/contract.md",
   "invokedAt": "2026-09-03T06:10:26Z",
   "invokedSha": "2e897899c0ea7f3482574f68789b0686b78e3571",
-  "evalsHash": "6f0ee9c978904d9bfd563cab7666c6fe841e41501fa69c162adb379c0f3ea4ca",
+  "evalsHash": "65b206148174341612cb303844aa95db41a9865411facf88f2333709164c8dd8",
   "runBaseline": false
 }

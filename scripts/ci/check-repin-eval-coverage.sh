@@ -262,7 +262,16 @@ teeth)
         fx '    paths: ["src/**"]
 '
         out="$(core "$d" write demo "$NEW" R9 '[0,0,0]')"; rc=$?
-        want healthy green "$out" "$rc" "prev_sha=${OLD:0:12}"
+        # Assert on the ARTIFACT, not on the announcement. Asserting only the stdout
+        # string `prev_sha=<old12>` measured a console.log that prints from a local
+        # variable: deleting `prev_sha` from the object actually written to the log left
+        # this case green, so the eval that owns AC-1 could not see AC-1 being deleted.
+        # Confirmed 2026-09-03 by an adversarial pass -- the case as first written was
+        # two-directional in name only.
+        out="$out
+--- run-log ---
+$(cat "$d/_acceptance/demo/run-log.jsonl")"
+        want healthy green "$out" "$rc" "prev_sha=${OLD:0:12}" "\"prev_sha\":\"$OLD\""
     fi
 
     # 2. the hole itself: a computable pin touched E1 and nothing re-ran it.
