@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e68cdd61b0e7108753431434216e4343e0117e77
+verified_commit: 5b440efdc75859cc700b7564e76b42e6a3e73fd9
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -185,3 +185,7 @@ sha: c1fae946b9185354407bcf5b080748cadac35488 · suites: 8 lệnh exit 0
 ### Re-pin lần 5 — 2026-09-03, do vòng soi xác nhận bác một phép sửa và nhánh sửa lại
 run_id: rkce-repin-20260903T065011Z
 sha: e68cdd61b0e7108753431434216e4343e0117e77 · suites: 8 lệnh exit 0
+
+### Re-pin lần 6 — 2026-09-03, do hợp nhất `origin/main` (33 commit) vào nhánh
+run_id: merge-repin-20260903T074652Z
+sha: 5b440efdc75859cc700b7564e76b42e6a3e73fd9 · suites: 8 lệnh exit 0

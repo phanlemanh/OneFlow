@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tuần tự (CLASSIFIER-FALLBACK sau BLOCKED vòng 3) + 3 lớp soi chỉ-đọc + 1 lượt soi xác nhận đối kháng
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e68cdd61b0e7108753431434216e4343e0117e77
+verified_commit: 5b440efdc75859cc700b7564e76b42e6a3e73fd9
 human_signoff: Phan Le Manh 2026-09-03
 ---
 
@@ -251,3 +251,39 @@ Không đo lặp. Ô đo của hồ sơ này tất định (script trên kho git
   verified_at: 2026-09-03T06:52:23Z
   output: |
     PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay
+
+### Re-pin lần 1 — 2026-09-03, do hợp nhất `origin/main` (33 commit) vào nhánh
+run_id: merge-repin-20260903T074652Z
+sha: 5b440efdc75859cc700b7564e76b42e6a3e73fd9 · suites: 8 lệnh exit 0
+
+## Sửa đổi sau chữ ký — 2026-09-03: một bế tắc tự-quy-chiếu
+
+Hợp nhất `origin/main` (33 commit) vào nhánh làm bốn hồ sơ hoá ôi; lần ghim đóng lại việc
+ấy **bị chính hàng rào này bắt là nuốt 4 ô đo**. Ba ô chạy lại xanh. Hai ô còn lại — `E5`
+và `E6` — **không thể xanh**, và lý do là cấu trúc chứ không phải hỏng hóc:
+
+- cả hai **chạy chính chế độ `check`**;
+- cả hai khai `paths` gồm mục thư mục trần `_acceptance`;
+- mọi lần ghim đều ghi vào `_acceptance/**` — kể cả **dòng ghim của chính nó**;
+- nên mọi lần ghim đều "chạm" E5/E6, và `check` chỉ thoát 0 khi E5/E6 đã có dòng chạy lại
+  XANH tại sha ấy. Vòng tròn khép kín.
+
+Chứng minh bằng thực nghiệm trong một worktree: thêm hai dòng xanh giả cho E5/E6 thì
+`check` in `eval bi nuot: 0 … OK`; bỏ đi thì đỏ. Tức **E5 và E6 là hai vật chặn duy nhất,
+và chúng chặn lẫn nhau**.
+
+Hai dòng `exit_code: 1` của E5/E6 **được giữ nguyên trong sổ chạy**. Chúng là bản ghi
+trung thực của hai lượt chạy có thật; xoá đi để hàng rào xanh chính là hành vi mà hồ sơ
+này tồn tại để chặn.
+
+**Không chặn merge:** `pre-merge-check: clean` — vì hàng rào chưa được cắm vào CI (giới
+hạn số 1 đã khai ở trên). Nhưng nó có nghĩa **hàng rào đang đỏ trên chính lần ghim của
+mình**, và phải sửa trước khi ai cắm nó vào CI, nếu không nó chặn mọi PR sau đó mà không
+có lối ra.
+
+Đã ghi vào `review-findings.md` mục «Ngoài hợp đồng» để định đoạt ở hồ sơ riêng. Hai lối
+đã thấy, cả hai đều là quyết định thiết kế chứ không phải bản vá: **thu hẹp `paths` của
+E5/E6** bỏ mục `_acceptance` (chúng đo LOGIC của hàng rào, không đo nội dung hồ sơ) —
+nhưng khi ấy một lần ghim chỉ đụng hồ sơ sẽ không buộc chạy lại chúng nữa, mà kết luận
+của `check` thì CÓ phụ thuộc nội dung ấy; hoặc **miễn trừ tường minh** các ô tự-quy-chiếu
+ngay trong luật của hàng rào.

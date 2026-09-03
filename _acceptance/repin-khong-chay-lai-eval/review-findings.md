@@ -14,6 +14,14 @@ Bốn vòng có findings, tất cả đã vá và có phép đo hai chiều. Chi
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
+- **Hàng rào đỏ trên chính lần ghim của nó — bế tắc tự-quy-chiếu**
+  Người dùng thấy gì: Sau một lần hợp nhất, phép kiểm báo lần ghim ấy bỏ sót hai phép
+  kiểm — nhưng hai phép kiểm ấy CHÍNH LÀ nó, nên chúng không bao giờ xanh được. Ai cắm
+  hàng rào này vào lượt kiểm tự động sẽ chặn mọi PR sau đó mà không có lối ra.
+  file: `_acceptance/repin-khong-chay-lai-eval/evals.yaml` (E5, E6 khai `paths` gồm `_acceptance`)
+  severity: high
+  Đề xuất: mở hợp đồng mới
+
 - **Phần kiểm dòng ghim mới coi "không đọc được mốc so sánh" là "chưa có sổ nào"**
   Người dùng thấy gì: Trên một bản sao kho không tải đủ nhánh chính — bản tách nhánh, bản
   sao rút gọn, hoặc một lượt kiểm tự động chưa đồng bộ xong — phép kiểm coi toàn bộ 1674
