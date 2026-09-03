@@ -5,7 +5,7 @@ slug: hang-rao-doc-nham-loi-thanh-khong-co-gi
 risk_tier: T2
 surfaces: []
 design_doc: docs/superpowers/specs/2026-09-03-hang-rao-doc-nham-loi-design.md
-status: verified
+status: approved
 owner: phanlemanh@gmail.com
 approved_by:
 approved_at:
@@ -38,6 +38,8 @@ veto_opened_at: 2026-09-03T21:36:18Z
 - AC-10: Given hướng của phép quên là tiêu chí duy nhất đáng cân khi chọn cơ chế miễn trừ, When một ô đo tự-quy-chiếu KHÔNG khai `self_referential`, Then nó nằm trong tập phải-chạy-lại như cũ và hàng rào **ĐỎ**. Chứng minh việc bế tắc đã hết đòi **hoàn nguyên `paths` của E5/E6** (hồ sơ `repin-khong-chay-lai-eval`) về đủ `_acceptance` — phép thu hẹp 03/09 mua yên tĩnh bằng cách bán độ phủ thật; không hoàn nguyên thì bế tắc chỉ đang bị giấu, không phải đã hết. **[QUÊN khai thì hàng rào ĐỎ, không xanh.]**
 
 - AC-11: Given vòng này chạm `scripts/ci/**` và **thêm một file mới dưới `scripts/acceptance/**`** — vùng nằm trong phạm vi eval của nhiều hồ sơ đã ký, When chạy phép kiểm làn sóng ký lại cho hồ sơ này, Then không hồ sơ đã ký nào khác còn mang bằng chứng có trước code của nhánh. Đo 03/09 trên nhánh trước: chạm `scripts/acceptance/` làm **4** hồ sơ hoá ôi. Không có tiêu chí này thì việc ghim lại là một bước người phải nhớ, và một bước phải nhớ là một bước sẽ quên. **[Nhánh này không để hồ sơ nào khác mang bằng chứng ôi.]**
+
+- AC-12: Given cùng hình dạng `gitOk("diff","--name-only", "<prev>..<sha>") || ""` còn ở chế độ **lập kế hoạch ghim** — chế độ mà người vận hành chạy để biết lần ghim này phải chạy lại những ô đo nào — nên một tham chiếu gõ nhầm in `0 file doi` · `BI CHAM (0): (rong)` rồi thoát 0, tức một chỉ dẫn trông có thẩm quyền bảo *không cần chạy lại gì cả*, When phép so hai mốc ấy thất bại, Then `plan` **DỪNG** nêu cặp tham chiếu. Đo 04/09 trước khi sửa: `plan repin-khong-chay-lai-eval deadbeefdeadbeef HEAD` in đúng hai dòng trên và thoát 0. Tiêu chí này **thêm ở Cổng 2 vòng 1** (owner trả thẻ, chọn nâng phạm vi): nó là **điểm thứ tư** trong bốn điểm mà ma trận thiết kế kê vào diện *sửa*, và thiếu nó thì chính con số «4/9» của Đường đo là sai. **[Chế độ lập kế hoạch ghim TỪ CHỐI khi phép so hai mốc thất bại.]**
 
 ## Coverage
 
@@ -86,7 +88,7 @@ vi owner đã chốt. Giữ nguyên câu chữ cũ là hứa một thứ bằng 
 
 | Thước | Số từ đâu | AC nào bảo đảm |
 |---|---|---|
-| **4/9** điểm gọi `gitOk` trong `repin-eval-coverage.mjs` chuyển từ đọc-nhầm sang từ-chối; 5 điểm còn lại GIỮ, mỗi điểm một lý do (xem ma trận trong design doc) | đếm điểm gọi, ma trận viết trước, 9 dòng | AC-1, AC-3, AC-5 (sửa) · AC-4 (in ra) |
+| **4/9** điểm gọi `gitOk` trong `repin-eval-coverage.mjs` chuyển từ đọc-nhầm sang từ-chối; 5 điểm còn lại GIỮ, mỗi điểm một lý do (xem ma trận trong design doc) | đếm điểm gọi, ma trận viết trước, 9 dòng | AC-1, AC-3, AC-5, **AC-12** (sửa) · AC-4 (in ra) |
 | Mỗi chỗ có **cặp hai chiều**: cây lành → xanh; hỏng đúng nguồn ấy → **ĐỎ nêu đích danh** | fixture của từng ca | AC-1+AC-2 · AC-3 · AC-6+AC-7 · AC-10 |
 | Hàng rào ghim chạy trên **bản sao rút gọn** không đẻ lỗi giả | 25 → 0 | AC-1 |
 | Ô đo tự-quy-chiếu xanh sau một lần ghim **mà không cần** thu hẹp `paths` | 2 ô | AC-8, AC-9, AC-10 |

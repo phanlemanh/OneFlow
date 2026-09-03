@@ -660,6 +660,7 @@ executors:
     hrdn_selfref_bucket: bash scripts/ci/check-repin-eval-coverage.sh check --min-selfref 5 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-dem-giam
     hrdn_selfref_forget: bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-quen-khai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case paths-e5e6-hoan-nguyen
     hrdn_resign_wave: bash scripts/acceptance/check-resign-wave.sh hang-rao-doc-nham-loi-thanh-khong-co-gi origin/main
+    hrdn_plan_diff_must: bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-diff-that-bai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id
     kkt_gd_one_reader: "bash scripts/settings/check-one-env-reader.sh"
     kkt_gd_one_reader_teeth: "bash scripts/settings/check-one-env-reader-teeth.sh"
     kkt_gd_a11y_proto: "bash scripts/settings/check-a11y-proto.sh"

@@ -177,3 +177,19 @@ evals:
       Nên vòng này kèm một sự kiện re-pin, và lane ấy là việc CUỐI CÙNG trước lượt verify.
       KHÔNG khai `paths` → ô này luôn chạy lại, đúng mặc định an toàn.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.hrdn_plan_diff_must
+    paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 cho HAI lượt. Lượt một: ca `plan-diff-that-bai` — chạy `plan` với một tham
+      chiếu KHÔNG phân giải được, đòi thoát KHÁC 0, thông điệp nêu NGUYÊN VĂN cặp tham
+      chiếu, **và** KHÔNG in dòng `BI CHAM (0): (rong)` — thiếu vế sau thì một bản dừng ở
+      cuối vẫn xanh trong khi vẫn kịp bảo người vận hành «không cần chạy lại gì». Lượt
+      hai: ca `plan-tap-id` (đã có từ trước) vẫn XANH — đối chứng dương chứng minh phép
+      từ chối không viết quá tay thành "mọi lượt plan đều lỗi". Đo 04/09 trước khi sửa:
+      `plan repin-khong-chay-lai-eval deadbeefdeadbeef HEAD` in `0 file doi` ·
+      `BI CHAM (0): (rong)` rồi thoát 0 — chiều đỏ đã chạy được trên kho thật.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

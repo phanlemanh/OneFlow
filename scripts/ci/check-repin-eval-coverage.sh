@@ -26,7 +26,7 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 # the cases, `so-khop-total` checks that the numbers written into evals.yaml still name
 # this suite. Deriving TOTAL rather than typing it removes the only way the two can
 # disagree.
-KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file diff-that-bai shallow-do-loi tu-quy-chieu-khai tu-quy-chieu-quen-khai tu-quy-chieu-dem-giam paths-e5e6-hoan-nguyen"
+KNOWN="healthy nuot-eval da-chay-lai ong-ba khong-khai-paths paths-thu-muc-tran paths-glob write-thieu-verified-commit plan-tap-id plan-them-mot-file write-thieu-suites write-lan-do write-prev-bang-sha diem-vao-duong-dan-la write-giu-dong-cu chay-lai-do log-hong newlines-thieu-prev so-khop-lech so-khop-rong san-tinh-duoc base-khong-phan-giai base-thieu-file diff-that-bai shallow-do-loi tu-quy-chieu-khai tu-quy-chieu-quen-khai tu-quy-chieu-dem-giam paths-e5e6-hoan-nguyen plan-diff-that-bai"
 TOTAL=$(printf '%s\n' $KNOWN | wc -w | tr -d ' ')
 
 case "$MODE" in
@@ -568,6 +568,22 @@ $(cat "$d/_acceptance/demo/run-log.jsonl")"
                 || { echo "CASE paths-e5e6-hoan-nguyen: FAIL — $id chua hoan nguyen muc _acceptance trong paths"; miss=1; }
         done
         if [ "$miss" -eq 0 ]; then echo "CASE paths-e5e6-hoan-nguyen: PASS"; else FAILED=1; fi
+    fi
+
+    # 30. `plan` is the mode an operator runs to decide WHICH evals a re-pin must re-run,
+    # and it carried the same `|| ""` as check did -- so an unresolvable ref printed
+    # `0 file doi` / `BI CHAM (0): (rong)` and exited 0: an authoritative-looking
+    # instruction to re-run nothing. Added at Gate 2 of round 1 when the owner widened
+    # scope; it is the FOURTH of the four call sites the design matrix marked "fix".
+    # The KHONG: needle is what separates "refuses" from "refuses only after telling the
+    # operator there is nothing to do".
+    if run plan-diff-that-bai; then
+        fx '    paths: ["src/**"]
+'
+        out="$(core "$d" plan demo deadbeefdeadbeefdeadbeefdeadbeefdeadbeef "$NEW")"; rc=$?
+        want plan-diff-that-bai red "$out" "$rc" \
+            "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef" \
+            "KHONG:BI CHAM (0)"
     fi
 
     # 19-20. the size-invariant's own two directions. Its red half already fired on real

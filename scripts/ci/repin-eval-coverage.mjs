@@ -332,7 +332,18 @@ function modeWrite(slug, sha, runId, suites) {
 
 function modePlan(slug, prev, sha) {
     if (!slug || !prev || !sha) die("plan can <slug> <prev_sha> <sha>");
-    const changed = (gitOk("diff", "--name-only", `${prev}..${sha}`) || "")
+    // The fourth of the four `gitOk` sites the design marked "fix", and the one with the
+    // worst consequence: `plan` is what an operator runs to decide WHICH evals a re-pin
+    // must re-run. With `|| ""` a mistyped or unresolvable ref printed `0 file doi` and
+    // `BI CHAM (0): (rong)` and exited 0 -- an authoritative-looking instruction to re-run
+    // nothing. Unlike `check`, neither ref has been validated here, so refusing is the
+    // only honest answer.
+    const changed = gitMust(
+        `khong so duoc hai moc: prev=${prev} sha=${sha} — khong ket luan duoc lan ghim nay cham o do nao`,
+        "diff",
+        "--name-only",
+        `${prev}..${sha}`,
+    )
         .split("\n")
         .filter(Boolean);
     const evals = evalsOf(slug);
