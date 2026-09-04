@@ -279,10 +279,19 @@ for (const [slug] of parkRows) {
     if (!SLUG_RE.test(slug)) continue;
     const d = dossiers.get(slug);
     if (!d) continue;
-    if (d.opportunity?.decision !== "park")
+    // Any HUMAN-CLOSED state counts, not just `park`. F5 requires every closed
+    // dossier to be listed in this table; demanding `park` here as well left
+    // `kill` and `stage: archived` with NO valid position at all — unlisted was
+    // an F5, listed was an F3, and the guard's own message says "fix the roadmap
+    // or the dossier, not the guard". Measured by probe in the S4 round-3 review.
+    const opp = d.opportunity;
+    const closed =
+        OPP_CLOSED_DECISIONS.has(opp?.decision ?? "") ||
+        opp?.stage === "archived";
+    if (!closed)
         fail(
             "F3",
-            `${slug} khai park mà hồ sơ chưa park (opportunity.md cần decision: park)`,
+            `${slug} nằm trong Xếp lại sau mà hồ sơ chưa đóng (opportunity.md cần decision: park hoặc kill, hoặc stage: archived)`,
         );
 }
 

@@ -171,8 +171,12 @@ case_parked_opportunity() {
     printf -- '---\nschema_version: 1\nslug: teeth-probe-parked\nstage: decided\ndecision: park\n---\n' \
         >"$tmp/t/_acceptance/teeth-probe-parked/opportunity.md"
     check_is_red || return 1
-    out_has 'teeth-probe-parked' || return 1
-    out_has 'Xếp lại sau'
+    # Hai `out_has` doc lap quet TOAN BO stdout khong do duoc mot QUAN HE: sau khi
+    # go dung nhanh phan loai park, slug hien o dong FAIL cua o "cân nhắc" con
+    # chuoi "Xếp lại sau" van hien o cac dong FAIL cua ba ho so park that, nen ca
+    # hai deu xanh va ca nay PASS tren dung hoi quy no khai la minh bat (do o S4
+    # vong 3). Slug va O phai nam tren CUNG MOT dong.
+    grep -Eq 'teeth-probe-parked.*\(Xếp lại sau\)' "$tmp/out"
 }
 
 # AC-4 fail-closed (a): the artifact is not there at all.

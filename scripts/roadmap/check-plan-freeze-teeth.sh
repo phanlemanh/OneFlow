@@ -29,6 +29,8 @@ CASES=(
   o-moi-co-hoi-hong
   park-chua-ky
   park-ngoai-bang
+  ngoai-le-thieu-ngay
+  kill-hop-le
   tick-noi-doi
   tin-theo-loi
   park-khong-that
@@ -262,6 +264,45 @@ PY
   ! out_has 'zz-park-lau'
 }
 
+# AC-5 nua thu hai. Lop nay co HAI phan tu — "ly do ngoai ba ten" VA "thieu
+# ngay/ai quyet" — nhung chi phan tu dau co ca do: fixture cua ngoai-le-tran mang
+# ngay hop le va nguoi hop le, chi sai moi ly do. Do o S4 vong 3: xoa han nhanh
+# `thieu ngay hoac ai quyet` cua guard roi chay 17/18 ca thi TAT CA van PASS. Cung
+# thuoc ma AC-8 da bi ap: mot lop N phan tu can N hinh dang do.
+case_ngoai_le_thieu_ngay() {
+  local shape
+  for shape in thieu-ngay thieu-ai-quyet; do
+    build_fixture
+    case "$shape" in
+      thieu-ngay)     add_exception_row "| probe-$shape | bảo-mật |  | Manh |" ;;
+      thieu-ai-quyet) add_exception_row "| probe-$shape | bảo-mật | 2026-09-05 |  |" ;;
+    esac
+    guard_is_red || { echo "    hinh dang $shape van XANH — nua lop nay khong co phep do" >&2; return 1; }
+    out_has 'F4' || { echo "    $shape do nhung khong phai F4" >&2; return 1; }
+    out_has "probe-$shape" || { echo "    $shape do nhung khong goi ten dong ngoai le" >&2; return 1; }
+  done
+}
+
+# Chieu XANH cua F3 sau khi no thoi doi rieng `park`. Truoc S4 vong 3, mot ho so
+# `decision: kill` khong co cho nao hop le: khong niem yet thi F5 doi, niem yet
+# thi F3 doi — hai loi thoat loai tru nhau, va guard lai in "sua roadmap hoac ho
+# so, khong sua guard". Ca nay la bang chung cua ca hai vong: kill niem yet va ky
+# du thi guard XANH.
+case_kill_hop_le() {
+  build_fixture
+  mkdir -p "$tmp/t/_acceptance/zz-da-bac"
+  printf -- '---\nschema_version: 1\nslug: zz-da-bac\nstage: decided\ndecision: kill\ndecided_by: Ai Do\ndecided_at: 2026-09-04\n---\n' \
+    > "$tmp/t/_acceptance/zz-da-bac/opportunity.md"
+  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+i = s.index("**Xếp lại sau**"); j = s.index("\n", s.index("|---", i)) + 1
+p.write_text(s[:j] + "| zz-da-bac | da bi bac | — |\n" + s[j:], encoding="utf-8")
+PY
+  guard_is_green || { echo "    kill niem yet + ky du van do — F3 va F5 con mau thuan" >&2; return 1; }
+  ! out_has 'zz-da-bac'
+}
+
 # AC-3 red half. A slug row ticked ✅ while its contract is not signed off.
 case_tick_noi_doi() {
   build_fixture
@@ -290,7 +331,7 @@ p.write_text(s.replace("decision: park", "decision:", 1), encoding="utf-8")
 PY
   guard_is_red || return 1
   out_has 'F3' || return 1
-  out_has 'timeline-view khai park mà hồ sơ chưa park'
+  out_has 'timeline-view nằm trong Xếp lại sau mà hồ sơ chưa đóng'
 }
 
 # AC-5 red half. An exception with a reason outside the named three.

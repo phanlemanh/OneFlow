@@ -144,7 +144,11 @@ p.write_text("\n".join(l for l in s.split("\n")
                        if not l.startswith("## Định vị — bổ sung 04/09")), encoding="utf-8")
 PY
     is_red || return 1
-    out_has 'vision.md có đoạn định vị ba tầng'
+    # Tien to FAIL la bat buoc: `need()` in NHAN o CA HAI chieu (`OK: <nhan>` va
+    # `FAIL: <nhan> — …`), nen ghim nhan tran thi khang dinh nay con thoa man ca
+    # khi guard do VI MOT PHEP KIEM KHAC — phep do tut ve "script thoat khac 0".
+    # Chinh hinh dang ma AC-9 khoan (c) cua ho so nay dat ten va cam.
+    out_has 'FAIL: vision.md có đoạn định vị ba tầng'
 }
 
 # THE LOAD-BEARING CASE. A 37th signed dossier appears and nobody updates

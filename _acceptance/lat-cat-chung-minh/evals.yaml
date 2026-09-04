@@ -44,7 +44,7 @@ evals:
     cmd: config:executors.script.lcm_teeth_park
     paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/timeline-view/opportunity.md"]
     expected: >-
-      exit 0 và stdout `CASE park-khong-that: PASS` — F3 nêu `timeline-view khai park mà hồ sơ chưa park`.
+      exit 0 và stdout `CASE park-khong-that: PASS` — F3 nêu `timeline-view nằm trong Xếp lại sau mà hồ sơ chưa đóng`.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -116,7 +116,7 @@ evals:
     cmd: config:executors.script.plan_freeze_teeth_all
     paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
     expected: >-
-      exit 0 và dòng cuối `✅ răng: 18/18 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
+      exit 0 và dòng cuối `✅ răng: 20/20 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E11
