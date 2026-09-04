@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: fa3a3ef2ee2faa3ed7ace6ff3b3f59a0710817ff
+verified_commit: 792163491a11febaa0f5ff729f112442e3eecbef
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -298,7 +298,87 @@ Analyst).
 - [ ] No judgment items in this feature — nothing to override
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
 
-### Re-pin lần 1 — 2026-09-04, do hồ sơ `khong-noi-sai-ve-kho-khoa` chạm `src/app/api/settings/env/route.ts`, rơi vào glob `src/app/api/**` mà E12 khai quá rộng — đúng điều mục 2 của báo cáo này đã dự đoán ngày 02/09. Glob VẪN chưa thu lại; việc đó là hồ sơ riêng
+### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-conformance-l0-20260827T101500Z
+sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 9 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-conformance-l0-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 9 lệnh exit 0
+
+### Re-pin lần 3 — 2026-08-28, do nhánh `draft/chong-doc-sai-em-ru` sửa `sdk/tongflow/text/normalize_vi.py` và `sdk/tests/test_normalize_vi.py`: hồ sơ này khai `sdk/**` trong `paths` của một eval, nên thay đổi đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` (PR #83) vào nhánh — trước merge cả hai cổng đều xanh, đúng lý do "cổng chạy trên cây đã merge main mới là cổng thật". Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh, preflight GREEN, mọi lệnh exit 0
+run_id: repin-conformance-l0-20260828T124500Z
+sha: 9caa25568b35132ab0387e09e5aa0b503c8a8deb · suites: 9 lệnh exit 0
+
+### Re-pin lần 4 — 2026-08-29, do nhánh `feat/add-media-library` thêm ba route API dưới `src/app/api/media-library/`: hồ sơ này khai `src/app/api/**` trong `paths` của một eval, nên ba file đó rơi vào vùng soi staleness. Chỉ lộ ra SAU khi merge `main` vào nhánh — trên chính `main` thì cổng sạch, staleness sinh ra từ nhánh chứ không phải từ `main`. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN, mọi lệnh exit 0. Lane chạy LẠI ở mốc cuối sau khi hai file `scripts/acceptance/` bỏ dở trong worktree được commit — một ghim chỉ được dời sau một lane đã thật sự chạy tại đúng mốc đó
+run_id: repin-conformance-l0-20260829T025815Z
+sha: 1406d9686404e9924c19797908b00bc2f40d524a · suites: 9 lệnh exit 0
+
+### Re-pin lần 5 — 2026-08-29, do nhánh `feat/add-media-library` đi tiếp tới chữ ký Cổng 2: sau lần re-pin 4 nhánh còn commit thêm bảy lượt (hai lỗi nặng của vòng 7, khai thư mục dist trong `tsconfig.json`, bỏ bước khôi phục phá dữ liệu khỏi guard a11y, và bộ hồ sơ nghiệm thu). Hồ sơ này khai `src/**` và `sdk/**` trong `paths`, nên các commit đó rơi vào vùng soi staleness. Mã của gói này không đổi một byte; một phiên tươi chạy lại cả 9 lệnh trong worktree của nhánh, preflight GREEN ở mọi agent kiểm nó, mọi lệnh exit 0. Ghim dời **sau** khi mọi commit ngoài `_acceptance/**` đã xong — đúng bài học lần 4: ghim trước rồi commit tiếp là tự huỷ ghim vừa lấy. Hai lệnh pytest đỏ ở lượt đầu là **lỗi gọi của người dựng lane**, không phải hồ sơ đỏ: exit 4 là mã *usage error* của pytest (target không tồn tại) chứ không phải mã test trượt — target thật là `tests/test_engine_batch.py` và `tests/conformance`, sai vì bản liệt kê config bị cắt ở 110 ký tự rồi bị coi là nguồn. Sửa target, chạy lại: 9/9 exit 0.
+run_id: repin-conformance-l0-20260829T134252Z
+sha: 31968535286d7800678c5f9af0e2aa0a33c4c54a · suites: 9 lệnh exit 0
+
+### Re-pin lần 6 — 2026-08-31, do `chong-mat-khoa-byo` chạm `src/app/api/**` mà hồ sơ này khai trong `paths`
+run_id: repin-20260831T022203Z-2767
+sha: 292d740129ec49e46dda86ecef6b6f0a51b5080e · suites: 7 lệnh exit 0
+
+Lane máy thuần chạy bởi một agent tươi tại HEAD: preflight GREEN · build+typecheck ·
+lint · vitest 708 · sdk pytest 292 · verify:plugins · gen:abi sạch. Cây sạch trước và
+sau. Không chữ ký người nào bị đụng.
+
+### Re-pin lần 7 — 2026-09-01, do dang-ky-fork-openai chạm scripts/plugins/** trong phạm vi hẹp của hồ sơ này
+run_id: repin-20260901T093702Z-3535
+sha: bb85560ca1337e308b1e06f5be7234dd64a0be2a · suites: 8 lệnh exit 0
+
+### Re-pin lần 8 — 2026-09-01, do dang-ky-fork-openai chạm scripts/plugins/** thêm ở vòng sửa
+run_id: repin-20260901T151335Z-6351
+sha: 35b24ee4cb06dd97020f13aee913777c3255d00f · suites: 8 lệnh exit 0
+
+### Re-pin lần 9 — 2026-09-01, do noi-thuoc-tai-lieu-vao-ci chạm .github/workflows/ci.yml và scripts/plugins/**
+run_id: repin-20260902T020812Z-5668
+sha: e0eb0a92d5ca672e2af4f372bbdede9260727d74 · suites: 8 lệnh exit 0
+
+### Re-pin lần 10 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci chạm ci.yml, scripts/ci/**, scripts/plugins/** và package.json
+run_id: repin-20260902T093055Z-6608
+sha: 10e50bdad103b8d9c80efe6ba2b5ebddc4f34ebf · suites: 8 lệnh exit 0
+
+### Re-pin lần 11 — 2026-09-02, do noi-thuoc-tai-lieu-vao-ci rút chế độ exit-propagates và khôi phục dòng in số id
+run_id: repin-20260902T102111Z-4002
+sha: 0110e2a557c1e5524d7e5a91db39023da23b5df8 · suites: 8 lệnh exit 0 (làn chạy TUẦN TỰ, không tung bầy — vòng trước BLOCKED vì agent chết)
+
+### Re-pin lần 12 — 2026-09-02, do repin-khong-chay-lai-eval chạm scripts/ci/**
+run_id: repin-20260902T162209Z-29839
+sha: ddea746f4269130b59797ea4236f2ec9a44a6c61 · suites: 8 lệnh exit 0 (làn tuần tự; dòng repin ghi bằng chế độ `write`, mang `prev_sha`)
+
+### Re-pin lần 13 — 2026-09-02, do nhánh thêm hai phép từ chối cho `write` và một guard điểm vào
+run_id: rkce-repin-20260902T221339Z
+sha: 3c859a4998c875a1032d76ee6529b263474d3b20 · suites: 8 lệnh exit 0
+
+### Re-pin lần 14 — 2026-09-03, do nhánh gom mọi lượt đọc/ghi run-log về một cửa
+run_id: rkce-repin-20260903T023014Z
+sha: 71449d00fb483e1ef48b95a7da0e4adbb156fb45 · suites: 8 lệnh exit 0
+
+### Re-pin lần 15 — 2026-09-03, do nhánh buộc mọi con số viết tay vào vật nó mô tả
+run_id: rkce-repin-20260903T054659Z
+sha: c1fae946b9185354407bcf5b080748cadac35488 · suites: 8 lệnh exit 0
+
+### Re-pin lần 16 — 2026-09-03, do vòng soi xác nhận bác một phép sửa và nhánh sửa lại
+run_id: rkce-repin-20260903T065011Z
+sha: e68cdd61b0e7108753431434216e4343e0117e77 · suites: 8 lệnh exit 0
+
+### Re-pin lần 17 — 2026-09-03, do hợp nhất `origin/main` (33 commit) vào nhánh
+run_id: merge-repin-20260903T074652Z
+sha: 5b440efdc75859cc700b7564e76b42e6a3e73fd9 · suites: 8 lệnh exit 0
+
+### Re-pin lần 18 — 2026-09-04, do thêm `scripts/acceptance/check-eval-key-dupes.sh` và sửa `scripts/ci/repin-eval-coverage.mjs` cho hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi` — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T220954Z
+sha: 57c10c950893239c57559730ecdba193e75b0aab · suites: 7 lệnh exit 0
+
+### Re-pin lần 19 — 2026-09-04, do sửa `modePlan` của `scripts/ci/repin-eval-coverage.mjs` (AC-12, owner nâng phạm vi ở Cổng 2 vòng 1) và bộ răng lên 30 ca — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T231351Z
+sha: d1331546558e3ba13f3e77ef557f1393a44cffa9 · suites: 7 lệnh exit 0
+
+### Re-pin lần 20 — 2026-09-04, do hồ sơ `khong-noi-sai-ve-kho-khoa` chạm `src/app/api/settings/env/route.ts`, rơi vào glob `src/app/api/**` mà E12 khai quá rộng — đúng điều mục 2 của báo cáo này đã dự đoán ngày 02/09. Glob VẪN chưa thu lại; việc đó là hồ sơ riêng
 
 run_id: repin-conformance-l0-20260903T215029Z
 sha: fa3a3ef2ee2faa3ed7ace6ff3b3f59a0710817ff · suites: 15 lệnh exit 0
@@ -307,3 +387,7 @@ Chạy lại **toàn bộ 15 ô đo của chính hồ sơ này** tại HEAD, kh�
 4 suite: mã dưới `paths` của E12 đã đổi thật, nên câu cần trả lời là «bằng
 chứng của hồ sơ NÀY còn đứng không», và chỉ ô đo của nó trả lời được. E12 —
 ô mang cái glob rộng — xanh 11/11, y như lần ký. Không đụng chữ ký người.
+
+### Re-pin lần 21 — 2026-09-04, do hợp nhất `feat/fork-oneflow-api-openai` vào `main` — 36 commit của `main` (tính năng `khong-noi-sai-ve-kho-khoa`) vào cùng cây với hai hồ sơ của nhánh. Mã của gói này không đổi; lane máy chạy trên CÂY ĐÃ TRỘN: 7 lệnh exit 0
+run_id: merge-repin-20260904T030830Z
+sha: 792163491a11febaa0f5ff729f112442e3eecbef · suites: 7 lệnh exit 0

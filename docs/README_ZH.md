@@ -170,7 +170,7 @@ OneFlow **桌面版**是一个轻量（约 10 MB）的壳应用，直接加载�
 
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — 默认 `gen_text` 路由，使用 OpenRouter 免费模型
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — 基于 Google Gemini 的 `gen_text` 及图像生成 / 编辑 / 融合（Nano Banana）
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — 基于 OpenAI 的 `gen_text` 及图像生成 / 编辑 / 融合（`gpt-image-2`）
+- [oneflow-api-openai](https://github.com/phanlemanh/oneflow-api-openai) — 基于 OpenAI 的 `gen_text`、图像生成 / 编辑 / 融合（`gpt-image-2`）及语音转写（`gpt-transcribe`）
 - [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — 基于 DeepSeek V4（`flash` / `pro`，带流式**思考**气泡）的 `gen_text` 及文本工具
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — 基于火山方舟（豆包 Seedance 2.0）的 文 / 图 / 音 → 视频
 - [tongflow-api-apimart](https://github.com/tong-io/tongflow-api-apimart) — APIMart 聚合网关，支持节点上**按模型选择**：图像生成 / 编辑（Z-Image、Seedream、Nano Banana、GPT-Image）、文 / 图 → 视频（可灵、VEO3、Sora2、Seedance）、`gen_text`（GPT-5、Claude、Gemini）、Whisper 转录与 TTS

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 1a6c6e0f32a4d624eca821e6be620a6497397c47
+verified_commit: 792163491a11febaa0f5ff729f112442e3eecbef
 human_signoff: Manh 2026-08-07
 ---
 
@@ -235,3 +235,15 @@ sha: 4f987d8f43fa1edaa46ad61a525930c1d81a2c39 · suites: 15 lệnh exit 0
 ### Re-pin lần 4 — 2026-08-28, cùng nhánh `feat/preflight-verify-env`: commit `1a6c6e0` sửa `scripts/acceptance/preflight-verify-env.sh` (câu lệnh gỡ in ra thiếu `rm -rf node_modules`, đo được trên cây hỏng thật), lại rơi vào union `paths` `scripts/acceptance/**`. Cùng lý do như lần 3 — guard scoping không đọc tới preflight. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
 run_id: repin-stale-scope-by-paths-20260828T094424Z
 sha: 1a6c6e0f32a4d624eca821e6be620a6497397c47 · suites: 15 lệnh exit 0
+
+### Re-pin lần 5 — 2026-09-04, do thêm `scripts/acceptance/check-eval-key-dupes.sh` và sửa `scripts/ci/repin-eval-coverage.mjs` cho hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi` — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T220954Z
+sha: 57c10c950893239c57559730ecdba193e75b0aab · suites: 7 lệnh exit 0
+
+### Re-pin lần 6 — 2026-09-04, do sửa `modePlan` của `scripts/ci/repin-eval-coverage.mjs` (AC-12, owner nâng phạm vi ở Cổng 2 vòng 1) và bộ răng lên 30 ca — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T231351Z
+sha: d1331546558e3ba13f3e77ef557f1393a44cffa9 · suites: 7 lệnh exit 0
+
+### Re-pin lần 7 — 2026-09-04, do hợp nhất `feat/fork-oneflow-api-openai` vào `main` — 36 commit của `main` (tính năng `khong-noi-sai-ve-kho-khoa`) vào cùng cây với hai hồ sơ của nhánh. Mã của gói này không đổi; lane máy chạy trên CÂY ĐÃ TRỘN: 7 lệnh exit 0
+run_id: merge-repin-20260904T030830Z
+sha: 792163491a11febaa0f5ff729f112442e3eecbef · suites: 7 lệnh exit 0
