@@ -5,7 +5,7 @@ slug: lat-cat-chung-minh
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [cli, docs]
-status: implemented
+status: verified
 approved_by: Phan Le Manh
 approved_at: 2026-09-04
 design_doc: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
