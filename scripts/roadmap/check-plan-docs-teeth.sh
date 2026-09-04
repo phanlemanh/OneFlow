@@ -17,7 +17,7 @@ self="$repo_root/scripts/roadmap/check-plan-docs-teeth.sh"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-CASES=(clean lui-ngay nhay-nguoc mat-dinh-vi ho-so-thu-37)
+CASES=(clean lui-ngay ngay-tien nhay-nguoc mat-dinh-vi ho-so-thu-37 ti-le-lech adr-da-co khong-ho-so-ky)
 is_case() { local n="$1" c; for c in "${CASES[@]}"; do [ "$c" = "$n" ] && return 0; done; return 1; }
 
 build_fixture() {
@@ -62,7 +62,56 @@ p.write_text(re.sub(r"^## Hiện trạng \(2026-09-04", "## Hiện trạng (2026
                     s, count=1, flags=re.M), encoding="utf-8")
 PY
     is_red || return 1
-    out_has 'FAIL: STATUS.md đề ngày 04/09'
+    out_has 'FAIL: STATUS.md đề ngày 2026-08-17 nhưng hồ sơ ký mới nhất'
+}
+
+# Chieu NGUOC cua cung phep do, va la ca chiu luc: ban cu ghim mot ngay literal
+# nen no do SAI HUONG — mot STATUS.md oi van xanh, con mot lan lam moi hop le lai
+# lam CI do (S4 vong 2). Day ngay len tuong lai phai XANH.
+case_ngay_tien() {
+    build_fixture
+    python3 - "$tmp/t/STATUS.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+assert "## Hiện trạng (2026-09-04" in s, "fixture stale: STATUS.md date line moved"
+p.write_text(re.sub(r"^## Hiện trạng \(2026-09-04", "## Hiện trạng (2026-09-18",
+                    s, count=1, flags=re.M), encoding="utf-8")
+PY
+    is_green || { echo "    lam moi STATUS.md hop le ma van do — guard sai huong" >&2; return 1; }
+    out_has 'OK: STATUS.md đề ngày 2026-09-18'
+}
+
+# Ky them mot ho so (37) VA sua so trong STATUS.md cho khop, de phep dem xanh va
+# chi con doan ti le lech mau so. Tach khoi ca ho-so-thu-37 de moi ca to dung mot
+# phep kiem, khong nup bong cai do cua phep kiem ben canh.
+case_ti_le_lech() {
+    build_fixture
+    mkdir -p "$tmp/t/_acceptance/zz-ho-so-thu-37"
+    printf -- '---\nschema_version: 1\nslug: zz-ho-so-thu-37\nrisk_tier: T2\nstatus: signed-off\napproved_at: 2026-09-02\n---\n' \
+        > "$tmp/t/_acceptance/zz-ho-so-thu-37/contract.md"
+    python3 - "$tmp/t/STATUS.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+s2 = re.sub(r"\*\*36 hồ sơ đã ký\*\*", "**37 hồ sơ đã ký**", s, count=1)
+assert s2 != s, "fixture stale: STATUS.md khong con khai 36 ho so"
+p.write_text(s2, encoding="utf-8")
+PY
+    is_red || { echo "    doan ti le van 16/36 tren cay 37 ho so ma guard xanh" >&2; return 1; }
+    out_has "đoạn tỉ lệ khai 'trên 36 hồ sơ' nhưng cây đếm được 37"
+}
+
+# Chieu NGUOC cua luat cam ADR-0013: cam la CO DIEU KIEN. Ngay ADR ay ha canh
+# that, ban cu van cam vinh vien, tuc guard chan dung cai no le ra cho phep.
+case_adr_da_co() {
+    build_fixture
+    printf -- '# ADR-0013 — thu nghiem rang\n' > "$tmp/t/docs/adr/0013-thu-nghiem-rang.md"
+    python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+p.write_text(s.rstrip("\n") + "\n\nGhi chu rang: xem ADR-0013.\n", encoding="utf-8")
+PY
+    is_green || { echo "    ADR-0013 da co tren cay ma roadmap nhac van bi cam" >&2; return 1; }
+    out_has 'OK: ADR-0013 đã có trên cây'
 }
 
 case_nhay_nguoc() {
@@ -107,6 +156,28 @@ case_ho_so_thu_37() {
         > "$tmp/t/_acceptance/zz-ho-so-thu-37/contract.md"
     is_red || return 1
     out_has 'STATUS.md ghi [0-9]+ hồ sơ đã ký, đếm trên cây được [0-9]+'
+}
+
+# Chieu do cua viec BOC grep. Cay khong co ho so ky nao: truoc day
+# `grep -l '^status: signed-off'` thoat 1, `set -e` giet script giua chung — khong
+# dong FAIL nao, 14 phep kiem con lai khong bao gio chay, va cai chet ay doc y het
+# mot lan bat loi that (S4 vong 2). Gio phai la mot FAIL CO TEN, va cac phep kiem
+# sau no van chay.
+case_khong_ho_so_ky() {
+    build_fixture
+    python3 - "$tmp/t/_acceptance" <<'PY'
+import pathlib, re, sys
+for c in pathlib.Path(sys.argv[1]).glob("*/contract.md"):
+    c.write_text(re.sub(r"^status: signed-off$", "status: draft",
+                        c.read_text(encoding="utf-8"), flags=re.M), encoding="utf-8")
+PY
+    is_red || return 1
+    out_has 'STATUS.md ghi [0-9]+ hồ sơ đã ký, đếm trên cây được 0' \
+        || { echo "    khong to duoc so ho so lech" >&2; return 1; }
+    # Bang chung script KHONG chet ngang: cac phep kiem sau van in ra.
+    out_has 'OK: roadmap 1.6 trỏ B7' \
+        || { echo "    script chet giua chung — cac phep kiem sau khong chay" >&2; return 1; }
+    out_has '❌ check-plan-docs: [0-9]+ phép kiểm hỏng'
 }
 
 run_case() {

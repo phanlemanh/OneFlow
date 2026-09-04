@@ -350,6 +350,8 @@ executors:
     lcm_teeth_khoi_hong: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case khoi-hong"
     lcm_teeth_o_moi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case o-moi-ngoai-ke-hoach"
     lcm_teeth_o_moi_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case o-moi-co-hoi-hong"
+    lcm_teeth_park_ky: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-chua-ky && bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-ngoai-bang"
+    lcm_docs_quan_he: "bash scripts/roadmap/check-plan-docs-teeth.sh --case ngay-tien && bash scripts/roadmap/check-plan-docs-teeth.sh --case ti-le-lech && bash scripts/roadmap/check-plan-docs-teeth.sh --case adr-da-co && bash scripts/roadmap/check-plan-docs-teeth.sh --case khong-ho-so-ky"
     lcm_teeth_tick_noi_doi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case tick-noi-doi && bash scripts/roadmap/check-plan-freeze-teeth.sh --case tin-theo-loi"
     lcm_teeth_park: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-khong-that"
     lcm_teeth_ngoai_le: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-tran && bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-hop-le"

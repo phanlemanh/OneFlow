@@ -27,6 +27,8 @@ CASES=(
   khoi-hong
   o-moi-ngoai-ke-hoach
   o-moi-co-hoi-hong
+  park-chua-ky
+  park-ngoai-bang
   tick-noi-doi
   tin-theo-loi
   park-khong-that
@@ -53,6 +55,22 @@ build_fixture() {
     [ -f "$d/contract.md" ] && cp "$d/contract.md" "$tmp/t/_acceptance/$slug/"
     [ -f "$d/opportunity.md" ] && cp "$d/opportunity.md" "$tmp/t/_acceptance/$slug/"
   done
+  # A LÀNH tree by the F5 rule: a park carries the two human fields. On the real
+  # tree the three parks this branch lands still have them EMPTY — that is the
+  # owner's signature to write, not the machine's, and the guard is red there on
+  # purpose. The fixture fills them so the other cases measure what they claim to
+  # measure; ca `park-chua-ky` below is the one that proves the guard notices when
+  # they are missing, which is exactly today's state of the real tree.
+  python3 - "$tmp/t/_acceptance" <<'PY'
+import pathlib, re, sys
+for o in pathlib.Path(sys.argv[1]).glob("*/opportunity.md"):
+    t = o.read_text(encoding="utf-8")
+    if not re.search(r"^decision:\s*(park|kill)\s*$", t, re.M):
+        continue
+    t = re.sub(r"^decided_by:\s*$", "decided_by: Fixture", t, count=1, flags=re.M)
+    t = re.sub(r"^decided_at:\s*$", "decided_at: 2026-09-04", t, count=1, flags=re.M)
+    o.write_text(t, encoding="utf-8")
+PY
   return 0
 }
 
@@ -191,9 +209,55 @@ case_o_moi_co_hoi_hong() {
   # opportunity.md cung qua het ba hinh dang tren.
   build_fixture
   mkdir -p "$tmp/t/_acceptance/probe-da-park"
-  printf -- '---\nschema_version: 1\nslug: probe-da-park\nstage: decided\ndecision: park\n---\n' > "$tmp/t/_acceptance/probe-da-park/opportunity.md"
-  guard_is_green || { echo "    co hoi da park van bi doi — F1 qua rong" >&2; return 1; }
+  # Park HOP LE day du theo F5: niem yet trong bang + hai truong nguoi. Thieu bat
+  # ky ve nao thi ca nay do vi F5 chu khong vi F1, va no khong con do dieu no khai.
+  printf -- '---\nschema_version: 1\nslug: probe-da-park\nstage: decided\ndecision: park\ndecided_by: Ai Do\ndecided_at: 2026-09-04\n---\n' > "$tmp/t/_acceptance/probe-da-park/opportunity.md"
+  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+i = s.index("**Xếp lại sau**"); j = s.index("\n", s.index("|---", i)) + 1
+p.write_text(s[:j] + "| probe-da-park | thu nghiem rang | — |\n" + s[j:], encoding="utf-8")
+PY
+  guard_is_green || { echo "    co hoi da park hop le van bi doi — F1 qua rong" >&2; return 1; }
   ! out_has 'probe-da-park'
+}
+
+# AC-16 nua CHUA KY. Go truong nguoi cua mot ho so da park -> F5. Day dung la
+# hien trang cay THAT tai 04/09: ba ho so park deu trong decided_by/decided_at.
+case_park_chua_ky() {
+  build_fixture
+  python3 - "$tmp/t/_acceptance/timeline-view/opportunity.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+assert "decided_by: Fixture" in s, "fixture stale: build_fixture khong con dien truong nguoi"
+p.write_text(re.sub(r"^decided_by: .*$", "decided_by:", s, count=1, flags=re.M), encoding="utf-8")
+PY
+  guard_is_red || return 1
+  out_has 'F5' || return 1
+  out_has 'timeline-view khai park nhưng thiếu decided_by'
+}
+
+# AC-16 nua CHUA NIEM YET. Mot ho so park khong co dong nao trong bang Xep lai
+# sau: F1 bo qua no vi da dong, F3 chi di theo cac dong CO trong bang, nen truoc
+# F5 khong luat nao cham toi no — go bang chi bang mot dong trong ho so cua chinh
+# minh (do bang probe o S4 vong 2).
+case_park_ngoai_bang() {
+  build_fixture
+  mkdir -p "$tmp/t/_acceptance/zz-park-lau"
+  printf -- '---\nschema_version: 1\nslug: zz-park-lau\nstage: decided\ndecision: park\ndecided_by: Ai Do\ndecided_at: 2026-09-04\n---\n' \
+    > "$tmp/t/_acceptance/zz-park-lau/opportunity.md"
+  guard_is_red || { echo "    park ngoai bang van XANH — van con duong go bang mot minh" >&2; return 1; }
+  out_has 'F5' || return 1
+  out_has 'zz-park-lau khai park nhưng không có trong bảng Xếp lại sau' || return 1
+  # Chieu nguoc tren CUNG duong ma: dua dung slug ay vao bang thi het vi pham.
+  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+i = s.index("**Xếp lại sau**"); j = s.index("\n", s.index("|---", i)) + 1
+p.write_text(s[:j] + "| zz-park-lau | thu nghiem rang | — |\n" + s[j:], encoding="utf-8")
+PY
+  guard_is_green || { echo "    niem yet roi ma van do — F5 chan ca duong hop le" >&2; return 1; }
+  ! out_has 'zz-park-lau'
 }
 
 # AC-3 red half. A slug row ticked ✅ while its contract is not signed off.

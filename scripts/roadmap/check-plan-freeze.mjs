@@ -286,6 +286,44 @@ for (const [slug] of parkRows) {
         );
 }
 
+// --- F5: leaving the freeze by parking is a PLAN edit, and it is signed -------
+// `decision: park` closes a dossier for F1, so on its own it was a way out of the
+// freeze that cost one line in a file you own: no roadmap edit, no signer, no
+// date. Confirmed by probe in the S4 round-2 review — a dossier carrying nothing
+// but `stage: decided` + `decision: park` never reached ANY rule, because F1 skips
+// it as closed and F3 only walks slugs already written into the park table.
+//
+// Two conditions, and neither is new policy — both already govern the neighbours
+// in this same file. Being listed is what F4 demands of an exception (the way out
+// is written in the shared plan, not in your own dossier). Being signed is what F2
+// demands of a Cổng Đáng before it will trust an opportunity ("cần decision và
+// decided_by"); a park is the same kind of human call, so it carries the same
+// two human fields.
+const parkListed = new Set(
+    parkRows.map(([s]) => s).filter((s) => SLUG_RE.test(s)),
+);
+for (const [slug, d] of dossiers) {
+    const opp = d.opportunity;
+    if (!opp) continue;
+    const closedByHuman =
+        OPP_CLOSED_DECISIONS.has(opp.decision ?? "") ||
+        opp.stage === "archived";
+    if (!closedByHuman) continue;
+    if (!parkListed.has(slug))
+        fail(
+            "F5",
+            `${slug} khai ${opp.decision || opp.stage} nhưng không có trong bảng Xếp lại sau — rời băng là một lần sửa KẾ HOẠCH CHUNG, không phải một dòng trong hồ sơ của chính mình`,
+        );
+    const missing = ["decided_by", "decided_at"].filter(
+        (k) => !(opp[k] || "").trim(),
+    );
+    if (missing.length)
+        fail(
+            "F5",
+            `${slug} khai ${opp.decision || opp.stage} nhưng thiếu ${missing.join(" và ")} — cùng luật với F2: một quyết định của người phải mang tên người và ngày`,
+        );
+}
+
 // --- checkpoint: a reminder, never a failure ---------------------------------
 if (TODAY > header.checkpoint && !header.checkpoint_done)
     notes.push(

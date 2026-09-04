@@ -116,7 +116,7 @@ evals:
     cmd: config:executors.script.plan_freeze_teeth_all
     paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
     expected: >-
-      exit 0 và dòng cuối `✅ răng: 16/16 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
+      exit 0 và dòng cuối `✅ răng: 18/18 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E11
@@ -174,7 +174,7 @@ evals:
     cmd: config:executors.script.lcm_docs_teeth
     paths: ["scripts/roadmap/check-plan-docs.sh", "scripts/roadmap/check-plan-docs-teeth.sh"]
     expected: >-
-      exit 0 và dòng cuối `✅ răng tài liệu: 5/5 case`; bốn ca phá trên bản sao (lùi ngày
+      exit 0 và dòng cuối `✅ răng tài liệu: 9/9 case`; bốn ca phá trên bản sao (lùi ngày
       STATUS.md · trả lại nháy ngược ở đoạn tỉ lệ · xoá đoạn định vị khỏi vision.md · thêm một
       hồ sơ ký mới mà không sửa STATUS.md) đều làm `check-plan-docs.sh` đỏ **đúng phép kiểm nêu
       tên**, ca lành xanh. Ca thứ tư là ca chịu lực: nó phân biệt "đếm trên cây" với "grep hằng
@@ -200,6 +200,37 @@ evals:
       - verifier
       - verified_at
       - output
+  - id: E17
+    criterion: AC-16
+    executor: script
+    cmd: config:executors.script.lcm_teeth_park_ky
+    paths:
+      - scripts/roadmap/check-plan-freeze.mjs
+      - scripts/roadmap/check-plan-freeze-teeth.sh
+    expected: >-
+      exit 0 và stdout có `CASE park-chua-ky: PASS` (gỡ `decided_by` của một hồ sơ đã park →
+      F5 nêu `timeline-view khai park nhưng thiếu decided_by`) lẫn `CASE park-ngoai-bang: PASS`
+      (một hồ sơ park KHÔNG có dòng trong bảng Xếp lại sau → F5 nêu đúng slug; rồi thêm đúng
+      dòng ấy vào bảng → guard XANH và không còn gọi tên nó). Trước F5, cả hai hình dạng đều
+      thoát 0 xanh: F1 bỏ qua vì hồ sơ đã đóng, F3 chỉ đi theo các dòng CÓ trong bảng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-17
+    executor: script
+    cmd: config:executors.script.lcm_docs_quan_he
+    paths:
+      - scripts/roadmap/check-plan-docs.sh
+      - scripts/roadmap/check-plan-docs-teeth.sh
+    expected: >-
+      exit 0 và stdout có cả bốn ca. `ngay-tien` là ca chịu lực: đẩy ngày STATUS.md lên tương
+      lai phải XANH — bản ghim hằng số đỏ SAI HƯỚNG ở đúng ca này. `ti-le-lech`: ký hồ sơ thứ 37
+      và sửa STATUS.md cho khớp, chỉ còn đoạn tỉ lệ lệch → FAIL nêu `khai 'trên 36 hồ sơ' nhưng
+      cây đếm được 37`. `adr-da-co`: ADR-0013 có thật trên cây thì roadmap được phép nhắc → XANH.
+      `khong-ho-so-ky`: cây không có hồ sơ ký nào phải cho FAIL CÓ TÊN và các phép kiểm sau vẫn
+      chạy (`OK: roadmap 1.6 trỏ B7` vẫn in) — không tắt ngang vì `grep` không khớp dưới `set -e`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
   - id: J1
     criterion: AC-2
     executor: judgment
