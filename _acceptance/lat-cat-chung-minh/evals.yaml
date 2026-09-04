@@ -93,7 +93,7 @@ evals:
     criterion: AC-9
     executor: script
     cmd: config:executors.script.lcm_wiring
-    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "_acceptance/config.yaml", "scripts/roadmap/check-plan-freeze.mjs"]
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "_acceptance/config.yaml", "scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-suite-key.sh"]
     expected: >-
       exit 0; mode shape nêu **đủ BA guard** (roadmap-fresh, product-map, và tên mới
       `check-plan-freeze.mjs` — hằng số danh sách trước hồ sơ này có HAI tên, gỡ tên mới khỏi

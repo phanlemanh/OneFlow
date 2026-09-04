@@ -363,7 +363,7 @@ executors:
     # build/typecheck ma kho da DAO NGUOC 02/09, nen no do san tren main truoc
     # ho so nay (do tren cay eb175ed). Ve «la mot suite key» cua AC-9 do bang
     # phep khang dinh truc tiep ben duoi. Phat hien ngoai hop dong -> Cong 2.
-    lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && python3 -c \"import sys,yaml;k=yaml.safe_load(open('_acceptance/config.yaml'))['feature_loop']['suite_keys'];sys.exit(0 if 'executors.script.plan_freeze' in k else print('FAIL: suite_keys thieu executors.script.plan_freeze') or 1)\""
+    lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/roadmap/check-plan-suite-key.sh"
     lcm_pmap: "node scripts/ci/check-product-map.mjs && bash scripts/ci/check-product-map-teeth.sh --case parked-opportunity"
     # Job CI: rut lenh RA TU ci.yml roi CHAY no, theo khuon check-vitest-job.sh.
     # Doc YAML la do chi dan; chay lenh rut ra moi la do hanh vi.
