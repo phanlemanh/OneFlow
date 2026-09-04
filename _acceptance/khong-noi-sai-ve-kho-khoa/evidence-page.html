@@ -1,0 +1,134 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · khong-noi-sai-ve-kho-khoa</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Không nói sai về kho khoá — server kiểm tiền đề của lệnh thay-kho, client phân loại lỗi đọc dương cả hai chiều</h1><div class="sub">Trang bằng chứng · <span class="mono">khong-noi-sai-ve-kho-khoa</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E1-r3</td><td class="mono">2026-09-03T17:22:59+07:00</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E2-r3</td><td class="mono">2026-09-03T17:23:04+07:00</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E3-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E4-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E5-r3</td><td class="mono">2026-09-03T17:23:02+07:00</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E6-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E7-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E8-r3</td><td class="mono">2026-09-03T17:23:04+07:00</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E9-r3</td><td class="mono">2026-09-03T17:23:05+07:00</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E10-r3</td><td class="mono">2026-09-03T17:23:05+07:00</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E11-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E12-r3</td><td class="mono">2026-09-03T17:23:03+07:00</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-9</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-khong-noi-sai-ve-kho-khoa-E13-r3</td><td class="mono">2026-09-03T17:23:10+07:00</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · test</h3><p class="crit">AC-1: (cross-layer)** Given kho khoá ở server đọc ra `ok` HOẶC `absent`, When một</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E1-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/app/api/settings/env/route.replace-premise.test.ts</b></span><span>verified_at <b>2026-09-03T17:22:59+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  6 passed (6)
+Start at  17:22:59
+Duration  648ms (transform 354ms, setup 0ms, import 96ms, tests 398ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · test</h3><p class="crit">AC-2: Given `readEnvForBrowser` nhận một trong **mười** tín hiệu — 200 kèm `env`</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E2-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/lib/settings/env-client.taxonomy.test.ts</b></span><span>verified_at <b>2026-09-03T17:23:04+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  11 passed (11)
+Start at  17:23:04
+Duration  234ms (transform 68ms, setup 0ms, import 148ms, tests 11ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · test</h3><p class="crit">AC-3: Given lượt đọc nhận **401**, When phân loại, Then đúng **một**</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E3-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/lib/settings/env-client.seam.test.ts</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  7 passed (7)
+Start at  17:23:03
+Duration  725ms (transform 103ms, setup 0ms, import 209ms, tests 10ms, environment 419ms)</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · test</h3><p class="crit">AC-4: Given `fetch` không bao giờ resolve, When quá **30 000 ms**, Then lượt đọc ra</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E4-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/lib/settings/env-client.timeout.test.ts</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  7 passed (7)
+Start at  17:23:03
+Duration  1.35s (transform 439ms, setup 0ms, import 863ms, tests 27ms, environment 368ms)</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · test</h3><p class="crit">AC-5: Given ba bề mặt (màn Cài đặt · node key prompt · media-library panel) × bốn</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E5-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/components/workspace/store-read-states.test.tsx</b></span><span>verified_at <b>2026-09-03T17:23:02+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  17 passed (17)
+Start at  17:23:02
+Duration  2.14s (transform 545ms, setup 0ms, import 968ms, tests 341ms, environment 690ms)</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · test</h3><p class="crit">AC-6: Given một bề mặt đang ở state không-`ok`, When bấm **Thử lại**, Then đúng</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E6-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/components/workspace/store-read-states-retry.test.tsx</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  6 passed (6)
+Start at  17:23:03
+Duration  1.67s (transform 530ms, setup 0ms, import 928ms, tests 259ms, environment 371ms)</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · test</h3><p class="crit">AC-7: Given màn Cài đặt ở `store-unreadable`, người dùng đi qua hộp xác nhận, When</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E7-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/components/workspace/settings-dialog.replace-refused.test.tsx</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  4 passed (4)
+Start at  17:23:03
+Duration  1.11s (transform 220ms, setup 0ms, import 476ms, tests 230ms, environment 304ms)</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · script</h3><p class="crit">AC-8: Given cây nguồn, When guard cấu trúc chạy, Then `notifyUnauthorized` có</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E8-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">scripts/settings/check-unauthorized-seam.sh</b></span><span>verified_at <b>2026-09-03T17:23:04+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">src/lib/api/client.ts
+src/lib/settings/env-client.ts
+OK: 1 dispatch site, 2 callers</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · script</h3><p class="crit">AC-8: Given cây nguồn, When guard cấu trúc chạy, Then `notifyUnauthorized` có</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E9-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">scripts/settings/check-unauthorized-seam-teeth.sh</b></span><span>verified_at <b>2026-09-03T17:23:05+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">ok   case &#39;a third caller in a component&#39; exited 1
+ok   case &#39;emptied client.ts&#39; exited 2
+OK: guard bites on all four perturbations and is green on the real tree</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · script</h3><p class="crit">AC-8: Given cây nguồn, When guard cấu trúc chạy, Then `notifyUnauthorized` có</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E10-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">scripts/settings/check-one-env-reader.sh</b></span><span>verified_at <b>2026-09-03T17:23:05+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: the key endpoint has exactly one non-test caller (src/lib/settings/env-client.ts)</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · test</h3><p class="crit">AC-9: Given hai state mới (`unauthenticated`, `unavailable`) có chuỗi hiển thị,</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E11-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/components/workspace/store-read-states-i18n.test.tsx</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  20 passed (20)
+Start at  17:23:03
+Duration  816ms (transform 110ms, setup 0ms, import 288ms, tests 40ms, environment 387ms)</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · test</h3><p class="crit">AC-9: Given hai state mới (`unauthenticated`, `unavailable`) có chuỗi hiển thị,</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E12-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">src/i18n/locale-parity.test.ts</b></span><span>verified_at <b>2026-09-03T17:23:03+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  10 passed (10)
+Start at  17:23:03
+Duration  198ms (transform 75ms, setup 0ms, import 99ms, tests 2ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · script</h3><p class="crit">AC-9: Given hai state mới (`unauthenticated`, `unavailable`) có chuỗi hiển thị,</p>
+<div class="kv"><span>run_id <b>minted-khong-noi-sai-ve-kho-khoa-E13-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">scripts/settings/check-a11y-read-states.sh</b></span><span>verified_at <b>2026-09-03T17:23:10+07:00</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">&quot;verdict&quot;: &quot;PASS&quot;
+}
+4/4 pages scanned AND 4/4 rendered the state, the theme AND the shipping component</pre>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">carried tu round trước — baseline không đo lại round này.
+none — mọi eval của tính năng mang baseline: n-a round này (không đo lại); lệnh suite xanh-cả-hai-phía là regression-guard bình thường, không liệt kê ở đây.</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: các ma trận eval E1, E3-E7, E9-E13 còn hở nửa (nội suy tiêu đề thay vì khẳng định số ca, thẻ tự dựng thay vì mount surface thật, khẳng định giá trị thay vì quan hệ state→khoá) — không đóng đủ chiều đỏ, quay lại implementation để viết lại eval + fix hành vi tương ứng.</li><li>Round 2: toàn bộ 13 eval (E1-E13) PASS trên mã hiện tại; lệnh suite không gắn eval `pnpm gen:abi &amp;&amp; git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` thoát mã 1 — generated ABI lệch cây đã commit. Verdict: REJECT.</li><li>Round 3: `pnpm gen:abi` được chạy lại và cây generated (`src/generated/abi`, `sdk/tongflow/_data/tongflow.abi.json`) được đồng bộ với commit đã verify; toàn bộ 13 eval (E1-E13) và bảy lệnh suite hồi quy đều PASS trên cùng một cây. Verdict: PASS.</li></ul>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

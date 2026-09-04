@@ -35,15 +35,17 @@ describe("readEnvForBrowser — the gate is a positive assertion", () => {
     });
 
     for (const [name, make] of READ_FAILURES) {
-        it(`reports unreadable for ${name}`, async () => {
+        it(`never reports ok for ${name}`, async () => {
             vi.stubGlobal(
                 "fetch",
                 vi.fn(async () => make()),
             );
             const read = await readEnvForBrowser();
-            expect(read.state, `shape ${name} must be unreadable`).toBe(
-                "unreadable",
-            );
+            // Which non-ok state each shape maps to is the taxonomy suite's
+            // job (env-client.taxonomy.test.ts). What THIS suite protects is
+            // the older, blunter invariant: no failed read is ever mistaken
+            // for a good one.
+            expect(read.state, `shape ${name} must not be ok`).not.toBe("ok");
         });
     }
 });
@@ -60,7 +62,7 @@ describe("saveEnvKeys — refuses to write onto a store it cannot read", () => {
 
             expect(out.ok, `shape ${name}`).toBe(false);
             if (!out.ok)
-                expect(out.reason, `shape ${name}`).toBe("store-unreadable");
+                expect(out.reason, `shape ${name}`).toBe("read-failed");
             const puts = putsOf(f);
             expect(
                 puts.length,

@@ -53,9 +53,22 @@
                 "http": "máy chủ trả về {status}",
                 "not-json": "phản hồi không phải JSON",
                 "no-env": "phản hồi không kèm danh sách khoá",
-                "network": "yêu cầu không hoàn tất ({detail})"
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá {seconds} giây không có trả lời"
             },
-            "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi."
+            "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
         }
     },
     "Index": {
@@ -1125,8 +1138,21 @@
                 "http": "máy chủ trả về {status}",
                 "not-json": "phản hồi không phải JSON",
                 "no-env": "phản hồi không kèm danh sách khoá",
-                "network": "yêu cầu không hoàn tất ({detail})"
-            }
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá {seconds} giây không có trả lời"
+            },
+            "retry": "Thử lại"
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
         }
     },
     "Upload": {

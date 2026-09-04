@@ -25,7 +25,10 @@ export type EnvStore = Record<string, string>;
  * route module may only export its handlers and a fixed set of config fields —
  * `pnpm build` rejects anything else, which lint and typecheck both let past.
  */
-export const ENV_STORE_UNREADABLE = "ENV_STORE_UNREADABLE" as const;
+// Re-exported from the neutral module so the browser and the server compare
+// against the SAME value; the constant used to live here, where client code
+// could not reach it.
+export { ENV_STORE_UNREADABLE } from "@/lib/settings/env-codes";
 
 /** Why a store could not be read. Each cause stays tellable from the others. */
 export type EnvStoreReadReason = "io" | "decode" | "parse" | "shape";

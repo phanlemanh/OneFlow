@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H3 · Phân loại và bề mặt — khong-noi-sai-ve-kho-khoa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f7f7f8;
+      --color-ink:    #1a0033;
+      --color-muted:  #4f4a63;
+      --color-accent: #e100e1;
+      --font-sans:  'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Lora', serif;
+      --font-mono:  'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">H3 · luồng ba tầng (sankey + ma trận) · Cổng 1 · khong-noi-sai-ve-kho-khoa</p>
+    <h1>Mười tín hiệu → bốn state → ba bề mặt, và ô duy nhất có nút phá huỷ</h1>
+
+    <svg viewBox="0 0 1200 768" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ===== Tier eyebrows ===== -->
+      <text x="40" y="52" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">TẦNG 1 · 10 TÍN HIỆU</text>
+      <text x="440" y="52" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">TẦNG 2 · 4 STATE · DƯƠNG CẢ HAI CHIỀU</text>
+      <text x="800" y="52" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">TẦNG 3 · 3 BỀ MẶT × HÀNH ĐỘNG</text>
+
+      <!-- ===== Ribbons: 1 tín hiệu = 48px, drawn first ===== -->
+      <!-- 200+env → ok -->
+      <path d="M208,96 C332,96 332,96 456,96 L456,144 C332,144 332,144 208,144 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- 503+code → store-unreadable · THE ONE ACCENT RIBBON -->
+      <path d="M208,152 C332,152 332,168 456,168 L456,216 C332,216 332,200 208,200 Z" fill="rgba(225,0,225,0.22)"/>
+      <!-- 401 → unauthenticated -->
+      <path d="M208,208 C332,208 332,240 456,240 L456,288 C332,288 332,256 208,256 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- 403 → unavailable -->
+      <path d="M208,264 C332,264 332,312 456,312 L456,360 C332,360 332,312 208,312 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- 500 → unavailable -->
+      <path d="M208,320 C332,320 332,360 456,360 L456,408 C332,408 332,368 208,368 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- 502-html → unavailable -->
+      <path d="M208,376 C332,376 332,408 456,408 L456,456 C332,456 332,424 208,424 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- not-json → unavailable -->
+      <path d="M208,432 C332,432 332,456 456,456 L456,504 C332,504 332,480 208,480 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- env-sai-hình → unavailable -->
+      <path d="M208,488 C332,488 332,504 456,504 L456,552 C332,552 332,536 208,536 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- mạng rớt → unavailable -->
+      <path d="M208,544 C332,544 332,552 456,552 L456,600 C332,600 332,592 208,592 Z" fill="rgba(79,74,99,0.18)"/>
+      <!-- quá trần → unavailable -->
+      <path d="M208,600 C332,600 332,600 456,600 L456,648 C332,648 332,648 208,648 Z" fill="rgba(79,74,99,0.18)"/>
+
+      <!-- ===== Tier 1 bars + labels ===== -->
+      <rect x="192" y="96"  width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="152" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="208" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="264" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="320" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="376" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="432" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="488" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="544" width="16" height="48" fill="#4f4a63"/>
+      <rect x="192" y="600" width="16" height="48" fill="#4f4a63"/>
+
+      <text x="180" y="118" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">200+env</text>
+      <text x="180" y="132" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">env là object</text>
+
+      <text x="180" y="174" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">503+code</text>
+      <text x="180" y="188" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">ENV_STORE_UNREADABLE</text>
+
+      <text x="180" y="230" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">401</text>
+      <text x="180" y="244" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">bắn tf:unauthorized</text>
+
+      <text x="180" y="286" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">403</text>
+      <text x="180" y="300" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">không bắn seam</text>
+
+      <text x="180" y="342" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">500</text>
+      <text x="180" y="356" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">5xx khác</text>
+
+      <text x="180" y="398" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">502-html</text>
+      <text x="180" y="412" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">thân HTML</text>
+
+      <text x="180" y="454" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">not-json</text>
+      <text x="180" y="468" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">200 thân không-JSON</text>
+
+      <text x="180" y="510" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">env-sai-hình</text>
+      <text x="180" y="524" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">200 env sai hình</text>
+
+      <text x="180" y="566" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">mạng rớt</text>
+      <text x="180" y="580" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">fetch ném</text>
+
+      <text x="180" y="622" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="end">quá trần</text>
+      <text x="180" y="636" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">30 000 ms</text>
+
+      <!-- ===== Tier 2 bars + labels ===== -->
+      <rect x="456" y="96"  width="16" height="48"  fill="#1a0033"/>
+      <rect x="456" y="168" width="16" height="48"  fill="#1a0033"/>
+      <rect x="456" y="240" width="16" height="48"  fill="#1a0033"/>
+      <rect x="456" y="312" width="16" height="336" fill="#4f4a63"/>
+
+      <text x="480" y="116" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace">ok</text>
+      <text x="480" y="130" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">chỉ từ 200+env</text>
+
+      <text x="480" y="188" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace">store-unreadable</text>
+      <text x="480" y="202" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">chỉ từ 503+code</text>
+
+      <text x="480" y="260" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace">unauthenticated</text>
+      <text x="480" y="274" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">chỉ từ 401 · bắn seam</text>
+
+      <text x="480" y="468" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace">unavailable</text>
+      <text x="480" y="482" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">phần bù · 7/10</text>
+      <text x="480" y="494" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">tên trung tính + lý do</text>
+
+      <!-- ===== Tier 3 matrix (rows aligned to state bars) ===== -->
+      <text x="690"  y="84" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Cài đặt</text>
+      <text x="876"  y="84" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Node key prompt</text>
+      <text x="1062" y="84" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ML panel</text>
+
+      <!-- row ok -->
+      <rect x="600" y="96" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="786" y="96" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="972" y="96" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="608" y="118" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">form · Lưu bấm được</text>
+      <text x="608" y="132" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">0 Thử lại · 0 nút phá huỷ</text>
+      <text x="794" y="118" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">form khoá</text>
+      <text x="794" y="132" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">0 Thử lại · 0 nút phá huỷ</text>
+      <text x="980" y="118" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">form cấu hình</text>
+      <text x="980" y="132" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">0 Thử lại · 0 nút phá huỷ</text>
+
+      <!-- row store-unreadable -->
+      <rect x="600" y="168" width="180" height="48" rx="4" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <rect x="786" y="168" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="972" y="168" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="608" y="184" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">tấm chặn «kho hỏng» · Thử lại</text>
+      <text x="608" y="196" fill="#9c009c" font-size="10" font-weight="600" font-family="'Geist', sans-serif">NÚT PHÁ HUỶ · ô duy nhất</text>
+      <text x="608" y="208" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">→ hộp xác nhận → PUT có cờ</text>
+      <text x="794" y="184" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">tấm chặn «kho hỏng» · Thử lại</text>
+      <text x="794" y="196" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">link Cài đặt</text>
+      <text x="794" y="208" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">0 nút phá huỷ · PUT = 0</text>
+      <text x="980" y="184" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">như node prompt</text>
+      <text x="980" y="208" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">0 nút phá huỷ · PUT = 0</text>
+
+      <!-- row unauthenticated -->
+      <rect x="600" y="240" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="786" y="240" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="972" y="240" width="180" height="48" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="608" y="256" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">tấm chặn «phiên đã hết»</text>
+      <text x="608" y="268" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="608" y="280" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0 · seam đã bắn</text>
+      <text x="794" y="256" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">như Cài đặt (không link)</text>
+      <text x="794" y="268" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="794" y="280" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0</text>
+      <text x="980" y="256" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">như node prompt</text>
+      <text x="980" y="268" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="980" y="280" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0</text>
+
+      <!-- row unavailable (tall: 7 tín hiệu) -->
+      <rect x="600" y="312" width="180" height="336" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="786" y="312" width="180" height="336" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <rect x="972" y="312" width="180" height="336" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="608" y="452" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">tấm chặn «không tới được»</text>
+      <text x="608" y="464" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">+ lý do · reason.code:</text>
+      <text x="608" y="476" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">http · not-json · no-env</text>
+      <text x="608" y="488" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">network · timeout</text>
+      <text x="608" y="504" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="608" y="516" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0</text>
+      <text x="794" y="476" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">như Cài đặt</text>
+      <text x="794" y="488" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="794" y="500" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0</text>
+      <text x="980" y="476" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">như node prompt</text>
+      <text x="980" y="488" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">Thử lại · 0 nút phá huỷ</text>
+      <text x="980" y="500" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">PUT = 0</text>
+
+      <!-- ===== Ribbon labels (masked, last so nothing paints over them) ===== -->
+      <rect x="308" y="112" width="48" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="332" y="123" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DƯƠNG</text>
+
+      <rect x="308" y="176" width="48" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="332" y="187" fill="#9c009c" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DƯƠNG</text>
+
+      <rect x="308" y="240" width="48" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="332" y="251" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">DƯƠNG</text>
+
+      <rect x="284" y="460" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="332" y="471" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">PHẦN BÙ · 7/10</text>
+
+      <!-- ===== Honesty line ===== -->
+      <text x="600" y="680" fill="#4f4a63" font-size="13" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">Bề rộng dải ∝ số tín hiệu: 1 + 1 + 1 + 7 = 10. Nút phá huỷ ở đúng một ô · Thử lại ở 9 ô không-ok · PUT = 0 ở 9 ô không-ok.</text>
+
+      <!-- ===== Legend ===== -->
+      <line x1="40" y1="704" x2="1160" y2="704" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="720" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND</text>
+
+      <rect x="40" y="736" width="16" height="12" fill="rgba(225,0,225,0.22)" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="64" y="746" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">dải dương duy nhất dẫn tới ô có nút phá huỷ</text>
+
+      <rect x="340" y="736" width="16" height="12" fill="rgba(79,74,99,0.18)" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+      <text x="364" y="746" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">dải · bề rộng ∝ số tín hiệu (1 đơn vị = 1 tín hiệu)</text>
+
+      <rect x="680" y="736" width="16" height="12" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="704" y="746" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">ô duy nhất có nút phá huỷ — chữ nằm trong ô</text>
+
+      <text x="1160" y="746" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">AC-2 · AC-3 · AC-5 · AC-6</text>
+    </svg>
+  </div>
+</body>
+</html>

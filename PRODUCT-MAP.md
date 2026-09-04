@@ -11,7 +11,7 @@ flowchart TD
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>31 việc"]
+  GB --> DG["Đã giao<br/>32 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -47,6 +47,7 @@ flowchart TD
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)
 - Kho khoá toàn vẹn — đọc không cắt bớt âm thầm, ghi không để lại file cụt (`kho-khoa-toan-ven`)
+- Không nói sai về kho khoá — server kiểm tiền đề của lệnh thay-kho, client phân loại lỗi đọc dương cả hai chiều (`khong-noi-sai-ve-kho-khoa`)
 - Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
 - Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
 - slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`)

@@ -53,9 +53,22 @@
                 "http": "the server answered {status}",
                 "not-json": "the response was not JSON",
                 "no-env": "the response carried no key list",
-                "network": "the request did not complete ({detail})"
+                "network": "the request did not complete ({detail})",
+                "timeout": "the request timed out after {seconds} seconds"
             },
-            "writeFailed": "Could not save ({reason}). Nothing has been changed."
+            "writeFailed": "Could not save ({reason}). Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unauthenticated": {
+            "title": "Your session has expired",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unavailable": {
+            "title": "Cannot reach the key server",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again",
+            "reason": "The request got no answer ({code})."
         }
     },
     "Index": {
@@ -1125,8 +1138,21 @@
                 "http": "the server answered {status}",
                 "not-json": "the response was not JSON",
                 "no-env": "the response carried no key list",
-                "network": "the request did not complete ({detail})"
-            }
+                "network": "the request did not complete ({detail})",
+                "timeout": "the request timed out after {seconds} seconds"
+            },
+            "retry": "Try again"
+        },
+        "unauthenticated": {
+            "title": "Your session has expired",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unavailable": {
+            "title": "Cannot reach the key server",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again",
+            "reason": "The request got no answer ({code})."
         }
     },
     "Upload": {

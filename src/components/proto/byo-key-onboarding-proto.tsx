@@ -11,7 +11,6 @@ import {
     NodeKeyPrompt,
     type NodeKeyPromptLabels,
 } from "@/components/workspace/node-key-prompt";
-import type { ReadFailure } from "@/lib/settings/env-client";
 
 /**
  * Prototype for the `byo-key-onboarding` design-pass session.
@@ -57,13 +56,6 @@ const KEY_LABELS: NodeKeyPromptLabels = {
     invalid: "Khoá không dùng được",
     verified: "Khoá hoạt động",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-    storeUnreadable: {
-        title: "Không đọc được kho khoá đã lưu",
-        unchanged: "Chưa có gì bị thay đổi.",
-        reason: (cause: ReadFailure) =>
-            `Máy chủ không trả về được danh sách khoá đang lưu (${cause.code}).`,
-        toSettings: "Mở màn Cài đặt",
-    },
 };
 
 // Capability labels, not plugin ids: this is what the strip shows a seller who

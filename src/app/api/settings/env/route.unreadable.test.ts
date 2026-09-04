@@ -100,23 +100,31 @@ describe("PUT replaceUnreadableStore", () => {
         });
     });
 
-    it("is ignored when the store is healthy", async () => {
-        // The flag names a CONDITION, not a mode. With a readable store it must
-        // not become a second write path with its own behaviour.
+    it("is REFUSED when the store is healthy", async () => {
+        // SUPERSEDED, deliberately. This case used to assert the flag was
+        // *ignored* on a readable store — "it names a condition, not a mode".
+        // That reading held only because this case sends `env: {A:"2"}`: with a
+        // non-empty map, "behaves like a plain PUT" looks harmless. The screen
+        // that sets the flag sends `env: {}`, and there "behaves like a plain
+        // PUT" means "overwrites every key with nothing".
+        //
+        // So the flag is now a CLAIM the server checks, and a false claim is
+        // refused rather than quietly obeyed (khong-noi-sai-ve-kho-khoa AC-1).
         writeFileSync(store(), '{"A":"1"}', "utf8");
         const { PUT } = await import("./route");
 
-        const plain = await PUT(put({ env: { A: "2" } }) as never);
-        const plainBody = await plain.json();
-        const plainDisk = readFileSync(store(), "utf8");
-
-        writeFileSync(store(), '{"A":"1"}', "utf8");
         const flagged = await PUT(
             put({ env: { A: "2" }, replaceUnreadableStore: true }) as never,
         );
 
-        expect(flagged.status).toBe(plain.status);
-        await expect(flagged.json()).resolves.toEqual(plainBody);
-        expect(readFileSync(store(), "utf8")).toBe(plainDisk);
+        expect(flagged.status, "a false premise must be refused").toBe(409);
+        await expect(flagged.json()).resolves.toMatchObject({
+            code: "ENV_STORE_REPLACE_REFUSED",
+            state: "ok",
+        });
+        expect(
+            readFileSync(store(), "utf8"),
+            "the refusal must write nothing",
+        ).toBe('{"A":"1"}');
     });
 });

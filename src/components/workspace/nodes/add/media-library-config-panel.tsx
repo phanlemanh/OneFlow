@@ -1,11 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type ReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { type EnvReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
 import { requestOpenSettings } from "@/lib/settings/settings-events";
 
 /**
@@ -31,10 +32,6 @@ export function MediaLibraryConfigPanel({
         save: string;
         saving: string;
         writeFailed: string;
-        storeUnreadableTitle: string;
-        storeUnreadableUnchanged: string;
-        storeUnreadableReason: (cause: ReadFailure) => string;
-        toSettings: string;
     };
     onSaved: () => void;
 }) {
@@ -42,8 +39,14 @@ export function MediaLibraryConfigPanel({
     const [key, setKey] = useState("");
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
-    /** Why the store could not be read, or null. Blocks the form entirely. */
-    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
+    /**
+     * How the read failed, or null. Blocks the form entirely.
+     *
+     * The whole union, not one shape: only `store-unreadable` describes a
+     * broken store, and only it should wear the destructive card.
+     */
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
+    const t = useTranslations("Workspace");
 
     const save = async () => {
         setSaving(true);
@@ -58,16 +61,26 @@ export function MediaLibraryConfigPanel({
             if (key.trim()) patch.MEDIA_LIBRARY_API_KEY = key.trim();
             const out = await saveEnvKeys(patch);
             if (!out.ok) {
-                if (out.reason === "store-unreadable") {
+                if (out.reason === "unauthenticated") {
+                    // Same quiet card as a 401 on the read. Nothing was
+                    // written, and nothing here is about the key.
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
+                if (out.reason === "read-failed") {
                     // Not "we could not read" and then a form to try again in:
                     // this panel has no way to repair a broken store, so it
                     // says so and points at the screen that does.
-                    setBlocked(out.detail);
+                    setBlocked(out.read);
                     return;
                 }
+                // A write failure is not a read failure: the card goes away
+                // and the form comes back with an error beside it.
+                setBlocked(null);
                 setError(labels.writeFailed);
                 return;
             }
+            setBlocked(null);
             onSaved();
         } finally {
             setSaving(false);
@@ -77,21 +90,30 @@ export function MediaLibraryConfigPanel({
     if (blocked) {
         return (
             <div className="w-full nodrag">
-                <StoreUnreadableNotice
-                    reason={labels.storeUnreadableReason(blocked)}
-                    labels={{
-                        title: labels.storeUnreadableTitle,
-                        unchanged: labels.storeUnreadableUnchanged,
+                <ReadStateNotice
+                    read={blocked}
+                    t={t}
+                    retrying={saving}
+                    onRetry={() => {
+                        // The card STAYS. Clearing `blocked` first unmounted
+                        // it, so the `retrying` flag above never took effect
+                        // and a second click started a second save; it also
+                        // took away the "nothing has been changed" sentence at
+                        // the moment the user acted on it. `save()` replaces
+                        // or clears the card when it settles.
+                        void save();
                     }}
                 >
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={requestOpenSettings}
-                    >
-                        {labels.toSettings}
-                    </Button>
-                </StoreUnreadableNotice>
+                    {blocked.state === "store-unreadable" ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={requestOpenSettings}
+                        >
+                            {t("storeUnreadable.toSettings")}
+                        </Button>
+                    ) : null}
+                </ReadStateNotice>
             </div>
         );
     }

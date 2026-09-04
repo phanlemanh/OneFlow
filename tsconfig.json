@@ -32,7 +32,8 @@
         "build/types/**/*.ts",
         "build/aml-a11y/types/**/*.ts",
         "build/kkt-a11y/types/**/*.ts",
-        "build/bko-a11y/types/**/*.ts"
+        "build/bko-a11y/types/**/*.ts",
+        "build/knsk-a11y/types/**/*.ts"
     ],
     // "build" is EXCLUDED even though `include` still names
     // build/*/types/**: those include entries exist only so Next finds its

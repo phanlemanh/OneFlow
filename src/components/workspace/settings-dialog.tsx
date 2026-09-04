@@ -14,7 +14,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { StoreUnreadableNotice } from "@/components/settings/store-unreadable-notice";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -49,7 +49,7 @@ import type {
     PluginEnvVar,
 } from "@/lib/plugins/plugin-env-manifest-schema";
 import { pluginDisplayName } from "@/lib/plugins/plugin-id";
-import type { ReadFailure } from "@/lib/settings/env-client";
+import type { EnvReadFailure } from "@/lib/settings/env-client";
 import {
     putEnvMap,
     readEnvForBrowser,
@@ -321,7 +321,7 @@ export function SettingsDialog() {
      * over every stored key. Holding the reason in state is what lets the
      * screen say so and refuse.
      */
-    const [blocked, setBlocked] = useState<ReadFailure | null>(null);
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
     const [confirming, setConfirming] = useState(false);
     const [replaceError, setReplaceError] = useState<string | null>(null);
     /**
@@ -367,7 +367,7 @@ export function SettingsDialog() {
                 // Every shape of failure lands here, not just the one the
                 // server labels: a proxy 502 and an HTML error page never
                 // carry the store-unreadable code.
-                setBlocked(read.reason);
+                setBlocked(read);
                 return;
             }
             setBlocked(null);
@@ -383,14 +383,35 @@ export function SettingsDialog() {
         replacing.current = true;
         try {
             const out = await replaceUnreadableStore();
+            if (!out.ok && out.reason === "replace-refused") {
+                // The server just told us our premise was wrong: the store
+                // reads fine and nothing was written. Re-check the premise
+                // rather than reporting a fault that does not exist.
+                setConfirming(false);
+                await fetchEnv();
+                return;
+            }
             if (!out.ok) {
                 // `replaceUnreadableStore` never reads first, so it can only
                 // fail on the write; narrowing keeps the reason a plain string
                 // rather than the read-failure union.
+                if (out.reason === "unauthenticated") {
+                    // The session expired mid-wipe. Nothing was written, and
+                    // the truthful card is the quiet one, not a replace error.
+                    setConfirming(false);
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
                 const reason =
                     out.reason === "write-failed"
                         ? writeFailureText(tStore, out.detail)
-                        : readFailureText(tStore, out.detail);
+                        : readFailureText(tStore, {
+                              // `replaceUnreadableStore` never reads, so this
+                              // arm is unreachable; keep it honest rather than
+                              // inventing a cause.
+                              code: "network",
+                              detail: out.read.state,
+                          });
                 setReplaceError(tStore("replaceFailed", { reason }));
                 return;
             }
@@ -448,18 +469,27 @@ export function SettingsDialog() {
         try {
             const out = await putEnvMap(env);
             if (!out.ok) {
-                logger.error("Failed to save settings:", out.detail);
-                if (out.reason === "store-unreadable") {
+                logger.error("Failed to save settings:", out);
+                if (out.reason === "unauthenticated") {
+                    // Same card the read half shows for a 401, and the sign-in
+                    // seam has already fired inside the client.
+                    setBlocked({ state: "unauthenticated" });
+                } else if (out.reason === "read-failed") {
                     // The store broke between opening the screen and saving.
                     // `blocked` was captured at fetch time, so without this the
                     // screen would keep offering a Save that can never land.
-                    setBlocked(out.detail);
-                } else {
+                    setBlocked(out.read);
+                } else if (out.reason === "write-failed") {
                     toast.error(
                         tStore("writeFailed", {
                             reason: writeFailureText(tStore, out.detail),
                         }),
                     );
+                } else {
+                    // A merge-save never claims the store is unreadable, so the
+                    // server has no premise to refuse. Re-reading is still the
+                    // truthful response if it ever does.
+                    await fetchEnv();
                 }
                 return;
             }
@@ -495,34 +525,46 @@ export function SettingsDialog() {
                     <DialogDescription>{t("description")}</DialogDescription>
                 </DialogHeader>
 
-                {loading ? (
+                {/*
+                 * `!blocked` matters. A retry sets `loading`, and swapping the
+                 * whole card for a spinner takes away the sentence that makes
+                 * the card safe — "nothing has been changed" — at the exact
+                 * moment the user acted on it. Keeping the card and disabling
+                 * its button says the same thing and stays put.
+                 */}
+                {loading && !blocked ? (
                     <div className="flex justify-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
                 ) : blocked ? (
-                    <StoreUnreadableNotice
-                        reason={tStore("reason", {
-                            reason: readFailureText(tStore, blocked),
-                        })}
-                        labels={{
-                            title: tStore("title"),
-                            unchanged: tStore("unchanged"),
-                        }}
+                    <ReadStateNotice
+                        read={blocked}
+                        t={t}
+                        retrying={loading}
+                        onRetry={() => void fetchEnv()}
                     >
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setConfirming(true)}
-                        >
-                            {tStore("escape")}
-                        </Button>
+                        {/*
+                         * The destructive way out exists ONLY for a store that
+                         * is really unreadable. Offering it for an expired
+                         * session or a proxy 502 was the defect: the store is
+                         * fine, and the button erases it.
+                         */}
+                        {blocked.state === "store-unreadable" ? (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setConfirming(true)}
+                            >
+                                {tStore("escape")}
+                            </Button>
+                        ) : null}
                         {replaceError ? (
                             <p className="pt-2 text-xs text-destructive">
                                 {replaceError}
                             </p>
                         ) : null}
-                    </StoreUnreadableNotice>
+                    </ReadStateNotice>
                 ) : (
                     <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
                         {groups.map((group) => (

@@ -31,14 +31,12 @@ import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
 import {
-    type ReadFailure,
+    type EnvReadFailure,
+    readEnvForBrowser,
     saveEnvKeys,
     type WriteFailure,
 } from "@/lib/settings/env-client";
-import {
-    readFailureText,
-    writeFailureText,
-} from "@/lib/settings/read-failure-text";
+import { writeFailureText } from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -66,21 +64,17 @@ const KEY_PROMPT_BASE = {
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-} satisfies Omit<NodeKeyPromptLabels, "storeUnreadable">;
+} satisfies NodeKeyPromptLabels;
 
-/** Blocked-store copy, from the catalogue rather than from a literal. */
+/*
+ * The blocked-store copy used to be threaded through here as four more label
+ * props. It is not, any more: the card now reads its own namespace, because
+ * three states x four strings threaded through two prop bags is the drift
+ * vector this dossier exists to remove. Everything ABOVE stays a prop — those
+ * strings differ per surface; the read-state copy does not.
+ */
 function useKeyPromptLabels(): NodeKeyPromptLabels {
-    const t = useTranslations("Workspace.storeUnreadable");
-    return {
-        ...KEY_PROMPT_BASE,
-        storeUnreadable: {
-            title: t("title"),
-            unchanged: t("unchanged"),
-            reason: (cause: ReadFailure) =>
-                t("reason", { reason: readFailureText(t, cause) }),
-            toSettings: t("toSettings"),
-        },
-    };
+    return KEY_PROMPT_BASE;
 }
 
 /** Failure messages that mean "a key is missing or was rejected". */
@@ -140,19 +134,32 @@ async function saveAndVerifyKey(
     envKey: string,
     value: string,
 ): Promise<
-    | KeyVerdict
-    | { storeUnreadable: ReadFailure }
-    | { writeFailed: WriteFailure }
+    KeyVerdict | { readFailed: EnvReadFailure } | { writeFailed: WriteFailure }
 > {
     const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
     if (!out.ok) {
-        if (out.reason === "store-unreadable") {
-            return { storeUnreadable: out.detail };
+        if (out.reason === "read-failed") {
+            // The whole union travels. Collapsing it to one shape here is how
+            // an expired session reached the node as "your key store is
+            // broken" — and the card for that offers to erase the store.
+            return { readFailed: out.read };
         }
         // A failed WRITE is not a statement about the key. Throwing here landed
         // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
         // which invites the user to type a new key because the disk was full or
         // the connection dropped.
+        // An expired session is a statement about the SESSION, so it travels
+        // as a read failure and renders the quiet card with a retry — not as
+        // `saved-unverified`, which tells the user the key was stored.
+        if (out.reason === "unauthenticated") {
+            return { readFailed: { state: "unauthenticated" } };
+        }
+        // `replace-refused` cannot reach here: only the destructive replace
+        // asks for it, and this path never does. Narrowing rather than casting
+        // keeps that a compiler-checked claim.
+        if (out.reason === "replace-refused") {
+            return { writeFailed: { code: "http", status: 409 } };
+        }
         return { writeFailed: out.detail };
     }
     return (
@@ -164,13 +171,57 @@ async function saveAndVerifyKey(
     );
 }
 
-interface NodeKeyGate {
+/**
+ * The ONE place the key prompt is mounted.
+ *
+ * Exported so the evals mount what ships. Before this existed, the suite built
+ * its own `<NodeKeyPrompt …>` and passed `onRetry` itself — measuring a wiring
+ * the real node did not have, and reporting green while every blocked card on
+ * a node had no control on it at all. A stand-in surface proves things about
+ * the stand-in.
+ */
+export function NodeKeyGateSurface({
+    gate,
+    providerName,
+}: {
+    gate: NodeKeyGate;
+    providerName: string;
+}) {
+    const labels = useKeyPromptLabels();
+    if (!gate.envKey) return null;
+    return (
+        <NodeKeyPrompt
+            envKey={gate.envKey}
+            providerName={providerName}
+            state={gate.state}
+            labels={labels}
+            value={gate.value}
+            onChange={gate.setValue}
+            onSave={gate.save}
+            onRetry={gate.retry}
+            retrying={gate.retrying}
+        />
+    );
+}
+
+export interface NodeKeyGate {
     envKey: string | null;
     state: KeyPromptState;
     value: string;
     setValue: (value: string) => void;
     noteTask: (task: Task) => void;
     save: () => Promise<void>;
+    /** A retry is in flight. The card disables its button while this is true. */
+    retrying: boolean;
+    /**
+     * Read the store again from a blocked card.
+     *
+     * Part of the gate, not a prop the mount site may forget. A card that
+     * states a transient failure and offers nothing to press leaves the user
+     * with no way out at all — there is no destructive control on a node, and
+     * the link to Settings only makes sense when the store is really broken.
+     */
+    retry: () => Promise<void>;
 }
 
 /**
@@ -185,6 +236,7 @@ export function useNodeKeyGate(): NodeKeyGate {
     );
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
+    const [retrying, setRetrying] = useState(false);
     const [value, setValue] = useState("");
     const nodeId = useNodeId();
     const reactFlow = useReactFlow();
@@ -231,14 +283,11 @@ export function useNodeKeyGate(): NodeKeyGate {
                     phase: "saved-unverified",
                     reason: writeFailedText(verdict.writeFailed),
                 });
-            } else if ("storeUnreadable" in verdict) {
+            } else if ("readFailed" in verdict) {
                 // Not a statement about the key. Saying "invalid" here would
-                // invite the user to type a new one, into a store that cannot
-                // be read.
-                setState({
-                    phase: "store-unreadable",
-                    reason: verdict.storeUnreadable,
-                });
+                // invite the user to type a new one, into a store that may not
+                // be readable at all.
+                setState({ phase: "read-failed", read: verdict.readFailed });
             } else if (verdict.works) {
                 setState({ phase: "verified" });
             } else if (verdict.checked) {
@@ -258,7 +307,25 @@ export function useNodeKeyGate(): NodeKeyGate {
         }
     }, [envKey, value]);
 
-    return { envKey, state, value, setValue, noteTask, save };
+    const retry = useCallback(async () => {
+        // Mark in flight BEFORE awaiting. A boolean set after the await has not
+        // settled when the second click dispatches, and N clicks then fire N
+        // concurrent reads whose last arrival wins — which is the shape the
+        // retry contract says is closed, and it held only on the settings
+        // screen because only that surface passed a busy flag.
+        setRetrying(true);
+        const read = await readEnvForBrowser();
+        setRetrying(false);
+        // A healthy read means the obstacle is gone: hand the form back rather
+        // than leaving a card that is no longer true on screen.
+        setState(
+            read.state === "ok"
+                ? { phase: "needs-key" }
+                : { phase: "read-failed", read },
+        );
+    }, []);
+
+    return { envKey, state, value, setValue, noteTask, save, retry, retrying };
 }
 
 export interface AbiNodeShellProps<F extends NodeSlot> {
@@ -324,7 +391,6 @@ export function AbiNodeShell<F extends NodeSlot>({
     transformPrompts,
 }: AbiNodeShellProps<F>) {
     const keyGate = useNodeKeyGate();
-    const keyPromptLabels = useKeyPromptLabels();
     const providerName = useProviderName(feature);
     const { noteTask } = keyGate;
 
@@ -372,17 +438,7 @@ export function AbiNodeShell<F extends NodeSlot>({
             setMissingPluginOpen={exec.setMissingPluginOpen}
         >
             {children}
-            {keyGate.envKey ? (
-                <NodeKeyPrompt
-                    envKey={keyGate.envKey}
-                    providerName={providerName}
-                    state={keyGate.state}
-                    labels={keyPromptLabels}
-                    value={keyGate.value}
-                    onChange={keyGate.setValue}
-                    onSave={keyGate.save}
-                />
-            ) : null}
+            <NodeKeyGateSurface gate={keyGate} providerName={providerName} />
             {autoHandles && (
                 <AbiHandles feature={feature} sourceSpec={sourceSpec} />
             )}

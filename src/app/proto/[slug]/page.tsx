@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { AddMediaLibraryProto } from "@/components/proto/add-media-library-proto";
 import { ByoKeyOnboardingProto } from "@/components/proto/byo-key-onboarding-proto";
 import { ChongMatKhoaByoGiaoDienProto } from "@/components/proto/chong-mat-khoa-byo-giao-dien-proto";
+import { KhongNoiSaiVeKhoKhoaProto } from "@/components/proto/khong-noi-sai-ve-kho-khoa-proto";
 import { NormalizeTextViProto } from "@/components/proto/normalize-text-vi-proto";
 
 /**
@@ -25,6 +26,9 @@ const PROTOS: Record<string, (state: string) => React.ReactNode> = {
     "normalize-text-vi": (state) => <NormalizeTextViProto state={state} />,
     "chong-mat-khoa-byo-giao-dien": (state) => (
         <ChongMatKhoaByoGiaoDienProto state={state} />
+    ),
+    "khong-noi-sai-ve-kho-khoa": (state) => (
+        <KhongNoiSaiVeKhoKhoaProto state={state} />
     ),
 };
 
