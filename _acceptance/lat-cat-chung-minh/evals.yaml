@@ -173,6 +173,13 @@ evals:
   - id: J1
     criterion: AC-2
     executor: judgment
+    question: >-
+      Bốn thông điệp chặn của chốt chặn (hồ sơ mở ngoài kế hoạch · dấu xong nói dối ·
+      khai xếp-lại-sau mà hồ sơ chưa xếp · ngoại lệ không có lý do có tên) có nói cho
+      người đọc biết THỨ gì sai và VIỆC gì phải làm không, hay chỉ ném ra một mã lỗi?
+    inputs:
+      - _acceptance/lat-cat-chung-minh/contract.md
+      - scripts/roadmap/check-plan-freeze.mjs
     rubric: >-
       Đọc stdout/stderr của guard ở các ca F1–F4 (trong evidence của E2, E4, E5, E3): mỗi thông
       điệp gọi đúng tên slug, nói THỨ gì sai và VIỆC gì phải làm (thêm Ngoại lệ / park / ký),
