@@ -47,7 +47,7 @@ Source input: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
 - Trục vòng đời: đóng băng · gỡ băng · mốc tái hoạch · đóng kế hoạch (`closed:` — chưa có case, ghi Known limits)
 - Trục đấu dây: step CI · needle guard-của-guard · suite key local · bản đồ sản phẩm
 - Trục tài liệu: roadmap · STATUS.md · vision.md · ba opportunity park · cơ hội lát cắt
-- Trục chiều đo (thêm sau gap-probe 04/09): mỗi phán quyết phải có **cặp hai chiều trên cùng fixture** — F1 (o-moi ↔ go-bang) · F2-contract (tick-noi-doi ↔ tin-theo-loi) · F2-opportunity (kiem-co-hoi ↔ kiem-co-hoi-de-xuat) · F3 (park-khong-that ↔ clean) · F4 (ngoai-le-tran ↔ ngoai-le-hop-le) · NOTE mốc (checkpoint-note ↔ checkpoint-done) · tài liệu (check-plan-docs-teeth 4 ca ↔ ca lành) [thước CE: ba nửa-xanh này chính là ba lỗ gap-probe tìm ra]
+- Trục chiều đo (thêm sau gap-probe 04/09): mỗi phán quyết phải có **cặp hai chiều trên cùng fixture** — F1-contract (o-moi ↔ go-bang) · F1-opportunity (o-moi-co-hoi-hong ba hình dạng hỏng ↔ cơ hội `decision: park` vẫn xanh) [thêm 04/09 sau S4 vòng 1 — nửa này trước đó không có phép đo nào] · F2-contract (tick-noi-doi ↔ tin-theo-loi) · F2-opportunity (kiem-co-hoi ↔ kiem-co-hoi-de-xuat) · F3 (park-khong-that ↔ clean) · F4 (ngoai-le-tran ↔ ngoai-le-hop-le) · NOTE mốc (checkpoint-note ↔ checkpoint-done) · tài liệu (check-plan-docs-teeth 4 ca ↔ ca lành) [thước CE: ba nửa-xanh này chính là ba lỗ gap-probe tìm ra]
 - Bỏ coverage-scan bằng skill — xem entry `descope` d-20260904T121500Z-lcm4 (không gian AC là bảng phán quyết × vòng đời × đấu dây × tài liệu, đã liệt kê đủ ở §5/§9 thiết kế được owner duyệt từng phần)
 
 ## Out of scope
