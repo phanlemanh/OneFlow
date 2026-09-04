@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: c2f028ced724e6ba78f91744edee4c319029af41
+verified_commit: b5be36486c9e8d53db889b19fe15239f72e01320
 human_signoff: Manh 2026-08-27
 ---
 
@@ -357,3 +357,19 @@ sha: c2f028ced724e6ba78f91744edee4c319029af41 · suites: 8 lệnh exit 0
 Mười ô đo của hồ sơ này đều bị chạm theo chế độ `plan` (10/10 khai `paths`, 312 file đổi so với
 mốc cũ), nên cả mười được **chạy lại** chứ không chỉ dời mốc — đúng luật `repin-khong-chay-lai-eval`
 ký 03/09. Cả mười exit 0. Làn máy chạy bằng một phiên tươi, tuần tự tám lệnh tại `c2f028c`.
+
+### Re-pin lần 3 — 04/09/2026, do `lat-cat-chung-minh` sửa tiếp bốn guard dưới `scripts/roadmap/**` sau vòng S4 thứ nhất
+
+run_id: repin-lcm-20260904T151500Z
+sha: b5be36486c9e8d53db889b19fe15239f72e01320 · suites: 8 lệnh exit 0
+
+Mốc cũ `c2f028c` do chính hồ sơ này ghim ở lần 2, rồi bốn commit sau đó lại chạm
+`scripts/roadmap/**` — vá lỗ fail-open của F1, thêm ca răng thứ 16, đổi mẫu số của bộ răng sang
+độ dài mảng, và đổi phép đo AC-13 từ phép grep sang phép giải. Không commit nào chạm
+`roadmap-drift.mjs` hay `check-roadmap-fresh.sh`, tức mã của gói này không đổi; staleness ở đây là
+theo GLOB, không theo hành vi.
+
+Cả mười ô đo được **chạy lại** chứ không chỉ dời mốc — luật `repin-khong-chay-lai-eval` ký 03/09.
+Cả mười exit 0. Làn máy do một phiên tươi chạy tuần tự tám lệnh tại `b5be364`, cây sạch trước và
+sau. Lần này re-pin là việc CUỐI trước vòng verify: lần 2 ghim xong rồi còn commit tiếp vào đúng
+vùng vừa ghim, nên mốc ấy hỏng ngay trong ngày.
