@@ -7,7 +7,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8654dcecf2d836e771045c1c96f8af4feb2d63fc
+verified_commit: 792163491a11febaa0f5ff729f112442e3eecbef
 human_signoff: Phan Le Manh 2026-09-04
 ---
 
@@ -235,3 +235,7 @@ none — không có eval nào chạy nhiều lần (runs > 1) trong vòng này; 
 Round 1 (2026-09-03): E1-E12 chạy xanh nhưng gặp bế tắc tự quy chiếu giữa `paths` của E5/E6 chặn re-pin — owner chốt thu hẹp `paths` (commit 152d724), verdict PENDING-JUDGMENT chờ owner quyết.
 
 Round 2 (2026-09-04): 12 eval + 7 lệnh suite (build/typecheck/lint/test/sdk pytest/verify:plugins/gen:abi) đều xanh; E6/E7 carry-forward từ round 1 vì delta round này không chạm `paths` của chúng. Bước phân loại phạm vi (scope-triage) không chạy được round này nên máy không tự sửa gì trong 9 finding được review-findings.md nêu ra — verdict giữ PENDING-JUDGMENT, người xem lại toàn bộ trước khi ký.
+
+### Re-pin lần 1 — 2026-09-04, do hợp nhất `feat/fork-oneflow-api-openai` vào `main` — 36 commit của `main` (tính năng `khong-noi-sai-ve-kho-khoa`) vào cùng cây với hai hồ sơ của nhánh. Mã của gói này không đổi; lane máy chạy trên CÂY ĐÃ TRỘN: 7 lệnh exit 0
+run_id: merge-repin-20260904T030830Z
+sha: 792163491a11febaa0f5ff729f112442e3eecbef · suites: 7 lệnh exit 0

@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: d1331546558e3ba13f3e77ef557f1393a44cffa9
+verified_commit: 792163491a11febaa0f5ff729f112442e3eecbef
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -387,3 +387,7 @@ Chạy lại **toàn bộ 15 ô đo của chính hồ sơ này** tại HEAD, kh�
 4 suite: mã dưới `paths` của E12 đã đổi thật, nên câu cần trả lời là «bằng
 chứng của hồ sơ NÀY còn đứng không», và chỉ ô đo của nó trả lời được. E12 —
 ô mang cái glob rộng — xanh 11/11, y như lần ký. Không đụng chữ ký người.
+
+### Re-pin lần 21 — 2026-09-04, do hợp nhất `feat/fork-oneflow-api-openai` vào `main` — 36 commit của `main` (tính năng `khong-noi-sai-ve-kho-khoa`) vào cùng cây với hai hồ sơ của nhánh. Mã của gói này không đổi; lane máy chạy trên CÂY ĐÃ TRỘN: 7 lệnh exit 0
+run_id: merge-repin-20260904T030830Z
+sha: 792163491a11febaa0f5ff729f112442e3eecbef · suites: 7 lệnh exit 0
