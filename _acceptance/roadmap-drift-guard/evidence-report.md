@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: edd4fa9a86ae54bac66fb43f5fdfa779a0e1fb0d
+verified_commit: c2f028ced724e6ba78f91744edee4c319029af41
 human_signoff: Manh 2026-08-27
 ---
 
@@ -348,3 +348,12 @@ làn máy thuần cho vòng này (31/08); nghi thức chuẩn gọi một agent 
 một lệch có khai, không phải một bước bị bỏ: tám lệnh là tám lệnh đã khai trong
 `feature_loop.suite_keys`, chạy tại đúng sha ghi trên, mã thoát ở
 `scratchpad/lane-*.log` của phiên.
+
+### Re-pin lần 2 — 04/09/2026, do `lat-cat-chung-minh` thêm bốn guard dưới `scripts/roadmap/**` và một khối mới trong `docs/roadmap.md`
+
+run_id: repin-lcm-20260904T103744Z
+sha: c2f028ced724e6ba78f91744edee4c319029af41 · suites: 8 lệnh exit 0
+
+Mười ô đo của hồ sơ này đều bị chạm theo chế độ `plan` (10/10 khai `paths`, 312 file đổi so với
+mốc cũ), nên cả mười được **chạy lại** chứ không chỉ dời mốc — đúng luật `repin-khong-chay-lai-eval`
+ký 03/09. Cả mười exit 0. Làn máy chạy bằng một phiên tươi, tuần tự tám lệnh tại `c2f028c`.
