@@ -322,7 +322,16 @@ console.log(
 console.log(
     `   cơ hội: ${dossiers.opportunity.length} hồ sơ, ${opportunities.length} mục trên bản đồ, nút mermaid ${mermaidCount("Đang cân nhắc cơ hội")}`,
 );
+// The parked bucket gets the same three-value shape as the two lines above:
+// AC-11 promises a RELATION between dossiers, map entries and mermaid nodes, and
+// checkBucket verifies all three — but until now it printed only the first, so a
+// green run could not be reconciled against what the criterion claims (S4 round
+// 1). A number nobody can cross-check is a number nobody can audit.
+const parked = blockItems("Xếp lại sau") ?? [];
 console.log(
-    `   chờ phiên nghiệm thu: ${dossiers.awaitingUat.length} · đang làm: ${dossiers.inProgress.length} · xếp lại sau: ${dossiers.parked.length} · chờ duyệt phạm vi: ${dossiers.other.length}`,
+    `   xếp lại sau: ${dossiers.parked.length} hồ sơ, ${parked.length} mục trên bản đồ, nút mermaid ${mermaidCount("Xếp lại sau")}`,
+);
+console.log(
+    `   chờ phiên nghiệm thu: ${dossiers.awaitingUat.length} · đang làm: ${dossiers.inProgress.length} · chờ duyệt phạm vi: ${dossiers.other.length}`,
 );
 console.log(`✅ ${MAP} khớp với ${ACCEPTANCE_DIR}/ — không có trôi.`);

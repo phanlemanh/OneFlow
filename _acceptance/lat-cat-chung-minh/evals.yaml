@@ -121,7 +121,7 @@ evals:
     cmd: config:executors.script.lcm_pmap
     paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh", "PRODUCT-MAP.md", "_acceptance/director-v2/opportunity.md", "_acceptance/timeline-view/opportunity.md", "_acceptance/staleness-ho-so-thieu-paths/opportunity.md"]
     expected: >-
-      exit 0; checker in dòng đếm `xếp lại sau: 3` (cùng dòng với chờ phiên nghiệm thu · đang làm · chờ duyệt phạm vi) rồi `✅ PRODUCT-MAP.md khớp với _acceptance/`, và răng in `CASE parked-opportunity: PASS` (chiều đỏ: cơ hội park bị xếp vào "cân nhắc").
+      exit 0; checker in NGUYÊN VĂN `xếp lại sau: 3 hồ sơ, 3 mục trên bản đồ, nút mermaid 3` — ba giá trị đúng quan hệ AC-11 hứa, in ra để đối chiếu được chứ không nằm im trong bụng checkBucket — rồi `✅ PRODUCT-MAP.md khớp với _acceptance/`, và răng in `CASE parked-opportunity: PASS` (chiều đỏ: cơ hội park bị xếp vào "cân nhắc").
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12
@@ -144,7 +144,10 @@ evals:
     cmd: config:executors.script.lcm_teeth_builtins
     paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
     expected: >-
-      exit 0 và stdout `CASE builtins-only: PASS` — chỉ import `node:`; cờ rác → exit 2 kèm `không nhận tham số`.
+      exit 0 và stdout `CASE builtins-only: PASS` — bản sao guard chạy TỪ TRONG cây tạm (không có
+      `node_modules` ở cấp cha nào) vẫn in `plan-freeze:`; bản sao thêm `import … from "clsx"` thì
+      CHẾT `ERR_MODULE_NOT_FOUND`, chứng minh cây tạm cô lập thật; lưới grep có đối chứng dương
+      (mẫu phải khớp ≥1 dòng `import … from "node:"`); cờ rác → exit 2 kèm `không nhận tham số`.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E14

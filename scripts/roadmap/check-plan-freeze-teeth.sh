@@ -380,21 +380,45 @@ PY
 # AC-13. Builtins only, and refuses arguments (the CI teeth mode appends a junk
 # flag and requires a non-zero exit).
 case_builtins_only() {
-  # Positive control FIRST (S4 round 1): the assertion below is a negative one,
-  # and a negative assertion alone also passes when the pattern matches nothing
-  # — a typo in the regex, or a guard rewritten to require() — so prove the
-  # pattern still finds the imports we know are there before trusting its silence.
-  local n_import
-  n_import=$(grep -cE '^\s*import .* from ["'"'"']node:' "$guard" || true)
-  if [ "$n_import" -lt 1 ]; then
-    echo "    mau import khong khop dong nao trong guard — phep do nay dang do bong" >&2
+  build_fixture
+  # AC-13. Bản cũ đo lời hứa "chỉ import builtins" bằng ĐÚNG MỘT grep âm, và một
+  # grep âm cũng xanh khi mẫu không khớp gì: import xuống dòng (cách Biome format
+  # kho này), `import "polyfill"`, `await import(...)`, `require(...)` đều lọt.
+  # Vế thứ hai ("chạy trong thư mục không có node_modules") thì RỖNG: Node giải
+  # specifier trần từ thư mục CỦA MODULE, không từ cwd, nên `cd $tmp/t && node
+  # $guard` với $guard là đường dẫn thật trong kho vẫn thấy node_modules của kho.
+  # Khẳng định ấy đúng cho mọi guard, kể cả guard phụ thuộc node_modules.
+  #
+  # Nên phép đo chịu lực bây giờ là PHÉP GIẢI, không phải phép grep: chép guard
+  # VÀO cây tạm rồi chạy từ đó. mktemp -d không có node_modules ở bất kỳ cấp cha
+  # nào, nên một import không-builtin chết thật.
+  cp "$guard" "$tmp/t/guard-copy.mjs"
+  guard_capture_at() { local f="$1" rc=0; (cd "$tmp/t" && node "$f") > "$tmp/out" 2>&1 || rc=$?; return $rc; }
+
+  guard_capture_at guard-copy.mjs || { echo "    ban sao khong chay duoc ngoai cay kho" >&2; return 1; }
+  out_has 'plan-freeze:' || return 1
+
+  # Chiều đỏ trên CÙNG cơ chế: `clsx` CÓ trong node_modules của kho. Bản sao
+  # import nó mà vẫn chạy nghĩa là cây tạm không hề cô lập — phép đo trên đang
+  # đo bóng. Bản sao chết nghĩa là cả hai điều được chứng minh cùng lúc: cây tạm
+  # thật sự không thấy node_modules, VÀ một import không-builtin thì đỏ.
+  { head -1 "$guard"; echo 'import _goiNgoai from "clsx";'; tail -n +2 "$guard"; } > "$tmp/t/guard-ban.mjs"
+  if guard_capture_at guard-ban.mjs; then
+    echo "    ban sao import goi ngoai VAN chay — cay tam khong co lap, phep do do bong" >&2
     return 1
   fi
+  out_has 'ERR_MODULE_NOT_FOUND|Cannot find package' || { echo "    ban sao chet vi ly do KHAC, khong phai vi giai goi that bai" >&2; return 1; }
+
+  # Lưới thứ hai, rẻ: mẫu grep phải khớp ÍT NHẤT MỘT dòng thật trước khi tin vào
+  # sự im lặng của nó — một khẳng định âm đứng một mình cũng xanh khi mẫu sai.
+  local n_import
+  n_import=$(grep -cE '^\s*import .* from ["'"'"']node:' "$guard" || true)
+  [ "$n_import" -ge 1 ] || { echo "    mau import khong khop dong nao — luoi thu hai dang do bong" >&2; return 1; }
   if grep -E '^\s*import .* from ["'"'"']' "$guard" | grep -vE 'from ["'"'"']node:'; then
     echo "    guard imports a non-builtin module" >&2
     return 1
   fi
-  build_fixture
+
   local rc=0
   (cd "$tmp/t" && node "$guard" --co-rac-khong-ton-tai) > "$tmp/out" 2>&1 || rc=$?
   [ "$rc" -eq 2 ] || return 1
