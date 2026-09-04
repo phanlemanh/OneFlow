@@ -41,6 +41,7 @@ CASES=(
     contract-unparsable
     status-unknown
     dir-empty
+    parked-opportunity
 )
 
 is_case() {
@@ -158,6 +159,20 @@ case_opportunity_mismatch() {
     printf '# probe\n' >"$tmp/t/_acceptance/teeth-probe-opportunity/opportunity.md"
     check_is_red || return 1
     out_has 'cân nhắc cơ hội' || return 1
+}
+
+# lat-cat-chung-minh AC-11. A parked opportunity (decision: park) belongs in
+# "Xếp lại sau", not "Đang cân nhắc cơ hội". Before 04/09 the checker binned every
+# opportunity-only dossier as "cân nhắc" and the two sides disagreed on every
+# parked item the moment the map was regenerated.
+case_parked_opportunity() {
+    build_fixture
+    mkdir -p "$tmp/t/_acceptance/teeth-probe-parked"
+    printf -- '---\nschema_version: 1\nslug: teeth-probe-parked\nstage: decided\ndecision: park\n---\n' \
+        >"$tmp/t/_acceptance/teeth-probe-parked/opportunity.md"
+    check_is_red || return 1
+    out_has 'teeth-probe-parked' || return 1
+    out_has 'Xếp lại sau'
 }
 
 # AC-4 fail-closed (a): the artifact is not there at all.

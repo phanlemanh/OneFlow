@@ -115,19 +115,45 @@ function mermaidCount(label) {
 }
 
 /**
- * Every directory under _acceptance/ lands in exactly one of four closed
- * buckets: signed · some other declared status · opportunity-only · NOT
- * CLASSIFIABLE.
+ * Every directory under _acceptance/ lands in exactly one closed bucket:
+ * signed · signed-but-awaiting-UAT · in progress · awaiting scope approval ·
+ * opportunity-only · parked · NOT CLASSIFIABLE.
  *
- * The fourth bucket is red BY NAME, never a silent skip. Without it a dossier
+ * The last bucket is red BY NAME, never a silent skip. Without it a dossier
  * whose frontmatter is off by a quote (`status: "signed-off"`) or a capital
  * (`Signed-off`), or whose YAML is broken, gets binned as "not signed": it drops
  * out of the must-appear set, the counts still balance, and the whole checker
  * goes green while the map is missing exactly that dossier. That is a fail-OPEN
  * sitting inside a checker sold as fail-closed.
  */
+// The generator files a dossier by CONTRACT STATUS first, and only falls back to
+// the opportunity's stage/decision when there is no contract. Read the same two
+// fields here or the two sides disagree about every parked or awaiting-UAT item
+// (measured 2026-09-04: regenerating with kit 2.8.0 turned this checker red on a
+// dossier neither side had got wrong).
+function opportunityDecision(slug) {
+    let text;
+    try {
+        text = read(join(ACCEPTANCE_DIR, slug, "opportunity.md"));
+    } catch {
+        return null;
+    }
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!fm) return "";
+    const m = fm[1].match(/^decision:[ \t]*(.*)$/m);
+    return m ? m[1].trim() : "";
+}
+
 function classifyDossiers() {
-    const out = { signed: [], other: [], opportunity: [], unclassified: [] };
+    const out = {
+        signed: [],
+        awaitingUat: [],
+        inProgress: [],
+        opportunity: [],
+        parked: [],
+        other: [],
+        unclassified: [],
+    };
     for (const d of readdirSync(ACCEPTANCE_DIR, { withFileTypes: true })) {
         if (!d.isDirectory()) continue;
         const slug = d.name;
@@ -140,14 +166,16 @@ function classifyDossiers() {
         }
 
         if (contract === null) {
-            try {
-                read(join(ACCEPTANCE_DIR, slug, "opportunity.md"));
-                out.opportunity.push(slug);
-            } catch {
+            const decision = opportunityDecision(slug);
+            if (decision === null) {
                 out.unclassified.push({
                     slug,
                     reason: "không có contract.md lẫn opportunity.md",
                 });
+            } else if (decision === "park") {
+                out.parked.push(slug);
+            } else {
+                out.opportunity.push(slug);
             }
             continue;
         }
@@ -172,13 +200,27 @@ function classifyDossiers() {
                 reason: `status lạ \`${status || "(trống)"}\``,
             });
         } else if (status === "signed-off") {
-            out.signed.push(slug);
-        } else {
+            // A signed dossier that came from an opportunity still owes a UAT
+            // session, so the generator parks it one bucket short of "Đã giao".
+            const decision = opportunityDecision(slug);
+            if (decision === "build" || decision === "iterate")
+                out.awaitingUat.push(slug);
+            else out.signed.push(slug);
+        } else if (status === "draft") {
             out.other.push(slug);
+        } else {
+            // approved / implemented / verified — code is being written.
+            out.inProgress.push(slug);
         }
     }
-    out.signed.sort();
-    out.opportunity.sort();
+    for (const k of [
+        "signed",
+        "awaitingUat",
+        "inProgress",
+        "opportunity",
+        "parked",
+    ])
+        out[k].sort();
     return out;
 }
 
@@ -198,11 +240,16 @@ for (const { slug, reason } of dossiers.unclassified)
  */
 function checkBucket({ rule, heading, node, expected }) {
     const items = blockItems(heading);
+    const count = mermaidCount(node);
+    // The generator omits a section whose bucket is empty (measured 04/09: the
+    // map carried four headings for ten sections). Absent heading + nothing
+    // expected + a mermaid node reading "chưa có" is the healthy empty state,
+    // not drift. Any other combination still fails by name.
     if (items === null) {
+        if (expected.length === 0 && count === 0) return;
         fail(rule, `không tìm thấy khối "## ${heading}" trong ${MAP}`);
         return;
     }
-    const count = mermaidCount(node);
     if (count === null) {
         fail(rule, `không đọc được nút mermaid "${node}" trong ${MAP}`);
         return;
@@ -245,6 +292,24 @@ checkBucket({
     node: "Đang cân nhắc cơ hội",
     expected: dossiers.opportunity,
 });
+checkBucket({
+    rule: "chờ phiên nghiệm thu",
+    heading: "Đã giao — chờ phiên nghiệm thu",
+    node: "Chờ phiên nghiệm thu",
+    expected: dossiers.awaitingUat,
+});
+checkBucket({
+    rule: "đang làm",
+    heading: "Đang làm",
+    node: "Đang làm",
+    expected: dossiers.inProgress,
+});
+checkBucket({
+    rule: "xếp lại sau",
+    heading: "Xếp lại sau",
+    node: "Xếp lại sau",
+    expected: dossiers.parked,
+});
 
 // --- report ----------------------------------------------------------------
 report();
@@ -256,5 +321,8 @@ console.log(
 );
 console.log(
     `   cơ hội: ${dossiers.opportunity.length} hồ sơ, ${opportunities.length} mục trên bản đồ, nút mermaid ${mermaidCount("Đang cân nhắc cơ hội")}`,
+);
+console.log(
+    `   chờ phiên nghiệm thu: ${dossiers.awaitingUat.length} · đang làm: ${dossiers.inProgress.length} · xếp lại sau: ${dossiers.parked.length} · chờ duyệt phạm vi: ${dossiers.other.length}`,
 );
 console.log(`✅ ${MAP} khớp với ${ACCEPTANCE_DIR}/ — không có trôi.`);
