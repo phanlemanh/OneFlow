@@ -39,6 +39,10 @@ job_block() {
 GUARD_NEEDLES=(
     check-roadmap-fresh.sh
     check-product-map.mjs
+    check-plan-freeze.mjs
+    check-plan-freeze-teeth.sh
+    check-plan-docs.sh
+    check-plan-docs-teeth.sh
     check-eval-filters.mjs
     "check-live-docs-manifest-synced.sh readme"
     "check-live-docs-manifest-synced.sh claude"
@@ -53,6 +57,8 @@ GUARD_NEEDLES=(
 TEETH_SKIP=(
     "check-live-docs-manifest-synced.sh orphans|doc base ref qua git show; cay tham do la thu muc mktemp khong co .git"
     "check-live-docs-manifest-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
+    "check-plan-freeze-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
+    "check-plan-docs-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
 )
 teeth_skipped() {
     local n="$1" e
@@ -258,6 +264,11 @@ teeth)
     # a file is missing, not because drift was caught — a red that proves nothing.
     mkdir -p "$probe/t/config"
     cp README.md CLAUDE.md "$probe/t/"
+    # check-plan-docs.sh reads these two; without them its red half would fail
+    # because a file is missing, not because drift was caught.
+    cp STATUS.md "$probe/t/"
+    mkdir -p "$probe/t/docs/strategy"
+    cp docs/strategy/vision.md "$probe/t/docs/strategy/"
     cp docs/README_ZH.md docs/README_JA.md "$probe/t/docs/"
     cp config/official-plugins.json "$probe/t/config/"
     # node_modules so the eval-filter guard fails on a BROKEN FILTER rather than
@@ -297,6 +308,11 @@ cm = root / "CLAUDE.md"
 t3 = cm.read_text(encoding="utf-8")
 assert "`oneflow-api-openai`" in t3, "fixture anchor moved: CLAUDE.md origin id list"
 cm.write_text(t3.replace("`oneflow-api-openai`", "`oneflow-api-openai`, `tongflow-api-openai`", 1), encoding="utf-8")
+# A working-state dossier outside the plan -> check-plan-freeze.mjs must go red.
+stray = root / "_acceptance" / "teeth-probe-freeze"
+stray.mkdir(parents=True, exist_ok=True)
+(stray / "contract.md").write_text(
+    "---\nschema_version: 1\nslug: teeth-probe-freeze\nstatus: draft\n---\n", encoding="utf-8")
 PERTURB
 
     red_cmds=()
