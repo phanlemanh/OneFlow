@@ -11,7 +11,7 @@ flowchart TD
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>32 việc"]
+  GB --> DG["Đã giao<br/>36 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -30,6 +30,8 @@ flowchart TD
 ## Đã giao
 
 - Node nạp-từ-kho — tìm trong media-library và nạp một asset về kho file thành file_key (`add-media-library`)
+- Cứu đường phiên âm: fork oneflow-api-openai sau khi OpenAI khai tử cả bốn model (`dang-ky-fork-openai`)
+- Nối hai thước tài-liệu-sống ↔ manifest vào CI (`noi-thuoc-tai-lieu-vao-ci`)
 - BYO-key onboarding — first run reaches a real result before asking for a key (`byo-key-onboarding`)
 - Cache L1 — node_fingerprint() and digest_form(), pure key computation (`cache-l1-fingerprint`)
 - Cache L2 — on-disk node cache, tier A only (`cache-l2-store`)
@@ -54,6 +56,7 @@ flowchart TD
 - Ô đo chạy 0 ca thử mà vẫn báo đạt — hàng rào ở chốt CI (`o-do-chay-0-ca-van-xanh`)
 - Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
 - Per-plugin origin in the official manifest (`per-plugin-origin`)
+- Làm độ trôi eval sau re-pin tính được và bắt được (`repin-khong-chay-lai-eval`)
 - pnpm 11 build-script approvals — move to pnpm-workspace.yaml (allowBuilds) and unblock the verify toolchain (`pnpm-build-approvals`)
 - Guard chống trôi docs/roadmap.md — ba kiểm A/B/C, răng tách theo case, nối pnpm roadmap:check (`roadmap-drift-guard`)
 - The plugin scanner reports the reason it already has, instead of blaming entry.py (`scan-scope-diagnostics`)
@@ -61,3 +64,4 @@ flowchart TD
 - Publish the SDK as oneflow-sdk while keeping the tongflow import package (`sdk-distribution-rename`)
 - Scope evidence staleness by declared eval paths (`stale-scope-by-paths`)
 - Per-task metering columns and measured plugin duration (`task-metering`)
+- Hàng rào thôi đọc nhầm "không đo được" thành "không có gì sai" (`hang-rao-doc-nham-loi-thanh-khong-co-gi`)

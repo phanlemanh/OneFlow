@@ -635,6 +635,41 @@ executors:
     # Cố ý KHÔNG gọi pnpm và KHÔNG nạp gì từ node_modules — nó phải chạy được
     # trên đúng cái cây đang hỏng mà nó chẩn đoán.
     preflight_env: "bash scripts/acceptance/preflight-verify-env.sh"
+    dkfo_readme_sync: bash scripts/plugins/check-live-docs-manifest-synced.sh readme
+    dkfo_resign_wave: bash scripts/acceptance/check-resign-wave.sh dang-ky-fork-openai origin/main
+    dkfo_claude_origin_ids: bash scripts/plugins/check-live-docs-manifest-synced.sh claude
+    dkfo_icon_no_new_orphan: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
+    dkfo_docs_teeth: bash scripts/plugins/check-live-docs-manifest-teeth.sh
+    ntlc_resign_wave: bash scripts/acceptance/check-resign-wave.sh noi-thuoc-tai-lieu-vao-ci origin/main
+    ntlc_no_new_checkout: bash scripts/ci/check-gate-guards-job.sh job-count && bash scripts/ci/check-action-pins.sh
+    rkce_plan: bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-them-mot-file
+    rkce_check: bash scripts/ci/check-repin-eval-coverage.sh check
+    rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
+    rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main
+    rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case healthy && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
+    rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main && bash scripts/ci/check-repin-eval-coverage.sh teeth --case newlines-thieu-prev
+    rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
+    rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers
+    rkce_write_refusals: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-suites && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-lan-do && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-prev-bang-sha
+    rkce_entrypoint: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diem-vao-duong-dan-la
+    rkce_gateway: bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-giu-dong-cu && bash scripts/ci/check-repin-eval-coverage.sh teeth --case log-hong
+    rkce_exit_code: bash scripts/ci/check-repin-eval-coverage.sh teeth --case chay-lai-do
+    rkce_check_min: bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case san-tinh-duoc
+    rkce_so_khop_total: bash scripts/ci/check-repin-eval-coverage.sh so-khop-total && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-lech && bash scripts/ci/check-repin-eval-coverage.sh teeth --case so-khop-rong
+    hrdn_base_ref: bash scripts/ci/check-repin-eval-coverage.sh teeth --case base-khong-phan-giai
+    hrdn_base_absent: bash scripts/ci/check-repin-eval-coverage.sh teeth --case base-thieu-file
+    hrdn_diff_must: bash scripts/ci/check-repin-eval-coverage.sh teeth --case diff-that-bai
+    hrdn_check_counts: bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case ong-ba
+    hrdn_shallow_probe: bash scripts/ci/check-repin-eval-coverage.sh teeth --case shallow-do-loi
+    hrdn_dupkey: bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth
+    hrdn_dupkey_msg: bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-neu-dich-danh
+    hrdn_selfref_declared: bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-khai
+    # E9 doi hang tu-quy-chieu >= 5 VA co chieu do. `--min-computable 1` khong
+    # khang dinh dieu nao trong hai: mot cai dat in `tu-quy-chieu: 0` van xanh.
+    hrdn_selfref_bucket: bash scripts/ci/check-repin-eval-coverage.sh check --min-selfref 5 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-dem-giam
+    hrdn_selfref_forget: bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-quen-khai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case paths-e5e6-hoan-nguyen
+    hrdn_resign_wave: bash scripts/acceptance/check-resign-wave.sh hang-rao-doc-nham-loi-thanh-khong-co-gi origin/main
+    hrdn_plan_diff_must: bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-diff-that-bai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id
     kkt_gd_one_reader: "bash scripts/settings/check-one-env-reader.sh"
     kkt_gd_one_reader_teeth: "bash scripts/settings/check-one-env-reader-teeth.sh"
     kkt_gd_a11y_proto: "bash scripts/settings/check-a11y-proto.sh"

@@ -63,9 +63,18 @@ expect_red "an origin URL was changed"
 stage "m.plugins.find((e) => typeof e === 'object').id = 'oneflow-not-that-one';"
 expect_red "an origin entry id was changed"
 
+# Read the pinned count out of the guard instead of restating it here. This label said
+# "a 37th plain string" from the day the guard pinned 36; when the OpenAI fork moved the
+# pin to 35 the label kept claiming 37, so the teeth script's own output named a count
+# one higher than the perturbation it performs.
+guard_pinned_count() {
+    grep -oE 'strings\.length !== [0-9]+' "$(dirname "${BASH_SOURCE[0]}")/check-manifest-unmoved.sh" \
+        | grep -oE '[0-9]+'
+}
+
 # 5. A plain string added (the count that started this guard's life).
 stage "m.plugins.push('tongflow-modal-something-new');"
-expect_red "a 37th plain string was added"
+expect_red "one more plain string than the guard's pinned count ($(guard_pinned_count) + 1) was added"
 
 # 6. An origin entry demoted back to a plain string.
 stage "

@@ -3,7 +3,10 @@
     "plugins": [
         "tongflow-api-openrouter-free",
         "tongflow-api-gemini",
-        "tongflow-api-openai",
+        {
+            "id": "oneflow-api-openai",
+            "origin": "https://github.com/phanlemanh"
+        },
         "tongflow-api-deepseek",
         "tongflow-api-bytedance",
         "tongflow-api-apimart",
