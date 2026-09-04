@@ -227,19 +227,51 @@ teeth)
         cmds+=("$cmd")
     done
 
+    # Every perturbed needle must go red for ITS OWN reason. Asserting only
+    # `red_rc -ne 0` credits a BORROWED red: check-plan-docs.sh went red purely
+    # off the duplicated-ledger-row perturbation meant for check-roadmap-fresh.sh
+    # while all 15 of its own checks stayed OK in both directions, and this mode
+    # called that proof (S4 round 2, in-contract finding). Tokens are measured
+    # from the real red output of the probe tree, not guessed.
+    RED_TOKEN=(
+        "check-roadmap-fresh.sh|roadmap drift"
+        "check-product-map.mjs|vắng trên bản đồ"
+        "check-plan-freeze.mjs|teeth-probe-freeze mở ngoài kế hoạch"
+        "check-plan-docs.sh|FAIL: STATUS.md đề ngày"
+        "check-eval-filters.mjs|KHÔNG ca thử nào khớp"
+        "check-live-docs-manifest-synced.sh readme|does not list"
+        "check-live-docs-manifest-synced.sh claude|no origin entry for"
+    )
+    red_token_for() {
+        local e
+        for e in "${RED_TOKEN[@]}"; do
+            [ "${e%%|*}" = "$1" ] && { printf '%s' "${e#*|}"; return 0; }
+        done
+        return 1
+    }
+
     # GREEN HALF, on the healthy tree, on the SAME extracted string.
     #
     # Without it a red-only assertion cannot tell "the guard caught the drift"
     # from "the command is simply broken": a typo'd flag exits non-zero on the
     # perturbed copy too, the mode passes, and CI is then red on every PR after
     # this lands.
-    for cmd in "${cmds[@]}"; do
+    for gi in "${!cmds[@]}"; do
+        cmd="${cmds[$gi]}"
         set +e
         eval "$cmd" >/tmp/cggj-green.log 2>&1
         green_rc=$?
         set -e
         [ "$green_rc" -eq 0 ] \
             || fail "'$cmd' đỏ trên cây LÀNH (exit $green_rc) — lệnh sai, không phải guard bắt lỗi. Xem /tmp/cggj-green.log"
+        # A token that ALSO appears on the healthy tree proves nothing: the first
+        # draft pinned "STATUS.md đề ngày", which this guard prints as `OK: STATUS.md
+        # đề ngày 04/09` on a PASS, so the red-half assertion matched a green line
+        # and stayed satisfied with the perturbation removed. Measured, not assumed.
+        if gt=$(red_token_for "${GUARD_NEEDLES[$gi]}"); then
+            grep -qF -- "$gt" /tmp/cggj-green.log \
+                && fail "RED_TOKEN của '${GUARD_NEEDLES[$gi]}' («$gt») xuất hiện trên cây LÀNH — token này khớp cả lúc guard xanh, nên vế đỏ dựa vào nó không chứng minh gì"
+        fi
     done
 
     # RED HALF: perturb a throwaway copy and run the same commands against it.
@@ -308,6 +340,15 @@ cm = root / "CLAUDE.md"
 t3 = cm.read_text(encoding="utf-8")
 assert "`oneflow-api-openai`" in t3, "fixture anchor moved: CLAUDE.md origin id list"
 cm.write_text(t3.replace("`oneflow-api-openai`", "`oneflow-api-openai`, `tongflow-api-openai`", 1), encoding="utf-8")
+# Roll STATUS.md's heading date back a day -> check-plan-docs.sh must go red on
+# ITS OWN check. Before this, the only perturbations in this block belonged to
+# other guards, and check-plan-docs.sh went red purely by borrowing the
+# duplicated-ledger-row perturbation meant for check-roadmap-fresh.sh: its own
+# 15 checks stayed OK in BOTH directions (S4 round 2, in-contract finding).
+st = root / "STATUS.md"
+t4 = st.read_text(encoding="utf-8")
+assert "## Hiện trạng (2026-09-04" in t4, "fixture anchor moved: STATUS.md heading date"
+st.write_text(t4.replace("## Hiện trạng (2026-09-04", "## Hiện trạng (2026-09-03", 1), encoding="utf-8")
 # A working-state dossier outside the plan -> check-plan-freeze.mjs must go red.
 stray = root / "_acceptance" / "teeth-probe-freeze"
 stray.mkdir(parents=True, exist_ok=True)
@@ -315,13 +356,21 @@ stray.mkdir(parents=True, exist_ok=True)
     "---\nschema_version: 1\nslug: teeth-probe-freeze\nstatus: draft\n---\n", encoding="utf-8")
 PERTURB
 
-    red_cmds=()
+    # First line that reads like a verdict, for the log above. A red whose reason
+    # nobody prints is a red nobody can attribute to the right guard.
+    red_reason() {
+        grep -m1 -E '^(FAIL|VIOLATION|❌|.*VIOLATION)' "$1" 2>/dev/null | head -c 160 \
+            || true
+    }
+
+    red_cmds=(); red_needles=()
     for i in "${!cmds[@]}"; do
         if teeth_skipped "${GUARD_NEEDLES[$i]}"; then continue; fi
-        red_cmds+=("${cmds[$i]}")
+        red_cmds+=("${cmds[$i]}"); red_needles+=("${GUARD_NEEDLES[$i]}")
     done
 
-    for cmd in "${red_cmds[@]}"; do
+    for ri in "${!red_cmds[@]}"; do
+        cmd="${red_cmds[$ri]}"; needle="${red_needles[$ri]}"
         # The probe tree holds the CONFIG and the docs the guards read, but not
         # the source tree — symlinking src breaks vitest's module resolution
         # and hard-linking it just moves the failure to config/. So the
@@ -340,6 +389,11 @@ PERTURB
         set -e
         [ "$red_rc" -ne 0 ] \
             || fail "'$run' thoát 0 trên cây đã phá — guard rỗng. Xem /tmp/cggj-red.log"
+        token=$(red_token_for "$needle") \
+            || fail "needle '$needle' nằm trong PHÁ nhưng RED_TOKEN không khai câu đỏ của nó — không phân biệt được đỏ của chính nó với đỏ đi mượn"
+        grep -qF -- "$token" /tmp/cggj-red.log \
+            || fail "'$run' đỏ trên cây đã phá nhưng KHÔNG vì phép kiểm của chính nó: chờ '$token', không thấy trong /tmp/cggj-red.log — đây là một cái đỏ đi mượn"
+        echo "  đỏ vì: $(red_reason /tmp/cggj-red.log)"
     done
 
     # GUARD-OF-THE-GUARD. Append a junk flag to the first extracted command and

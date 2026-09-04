@@ -102,8 +102,12 @@ evals:
       trong dòng OK: dòng ấy viết "cả hai guard" từ thời hằng số có hai tên và nay đã mười một,
       nhưng nó là stdout ĐÃ GHI vào bằng chứng của hai hồ sơ đã ký (`cong-tu-canh-minh` E9,
       `o-do-chay-0-ca-van-xanh` E10), nên hồ sơ này không sửa nó — ghi ngoài hợp đồng; mode teeth in
-      `lệnh dưới phép thử … check-plan-freeze.mjs` và không FAIL — tức guard đỏ trên cây đã
-      phá (hồ sơ teeth-probe-freeze) và xanh trên cây lành; mode suite-keys xanh.
+      `lệnh dưới phép thử … check-plan-freeze.mjs` và, với TỪNG needle trong tập PHÁ, một dòng
+      `đỏ vì: <câu đỏ của chính needle ấy>` — bảy dòng, bảy câu khác nhau, trong đó
+      `check-plan-docs.sh` phải đỏ vì `FAIL: STATUS.md đề ngày` chứ không vì `FAIL: guard sổ cái đỏ`
+      (đỏ đi mượn). Ba chiều đỏ của chính phép ghim này: gỡ phép phá STATUS.md · bỏ khai RED_TOKEN
+      cho một needle đang PHÁ · ghim một token cũng khớp trên cây lành — cả ba đều làm mode FAIL.
+      Bất biến `KÊ=PHÁ+BỎ QUA` giữ nguyên; mode suite-keys xanh.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E10
