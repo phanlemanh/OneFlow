@@ -1,53 +1,21 @@
 {
-  "feature_plain": "Kho có một chỗ duy nhất nói việc gì đang làm và làm tới đâu, kèm một chốt chặn ở cửa gộp mã: chừng nào việc đang dở chưa xong thì không ai mở thêm việc mới, trừ ba lý do đã đặt tên trước.",
-
-  "will_do": [
-    { "id": "AC-1", "p": "Sẽ đọc được bảng kế hoạch trong lộ trình và đếm đúng 20 việc, 16 việc nằm trên đường tới hạn." },
-    { "id": "AC-1", "p": "Sẽ tính tỉ lệ hoàn thành theo số việc thật, kể cả việc mở thêm bằng ngoại lệ — không dùng con số cứng." },
-    { "id": "AC-5", "p": "Sẽ nhận một ngoại lệ hợp lệ và cho việc đó chạy: đủ lý do có tên, ngày, và ai quyết." },
-    { "id": "AC-6", "p": "Sẽ tự gỡ băng khi xong toàn bộ đường tới hạn và ít nhất 85% tổng số việc — không cần ai gỡ tay." },
-    { "id": "AC-4", "p": "Sẽ đối chiếu việc khai là xếp-lại-sau với hồ sơ thật của nó, để danh sách hoãn không nói một đằng làm một nẻo." },
-    { "id": "AC-8", "p": "Sẽ dừng và báo khi chính bảng kế hoạch bị hỏng, thay vì đoán rồi cho qua." },
-    { "id": "AC-9", "p": "Sẽ chạy chốt chặn này trong mỗi lần kiểm tự động, và có phép đo chứng minh nó thật sự chặn được." },
-    { "id": "AC-10", "p": "Sẽ có 15 phép thử chứng minh chốt chặn biết nói sai VÀ biết nói đúng, mỗi phép một kết quả riêng." },
-    { "id": "AC-11", "p": "Sẽ hiện ba việc vừa hoãn vào đúng ô Xếp lại sau trên bản đồ sản phẩm." },
-    { "id": "AC-12", "p": "Sẽ đếm số hồ sơ đã ký ngay trên kho rồi so với con số ghi trong trang trạng thái — lệch thì báo cả hai số." },
-    { "id": "AC-15", "p": "Sẽ có bốn phép thử chứng minh việc canh tài liệu biết bắt lỗi, kể cả khi hồ sơ thứ 37 được ký mà trang trạng thái quên cập nhật." },
-    { "id": "AC-13", "p": "Sẽ chạy được ở máy chưa cài gói phụ thuộc nào, và từ chối mọi tuỳ chọn lạ thay vì lặng lẽ bỏ qua." }
-  ],
-
-  "wont_do": [
-    { "id": "AC-2", "p": "Chặn mở hồ sơ mới nằm ngoài kế hoạch, chừng nào băng chưa gỡ." },
-    { "id": "AC-3", "p": "Chặn đánh dấu một việc là xong khi hồ sơ của nó chưa ai ký." },
-    { "id": "AC-14", "p": "Chặn tính việc chốt ngưỡng là xong khi các mức đo vẫn còn là đề xuất — chốt vạch và ký tên phải đủ cả hai." },
-    { "id": "AC-7", "p": "Sẽ KHÔNG tự quyết thay người ở mốc soát lại 09/10: chỉ nhắc một dòng, không chặn gì." }
-  ],
-
-  "scope_plain": "Chưa hạ cánh các nhánh đang treo và chưa mở việc nào khác của kế hoạch; chưa canh khoá đóng-kế-hoạch bằng phép thử; hai ô ngày tháng của ba việc hoãn để anh tự điền.",
-
-  "coverage_plain": [
-    { "i": 0, "p": "Năm kiểu chặn đều có phép đo riêng, và hai kiểu dễ sai nhất còn có phép đo chiều ngược để chứng minh chúng không chặn nhầm." },
-    { "i": 1, "p": "Bốn chặng của vòng đời đóng băng đều có phép đo, trừ chặng đóng kế hoạch — khai là giới hạn đã biết, chờ tới lúc thật sự đóng." },
-    { "i": 2, "p": "Bốn chỗ chốt chặn phải cắm vào đều được kiểm: kiểm tự động, phép đo canh chính nó, lượt kiểm tại máy, và bản đồ sản phẩm." },
-    { "i": 3, "p": "Năm trang tài liệu phải khớp nhau đều có phép đo, gồm cả ba hồ sơ vừa hoãn và hồ sơ cơ hội của tính năng đầu tiên." },
-    { "i": 4, "p": "Mỗi phép đo có một cặp hai chiều trên cùng một hồ sơ dựng sẵn — bắt được lỗi VÀ chứng minh được không báo oan. Đây là trục bổ sung sau vòng phản biện, vì ba lỗ tìm ra đều là thiếu chiều báo-đúng." },
-    { "i": 5, "p": "Không chạy lượt quét chống-sót-tiêu-chí bằng công cụ, vì không gian tiêu chí ở đây đã liệt kê hết trong bản thiết kế anh vừa duyệt từng phần." }
-  ],
-
-  "gap_probe_plain": [
-    { "i": 0, "p": "Van an toàn của luật đóng băng mới chỉ chứng minh được là nó CHẶN, chưa chứng minh được là nó MỞ: không phép đo nào thử một ngoại lệ hợp lệ. Ngày anh cần mở gấp vì sự cố bảo mật là ngày đầu tiên đường đó chạy thật. Đã sửa: thêm phép đo chạy thử một ngoại lệ bảo-mật đủ ba ô, và bỏ con số cứng trong cách tính tỉ lệ." },
-    { "i": 1, "p": "Việc chốt ngưỡng cho tính năng đầu tiên có hai vế — bỏ nhãn đề-xuất khỏi các mức đo, và ký tên — nhưng chốt chặn mới chỉ nhìn vế ký tên. Ký mà chưa bỏ nhãn thì coi như đã chốt vạch, đúng thứ việc này sinh ra để ngăn. Đã sửa: chốt chặn nay đòi cả hai vế." },
-    { "i": 2, "p": "Phép đo canh tài liệu không khai là nó phụ thuộc bộ đọc sổ cái, nên lượt kiểm sau có thể bỏ qua nó đúng lúc bộ đọc ấy đổi. Đã sửa: khai đủ đường phụ thuộc." },
-    { "i": 3, "p": "Phép đo canh trang trạng thái đang tìm chữ 36 thay vì đếm hồ sơ thật, nên hồ sơ thứ 37 ký xong mà trang vẫn ghi 36 thì phép đo vẫn báo đạt — đúng bệnh việc này sinh ra để chữa. Đã sửa: nay đếm trên kho rồi so hai số, và thêm bốn phép thử chứng minh nó biết bắt lỗi." },
-    { "i": 4, "p": "Phép đo canh chỗ cắm của chốt chặn ghim con số cũ (hai chốt) trong khi việc này thêm chốt thứ ba, nên nó vẫn báo đạt dù chỗ cắm chưa được cập nhật. Đã sửa: ghim con số sau thay đổi." }
-  ],
-
+  "feature_plain": "Kho có một bản kế hoạch duy nhất mà máy đọc được, và một chốt chặn không cho mở việc mới ngoài kế hoạch ấy cho tới khi phần đã hứa làm gần xong.",
+  "scope_plain": "Chưa hạ cánh Director D0, chưa mở nhánh mã nguồn mở, chưa động tới các hồ sơ B4 đến B10; ba trường người của các cơ hội xếp lại do owner tự điền.",
   "decisions_plain": [
-    { "id": "d-20260904T120000Z-lcm1", "p": "KHÔNG làm phép thử cho khoá đóng-kế-hoạch lúc này — đổi lại, nếu khoá đó viết sai thì chỉ lộ ra vào ngày kế hoạch kết thúc." },
-    { "id": "d-20260904T120500Z-lcm2", "p": "KHÔNG để máy tự điền tên người quyết và ngày cho ba việc hoãn — đổi lại, bản đồ sản phẩm hiện chúng là đã hoãn nhưng chưa có tên người quyết cho tới khi anh ký." },
-    { "id": "d-20260904T121000Z-lcm3", "p": "KHÔNG viết đặc tả giao diện, vì việc này không có màn hình nào — đổi lại, thứ anh thấy lần đầu là chốt chặn và tài liệu, không phải bản vẽ." },
-    { "id": "d-20260904T121500Z-lcm4", "p": "KHÔNG chạy lượt quét chống-sót-tiêu-chí bằng công cụ, vì không gian tiêu chí đã liệt kê hết trong bản thiết kế — đổi lại, không có bằng chứng độ phủ do máy sinh; vòng phản biện đã đối chiếu thay." },
-    { "id": "d-20260904T122000Z-lcm5", "p": "Chọn xin chữ ký thật của anh ở cổng này thay vì đi tiếp với cửa phản đối để mở — đổi lại mất một lượt chờ, được lại là ba con số ràng buộc chính anh có chữ ký trước khi tỉ lệ đầu tiên hiện ra." },
-    { "id": "d-20260904T131500Z-lcm6", "p": "Chọn sửa hết năm phát hiện của vòng phản biện ngay trong hồ sơ, không đẩy cái nào lên anh quyết — đổi lại phần việc máy dài thêm khoảng một ngày, được lại là mọi phép đo đều có cặp hai chiều." }
+    { "id": "d-20260904T120000Z-lcm1", "p": "KHÔNG làm phép đo cho đường đóng hẳn một kế hoạch — đổi lại lối đóng ấy chưa ai thử qua, ghi vào phần hạn chế đã biết." },
+    { "id": "d-20260904T120500Z-lcm2", "p": "KHÔNG để máy tự ghi ai quyết xếp lại một cơ hội — đổi lại owner phải tự điền, và chốt chặn đỏ cho tới lúc đó." },
+    { "id": "d-20260904T121000Z-lcm3", "p": "KHÔNG viết đặc tả giao diện — việc này chỉ chạm dòng lệnh và tài liệu, không có màn hình nào để tả." },
+    { "id": "d-20260904T121500Z-lcm4", "p": "KHÔNG quét máy để tìm tiêu chí còn sót — đổi lại không có bằng chứng độ phủ, chỉ có bản liệt kê owner đã duyệt từng phần." },
+    { "id": "d-20260904T122000Z-lcm5", "p": "Xin chữ ký người ở cổng phạm vi thay vì để máy tự đi tiếp — vì thứ đang chốt là luật ràng buộc chính owner, và một cái ngưỡng." },
+    { "id": "d-20260904T131500Z-lcm6", "p": "Sửa hết năm điểm phản biện tìm ra ngay trong hồ sơ, không đẩy sang cho người — luật chung rút ra là mọi phép đo phải chứng minh được cả chiều xanh lẫn chiều đỏ." },
+    { "id": "d-20260904T140100Z-lcm8", "p": "KHÔNG sinh lại bản đồ sản phẩm ở cổng phạm vi — bộ sinh xếp một hồ sơ sang ô khác với bản đang có, và sửa chỗ đó không thuộc việc này." },
+    { "id": "d-20260904T150000Z-lcm9", "p": "Nhận một chốt chặn vốn đã đỏ sẵn từ trước việc này, thay vì sửa nó ở đây — đổi lại nó vẫn đỏ cho tới khi có người nhận sửa riêng." },
+    { "id": "d-20260904T151000Z-lcm10", "p": "Đấu bốn bước kiểm vào máy chạy tự động thay vì hai như kế hoạch — vì lời hứa tài liệu không trôi cần cả phép kiểm lẫn răng của nó cùng chạy." },
+    { "id": "d-20260904T160000Z-lcm11", "p": "Ghi lại một lỗ của bộ công cụ dựng phép đo: nó nhận đường dẫn không có thật mà không báo, nên người chấm có thể đọc phải file rỗng." },
+    { "id": "d-20260904T210000Z-lcm12", "p": "KHÔNG đổi bộ kiểm bản đồ sang gọi thẳng bộ sinh như owner định — đo ra máy chạy tự động không có sẵn bộ sinh, và làm thế phải mở lại chữ ký của một hồ sơ khác." },
+    { "id": "d-20260904T233000Z-lcm13", "p": "Owner nâng phạm vi ngay tại chỗ cho hai lỗ ngoài hợp đồng, thay vì để lại phần hạn chế đã biết — thành hai tiêu chí mới có phép đo riêng." },
+    { "id": "d-20260904T233500Z-lcm14", "p": "Để chốt chặn đỏ vì ba cơ hội xếp lại chưa có tên người quyết, thay vì máy tự điền — đổi lại cả vòng dừng cho tới khi owner ký." },
+    { "id": "d-20260905T001000Z-lcm15", "p": "Owner ủy quyền tường minh cho máy điền tên và ngày ấy — dòng này là vết của lần ủy quyền đó." },
+    { "id": "d-20260905T012000Z-lcm16", "p": "Nới một luật vừa thêm, vì nó và một luật cũ chặn nhau: một cơ hội bị bác không có chỗ nào đứng cho hợp lệ." }
   ]
 }
