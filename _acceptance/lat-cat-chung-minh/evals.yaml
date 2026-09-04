@@ -44,7 +44,10 @@ evals:
     cmd: config:executors.script.lcm_teeth_park
     paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/timeline-view/opportunity.md"]
     expected: >-
-      exit 0 và stdout `CASE park-khong-that: PASS` — F3 nêu `timeline-view nằm trong Xếp lại sau mà hồ sơ chưa đóng`.
+      exit 0 và stdout có `CASE park-khong-that: PASS` (F3 nêu `timeline-view nằm trong Xếp lại
+      sau mà hồ sơ chưa đóng`) lẫn `CASE kill-hop-le: PASS` — chiều XANH: một hồ sơ `decision: kill`
+      niêm yết trong bảng và đủ hai trường người thì guard thoát 0 và không gọi tên nó. Trước vòng 3,
+      F3 đòi riêng `park` nên `kill` không có chỗ nào hợp lệ: không niêm yết thì F5 đỏ, niêm yết thì F3 đỏ.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
