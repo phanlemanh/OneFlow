@@ -44,7 +44,7 @@ mục 1 (xem bên dưới) cùng một làn việc mới xen kẽ giữa các h�
 |---|---|---|
 | S1 | ADR-0011 | ✅ 05/08 |
 | S2 | `oneflow-api-ffmpeg` + `oneflow-api-pyscenedetect` thay 2 plugin Modal `gpu=NONE`; venv riêng mỗi plugin | ✅ ký 07/08 (`local-cpu-plugins`) |
-| S3 | Đường transcribe không-Modal | 🔜 **đã chen trước 1.4** (chốt 19/08) — nằm trên **hai** đường tới hạn (skill #1 *và* phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); xếp sau 1.3b trong hàng thực thi Phase 1 |
+| S3 | Đường transcribe không-Modal | ✅ **de facto 01/09** qua fork `oneflow-api-openai` (`dang-ky-fork-openai`): máy dev quét được cả hai slot transcribe, model `gpt-transcribe`, 0 lỗi. *Chưa gọi tên ở đây tới 04/09.* Còn kiểm chứng end-to-end trong lát cắt — B7 của khối kế hoạch bên dưới |
 | S4 | UX BYO key cho người dùng đầu tiên | ✅ **ký 19/08** (`byo-key-onboarding`, T3, merge PR #68) — điều kiện đảo chiều của ADR-0011 **từ nay đo được**; phiên nghiệm thu với người dùng đại diện thành việc của làn A |
 | S5 | Desktop app thành app local thật (hôm nay là vỏ Pake trỏ `app.tongflow.com`) | 🔴 chưa bắt đầu — liên đới hạng mục 0.1 "desktop chưa tách" |
 | S6 | 26 plugin GPU còn lại sang đường API — tuần tự theo nhu cầu ([ADR-0007](adr/0007-sequential-plugin-forking.md)). *Thu hẹp 19/08:* bộ ba crawl `docling`/`crawl4ai`/`scrapling` **rút khỏi S6** — chúng chồng vai ingest của media-library ([ADR-0012](adr/0012-media-library-boundary.md)); số phận là quyết định **hai repo**, chưa chốt | 🔴 chưa bắt đầu |
@@ -108,8 +108,8 @@ không đánh lại số cũ):
 - **1.3b** ✅ **Node nạp-từ-kho** — giai đoạn A của [ADR-0012](adr/0012-media-library-boundary.md): search → chọn thẻ → URL ký → `file_key`. Add node không ABI-driven nên không đụng ABI/SDK; key qua kho khoá BYO. Mở khoá input cho skill #1. *Ký 29/08. Hồ sơ mở lại sau 9 ngày vì `main` trôi 219 commit qua vùng `src/**`, `sdk/**` mà hợp đồng khai — bằng chứng 20/08 mô tả một cây không còn tồn tại. Đóng bằng vòng 8 (29/29 eval xanh) + một lane máy thuần tại HEAD, sau khi owner chọn **đóng băng**: ba vòng liền lớp phép đo hội tụ còn lớp phản biện thì không, nên **23 phát hiện** thành giới hạn khai rõ trong hợp đồng thay vì mở vòng thứ tư. **Còn mở:** trạng thái `imported` đã thiết kế và duyệt nhưng chưa có trong sản phẩm; `.mkv` nhập được mà không phát được, và chính phép đo lẽ ra bắt được nó chỉ phủ 2/4 đuôi. Hai thứ có cấu tính tách sang hợp đồng con: kiểm payload một lần ở biên, và sáu lỗ thủng của bộ đo. Một lỗi **mất dữ liệu tách hẳn ra ngoài hồ sơ này** vì đo được là nợ sẵn của `main`: `loadEnvStore()` nuốt lỗi rồi trả `{}` với HTTP 200, nên lưu một khoá BYO có thể xoá sạch mọi khoá còn lại.*
 - **S3** **Transcribe không-Modal** — *chen trước 1.4, chốt 19/08*: nằm trên **hai** đường tới hạn cùng lúc (chuỗi skill #1 và phép đo WER của G0 theo [ADR-0010](adr/0010-mainstream-infra-and-models.md)); có nó thì ngày corpus về là đo được ngay. Trong chuỗi skill #1, transcribe cũng đứng trước TTS.
 - **1.4** **Plugin TTS ElevenLabs** (tiếng Việt) theo pattern API-plugin.
-- **1.5** **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch".
-- **1.6** **Skill #1 "Footage → kho clip"** — *viết lại theo ADR-0012, "kho clip" nay LÀ media-library*: input từ node nạp-từ-kho (1.3b) hoặc upload → split-video → transcribe-timestamp → drop-video → tách/thay hoặc denoise audio → overlay phụ đề + khung giá → xuất 9:16 → **ingest ngược về library** (`provenance: generated` + nhãn AI, chữ ký `provider:oneflow`) + telemetry lượt dùng. Giai đoạn B của ADR-0012 nhập vào hạng mục này, không tách riêng. (Livestream hay tour nhà là tham số.)
+- **1.5** **Skill system v1** ([ADR-0002](adr/0002-skill-template-orchestrator.md)): template + manifest tham số + orchestrator TS (`src/lib/skills/`); Director sinh instance; canvas ẩn sau "xem/sửa kế hoạch". → **B5** trong khối kế hoạch lát cắt chứng minh (04/09).
+- **1.6** **Skill #1 "Footage → kho clip"** — *viết lại theo ADR-0012, "kho clip" nay LÀ media-library*: input từ node nạp-từ-kho (1.3b) hoặc upload → split-video → transcribe-timestamp → drop-video → tách/thay hoặc denoise audio → overlay phụ đề + khung giá → xuất 9:16 → **ingest ngược về library** (`provenance: generated` + nhãn AI, chữ ký `provider:oneflow`) + telemetry lượt dùng. Giai đoạn B của ADR-0012 nhập vào hạng mục này, không tách riêng. (Livestream hay tour nhà là tham số.) → **B7** trong khối kế hoạch; ingest ngược là dòng Should S3 của khối.
 - **1.7** **KG v0 + provenance wire shape** ([ADR-0004](adr/0004-universe-kg-three-entities.md), hiện thực theo [ADR-0012](adr/0012-media-library-boundary.md)): **uỷ quyền media-library** — `tasks.entity_refs` trỏ `entity_id` của library, `FieldBinding kind:"entity"` resolve qua API; giới hạn 3 loại thực thể giữ nguyên như bộ lọc tiêu thụ, không xây bảng entities riêng.
 
 > **Làn local-first xen kẽ ở đây, không nối đuôi.** Câu hỏi thứ tự 1.4 / S3 / S4 mở từ 07/08
@@ -120,6 +120,70 @@ không đánh lại số cũ):
 **Gate G1:** 50 clip liên tiếp không lỗi dấu / không sai số giá trên overlay · demo "đổi giá →
 chỉ re-run overlay+merge" chứng minh bằng telemetry · skill #1 chạy headless qua engine cho kết
 quả giống canvas (conformance pass).
+
+## Kế hoạch lát cắt chứng minh (04/09 → 08/11) — và luật đóng băng
+
+> Thiết kế: [lat-cat-chung-minh-design](superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md).
+> Định vị ba tầng (nền tảng đa mục đích → năm trụ cột → lát cắt) ghi ở [vision.md](strategy/vision.md).
+> Skill #1 là **lát cắt chứng minh đầu tiên** của nền tảng, không phải định nghĩa sản phẩm.
+>
+> **Luật đóng băng.** Từ khi hồ sơ `lat-cat-chung-minh` merge tới khi gỡ băng, không hồ sơ nào
+> được mở ở trạng thái làm việc nếu slug không nằm trong ba bảng dưới. Băng đóng **phạm vi**,
+> không đóng định vị. Ngoại lệ chỉ nhận ba lý do có tên: mất-dữ-liệu · bảo-mật · chặn-★, và
+> tính vào mẫu số. Gỡ băng khi **mọi dòng ★ ✅ và ≥ 85% tổng dòng ✅**. Guard:
+> `scripts/roadmap/check-plan-freeze.mjs` (job Acceptance Gate) in tỉ lệ mỗi lần chạy — đó là
+> bảng điều khiển duy nhất. Mốc tái hoạch 09/10 theo §6.3 của thiết kế.
+
+<!-- plan-freeze:start -->
+plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=85% · checkpoint: 2026-10-09
+| # | ★ | Hạng mục | slug | Trạng thái | Ghi chú |
+|---|---|---|---|---|---|
+| B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap; mở cơ hội của lát cắt | lat-cat-chung-minh | ◐ | hạng mục mới cuối cùng được nhận; vòng nội bộ, ngưỡng Không đo được |
+| B2 | ★ | Hạ cánh nhánh mở hoá b01: ba README, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ⬜ | code có trước hợp đồng nên đi làn prototype keep; merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
+| B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, ADR Director trường kỳ về main, mục Làn D | director-wire-shape | ⬜ | T3 vì chạm src/db; soi Gate 1.5 đã qua chưa; director-v2 D1 D2 D4 đã park |
+| B4 | ★ | Engine dùng venv per-plugin như TS, bỏ fallback về sys.executable; SDK 0.2.20 và bump pin bốn plugin | hai-duong-chay-mot-venv | ⬜ | T3 vì chạm sdk, kèm train SDK; sau A6 |
+| B5 | ★ | Skill system v1: manifest tham số, template, orchestrator v1, nút skill, xem sửa kế hoạch; skill thứ hai giả lập không đụng engine | skill-system-v1 | ⬜ | T3 vì chạm src/app/api; dòng nền tảng |
+| B6 | ★ | Overlay chạy local (port khỏi Modal, cùng slot) kèm canvas 9:16 pad crop | overlay-chay-local | ⬜ | T2; sau A7 |
+| B7 | ★ | Skill #1 Footage sang kho clip 9:16: nạp hoặc upload, split, transcribe-timestamp, drop, overlay phụ đề và giá, gom; conformance headless | skill-1-footage-kho-clip | ⬜ | T3 vì chạm src/lib/workflow |
+| B8 | ★ | Director sinh instance skill từ prompt | director-sinh-instance | ⬜ | T3; có thể hạ Should ở mốc 09/10 |
+| B9 | ★ | Đo G0 (WER, COGS từ ảnh chụp giá) và G1 (50 clip, đổi giá chỉ overlay chạy lại, headless bằng canvas) | do-g0-g1-lat-cat | ⬜ | T2; chờ A1 và A3 |
+| B10 | ★ | Cổng Giá trị của cơ hội lát cắt: phiên UAT với 3 tới 5 người dùng đại diện trên máy trắng; phán quyết release iterate kill | — | ⬜ | làn A và B; chờ A2 và A5; ✅ khi cơ hội có verdict |
+| A1 | ★ | Ký Cổng Đáng của cơ hội lát cắt: gỡ nhãn đề xuất ở U1 tới U8 và ba số G0 (WER ≤ 10%, lỗi chữ số trên câu có giá bằng 0, COGS ≤ 11 đô) | — | ⬜ | làn A · T5 · kiểm: opportunity:skill-1-footage-kho-clip |
+| A2 | ★ | Chốt ngách seller thương mại điện tử hay môi giới bất động sản | — | ⬜ | làn A · T8 |
+| A3 | ★ | Corpus ít nhất 10 clip thực địa kèm bản chép tay vào measure/wer-corpus | — | ⬜ | làn A · T9 |
+| A4 | ★ | Một lượt chạy thật kèm hoá đơn | — | ⬜ | làn A · T11 |
+| A5 | ★ | Tuyển 3 tới 5 người dùng đại diện cho phiên nghiệm thu | — | ⬜ | làn A · T13 |
+| A6 |  | Thu hồi token PyPI toàn tài khoản, cấp lại loại hẹp theo dự án | — | ⬜ | làn A · T6, trước B4 |
+| A7 | ★ | Tạo kho công khai oneflow-api-compose-overlay | — | ⬜ | làn A · T8, trước B6 |
+| S1 |  | Hạ cánh bản vá t1-escape đòi artifact hồ sơ (2 commit sẵn) | t1-escape-doi-hoi-artifact-ho-so | ⬜ | Should; code có trước hợp đồng nên đi làn prototype keep |
+| S2 |  | Đăng ký plugin normalize-text-vi, đóng lỗ 1.3 | dang-ky-plugin-normalize-text-vi | ⬜ | Should; cần kho plugin công khai |
+| S3 |  | Ingest ngược về media-library (giai đoạn B của quyết định ranh giới kho) | ingest-nguoc-media-library | ⬜ | Should; ứng viên iterate sau phiên nghiệm thu |
+
+**Xếp lại sau**
+| slug | vì sao đông lạnh | nhánh |
+|---|---|---|
+| director-v2 | D1 D2 D4 sau lát cắt; D0 hạ cánh ở B3 | feat/director-wire-shape |
+| timeline-view | cơ hội chưa điền, không trên đường ★ | — |
+| staleness-ho-so-thieu-paths | lỗ cổng đo được 31/08, giả thuyết chưa kiểm; mọi hồ sơ của kế hoạch khai đủ paths | — |
+| roadmap-alias-guard | nháp 10 tiêu chí và 9 phép đo, hạ tầng cổng | chore/roadmap-alias-guard |
+| bo-phan-loai-token | nháp, phục vụ đường lồng tiếng ngoài lát cắt | draft/bo-phan-loai-token |
+| ci-recheck-all | nháp 8 tiêu chí và 10 phép đo, hạ tầng cổng | chore/acceptance-ci-recheck-all |
+| scan-parse-failure-semantics | bàn giao sẵn trong hồ sơ scan-scope-diagnostics, hạ tầng cổng | — |
+| overlay-canvas-reach | form node overlay; có thể vô nghĩa khi skill ẩn canvas | — |
+| 1.1-L1b mime và filename vào digest | transcribe không trong allowlist tầng A; phép đo G1 sẽ lộ nếu thành vấn đề | — |
+| 1.1-L2b file_key_base cho desktop | desktop là S5, đã park | — |
+| 0.7 English-only vs văn bản vendor; 0.8 hai nửa còn lại | hạ tầng cổng | — |
+| hai hợp đồng con của add-media-library | kiểm payload ở biên; sáu lỗ thủng bộ đo — không trên đường ★ | — |
+| cost_usd và gpu_type (DoD 0.2 còn một phần ba) | COGS đo bằng hoá đơn và ảnh chụp giá | — |
+| trần ba lượt đồng thời nửa vời | đường tạo task lẻ không gọi bộ đếm — không trên đường ★ | — |
+| desktop 0.1d và S5; ja.json 76 khoá; gói nợ fork; 1.4 TTS; 1.7 KG; S6 | ngoài lát cắt | — |
+| oneflow-api-vercel-gateway | mở khi phiên âm của cổng hết beta VÀ Phase 2 mục 4 bắt đầu, HOẶC phiên nghiệm thu cho thấy U1 trượt vì nhập nhiều khoá | — |
+| hàng rào chặn model đã khai tử | đọc trường deprecated_at từ catalog công khai thay vì bảng tay | — |
+
+**Ngoại lệ mở giữa lúc băng**
+| slug | lý do | ngày | ai quyết |
+|---|---|---|---|
+<!-- plan-freeze:end -->
 
 ## Phase 2 — Năng lực cloud & vòng dữ liệu (T11–T16)
 
@@ -208,6 +272,9 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này:** 14/23 hạng mục đã ký là năng lực sản phẩm, 9/23 là hạ tầng quy
-trình và CI. Con số thứ hai không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
+**Đọc được gì từ tỉ lệ này (đếm lại 04/09 trên 36 hồ sơ):** 16/36 là hạng mục trên lộ trình,
+5/36 là sửa lỗi sản phẩm ngoài lộ trình (bốn hồ sơ kho khoá và fork OpenAI), 15/36 là hạ tầng
+quy trình và CI. Con số thứ ba không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.
+Trong 15 hồ sơ ký từ 27/08, 7 là hạ tầng quy trình: đó chính là xu hướng mà khối kế hoạch và
+luật đóng băng ở trên chặn lại.

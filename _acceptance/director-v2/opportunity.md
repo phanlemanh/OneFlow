@@ -3,8 +3,8 @@ schema_version: 1
 slug: director-v2
 feature: Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy
 owner: Manh
-stage: discovery
-decision:
+stage: decided
+decision: park
 decided_by:
 decided_at:
 prototype:
@@ -79,3 +79,7 @@ Bốn hạng mục, thứ tự phát triển 1 → 2 → 5 → 3:
 - Tự chạy làm MẶC ĐỊNH — bất biến không-tự-chạy giữ nguyên, auto chỉ là opt-in. (bác 26/08)
 - Timeline view — tách sang ô `timeline-view`, ngưỡng chết khác hẳn. (tách 26/08)
 - App di động — chưa có tín hiệu người dùng cần.
+
+## Cổng 0 — 04/09
+
+- **decision = park.** Căn cứ: khối kế hoạch lát cắt chứng minh (docs/roadmap.md) đóng băng việc mở hạng mục mới; hồ sơ này không nằm trên đường ★. Mở lại khi gỡ băng, hoặc qua bảng Ngoại lệ với lý do có tên.
