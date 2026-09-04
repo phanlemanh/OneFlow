@@ -5,7 +5,7 @@ slug: hang-rao-doc-nham-loi-thanh-khong-co-gi
 risk_tier: T2
 surfaces: []
 design_doc: docs/superpowers/specs/2026-09-03-hang-rao-doc-nham-loi-design.md
-status: verified
+status: signed-off
 owner: phanlemanh@gmail.com
 approved_by:
 approved_at:
@@ -94,3 +94,10 @@ vi owner đã chốt. Giữ nguyên câu chữ cũ là hứa một thứ bằng 
 | Ô đo tự-quy-chiếu xanh sau một lần ghim **mà không cần** thu hẹp `paths` | 2 ô | AC-8, AC-9, AC-10 |
 
 ## Notes
+- **Known limits (Ngoài-1 + Ngoài-5, chốt ở Cổng 2 vòng 2):** bản đồ sản phẩm từng lệch làm
+  bước «Product map freshness» của CI đỏ tại HEAD. **Đã sửa trong chính vòng này** — gỡ mục
+  cơ hội của hồ sơ này, chỉnh nhãn sơ đồ, và thêm hồ sơ vào mục «Đã giao» khi ký;
+  `check-product-map.mjs` thoát 0. Ghi ở đây làm dấu vết, KHÔNG phải một hạn chế còn tồn tại.
+- **Ngoài-7 của vòng 1 vẫn mở:** chế độ lập kế hoạch ghim báo «kế hoạch sạch» cho một hồ sơ
+  không tồn tại. Cố ý để lại — owner chỉ đích danh Ngoài-6.
+
