@@ -609,10 +609,12 @@ CASES=(
   tin-theo-loi
   park-khong-that
   ngoai-le-tran
+  ngoai-le-hop-le
   go-bang
   checkpoint-note
   checkpoint-done
   kiem-co-hoi
+  kiem-co-hoi-de-xuat
   builtins-only
   case-isolation
 )
@@ -745,6 +747,33 @@ PY
   out_has 'tien-tay không có lý do có tên'
 }
 
+# AC-5 GREEN HALF (gap-probe 04/09 P0). The freeze's safety valve must be shown to
+# OPEN, not just to block: a well-formed exception is accepted, its slug joins F1's
+# allowed set, and the denominator grows by one. Without this the valve is only ever
+# exercised the day there is a real security incident.
+case_ngoai_le_hop_le() {
+  build_fixture
+  # A dossier that is open and NOT in any table — F1 would redden on it...
+  mkdir -p "$tmp/t/_acceptance/su-co-bao-mat"
+  printf -- '---\nschema_version: 1\nslug: su-co-bao-mat\nstatus: draft\n---\n' > "$tmp/t/_acceptance/su-co-bao-mat/contract.md"
+  guard_is_red || return 1
+  out_has 'F1' || return 1
+  local before
+  before=$(sed -n 's/.*tổng [0-9]*\/\([0-9]*\).*/\1/p' "$tmp/out" | head -1)
+  # ...until a valid exception row admits it.
+  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+row = "| su-co-bao-mat | bảo-mật | 2026-09-20 | Manh |\n"
+p.write_text(s.replace("<!-- plan-freeze:end -->", row + "<!-- plan-freeze:end -->", 1), encoding="utf-8")
+PY
+  guard_is_green || return 1
+  ! out_has 'su-co-bao-mat mở ngoài kế hoạch' || return 1
+  local after
+  after=$(sed -n 's/.*tổng [0-9]*\/\([0-9]*\).*/\1/p' "$tmp/out" | head -1)
+  [ -n "$before" ] && [ -n "$after" ] && [ "$after" -eq $((before + 1)) ]
+}
+
 # AC-6. THE THAW. Every row ✅ with every slug row backed by a signed contract:
 # the guard must say GỠ BĂNG, exit 0, and F1 must be OFF (a stray dossier no
 # longer turns it red). Without this case a guard hardcoded to freeze forever
@@ -834,6 +863,35 @@ PY
   ! out_has 'tin theo lời.*A1'
 }
 
+# AC-14 SECOND HALF (gap-probe 04/09 P1). Cổng Đáng has TWO halves: strike the
+# `[đề xuất]` prefixes off the thresholds, AND sign the three human fields. Signing
+# while every threshold is still a proposal would tick A1 ✅ with no line agreed —
+# defeating the very "set the bar before you see the number" rule A1 exists for.
+case_kiem_co_hoi_de_xuat() {
+  build_fixture
+  set_row_state "| A1 |" "✅"
+  # Sign the human fields but leave the [đề xuất] prefixes in place.
+  python3 - "$tmp/t/_acceptance/skill-1-footage-kho-clip/opportunity.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+s = re.sub(r"^stage:.*$", "stage: decided", s, count=1, flags=re.M)
+s = re.sub(r"^decision:.*$", "decision: build", s, count=1, flags=re.M)
+s = re.sub(r"^decided_by:.*$", "decided_by: Fixture", s, count=1, flags=re.M)
+assert "[đề xuất]" in s, "fixture stale: opportunity has no [đề xuất] left to keep"
+p.write_text(s, encoding="utf-8")
+PY
+  guard_is_red || return 1
+  out_has 'F2' || return 1
+  out_has 'skill-1-footage-kho-clip.*còn ngưỡng đề xuất' || return 1
+  # Green half: strike the prefixes and it passes.
+  python3 - "$tmp/t/_acceptance/skill-1-footage-kho-clip/opportunity.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1])
+p.write_text(p.read_text(encoding="utf-8").replace("[đề xuất] ", ""), encoding="utf-8")
+PY
+  guard_is_green
+}
+
 # AC-13. Builtins only, and refuses arguments (the CI teeth mode appends a junk
 # flag and requires a non-zero exit).
 case_builtins_only() {
@@ -920,7 +978,7 @@ Run:
 ```bash
 chmod +x scripts/roadmap/check-plan-freeze-teeth.sh && bash scripts/roadmap/check-plan-freeze-teeth.sh; echo "exit=$?"
 ```
-Expected: mọi case `FAIL` (guard chưa tồn tại → `node` thoát 1 với "Cannot find module"), dòng cuối `❌ răng: 0 đạt / 13 hỏng`, `exit=1`.
+Expected: mọi case `FAIL` (guard chưa tồn tại → `node` thoát 1 với "Cannot find module"), dòng cuối `❌ răng: 0 đạt / 15 hỏng`, `exit=1`.
 
 - [ ] **Step 3: Commit (test đỏ)**
 
@@ -1064,11 +1122,16 @@ const rows = mainRows.map(([id, star, item, slug, state, note]) => {
 });
 
 // --- read the dossiers -----------------------------------------------------
+// Returns the frontmatter fields plus one fact about the BODY: whether any
+// threshold is still marked `[đề xuất]`. Cổng Đáng has two halves — strike the
+// proposals and sign the fields — and reading only the frontmatter would accept a
+// signature over thresholds nobody agreed to.
 function frontmatter(path) {
     if (!existsSync(path)) return null;
-    const fm = readFileSync(path, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!fm) return {};
-    const out = {};
+    const text = readFileSync(path, "utf8");
+    const fm = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    const out = { hasProposal: text.includes("[đề xuất]") };
+    if (!fm) return out;
     for (const l of fm[1].split("\n")) {
         const m = l.match(/^([a-z_]+):\s*(.*)$/);
         if (m) out[m[1]] = m[2].trim();
@@ -1114,6 +1177,8 @@ for (const r of rows) {
         const opp = dossiers.get(m[1])?.opportunity;
         if (!opp || !opp.decision || !opp.decided_by)
             fail("F2", `${r.id} ✅ nhưng cơ hội ${m[1]} chưa ký Cổng Đáng (cần decision và decided_by)`);
+        else if (opp.hasProposal)
+            fail("F2", `${r.id} ✅ nhưng cơ hội ${m[1]} còn ngưỡng đề xuất — Cổng Đáng chốt vạch TRƯỚC khi ký, gỡ hết [đề xuất] rồi mới tính`);
         continue;
     }
     if (!isSigned(r.slug)) fail("F2", `${r.id} ✅ nhưng hồ sơ ${r.slug} chưa ký`);
@@ -1193,7 +1258,7 @@ Run:
 ```bash
 bash scripts/roadmap/check-plan-freeze-teeth.sh
 ```
-Expected: 13 dòng `✓ CASE …: PASS`, cuối `✅ răng: 13/13 case — mỗi case một mã thoát riêng`. Nếu một case đỏ: sửa **guard** cho tới khi khớp thông điệp Task 2 đòi (không nới case).
+Expected: 15 dòng `✓ CASE …: PASS`, cuối `✅ răng: 15/15 case — mỗi case một mã thoát riêng`. Nếu một case đỏ: sửa **guard** cho tới khi khớp thông điệp Task 2 đòi (không nới case).
 
 - [ ] **Step 3: Chạy guard trên cây thật**
 
@@ -1247,7 +1312,9 @@ git commit -F /tmp/lcm-msg.txt
 # while 36 were signed — a document that lies about the count teaches readers
 # to stop reading it. Greps, not prose review; one FAIL line per miss.
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+# Root comes from the script's own location, never hardcoded — the teeth script
+# points PLAN_DOCS_ROOT at a throwaway copy to prove each check can go red.
+cd "${PLAN_DOCS_ROOT:-$(dirname "$0")/../..}"
 if [ $# -gt 0 ]; then
     echo "check-plan-docs: không nhận tham số nào — nhận được: $*" >&2
     exit 2
@@ -1262,7 +1329,19 @@ forbid() { # forbid <file> <regex> <label>
 }
 
 need STATUS.md '^## Hiện trạng \(2026-09-04' 'STATUS.md đề ngày 04/09'
-need STATUS.md '36 hồ sơ đã ký' 'STATUS.md ghi 36 hồ sơ'
+
+# The signed-dossier count is a RELATION, not a string. Grepping a constant keeps
+# this green the day the 37th dossier is signed — the exact drift this file exists
+# to catch, certified as fixed by a check that never looked (gap-probe 04/09 P1).
+counted=$(grep -l '^status: signed-off' _acceptance/*/contract.md 2>/dev/null | wc -l | tr -d ' ')
+claimed=$(sed -n 's/.*\*\*\([0-9]\{1,\}\) hồ sơ đã ký\*\*.*/\1/p' STATUS.md | head -1)
+if [ -z "$claimed" ]; then
+    echo "FAIL: STATUS.md không khai số hồ sơ đã ký (cần dạng **<số> hồ sơ đã ký**)"; fails=$((fails + 1))
+elif [ "$claimed" != "$counted" ]; then
+    echo "FAIL: STATUS.md ghi $claimed hồ sơ đã ký, đếm trên cây được $counted"; fails=$((fails + 1))
+else
+    echo "OK: số hồ sơ đã ký khớp cây ($counted)"
+fi
 need STATUS.md 'Kế hoạch lát cắt chứng minh' 'STATUS.md trỏ vào khối kế hoạch'
 need STATUS.md 'plan:check' 'STATUS.md nêu lệnh xem tỉ lệ'
 need STATUS.md 'Phân vùng phiên' 'STATUS.md có nghi thức phân vùng phiên'
@@ -1285,6 +1364,109 @@ bash scripts/roadmap/check-roadmap-fresh.sh >/dev/null && echo "OK: guard sổ c
 [ "$fails" -eq 0 ] || { echo "❌ check-plan-docs: $fails phép kiểm hỏng"; exit 1; }
 echo "✅ check-plan-docs: tài liệu khớp kế hoạch"
 ```
+
+- [ ] **Step 1b: `scripts/roadmap/check-plan-docs-teeth.sh` — răng cho phép kiểm tài liệu**
+
+```bash
+#!/usr/bin/env bash
+# Teeth for check-plan-docs.sh (gap-probe 04/09 P1). Its red direction used to be a
+# single manual run during Task 4; a check whose red half lives in a plan document
+# rather than in a script is a check nobody will ever re-prove.
+#
+# Case `ho-so-thu-37` is the load-bearing one: it distinguishes "counts the tree"
+# from "greps a constant" — a grep-based check stays GREEN there.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+repo_root=$(pwd)
+checker="$repo_root/scripts/roadmap/check-plan-docs.sh"
+self="$repo_root/scripts/roadmap/check-plan-docs-teeth.sh"
+tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+
+CASES=(clean lui-ngay nhay-nguoc mat-dinh-vi ho-so-thu-37)
+is_case() { local n="$1" c; for c in "${CASES[@]}"; do [ "$c" = "$n" ] && return 0; done; return 1; }
+
+build_fixture() {
+  rm -rf "$tmp/t"; mkdir -p "$tmp/t/docs/strategy" "$tmp/t/_acceptance" "$tmp/t/scripts/roadmap"
+  cp "$repo_root/STATUS.md" "$tmp/t/STATUS.md"
+  cp "$repo_root/docs/roadmap.md" "$tmp/t/docs/roadmap.md"
+  cp "$repo_root/docs/strategy/vision.md" "$tmp/t/docs/strategy/vision.md"
+  cp -R "$repo_root/docs/adr" "$tmp/t/docs/adr"
+  cp "$repo_root/scripts/roadmap/check-roadmap-fresh.sh" "$repo_root/scripts/roadmap/roadmap-drift.mjs" "$tmp/t/scripts/roadmap/"
+  for d in "$repo_root"/_acceptance/*/; do
+    slug=$(basename "$d"); mkdir -p "$tmp/t/_acceptance/$slug"
+    [ -f "$d/contract.md" ] && cp "$d/contract.md" "$tmp/t/_acceptance/$slug/"
+    [ -f "$d/opportunity.md" ] && cp "$d/opportunity.md" "$tmp/t/_acceptance/$slug/"
+  done
+  return 0
+}
+run_checker() { local rc=0; PLAN_DOCS_ROOT="$tmp/t" bash "$checker" > "$tmp/out" 2>&1 || rc=$?; return $rc; }
+is_red()   { ! run_checker; }
+is_green() {   run_checker; }
+out_has()  { grep -Eq -- "$1" "$tmp/out"; }
+
+case_clean() { build_fixture; is_green || return 1; out_has 'số hồ sơ đã ký khớp cây'; }
+
+case_lui_ngay() {
+  build_fixture
+  sed -i '' 's/^## Hiện trạng (2026-09-04/## Hiện trạng (2026-08-17/' "$tmp/t/STATUS.md"
+  is_red || return 1; out_has 'FAIL: STATUS.md đề ngày 04/09'
+}
+
+case_nhay_nguoc() {
+  build_fixture
+  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+import sys, pathlib
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+i = s.index("**Đọc được gì từ tỉ lệ này")
+j = s.index("\n\n", i)
+p.write_text(s[:i] + s[i:j].replace("hạ tầng quy trình", "`hạ tầng quy trình`", 1) + s[j:], encoding="utf-8")
+PY
+  is_red || return 1; out_has 'đoạn tỉ lệ có nháy ngược'
+}
+
+case_mat_dinh_vi() {
+  build_fixture
+  grep -v '^## Định vị — bổ sung 04/09' "$tmp/t/docs/strategy/vision.md" > "$tmp/v" && mv "$tmp/v" "$tmp/t/docs/strategy/vision.md"
+  is_red || return 1; out_has 'vision.md có đoạn định vị ba tầng'
+}
+
+# THE LOAD-BEARING CASE. A 37th signed dossier appears and nobody updates STATUS.md.
+# A grep for the constant "36" stays green here; a count of the tree does not.
+case_ho_so_thu_37() {
+  build_fixture
+  mkdir -p "$tmp/t/_acceptance/zz-ho-so-thu-37"
+  printf -- '---\nschema_version: 1\nslug: zz-ho-so-thu-37\nrisk_tier: T2\nstatus: signed-off\n---\n' \
+    > "$tmp/t/_acceptance/zz-ho-so-thu-37/contract.md"
+  is_red || return 1
+  out_has 'STATUS.md ghi [0-9]+ hồ sơ đã ký, đếm trên cây được [0-9]+'
+}
+
+run_case() {
+  local name="$1" fn; fn="case_$(printf '%s' "$name" | tr '-' '_')"
+  if "$fn"; then echo "  ✓ CASE $name: PASS"; return 0; fi
+  echo "  ✗ CASE $name: FAIL"; return 1
+}
+refuse() { echo "check-plan-docs-teeth: $1" >&2; echo "case hợp lệ: ${CASES[*]}" >&2; exit 2; }
+
+ONE=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --list) printf '%s\n' "${CASES[@]}"; exit 0 ;;
+    --case) [ $# -ge 2 ] || refuse "\`--case\` cần một tên"; is_case "$2" || refuse "case lạ \`$2\`"; ONE="$2"; shift 2 ;;
+    *) refuse "tham số lạ \`$1\`" ;;
+  esac
+done
+if [ -n "$ONE" ]; then echo "→ răng tài liệu: case $ONE"; run_case "$ONE"; exit $?; fi
+
+echo "→ răng của check-plan-docs.sh"
+pass=0; fail=0
+for c in "${CASES[@]}"; do if run_case "$c"; then pass=$((pass+1)); else fail=$((fail+1)); fi; done
+echo
+[ "$fail" -eq 0 ] || { echo "❌ răng tài liệu: $pass đạt / $fail hỏng"; exit 1; }
+echo "✅ răng tài liệu: $pass/$pass case"
+```
+
+Run: `chmod +x scripts/roadmap/check-plan-docs-teeth.sh && bash scripts/roadmap/check-plan-docs-teeth.sh` → sau Step 4 phải xanh 5/5. (Trước Step 4, ca `clean` đỏ vì STATUS.md chưa sửa — đúng, đó là chiều đỏ của chính nó.)
 
 - [ ] **Step 2: Chạy → đỏ (STATUS/vision chưa sửa)**
 
@@ -1333,7 +1515,7 @@ hien_trang = """## Hiện trạng (2026-09-04, sau khi mở kế hoạch lát c�
 > File này giữ vai *đang ở đâu*; *làm gì tiếp* nằm ở **một chỗ duy nhất**: khối kế hoạch trong
 > [docs/roadmap.md](docs/roadmap.md) (mục "Kế hoạch lát cắt chứng minh").
 
-- **36 hồ sơ đã ký, tất cả trên `main`** (guard sổ cái xanh 36/36 @ `eb175ed`, 04/09). Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
+- **36 hồ sơ đã ký**, tất cả trên `main` (guard sổ cái xanh 36/36 @ `eb175ed`, 04/09). Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
 - **Định vị ba tầng** ghi ở [vision.md](docs/strategy/vision.md) (04/09): nền tảng đa mục đích → năm trụ cột → lát cắt. Skill #1 là lát cắt chứng minh đầu tiên, không phải định nghĩa sản phẩm.
 - **Đóng băng mở hạng mục mới** từ khi `lat-cat-chung-minh` merge tới khi 16/16 ★ và ≥ 85% dòng ✅. Xem tỉ lệ: `pnpm plan:check`. Ngoại lệ chỉ ba lý do: mất-dữ-liệu · bảo-mật · chặn-★.
 - **Máy dev đang cài 4 plugin:** `oneflow-api-ffmpeg`, `oneflow-api-openai` (phục vụ cả hai slot transcribe — S3 de facto xong), `oneflow-api-pyscenedetect`, `oneflow-modal-compose-overlay` (mắt Modal duy nhất còn lại trên chuỗi Skill #1 → B6).
@@ -1604,13 +1786,14 @@ Sau dòng `roadmap_teeth_duplicate: …` thêm (giữ 4 khoảng trắng đầu 
     lcm_teeth_o_moi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case o-moi-ngoai-ke-hoach"
     lcm_teeth_tick_noi_doi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case tick-noi-doi && bash scripts/roadmap/check-plan-freeze-teeth.sh --case tin-theo-loi"
     lcm_teeth_park: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-khong-that"
-    lcm_teeth_ngoai_le: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-tran"
+    lcm_teeth_ngoai_le: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-tran && bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-hop-le"
     lcm_teeth_go_bang: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case go-bang"
     lcm_teeth_checkpoint: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-note && bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-done"
     lcm_teeth_builtins: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case builtins-only"
-    lcm_teeth_kiem_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi"
+    lcm_teeth_kiem_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi && bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi-de-xuat"
     lcm_teeth_isolation: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case case-isolation"
     lcm_docs: "bash scripts/roadmap/check-plan-docs.sh"
+    lcm_docs_teeth: "bash scripts/roadmap/check-plan-docs-teeth.sh"
     lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh suite-keys && bash scripts/ci/check-gate-guards-job.sh teeth"
     lcm_pmap: "node scripts/ci/check-product-map.mjs && bash scripts/ci/check-product-map-teeth.sh --case parked-opportunity"
 ```
