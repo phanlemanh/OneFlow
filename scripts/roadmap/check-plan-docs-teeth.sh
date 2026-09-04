@@ -147,7 +147,13 @@ for c in "${CASES[@]}"; do
 done
 echo
 [ "$fail" -eq 0 ] || {
-    echo "❌ răng tài liệu: $pass đạt / $fail hỏng"
+    echo "❌ răng tài liệu: $pass đạt / $fail hỏng trên ${#CASES[@]} ca"
     exit 1
 }
-echo "✅ răng tài liệu: $pass/$pass case"
+# Mau so tu DO DAI MANG (S4 vong 1, cung lop hang-dung voi check-plan-freeze-teeth):
+# "$pass/$pass" bang nhau bang cau truc, nen no khong bao gio to duoc mot ca bi xoa.
+if [ "$pass" -ne "${#CASES[@]}" ]; then
+    echo "❌ răng tài liệu: chạy $pass ca nhưng mảng khai ${#CASES[@]} — có ca không chạy"
+    exit 1
+fi
+echo "✅ răng tài liệu: $pass/${#CASES[@]} case"

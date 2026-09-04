@@ -179,16 +179,23 @@ if (existsSync(ACCEPTANCE_DIR))
     }
 const isSigned = (slug) =>
     dossiers.get(slug)?.contract?.status === "signed-off";
-// "Open" = someone is working on it: a contract not yet signed, or an
-// opportunity still in discovery / decided build|iterate.
+
+// A dossier is CLOSED only when it says so in one of these exact ways. Everything
+// else — including a broken frontmatter, a capitalised `Discovery`, or a stage
+// nobody has heard of — counts as OPEN and reddens F1.
+//
+// The first version enumerated the OPEN states instead, and that is fail-OPEN:
+// three real strays (frontmatter missing its closing `---`, `stage: Discovery`,
+// `stage: prototype`) all read as "nothing there" and the guard exited 0 green.
+// Measured 2026-09-04 by the S4 adversarial review. The sibling checker
+// check-product-map.mjs had already learned this lesson in its own header.
+const OPP_CLOSED_DECISIONS = new Set(["park", "kill"]);
 function isOpen({ contract, opportunity }) {
     if (contract) return contract.status !== "signed-off";
-    if (opportunity)
-        return (
-            opportunity.stage === "discovery" ||
-            opportunity.decision === "build" ||
-            opportunity.decision === "iterate"
-        );
+    if (opportunity) {
+        if (opportunity.stage === "archived") return false;
+        return !OPP_CLOSED_DECISIONS.has(opportunity.decision ?? "");
+    }
     return false;
 }
 

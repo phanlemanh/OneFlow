@@ -26,6 +26,7 @@ CASES=(
   clean
   khoi-hong
   o-moi-ngoai-ke-hoach
+  o-moi-co-hoi-hong
   tick-noi-doi
   tin-theo-loi
   park-khong-that
@@ -115,16 +116,48 @@ case_clean() {
 }
 
 # AC-8. Block unreadable -> F0, fail-closed.
+# AC-8 is a CLASS of four: missing marker · missing header key · wrong column
+# count · state outside ⬜ ◐ ✅. Only the first was ever exercised (S4 round 1),
+# so the other three die() branches could have been misspelled, mis-regexed, or
+# exited 0 and the suite stayed green. Four shapes, four asserted messages.
 case_khoi_hong() {
-  build_fixture
-  python3 - "$tmp/t/docs/roadmap.md" <<'PY'
+  local shape
+  for shape in mat-marker thieu-khoa-header sai-so-cot trang-thai-la; do
+    build_fixture
+    if python3 - "$tmp/t/docs/roadmap.md" "$shape" <<'PY'
 import sys, pathlib
-p = pathlib.Path(sys.argv[1])
-p.write_text(p.read_text(encoding="utf-8").replace("<!-- plan-freeze:end -->", "", 1), encoding="utf-8")
+p, shape = pathlib.Path(sys.argv[1]), sys.argv[2]
+s = p.read_text(encoding="utf-8")
+if shape == "mat-marker":
+    s = s.replace("<!-- plan-freeze:end -->", "", 1)
+elif shape == "thieu-khoa-header":
+    s = s.replace(" · checkpoint: 2026-10-09", "", 1)
+elif shape == "sai-so-cot":
+    # Drop one separator from a data row: the row now has 5 cells, not 6.
+    i = s.index("<!-- plan-freeze:start -->")
+    j = s.index("| B1 |", i)
+    k = s.index("\n", j)
+    s = s[:j] + s[j:k].replace(" | ", " ", 1) + s[k:]
+else:
+    i = s.index("<!-- plan-freeze:start -->")
+    j = s.index("| B1 |", i)
+    k = s.index("\n", j)
+    row = s[j:k]
+    cells = [c.strip() for c in row.strip().strip("|").split("|")]
+    cells[4] = "X"
+    s = s[:j] + "| " + " | ".join(cells) + " |" + s[k:]
+p.write_text(s, encoding="utf-8")
 PY
-  guard_is_red || return 1
-  out_has 'VIOLATION \[plan-freeze\] F0' || return 1
-  out_has 'marker'
+    then :; else echo "    dung fixture $shape that bai — hang trong khoi da doi ten?" >&2; return 1; fi
+    guard_is_red || { echo "    hinh dang $shape van XANH — F0 khong fail-closed" >&2; return 1; }
+    out_has 'VIOLATION \[plan-freeze\] F0' || { echo "    $shape do nhung khong phai F0" >&2; return 1; }
+    case "$shape" in
+      mat-marker)        out_has 'marker' ;;
+      thieu-khoa-header) out_has 'header thiếu khoá' ;;
+      sai-so-cot)        out_has 'cột, cần' ;;
+      trang-thai-la)     out_has 'ngoài ⬜ ◐ ✅' ;;
+    esac || { echo "    $shape do nhung thong diep khong noi ro ca nao" >&2; return 1; }
+  done
 }
 
 # AC-2. A new working-state dossier whose slug is in none of the three tables.
@@ -134,6 +167,33 @@ case_o_moi_ngoai_ke_hoach() {
   guard_is_red || return 1
   out_has 'F1' || return 1
   out_has 'la-ngoai-ke-hoach mở ngoài kế hoạch'
+}
+
+# AC-2, nua bi bo sot (S4 vong 1, muc nang nhat). `stray_dossier` chi viet
+# contract.md, tuc chi di duong FAIL-CLOSED. Ho so CHI-CO-CO-HOI di duong khac, va
+# duong ay tung fail-OPEN: frontmatter hong / `Discovery` viet hoa / `stage` la deu
+# doc thanh "khong co gi" va guard thoat 0 xanh. Ba hinh dang, mot ca.
+case_o_moi_co_hoi_hong() {
+  local shape
+  for shape in fm-hong hoa-D stage-la; do
+    build_fixture
+    mkdir -p "$tmp/t/_acceptance/probe-$shape"
+    case "$shape" in
+      fm-hong)  printf -- '---\nschema_version: 1\nslug: probe-%s\nstage: discovery\n' "$shape" > "$tmp/t/_acceptance/probe-$shape/opportunity.md" ;;
+      hoa-D)    printf -- '---\nschema_version: 1\nslug: probe-%s\nstage: Discovery\n---\n' "$shape" > "$tmp/t/_acceptance/probe-$shape/opportunity.md" ;;
+      stage-la) printf -- '---\nschema_version: 1\nslug: probe-%s\nstage: prototype\ndecision:\n---\n' "$shape" > "$tmp/t/_acceptance/probe-$shape/opportunity.md" ;;
+    esac
+    guard_is_red || { echo "    hinh dang $shape van XANH — fail-open" >&2; return 1; }
+    out_has "probe-$shape mở ngoài kế hoạch" || { echo "    hinh dang $shape do nhung khong goi ten" >&2; return 1; }
+  done
+  # Chieu nguoc tren CUNG duong ma: mot co hoi da DONG (decision: park) khong bi
+  # F1 doi, va guard XANH. Khong co ve nay thi mot guard doi MOI thu muc co
+  # opportunity.md cung qua het ba hinh dang tren.
+  build_fixture
+  mkdir -p "$tmp/t/_acceptance/probe-da-park"
+  printf -- '---\nschema_version: 1\nslug: probe-da-park\nstage: decided\ndecision: park\n---\n' > "$tmp/t/_acceptance/probe-da-park/opportunity.md"
+  guard_is_green || { echo "    co hoi da park van bi doi — F1 qua rong" >&2; return 1; }
+  ! out_has 'probe-da-park'
 }
 
 # AC-3 red half. A slug row ticked ✅ while its contract is not signed off.
@@ -320,6 +380,16 @@ PY
 # AC-13. Builtins only, and refuses arguments (the CI teeth mode appends a junk
 # flag and requires a non-zero exit).
 case_builtins_only() {
+  # Positive control FIRST (S4 round 1): the assertion below is a negative one,
+  # and a negative assertion alone also passes when the pattern matches nothing
+  # — a typo in the regex, or a guard rewritten to require() — so prove the
+  # pattern still finds the imports we know are there before trusting its silence.
+  local n_import
+  n_import=$(grep -cE '^\s*import .* from ["'"'"']node:' "$guard" || true)
+  if [ "$n_import" -lt 1 ]; then
+    echo "    mau import khong khop dong nao trong guard — phep do nay dang do bong" >&2
+    return 1
+  fi
   if grep -E '^\s*import .* from ["'"'"']' "$guard" | grep -vE 'from ["'"'"']node:'; then
     echo "    guard imports a non-builtin module" >&2
     return 1
@@ -395,7 +465,14 @@ done
 
 echo
 if [ "$fail" -ne 0 ]; then
-  echo "❌ răng: $pass đạt / $fail hỏng — guard không đáng tin"
+  echo "❌ răng: $pass đạt / $fail hỏng trên ${#CASES[@]} ca — guard không đáng tin"
   exit 1
 fi
-echo "✅ răng: $pass/$pass case — mỗi case một mã thoát riêng"
+# Mau so lay tu DO DAI MANG, khong phai tu $pass. In "$pass/$pass" la mot hang dung:
+# no bang nhau du mang co bao nhieu ca, nen no khong bao gio noi duoc "thieu ca"
+# (S4 vong 1, lop hang-dung). Chenh lech giua hai so la mot ca chua chay.
+if [ "$pass" -ne "${#CASES[@]}" ]; then
+  echo "❌ răng: chạy $pass ca nhưng mảng khai ${#CASES[@]} — có ca không chạy"
+  exit 1
+fi
+echo "✅ răng: $pass/${#CASES[@]} case — mỗi case một mã thoát riêng"

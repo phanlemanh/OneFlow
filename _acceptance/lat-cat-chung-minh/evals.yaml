@@ -86,7 +86,7 @@ evals:
     cmd: config:executors.script.lcm_teeth_khoi_hong
     paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
     expected: >-
-      exit 0 và stdout `CASE khoi-hong: PASS` — thiếu marker → `VIOLATION [plan-freeze] F0` nhắc `marker`, fail-closed.
+      exit 0 và stdout `CASE khoi-hong: PASS` — bốn hình dạng F0 trên bốn fixture riêng (thiếu marker → `marker` · mất khoá `checkpoint:` → `header thiếu khoá` · bớt một dấu ngăn cột → `cột, cần` · trạng thái `X` → `ngoài ⬜ ◐ ✅`), mọi hình dạng đều `VIOLATION [plan-freeze] F0`, fail-closed.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9
@@ -108,7 +108,7 @@ evals:
     cmd: config:executors.script.plan_freeze_teeth_all
     paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
     expected: >-
-      exit 0 và dòng cuối `✅ răng: 15/15 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
+      exit 0 và dòng cuối `✅ răng: 16/16 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E11
@@ -117,7 +117,7 @@ evals:
     cmd: config:executors.script.lcm_pmap
     paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh", "PRODUCT-MAP.md", "_acceptance/director-v2/opportunity.md", "_acceptance/timeline-view/opportunity.md", "_acceptance/staleness-ho-so-thieu-paths/opportunity.md"]
     expected: >-
-      exit 0; stdout checker in `xếp lại sau: 3 hồ sơ, 3 mục trên bản đồ, nút mermaid 3` và `CASE parked-opportunity: PASS` (chiều đỏ: cơ hội park bị xếp vào "cân nhắc").
+      exit 0; checker in dòng đếm `xếp lại sau: 3` (cùng dòng với chờ phiên nghiệm thu · đang làm · chờ duyệt phạm vi) rồi `✅ PRODUCT-MAP.md khớp với _acceptance/`, và răng in `CASE parked-opportunity: PASS` (chiều đỏ: cơ hội park bị xếp vào "cân nhắc").
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E12
