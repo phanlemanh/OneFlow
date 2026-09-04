@@ -53,22 +53,22 @@ Mọi dòng dưới đây sẽ vào khối máy-đọc của `docs/roadmap.md` (
 
 | # | ★ | Hạng mục | slug | Cỡ | Tier | Vì sao ★ |
 |---|---|---|---|---|---|---|
-| B1 | ★ | Hồ sơ này: khối kế hoạch + luật đóng băng + guard; viết lại STATUS.md; đoạn định vị vào vision.md; sửa dòng S3 và dòng 211 của roadmap; park 3 cơ hội. *Hạng mục mới cuối cùng được nhận* | `lat-cat-chung-minh` | S | T2 | không có nó thì không có mẫu số |
-| B2 | ★ | Hạ cánh `b01/open-source-rebrand` (4 commit, 13 file: README ×3, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, `.github/*`, `desktop-release.yml`, `docker-compose.yml` → `ghcr.io/phanlemanh/oneflow`). Chạm `.github/**` và `docker-compose.yml` nên **không phải T1** — cần hồ sơ; merge lại `main` trước vì CLAUDE.md đã đổi 5 lần sau 26/08 | `mo-hoa-b01` | XS–S | T2 | U1 — đường cài đặt từ README phải trỏ đúng bản |
-| B3 | ★ | Hạ cánh D0 `director-wire-shape`: Cổng 2 (15 eval + E14b), mang ADR Director trường kỳ về `main` (`docs/adr/0013-*`), thêm mục "Làn D" vào roadmap; `director-v2` (D1/D2/D4) → park | `director-wire-shape` | M | T3 (`src/db/**`) | U2 — "xem/sửa kế hoạch" cần plan rời được server |
+| B1 | ★ | Hồ sơ này: khối kế hoạch + luật đóng băng + guard; viết lại STATUS.md; đoạn định vị vào vision.md; sửa dòng S3 và dòng 211 của roadmap; park 3 cơ hội; **mở cơ hội `skill-1-footage-kho-clip` ở `discovery` với U1–U8 mang `[đề xuất]`**. Vòng nội bộ: ngưỡng khai *Không đo được*, không có UAT riêng. *Hạng mục mới cuối cùng được nhận* | `lat-cat-chung-minh` | S | T2 | không có nó thì không có mẫu số |
+| B2 | ★ | Hạ cánh `b01/open-source-rebrand` (4 commit, 13 file: README ×3, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, `.github/*`, `desktop-release.yml`, `docker-compose.yml` → `ghcr.io/phanlemanh/oneflow`). Chạm `.github/**` và `docker-compose.yml` nên **không phải T1** — cần hồ sơ. **Code có trước hợp đồng → làn prototype của kit:** cơ hội khai `prototype.base_commit` + `disposition: keep` + bảng nợ kế thừa (Path · Giữ/Dựng lại · Chạm t3_paths?). Merge lại `main` trước vì CLAUDE.md đã đổi 5 lần sau 26/08 | `mo-hoa-b01` | XS–S | T2 | U1 — đường cài đặt từ README phải trỏ đúng bản |
+| B3 | ★ | Hạ cánh D0 `director-wire-shape`: hồ sơ đã `status: implemented` → feature-loop **resume thẳng S4 VERIFY** (15 eval + E14b), soi Gate 1.5 (T3) đã qua chưa; Cổng 2; mang ADR Director trường kỳ về `main` (`docs/adr/0013-*`), thêm mục "Làn D" vào roadmap; `director-v2` (D1/D2/D4) → park | `director-wire-shape` | M | T3 (`src/db/**`) | U2 — "xem/sửa kế hoạch" cần plan rời được server |
 | B4 | ★ | Engine dùng venv per-plugin như TS (`sdk/tongflow/engine/plugins.py:99` hiện dựng venv chung ngay tại root mà `plugin-python-env.server.ts:37` coi là root chứa nhiều venv con → `removeLegacySharedVenv()` xoá sạch); bỏ hai `return sys.executable` (dòng 227, 235); SDK 0.2.20; bump pin 4 plugin | `hai-duong-chay-mot-venv` | M | T3 (`sdk/**`) + train SDK | U6 chạy headless qua engine trên cùng máy sẽ kích vụ xoá venv |
 | B5 | ★ | Skill system v1 (1.5, ADR-0002): `src/lib/skills/` — manifest tham số (gộp D3), template ExecutableWorkflow, orchestrator v1 (instantiate → submit → gom kết quả; chưa judge/ma trận), nút skill + màn kết quả + "xem/sửa kế hoạch" mở canvas. **Bằng chứng nền tảng:** thêm một skill thứ hai giả lập (2 node) chỉ bằng manifest + template, không sửa dòng nào trong engine/compiler/exporter | `skill-system-v1` | L | T3 (`src/app/api/**`) | U2; nền tảng |
 | B6 | ★ | Port `oneflow-modal-compose-overlay` → `oneflow-api-compose-overlay` (Pillow + ffmpeg, cùng slot, đổi entry manifest như S2, guard đếm + 3 README + bullet CLAUDE.md); **kèm đường 9:16**: preset `tiktok-portrait` vẽ lên canvas 1080×1920 (pad/crop giữa). Quyết định owner 04/09: port thay vì giữ Modal; canvas trong plugin thay vì slot ABI `reframe-video` | `overlay-chay-local` | M | T2 | U8 — mắt Modal duy nhất còn lại; U3/U4 cần khung 9:16 |
 | B7 | ★ | Skill #1 (1.6): template nạp-từ-kho/upload → split-video → transcribe-timestamp → drop-video → [bỏ tiếng, tuỳ chọn] → compose-overlay (phụ đề + khung giá) → gom; tham số: giá, tên, ngôn ngữ, preset; test conformance headless | `skill-1-footage-kho-clip` | L | T3 (`src/lib/workflow/**`) | U2–U6 |
 | B8 | ★ | Director sinh instance: prompt → chọn skill + điền tham số (ADR-0002). **Được phép hạ xuống Should tại mốc 09/10** theo §6.3 | `director-sinh-instance` | M | T3 (`src/app/api/**`) | vế "agent là giao diện" |
 | B9 | ★ | Đo G0-WER trên corpus qua `oneflow-api-openai`; đo G1: 50 clip liên tiếp (U4), đổi giá → chỉ overlay chạy lại (U5), headless = canvas (U6); **bộ đo COGS đọc giá từ ảnh chụp catalog AI Gateway** commit trong `measure/` (§7); số vào `measure/` | `do-g0-g1-lat-cat` | M | T2 | U3–U7 |
-| B10 | ★ | Phiên UAT (`uat-session` của kit) với 3–5 người dùng đại diện trên máy trắng; phán quyết release/iterate/kill ghi vào hồ sơ `lat-cat-chung-minh`; đo luôn điều kiện đảo chiều ADR-0011 | — | S + lịch | — | U1, U7 |
+| B10 | ★ | **Cổng Giá trị của cơ hội `skill-1-footage-kho-clip`** — phiên UAT (`uat-session` của kit) với 3–5 người dùng đại diện trên máy trắng; phán quyết release/iterate/kill ghi `verdict` vào cơ hội ấy; đo luôn điều kiện đảo chiều ADR-0011. Không phải hồ sơ riêng; U2/U8 do B5/B6/B8 tạo ra nhưng **đo tại đây** — lát cắt là *một* bằng chứng | — | S + lịch | — | U1, U7 |
 
 ### 3.2 Làn A — chỉ owner làm được
 
 | # | ★ | Việc | Hạn |
 |---|---|---|---|
-| A1 | ★ | Ký ngưỡng G0: WER ≤ 10% · lỗi chữ số trên câu có giá = 0 · COGS ≤ $11 (g0-runbook §0) — 30 phút, **trước mọi phép đo** | tuần T5 (≤ 06/09) |
+| A1 | ★ | **Ký Cổng Đáng của cơ hội `skill-1-footage-kho-clip`**: gỡ tiền tố `[đề xuất]` ở U1–U8 và ba số G0 (WER ≤ 10% · lỗi chữ số trên câu có giá = 0 · COGS ≤ $11, g0-runbook §0), điền `decision: build`, `decided_by`, `decided_at` — 30 phút, **trước mọi phép đo**. Guard kiểm được dòng này qua ghi chú `kiểm: opportunity:skill-1-footage-kho-clip` (không còn tin theo lời) | tuần T5 (≤ 06/09) |
 | A2 | ★ | Chốt ngách (seller e-com ↔ BĐS) — chặn mẫu khung giá + chọn người UAT | T8 (≤ 27/09) |
 | A3 | ★ | Corpus: ≥ 10 clip × 60–90 s thực địa, mỗi clip có một lần đọc giá, + bản chép tay → `measure/wer-corpus/` (~3–4 giờ công) | T9 (≤ 04/10) |
 | A4 | ★ | Một lượt chạy thật + hoá đơn (COGS) | ngay khi B7 chạy được (T11) |
@@ -80,7 +80,7 @@ Mọi dòng dưới đây sẽ vào khối máy-đọc của `docs/roadmap.md` (
 
 | Hạng mục | slug | Ghi chú |
 |---|---|---|
-| Hạ cánh `fix/t1-escape-doi-hoi-artifact-ho-so` (2 commit, code sẵn) | `t1-escape-doi-hoi-artifact-ho-so` | vá lỗ cổng tự tắt khi PR chạm `_acceptance/` — đáng có *trong lúc* merge nhiều hồ sơ |
+| Hạ cánh `fix/t1-escape-doi-hoi-artifact-ho-so` (2 commit, code sẵn) | `t1-escape-doi-hoi-artifact-ho-so` | vá lỗ cổng tự tắt khi PR chạm `_acceptance/` — đáng có *trong lúc* merge nhiều hồ sơ; code có trước hợp đồng → làn prototype `disposition: keep` + bảng nợ kế thừa |
 | Đăng ký plugin `normalize-text-vi` (đóng lỗ 1.3) | `dang-ky-plugin-normalize-text-vi` | điều kiện: repo plugin phải tồn tại công khai — lý do rút 26/08 |
 | Ingest ngược về media-library (giai đoạn B, ADR-0012) | `ingest-nguoc-media-library` | ứng viên "iterate" sau UAT |
 
@@ -284,7 +284,8 @@ Thêm mục **"Định vị — bổ sung 04/09"** ngay sau "Một câu", nội 
 
 ### 8.4 Hồ sơ và bản đồ
 
-- `_acceptance/lat-cat-chung-minh/`: `opportunity.md` (Cổng Đáng: ngưỡng UAT = tám ô U; `decision: build`), `contract.md` (T2), `evals.yaml`, sau đó `evidence-report.md`.
+- `_acceptance/lat-cat-chung-minh/`: `opportunity.md` (vòng nội bộ — ngưỡng khai một dòng *Không đo được — việc nội bộ của bộ công cụ*; `decision: build`), `contract.md` (T2, không có section Đường đo), `evals.yaml`, `decisions.jsonl` (kèm entry `descope` mở đầu `"bỏ đặc-tả-UX — …"` theo luật kit 2.8.0 cho feature không chạm UI), `gap-probe.md` (phản biện context sạch, dispatch đồng bộ, 6 input), sau đó `evidence-report.md`.
+- `_acceptance/skill-1-footage-kho-clip/opportunity.md`: **cơ hội của lát cắt**, mở ở `stage: discovery` với tám ô U + ba số G0 mang tiền tố `[đề xuất]`; A1 = owner ký Cổng Đáng; B10 = Cổng Giá trị của chính nó. Hợp đồng B5/B6/B8 trỏ về cơ hội này trong Notes thay vì khai ngưỡng riêng.
 - `_acceptance/{director-v2, timeline-view, staleness-ho-so-thieu-paths}/opportunity.md`: `stage: decided`, `decision: park`. **`decided_by` / `decided_at` là trường người** — owner commit ba dòng đó trong một commit chỉ-trường-người, cùng nghi thức với chữ ký Cổng 2.
 - `PRODUCT-MAP.md`: sinh lại bằng generator của kit (3 ô "Đang cân nhắc" → "Xếp lại sau"); `scripts/ci/check-product-map.mjs` phải xanh.
 
@@ -305,7 +306,8 @@ Tier **T2** (chạm `scripts/roadmap/**`, `scripts/ci/**`, `.github/workflows/ci
 - AC-7: Given `PLAN_FREEZE_TODAY` sau `checkpoint` và không có `checkpoint_done`, When guard chạy, Then in NOTE mốc tái hoạch và **mã thoát không đổi**.
 - AC-8: Given khối thiếu marker, thiếu khoá header, hoặc có trạng thái ngoài `⬜ ◐ ✅`, When guard chạy, Then thoát 1 với mã F0 (fail-closed).
 - AC-9: Given `.github/workflows/ci.yml`, `scripts/ci/check-gate-guards-job.sh`, `_acceptance/config.yaml`, When chạy `check-gate-guards-job.sh` ở các mode `shape`, `reachable`, `suite-keys`, Then guard mới được nhận diện là một step có tên trong job `Acceptance Gate` và là một suite key.
-- AC-10: Given `check-plan-freeze-teeth.sh`, When chạy, Then cả sáu ca phá đều đỏ đúng mã và ca chiều ngược (AC-6) xanh; script tự in ca nào cố ý không đỏ (NOTE).
+- AC-10: Given `check-plan-freeze-teeth.sh`, When chạy, Then cả 13 case xanh (sáu ca phá đỏ đúng mã, ca chiều ngược AC-6 xanh, ca NOTE cố ý không đỏ), mỗi case một mã thoát; tên lạ bị từ chối exit 2.
+- AC-14: Given dòng A1 mang ghi chú `kiểm: opportunity:skill-1-footage-kho-clip` và đánh ✅ trong khi cơ hội ấy chưa có `decision` hoặc `decided_by`, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug cơ hội; Given cơ hội đã ký Cổng Đáng, Then A1 ✅ được nhận và không nằm trong "tin theo lời".
 - AC-11: Given ba cơ hội `director-v2`, `timeline-view`, `staleness-ho-so-thieu-paths` mang `decision: park` và `PRODUCT-MAP.md` sinh lại, When chạy `node scripts/ci/check-product-map.mjs`, Then xanh và bản đồ ghi 3 việc ở "Xếp lại sau".
 - AC-12: Given STATUS.md, vision.md, roadmap.md sau B1, When chạy `bash scripts/roadmap/check-roadmap-fresh.sh` và grep các con số (36 hồ sơ, ngày 04/09, đoạn định vị, dòng S3, dòng 211 không có nháy ngược), Then tất cả khớp.
 - AC-13: Given guard và teeth, When grep `import`/`require` và chạy guard trong một thư mục tạm **không có `node_modules`**, Then chỉ dùng `node:` builtins và vẫn chạy được.
@@ -327,6 +329,7 @@ Evals dự kiến: 12 `script` (fixture theo khuôn `check-roadmap-guard-teeth.s
 | R7 | Hai phiên một cây (đo 04/09) | nghi thức phân vùng vào STATUS.md |
 | R8 | b01 xung đột CLAUDE.md (5 lần sửa bullet manifest sau 26/08) | B2 merge `main` vào nhánh trước; giữ bullet ids theo `main` |
 | R9 | Guard sổ cái quét mọi `ADR-dddd` — nhắc ADR chưa có trên `main` có thể đỏ | B1 không nhắc số ADR Director; B3 làm |
+| R10 | Kit đang chạy là **2.8.0** (đo 04/09 qua `installed_plugins.json`), plugin cache giữ sáu bản; đọc nhầm bản cũ là chuyện đã xảy ra trong phiên này | mọi đường dẫn plugin qua `resolve-plugin.mjs`; STATUS.md ghi cả hai tầng phiên bản |
 
 Giả định đã nêu: T1 = tuần 03/08/2026; từ vựng kit `stage: discovery|decided|archived`, `decision: build|iterate|park|kill` (kit 2.7.0); `scripts/ci/check-gate-guards-job.sh` giữ danh sách guard bằng hằng số; job `Acceptance Gate` không cài `node_modules`.
 
@@ -341,3 +344,6 @@ Giả định đã nêu: T1 = tuần 03/08/2026; từ vựng kit `stage: discove
 7. Giữ T13 làm tuần đệm.
 8. Định vị ba tầng (nền tảng đa mục đích, tiếp cận được với bất kỳ ai) ghi vào vision.md; hồ sơ đổi tên `mot-tinh-nang-dung-duoc` → `lat-cat-chung-minh`.
 9. Vercel AI Gateway: ba chỉnh ở §7 — không vào đường ★, ảnh chụp giá cho B9, park plugin gateway với điều kiện mở.
+10. Thực thi theo nếp Acceptance-Gate Kit (feature-loop 2.8.0): S1 sinh contract + evals + gap-probe **trước** Gate 1, plan là S2; hồ sơ này **xin chữ ký Gate 1 thật** thay vì đường tự-đi-tiếp của T2, vì nó là luật ràng buộc chính owner.
+11. Năm chỉnh plan lớn theo kit: A1 = Cổng Đáng của cơ hội `skill-1-footage-kho-clip`; B10 = Cổng Giá trị của cơ hội ấy; B2 và S1 đi làn prototype keep; B1 khai *Không đo được*; B3 resume S4.
+12. Cơ hội duy nhất mang ngưỡng của lát cắt là `skill-1-footage-kho-clip`; B5/B6/B8 là đường B trỏ về nó.

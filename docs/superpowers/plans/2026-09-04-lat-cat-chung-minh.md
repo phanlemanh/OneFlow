@@ -21,7 +21,9 @@
 - Mỗi commit: Conventional Commits, tiếng Việt không dấu trong tiêu đề như các commit hiện có; message viết ra file rồi `git commit -F` (hook chặn nhầm `git commit -q -m` — xem memory). Không dùng cờ bỏ qua hook.
 - Comment trong code: **English only** (CLAUDE.md). Thông điệp guard in ra cho người: tiếng Việt, gọi đúng tên slug (luật N1–N6 của kit).
 - Trước mỗi commit chạm `scripts/**`: `pnpm lint:check` (Biome không quét `.mjs` ngoài `src/`? — vẫn chạy để chắc), và `bash scripts/acceptance/preflight-verify-env.sh` nếu định chạy vòng verify.
-- Owner làm hai việc người: ký Cổng 1 sau Task 7, và commit `decided_by` / `decided_at` cho ba cơ hội park (Task 1 chỉ điền `stage` + `decision`).
+- Owner làm ba việc người: **ký Cổng 1 sau Task 0** (quyết định §11 spec: hồ sơ này xin chữ ký thật, không đi đường tự-đi-tiếp của T2), ký Cổng Đáng của cơ hội `skill-1-footage-kho-clip` (= A1, bất kỳ lúc nào sau Task 0), và commit `decided_by` / `decided_at` cho ba cơ hội park (Task 1 chỉ điền `stage` + `decision`).
+- **Kit đang chạy: acceptance-gate 2.8.0 + feature-loop 2.8.0** (đo 04/09 qua `installed_plugins.json`). Không hardcode đường dẫn plugin cache — tìm bằng resolver: `RP=$(ls -d "$HOME"/.claude/plugins/cache/acceptance-gate-kit/feature-loop/*/scripts/resolve-plugin.mjs | sort -V | tail -1); AG=$(node "$RP" --plugin acceptance-gate --require scripts/product-map.mjs)` — in ra gốc bản đang cài, exit 1 nếu thiếu.
+- Luật 2.8.0 áp cho hồ sơ này: gap-probe dispatch **đồng bộ** với **6 input** (design doc, contract, evals, decisions, claims nếu có, opportunity); feature không chạm UI phải có entry `descope` mở đầu đúng chuỗi `"bỏ đặc-tả-UX — …"`; cơ hội nội bộ khai ngưỡng bằng **một dòng** `Không đo được — …`; `machine-cleared` chưa có đường ghi — vòng kết bằng `signed-off`.
 
 ---
 
@@ -29,6 +31,8 @@
 
 | File | Vai trò | Task |
 |---|---|---|
+| `_acceptance/lat-cat-chung-minh/{opportunity.md,contract.md,evals.yaml,decisions.jsonl,gap-probe.md}` | hồ sơ T2 (S1) — ngưỡng "Không đo được", 14 AC, gap-probe 6 input, thẻ Cổng 1 | 0 |
+| `_acceptance/skill-1-footage-kho-clip/opportunity.md` | cơ hội của lát cắt ở `discovery` với U1–U8 + ba số G0 mang `[đề xuất]`; A1 = owner ký Cổng Đáng | 0 |
 | `docs/roadmap.md` | khối `plan-freeze`, dòng S3, 1.5/1.6, đoạn 211, mục mới | 1 |
 | `_acceptance/{director-v2,timeline-view,staleness-ho-so-thieu-paths}/opportunity.md` | `stage: decided`, `decision: park` | 1 |
 | `scripts/roadmap/check-plan-freeze-teeth.sh` | răng: 12 case, mỗi case một mã thoát | 2 |
@@ -38,7 +42,362 @@
 | `docs/strategy/vision.md` · `STATUS.md` | định vị ba tầng · viết lại hiện trạng, con trỏ, nhãn nợ, nghi thức phân vùng | 4 |
 | `scripts/ci/check-product-map.mjs` · `scripts/ci/check-product-map-teeth.sh` · `PRODUCT-MAP.md` | ô "Xếp lại sau" theo `decision`, ô rỗng không heading; case `parked-opportunity`; sinh lại bản đồ | 5 |
 | `.github/workflows/ci.yml` · `scripts/ci/check-gate-guards-job.sh` · `_acceptance/config.yaml` | hai step mới; needle + skip + perturb; khoá executor + suite key | 6 |
-| `_acceptance/lat-cat-chung-minh/{opportunity.md,contract.md,evals.yaml,decisions.jsonl}` | hồ sơ T2 | 7 |
+| (không file mới) | kiểm toàn cục, re-pin, PR, bàn giao Cổng 2 | 7 |
+
+---
+
+### Task 0: Hồ sơ S1 — contract + evals + cơ hội của lát cắt, gap-probe, thẻ Cổng 1
+
+**Files:**
+- Create: `_acceptance/lat-cat-chung-minh/opportunity.md`, `contract.md`, `evals.yaml`, `decisions.jsonl`, `gap-probe.md` (máy sinh ở Step 6)
+- Create: `_acceptance/skill-1-footage-kho-clip/opportunity.md`
+
+**Interfaces:**
+- Consumes: design doc `docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md`; các khoá executor `lcm_*` sẽ được Task 6 khai (evals tham chiếu `config:` — hợp lệ ở S1 dù khoá chưa tồn tại; S4 mới chạy).
+- Produces: hồ sơ `status: draft` chờ Cổng 1; cơ hội lát cắt `stage: discovery` chờ Cổng Đáng (A1). Sau Task 0, **feature-loop S1 kết thúc**; Task 1–7 là S3.
+
+- [ ] **Step 1: `_acceptance/lat-cat-chung-minh/opportunity.md`**
+
+```markdown
+---
+schema_version: 1
+slug: lat-cat-chung-minh
+feature: Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard
+owner: phanlemanh@gmail.com
+stage: decided
+decision: build
+decided_by: Phan Le Manh
+decided_at: 2026-09-04T00:00:00Z
+prototype:
+  base_commit:
+  disposition: archive
+---
+
+## Vấn đề & ai gặp
+
+Owner (04/09): bốn nguồn kế hoạch (roadmap, STATUS.md, hồ sơ, nhánh) kể bốn chuyện; STATUS.md
+đề ngày 17/08 ghi 17 hồ sơ trong khi 36 đã ký; hơn một chục hồ sơ/nợ được đặt tên rồi không ai
+mở; 7 nhánh treo; một ADR chấp nhận 26/08 chưa về main. Trong 15 hồ sơ ký từ 27/08, 7 là hạ
+tầng quy trình. Cỗ máy đã có, chưa có tính năng nào người dùng dùng được. Bằng chứng: phiên
+điều tra 04/09, §1 của thiết kế.
+
+## Giả định chốt sinh tử
+
+| # | Giả định | Nếu sai thì | Phép thử rẻ nhất | Trạng thái |
+|---|---|---|---|---|
+| 1 | Một khối máy-đọc duy nhất + guard trong CI đủ để ba tài liệu ngừng trôi | STATUS/roadmap lại lệch trong 2 tuần | check-plan-docs.sh + tỉ lệ in mỗi lần CI | Chưa thử |
+| 2 | Đóng băng có răng không làm nghẹt sửa lỗi thật | ngoại lệ mất-dữ-liệu/bảo-mật không mở được | case ngoai-le-tran chiều xanh (lý do hợp lệ) | Chưa thử |
+| 3 | Băng tan được khi đủ ★ | guard thành khoá vĩnh viễn | case go-bang | Chưa thử |
+
+## Ngưỡng chết / ngưỡng UAT
+
+Không đo được — việc nội bộ của bộ công cụ, không có người dùng cuối; giá trị của nó đo qua Cổng Giá trị của cơ hội skill-1-footage-kho-clip (lát cắt), không phải qua hồ sơ này.
+
+## Cổng 0
+
+- **decision = build.** Căn cứ: quyết định owner 04/09 (§11 thiết kế); hạng mục mới cuối cùng trước băng.
+- **disposition = archive.** Không có prototype — hồ sơ hạ tầng quy trình.
+- **Ngưỡng UAT chốt cùng lúc ký:** Không đo được (dòng trên).
+
+## Out of scope từ khám phá
+
+- Hạ cánh D0, b01, B4–B10 — mỗi cái một hồ sơ riêng theo khối kế hoạch.
+- Sửa `scripts/pre-merge-check.sh` (đường vendor); chặn nhánh hay plan nháp.
+- Mục "Làn D" và số ADR Director trong roadmap — việc của B3.
+```
+
+- [ ] **Step 2: `_acceptance/lat-cat-chung-minh/contract.md`**
+
+```markdown
+---
+schema_version: 1
+feature: Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard
+slug: lat-cat-chung-minh
+owner: phanlemanh@gmail.com
+risk_tier: T2
+surfaces: [cli, docs]
+status: draft
+approved_by:
+approved_at:
+design_doc: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
+---
+
+# Acceptance Contract: lat-cat-chung-minh
+
+## Context
+
+Bốn nguồn kế hoạch của repo trôi khỏi nhau và hạng mục mới mở nhanh hơn hạng mục đóng (đo
+04/09, §1 thiết kế). Hồ sơ này đặt một khối kế hoạch máy-đọc vào docs/roadmap.md, một luật đóng
+băng có răng trong job Acceptance Gate, park ba cơ hội, mở cơ hội của lát cắt để owner ký
+ngưỡng, và đưa STATUS.md / vision.md về đúng sự thật. Đây là hạng mục mới cuối cùng được nhận
+trước băng.
+
+Source input: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
+
+## Criteria
+
+- AC-1: Given docs/roadmap.md có khối plan-freeze, When guard đọc, Then đếm được đúng 20 dòng kế hoạch, 16 dòng ★, ba bảng, và header đủ bốn khoá plan/opened/unlock/checkpoint.
+- AC-2: Given một thư mục `_acceptance/<slug>/` mới ở trạng thái mở (contract chưa signed-off, hoặc opportunity discovery/build/iterate) với slug ngoài ba bảng, When guard chạy trước gỡ băng, Then thoát 1 với `VIOLATION [plan-freeze] F1: <slug> mở ngoài kế hoạch`.
+- AC-3: Given một dòng có slug đánh ✅ mà contract chưa signed-off, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug; và Given một dòng slug `—` không mang chỉ dẫn kiểm đánh ✅, Then guard không đỏ nhưng in dòng đó trong danh sách "tin theo lời".
+- AC-4: Given một slug ở bảng Xếp lại sau có thư mục mà opportunity.md không mang `decision: park`, When guard chạy, Then thoát 1 với mã F3 nêu đúng slug.
+- AC-5: Given một dòng Ngoại lệ với lý do ngoài {mất-dữ-liệu, bảo-mật, chặn-★} hoặc thiếu ngày/ai quyết, When guard chạy, Then thoát 1 với mã F4.
+- AC-6: Given mọi dòng ★ ✅ và ≥ 85% dòng ✅ với contract của mọi slug ★ signed-off, When guard chạy, Then in `GỠ BĂNG`, thoát 0, và một thư mục mở ngoài kế hoạch không còn làm guard đỏ.
+- AC-7: Given `PLAN_FREEZE_TODAY` sau ngày checkpoint và header không có `checkpoint_done`, When guard chạy, Then in NOTE mốc tái hoạch và mã thoát không đổi; Given có `checkpoint_done`, Then không in NOTE.
+- AC-8: Given khối thiếu marker, thiếu khoá header, sai số cột, hoặc trạng thái ngoài ⬜ ◐ ✅, When guard chạy, Then thoát 1 với mã F0 — fail-closed.
+- AC-9: Given ci.yml, check-gate-guards-job.sh và config.yaml sau đấu dây, When chạy check-gate-guards-job.sh ở các mode shape, reachable, suite-keys, teeth, Then guard mới là một step có tên trong job Acceptance Gate, là một suite key, và mode teeth chứng minh nó đỏ trên cây đã phá.
+- AC-10: Given check-plan-freeze-teeth.sh, When chạy toàn bộ, Then 13/13 case xanh, mỗi case một mã thoát và một token `CASE <tên>: PASS`; tên case lạ bị từ chối exit 2; `--selftest-fail` in FAIL.
+- AC-11: Given ba cơ hội director-v2, timeline-view, staleness-ho-so-thieu-paths mang `decision: park` và PRODUCT-MAP.md sinh lại, When chạy check-product-map.mjs và case răng parked-opportunity, Then checker xanh với ô "Xếp lại sau" = 3 và case răng đỏ đúng chỗ.
+- AC-12: Given STATUS.md, vision.md, roadmap.md sau hồ sơ này, When chạy check-plan-docs.sh, Then mọi phép kiểm OK (ngày 04/09, 36 hồ sơ, con trỏ, phân vùng phiên, đoạn định vị, S3 de facto, 1.5→B5, 1.6→B7, đoạn tỉ lệ 16/36 không nháy ngược, không ADR-0013) và guard sổ cái xanh.
+- AC-13: Given guard và teeth, When grep import và chạy guard trong thư mục không có node_modules, Then chỉ dùng `node:` builtins, vẫn chạy được, và guard từ chối tham số lạ với exit 2.
+- AC-14: Given dòng A1 mang ghi chú `kiểm: opportunity:skill-1-footage-kho-clip` và đánh ✅ trong khi opportunity ấy chưa có `decision` hoặc chưa có `decided_by`, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug cơ hội; Given cơ hội đã ký Cổng Đáng, Then A1 ✅ được nhận mà không vào danh sách "tin theo lời".
+
+## Coverage
+
+- Trục phán quyết: F0 · F1 · F2 (contract) · F2 (opportunity — kiểm A1) · F3 · F4 [thước CE: mỗi phán quyết một case đỏ + case chiều ngược cho F1 (go-bang) và F2 (tin-theo-loi)]
+- Trục vòng đời: đóng băng · gỡ băng · mốc tái hoạch · đóng kế hoạch (`closed:` — chưa có case, ghi Known limits)
+- Trục đấu dây: step CI · needle guard-của-guard · suite key local · bản đồ sản phẩm
+- Trục tài liệu: roadmap · STATUS.md · vision.md · ba opportunity park · cơ hội lát cắt
+
+## Out of scope
+
+- Không hạ cánh D0, b01, các hồ sơ B4–B10; không mở hồ sơ Should.
+- Không sửa scripts/pre-merge-check.sh; không chặn nhánh hay docs/superpowers/plans.
+- Không phân loại lại cột "Vị trí trên lộ trình" của sổ cái; không thêm mục "Làn D".
+- Không kiểm `closed:` bằng răng; không kiểm B10 qua `verdict` (dòng B10 tin theo lời).
+- `decided_by`/`decided_at` của ba cơ hội park do owner điền trong commit chỉ-trường-người.
+
+## Notes
+
+- Hồ sơ nội bộ: ngưỡng khai `Không đo được` nên không có section Đường đo; giá trị của lát cắt đo tại Cổng Giá trị của `skill-1-footage-kho-clip`.
+- Thiết kế §5 định nghĩa hình dạng khối; §6.3 luật tái hoạch 09/10; §7 quyết định về Vercel AI Gateway (không vào đường ★).
+- Guard sổ cái quét mọi `ADR-\d{4}` trong roadmap: khối kế hoạch không nhắc số ADR chưa có trên main.
+```
+
+- [ ] **Step 3: `_acceptance/lat-cat-chung-minh/evals.yaml`**
+
+```yaml
+schema_version: 1
+feature_slug: lat-cat-chung-minh
+
+# T2, mười bốn tiêu chí, lớp script + tài liệu. Không (cross-layer). Mỗi case răng một khoá
+# executor riêng (bài học stale_scope_* / roadmap_teeth_*): case chưa cài và case đã qua
+# không được trông giống nhau sau một mã thoát.
+
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.lcm_teeth_clean
+    paths: ["docs/roadmap.md", "scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE clean: PASS`. Ca này đòi dòng tỉ lệ có dạng `★ a/16 · tổng c/20`
+      trên cây thật — một guard in 0/0 cũng xanh nhưng không qua được ca này.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.lcm_teeth_o_moi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout `CASE o-moi-ngoai-ke-hoach: PASS` — guard đỏ F1 và gọi đúng slug lạ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.lcm_teeth_tick_noi_doi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout có cả `CASE tick-noi-doi: PASS` lẫn `CASE tin-theo-loi: PASS` — chiều đỏ F2 và chiều tin-theo-lời.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.lcm_teeth_park
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/timeline-view/opportunity.md"]
+    expected: exit 0 và stdout `CASE park-khong-that: PASS`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.lcm_teeth_ngoai_le
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout `CASE ngoai-le-tran: PASS`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.lcm_teeth_go_bang
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE go-bang: PASS` — ca chiều ngược: 16/16 ★ + 20/20 → `GỠ BĂNG`, và
+      hồ sơ lạ không còn làm đỏ. Đây là ca chịu lực: không có nó, một guard khoá vĩnh viễn qua
+      mọi ca khác.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.lcm_teeth_checkpoint
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout có `CASE checkpoint-note: PASS` và `CASE checkpoint-done: PASS` — NOTE không đổi mã thoát; checkpoint_done tắt NOTE.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.lcm_teeth_khoi_hong
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout `CASE khoi-hong: PASS` — thiếu marker → F0, fail-closed.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.lcm_wiring
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "_acceptance/config.yaml", "scripts/roadmap/check-plan-freeze.mjs"]
+    expected: >-
+      exit 0; stdout của mode shape nêu cả hai guard nằm trong job; mode teeth in
+      `lệnh dưới phép thử … check-plan-freeze.mjs` và không FAIL — tức guard đỏ trên cây đã
+      phá (hồ sơ teeth-probe-freeze) và xanh trên cây lành.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.plan_freeze_teeth_all
+    paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
+    expected: exit 0 và dòng cuối `✅ răng: 13/13 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối, selftest-fail in FAIL).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.lcm_pmap
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh", "PRODUCT-MAP.md", "_acceptance/director-v2/opportunity.md", "_acceptance/timeline-view/opportunity.md", "_acceptance/staleness-ho-so-thieu-paths/opportunity.md"]
+    expected: exit 0; stdout checker in `xếp lại sau: 3 hồ sơ, 3 mục trên bản đồ, nút mermaid 3` và `CASE parked-opportunity: PASS`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.lcm_docs
+    paths: ["STATUS.md", "docs/strategy/vision.md", "docs/roadmap.md", "scripts/roadmap/check-plan-docs.sh"]
+    expected: exit 0 và dòng cuối `✅ check-plan-docs: tài liệu khớp kế hoạch`, không dòng `FAIL:` nào.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.lcm_teeth_builtins
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: exit 0 và stdout `CASE builtins-only: PASS` — chỉ import `node:`; cờ rác → exit 2 kèm "không nhận tham số".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.lcm_teeth_kiem_co_hoi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/skill-1-footage-kho-clip/opportunity.md"]
+    expected: exit 0 và stdout `CASE kiem-co-hoi: PASS` — A1 ✅ khi cơ hội chưa ký Cổng Đáng → F2 nêu `skill-1-footage-kho-clip`; cơ hội đã ký → xanh và A1 không nằm trong "tin theo lời".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: J1
+    criterion: AC-2
+    executor: judgment
+    rubric: >-
+      Đọc stdout/stderr của guard ở các ca F1–F4 (trong evidence của E2, E4, E5, E3): mỗi thông
+      điệp gọi đúng tên slug, nói THỨ gì sai và VIỆC gì phải làm (thêm Ngoại lệ / park / ký),
+      không dùng mã lỗi trần thay câu người (luật N1–N6 của kit). PASS nếu cả bốn đạt.
+    evidence_required: [run_id, verifier, verified_at, output]
+```
+
+- [ ] **Step 4: `_acceptance/lat-cat-chung-minh/decisions.jsonl` (ba entry)**
+
+```jsonl
+{"at":"2026-09-04T12:00:00Z","id":"d-20260904T120000Z-lcm1","type":"descope","stage":"S1","decision":"[khong kiem closed: bang rang] Khoa header `closed:` co trong guard de ket thuc ke hoach ma khong go guard, nhung chua co case rang — ghi Known limits, khong phai AC. Ly do: ke hoach chua ket thuc, mot case chua co du lieu that de doi chieu."}
+{"at":"2026-09-04T12:05:00Z","id":"d-20260904T120500Z-lcm2","type":"descope","stage":"S1","decision":"[decided_by/at la truong nguoi] Ba co hoi park chi nhan stage/decision tu may; decided_by va decided_at do owner commit rieng, cung nghi thuc chu ky Cong 2. Guard F3 chi doc decision nen khong phu thuoc hai truong nay."}
+{"at":"2026-09-04T12:10:00Z","id":"d-20260904T121000Z-lcm3","type":"descope","stage":"S1","decision":"bỏ đặc-tả-UX — hồ sơ chạm cli và docs, không có bề mặt UI nào; khuôn ux-spec-template không áp dụng","impact":"không có gì để soi ở Cổng 1 về UI — đúng bản chất hồ sơ hạ tầng quy trình"}
+```
+
+- [ ] **Step 5: `_acceptance/skill-1-footage-kho-clip/opportunity.md` — cơ hội của lát cắt, chờ Cổng Đáng (A1)**
+
+```markdown
+---
+schema_version: 1
+slug: skill-1-footage-kho-clip
+feature: Skill #1 Footage → kho clip 9:16 — lát cắt chứng minh đầu tiên của nền tảng
+owner: phanlemanh@gmail.com
+stage: discovery
+decision:
+decided_by:
+decided_at:
+prototype:
+  base_commit:
+  disposition:
+---
+
+## Vấn đề & ai gặp
+
+Người bán hàng hoặc môi giới có livestream / tour quay điện thoại nhưng không có clip 9:16 có
+phụ đề và khung giá đúng để đăng. Hôm nay OneFlow có đủ mắt xích (split, transcribe, overlay)
+nhưng phải tự nối 6–7 node và cần tài khoản Modal cho overlay. Bằng chứng: phiên điều tra
+04/09 (§1 thiết kế lat-cat-chung-minh), feature-index 17/08.
+
+## Giả định chốt sinh tử
+
+| # | Giả định | Nếu sai thì | Phép thử rẻ nhất | Trạng thái |
+|---|---|---|---|---|
+| 1 | Người dùng đại diện tự nhập được key (ADR-0011) | managed quay lại làm mặc định (Phase 2) | phiên UAT, đếm ≥ 2/3 | Chưa thử |
+| 2 | WER thực địa ≤ 10% qua đường API hiện có | wedge chuyển sang phụ đề có bước sửa tay | B9 trên corpus A3 | Chưa thử |
+| 3 | Đổi giá chỉ chạy lại overlay (cache tầng B giữ transcribe) | lời hứa "sửa rẻ" không đứng | telemetry cache_calls_* ở G1 | Chưa thử |
+
+## Ngưỡng chết / ngưỡng UAT
+
+- Câu hỏi phép đo trả lời: [đề xuất] một người dùng đại diện, không phải tác giả, trên máy trắng, có đưa footage vào và nhận về kho clip 9:16 đúng phụ đề đúng giá, và đổi giá mà chỉ overlay chạy lại không?
+- Kết quả nào là SỐNG: [đề xuất] U1 cài + tự nhập key ≤ 30 phút, ≥ 2/3 người tự làm được · U2 một nút · U3 WER ≤ 10% và lỗi token chữ số trên câu có giá = 0 · U4 50 clip liên tiếp không lỗi dấu/giá · U5 đổi giá → chỉ overlay + merge chạy lại · U6 headless = canvas · U7 COGS ≤ $11/seller/tháng · U8 không cần Modal
+- Kết quả nào là CHẾT: [đề xuất] < 1/3 người tự nhập được key (đảo chiều ADR-0011) · WER > 15% (vùng chết hội đồng) · đổi giá làm transcribe chạy lại
+- Timebox: [đề xuất] UAT trước 11.11.2026 (T14); tái hoạch 09/10 theo §6.3 thiết kế lat-cat-chung-minh
+
+## Cổng 0
+
+- **decision = …** Căn cứ: … (owner điền khi ký — đây là A1 của khối kế hoạch; gỡ tiền tố [đề xuất] ở ba bullet trên là chốt ngưỡng)
+- **disposition = archive.** Không có prototype trước hợp đồng.
+- **Ngưỡng UAT chốt cùng lúc ký:** ba bullet trên sau khi gỡ [đề xuất].
+
+## Out of scope từ khám phá
+
+- TTS/lồng tiếng (1.4), ingest ngược về media-library (Should S3), Skill #2, judge.
+- Bộ nhớ Director (D1–D4, park).
+```
+
+- [ ] **Step 6: claim-scan + gap-probe đồng bộ (bước mặc định T2 của kit 2.8.0)**
+
+Run (resolver, không hardcode):
+```bash
+RP=$(ls -d "$HOME"/.claude/plugins/cache/acceptance-gate-kit/feature-loop/*/scripts/resolve-plugin.mjs | sort -V | tail -1)
+FL=$(node "$RP" --plugin feature-loop --require scripts/claim-scan.mjs)
+node "$FL/scripts/claim-scan.mjs" --root . --slug lat-cat-chung-minh > "$TMPDIR/claims-lat-cat-chung-minh.md"; echo "exit=$?"; wc -c "$TMPDIR/claims-lat-cat-chung-minh.md"
+```
+Rồi dispatch **một** subagent context sạch (Agent tool, `run_in_background: false`) với đúng các input: design doc, `contract.md`, `evals.yaml`, `decisions.jsonl`, file claims (nếu không rỗng), `opportunity.md` — **cấm** đưa hội thoại, cấm đọc code repo. Prompt giữ đủ 7 ý của kit (giả định có thiếu sót; chỉ lỗ làm feature fail acceptance hoặc Gate 1 duyệt sai; mỗi finding 4 trường artifact · kịch bản fail · severity · thước đo; cross-check AC↔eval, GWT không đo được, trục Coverage không có AC, lớp đo-lường; cap 5; `clean` hợp lệ; không lật entry đã seal/descope; claim là advisory, cite `[id]`). Ghi `_acceptance/lat-cat-chung-minh/gap-probe.md` với frontmatter `slug / at / verdict: clean|findings|probe-failed / p0 / p1 / p2` và bảng `| Sev | Artifact | Thiếu gì | Kịch bản fail | Thước đo | Xử lý |`. **Định đoạt từng finding** vào cột Xử lý: P0 = sửa artifact ngay hoặc `human-gate1`; P1/P2 = `fixed:` | `deferred:` | `rejected:`. One-pass, không re-probe.
+
+- [ ] **Step 7: Commit hồ sơ S1**
+
+```bash
+cat > /tmp/lcm-msg.txt <<'EOF'
+chore(acceptance): mo ho so lat-cat-chung-minh (S1) — contract T2 14 AC, evals, gap-probe; mo co hoi skill-1 cho Cong Dang
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+EOF
+git add _acceptance/lat-cat-chung-minh _acceptance/skill-1-footage-kho-clip
+git commit -F /tmp/lcm-msg.txt
+```
+
+- [ ] **Step 8: Render thẻ Cổng 1 và DỪNG chờ owner**
+
+Invoke skill `acceptance-gate:acceptance-card` với args `lat-cat-chung-minh`. Đây là **điểm dừng người** theo quyết định owner (§11 spec) — không đi đường tự-đi-tiếp dù T2 đủ điều kiện. Owner duyệt → contract `status: approved`, `approved_by`, `approved_at`, seal entry vào decisions.jsonl. Cùng lúc owner có thể ký Cổng Đáng của `skill-1-footage-kho-clip` (= A1): gỡ `[đề xuất]`, điền `decision: build`, `decided_by`, `decided_at`, `stage: decided`.
 
 ---
 
@@ -100,24 +459,24 @@ Chèn nguyên khối sau (kết thúc bằng một dòng trống trước `## Ph
 plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=85% · checkpoint: 2026-10-09
 | # | ★ | Hạng mục | slug | Trạng thái | Ghi chú |
 |---|---|---|---|---|---|
-| B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap | lat-cat-chung-minh | ◐ | hạng mục mới cuối cùng được nhận |
-| B2 | ★ | Hạ cánh nhánh mở hoá b01: README x3, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ⬜ | merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
-| B3 | ★ | Hạ cánh D0 Director wire-shape: Cổng 2, ADR Director trường kỳ về main, mục Làn D | director-wire-shape | ⬜ | T3 (src/db); director-v2 D1/D2/D4 đã park |
+| B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap; mở cơ hội của lát cắt | lat-cat-chung-minh | ◐ | hạng mục mới cuối cùng được nhận; vòng nội bộ, ngưỡng Không đo được |
+| B2 | ★ | Hạ cánh nhánh mở hoá b01: README x3, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ⬜ | code có trước hợp đồng → cơ hội khai prototype keep + bảng nợ kế thừa; merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
+| B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, ADR Director trường kỳ về main, mục Làn D | director-wire-shape | ⬜ | T3 (src/db), soi Gate 1.5 đã qua chưa; director-v2 D1/D2/D4 đã park |
 | B4 | ★ | Engine dùng venv per-plugin như TS, bỏ fallback về sys.executable; SDK 0.2.20 + bump pin 4 plugin | hai-duong-chay-mot-venv | ⬜ | T3 (sdk) + train SDK; sau A6 |
 | B5 | ★ | Skill system v1: manifest tham số, template, orchestrator v1, nút skill, xem/sửa kế hoạch; skill thứ hai giả lập không đụng engine | skill-system-v1 | ⬜ | T3 (src/app/api); nền tảng |
 | B6 | ★ | Overlay chạy local (port khỏi Modal, cùng slot) kèm canvas 9:16 pad/crop | overlay-chay-local | ⬜ | T2; sau A7 |
 | B7 | ★ | Skill #1 Footage → kho clip 9:16: nạp/upload → split → transcribe-timestamp → drop → overlay phụ đề + giá → gom; conformance headless | skill-1-footage-kho-clip | ⬜ | T3 (src/lib/workflow) |
 | B8 | ★ | Director sinh instance skill từ prompt | director-sinh-instance | ⬜ | T3; có thể hạ Should ở mốc 09/10 |
 | B9 | ★ | Đo G0 (WER, COGS từ ảnh chụp giá) và G1 (50 clip, đổi giá chỉ overlay chạy lại, headless = canvas) | do-g0-g1-lat-cat | ⬜ | T2; chờ A1, A3 |
-| B10 | ★ | Phiên UAT với 3–5 người dùng đại diện trên máy trắng; phán quyết release/iterate/kill | — | ⬜ | làn A + B; chờ A2, A5 |
-| A1 | ★ | Ký ngưỡng G0: WER ≤ 10%, lỗi chữ số trên câu có giá = 0, COGS ≤ $11 | — | ⬜ | làn A · T5 |
+| B10 | ★ | Cổng Giá trị của cơ hội skill-1-footage-kho-clip: phiên UAT (uat-session) với 3–5 người dùng đại diện trên máy trắng; phán quyết release/iterate/kill | — | ⬜ | làn A + B; chờ A2, A5; ✅ khi cơ hội có verdict |
+| A1 | ★ | Ký Cổng Đáng của cơ hội skill-1-footage-kho-clip: gỡ [đề xuất] ở U1–U8 và ba số G0 (WER ≤ 10%, lỗi chữ số = 0, COGS ≤ $11) | — | ⬜ | làn A · T5 · kiểm: opportunity:skill-1-footage-kho-clip |
 | A2 | ★ | Chốt ngách seller e-com hay BĐS | — | ⬜ | làn A · T8 |
 | A3 | ★ | Corpus ≥ 10 clip thực địa + bản chép tay vào measure/wer-corpus | — | ⬜ | làn A · T9 |
 | A4 | ★ | Một lượt chạy thật + hoá đơn | — | ⬜ | làn A · T11 |
 | A5 | ★ | Tuyển 3–5 người dùng đại diện cho UAT | — | ⬜ | làn A · T13 |
 | A6 |  | Thu hồi token PyPI toàn tài khoản, cấp lại project-scoped | — | ⬜ | làn A · T6, trước B4 |
 | A7 | ★ | Tạo repo public oneflow-api-compose-overlay | — | ⬜ | làn A · T8, trước B6 |
-| S1 |  | Hạ cánh fix t1-escape đòi artifact hồ sơ (2 commit sẵn) | t1-escape-doi-hoi-artifact-ho-so | ⬜ | Should |
+| S1 |  | Hạ cánh fix t1-escape đòi artifact hồ sơ (2 commit sẵn) | t1-escape-doi-hoi-artifact-ho-so | ⬜ | Should; code có trước hợp đồng → prototype keep + bảng nợ kế thừa |
 | S2 |  | Đăng ký plugin normalize-text-vi, đóng lỗ 1.3 | dang-ky-plugin-normalize-text-vi | ⬜ | Should; cần repo plugin public |
 | S3 |  | Ingest ngược về media-library (giai đoạn B ADR-0012) | ingest-nguoc-media-library | ⬜ | Should; ứng viên iterate sau UAT |
 
@@ -253,6 +612,7 @@ CASES=(
   go-bang
   checkpoint-note
   checkpoint-done
+  kiem-co-hoi
   builtins-only
   case-isolation
 )
@@ -452,6 +812,28 @@ PY
   ! out_has 'NOTE \[plan-freeze\] đã qua mốc'
 }
 
+# AC-14. A slug-less row can carry `kiểm: opportunity:<slug>` in its note: its ✅ is
+# then verified against that opportunity's Cổng Đáng (decision + decided_by), not trusted.
+case_kiem_co_hoi() {
+  build_fixture
+  set_row_state "| A1 |" "✅"
+  # Red half: the opportunity exists but has not been decided.
+  guard_is_red || return 1
+  out_has 'F2' || return 1
+  out_has 'skill-1-footage-kho-clip chưa ký Cổng Đáng' || return 1
+  # Green half: sign it the way the owner would.
+  python3 - "$tmp/t/_acceptance/skill-1-footage-kho-clip/opportunity.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+s = re.sub(r"^stage:.*$", "stage: decided", s, count=1, flags=re.M)
+s = re.sub(r"^decision:.*$", "decision: build", s, count=1, flags=re.M)
+s = re.sub(r"^decided_by:.*$", "decided_by: Fixture", s, count=1, flags=re.M)
+p.write_text(s, encoding="utf-8")
+PY
+  guard_is_green || return 1
+  ! out_has 'tin theo lời.*A1'
+}
+
 # AC-13. Builtins only, and refuses arguments (the CI teeth mode appends a junk
 # flag and requires a non-zero exit).
 case_builtins_only() {
@@ -538,7 +920,7 @@ Run:
 ```bash
 chmod +x scripts/roadmap/check-plan-freeze-teeth.sh && bash scripts/roadmap/check-plan-freeze-teeth.sh; echo "exit=$?"
 ```
-Expected: mọi case `FAIL` (guard chưa tồn tại → `node` thoát 1 với "Cannot find module"), dòng cuối `❌ răng: 0 đạt / 12 hỏng`, `exit=1`.
+Expected: mọi case `FAIL` (guard chưa tồn tại → `node` thoát 1 với "Cannot find module"), dòng cuối `❌ răng: 0 đạt / 13 hỏng`, `exit=1`.
 
 - [ ] **Step 3: Commit (test đỏ)**
 
@@ -716,12 +1098,22 @@ function isOpen({ contract, opportunity }) {
     return false;
 }
 
-// --- F2: a ✅ must be backed by a signed contract; slug-less rows are trusted --
+// --- F2: a ✅ must be backed by a signed contract. A slug-less row is trusted,
+// unless its note carries `kiểm: opportunity:<slug>` — then its ✅ means that
+// opportunity passed Cổng Đáng (a decision AND a decider on record).
 const trusted = [];
+const OPP_CHECK = /kiểm:\s*opportunity:([a-z0-9][a-z0-9-]*)/;
 for (const r of rows) {
     if (r.state !== "✅") continue;
     if (r.slug === null) {
-        trusted.push(r.id);
+        const m = r.note.match(OPP_CHECK);
+        if (!m) {
+            trusted.push(r.id);
+            continue;
+        }
+        const opp = dossiers.get(m[1])?.opportunity;
+        if (!opp || !opp.decision || !opp.decided_by)
+            fail("F2", `${r.id} ✅ nhưng cơ hội ${m[1]} chưa ký Cổng Đáng (cần decision và decided_by)`);
         continue;
     }
     if (!isSigned(r.slug)) fail("F2", `${r.id} ✅ nhưng hồ sơ ${r.slug} chưa ký`);
@@ -801,7 +1193,7 @@ Run:
 ```bash
 bash scripts/roadmap/check-plan-freeze-teeth.sh
 ```
-Expected: 12 dòng `✓ CASE …: PASS`, cuối `✅ răng: 12/12 case — mỗi case một mã thoát riêng`. Nếu một case đỏ: sửa **guard** cho tới khi khớp thông điệp Task 2 đòi (không nới case).
+Expected: 13 dòng `✓ CASE …: PASS`, cuối `✅ răng: 13/13 case — mỗi case một mã thoát riêng`. Nếu một case đỏ: sửa **guard** cho tới khi khớp thông điệp Task 2 đòi (không nới case).
 
 - [ ] **Step 3: Chạy guard trên cây thật**
 
@@ -946,7 +1338,7 @@ hien_trang = """## Hiện trạng (2026-09-04, sau khi mở kế hoạch lát c�
 - **Đóng băng mở hạng mục mới** từ khi `lat-cat-chung-minh` merge tới khi 16/16 ★ và ≥ 85% dòng ✅. Xem tỉ lệ: `pnpm plan:check`. Ngoại lệ chỉ ba lý do: mất-dữ-liệu · bảo-mật · chặn-★.
 - **Máy dev đang cài 4 plugin:** `oneflow-api-ffmpeg`, `oneflow-api-openai` (phục vụ cả hai slot transcribe — S3 de facto xong), `oneflow-api-pyscenedetect`, `oneflow-modal-compose-overlay` (mắt Modal duy nhất còn lại trên chuỗi Skill #1 → B6).
 - **7 nhánh chưa về `main`** (đo 04/09): `feat/director-wire-shape` (11, → B3), `docs/director-lane-d` (5, nằm trong D0), `b01/open-source-rebrand` (4, → B2), `fix/t1-escape-doi-hoi-artifact-ho-so` (2, → S1), `chore/roadmap-alias-guard`, `draft/bo-phan-loai-token`, `chore/acceptance-ci-recheck-all` (park, giữ nguyên trên ổ).
-- **Kit gate:** plugin cache 2.7.0; thước vendored trong `scripts/pre-merge-check.sh` là bản fork của repo — hỏi "version nào" phải nêu cả hai.
+- **Kit gate (hai tầng):** plugin cache **acceptance-gate 2.8.0 + feature-loop 2.8.0** (đo 04/09); thước vendored trong `scripts/pre-merge-check.sh` là bản fork của repo — hỏi "version nào" phải nêu cả hai. Các con số "kit 1.24.0" / "kit 2.1.0" ở các mục cũ của file này là sử liệu, không phải hiện trạng.
 - **Nền tảng:** fork TongFlow (AGPL-3.0). SDK `oneflow-sdk` 0.2.18 trên PyPI, import `tongflow`; 0.2.20 đi cùng B4.
 """
 s = replace_section(s, "Hiện trạng", hien_trang)
@@ -1129,8 +1521,10 @@ console.log(
 
 Run:
 ```bash
-node "$HOME/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.7.0/scripts/product-map.mjs" --root . \
-  && grep -n '^## ' PRODUCT-MAP.md \
+RP=$(ls -d "$HOME"/.claude/plugins/cache/acceptance-gate-kit/feature-loop/*/scripts/resolve-plugin.mjs | sort -V | tail -1)
+AG=$(node "$RP" --plugin acceptance-gate --require scripts/product-map.mjs)
+node "$AG/scripts/product-map.mjs" --root . \
+  && grep '^## ' PRODUCT-MAP.md \
   && node scripts/ci/check-product-map.mjs \
   && bash scripts/ci/check-product-map-teeth.sh
 ```
@@ -1214,6 +1608,7 @@ Sau dòng `roadmap_teeth_duplicate: …` thêm (giữ 4 khoảng trắng đầu 
     lcm_teeth_go_bang: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case go-bang"
     lcm_teeth_checkpoint: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-note && bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-done"
     lcm_teeth_builtins: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case builtins-only"
+    lcm_teeth_kiem_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi"
     lcm_teeth_isolation: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case case-isolation"
     lcm_docs: "bash scripts/roadmap/check-plan-docs.sh"
     lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh suite-keys && bash scripts/ci/check-gate-guards-job.sh teeth"
@@ -1251,298 +1646,34 @@ git commit -F /tmp/lcm-msg.txt
 
 ---
 
-### Task 7: Hồ sơ `_acceptance/lat-cat-chung-minh/` + kiểm toàn cục
+### Task 7: Kiểm toàn cục, PR, bàn giao Cổng 2
 
-**Files:**
-- Create: `_acceptance/lat-cat-chung-minh/opportunity.md`, `contract.md`, `evals.yaml`, `decisions.jsonl`
+**Files:** không file mới; có thể chạm `run-log.jsonl` / `evidence-report.md` của hồ sơ đã ký khác nếu phải re-pin, và `PRODUCT-MAP.md` sinh lại.
 
 **Interfaces:**
-- Consumes: khoá executor Task 6; `check-plan-docs.sh` Task 4; case răng Task 2/5.
-- Produces: hồ sơ `status: draft` (Cổng 1 chờ owner); `opportunity.md` `stage: decided`, `decision: build`.
+- Consumes: mọi thứ Task 0–6; hồ sơ `lat-cat-chung-minh` đang `status: approved` (Cổng 1 đã ký ở Task 0 Step 8).
+- Produces: cây sẵn cho S4 VERIFY (`status: implemented`) và Cổng 2.
 
-- [ ] **Step 1: `opportunity.md`**
-
-```markdown
----
-schema_version: 1
-slug: lat-cat-chung-minh
-feature: Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard
-owner: phanlemanh@gmail.com
-stage: decided
-decision: build
-decided_by: Phan Le Manh
-decided_at: 2026-09-04T00:00:00Z
-prototype:
-  base_commit:
-  disposition: archive
----
-
-## Vấn đề & ai gặp
-
-Owner (04/09): bốn nguồn kế hoạch (roadmap, STATUS.md, hồ sơ, nhánh) kể bốn chuyện; STATUS.md
-đề ngày 17/08 ghi 17 hồ sơ trong khi 36 đã ký; hơn một chục hồ sơ/nợ được đặt tên rồi không ai
-mở; 7 nhánh treo; một ADR chấp nhận 26/08 chưa về main. Trong 15 hồ sơ ký từ 27/08, 7 là hạ
-tầng quy trình. Cỗ máy đã có, chưa có tính năng nào người dùng dùng được. Bằng chứng: phiên
-điều tra 04/09, ghi ở §1 của thiết kế.
-
-## Giả định chốt sinh tử
-
-| # | Giả định | Nếu sai thì | Phép thử rẻ nhất | Trạng thái |
-|---|---|---|---|---|
-| 1 | Một khối máy-đọc duy nhất + guard trong CI đủ để ba tài liệu ngừng trôi | STATUS/roadmap lại lệch trong 2 tuần | check-plan-docs.sh + tỉ lệ in mỗi lần CI | Chưa thử |
-| 2 | Đóng băng có răng không làm nghẹt sửa lỗi thật | ngoại lệ mất-dữ-liệu/bảo-mật không mở được | case ngoai-le-tran chiều xanh (lý do hợp lệ) | Chưa thử |
-| 3 | Băng tan được khi đủ ★ | guard thành khoá vĩnh viễn | case go-bang | Chưa thử |
-
-## Ngưỡng chết / ngưỡng UAT
-
-- Câu hỏi phép đo trả lời: sau B1, một phiên mới (người hay máy) có tìm được việc kế tiếp và tỉ lệ hoàn thành trong ≤ 5 phút chỉ bằng STATUS.md → khối kế hoạch → hồ sơ không?
-- Kết quả nào là SỐNG: guard in tỉ lệ trên mọi PR; không hồ sơ mới nào mở ngoài kế hoạch trong 4 tuần đầu mà không qua bảng Ngoại lệ; STATUS.md không lệch sổ cái.
-- Kết quả nào là CHẾT: hai lần liên tiếp phải sửa guard thay vì sửa kế hoạch; hoặc ngoại lệ mở > 3 trong 4 tuần.
-- Timebox: B1 ≤ 3 ngày làm việc (T5–T6).
-
-## Cổng 0
-
-- **decision = build.** Căn cứ: quyết định owner 04/09 (§11 thiết kế); hạng mục mới cuối cùng trước băng.
-- **disposition = archive.** Không có prototype — hồ sơ hạ tầng quy trình.
-- **Ngưỡng UAT chốt cùng lúc ký:** ba bullet trên.
-
-## Out of scope từ khám phá
-
-- Hạ cánh D0, b01, B4–B10 — mỗi cái một hồ sơ riêng theo khối kế hoạch.
-- Sửa `scripts/pre-merge-check.sh` (đường vendor); chặn nhánh hay plan nháp.
-- Mục "Làn D" và số ADR Director trong roadmap — việc của B3.
-```
-
-- [ ] **Step 2: `contract.md`**
-
-```markdown
----
-schema_version: 1
-feature: Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard
-slug: lat-cat-chung-minh
-owner: phanlemanh@gmail.com
-risk_tier: T2
-surfaces: [cli, docs]
-status: draft
-approved_by:
-approved_at:
-design_doc: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
----
-
-# Acceptance Contract: lat-cat-chung-minh
-
-## Context
-
-Bốn nguồn kế hoạch của repo trôi khỏi nhau và hạng mục mới mở nhanh hơn hạng mục đóng (đo
-04/09, §1 thiết kế). Hồ sơ này đặt một khối kế hoạch máy-đọc vào docs/roadmap.md, một luật đóng
-băng có răng trong job Acceptance Gate, park ba cơ hội, và đưa STATUS.md / vision.md về đúng sự
-thật. Đây là hạng mục mới cuối cùng được nhận trước băng.
-
-Source input: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
-
-## Criteria
-
-- AC-1: Given docs/roadmap.md có khối plan-freeze, When guard đọc, Then đếm được đúng 20 dòng kế hoạch, 16 dòng ★, ba bảng, và header đủ bốn khoá plan/opened/unlock/checkpoint.
-- AC-2: Given một thư mục `_acceptance/<slug>/` mới ở trạng thái mở (contract chưa signed-off, hoặc opportunity discovery/build/iterate) với slug ngoài ba bảng, When guard chạy trước gỡ băng, Then thoát 1 với `VIOLATION [plan-freeze] F1: <slug> mở ngoài kế hoạch`.
-- AC-3: Given một dòng có slug đánh ✅ mà contract chưa signed-off, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug; và Given một dòng slug `—` đánh ✅, Then guard không đỏ nhưng in dòng đó trong danh sách "tin theo lời".
-- AC-4: Given một slug ở bảng Xếp lại sau có thư mục mà opportunity.md không mang `decision: park`, When guard chạy, Then thoát 1 với mã F3 nêu đúng slug.
-- AC-5: Given một dòng Ngoại lệ với lý do ngoài {mất-dữ-liệu, bảo-mật, chặn-★} hoặc thiếu ngày/ai quyết, When guard chạy, Then thoát 1 với mã F4.
-- AC-6: Given mọi dòng ★ ✅ và ≥ 85% dòng ✅ với contract của mọi slug ★ signed-off, When guard chạy, Then in `GỠ BĂNG`, thoát 0, và một thư mục mở ngoài kế hoạch không còn làm guard đỏ.
-- AC-7: Given `PLAN_FREEZE_TODAY` sau ngày checkpoint và header không có `checkpoint_done`, When guard chạy, Then in NOTE mốc tái hoạch và mã thoát không đổi; Given có `checkpoint_done`, Then không in NOTE.
-- AC-8: Given khối thiếu marker, thiếu khoá header, sai số cột, hoặc trạng thái ngoài ⬜ ◐ ✅, When guard chạy, Then thoát 1 với mã F0 — fail-closed.
-- AC-9: Given ci.yml, check-gate-guards-job.sh và config.yaml sau đấu dây, When chạy check-gate-guards-job.sh ở các mode shape, reachable, suite-keys, teeth, Then guard mới là một step có tên trong job Acceptance Gate, là một suite key, và mode teeth chứng minh nó đỏ trên cây đã phá.
-- AC-10: Given check-plan-freeze-teeth.sh, When chạy toàn bộ, Then 12/12 case xanh, mỗi case một mã thoát và một token `CASE <tên>: PASS`; tên case lạ bị từ chối exit 2; `--selftest-fail` in FAIL.
-- AC-11: Given ba cơ hội director-v2, timeline-view, staleness-ho-so-thieu-paths mang `decision: park` và PRODUCT-MAP.md sinh lại, When chạy check-product-map.mjs và case răng parked-opportunity, Then checker xanh với ô "Xếp lại sau" = 3 và case răng đỏ đúng chỗ.
-- AC-12: Given STATUS.md, vision.md, roadmap.md sau hồ sơ này, When chạy check-plan-docs.sh, Then mọi phép kiểm OK (ngày 04/09, 36 hồ sơ, con trỏ, phân vùng phiên, đoạn định vị, S3 de facto, 1.5→B5, 1.6→B7, đoạn tỉ lệ 16/36 không nháy ngược, không ADR-0013) và guard sổ cái xanh.
-- AC-13: Given guard và teeth, When grep import và chạy guard trong thư mục không có node_modules, Then chỉ dùng `node:` builtins, vẫn chạy được, và guard từ chối tham số lạ với exit 2.
-
-## Coverage
-
-- Trục phán quyết: F0 · F1 · F2 · F3 · F4 [thước CE: mỗi phán quyết một case đỏ + case chiều ngược cho F1 (go-bang) và F2 (tin-theo-loi)]
-- Trục vòng đời: đóng băng · gỡ băng · mốc tái hoạch · đóng kế hoạch (`closed:` — chưa có case, ghi Known limits)
-- Trục đấu dây: step CI · needle guard-của-guard · suite key local · bản đồ sản phẩm
-- Trục tài liệu: roadmap · STATUS.md · vision.md · ba opportunity park
-
-## Đường đo
-
-- Thước: tỉ lệ hoàn thành · số từ: dòng `plan-freeze: ★ a/16 · tổng c/20` của guard, in mỗi lần CI · bảo đảm bởi: AC-1, AC-6
-- Thước: số ngoại lệ mở giữa lúc băng · số từ: bảng Ngoại lệ trong khối · bảo đảm bởi: AC-5
-- Thước: tài liệu không lệch sổ cái · số từ: check-plan-docs.sh + check-roadmap-fresh.sh · bảo đảm bởi: AC-12
-
-## Out of scope
-
-- Không hạ cánh D0, b01, các hồ sơ B4–B10; không mở hồ sơ Should.
-- Không sửa scripts/pre-merge-check.sh; không chặn nhánh hay docs/superpowers/plans.
-- Không phân loại lại cột "Vị trí trên lộ trình" của sổ cái; không thêm mục "Làn D".
-- Không kiểm `closed:` bằng răng (khoá header có mặt trong guard, chưa có case).
-- `decided_by`/`decided_at` của ba cơ hội park do owner điền trong commit chỉ-trường-người.
-
-## Notes
-
-- Thiết kế §5 định nghĩa hình dạng khối; §6.3 luật tái hoạch 09/10; §7 quyết định về Vercel AI Gateway (không vào đường ★).
-- Guard sổ cái quét mọi `ADR-\d{4}` trong roadmap: khối kế hoạch không nhắc số ADR chưa có trên main.
-```
-
-- [ ] **Step 3: `evals.yaml`**
-
-```yaml
-schema_version: 1
-feature_slug: lat-cat-chung-minh
-
-# T2, mười ba tiêu chí, lớp script + tài liệu. Không (cross-layer). Mỗi case răng một khoá
-# executor riêng (bài học stale_scope_* / roadmap_teeth_*): case chưa cài và case đã qua
-# không được trông giống nhau sau một mã thoát.
-
-evals:
-  - id: E1
-    criterion: AC-1
-    executor: script
-    cmd: config:executors.script.lcm_teeth_clean
-    paths: ["docs/roadmap.md", "scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: >-
-      exit 0 và stdout `CASE clean: PASS`. Ca này đòi dòng tỉ lệ có dạng `★ a/16 · tổng c/20`
-      trên cây thật — một guard in 0/0 cũng xanh nhưng không qua được ca này.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E2
-    criterion: AC-2
-    executor: script
-    cmd: config:executors.script.lcm_teeth_o_moi
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout `CASE o-moi-ngoai-ke-hoach: PASS` — guard đỏ F1 và gọi đúng slug lạ.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E3
-    criterion: AC-3
-    executor: script
-    cmd: config:executors.script.lcm_teeth_tick_noi_doi
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout có cả `CASE tick-noi-doi: PASS` lẫn `CASE tin-theo-loi: PASS` — chiều đỏ F2 và chiều tin-theo-lời.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E4
-    criterion: AC-4
-    executor: script
-    cmd: config:executors.script.lcm_teeth_park
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/timeline-view/opportunity.md"]
-    expected: exit 0 và stdout `CASE park-khong-that: PASS`.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E5
-    criterion: AC-5
-    executor: script
-    cmd: config:executors.script.lcm_teeth_ngoai_le
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout `CASE ngoai-le-tran: PASS`.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E6
-    criterion: AC-6
-    executor: script
-    cmd: config:executors.script.lcm_teeth_go_bang
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: >-
-      exit 0 và stdout `CASE go-bang: PASS` — ca chiều ngược: 16/16 ★ + 20/20 → `GỠ BĂNG`, và
-      hồ sơ lạ không còn làm đỏ. Đây là ca chịu lực: không có nó, một guard khoá vĩnh viễn qua
-      mọi ca khác.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E7
-    criterion: AC-7
-    executor: script
-    cmd: config:executors.script.lcm_teeth_checkpoint
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout có `CASE checkpoint-note: PASS` và `CASE checkpoint-done: PASS` — NOTE không đổi mã thoát; checkpoint_done tắt NOTE.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E8
-    criterion: AC-8
-    executor: script
-    cmd: config:executors.script.lcm_teeth_khoi_hong
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout `CASE khoi-hong: PASS` — thiếu marker → F0, fail-closed.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E9
-    criterion: AC-9
-    executor: script
-    cmd: config:executors.script.lcm_wiring
-    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "_acceptance/config.yaml", "scripts/roadmap/check-plan-freeze.mjs"]
-    expected: >-
-      exit 0; stdout của mode shape nêu cả hai guard nằm trong job; mode teeth in
-      `lệnh dưới phép thử … check-plan-freeze.mjs` và không FAIL — tức guard đỏ trên cây đã
-      phá (hồ sơ teeth-probe-freeze) và xanh trên cây lành.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E10
-    criterion: AC-10
-    executor: script
-    cmd: config:executors.script.plan_freeze_teeth_all
-    paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
-    expected: exit 0 và dòng cuối `✅ răng: 12/12 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối, selftest-fail in FAIL).
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E11
-    criterion: AC-11
-    executor: script
-    cmd: config:executors.script.lcm_pmap
-    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh", "PRODUCT-MAP.md", "_acceptance/director-v2/opportunity.md", "_acceptance/timeline-view/opportunity.md", "_acceptance/staleness-ho-so-thieu-paths/opportunity.md"]
-    expected: exit 0; stdout checker in `xếp lại sau: 3 hồ sơ, 3 mục trên bản đồ, nút mermaid 3` và `CASE parked-opportunity: PASS`.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E12
-    criterion: AC-12
-    executor: script
-    cmd: config:executors.script.lcm_docs
-    paths: ["STATUS.md", "docs/strategy/vision.md", "docs/roadmap.md", "scripts/roadmap/check-plan-docs.sh"]
-    expected: exit 0 và dòng cuối `✅ check-plan-docs: tài liệu khớp kế hoạch`, không dòng `FAIL:` nào.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: E13
-    criterion: AC-13
-    executor: script
-    cmd: config:executors.script.lcm_teeth_builtins
-    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
-    expected: exit 0 và stdout `CASE builtins-only: PASS` — chỉ import `node:`; cờ rác → exit 2 kèm "không nhận tham số".
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: J1
-    criterion: AC-2
-    executor: judgment
-    rubric: >-
-      Đọc stdout/stderr của guard ở các ca F1–F4 (trong evidence của E2, E4, E5, E3): mỗi thông
-      điệp gọi đúng tên slug, nói THỨ gì sai và VIỆC gì phải làm (thêm Ngoại lệ / park / ký),
-      không dùng mã lỗi trần thay câu người (luật N1–N6 của kit). PASS nếu cả bốn đạt.
-    evidence_required: [run_id, verifier, verified_at, output]
-```
-
-- [ ] **Step 4: `decisions.jsonl` (hai entry descope)**
-
-```jsonl
-{"at":"2026-09-04T12:00:00Z","id":"d-20260904T120000Z-lcm1","type":"descope","stage":"S1","decision":"[khong kiem closed: bang rang] Khoa header `closed:` co trong guard de ket thuc ke hoach ma khong go guard, nhung chua co case rang — ghi Known limits, khong phai AC. Ly do: ke hoach chua ket thuc, mot case chua co du lieu that de doi chieu."}
-{"at":"2026-09-04T12:05:00Z","id":"d-20260904T120500Z-lcm2","type":"descope","stage":"S1","decision":"[decided_by/at la truong nguoi] Ba co hoi park chi nhan stage/decision tu may; decided_by va decided_at do owner commit rieng, cung nghi thuc chu ky Cong 2. Guard F3 chi doc decision nen khong phu thuoc hai truong nay."}
-```
-
-- [ ] **Step 5: Kiểm toàn cục trước khi giao Cổng 1**
+- [ ] **Step 1: Kiểm toàn cục trước khi giao Cổng 2**
 
 Run:
 ```bash
-printf 'chore(acceptance): mo ho so lat-cat-chung-minh — contract T2, 13 AC / 13 eval + 1 judgment\n' > /tmp/lcm-msg.txt
-git add _acceptance/lat-cat-chung-minh && git commit -F /tmp/lcm-msg.txt
+RP=$(ls -d "$HOME"/.claude/plugins/cache/acceptance-gate-kit/feature-loop/*/scripts/resolve-plugin.mjs | sort -V | tail -1)
+AG=$(node "$RP" --plugin acceptance-gate --require scripts/product-map.mjs)
 bash scripts/acceptance/preflight-verify-env.sh
 node scripts/roadmap/check-plan-freeze.mjs
 bash scripts/roadmap/check-plan-freeze-teeth.sh | tail -1
 bash scripts/roadmap/check-plan-docs.sh | tail -1
 node scripts/ci/check-product-map.mjs | tail -1
-node "$HOME/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.7.0/scripts/product-map.mjs" --root . --check
+node "$AG/scripts/product-map.mjs" --root . --check
 pnpm lint:check && pnpm test
 bash scripts/pre-merge-check.sh . --base origin/main
 ```
-Expected: preflight xanh; guard `★ 0/16 · tổng 0/20 · còn băng` xanh (B1 ◐, hồ sơ draft nằm trong bảng nên F1 im); răng 12/12; docs xanh; bản đồ khớp — **lưu ý:** hồ sơ mới có contract draft → generator xếp vào "Chờ duyệt phạm vi": chạy lại generator (không `--check`) rồi commit PRODUCT-MAP.md nếu `--check` đỏ; lint + test xanh; pre-merge-check in `VIOLATION [lat-cat-chung-minh]: status=draft …` hoặc tương đương là **đúng** (cổng chặn merge tới Cổng 2), mọi hồ sơ đã ký khác `OK`.
+Expected: preflight xanh; guard `★ 0/16 · tổng 0/20 · còn băng` xanh (B1 ◐, hồ sơ approved nằm trong bảng nên F1 im; cơ hội skill-1 ở discovery cũng trong bảng); răng 13/13; docs xanh; bản đồ khớp — **lưu ý:** hồ sơ B1 và cơ hội skill-1 làm generator xếp thêm ô ("Chờ duyệt phạm vi"/"Đang làm", "Đang cân nhắc cơ hội"): chạy lại generator (không `--check`) rồi commit PRODUCT-MAP.md nếu `--check` đỏ; lint + test xanh; pre-merge-check in `VIOLATION [lat-cat-chung-minh]: status=approved …` hoặc tương đương là **đúng** (cổng chặn merge tới Cổng 2), mọi hồ sơ đã ký khác `OK`.
 
 Nếu pre-merge-check báo hồ sơ đã ký nào **stale** vì diff chạm `paths` của nó (ứng viên: `roadmap-drift-guard` với `scripts/roadmap/**`? — nó khai `scripts/roadmap/check-roadmap-fresh.sh` và `roadmap-drift.mjs`, không chạm; `cong-tu-canh-minh` khai `scripts/ci/check-gate-guards-job.sh` và `.github/workflows/ci.yml` → **sẽ stale**; `noi-thuoc-tai-lieu-vao-ci` có thể khai `ci.yml`): làm đúng nghi thức re-pin (AGENTS.md): chạy lại eval của hồ sơ đó bằng khoá executor của nó, ghi dòng repin JSON nén vào `run-log.jsonl` (kèm `prev_sha`), dời `verified_commit` — **re-pin là việc cuối** trước vòng verify.
 
-- [ ] **Step 6: Push và mở PR nháp**
+- [ ] **Step 2: Push và cập nhật PR**
 
 ```bash
 git push -u origin feat/lat-cat-chung-minh
@@ -1561,16 +1692,17 @@ EOF
 )
 ```
 
-- [ ] **Step 7: Bàn giao cho owner (hai việc người, không phải máy)**
+- [ ] **Step 3: Bàn giao cho owner (việc người, không phải máy)**
 
-1. **Ký Cổng 1**: chạy `/feature-loop:feature-loop lat-cat-chung-minh` hoặc `/acceptance-gate:acceptance-card` để xem thẻ; duyệt 13 AC; `status: approved`.
-2. **Commit chỉ-trường-người** điền `decided_by: Phan Le Manh` và `decided_at: <ISO UTC>` cho ba file `_acceptance/{director-v2,timeline-view,staleness-ho-so-thieu-paths}/opportunity.md` — không sửa gì khác trong commit đó.
-3. Sau Cổng 1: vòng verify S4 (`feature-loop:acceptance-verify`) với `runBaseline` tắt; rồi Cổng 2; merge bằng merge commit (không squash); sau merge, dòng B1 trong khối kế hoạch chuyển `◐` → `✅` trong PR kế tiếp (guard F2 sẽ xác nhận contract signed-off).
+1. Đặt contract `status: implemented`; feature-loop resume vào **S4 VERIFY** (`feature-loop:acceptance-verify`) với `runBaseline` tắt; tối đa 3 round.
+2. **Commit chỉ-trường-người** điền `decided_by: Phan Le Manh` và `decided_at: <ISO UTC>` cho ba file `_acceptance/{director-v2,timeline-view,staleness-ho-so-thieu-paths}/opportunity.md` — không sửa gì khác trong commit đó. (Nếu chưa làm ở Task 0: ký Cổng Đáng của `skill-1-footage-kho-clip` = A1.)
+3. **Cổng 2**: xem thẻ bằng `acceptance-gate:acceptance-card`; ký `signed-off` trong commit chỉ-trường-người; merge bằng merge commit (không squash); sau merge, dòng B1 trong khối kế hoạch chuyển `◐` → `✅` trong PR kế tiếp (guard F2 xác nhận contract signed-off), và A1 chuyển ✅ khi cơ hội đã ký (guard F2 xác nhận qua `kiểm: opportunity:`).
 
 ---
 
 ## Self-review (đã chạy khi viết)
 
-- **Spec coverage:** §3 khối kế hoạch → Task 1; §4/§5 luật + guard + teeth + đấu dây → Task 2, 3, 6; §8.1 vision → Task 4; §8.2 roadmap → Task 1; §8.3 STATUS → Task 4; §8.4 hồ sơ + park + bản đồ → Task 1, 5, 7; §9 AC-1…AC-13 → E1…E13 (E1↔AC-1 dùng case clean đếm 20/16; AC-9 ↔ lcm_wiring; AC-11 ↔ lcm_pmap; AC-12 ↔ lcm_docs; AC-13 ↔ builtins-only). Khoá `closed:` có trong guard, không có case — khai Known limits (decisions lcm1).
+- **Nếp kit (2.8.0):** Task 0 = S1 (ba artifact + cơ hội + gap-probe đồng bộ 6 input + thẻ Cổng 1, dừng chờ người theo quyết định owner); plan này = S2; Task 1–7 = S3; S4/Cổng 2/S5 ở Task 7 Step 3. Kit đo bằng `installed_plugins.json`, đường dẫn plugin qua `resolve-plugin.mjs`.
+- **Spec coverage:** §3 khối kế hoạch → Task 1; §4/§5 luật + guard + teeth + đấu dây → Task 2, 3, 6; §8.1 vision → Task 4; §8.2 roadmap → Task 1; §8.3 STATUS → Task 4; §8.4 hồ sơ + cơ hội lát cắt + park + bản đồ → Task 0, 1, 5; §9 AC-1…AC-14 → E1…E14 (E1↔AC-1 dùng case clean đếm 20/16; AC-9 ↔ lcm_wiring; AC-11 ↔ lcm_pmap; AC-12 ↔ lcm_docs; AC-13 ↔ builtins-only; AC-14 ↔ kiem-co-hoi). Khoá `closed:` có trong guard, không có case — khai Known limits (decisions lcm1). B10 tin theo lời (Out of scope).
 - **Placeholder scan:** không TBD/TODO; mọi bước code có code; các "nếu … thì" đều nêu việc cụ thể.
-- **Type consistency:** tên case ở Task 2 = tên trong khoá executor Task 6 = tên trong evals Task 7; chuỗi thông điệp guard (Task 3) = chuỗi teeth grep (Task 2): `mở ngoài kế hoạch`, `chưa ký`, `tin theo lời`, `khai park mà hồ sơ chưa park`, `không có lý do có tên`, `GỠ BĂNG`, `NOTE [plan-freeze] đã qua mốc tái hoạch`, `không nhận tham số`, `F0`…`F4`. Nhãn bảng `**Xếp lại sau**` / `**Ngoại lệ mở giữa lúc băng**` giống nhau ở Task 1 và Task 3. Khoá `lcm_teeth_tick_noi_doi` và `lcm_teeth_checkpoint` phải viết dạng `a && b` (ghi chú trong Task 6 Step 3).
+- **Type consistency:** tên case ở Task 2 (13) = tên trong khoá executor Task 6 = tên trong evals Task 0; chuỗi thông điệp guard (Task 3) = chuỗi teeth grep (Task 2): `mở ngoài kế hoạch`, `chưa ký`, `chưa ký Cổng Đáng`, `tin theo lời`, `khai park mà hồ sơ chưa park`, `không có lý do có tên`, `GỠ BĂNG`, `NOTE [plan-freeze] đã qua mốc tái hoạch`, `không nhận tham số`, `F0`…`F4`. Nhãn bảng `**Xếp lại sau**` / `**Ngoại lệ mở giữa lúc băng**` và cú pháp ghi chú `kiểm: opportunity:<slug>` giống nhau ở Task 1 và Task 3. Khoá `lcm_teeth_tick_noi_doi` và `lcm_teeth_checkpoint` viết dạng `a && b`.
