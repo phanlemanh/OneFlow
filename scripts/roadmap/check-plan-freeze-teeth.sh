@@ -229,7 +229,9 @@ case_park_chua_ky() {
   python3 - "$tmp/t/_acceptance/timeline-view/opportunity.md" <<'PY'
 import sys, pathlib, re
 p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
-assert "decided_by: Fixture" in s, "fixture stale: build_fixture khong con dien truong nguoi"
+# Gia tri co the la ten that (cay da ky) hay "Fixture" (build_fixture dien ho);
+# ca nay chi can no CO gia tri roi go di, khong quan tam gia tri nao.
+assert re.search(r"^decided_by: \S", s, re.M), "fixture stale: khong ho so park nao co decided_by"
 p.write_text(re.sub(r"^decided_by: .*$", "decided_by:", s, count=1, flags=re.M), encoding="utf-8")
 PY
   guard_is_red || return 1

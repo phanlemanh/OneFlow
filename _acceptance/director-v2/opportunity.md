@@ -5,8 +5,8 @@ feature: Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi ph
 owner: Manh
 stage: decided
 decision: park
-decided_by:
-decided_at:
+decided_by: Phan Le Manh
+decided_at: 2026-09-04
 prototype:
   base_commit:
   disposition:
