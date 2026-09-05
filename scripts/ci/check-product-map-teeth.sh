@@ -41,6 +41,7 @@ CASES=(
     contract-unparsable
     status-unknown
     dir-empty
+    parked-opportunity
 )
 
 is_case() {
@@ -158,6 +159,24 @@ case_opportunity_mismatch() {
     printf '# probe\n' >"$tmp/t/_acceptance/teeth-probe-opportunity/opportunity.md"
     check_is_red || return 1
     out_has 'cân nhắc cơ hội' || return 1
+}
+
+# lat-cat-chung-minh AC-11. A parked opportunity (decision: park) belongs in
+# "Xếp lại sau", not "Đang cân nhắc cơ hội". Before 04/09 the checker binned every
+# opportunity-only dossier as "cân nhắc" and the two sides disagreed on every
+# parked item the moment the map was regenerated.
+case_parked_opportunity() {
+    build_fixture
+    mkdir -p "$tmp/t/_acceptance/teeth-probe-parked"
+    printf -- '---\nschema_version: 1\nslug: teeth-probe-parked\nstage: decided\ndecision: park\n---\n' \
+        >"$tmp/t/_acceptance/teeth-probe-parked/opportunity.md"
+    check_is_red || return 1
+    # Hai `out_has` doc lap quet TOAN BO stdout khong do duoc mot QUAN HE: sau khi
+    # go dung nhanh phan loai park, slug hien o dong FAIL cua o "cân nhắc" con
+    # chuoi "Xếp lại sau" van hien o cac dong FAIL cua ba ho so park that, nen ca
+    # hai deu xanh va ca nay PASS tren dung hoi quy no khai la minh bat (do o S4
+    # vong 3). Slug va O phai nam tren CUNG MOT dong.
+    grep -Eq 'teeth-probe-parked.*\(Xếp lại sau\)' "$tmp/out"
 }
 
 # AC-4 fail-closed (a): the artifact is not there at all.

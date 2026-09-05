@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: edd4fa9a86ae54bac66fb43f5fdfa779a0e1fb0d
+verified_commit: be5426e3199bac5febf168f1607a9f456b5b7dcc
 human_signoff: Manh 2026-08-27
 ---
 
@@ -348,3 +348,62 @@ làn máy thuần cho vòng này (31/08); nghi thức chuẩn gọi một agent 
 một lệch có khai, không phải một bước bị bỏ: tám lệnh là tám lệnh đã khai trong
 `feature_loop.suite_keys`, chạy tại đúng sha ghi trên, mã thoát ở
 `scratchpad/lane-*.log` của phiên.
+
+### Re-pin lần 2 — 04/09/2026, do `lat-cat-chung-minh` thêm bốn guard dưới `scripts/roadmap/**` và một khối mới trong `docs/roadmap.md`
+
+run_id: repin-lcm-20260904T103744Z
+sha: c2f028ced724e6ba78f91744edee4c319029af41 · suites: 8 lệnh exit 0
+
+Mười ô đo của hồ sơ này đều bị chạm theo chế độ `plan` (10/10 khai `paths`, 312 file đổi so với
+mốc cũ), nên cả mười được **chạy lại** chứ không chỉ dời mốc — đúng luật `repin-khong-chay-lai-eval`
+ký 03/09. Cả mười exit 0. Làn máy chạy bằng một phiên tươi, tuần tự tám lệnh tại `c2f028c`.
+
+### Re-pin lần 3 — 04/09/2026, do `lat-cat-chung-minh` sửa tiếp bốn guard dưới `scripts/roadmap/**` sau vòng S4 thứ nhất
+
+run_id: repin-lcm-20260904T151500Z
+sha: b5be36486c9e8d53db889b19fe15239f72e01320 · suites: 8 lệnh exit 0
+
+Mốc cũ `c2f028c` do chính hồ sơ này ghim ở lần 2, rồi bốn commit sau đó lại chạm
+`scripts/roadmap/**` — vá lỗ fail-open của F1, thêm ca răng thứ 16, đổi mẫu số của bộ răng sang
+độ dài mảng, và đổi phép đo AC-13 từ phép grep sang phép giải. Không commit nào chạm
+`roadmap-drift.mjs` hay `check-roadmap-fresh.sh`, tức mã của gói này không đổi; staleness ở đây là
+theo GLOB, không theo hành vi.
+
+Cả mười ô đo được **chạy lại** chứ không chỉ dời mốc — luật `repin-khong-chay-lai-eval` ký 03/09.
+Cả mười exit 0. Làn máy do một phiên tươi chạy tuần tự tám lệnh tại `b5be364`, cây sạch trước và
+sau. Lần này re-pin là việc CUỐI trước vòng verify: lần 2 ghim xong rồi còn commit tiếp vào đúng
+vùng vừa ghim, nên mốc ấy hỏng ngay trong ngày.
+
+### Re-pin lần 4 — 05/09/2026, do `lat-cat-chung-minh` sửa tiếp `scripts/roadmap/**` qua bốn vòng S4
+
+run_id: repin-lcm-20260905T064500Z
+sha: 99b7c61d1c6711ade7242cd008fd2f07111649b8 · suites: 8 lệnh exit 0
+
+Mốc lần 3 (`b5be364`) hỏng vì ba commit sau đó lại chạm `scripts/roadmap/**`: F5 buộc một hồ sơ
+park phải niêm yết và mang chữ ký, ba chỗ ghim hằng số trong bộ kiểm tài liệu đổi thành quan hệ
+tính trên cây, và F3 thôi đòi riêng `park` sau khi nó và F5 chặn nhau. Mã của gói này không đổi —
+không commit nào chạm `roadmap-drift.mjs` hay `check-roadmap-fresh.sh`; staleness ở đây theo GLOB,
+không theo hành vi.
+
+Cả mười ô đo được **chạy lại** chứ không chỉ dời mốc — luật `repin-khong-chay-lai-eval` ký 03/09.
+Cả mười exit 0, kèm tám lệnh làn máy.
+
+Ghi thêm vì nó là bài học chứ không phải thủ tục: **làn đo đầu tiên của lần này đã bị BỎ.** Cả 18
+mã thoát đều 0, nhưng phiên điều phối ghi thẻ Cổng 2 và trang bằng chứng vào cùng cây GIỮA LÚC đo,
+nên những số ấy không thuộc về commit định ghim. Chính phiên tươi phát hiện, bằng cách so mtime ba
+file với thời điểm chạy từng lệnh. Ba file ấy nằm ngoài mọi `paths` của hồ sơ này nên kết quả gần
+như chắc không đổi — nhưng một mốc ghim là lời khai «cây tại commit này đã được đo», và khai thế
+khi cây có file chưa commit là khai sai. Làn ghi ở đây là làn thứ hai, chạy trên cây sạch tại
+`99b7c61`, sạch cả trước lẫn sau.
+
+### Re-pin lần 5 — 05/09/2026, do `lat-cat-chung-minh` sửa tiếp `scripts/roadmap/**` sau khi ký Cổng 2
+
+run_id: repin-lcm-20260905T093000Z
+sha: be5426e3199bac5febf168f1607a9f456b5b7dcc · suites: 8 lệnh exit 0
+
+Mốc lần 4 (`99b7c61`) hỏng vì việc KÝ kéo theo một dây sửa: hồ sơ thành cái thứ 37 được ký nên
+tài liệu, sổ cái và bản đồ phải theo, và ba ca răng ghim con số của hôm trước đỏ thật ngay hôm ấy —
+nên chúng phải đổi sang đọc giá trị từ cây. Mã của gói này vẫn không đổi; staleness theo GLOB.
+
+Cả mười ô đo chạy lại, cả mười exit 0, kèm tám lệnh làn máy. Cây sạch trước và sau, HEAD không đổi.
+Lần này phiên điều phối KHÔNG ghi gì trong lúc đo — lần 4 đã hỏng đúng vì thế.

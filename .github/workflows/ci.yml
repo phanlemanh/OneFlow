@@ -146,6 +146,20 @@ jobs:
       - name: Product map freshness
         run: node scripts/ci/check-product-map.mjs
 
+      # Freeze rule of the proof-slice plan (docs/roadmap.md, block plan-freeze):
+      # no working-state dossier outside the plan until every ★ row is done.
+      # Prints the completion ratio on every run — the plan's only dashboard.
+      - name: Plan freeze
+        run: node scripts/roadmap/check-plan-freeze.mjs
+      - name: Plan freeze guard still has teeth
+        run: bash scripts/roadmap/check-plan-freeze-teeth.sh
+      # The three living documents must keep carrying the plan's numbers. The
+      # signed-dossier count is COUNTED on the tree here, not grepped.
+      - name: Plan docs match the plan
+        run: bash scripts/roadmap/check-plan-docs.sh
+      - name: Plan docs guard still has teeth
+        run: bash scripts/roadmap/check-plan-docs-teeth.sh
+
       # Four steps, not one. The teeth mode of check-gate-guards-job.sh extracts the
       # command for each needle with `tail -1`, so a single combined `a && b && c`
       # line makes every needle resolve to the same row and only the last one is

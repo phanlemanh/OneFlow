@@ -342,6 +342,32 @@ executors:
     # vo hinh. Do 31/08: so cai CO dong trung normalize-text-vi ma guard van xanh.
     roadmap_fresh: "bash scripts/roadmap/check-roadmap-fresh.sh"
     roadmap_teeth_duplicate: "bash scripts/roadmap/check-roadmap-guard-teeth.sh --case ledger-duplicate"
+    # --- lat-cat-chung-minh (04/09) --- guard dong bang + rang, MOT khoa moi case:
+    # case chua cai va case da qua khong duoc trong giong nhau sau mot ma thoat.
+    plan_freeze: "node scripts/roadmap/check-plan-freeze.mjs"
+    plan_freeze_teeth_all: "bash scripts/roadmap/check-plan-freeze-teeth.sh"
+    lcm_teeth_clean: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case clean"
+    lcm_teeth_khoi_hong: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case khoi-hong"
+    lcm_teeth_o_moi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case o-moi-ngoai-ke-hoach"
+    lcm_teeth_o_moi_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case o-moi-co-hoi-hong"
+    lcm_teeth_park_ky: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-chua-ky && bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-ngoai-bang"
+    lcm_docs_quan_he: "bash scripts/roadmap/check-plan-docs-teeth.sh --case ngay-tien && bash scripts/roadmap/check-plan-docs-teeth.sh --case ti-le-lech && bash scripts/roadmap/check-plan-docs-teeth.sh --case adr-da-co && bash scripts/roadmap/check-plan-docs-teeth.sh --case khong-ho-so-ky"
+    lcm_teeth_tick_noi_doi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case tick-noi-doi && bash scripts/roadmap/check-plan-freeze-teeth.sh --case tin-theo-loi"
+    lcm_teeth_park: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case park-khong-that && bash scripts/roadmap/check-plan-freeze-teeth.sh --case kill-hop-le"
+    lcm_teeth_ngoai_le: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-tran && bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-thieu-ngay && bash scripts/roadmap/check-plan-freeze-teeth.sh --case ngoai-le-hop-le"
+    lcm_teeth_go_bang: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case go-bang"
+    lcm_teeth_checkpoint: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-note && bash scripts/roadmap/check-plan-freeze-teeth.sh --case checkpoint-done"
+    lcm_teeth_kiem_co_hoi: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi && bash scripts/roadmap/check-plan-freeze-teeth.sh --case kiem-co-hoi-de-xuat"
+    lcm_teeth_builtins: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case builtins-only"
+    lcm_teeth_isolation: "bash scripts/roadmap/check-plan-freeze-teeth.sh --case case-isolation"
+    lcm_docs: "bash scripts/roadmap/check-plan-docs.sh"
+    lcm_docs_teeth: "bash scripts/roadmap/check-plan-docs-teeth.sh"
+    # `suite-keys` CO Y khong nam trong day: mode ay khang dinh viec tach
+    # build/typecheck ma kho da DAO NGUOC 02/09, nen no do san tren main truoc
+    # ho so nay (do tren cay eb175ed). Ve «la mot suite key» cua AC-9 do bang
+    # phep khang dinh truc tiep ben duoi. Phat hien ngoai hop dong -> Cong 2.
+    lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/roadmap/check-plan-suite-key.sh"
+    lcm_pmap: "node scripts/ci/check-product-map.mjs && bash scripts/ci/check-product-map-teeth.sh --case parked-opportunity"
     # Job CI: rut lenh RA TU ci.yml roi CHAY no, theo khuon check-vitest-job.sh.
     # Doc YAML la do chi dan; chay lenh rut ra moi la do hanh vi.
     # o-do-chay-0-ca-van-xanh: mot o do loc theo ten ca ma khong ca nao khop
@@ -795,6 +821,9 @@ feature_loop:
     # các lệnh máy SONG SONG nên thứ tự này không phải thứ tự thi hành — bản
     # thân ô preflight phát biểu cách phân loại các ô còn lại.
     - executors.script.preflight_env
+    # lat-cat-chung-minh (04/09): moi vong verify local cung phai thay dong bang —
+    # cong local khong chay guard so cai, nen PR #96 len CI moi do.
+    - executors.script.plan_freeze
     # GOP LAI 02/09 sau khi tach doi 31/08 (cong-tu-canh-minh). Ly do tach: mot
     # luot build bi cong cu giet (exit 144, do 322s) nuot luon tin hieu
     # typecheck di cung (24s). Ly do gop lai: tach doi dat `pnpm build` va

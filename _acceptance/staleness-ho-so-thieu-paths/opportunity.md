@@ -3,10 +3,10 @@ schema_version: 1
 slug: staleness-ho-so-thieu-paths
 feature: Chốt chặn có thể đang bỏ qua kiểm bằng chứng lỗi thời cho hồ sơ khai thiếu paths
 owner: Manh
-stage: discovery
-decision:
-decided_by:
-decided_at:
+stage: decided
+decision: park
+decided_by: Phan Le Manh
+decided_at: 2026-09-04
 prototype:
   base_commit:
   disposition:
@@ -65,3 +65,7 @@ một bộ kiểm im lặng còn tệ hơn một bộ kiểm không có.
 
 `pre-merge-check.sh` là chốt chặn CI. Sửa mà chưa đo xong sẽ chặn nhầm mọi PR.
 Nó cũng nằm trong `t1_skip_globs`, nên chạm nó là một quyết định phạm vi riêng.
+
+## Cổng 0 — 04/09
+
+- **decision = park.** Căn cứ: khối kế hoạch lát cắt chứng minh (docs/roadmap.md) đóng băng việc mở hạng mục mới; hồ sơ này không nằm trên đường ★. Mở lại khi gỡ băng, hoặc qua bảng Ngoại lệ với lý do có tên.
