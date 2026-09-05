@@ -148,7 +148,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 | B8 | ★ | Director sinh instance skill từ prompt | director-sinh-instance | ⬜ | T3; có thể hạ Should ở mốc 09/10 |
 | B9 | ★ | Đo G0 (WER, COGS từ ảnh chụp giá) và G1 (50 clip, đổi giá chỉ overlay chạy lại, headless bằng canvas) | do-g0-g1-lat-cat | ⬜ | T2; chờ A1 và A3 |
 | B10 | ★ | Cổng Giá trị của cơ hội lát cắt: phiên UAT với 3 tới 5 người dùng đại diện trên máy trắng; phán quyết release iterate kill | — | ⬜ | làn A và B; chờ A2 và A5; ✅ khi cơ hội có verdict |
-| A1 | ★ | Ký Cổng Đáng của cơ hội lát cắt: gỡ nhãn đề xuất ở U1 tới U8 và ba số G0 (WER ≤ 10%, lỗi chữ số trên câu có giá bằng 0, COGS ≤ 11 đô) | — | ⬜ | làn A · T5 · kiểm: opportunity:skill-1-footage-kho-clip |
+| A1 | ★ | Ký Cổng Đáng của cơ hội lát cắt: gỡ nhãn đề xuất ở U1 tới U8 và ba số G0 (WER ≤ 10%, lỗi chữ số trên câu có giá bằng 0, COGS ≤ 11 đô) | — | ✅ | làn A · T5 · kiểm: opportunity:skill-1-footage-kho-clip |
 | A2 | ★ | Chốt ngách seller thương mại điện tử hay môi giới bất động sản | — | ⬜ | làn A · T8 |
 | A3 | ★ | Corpus ít nhất 10 clip thực địa kèm bản chép tay vào measure/wer-corpus | — | ⬜ | làn A · T9 |
 | A4 | ★ | Một lượt chạy thật kèm hoá đơn | — | ⬜ | làn A · T11 |
