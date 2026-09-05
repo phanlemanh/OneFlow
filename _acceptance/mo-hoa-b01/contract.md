@@ -5,7 +5,7 @@ slug: mo-hoa-b01
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [cli, docs]
-status: approved
+status: implemented
 approved_by:
 approved_at:
 veto_state: mo
