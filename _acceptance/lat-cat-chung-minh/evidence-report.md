@@ -287,6 +287,38 @@ Verdict tổng thể là PASS: toàn bộ 18 eval máy (E1-E18) và judgment J1 
 
 ## Ngoài hợp đồng
 
+Mười sáu phát hiện dưới đây đã được đối kháng xác nhận ở vòng 4 và **không** ánh xạ vào
+tiêu chí nào của hồ sơ này, nên chúng không làm đổi verdict. Chúng CHƯA được định đoạt:
+owner chọn từng mục ở Cổng 2. Nguyên văn từng phát hiện kèm thực nghiệm ở
+[`review-findings.md`](review-findings.md).
+
+⚠ Cụm ngoài vùng phủ: 2/16 rơi vào file không ô đo nào phủ (`package.json`,
+`_acceptance/lat-cat-chung-minh/evals.yaml`) — dừng và quyết mở rộng hợp đồng hay rút phạm vi.
+
+Mục này TỪNG RỖNG trong bản báo cáo bộ tổng hợp trả về, dù cùng vòng ấy nó ghi 16 phát hiện
+vào `review-findings.md`. Cổng tiền hợp nhất đọc đúng mục này, nên với bản rỗng nó kết luận
+«xanh-sạch — máy đi tiếp, KHÔNG mời ký», tức 16 phát hiện (5 mức cao) sẽ trôi qua mà owner
+không phải quyết gì. Điền lại từ chính dữ liệu vòng 4; không nới cổng.
+
+| # | Phát hiện | Owner chọn |
+|---|---|---|
+| Ngoài-1 | Teeth fixtures pin today's snapshot values — the doc updates the sibling guard mandates turn CI red (high) · `scripts/roadmap/check-plan-docs-teeth.sh:60` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-2 | check-product-map.mjs leaves the `draft` / "Chờ duyệt phạm vi" bucket unchecked — the fail-open its own header rails against (medium) · `scripts/ci/check-product-map.mjs:209` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
+| Ngoài-3 | Broken or missing opportunity frontmatter is binned as "opportunity-only" instead of unclassified (medium) · `scripts/ci/check-product-map.mjs:141` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-4 | Guard root is overridable by ambient env, deviating from the repo's cwd-based fixture pattern; one seam is never exercised (low) · `scripts/roadmap/check-plan-docs.sh:15` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-5 | CI runs four new guard steps but package.json exposes an alias for only two (low) · `package.json:40` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-6 | check-plan-docs.sh aborts silently (no FAIL line, 15 checks unreported) when signed contracts carry no approved_at (high) · `scripts/roadmap/check-plan-docs.sh:44` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-7 | check-product-map.mjs never checks the `draft` bucket — a draft dossier is invisible and the checker stays green (high) · `scripts/ci/check-product-map.mjs:210` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
+| Ngoài-8 | check-product-map.mjs classifies `decision: kill` / `stage: archived` as "still under consideration", contradicting check-plan-freeze.mjs in the same PR (medium) · `scripts/ci/check-product-map.mjs:175` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
+| Ngoài-9 | check-plan-docs.sh swallows check-roadmap-fresh.sh's output and reports any failure cause as "guard sổ cái đỏ" (medium) · `scripts/roadmap/check-plan-docs.sh:143` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-10 | check-plan-freeze.mjs isOpen() treats a dossier with neither contract.md nor opportunity.md as closed, so F1 never sees it (low) · `scripts/roadmap/check-plan-freeze.mjs:193` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-11 | Hình dạng 5 — AC-17(b) tuyên một quan hệ HAI vế (mẫu số + tổng tử số) nhưng teeth chỉ đo vế mẫu số (high) · `scripts/roadmap/check-plan-docs-teeth.sh:87` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-12 | Hình dạng 3 — lời hứa gỡ băng là QUAN HỆ (≥ 85%) nhưng assert duy nhất là chuỗi ở mốc 100% (high) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-13 | Hình dạng 5 — AC-17(c) tuyên một luật CÓ ĐIỀU KIỆN hai nhánh, teeth chỉ có ca cho nhánh cho phép (medium) · `scripts/roadmap/check-plan-docs-teeth.sh:105` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-14 | Hình dạng 3 — case_go_bang ghim mẫu số 20 mà chính guard tính được, nên van an toàn mở là teeth đỏ oan (medium) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-15 | Hình dạng 4 — E9 khai một chiều đỏ không tồn tại: gỡ tên khỏi GUARD_NEEDLES thì mode shape vẫn XANH (medium) · `_acceptance/lat-cat-chung-minh/evals.yaml:103` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-16 | Hình dạng 3 — ca dựng để chứng minh «đếm trên cây, đừng grep hằng số» lại ghim hằng số 36/37 trong khẳng định của chính nó (low) · `scripts/roadmap/check-plan-docs-teeth.sh:100` | **chưa quyết** — máy đề xuất: ghi Known limits |
+
 ## Analyst
 
 none — mọi eval feature đều red trên baseline (có phân biệt)
