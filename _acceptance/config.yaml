@@ -368,6 +368,19 @@ executors:
     # phep khang dinh truc tiep ben duoi. Phat hien ngoai hop dong -> Cong 2.
     lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/roadmap/check-plan-suite-key.sh"
     lcm_pmap: "node scripts/ci/check-product-map.mjs && bash scripts/ci/check-product-map-teeth.sh --case parked-opportunity"
+    # --- mo-hoa-b01 (05/09) --- guard dinh danh fork + rang, MOT khoa moi ca (khuon lcm_*).
+    fork_identity: "bash scripts/fork/check-fork-identity.sh"
+    mhb_teeth_all: "bash scripts/fork/check-fork-identity-teeth.sh"
+    mhb_teeth_image: "bash scripts/fork/check-fork-identity-teeth.sh --case image-upstream && bash scripts/fork/check-fork-identity-teeth.sh --case conf-remote-lech && bash scripts/fork/check-fork-identity-teeth.sh --case readme-image-missing"
+    mhb_teeth_compose_build: "bash scripts/fork/check-fork-identity-teeth.sh --case compose-no-build && bash scripts/fork/check-fork-identity-teeth.sh --case readme-no-build-cmd"
+    mhb_teeth_release: "bash scripts/fork/check-fork-identity-teeth.sh --case tag-trigger-back && bash scripts/fork/check-fork-identity-teeth.sh --case prepare-if-gone && bash scripts/fork/check-fork-identity-teeth.sh --case disarmed-header-gone && bash scripts/fork/check-fork-identity-teeth.sh --case claude-not-released-gone && bash scripts/fork/check-fork-identity-teeth.sh --case claude-builds-line-back"
+    mhb_teeth_community: "bash scripts/fork/check-fork-identity-teeth.sh --case discord-back && bash scripts/fork/check-fork-identity-teeth.sh --case email-back && bash scripts/fork/check-fork-identity-teeth.sh --case funding-back && bash scripts/fork/check-fork-identity-teeth.sh --case clone-upstream && bash scripts/fork/check-fork-identity-teeth.sh --case issue-template-not-fork"
+    mhb_teeth_badges: "bash scripts/fork/check-fork-identity-teeth.sh --case badge-upstream && bash scripts/fork/check-fork-identity-teeth.sh --case release-badge-back && bash scripts/fork/check-fork-identity-teeth.sh --case ci-badge-gone && bash scripts/fork/check-fork-identity-teeth.sh --case pypi-badge-wrong-dist"
+    mhb_teeth_ratchet: "bash scripts/fork/check-fork-identity-teeth.sh --case clean && bash scripts/fork/check-fork-identity-teeth.sh --case hit-outside && bash scripts/fork/check-fork-identity-teeth.sh --case class-matrix && bash scripts/fork/check-fork-identity-teeth.sh --case stale-exemption"
+    mhb_teeth_notice: "bash scripts/fork/check-fork-identity-teeth.sh --case notice-dist-gone && bash scripts/fork/check-fork-identity-teeth.sh --case notice-unchanged-back && bash scripts/fork/check-fork-identity-teeth.sh --case notice-attribution-gone"
+    mhb_prototype_lane: "bash scripts/fork/check-prototype-lane.sh mo-hoa-b01 && bash scripts/fork/check-fork-identity-teeth.sh --case debt-table-missing"
+    mhb_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/fork/check-suite-key.sh fork_identity check-fork-identity.sh && bash scripts/fork/check-fork-identity-teeth.sh --case suite-key-dangling"
+    mhb_existing_guards: "bash scripts/plugins/check-live-docs-manifest-synced.sh readme && bash scripts/plugins/check-live-docs-manifest-synced.sh claude && bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main && bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh && bash scripts/ci/check-action-pins.sh && bash scripts/ci/check-docker-dryrun.sh && node scripts/roadmap/check-plan-freeze.mjs && bash scripts/roadmap/check-plan-docs.sh && bash scripts/roadmap/check-roadmap-fresh.sh && node scripts/ci/check-product-map.mjs"
     # Job CI: rut lenh RA TU ci.yml roi CHAY no, theo khuon check-vitest-job.sh.
     # Doc YAML la do chi dan; chay lenh rut ra moi la do hanh vi.
     # o-do-chay-0-ca-van-xanh: mot o do loc theo ten ca ma khong ca nao khop
@@ -841,6 +854,7 @@ feature_loop:
     - executors.test.sdk_pytest
     - executors.script.verify_plugins
     - executors.script.gen_abi_clean
+    - executors.script.fork_identity
 
 dev_server:
   # Own dist dir, not the shared `.next`. The machine lane runs

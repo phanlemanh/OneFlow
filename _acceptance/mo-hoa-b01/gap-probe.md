@@ -1,0 +1,27 @@
+---
+slug: mo-hoa-b01
+at: 2026-09-05T07:36:39Z
+verdict: findings
+p0: 0
+p1: 4
+p2: 1
+---
+
+## Findings
+
+| Sev | Artifact | Thiếu gì | Kịch bản fail | Thước đo | Xử lý |
+|---|---|---|---|---|---|
+| P1 | evals | Lớp định danh upstream khai 8 mẫu regex (design §5) nhưng ma trận đỏ chỉ đi qua thông điệp của CHÍNH LỚP (`định danh upstream ngoài miễn trừ`) ở 2 mẫu: `github.com/tong-io/tongflow` (hit-outside, clone-upstream) và `discord.gg` (discord-back). Mẫu `ghcr.io/tong-io`, `shields.io/…tong-io`, `pypi/v/tongflow` chỉ đỏ nhờ khẳng định dương cùng ca, còn `tongflow\.com`, `pypi.org/project/tongflow/`, `TongFlow-(mac|win)` không ca nào. AC-4 hứa «không file nào chứa email `@tongflow.com`» mà E4 không có ca email. Cùng lớp [chong-mat-khoa-byo-giao-dien#F1] «tuyên quét một LỚP mà không có ma trận toàn phần» | Implementer gõ sai một mẫu hoặc bỏ hẳn 3 mẫu không ca — răng vẫn xanh. Sau merge, ai đó trả `security@tongflow.com` vào SECURITY.md hoặc link `pypi.org/project/tongflow/` vào README_ZH: guard xanh, AC-4/AC-6 đã ký mà lời hứa không có thật | E6 mở ma trận toàn phần: mỗi mẫu trong lớp một lượt chèn hit vào một file lành ngoài miễn trừ, ghim đúng `định danh upstream ngoài miễn trừ — <file>:<dòng>`; số lượt = số mẫu, ghim hằng trong E6. E4 nhận ca `email-back` | **fixed:** ca răng `class-matrix` chạy 8/8 mẫu trên cùng fixture, E6 ghim `8/8 mẫu`; E4 thêm `email-back`; E7 mẫu số 27 |
+| P1 | evals | Khẳng định dương trong §5 là 18 vế nhưng răng chỉ phá một phần và có ca phá HAI biến ghim MỘT thông điệp (claude-release-lies, notice-lies) — trái luật §6 «phá đúng một biến». Không ca đỏ cho `if: startsWith`, header `DISARMED`, link fork trong ba issue template, badge CI, chuỗi ảnh trong `docker run`, lệnh `--build` ở README.md/ZH. Design §6 liệt 13 ca, E7 ghim 16 | Guard cài đúng một vế mỗi nhóm là đủ xanh: NOTICE có `oneflow-sdk` mà vẫn giữ `consumed unchanged` → AC-10 ký sai; CLAUDE.md có `Not currently released` nhưng câu «tag builds» vẫn còn → AC-3 ký sai; prepare mất `if:` → dry-run cắt bộ cài thương hiệu upstream mà guard xanh | Mỗi khẳng định dương một ca răng, phá đúng một biến, ghim thông điệp riêng; sửa design §6 khớp mảng CASES cuối | **fixed:** tách thành 27 ca, mỗi ca một biến một token (claude-release-lies → `claude-not-released-gone` + `claude-builds-line-back`; notice-lies → `notice-dist-gone` + `notice-unchanged-back`; thêm `prepare-if-gone`, `disarmed-header-gone`, `issue-template-not-fork`, `ci-badge-gone`, `readme-image-missing`, `release-badge-back`; các ca lặp ba README/ba template phá từng file một, ghim theo file); design §6 liệt đúng 27 ca |
+| P1 | contract | Trục Coverage «Cross-cutting: ghi công AGPL/NOTICE phải GIỮ» không có AC nào và không eval nào. E6 chỉ ghim `N hit đã miễn trừ` với N ≥ 1 — vô danh; AC-10 không đòi NOTICE còn trỏ nguồn upstream | Implementer đuổi guard xanh bằng cách XOÁ link `github.com/tong-io/tongflow` khỏi NOTICE.md thay vì viết dòng miễn trừ: không hit, không miễn trừ ôi, N ≥ 1 vẫn thoả nhờ `app.tongflow.com` ở desktop-release. Repo mất ghi công AGPL của upstream ngay sau khi ký | AC-10 thêm vế NOTICE chứa URL kho upstream VÀ bản miễn trừ có dòng `NOTICE.md\|github\.com/tong-io/tongflow\|ghi công`; E6 thay `N ≥ 1` bằng danh sách miễn trừ tối thiểu có tên; ca răng `notice-attribution-gone` | **fixed:** AC-10 nhận vế ghi công; guard in `OK: ghi công upstream còn ở NOTICE.md`; E6 ghim ba dòng miễn trừ tối thiểu có tên; ca `notice-attribution-gone` |
+| P1 | evals | AC-9 liệt 9 guard, opportunity nói «11/11», E9 ghim 8 token — không token cho mode `orphans` lẫn `check-prefix-docs`. Cùng kịch bản [noi-thuoc-tai-lieu-vao-ci#F1] «một step vào với 0 lượt thực thi» | Lệnh quên gọi `check-prefix-docs` — guard nhạy nhất với việc «dựng lại phần badge» ở README_ZH/JA; badge lệch prefix-docs mà E9 xanh, AC-9 ký sai | E9 ghim một token có tên cho MỖI guard (11 ↔ 11); contract/opportunity thống nhất con số | **fixed:** AC-9 liệt 11 lệnh, E9 ghim 11 token trong đó `OK: no new orphan` của mode orphans và `docs/plugins.md: documents the oneflow convention` của prefix-docs |
+| P2 | evals | E8 đo `grep -c` chuỗi-có-mặt trong khi lời hứa là quan hệ (khoá nằm DƯỚI `suite_keys` VÀ trỏ tới executor tồn tại). Design §8 khai executor `mhb_*` mà không nêu khoá `fork_identity` | suite_keys ghi khoá không tồn tại → grep vẫn 1, E8 xanh; vòng S4 của mọi hồ sơ sau dereference khoá rỗng, guard không bao giờ chạy trong verify — đúng lỗ [oneflow-verify-suite-keys-seam] | Đọc YAML có cấu trúc: `feature_loop.suite_keys` chứa X; `executors.script.X` tồn tại và gọi `check-fork-identity.sh`; chiều đỏ: đổi tên khoá đích trong bản sao → đỏ nêu tên | **fixed:** E8 dùng `scripts/fork/check-suite-key.sh fork_identity check-fork-identity.sh` (đọc cấu trúc theo khuôn check-plan-suite-key.sh của lat-cat-chung-minh), ca răng `suite-key-dangling`; design §8 nêu đích danh khoá `executors.script.fork_identity` |
+
+## Ghi chú định đoạt
+
+Năm finding, năm `fixed`, không finding nào đẩy sang `human-gate1`, không cái nào bị `rejected`. Bốn
+cái đầu cùng một họ với vòng lat-cat-chung-minh: **mỗi khẳng định dương phải có một lượt phá riêng
+trên cùng fixture, ghim thông điệp riêng**; ca phá hai biến ghim một thông điệp là ca chỉ chứng
+được một nửa. Lint độ phủ (advisory) cờ W1 ở AC-4 và AC-11: AC-4 nay có ba ca phủ định
+(discord-back · email-back · funding-back), AC-11 có `debt-table-missing` — lint chỉ tìm dấu
+phủ định trong chữ `expected`, không đọc được ca răng; ghi để người duyệt biết đã xem.
