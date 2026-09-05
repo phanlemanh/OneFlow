@@ -233,21 +233,3 @@ evals:
       `khong-ho-so-ky`: cây không có hồ sơ ký nào phải cho FAIL CÓ TÊN và các phép kiểm sau vẫn
       chạy (`OK: roadmap 1.6 trỏ B7` vẫn in) — không tắt ngang vì `grep` không khớp dưới `set -e`.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
-
-  - id: J1
-    criterion: AC-2
-    executor: judgment
-    question: >-
-      Bốn thông điệp chặn của chốt chặn (hồ sơ mở ngoài kế hoạch · dấu xong nói dối ·
-      khai xếp-lại-sau mà hồ sơ chưa xếp · ngoại lệ không có lý do có tên) có nói cho
-      người đọc biết THỨ gì sai và VIỆC gì phải làm không, hay chỉ ném ra một mã lỗi?
-    # Duong dan TUONG DOI voi thu muc ho so: s4-args resolve theo do va KHONG kiem
-    # file co that hay khong, nen mot duong kieu repo-relative thanh duong chet lang le.
-    inputs:
-      - contract.md
-      - ../../scripts/roadmap/check-plan-freeze.mjs
-    rubric: >-
-      Đọc stdout/stderr của guard ở các ca F1–F4 (trong evidence của E2, E4, E5, E3): mỗi thông
-      điệp gọi đúng tên slug, nói THỨ gì sai và VIỆC gì phải làm (thêm Ngoại lệ / park / ký),
-      không dùng mã lỗi trần thay câu người (luật N1–N6 của kit). PASS nếu cả bốn đạt.
-    evidence_required: [run_id, verifier, verified_at, output]

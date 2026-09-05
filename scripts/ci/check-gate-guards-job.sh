@@ -347,11 +347,15 @@ cm.write_text(t3.replace("`oneflow-api-openai`", "`oneflow-api-openai`, `tongflo
 # 15 checks stayed OK in BOTH directions (S4 round 2, in-contract finding).
 st = root / "STATUS.md"
 t4 = st.read_text(encoding="utf-8")
-assert "## Hiện trạng (2026-09-04" in t4, "fixture anchor moved: STATUS.md heading date"
+import re as _re
+_m = _re.search(r"^## Hiện trạng \((\d{4}-\d{2}-\d{2})", t4, _re.M)
+assert _m, "fixture anchor moved: STATUS.md heading date"
 # Must be older than the NEWEST approved_at on the tree, not merely one day back:
 # the check is a relation now (AC-17), so rolling back a single day can still
 # satisfy it. Rolling back to 2026-01-01 is unambiguous in either regime.
-st.write_text(t4.replace("## Hiện trạng (2026-09-04", "## Hiện trạng (2026-01-01", 1), encoding="utf-8")
+# Ngay doc TU CAY roi lui ve 2026-01-01. Ghim ngay hom nay o day la dung benh ma
+# AC-17 vua go khoi guard: no do that ngay STATUS.md duoc lam moi hop le.
+st.write_text(t4[:_m.start(1)] + "2026-01-01" + t4[_m.end(1):], encoding="utf-8")
 # A working-state dossier outside the plan -> check-plan-freeze.mjs must go red.
 stray = root / "_acceptance" / "teeth-probe-freeze"
 stray.mkdir(parents=True, exist_ok=True)

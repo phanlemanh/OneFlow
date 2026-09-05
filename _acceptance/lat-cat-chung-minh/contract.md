@@ -46,11 +46,12 @@ Source input: docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md
 
 ## Coverage
 
-- Trục phán quyết: F0 · F1 · F2 (contract) · F2 (opportunity — kiểm A1) · F3 · F4 · F5 (park niêm yết + ký) [thước CE: mỗi phán quyết một case đỏ + case chiều ngược cho F1 (go-bang) và F2 (tin-theo-loi)]
+- Trục phán quyết: F0 · F1 · F2 (contract) · F2 (opportunity — kiểm A1) · F3 · F4 · F5 (park niêm yết + ký) [thước CE: mỗi phán quyết một case đỏ; chất lượng CHỮ của thông điệp không còn phép đo nào sau descope J1 — 05/09] [thước CE: mỗi phán quyết một case đỏ + case chiều ngược cho F1 (go-bang) và F2 (tin-theo-loi)]
 - Trục vòng đời: đóng băng · gỡ băng · mốc tái hoạch · đóng kế hoạch (`closed:` — chưa có case, ghi Known limits)
 - Trục đấu dây: step CI · needle guard-của-guard · suite key local · bản đồ sản phẩm
 - Trục tài liệu: roadmap · STATUS.md · vision.md · ba opportunity park · cơ hội lát cắt
 - Trục chiều đo (thêm sau gap-probe 04/09): mỗi phán quyết phải có **cặp hai chiều trên cùng fixture** — F1-contract (o-moi ↔ go-bang) · F1-opportunity (o-moi-co-hoi-hong ba hình dạng hỏng ↔ cơ hội `decision: park` vẫn xanh) [thêm 04/09 sau S4 vòng 1 — nửa này trước đó không có phép đo nào] · F2-contract (tick-noi-doi ↔ tin-theo-loi) · F2-opportunity (kiem-co-hoi ↔ kiem-co-hoi-de-xuat) · F3 (park-khong-that ↔ clean) · F4 (ngoai-le-tran ↔ ngoai-le-hop-le) · NOTE mốc (checkpoint-note ↔ checkpoint-done) · tài liệu (check-plan-docs-teeth 4 ca ↔ ca lành) [thước CE: ba nửa-xanh này chính là ba lỗ gap-probe tìm ra]
+- **[descope 05/09 — owner quyết ở Cổng 2]** Bỏ ô phán đoán J1 («bốn thông điệp chặn có nói THỨ gì sai và VIỆC gì phải làm không»). Lý do không phải nội dung mà là **không có đường hợp lệ để đóng nó**: chốt bằng chứng đòi người chấm là script hoặc `config:<key>` và đòi `run_id` có dòng trong sổ máy, mà ô hội-đồng-máy không có cả hai — nên hồ sơ không bao giờ đạt `PASS`, trong khi cổng tiền hợp nhất lại đòi `PASS` mới cho merge. AC-2 vẫn còn **E2** (hồ sơ có contract, đường fail-closed) và **E16** (hồ sơ chỉ có opportunity, đường từng fail-open) phủ. Cái mất là phép đo CHẤT LƯỢNG THÔNG ĐIỆP: từ nay không có gì bắt được một thông điệp chặn chỉ ném ra mã lỗi mà không nói phải làm gì.
 - Bỏ coverage-scan bằng skill — xem entry `descope` d-20260904T121500Z-lcm4 (không gian AC là bảng phán quyết × vòng đời × đấu dây × tài liệu, đã liệt kê đủ ở §5/§9 thiết kế được owner duyệt từng phần)
 
 ## Out of scope

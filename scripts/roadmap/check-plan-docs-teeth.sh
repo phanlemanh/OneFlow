@@ -57,9 +57,11 @@ case_lui_ngay() {
     python3 - "$tmp/t/STATUS.md" <<'PY'
 import sys, pathlib, re
 p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
-assert "## Hiện trạng (2026-09-04" in s, "fixture stale: STATUS.md date line moved"
-p.write_text(re.sub(r"^## Hiện trạng \(2026-09-04", "## Hiện trạng (2026-08-17",
-                    s, count=1, flags=re.M), encoding="utf-8")
+# Ngay ĐỌC TỪ CÂY, khong ghim mot ngay chet: ghim la dung benh ma guard nay ton tai
+# de chan, va no do that ngay STATUS.md duoc lam moi hop le.
+m = re.search(r"^## Hiện trạng \((\d{4}-\d{2}-\d{2})", s, re.M)
+assert m, "fixture stale: STATUS.md khong con dong tieu de mang ngay"
+p.write_text(s[:m.start(1)] + "2026-08-17" + s[m.end(1):], encoding="utf-8")
 PY
     is_red || return 1
     out_has 'FAIL: STATUS.md đề ngày 2026-08-17 nhưng hồ sơ ký mới nhất'
@@ -73,9 +75,11 @@ case_ngay_tien() {
     python3 - "$tmp/t/STATUS.md" <<'PY'
 import sys, pathlib, re
 p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
-assert "## Hiện trạng (2026-09-04" in s, "fixture stale: STATUS.md date line moved"
-p.write_text(re.sub(r"^## Hiện trạng \(2026-09-04", "## Hiện trạng (2026-09-18",
-                    s, count=1, flags=re.M), encoding="utf-8")
+# Ngay ĐỌC TỪ CÂY, khong ghim mot ngay chet: ghim la dung benh ma guard nay ton tai
+# de chan, va no do that ngay STATUS.md duoc lam moi hop le.
+m = re.search(r"^## Hiện trạng \((\d{4}-\d{2}-\d{2})", s, re.M)
+assert m, "fixture stale: STATUS.md khong con dong tieu de mang ngay"
+p.write_text(s[:m.start(1)] + "2026-09-18" + s[m.end(1):], encoding="utf-8")
 PY
     is_green || { echo "    lam moi STATUS.md hop le ma van do — guard sai huong" >&2; return 1; }
     out_has 'OK: STATUS.md đề ngày 2026-09-18'
@@ -89,15 +93,19 @@ case_ti_le_lech() {
     mkdir -p "$tmp/t/_acceptance/zz-ho-so-thu-37"
     printf -- '---\nschema_version: 1\nslug: zz-ho-so-thu-37\nrisk_tier: T2\nstatus: signed-off\napproved_at: 2026-09-02\n---\n' \
         > "$tmp/t/_acceptance/zz-ho-so-thu-37/contract.md"
+    # Con so ĐỌC TỪ CÂY, khong ghim. Ban dau ca nay ghim 36/37 — dung thu benh no
+    # dung ra de chung minh la khong duoc mac, va no do that ngay ngay ho so thu 37
+    # duoc ky (05/09). Doc N tu chinh STATUS.md cua fixture roi dat N+1.
     python3 - "$tmp/t/STATUS.md" <<'PY'
 import sys, pathlib, re
 p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
-s2 = re.sub(r"\*\*36 hồ sơ đã ký\*\*", "**37 hồ sơ đã ký**", s, count=1)
-assert s2 != s, "fixture stale: STATUS.md khong con khai 36 ho so"
-p.write_text(s2, encoding="utf-8")
+m = re.search(r"\*\*(\d+) hồ sơ đã ký\*\*", s)
+assert m, "fixture stale: STATUS.md khong con khai so ho so da ky"
+n = int(m.group(1))
+p.write_text(s[:m.start(1)] + str(n + 1) + s[m.end(1):], encoding="utf-8")
 PY
-    is_red || { echo "    doan ti le van 16/36 tren cay 37 ho so ma guard xanh" >&2; return 1; }
-    out_has "đoạn tỉ lệ khai 'trên 36 hồ sơ' nhưng cây đếm được 37"
+    is_red || { echo "    doan ti le lech mau so ma guard van xanh" >&2; return 1; }
+    out_has "đoạn tỉ lệ khai 'trên [0-9]+ hồ sơ' nhưng cây đếm được [0-9]+"
 }
 
 # Chieu NGUOC cua luat cam ADR-0013: cam la CO DIEU KIEN. Ngay ADR ay ha canh

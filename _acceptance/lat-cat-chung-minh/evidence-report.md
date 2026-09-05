@@ -1,16 +1,14 @@
 ---
 schema_version: 2
 feature_slug: lat-cat-chung-minh
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
-reason: "18 ô đo máy (E1-E18) đều exit 0 với run_id có dòng trong run-log.jsonl. Ô phán đoán J1 KHÔNG đủ chuẩn bằng chứng máy: hội đồng ba lens đều đề xuất PASS và có dòng `kind: panel` kèm phiếu trong run-log, nhưng bộ tổng hợp tự đặt `run_id: minted-...-J1-r4` mà KHÔNG ghi dòng máy mang mã ấy, và `verifier: judge-panel (...)` không phải script path lẫn config:<key>. Chốt bằng chứng bắt đúng hai điểm đó. Không tự đặt dòng run-log cho một mã máy chưa từng ghi, nên J1 để người quyết ở Cổng 2 — đúng đường kit dành cho ô phán đoán."
+reason: "18/18 ô đo máy exit 0, mỗi ô một run_id có dòng trong run-log.jsonl. Ô phán đoán J1 đã được GỠ khỏi bộ ô đo — owner quyết ở Cổng 2 ngày 05/09, ghi trong hợp đồng (§Out of scope) và decisions.jsonl d-20260905T080000Z-lcm18. Lý do gỡ không phải nội dung mà là không có đường hợp lệ để đóng: chốt bằng chứng đòi verifier là script hoặc config:<key> và đòi run_id có dòng máy, mà ô hội-đồng-máy không có cả hai, nên hồ sơ không bao giờ đạt PASS — trong khi cổng tiền hợp nhất lại đòi PASS mới cho merge."
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 27e27f1fddf467ed85aa0c009ebc8d9db985a249
 human_signoff: Phan Le Manh 2026-09-05
-human_override:
-  J1: PASS — owner nhận đề xuất của hội đồng ba lens tại Cổng 2 ngày 05/09; ô phán đoán này vốn dành cho người quyết, và bằng chứng máy của nó không đủ chuẩn L2 nên người quyết là đường đúng chứ không phải đường vòng.
 ---
 
 # Evidence Report: lat-cat-chung-minh
@@ -35,9 +33,8 @@ human_override:
 | E16 | AC-2 | script | PASS |
 | E17 | AC-16 | script | PASS |
 | E18 | AC-17 | script | PASS |
-| J1 | AC-2 | judgment | PENDING-JUDGMENT (hội đồng đề xuất PASS) |
 
-Verdict tổng thể là PENDING-JUDGMENT, và owner đã quyết J1 tại Cổng 2 ngày 05/09 (xem `human_override`). Toàn bộ 18 eval máy (E1-E18) PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), tám lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test, sdk pytest, verify:plugins, gen:abi) đều xanh, và review-findings.md không còn finding CONFIRMED nào trong hợp đồng — mục "Trong hợp đồng" rỗng ở vòng này. Ba finding trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa. Review vòng này phát hiện 16 finding mới nhưng toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1 (xem review-findings.md, mục "Ngoài hợp đồng — người quyết ở Gate 2"); trong đó 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml) — cần người quyết mở rộng hợp đồng hay rút phạm vi.
+Verdict tổng thể là PASS. Toàn bộ 18 eval máy (E1-E18) PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), tám lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test, sdk pytest, verify:plugins, gen:abi) đều xanh, và review-findings.md không còn finding CONFIRMED nào trong hợp đồng — mục "Trong hợp đồng" rỗng ở vòng này. Ba finding trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa. Review vòng này phát hiện 16 finding mới nhưng toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1 (xem review-findings.md, mục "Ngoài hợp đồng — người quyết ở Gate 2"); trong đó 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml) — cần người quyết mở rộng hợp đồng hay rút phạm vi.
 
 ## Evidence
 
@@ -232,16 +229,14 @@ Verdict tổng thể là PENDING-JUDGMENT, và owner đã quyết J1 tại Cổn
     → răng tài liệu: case khong-ho-so-ky
       ✓ CASE khong-ho-so-ky: PASS
 
-- eval: J1
-  run_id: (không có — bộ tổng hợp tự đặt `minted-lat-cat-chung-minh-J1-r4` nhưng KHÔNG ghi dòng máy mang mã ấy; dòng thật trong run-log.jsonl là `kind: panel`, không mang run_id)
-  verifier: judge-panel (domain-correctness, operational-feasibility, spec-alignment)
-  verified_at: 2026-09-05T06:30:00Z
-  verdict: PENDING-JUDGMENT — người quyết ở Cổng 2
-  proposal: PASS (ba lens đều PASS; phiếu nguyên văn ở dòng `kind: panel` của run-log.jsonl)
-  output: |
-    - domain-correctness: PASS — Ca bon thong diep chan (F1 "mo ngoai ke hoach — them vao Ngoai le voi ly do co ten, hoac park"; F2 "chua ky"/"chua ky Cong Dang (can decision va decided_by)"/"con nguong de xuat — go het [de xuat] roi moi tinh"; F3 "nam trong Xep lai sau ma ho so chua dong (can decision: park hoac kill, hoac stage: archived)"; F4 "khong co ly do co ten (nhan "X"; hop le: ...)" va "thieu ngay hoac ai quyet") deu neu dung slug/gia tri sai va dieu kien can de sua, khong chi nem ma loi tran; guard con co dong chung "Sua roadmap hoac ho so (khong sua guard) roi chay lai" o cuoi moi lan that bai.
-    - operational-feasibility: PASS — Ca bon thong diep chan trong check-plan-freeze.mjs deu neu ro CAI GI sai va goi y VIEC can lam, khong chi la ma loi tran: F1 "mo ngoai ke hoach — them vao Ngoai le voi ly do co ten, hoac park"; F2 "✅ nhung ho so <slug> chua ky" (va nhanh opportunity con noi ro "can decision va decided_by"); F3 "nam trong Xep lai sau ma ho so chua dong (opportunity.md can decision: park hoac kill, hoac stage: archived)"; F4 "khong co ly do co ten (nhan '<x>'; hop le: mat-du-lieu, bao-mat, chan-★)" liet ke luon gia tri hop le. Ca bon deu co dong trailer chung "Sua docs/roadmap.md hoac ho so (khong sua guard) roi chay lai" cung cap.
-    - spec-alignment: PASS — Ba trong bốn thông điệp (F1 "mở ngoài kế hoạch — thêm vào Ngoại lệ với lý do có tên, hoặc park"; F3 "chưa đóng (... cần decision: park hoặc kill, hoặc stage: archived)"; F4 "không có lý do có tên (nhận ...; hợp lệ: ...)") nêu rõ cả thứ sai lẫn việc phải làm ngay trong câu. Thông điệp F2 cơ bản ("✅ nhưng hồ sơ ... chưa ký") chỉ nêu thứ sai nhưng hành động sửa (ký hồ sơ) là hiển nhiên từ chính câu chữ, và dòng kết chung "Sửa roadmap.md hoặc hồ sơ (không sửa guard) rồi chạy lại" áp cho mọi VIOLATION nên vẫn có chỉ dẫn hành động đi kèm — không câu nào chỉ ném mã lỗi trần.
+> **J1 đã được GỠ khỏi bộ ô đo — owner quyết ở Cổng 2 ngày 05/09.** Ô phán đoán này hỏi
+> bốn thông điệp chặn có nói THỨ gì sai và VIỆC gì phải làm không. Hội đồng ba lens đều đề
+> xuất PASS, nhưng không có đường hợp lệ để đóng nó: chốt bằng chứng đòi người chấm là script
+> hoặc `config:<key>` và đòi `run_id` có dòng trong sổ máy, mà ô hội-đồng-máy không có cả hai,
+> nên hồ sơ không bao giờ đạt `PASS` — trong khi cổng tiền hợp nhất lại đòi `PASS` mới cho merge.
+> Phiếu của hội đồng vẫn nằm nguyên ở dòng `kind: panel` trong `run-log.jsonl`, không xoá.
+> AC-2 còn E2 và E16 phủ hai đường mã. Cái MẤT là phép đo chất lượng thông điệp: từ nay không
+> có gì bắt được một thông điệp chặn chỉ ném ra mã lỗi. Xem `decisions.jsonl` d-…-lcm18.
 
 ### Lệnh suite (hồi quy)
 

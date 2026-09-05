@@ -138,7 +138,7 @@ quả giống canvas (conformance pass).
 plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=85% · checkpoint: 2026-10-09
 | # | ★ | Hạng mục | slug | Trạng thái | Ghi chú |
 |---|---|---|---|---|---|
-| B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap; mở cơ hội của lát cắt | lat-cat-chung-minh | ◐ | hạng mục mới cuối cùng được nhận; vòng nội bộ, ngưỡng Không đo được |
+| B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap; mở cơ hội của lát cắt | lat-cat-chung-minh | ✅ | hạng mục mới cuối cùng được nhận; vòng nội bộ, ngưỡng Không đo được |
 | B2 | ★ | Hạ cánh nhánh mở hoá b01: ba README, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ⬜ | code có trước hợp đồng nên đi làn prototype keep; merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
 | B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, ADR Director trường kỳ về main, mục Làn D | director-wire-shape | ⬜ | T3 vì chạm src/db; soi Gate 1.5 đã qua chưa; director-v2 D1 D2 D4 đã park |
 | B4 | ★ | Engine dùng venv per-plugin như TS, bỏ fallback về sys.executable; SDK 0.2.20 và bump pin bốn plugin | hai-duong-chay-mot-venv | ⬜ | T3 vì chạm sdk, kèm train SDK; sau A6 |
@@ -269,11 +269,12 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 
 | `khong-noi-sai-ve-kho-khoa` | T3 | 04/09 | *ngoài lộ trình* — bốn phát hiện HIGH của hội đồng chong-mat-khoa-byo-giao-dien, khoanh lại theo **bất biến** thay vì theo bề mặt: máy chủ kiểm tiền đề của lệnh thay-kho trước khi thi hành (kho lành thì từ chối, không ghi một byte), và giao diện phân loại lỗi đọc **dương cả hai chiều** trên chín tín hiệu dây — phiên hết hạn và proxy 502 thôi bị gọi là kho hỏng, nên tấm thẻ đỏ kèm nút xoá kho chỉ còn ở đúng một ô trong mười hai. Thêm trần 30 giây cho cả đọc lẫn ghi. 13/13 eval qua ba vòng, 5 giới hạn khai rõ; hai việc đi hồ sơ mới |
 | `hang-rao-doc-nham-loi-thanh-khong-co-gi` | T2 | 04/09 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: khi một phép kiểm không lấy được dữ liệu nó cần, nó **nói thẳng và dừng** thay vì im lặng kết luận rỗng ấy là sạch. 4/9 điểm đọc git trong hàng rào ghim chuyển sang từ chối (5 điểm giữ, mỗi điểm một lý do), thêm hàng rào bắt khoá lặp trong tệp khai ô đo — ca thật đã làm một hồ sơ đã ký mô tả một phép đo đã bị rút — và ô đo tự chấm chính mình nay phải **khai tường minh**, quên khai thì đỏ chứ không xanh. Đo được: chạy với một mốc so sánh không phân giải được, 25 lỗi giả về 0. 12/12 eval qua hai vòng, 2 giới hạn khai rõ; 6 việc đi hồ sơ mới, trong đó hai là lỗ trong chính công cụ vòng này dựng |
+| `lat-cat-chung-minh` | T2 | 05/09 | *ngoài lộ trình* — hạ tầng kế hoạch: bốn nguồn kế hoạch của kho gộp về **một khối máy-đọc-được** trong lộ trình, kèm luật đóng băng có răng chạy trong CI. Sáu phán quyết: khối hỏng thì fail-closed · hồ sơ mở ngoài kế hoạch · dấu xong nói dối · khai xếp-lại-sau mà hồ sơ chưa đóng · ngoại lệ không có lý do có tên · rời băng bằng cách xếp lại thì phải **niêm yết trên kế hoạch chung và mang chữ ký**. Bộ kiểm tài liệu thôi ghim hằng số: ngày và tỉ lệ suy từ cây, nên tài liệu ôi mới đỏ chứ không phải lần làm mới hợp lệ. 18/18 ô đo qua bốn vòng; ba vòng đầu REJECT vì phản biện tìm ra lỗ trong chính các phép đo, không phải trong sản phẩm. Răng 15→20 ca và 5→9 ca. 16 giới hạn khai rõ; J1 gỡ ở Cổng 2 vì hai chốt của kit chặn nhau |
 
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này (đếm lại 04/09 trên 36 hồ sơ):** 16/36 là hạng mục trên lộ trình,
-5/36 là sửa lỗi sản phẩm ngoài lộ trình (bốn hồ sơ kho khoá và fork OpenAI), 15/36 là hạ tầng
+**Đọc được gì từ tỉ lệ này (đếm lại 05/09 trên 37 hồ sơ):** 16/37 là hạng mục trên lộ trình,
+5/37 là sửa lỗi sản phẩm ngoài lộ trình (bốn hồ sơ kho khoá và fork OpenAI), 16/37 là hạ tầng
 quy trình và CI. Con số thứ ba không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.
 Trong 15 hồ sơ ký từ 27/08, 7 là hạ tầng quy trình: đó chính là xu hướng mà khối kế hoạch và
