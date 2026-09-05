@@ -9,19 +9,26 @@
 #
 # Usage: check-prototype-lane.sh <slug>
 # Env:   PROTOTYPE_LANE_ROOT (repo root; default toplevel) · PROTOTYPE_LANE_OPP (opportunity file override) ·
-#        PROTOTYPE_LANE_MAIN (default main)
+#        PROTOTYPE_LANE_MAIN (space-separated candidates; default "main origin/main")
 # Exit 0 ok · 1 relation broken · 2 cannot conclude.
 set -euo pipefail
 
 SLUG="${1:?usage: check-prototype-lane.sh <slug>}"
 ROOT="${PROTOTYPE_LANE_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-MAIN="${PROTOTYPE_LANE_MAIN:-main}"
 cd "$ROOT"
+# A PR checkout on CI is a detached HEAD with no local `main`; only origin/main
+# exists there (S4 round 1, in-contract finding). Resolve the first ref that
+# exists; none -> cannot conclude (exit 2), never "not an ancestor" (exit 1).
+MAIN=""
+for cand in ${PROTOTYPE_LANE_MAIN:-main origin/main}; do
+    if git rev-parse --verify --quiet "${cand}^{commit}" >/dev/null; then MAIN="$cand"; break; fi
+done
 # PROTOTYPE_LANE_OPP lets the teeth script point at a perturbed copy while git
 # still runs in the real repository.
 OPP="${PROTOTYPE_LANE_OPP:-_acceptance/$SLUG/opportunity.md}"
 
 die() { echo "FAIL: $* — không kết luận" >&2; exit 2; }
+[ -n "$MAIN" ] || die "không giải được nhánh chính (thử: ${PROTOTYPE_LANE_MAIN:-main origin/main}) — fetch trước"
 [ -f "$OPP" ] || die "thiếu $OPP"
 
 front="$(awk 'NR==1&&/^---$/{f=1;next} f&&/^---$/{exit} f' "$OPP")"

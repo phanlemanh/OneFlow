@@ -162,7 +162,7 @@ evals:
     cmd: config:executors.script.mhb_prototype_lane
     paths: ["scripts/fork/check-prototype-lane.sh", "scripts/fork/check-fork-identity-teeth.sh", "_acceptance/mo-hoa-b01/opportunity.md"]
     expected: >-
-      exit 0 và stdout có `OK: base_commit 5547aff2 là tổ tiên của main`, `OK: 13/13 file của diff có hàng trong bảng nợ`
+      exit 0 và stdout có `OK: base_commit 5547aff2 là tổ tiên của main` (trên checkout PR không có nhánh `main` cục bộ thì in `origin/main` — script giải theo thứ tự main rồi origin/main, không giải được thì exit 2 «không kết luận», S4 vòng 1), `OK: 13/13 file của diff có hàng trong bảng nợ`
       (chạy thật trên hồ sơ) và `CASE debt-table-missing: PASS` (xoá hàng `docs/README_JA.md` khỏi bản sao
       opportunity → guard đỏ ghim `thiếu hàng nợ cho docs/README_JA.md`). Chiều should-NOT-fire (lint W1):
       bản sao đủ 13 hàng thì guard thoát 0 — chính là lượt chạy thật.

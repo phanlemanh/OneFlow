@@ -33,7 +33,8 @@ READMES=(README.md docs/README_ZH.md docs/README_JA.md)
 TEMPLATES=(.github/ISSUE_TEMPLATE/bug_report.yml .github/ISSUE_TEMPLATE/config.yml .github/ISSUE_TEMPLATE/feature_request.yml)
 FIXTURE_FILES=("${READMES[@]}" docker-compose.yml CONTRIBUTING.md SECURITY.md NOTICE.md CLAUDE.md "${TEMPLATES[@]}" .github/workflows/desktop-release.yml sdk/pyproject.toml scripts/fork/fork-identity.conf scripts/fork/fork-identity-allow.txt _acceptance/config.yaml "_acceptance/$SLUG/opportunity.md")
 
-REPO_LC="$(sed -n 's/^repo=//p' scripts/fork/fork-identity.conf | head -1 | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+REPO_RAW="$(sed -n 's/^repo=//p' scripts/fork/fork-identity.conf | head -1 | tr -d '[:space:]')"
+REPO_LC="$(printf '%s' "$REPO_RAW" | tr '[:upper:]' '[:lower:]')"
 IMAGE="ghcr.io/$REPO_LC"
 DIST="$(sed -n 's/^name[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' sdk/pyproject.toml | head -1)"
 
@@ -116,7 +117,8 @@ case_clean() {
 case_image-upstream() {
     fixture; green_control image-upstream
     replace_in "$probe/docker-compose.yml" "image: $IMAGE:latest" "image: ghcr.io/tong-io/tongflow:latest"
-    expect_red image-upstream "ảnh container"
+    # The FAIL phrasing only — "ảnh container" alone also appears in the green OK line.
+    expect_red image-upstream "ảnh container — compose có image: ghcr.io/tong-io/tongflow:latest"
 }
 case_conf-remote-lech() {
     # The remote lives in the real repo, so the guard runs there with only the
@@ -124,10 +126,14 @@ case_conf-remote-lech() {
     fixture
     local out rc=0
     FORK_IDENTITY_CONF="$probe/scripts/fork/fork-identity.conf" bash "$GUARD" >"$probe/.out" 2>&1 || { echo "FAIL CASE conf-remote-lech: đối chứng dương (conf sao y) đỏ" >&2; cat "$probe/.out" >&2; return 1; }
-    replace_in "$probe/scripts/fork/fork-identity.conf" "repo=phanlemanh/OneFlow" "repo=ai-do/kho-khac"
+    replace_in "$probe/scripts/fork/fork-identity.conf" "repo=$REPO_RAW" "repo=ai-do/kho-khac"
     FORK_IDENTITY_CONF="$probe/scripts/fork/fork-identity.conf" bash "$GUARD" >"$probe/.out" 2>&1 || rc=$?
     [ "$rc" -ne 0 ] || { echo "FAIL CASE conf-remote-lech: guard vẫn xanh" >&2; return 1; }
-    grep -F 'conf lệch remote — conf=ai-do/kho-khac remote=' "$probe/.out" >/dev/null || { echo "FAIL CASE conf-remote-lech: token vắng" >&2; cat "$probe/.out" >&2; return 1; }
+    # Both values must be in the message (AC-1): the remote path comes from git,
+    # the same way the guard derives it — never pinned by hand.
+    local remote_lc; remote_lc="$(git remote get-url origin | sed -E 's#^.*github\.com[:/]##; s#\.git$##; s#/$##' | tr '[:upper:]' '[:lower:]')"
+    [ -n "$remote_lc" ] || { echo "FAIL CASE conf-remote-lech: không đọc được remote origin" >&2; return 1; }
+    grep -F "conf lệch remote — conf=ai-do/kho-khac remote=$remote_lc" "$probe/.out" >/dev/null || { echo "FAIL CASE conf-remote-lech: token 'conf=ai-do/kho-khac remote=$remote_lc' vắng" >&2; cat "$probe/.out" >&2; return 1; }
 }
 case_readme-image-missing() {
     local r
