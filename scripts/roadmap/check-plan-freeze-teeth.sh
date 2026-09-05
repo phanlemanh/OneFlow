@@ -123,6 +123,24 @@ stray_dossier() {
   printf -- '---\nschema_version: 1\nslug: %s\nstatus: draft\n---\n' "$1" > "$tmp/t/_acceptance/$1/contract.md"
 }
 
+# Dua mot co hoi ve trang thai CHUA KY Cong Dang trong ban sao: xoa ba truong nguoi,
+# stage ve discovery, va chen lai tien to [de xuat] vao moi bullet cua muc Nguong.
+# Vi sao: hai ca kiem-co-hoi tung MUON trang thai chua-ky tu cay that. Ngay A1 duoc
+# ky (05/09) ca hai do tren CI — fixture ghim hien trang hom qua, dung lop benh
+# Ngoai-1 cua S4 vong 2. Fixture phai tu dung diem khoi hanh cua no.
+unsign_opportunity() {
+  python3 - "$tmp/t/_acceptance/$1/opportunity.md" <<'PY'
+import sys, pathlib, re
+p = pathlib.Path(sys.argv[1]); s = p.read_text(encoding="utf-8")
+s = re.sub(r"^stage:.*$", "stage: discovery", s, count=1, flags=re.M)
+for k in ("decision", "decided_by", "decided_at"):
+    s = re.sub(rf"^{k}:.*$", f"{k}:", s, count=1, flags=re.M)
+i = s.index("## Ngưỡng chết / ngưỡng UAT"); j = s.index("\n## ", i + 1)
+sec = re.sub(r"^(- [^:\n]+: )(?!\[đề xuất\] )", r"\1[đề xuất] ", s[i:j], flags=re.M)
+p.write_text(s[:i] + sec + s[j:], encoding="utf-8")
+PY
+}
+
 # --- cases ------------------------------------------------------------------
 
 # AC-1 control: the real tree must be green and the ratio line must be present
@@ -440,6 +458,7 @@ PY
 # verified against that opportunity's Cổng Đáng, not trusted.
 case_kiem_co_hoi() {
   build_fixture
+  unsign_opportunity skill-1-footage-kho-clip
   set_row_state "| A1 |" "✅"
   guard_is_red || return 1
   out_has 'F2' || return 1
@@ -463,6 +482,7 @@ PY
 # agreed — defeating the very "set the bar before you see the number" rule.
 case_kiem_co_hoi_de_xuat() {
   build_fixture
+  unsign_opportunity skill-1-footage-kho-clip
   set_row_state "| A1 |" "✅"
   python3 - "$tmp/t/_acceptance/skill-1-footage-kho-clip/opportunity.md" <<'PY'
 import sys, pathlib, re
