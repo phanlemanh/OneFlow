@@ -86,7 +86,7 @@ evals:
     paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/fork-identity-allow.txt", "SECURITY.md", "NOTICE.md"]
     expected: >-
       exit 0 và stdout có cả hai chiều của bánh cóc trên cùng fixture cộng ma trận toàn phần của lớp:
-      `CASE clean: PASS` in ba dòng miễn trừ tối thiểu CÓ TÊN (`NOTICE.md|github\.com/tong-io/tongflow`,
+      `CASE clean: PASS` in ba dòng miễn trừ tối thiểu CÓ TÊN (`NOTICE.md|fork of \[TongFlow\](…tong-io/tongflow)`,
       `.github/workflows/desktop-release.yml|app\.tongflow\.com`, `.github/workflows/desktop-release.yml|TongFlow-(mac|win)`)
       — không phải một con số N; `CASE hit-outside: PASS` (thêm `https://github.com/tong-io/tongflow/issues`
       vào bản sao SECURITY → `định danh upstream ngoài miễn trừ — SECURITY.md:<dòng>`);
@@ -103,10 +103,10 @@ evals:
     cmd: config:executors.script.mhb_teeth_all
     paths: ["scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/check-fork-identity.sh", "scripts/fork/check-prototype-lane.sh", "scripts/fork/check-suite-key.sh"]
     expected: >-
-      exit 0; dòng tổng `PASS: 27/27 ca` với mẫu số đọc từ `${#CASES[@]}`; mỗi ca một token
-      `CASE <tên>: PASS` (27 token, đúng danh sách ca ở design §6); `--case bogus` thoát 2 với `ca lạ`;
+      exit 0; dòng tổng `PASS: 28/28 ca` với mẫu số đọc từ `${#CASES[@]}`; mỗi ca một token
+      `CASE <tên>: PASS` (28 token, đúng danh sách ca ở design §6); `--case bogus` thoát 2 với `ca lạ`;
       `--selftest-fail` in `FAIL` và thoát ≠ 0. Chiều đỏ của phép đếm: gỡ một phần tử khỏi CASES trong
-      bản sao thì tổng in 26/26 chứ không phải 27/27 — con số 27 do E7 ghim, không do script tự khai.
+      bản sao thì tổng in 27/27 chứ không phải 28/28 — con số 28 do E7 ghim, không do script tự khai.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8
@@ -152,7 +152,7 @@ evals:
       `oneflow-sdk` → `NOTICE không nêu oneflow-sdk`; tên đọc từ `[project] name` của pyproject — đổi pyproject
       trong bản sao thành `name = "x-sdk"` thì token đổi theo, phép đo là QUAN HỆ), `CASE notice-unchanged-back: PASS`
       (thêm lại câu `consumed unchanged from upstream` → `NOTICE còn consumed unchanged from upstream`), `CASE notice-attribution-gone: PASS`
-      (xoá URL kho upstream khỏi bản sao NOTICE → `miễn trừ ôi — NOTICE.md|github\.com/tong-io/tongflow` —
+      (xoá URL kho upstream khỏi bản sao NOTICE → `miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]…` —
       bánh cóc chiều hai cắn đúng chỗ ghi công AGPL). Trên cây lành guard in `OK: ghi công upstream còn ở NOTICE.md`.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 

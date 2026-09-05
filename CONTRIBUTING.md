@@ -17,8 +17,8 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful and construc
 ## Development Setup
 
 ```bash
-git clone https://github.com/tong-io/tongflow.git
-cd tongflow
+git clone https://github.com/phanlemanh/OneFlow.git
+cd OneFlow
 pnpm install
 
 cp .env.example .env       # fill in your API keys / tokens

@@ -1,8 +1,10 @@
 # Self-host OneFlow web with Docker Compose.
 #   docker compose up -d   →   http://localhost:3000
 #
-# Uses the prebuilt GHCR image by default. To build locally instead, comment out
-# `image:` and uncomment `build: .`.
+# `image:` names the fork's GHCR image, which the release workflow publishes when a
+# `v*` tag is cut; `build: .` sits next to it so `docker compose up -d --build`
+# (or a plain `up` while the image is not available locally) builds from this
+# checkout — the stack comes up before the first tagged release exists.
 #
 # All API keys are optional — you can also set them in-app under Settings
 # (persisted to /data/settings.json). Pass them here via a .env file or shell env.
@@ -10,7 +12,7 @@
 services:
   oneflow:
     image: ghcr.io/phanlemanh/oneflow:latest
-    # build: .
+    build: .
     ports:
       - "3000:3000"
     volumes:

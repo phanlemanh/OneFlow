@@ -3,10 +3,9 @@
 
   <h1>OneFlow：开源多模态 GenAI 工作流工作室</h1>
   <p>
-    <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
-    <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
-    <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-    <a href="https://pypi.org/project/tongflow/"><img src="https://img.shields.io/pypi/v/tongflow?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
+    <a href="https://github.com/phanlemanh/OneFlow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
+    <a href="https://github.com/phanlemanh/OneFlow/actions/workflows/ci.yml"><img src="https://github.com/phanlemanh/OneFlow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://pypi.org/project/oneflow-sdk/"><img src="https://img.shields.io/pypi/v/oneflow-sdk?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
   </p>
   <p>
     <video src="https://github.com/user-attachments/assets/407a7e7b-2d44-4c90-8016-33d0a9f5e7d5"></video>
@@ -206,7 +205,14 @@ pnpm start:prod        # 先构建一次,再启动于 http://localhost:3000
 
 ## 用 Docker 启动
 
-GHCR 上已发布自托管镜像——无需配置 Node/Python/pnpm：
+自托管镜像 `ghcr.io/phanlemanh/oneflow` 由发布工作流在打 `vX.Y.Z` 标签时推送到 GHCR。**在第一个带标签的发布存在之前，GHCR 上还没有这个镜像**——请直接从本仓库构建（两种方式都无需配置 Node/Python/pnpm）：
+
+```bash
+git clone https://github.com/phanlemanh/OneFlow.git && cd OneFlow
+docker compose up -d --build
+```
+
+发布之后可以改为拉取镜像：
 
 ```bash
 docker run -d -p 3000:3000 \
@@ -214,13 +220,7 @@ docker run -d -p 3000:3000 \
   ghcr.io/phanlemanh/oneflow:latest
 ```
 
-然后打开 **`http://localhost:3000`**。或者用 Compose（会克隆本仓库的 [`docker-compose.yml`](../docker-compose.yml)）：
-
-```bash
-docker compose up -d
-```
-
-想自己构建镜像而不是拉取：`docker build -t tongflow .`
+然后打开 **`http://localhost:3000`**。本仓库的 [`docker-compose.yml`](../docker-compose.yml) 同时声明了 `image:` 和 `build: .`，因此 `docker compose up -d` 在本地没有镜像时会构建，镜像发布后则会拉取。
 
 **数据与凭据。** 所有可写内容都存放在 `/data` 卷（SQLite 数据库、上传文件、设置）。API key 是可选的——在 app 内的**设置**对话框里填写，或在启动时传入（`-e OPENROUTER_API_KEY=…`）；支持的 key：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`、`ANTHROPIC_API_KEY`（为 Director agent 提供支持——见下文）。
 

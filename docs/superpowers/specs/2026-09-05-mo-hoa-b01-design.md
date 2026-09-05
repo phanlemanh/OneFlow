@@ -46,7 +46,7 @@ ngược.
 - Lớp định danh upstream (regex): `github\.com/tong-io/tongflow([^-a-z0-9]|$)` ·
   `ghcr\.io/tong-io` · `discord\.gg` · `tongflow\.com` · `pypi\.org/project/tongflow/` ·
   `shields\.io/[^ )"]*tong-io` · `TongFlow-(mac|win)` · `img\.shields\.io/pypi/v/tongflow`.
-- Bản miễn trừ `scripts/fork/fork-identity-allow.txt`, mỗi dòng `file|regex|lý do`.
+- Bản miễn trừ `scripts/fork/fork-identity-allow.txt`, mỗi dòng `file|regex|lý do`; regex ghim NGỮ CẢNH của chỗ nhắc (chữ link quanh URL), không miễn trừ cả file cho một mẫu — răng `clone-upstream` bắt được đúng lỗ của bản khai thô đầu tiên (05/09).
   Hit ngoài bản khai → `FAIL: định danh upstream ngoài miễn trừ — <file>:<dòng>`.
   Dòng miễn trừ không còn hit → `FAIL: miễn trừ ôi — <file>|<regex>` (bánh cóc chiều hai).
 - Khẳng định dương (mỗi cái một dòng OK/FAIL có tên):
@@ -74,7 +74,7 @@ ngược.
 Mảng `CASES`; mỗi ca: chép bộ file khai trước vào `mktemp`, chạy đối chứng dương (guard xanh)
 rồi phá ĐÚNG MỘT biến, đòi guard đỏ VÀ in đúng token ghim (gap-probe 05/09 P1: ca phá hai biến
 ghim một thông điệp chỉ chứng được một nửa). Ca lạ → exit 2; `--selftest-fail` in FAIL; tổng in
-`n/${#CASES[@]}` (không in `$pass/$pass`). **27 ca**, một khẳng định một ca:
+`n/${#CASES[@]}` (không in `$pass/$pass`). **28 ca**, một khẳng định một ca:
 
 | Nhóm | Ca | Biến bị phá | Token ghim |
 |---|---|---|---|
@@ -103,7 +103,7 @@ ghim một thông điệp chỉ chứng được một nửa). Ca lạ → exit 
 | lớp | `stale-exemption` | thêm dòng miễn trừ không có hit | `miễn trừ ôi — README.md|business@tongflow\.com` |
 | NOTICE | `notice-dist-gone` | xoá `oneflow-sdk` | `NOTICE không nêu oneflow-sdk` |
 | NOTICE | `notice-unchanged-back` | thêm lại `consumed unchanged from upstream` | `NOTICE còn consumed unchanged from upstream` |
-| NOTICE | `notice-attribution-gone` | xoá URL kho upstream khỏi NOTICE | `miễn trừ ôi — NOTICE.md|github\.com/tong-io/tongflow` |
+| NOTICE | `notice-attribution-gone` | xoá URL kho upstream khỏi NOTICE | `miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]…` |
 | dây | `suite-key-dangling` | đổi tên khoá `executors.script.fork_identity` trong bản sao config | `suite key fork_identity không trỏ executor nào` |
 | prototype | `debt-table-missing` | xoá hàng `docs/README_JA.md` khỏi bản sao opportunity | `thiếu hàng nợ cho docs/README_JA.md` |
 

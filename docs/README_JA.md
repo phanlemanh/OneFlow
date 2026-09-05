@@ -3,10 +3,9 @@
 
   <h1>OneFlow：オープンソースのマルチモーダル GenAI ワークフロースタジオ</h1>
   <p>
-    <a href="https://github.com/tong-io/tongflow/stargazers"><img src="https://img.shields.io/github/stars/tong-io/tongflow?style=flat&logo=github" alt="GitHub Stars" /></a>
-    <a href="https://github.com/tong-io/tongflow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
-    <a href="https://github.com/tong-io/tongflow/actions/workflows/ci.yml"><img src="https://github.com/tong-io/tongflow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-    <a href="https://pypi.org/project/tongflow/"><img src="https://img.shields.io/pypi/v/tongflow?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
+    <a href="https://github.com/phanlemanh/OneFlow/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg" alt="License" /></a>
+    <a href="https://github.com/phanlemanh/OneFlow/actions/workflows/ci.yml"><img src="https://github.com/phanlemanh/OneFlow/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://pypi.org/project/oneflow-sdk/"><img src="https://img.shields.io/pypi/v/oneflow-sdk?logo=pypi&logoColor=white&label=Python%20SDK" alt="PyPI" /></a>
   </p>
   <p>
     <video src="https://github.com/user-attachments/assets/407a7e7b-2d44-4c90-8016-33d0a9f5e7d5"></video>
@@ -207,7 +206,14 @@ pnpm start:prod        # 一度ビルドしてから http://localhost:3000 で�
 
 ## Docker で起動
 
-セルフホスト用イメージが GHCR に公開されています——Node/Python/pnpm のセットアップは不要です：
+セルフホスト用イメージ `ghcr.io/phanlemanh/oneflow` は、`vX.Y.Z` タグを打ったときにリリースワークフローが GHCR へ公開します。**最初のタグ付きリリースが存在するまで、このイメージは GHCR にありません**——代わりに本リポジトリからビルドしてください（どちらの方法でも Node/Python/pnpm のセットアップは不要です）：
+
+```bash
+git clone https://github.com/phanlemanh/OneFlow.git && cd OneFlow
+docker compose up -d --build
+```
+
+リリース公開後は、ビルドの代わりにプルできます：
 
 ```bash
 docker run -d -p 3000:3000 \
@@ -215,13 +221,7 @@ docker run -d -p 3000:3000 \
   ghcr.io/phanlemanh/oneflow:latest
 ```
 
-その後 **`http://localhost:3000`** を開きます。または Compose で（本リポジトリの [`docker-compose.yml`](../docker-compose.yml) をクローンします）：
-
-```bash
-docker compose up -d
-```
-
-プルする代わりに自分でイメージをビルドするには：`docker build -t tongflow .`
+その後 **`http://localhost:3000`** を開きます。本リポジトリの [`docker-compose.yml`](../docker-compose.yml) は `image:` と `build: .` の両方を宣言しているため、`docker compose up -d` はローカルにイメージがなければビルドし、公開後はプルします。
 
 **データと認証情報。** 書き込み可能なものはすべて `/data` ボリュームに保存されます（SQLite DB、アップロード、設定）。API キーは任意です——アプリ内の**設定**ダイアログで設定するか、起動時に渡します（`-e OPENROUTER_API_KEY=…`）。対応キー：`OPENROUTER_API_KEY`、`GEMINI_API_KEY`、`OPENAI_API_KEY`、`MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`、`ANTHROPIC_API_KEY`（Director agent の利用に必要——詳細は後述）。
 

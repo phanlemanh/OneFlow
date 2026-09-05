@@ -216,7 +216,14 @@ Open **`http://localhost:3000`** and the canvas is live. Then follow [Self-host 
 
 ## Run with Docker
 
-A self-host image is published to GHCR — no Node/Python/pnpm setup required:
+The self-host image `ghcr.io/phanlemanh/oneflow` is published to GHCR by the release workflow when a `vX.Y.Z` tag is cut. **Until the first tagged release exists the image is not on GHCR yet** — build it from this repo instead (no Node/Python/pnpm setup required either way):
+
+```bash
+git clone https://github.com/phanlemanh/OneFlow.git && cd OneFlow
+docker compose up -d --build
+```
+
+Once a release has been published you can pull instead of building:
 
 ```bash
 docker run -d -p 3000:3000 \
@@ -224,13 +231,7 @@ docker run -d -p 3000:3000 \
   ghcr.io/phanlemanh/oneflow:latest
 ```
 
-Then open **`http://localhost:3000`**. Or with Compose (clones this repo's [`docker-compose.yml`](docker-compose.yml)):
-
-```bash
-docker compose up -d
-```
-
-To build the image yourself instead of pulling: `docker build -t tongflow .`
+Then open **`http://localhost:3000`**. This repo's [`docker-compose.yml`](docker-compose.yml) declares both `image:` and `build: .`, so `docker compose up -d` builds when the image is not available locally and pulls once it is published.
 
 **Data & credentials.** Everything writable lives in the `/data` volume (SQLite db, uploads, settings). API keys are optional — set them in the in-app **Settings** dialog, or pass them at launch (`-e OPENROUTER_API_KEY=…`); supported keys: `OPENROUTER_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`, `MODAL_TOKEN_ID` / `MODAL_TOKEN_SECRET`, `ANTHROPIC_API_KEY` (powers the Director agent — see below).
 
