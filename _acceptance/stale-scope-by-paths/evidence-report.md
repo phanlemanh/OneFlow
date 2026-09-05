@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh 2026-08-07
 ---
 
@@ -219,3 +219,45 @@ a788985 (E3 descoped at Gate 2 and not run).
 - [ ] AC-3 still has no direct machine eval (E3 descoped); confirm that remains an
       accepted, queued gap rather than something this round was expected to close
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-27, do fork `STALE-DIFF-SCOPE-GUARD` được thu hẹp (hồ sơ `gate-tooling-t1`): feature khai đủ `paths` nay lại bị soi staleness, làm lộ bản ghi cũ này. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260827T101500Z
+sha: d919b5eb51a0a3dfa70b5718113c935b39099ab0 · suites: 15 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 15 lệnh exit 0
+
+### Re-pin lần 3 — 2026-08-28, do nhánh `claude/silly-proskuriakova-aa99cc` thêm `scripts/acceptance/preflight-verify-env.sh` + `test-preflight-verify-env.sh`: hai file mới rơi vào union `paths` `scripts/acceptance/**` mà mọi eval của hồ sơ này khai, nên bản ghi cũ hoá stale. Guard scoping không đọc tới preflight — hai file đó không thể làm bằng chứng của hồ sơ này mất hiệu lực; union rộng hơn thứ nó cần bảo vệ, đã ghi vào hạng mục 0.8. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T061632Z
+sha: 4f987d8f43fa1edaa46ad61a525930c1d81a2c39 · suites: 15 lệnh exit 0
+
+### Re-pin lần 4 — 2026-08-28, cùng nhánh `feat/preflight-verify-env`: commit `1a6c6e0` sửa `scripts/acceptance/preflight-verify-env.sh` (câu lệnh gỡ in ra thiếu `rm -rf node_modules`, đo được trên cây hỏng thật), lại rơi vào union `paths` `scripts/acceptance/**`. Cùng lý do như lần 3 — guard scoping không đọc tới preflight. Mã của gói này không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-stale-scope-by-paths-20260828T094424Z
+sha: 1a6c6e0f32a4d624eca821e6be620a6497397c47 · suites: 15 lệnh exit 0
+
+### Re-pin lần 5 — 2026-09-04, do thêm `scripts/acceptance/check-eval-key-dupes.sh` và sửa `scripts/ci/repin-eval-coverage.mjs` cho hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi` — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T220954Z
+sha: 57c10c950893239c57559730ecdba193e75b0aab · suites: 7 lệnh exit 0
+
+### Re-pin lần 6 — 2026-09-04, do sửa `modePlan` của `scripts/ci/repin-eval-coverage.mjs` (AC-12, owner nâng phạm vi ở Cổng 2 vòng 1) và bộ răng lên 30 ca — cả hai nằm trong union `paths` của gói này. Mã của gói này không đổi; lane máy 7 lệnh exit 0
+run_id: repin-hang-rao-doc-nham-loi-20260903T231351Z
+sha: d1331546558e3ba13f3e77ef557f1393a44cffa9 · suites: 7 lệnh exit 0
+
+### Re-pin lần 7 — 2026-09-04, do hợp nhất `feat/fork-oneflow-api-openai` vào `main` — 36 commit của `main` (tính năng `khong-noi-sai-ve-kho-khoa`) vào cùng cây với hai hồ sơ của nhánh. Mã của gói này không đổi; lane máy chạy trên CÂY ĐÃ TRỘN: 7 lệnh exit 0
+run_id: merge-repin-20260904T030830Z
+sha: 792163491a11febaa0f5ff729f112442e3eecbef · suites: 7 lệnh exit 0
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

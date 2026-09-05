@@ -1,0 +1,35 @@
+  direct     6 ca  test.unit_byo_load_tolerant
+  direct     2 ca  test.unit_byo_read_ok_absent
+  direct     6 ca  test.unit_byo_read_unreadable
+  direct     2 ca  test.unit_byo_route_get
+  direct     2 ca  test.unit_byo_route_put_force
+  direct     1 ca  test.unit_byo_route_put_refuse
+  direct     3 ca  test.unit_byo_seam
+  wrapped    1 ca  test.unit_kkt_all_strings_untouched
+  wrapped    1 ca  test.unit_kkt_atomic_reader
+  wrapped    1 ca  test.unit_kkt_coerce_scalar
+  wrapped    1 ca  test.unit_kkt_empty_key_put
+  wrapped    1 ca  test.unit_kkt_no_temp_left
+  wrapped    1 ca  test.unit_kkt_refuse_empty_key
+  wrapped    1 ca  test.unit_kkt_refuse_structured
+  wrapped    3 ca  test.unit_kkt_round_trip
+  wrapped    3 ca  test.unit_kkt_run_path
+  wrapped    2 ca  test.unit_kkt_save_throws
+  direct     1 ca  test.unit_l2_data_dir_stable
+  direct     1 ca  test.unit_l2_tenant_sentinel
+  direct     1 ca  test.unit_l3_workflow_id_sentinel
+  direct     6 ca  test.unit_l4_delegate_persists
+  direct     4 ca  test.unit_l4_node_cached_consumer
+  direct     3 ca  test.unit_l4_schema_columns
+  direct     2 ca  test.unit_tts_family_matches_abi
+  direct     8 ca  test.unit_tts_order_compliant
+  direct     5 ca  test.unit_tts_order_violation
+  direct     2 ca  test.unit_venv_chain_per_id
+  direct     1 ca  test.unit_venv_common_parent
+  direct     1 ca  test.unit_venv_fail_loudly
+  direct     2 ca  test.unit_venv_legacy_migration
+  direct     1 ca  test.unit_venv_lite_fallback_kept
+  direct     1 ca  test.unit_venv_per_plugin
+  direct     6 ca  test.unit_venv_unsafe_id
+   đã kiểm 33 ô đo lọc theo tên — 23 gọi thẳng, 10 qua bộ bọc
+✅ mọi ô đo đều khớp ít nhất một ca thử.

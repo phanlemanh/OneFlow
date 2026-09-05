@@ -76,6 +76,7 @@ plugins and add credentials.
 #### Text
 
 - ✅ **Generate / rewrite**: create or edit copy from a prompt.
+- ⬜ **Read numbers aloud (Vietnamese)**: turn numbers, prices, dates and abbreviations into spoken Vietnamese — required before text-to-speech.
 
 #### Image
 
@@ -155,7 +156,7 @@ plugins and add credentials.
 
 - [tongflow-api-openrouter-free](https://github.com/tong-io/tongflow-api-openrouter-free) — default `gen_text` route via OpenRouter's free models
 - [tongflow-api-gemini](https://github.com/tong-io/tongflow-api-gemini) — Google Gemini for `gen_text` and image generation / editing / fusion (Nano Banana)
-- [tongflow-api-openai](https://github.com/tong-io/tongflow-api-openai) — OpenAI for `gen_text` and image generation / editing / fusion (`gpt-image-2`)
+- [oneflow-api-openai](https://github.com/phanlemanh/oneflow-api-openai) — OpenAI for `gen_text`, image generation / editing / fusion (`gpt-image-2`), and transcription (`gpt-transcribe`)
 - [tongflow-api-deepseek](https://github.com/tong-io/tongflow-api-deepseek) — DeepSeek V4 (`flash` / `pro`, with a streaming **thinking** bubble) for `gen_text` / text tools
 - [tongflow-api-bytedance](https://github.com/tong-io/tongflow-api-bytedance) — Volcengine Ark (Doubao Seedance 2.0) for text/image/audio → video
 - [tongflow-api-apimart](https://github.com/tong-io/tongflow-api-apimart) — APIMart gateway with a per-node **model picker**: image gen/edit (Z-Image, Seedream, Nano Banana, GPT-Image), text/image → video (Kling, VEO3, Sora2, Seedance), `gen_text` (GPT-5, Claude, Gemini), Whisper transcription and TTS

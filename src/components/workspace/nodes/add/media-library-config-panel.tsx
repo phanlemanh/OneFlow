@@ -1,0 +1,167 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { type EnvReadFailure, saveEnvKeys } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
+
+/**
+ * The way out of the missing-configuration state.
+ *
+ * Naming the missing variable is only half of ADR-0012 guarantee #2: a product
+ * that names it and then leaves the user with nowhere to type it is still a
+ * dead end. The form comes to the node — the same pattern the key prompt uses —
+ * rather than sending the user to a settings screen and costing them their
+ * place on the canvas.
+ */
+export function MediaLibraryConfigPanel({
+    missing,
+    message,
+    labels,
+    onSaved,
+}: {
+    missing: string[];
+    message: string;
+    labels: {
+        urlLabel: string;
+        keyLabel: string;
+        save: string;
+        saving: string;
+        writeFailed: string;
+    };
+    onSaved: () => void;
+}) {
+    const [url, setUrl] = useState("");
+    const [key, setKey] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    /**
+     * How the read failed, or null. Blocks the form entirely.
+     *
+     * The whole union, not one shape: only `store-unreadable` describes a
+     * broken store, and only it should wear the destructive card.
+     */
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
+    const t = useTranslations("Workspace");
+
+    const save = async () => {
+        setSaving(true);
+        setError("");
+        try {
+            // One shared writer, which reads first and refuses when that read
+            // did not produce a usable map. The panel used to do its own
+            // read-then-write pair; PUT replaces the whole map, so merging onto
+            // an untrustworthy read is how other keys got deleted.
+            const patch: Record<string, string> = {};
+            if (url.trim()) patch.MEDIA_LIBRARY_URL = url.trim();
+            if (key.trim()) patch.MEDIA_LIBRARY_API_KEY = key.trim();
+            const out = await saveEnvKeys(patch);
+            if (!out.ok) {
+                if (out.reason === "unauthenticated") {
+                    // Same quiet card as a 401 on the read. Nothing was
+                    // written, and nothing here is about the key.
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
+                if (out.reason === "read-failed") {
+                    // Not "we could not read" and then a form to try again in:
+                    // this panel has no way to repair a broken store, so it
+                    // says so and points at the screen that does.
+                    setBlocked(out.read);
+                    return;
+                }
+                // A write failure is not a read failure: the card goes away
+                // and the form comes back with an error beside it.
+                setBlocked(null);
+                setError(labels.writeFailed);
+                return;
+            }
+            setBlocked(null);
+            onSaved();
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (blocked) {
+        return (
+            <div className="w-full nodrag">
+                <ReadStateNotice
+                    read={blocked}
+                    t={t}
+                    retrying={saving}
+                    onRetry={() => {
+                        // The card STAYS. Clearing `blocked` first unmounted
+                        // it, so the `retrying` flag above never took effect
+                        // and a second click started a second save; it also
+                        // took away the "nothing has been changed" sentence at
+                        // the moment the user acted on it. `save()` replaces
+                        // or clears the card when it settles.
+                        void save();
+                    }}
+                >
+                    {blocked.state === "store-unreadable" ? (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={requestOpenSettings}
+                        >
+                            {t("storeUnreadable.toSettings")}
+                        </Button>
+                    ) : null}
+                </ReadStateNotice>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full space-y-3 rounded-lg border border-dashed border-muted-foreground/40 p-3 nodrag">
+            <p className="text-sm text-foreground">{message}</p>
+            <ul className="list-none p-0 m-0 space-y-2">
+                {missing.includes("MEDIA_LIBRARY_URL") ? (
+                    <li className="space-y-1">
+                        <Label
+                            htmlFor="media-library-url"
+                            className="font-mono text-xs"
+                        >
+                            MEDIA_LIBRARY_URL
+                        </Label>
+                        <Input
+                            id="media-library-url"
+                            value={url}
+                            placeholder={labels.urlLabel}
+                            onChange={(e) => setUrl(e.target.value)}
+                            onPointerDown={(e) => e.stopPropagation()}
+                        />
+                    </li>
+                ) : null}
+                {missing.includes("MEDIA_LIBRARY_API_KEY") ? (
+                    <li className="space-y-1">
+                        <Label
+                            htmlFor="media-library-key"
+                            className="font-mono text-xs"
+                        >
+                            MEDIA_LIBRARY_API_KEY
+                        </Label>
+                        <Input
+                            id="media-library-key"
+                            type="password"
+                            value={key}
+                            placeholder={labels.keyLabel}
+                            onChange={(e) => setKey(e.target.value)}
+                            onPointerDown={(e) => e.stopPropagation()}
+                        />
+                    </li>
+                ) : null}
+            </ul>
+            {error ? <p className="text-xs text-destructive">{error}</p> : null}
+            <Button size="sm" onClick={save} disabled={saving}>
+                {saving ? labels.saving : labels.save}
+            </Button>
+        </div>
+    );
+}

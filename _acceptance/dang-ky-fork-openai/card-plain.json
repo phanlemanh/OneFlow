@@ -1,0 +1,27 @@
+{
+  "feature_plain": "Người dùng chọn được nút phiên âm và nó chạy bằng bản OpenAI do đội này tự quản, thay vì bản cũ có mọi mô hình sắp bị nhà cung cấp tắt.",
+  "analyst_plain": "",
+  "decisions": [],
+  "scope_plain": [
+    "KHÔNG đụng nội dung bản plugin nằm ở kho ngoài — danh sách mô hình và slot mặc định là việc của kho đó.",
+    "KHÔNG dọn ba biểu tượng thiếu và ba tệp biểu tượng thừa đã có sẵn từ trước; lượt này chỉ hứa không làm chúng nhiều thêm.",
+    "KHÔNG dựng hàng rào chặn mô hình đã bị nhà cung cấp khai tử — việc riêng, đáng làm.",
+    "KHÔNG kiểm thứ tự các mục trong ba trang giới thiệu; chỉ kiểm đủ và đúng nguồn."
+  ],
+  "decisions_plain": [
+    { "id": "d-20260901T085957Z-9683", "p": "KHÔNG viết phần mô tả giao diện — việc này không đổi màn hình nào; đổi lại người duyệt gặp cấu trúc lần đầu trong mã." },
+    { "id": "d-20260901T085957Z-30167", "p": "Dựng hàng rào canh ba trang giới thiệu thay vì tin tay đã sửa đúng — đổi lại đây là phần mã mới duy nhất của lượt này." },
+    { "id": "d-20260901T085958Z-1858", "p": "Đặt hai tệp hàng rào cạnh các hàng rào plugin sẵn có — đổi lại phân loại theo vùng-bị-canh chứ không theo vai trò." },
+    { "id": "d-20260901T085958Z-19826", "p": "KHÔNG đòi mọi plugin phải có biểu tượng — đo được ba trong bốn bản tự quản đã thiếu, nên đó không phải luật của kho này." },
+    { "id": "d-20260901T085959Z-4375", "p": "KHÔNG lấy chốt chặn trước khi gộp làm tiêu chí — kho đã đo điều đó là bất khả từ bên trong một lượt kiểm; đổi lại nửa sau chữ ký chỉ người kiểm được." },
+    { "id": "d-20260901T090000Z-1481", "p": "KHÔNG đo việc bản plugin thật sự phục vụ đúng nút — thư mục cài đặt không nằm trong kho nên máy kiểm không có vật để đo." },
+    { "id": "d-20260901T134915Z-29237", "p": "Mở phạm vi cho bốn lỗi nặng nhất thay vì ghi hết vào phần hạn chế — đổi lại hợp đồng phải sửa và chạy thêm một lượt kiểm." },
+    { "id": "d-20260901T134916Z-12894", "p": "Sửa phép kiểm thông điệp lỗi để nó đọc đúng dòng báo lỗi — trước đó nó luôn đúng dù thông điệp chẳng nêu gì." },
+    { "id": "d-20260901T134917Z-26121", "p": "Đặt hàng rào vệ sinh cạnh nhóm hàng rào tích hợp — đổi lại tránh bảy lần ký lại cho các hồ sơ khác." },
+    { "id": "d-20260901T134918Z-30465", "p": "Siết cách hàng rào tìm đoạn văn trong sổ tay đội — chính bản sửa của lượt này tạo ra đoạn thứ hai gây nhầm." },
+    { "id": "d-20260901T150342Z-18378", "p": "KHÔNG vá tiếp sang lượt thứ tư — hai lượt sửa liền sinh lỗi cùng loại, nghĩa là cách giải sai chứ không phải chi tiết sai." },
+    { "id": "d-20260901T150343Z-14456", "p": "KHÔNG giữ hai tiêu chí vệ sinh tệp rác — tệp gây chuyện đã dọn và quy tắc bỏ qua đã có, nên hàng rào chỉ là dây an toàn." },
+    { "id": "d-20260901T150344Z-3579", "p": "KHÔNG giữ phép thử ghi tệp thăm dò vào cây thật — nó có thể làm một phép kiểm anh em báo đỏ oan." },
+    { "id": "d-20260901T150345Z-3588", "p": "Gỡ tên hàng rào khỏi đoạn văn mới trong sổ tay đội thay vì sửa hàng rào cũ — sửa hàng rào cũ sẽ bắt một hồ sơ đã ký phải ký lại." }
+  ]
+}

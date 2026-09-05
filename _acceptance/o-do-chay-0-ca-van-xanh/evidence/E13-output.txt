@@ -1,0 +1,3 @@
+ok actions/checkout: 8 site(s), all >= v7
+ok docker/login-action: 1 site(s), all >= v4
+action pins: at or above the contracted floor at every site

@@ -1,0 +1,189 @@
+schema_version: 1
+feature_slug: gate-tooling-t1
+# Mỗi eval khai `paths`. Chủ thể của hồ sơ này ĐÚNG LÀ gate tooling, nên khai
+# `scripts/pre-merge-check.sh` + `scripts/acceptance/**` là lời khai thật, không
+# phải mẹo né staleness — giống hệt lý do `stale-scope-by-paths` tự khai.
+#
+# MỘT key config cho MỘT eval. Gộp nhiều tiêu chí sau một exit code là để một
+# case chưa từng được viết trông y hệt một case đã đạt (bài học ghi ngay trong
+# evals.yaml của `stale-scope-by-paths`).
+#
+# Không có eval design-quality: `surfaces: [ci]`, không mặt nào vẽ web UI —
+# điều kiện bỏ qua theo đúng bước 2b của skill.
+# Không có tiêu chí `(cross-layer)`: không luồng nào đi từ UI xuống backend,
+# nên luật ghép đôi (c) không áp dụng.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.gt1_t1_escape_path
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. HAI NỬA trong một guard. Nửa should-NOT-fire: một fixture PR chỉ
+      đổi guard dưới `scripts/acceptance/**` VÀ mang `_acceptance/<slug>/` của
+      chính nó → cổng KHÔNG in `VIOLATION [PR]` t1-escape. Nửa should-fire:
+      cùng PR đó, gỡ artifact ra → `VIOLATION [PR]` PHẢI nổ lại. Thiếu nửa sau
+      thì eval này xanh kể cả khi luật t1-escape bị tắt hẳn.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.stale_scope_out_of_scope
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0; output chứa `CASE out-of-scope: PASS`. Feature khai đủ `paths`,
+      `_acceptance/fx/` NGOÀI diff, thay đổi nằm ngoài union → KHÔNG stale.
+      Trước khi thu hẹp fork, case này xanh RỖNG (khối staleness bị bỏ qua nên
+      "không stale" là đương nhiên); E3 là thứ chứng minh nó không còn rỗng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.stale_scope_announce
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0; output chứa `CASE announce: PASS`. Cổng in `narrow staleness scope
+      applied` kèm `suppressed` cho một scope ĐƯỢC CẤP — đây là bằng chứng phân
+      biệt "không stale vì được cấp scope hẹp" với "không stale vì không ai
+      nhìn". Không có dòng này thì E2 không chứng minh được điều nó nói.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.stale_scope_fork_undeclared
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0; case MỚI. Feature KHÔNG khai `paths`, `_acceptance/fx/` ngoài diff,
+      có thay đổi gated sau `verified_commit` → KHÔNG bị báo stale, và KHÔNG có
+      dòng narrow-scope nào. Đây là nửa SUPPRESSION của cả hồ sơ: nó ghim lý do
+      fork tồn tại, nên một bản "thu hẹp" tay trượt thành gỡ hẳn fork sẽ làm
+      case này đỏ thay vì lặng lẽ mở lại treadmill cho 19 feature không khai.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.stale_scope_fork_declared_in_union
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0; case MỚI. Feature khai đủ `paths`, `_acceptance/fx/` ngoài diff,
+      nhưng có file TRONG union đổi sau `verified_commit` → VẪN bị báo
+      `VIOLATION [fx]: evidence is stale`. Nửa should-fire đối xứng với E4:
+      thiếu nó thì "thu hẹp fork" thoái hoá thành "không bao giờ stale" mà E2,
+      E3, E4 vẫn xanh hết.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.gt1_all_scoping_cases
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Chạy lần lượt MỌI `--case` mà `check-stale-scoping.sh` khai trong
+      `KNOWN_CASES` và đòi tất cả exit 0; in tên case nào đỏ. Đọc danh sách case
+      từ chính guard chứ không chép cứng — chép cứng thì một case mới thêm vào
+      sẽ không bao giờ được chạy ở đây.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.stale_scope_undeclared
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0; case MỚI `undeclared` — đúng thứ item 0.8(a) xếp hàng. Fixture khai
+      ZERO `paths` (mode `none`) cùng một thay đổi gated, `_acceptance/fx/` TRONG
+      diff → cổng in `VIOLATION [fx]: evidence is stale`. Đây là AC-3 mệnh đề (a)
+      của `stale-scope-by-paths`, mất eval máy từ 05/08. Case riêng chứ không ké
+      exit code của `announce`: hai tiêu chí sau một lệnh thì cái chưa viết trông
+      hệt cái đã đạt.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.gt1_dead_code_absent
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Cả ba mảnh VẮNG MẶT ở HEAD: file
+      `scripts/acceptance/check-stale-golden.sh`, fixture
+      `scripts/acceptance/fixtures/baseline-gate-output.txt`, và key
+      `stale_scoping_golden` trong `_acceptance/config.yaml`. Guard hồi quy: một
+      lần vendor kit về sau có thể mang cả ba bò lại mà không ai nhận ra.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.gt1_fork_teeth
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Trên một BẢN COPY TẠM của cổng (cây làm việc không bao giờ bị sửa,
+      và cổng phát hành không mang công tắc nào): đổi điều kiện bỏ qua của
+      `STALE-DIFF-SCOPE-GUARD` → ít nhất một `--case` chuyển ĐỎ; hoàn nguyên →
+      xanh lại. Mỗi lần vá phải tự khẳng định là đã đổi được file (`cmp`), nếu
+      không thì một lần đổi tên biến sẽ khiến guard này lặng lẽ ngừng thử gì cả.
+      Lý do tồn tại: fork nằm trong `scripts/pre-merge-check.sh`, được
+      `t1_skip_globs` miễn, nên đổi ngữ nghĩa cổng ở đó lọt mọi rà soát khác.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.gt1_no_stale_on_empty_diff
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Chạy `pre-merge-check.sh` trên chính kho này với diff RỖNG và đòi
+      SỐ `VIOLATION ... evidence is stale` bằng 0. Diff rỗng là điều kiện quan
+      trọng: nó tách "hồ sơ stale sẵn có" khỏi "nhánh đang làm gây stale". Bốn
+      slug phải sạch sau wave: conformance-l0, measure-harness,
+      stale-scope-by-paths, task-metering.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.gt1_no_golden_claim
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Quét `_acceptance/stale-scope-by-paths/contract.md` và
+      `decisions.jsonl`: không còn khẳng định nào nói `check-stale-golden.sh`
+      (hoặc fixture / key `stale_scoping_golden`) GIỮ NGUYÊN trên cây. Neo vào
+      tên file chứ không vào nguyên văn câu, vì câu đó viết bằng văn xuôi và sẽ
+      được viết lại.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.gt1_landed_merge_repinned
+    paths: ["scripts/pre-merge-check.sh", "scripts/acceptance/**"]
+    expected: >-
+      exit 0. Đúng bốn contract được wave này re-pin — conformance-l0,
+      measure-harness, stale-scope-by-paths, task-metering — mỗi cái mang một
+      dòng `landed_merge:` trong frontmatter, và giá trị phải phân giải được
+      thành một commit có thật (`git rev-parse --verify`). Kiểm giá trị chứ
+      không chỉ kiểm sự hiện diện: một `landed_merge:` rỗng hoặc trỏ SHA ma vẫn
+      khiến `own-range.sh` tụt về fallback, tức đúng khuyết tật 0.8(c) muốn đóng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-12
+    executor: judgment
+    question: >-
+      Union `paths` của `measure-harness` (`src/**`, `scripts/**`,
+      `package.json`, `config/**`, `drizzle/**`, `tsconfig.json`,
+      `vitest.config.ts`) và của `task-metering` phủ gần như toàn cây, và đo
+      được là narrow scope của chúng chỉ chặn 9 thay đổi. Với một feature mà
+      union rộng đến thế, việc khai `paths` có còn nói thật điều nó hứa —
+      "những file eval của tôi thực sự chạy qua" — hay đã thành một lời khai
+      hình thức mua rất ít mà vẫn phải trả giá bị soi? Nên GIỮ, THU HẸP về đúng
+      tập file các eval chạm, hay BỎ khai để về whole-tree cho trung thực?
+    inputs:
+      - _acceptance/measure-harness/evals.yaml
+      - _acceptance/task-metering/evals.yaml
+      - _acceptance/stale-scope-by-paths/contract.md
+    evidence_required: [judged_by, verdict, rationale]

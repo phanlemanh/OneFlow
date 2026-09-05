@@ -1,0 +1,21 @@
+E22 network dump (Claude_Browser, http://localhost:3000/proto/add-media-library?state=version-mismatch)
+
+FAIL-eligible scope: same-origin http://localhost:3000 (dev_server.url).
+
+Target route requests (post-navigation to the proto URL under test):
+[61376CA035D2C111BE3B4D8E686ECB2E] GET /proto/add-media-library?state=version-mismatch -> 200 OK
+[41AFDE3370BCBEAF45A2AE7359766606] GET /proto/add-media-library?state=version-mismatch -> 200 OK (revisit)
+All supporting _next/static chunks/css/fonts for this route -> 200 OK.
+
+Console errors: none (read_console_messages onlyErrors=true -> "No console logs.")
+
+Noise, pre-dates the proto-route navigation, unrelated to this eval's steps:
+GET /workspace?_rsc=... -> 200 OK but reported [FAILED: net::ERR_ABORTED] (5 occurrences,
+timestamps 52566.86-52566.129, all BEFORE the proto route load). These are leftover
+Fast-Refresh/RSC requests from the tab's prior /workspace session that got cancelled when
+this session's own navigate() calls fired -- not a request the version-mismatch flow itself
+issues, and not a connection error (status still 200). Not counted toward FAIL-eligible
+verdict for E22.
+
+Verdict: no FAIL-eligible request for the tested route failed (no 4xx/5xx, no connection
+error/timeout on /proto/add-media-library or its assets).

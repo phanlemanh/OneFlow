@@ -1,0 +1,3 @@
+Driver used for E2: curl (HTTP status + HTML grep) + scripts/ui-capture.mjs (puppeteer-core headless screenshot-to-file).
+Neither exposes a network-request/console-error read API to this eval runner (no mcp browser tool with read_network_requests/read_console_messages was used for this step).
+networkObserved = n-a (driver)

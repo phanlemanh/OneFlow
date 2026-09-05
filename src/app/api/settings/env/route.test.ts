@@ -6,6 +6,11 @@ const store = vi.hoisted(() => ({ env: {} as Record<string, string> }));
 
 vi.mock("@/lib/settings/env-store.server", () => ({
     loadEnvStore: async () => ({ ...store.env }),
+    // The route reads through `readEnvStore` so it can tell an unreadable store
+    // from an empty one. This fake always reports a healthy store, which is the
+    // condition every case in this file is about — the unreadable paths are
+    // measured on a real temp dir in `route.unreadable.test.ts`.
+    readEnvStore: async () => ({ state: "ok", env: { ...store.env } }),
     saveEnvStore: async (next: Record<string, string>) => {
         store.env = { ...next };
     },

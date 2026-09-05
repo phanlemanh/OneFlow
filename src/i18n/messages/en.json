@@ -38,7 +38,38 @@
         "customSectionTitle": "Custom variables",
         "customSectionHint": "Variables not declared by any installed plugin.",
         "getKey": "Get key",
-        "requiredHint": "Required"
+        "requiredHint": "Required",
+        "storeUnreadable": {
+            "title": "Your saved API keys could not be read",
+            "unchanged": "Nothing has been changed.",
+            "reason": "The settings file could not be read ({reason}).",
+            "escape": "Replace the key store with an empty one…",
+            "confirmTitle": "Replace the key store with an empty one?",
+            "confirmBody": "Every stored key will be lost and cannot be recovered. After this you will have to enter each key again.",
+            "confirmCancel": "Leave it alone",
+            "confirmOk": "I understand — replace it",
+            "replaceFailed": "Could not replace the store ({reason}). Nothing has been changed.",
+            "cause": {
+                "http": "the server answered {status}",
+                "not-json": "the response was not JSON",
+                "no-env": "the response carried no key list",
+                "network": "the request did not complete ({detail})",
+                "timeout": "the request timed out after {seconds} seconds"
+            },
+            "writeFailed": "Could not save ({reason}). Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unauthenticated": {
+            "title": "Your session has expired",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unavailable": {
+            "title": "Cannot reach the key server",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again",
+            "reason": "The request got no answer ({code})."
+        }
     },
     "Index": {
         "title": "New Idea"
@@ -204,9 +235,11 @@
             "extractStem": "Extract Stem",
             "addTrack": "Add Track",
             "completeMusic": "Complete",
-            "musicBrief": "Music Brief"
+            "musicBrief": "Music Brief",
+            "tooltipMediaLibrary": "Media library"
         },
         "toast": {
+            "ttsNeedsNormalize": "Speech node(s) {nodes} have no “Read numbers aloud” node upstream — numbers, prices and dates may be read incorrectly. Add that node between the text source and the speech node.",
             "executing": "Executing...",
             "completed": "Completed",
             "cancelled": "Cancelled",
@@ -494,7 +527,8 @@
                 "musicExtract": "Extract Stem",
                 "musicLego": "Add Track",
                 "musicComplete": "Complete Arrangement",
-                "musicBrief": "Music Brief"
+                "musicBrief": "Music Brief",
+                "normalizeTextVi": "Read numbers aloud"
             },
             "options": {
                 "portrait": "Portrait",
@@ -556,7 +590,8 @@
                 "addTrack": "Generate Track",
                 "completeMusic": "Complete",
                 "musicBrief": "Generate Brief",
-                "applyOverlay": "Apply Overlay"
+                "applyOverlay": "Apply Overlay",
+                "normalizeTextVi": "Normalize"
             },
             "params": {
                 "prompt": "Prompt",
@@ -1047,6 +1082,37 @@
                 "endLabel": "End (s)",
                 "editOp": "Edit op",
                 "removeOp": "Remove op"
+            },
+            "addMediaLibrary": {
+                "title": "Load from library",
+                "searchPlaceholder": "Describe the scene you need, e.g. a living room full of sunlight",
+                "search": "Search",
+                "searching": "Searching…",
+                "importing": "Pulling the clip into your file store… it will appear as a video node on the canvas.",
+                "results": "{count} clips match your description. Pick one to pull into the workspace.",
+                "thinShelf": "No clip could be shown for this description ({candidates} clips passed the filters). Try another wording or loosen the request.",
+                "unranked": "Results are not ranked by meaning: the library is missing embeddings. The list still matches the filters, but the order does not reflect fit.",
+                "error": "The library call did not go through.",
+                "missingConfig": "The media library is not connected yet.",
+                "saveConfig": "Save and search again",
+                "savingConfig": "Saving…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "A key with the search scope",
+                "failure": {
+                    "AUTH_REJECTED": "The library key was not accepted. Check MEDIA_LIBRARY_API_KEY.",
+                    "MISSING_SCOPE": "The key lacks the search permission. Ask for the search scope on this key.",
+                    "BAD_REQUEST": "The request sent to the library was not valid.",
+                    "NOT_FOUND": "That clip is gone, or this key cannot see it.",
+                    "NOT_IMPLEMENTED": "The library has not wired up this route yet.",
+                    "VERSION_MISMATCH": "The library changed its contract version. Stopped rather than guess at the data.",
+                    "BAD_RESPONSE": "The library answered in a shape this version does not accept.",
+                    "NETWORK_ERROR": "Could not reach the library.",
+                    "UPSTREAM_ERROR": "The library returned an error.",
+                    "LOCAL_FAILURE": "OneFlow could not finish this on your own machine — check the app's log for the real cause.",
+                    "STORE_UNREADABLE": "Your saved API keys could not be read, so it is not clear whether this service is configured. Nothing has been changed — open Settings."
+                },
+                "readFailed": "Could not read the saved keys, so nothing was changed — try again.",
+                "writeFailed": "Could not save the keys. Nothing was changed."
             }
         },
         "firstRun": {
@@ -1062,6 +1128,31 @@
             "blocked": "Couldn't get things ready",
             "blockedReasonDownload": "Couldn't download the tools — check your connection.",
             "retry": "Retry"
+        },
+        "storeUnreadable": {
+            "title": "Your saved API keys could not be read",
+            "unchanged": "Nothing has been changed.",
+            "reason": "The server could not return the list of stored keys ({reason}).",
+            "toSettings": "Open Settings",
+            "cause": {
+                "http": "the server answered {status}",
+                "not-json": "the response was not JSON",
+                "no-env": "the response carried no key list",
+                "network": "the request did not complete ({detail})",
+                "timeout": "the request timed out after {seconds} seconds"
+            },
+            "retry": "Try again"
+        },
+        "unauthenticated": {
+            "title": "Your session has expired",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again"
+        },
+        "unavailable": {
+            "title": "Cannot reach the key server",
+            "unchanged": "Nothing has been changed.",
+            "retry": "Try again",
+            "reason": "The request got no answer ({code})."
         }
     },
     "Upload": {

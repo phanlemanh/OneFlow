@@ -10,6 +10,19 @@
 trong một vũ trụ dữ liệu mở — sửa một chỗ không phải trả tiền làm lại cả bài, chữ và giá tuyệt
 đối chính xác, và toàn bộ vũ trụ đó thuộc về khách hàng, không phải về nền tảng.**
 
+## Định vị — bổ sung 04/09
+
+Ba tầng, ba tốc độ thay đổi khác nhau:
+
+| Tầng | Nội dung | Thay đổi được? |
+|---|---|---|
+| **Định vị** | OneFlow là **công cụ nền tảng đa mục đích cho sáng tạo**; thế mạnh hướng đến: *studio quảng cáo AI có bộ nhớ*, tối ưu cho mọi nhu cầu sáng tạo, làm thiết kế đơn giản, **tiếp cận được với bất kỳ ai** | Bất biến — đổi bằng ADR mới |
+| **Trụ cột** | ① footage thật trước generative · ② dữ liệu **và thực thi** thuộc về người dùng · ③ sửa rẻ gần bằng không · ④ chữ và giá vẽ tất định · ⑤ tiếp cận được với bất kỳ ai (một nút, tự cài, tự nhập key) · ⑥ bộ nhớ — uỷ quyền media-library | Ít đổi |
+| **Lát cắt** | Một tính năng end-to-end chứng minh các trụ cột trên máy người dùng. Lát cắt đầu tiên: Skill #1 "Footage → kho clip" | Thay đổi được |
+
+Tính năng là **bằng chứng** của nền tảng, không phải định nghĩa của nó: thay lát cắt thì kế hoạch
+không đổi hình. Kế hoạch lát cắt chứng minh và luật đóng băng: [roadmap.md](../roadmap.md).
+
 ## Năm niềm tin nền
 
 1. **Model đang commoditize** — cả ngành bán lại cùng một rổ frontier model; giá trị bền dồn về

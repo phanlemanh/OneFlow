@@ -22,6 +22,7 @@
 #
 # For every feature in _acceptance/ whose contract has status
 # implemented|verified|signed-off and risk_tier T2|T3:
+#   (machine-cleared — ô kết làn V — cũng đã arm, xem case bên dưới)
 #   - Gate 1 was recorded: approved_by non-empty, or gate1_skipped: true
 #     (the audited escape hatch — NOTEd, not blocked)
 #   - evidence-report.md must exist
@@ -337,6 +338,15 @@ xanh_sach_check() { # <report path>
     _ack="$(front_field "$report" bypass_ack)"
     case "$_bp" in true|1|yes) clean_ok=0; clean_why="bypass_used=$_bp${_ack:+ (có bypass_ack)}" ;; esac
   fi
+  # enforcement_mode: off — dieu kien thu BA cua khoi EVIDENCE-XANH-SACH-BLOCK. Ban mjs
+  # (xanhSach) da kiem tu dau; ban bash truoc day KHONG, nen hai be mat tra loi khac nhau
+  # ve cung mot ho so, va rang cua machine-cleared / lan V coi mot bao cao ghi luc cong
+  # KHONG LAM GI la xanh-sach (finding S4-r1). Them o day, giu dung thu tu cua khoi.
+  if [ "$clean_ok" -eq 1 ]; then
+    local _enf
+    _enf="$(front_field "$report" enforcement_mode | tr '[:upper:]' '[:lower:]')"
+    case "$_enf" in off) clean_ok=0; clean_why="enforcement_mode=off (cong khong lam gi luc ghi)" ;; esac
+  fi
   _cdir="$(dirname "$report")"
   _tier="$(front_field "$_cdir/contract.md" risk_tier | tr '[:lower:]' '[:upper:]')"
   if [ "$clean_ok" -eq 1 ] && [ "$_tier" != "T2" ]; then
@@ -394,6 +404,7 @@ claims_released() { # <dir> — 0 iff thư mục TỰ NHẬN đã qua cổng.
   if [ -f "$1/contract.md" ]; then
     case "$(fm_field "$1/contract.md" status)" in
       implemented|verified|signed-off) return 0 ;;
+      machine-cleared) return 0 ;;
     esac
   fi
   return 1
@@ -1039,6 +1050,7 @@ for dir in "$ACC"/*/; do
   fi
   case "$REQUIRED_FOR" in *"$tier"*) ;; *) continue ;; esac
   # ── Hồ sơ CHƯA ARM cổng (status ngoài implemented/verified/signed-off) ──
+  # (machine-cleared cũng đã arm — arm mới thêm ở case dưới, hồ sơ ra-co-ten)
   # Bản cũ `continue` im lặng ở đây — cửa thứ ba của lớp «PASS chưa ai phán»
   # (hai cửa đầu: không contract / thiếu field, xử ở trên). Vòng 4 hồ sơ
   # release-2-2-0 (18/08): status approved + evidence-report REJECT + chữ ký
@@ -1055,6 +1067,7 @@ for dir in "$ACC"/*/; do
   # Đặt SAU `case REQUIRED_FOR`: tier ngoài required_for vẫn im (ARM12).
   case "$status" in
     implemented|verified|signed-off) ;;
+    machine-cleared) ;;
     *)
       _arm_why=""
       if [ -f "$dir/evidence-report.md" ] && { [ "$DIFF_READY" -eq 0 ] || slug_in_diff "$slug"; }; then
@@ -1068,6 +1081,18 @@ for dir in "$ACC"/*/; do
       fi
       continue ;;
   esac
+
+  # ── Răng LỜI KHAI của machine-cleared (hồ sơ ra-co-ten, AC-2) ──
+  # «máy đã thông» tự khai sáu điều kiện xanh-sạch. Lưới đòi VẬT, và trả lời bằng ĐÚNG
+  # điều kiện trượt. Đặt TRƯỚC luật Cổng 1 để trạng thái mới có thông điệp của chính nó
+  # thay vì mượn câu của làn V. Báo cáo VẮNG thì im ở đây — luật thiếu-hồ-sơ bên dưới
+  # sở hữu câu đó, mỗi luật một câu.
+  if [ "$status" = "machine-cleared" ] && [ -f "$dir/evidence-report.md" ]; then
+    if xanh_sach_check "$dir/evidence-report.md"; then :; else
+      echo "VIOLATION [$slug]: status machine-cleared nhưng hồ sơ còn cần người — $CLEAN_WHY. Hạ về verified rồi mời ký, hoặc sửa cho bằng chứng xanh-sạch thật."
+      violations=$((violations+1)); continue
+    fi
+  fi
 
   # Gate 1 must have been recorded BEFORE any post-approval status: a contract
   # that reached implemented+ with an empty approved_by jumped the gate. The
@@ -1188,7 +1213,13 @@ for dir in "$ACC"/*/; do
       ' "${dir}evals.yaml" | sort -u)"
       while IFS= read -r xac; do
         [ -n "$xac" ] || continue
-        if ! printf '%s\n' "$xl_paired" | grep -qx "$xac"; then
+        # `xl_paired` giữ giá trị criterion NGUYÊN VĂN từ evals.yaml, mà nhiều repo
+        # viết kèm chữ mô tả cho người đọc (`criterion: AC-7 (ghi sổ phía sau)`).
+        # So nguyên-chuỗi (`grep -qx`) thì mã "AC-7" không bao giờ khớp những dòng
+        # đó → luật bắn dương-tính-giả cho MỌI tiêu chí có nhãn (cross-layer).
+        # Neo ĐẦU CHUỖI + biên không-phải-số: thiếu biên thì "AC-1" khớp nhầm
+        # "AC-16 (...)" và luật tự tạo xanh-giả — đúng thứ nó sinh ra để chặn. (P183)
+        if ! printf '%s\n' "$xl_paired" | grep -qE "^${xac}([^0-9]|$)"; then
           echo "VIOLATION [$slug]: $xac is tagged (cross-layer) but no eval of it declares layer: backend-effect — a cross-layer criterion would merge on UI-only evidence; add the paired test/script eval, or untag it with the human's signoff at Gate 1"
           violations=$((violations+1))
         fi
@@ -1256,6 +1287,13 @@ XLACS
   # while its provenance reads empty (would otherwise let a bypassed PASS slip).
   verdict="$(front_field "$report" verdict)"
   signoff="$(front_field "$report" human_signoff)"
+  # ── machine-cleared × chữ ký người = hai sự thật cãi nhau (hồ sơ ra-co-ten, AC-15) ──
+  # Ký thì status phải sang signed-off; để chữ ký nằm trên hồ sơ máy-thông là mọi bên đọc
+  # nói hai chuyện về cùng một hồ sơ.
+  if [ "$status" = "machine-cleared" ] && [ -n "$signoff" ]; then
+    echo "VIOLATION [$slug]: chữ ký người trên hồ sơ máy-thông — ký thì status phải sang signed-off (human_signoff=\"$signoff\", status=machine-cleared). /signoff đổi status cùng lượt ghi chữ ký."
+    violations=$((violations+1)); continue
+  fi
   if [ "$verdict" != "PASS" ]; then
     echo "VIOLATION [$slug]: verdict=$verdict (must be PASS to merge)"
     violations=$((violations+1)); continue
@@ -1377,8 +1415,30 @@ XLACS
   # gán là rò vc slug trước sang (đúng lớp rò-trạng-thái gap-probe P0-2).
   # Guard kiểm DIFF_READY chứ KHÔNG kiểm $BASE: base-có-mà-diff-không-dựng-được
   # (clone shallow CI) phải rơi về kiểm-tất, không phải tắt im (gap-probe P0-1).
-  if [ "$DIFF_READY" -eq 1 ] && ! slug_in_diff "$slug"; then # STALE-DIFF-SCOPE-GUARD
-    : # sử liệu ngoài diff — không soi verified_commit (AC-2); chạm hồ sơ là nó vào diff và bị soi lại như thường (AC-3)
+  # ─── THU HẸP 2026-08-27: chỉ bỏ qua khi NGOÀI DIFF **VÀ** KHÔNG KHAI paths ──
+  # Bản đầu của fork bọc TRỌN khối cho mọi slug ngoài diff. Cái giá đo được:
+  # feature CÓ khai `paths` cũng bị bỏ qua, nên đường narrow-scope không bao giờ
+  # chạy cho feature đã merge — đúng ca mà `stale-scope-by-paths` sinh ra để
+  # phục vụ. Hệ quả là AC-2 của contract đó ("ngoài union thì KHÔNG stale") mất
+  # chỗ quan sát: muốn khối chạy thì slug phải vào diff, mà vào diff thì
+  # cross-check đòi union phủ coverage set, mà file làm nó phủ lại nằm sẵn
+  # trong tập staleness — nên "được cấp scope" kéo theo "stale" một cách tất
+  # yếu. Fixture không dựng được ca đó, và `case_out_of_scope` xanh RỖNG.
+  #
+  # Thu hẹp lại: slug ngoài diff mà KHAI ĐỦ `paths` thì VẪN vào khối. Cross-check
+  # bên dưới đã tự gate theo `slug_acceptance_touched`, nên nó tự động không
+  # chạy — đúng AC-7 vế 1 ("ngoài diff → narrow scope, KHÔNG cross-check"),
+  # không cần thêm điều kiện nào. Lý do fork vẫn còn nguyên vẹn cho nhóm nó
+  # thật sự bảo vệ: feature KHÔNG khai `paths` (whole-tree) vẫn được bỏ qua
+  # trọn khối, nên nhánh mới không bị chặn vì lịch sử.
+  #
+  # Đánh đổi có mắt: feature CÓ khai `paths` mà ngoài diff nay lại bị soi
+  # verified_commit, nên nó stale khi PR chạm code NẰM TRONG union của chính nó
+  # — đó là AC-1, và cũng đúng là giao kèo mà việc khai `paths` đổi lấy. Kèm
+  # theo, nhóm đó nhận lại các NOTE pin-ma/shallow/no-vc mà bản đầu bọc im.
+  if [ "$DIFF_READY" -eq 1 ] && ! slug_in_diff "$slug" \
+     && ! feature_scope "$dir/evals.yaml" >/dev/null 2>&1; then # STALE-DIFF-SCOPE-GUARD
+    : # sử liệu ngoài diff VÀ không khai paths — không soi verified_commit (AC-2); chạm hồ sơ là nó vào diff và bị soi lại như thường (AC-3)
   else
   if [ -z "$vc" ]; then
     echo "NOTE [$slug]: report has no verified_commit (older template) — evidence is not pinned to a commit; code drift since verify is NOT machine-checked. Re-verify to pin."

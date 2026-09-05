@@ -55,7 +55,10 @@ __pycache__/
 /plugins/*
 !/plugins/.gitkeep
 
-.claude/
+# Ignore agent scratch under .claude/, but TRACK the repo-level plugin declaration
+# so a teammate opening the repo is prompted to install the right kit plugins.
+.claude/*
+!.claude/settings.json
 
 # Agent session scratch (working notes, reports). Untracked and never shipped —
 # listed here so a `git add -A` cannot sweep it into a commit.
@@ -80,3 +83,8 @@ __pycache__/
 
 # Local media scratch — sample clips dropped in during development, never shipped
 /video/
+
+# Editor/tool backups. `config-patch.mjs --write` and `sed -i.bak` both leave these;
+# one was committed by accident (dang-ky-fork-openai, 2026-09-01) and shipped a shadow
+# copy of _acceptance/config.yaml whose executor refs pointed at deleted scripts.
+*.bak

@@ -38,7 +38,38 @@
         "customSectionTitle": "カスタム変数",
         "customSectionHint": "どのインストール済みプラグインにも宣言されていない変数。",
         "getKey": "キーを取得",
-        "requiredHint": "必須"
+        "requiredHint": "必須",
+        "storeUnreadable": {
+            "title": "保存された API キーを読み取れませんでした",
+            "unchanged": "何も変更されていません。",
+            "reason": "設定ファイルを読み取れませんでした（{reason}）。",
+            "escape": "キーストアを空のものに置き換える…",
+            "confirmTitle": "キーストアを空のものに置き換えますか？",
+            "confirmBody": "保存されているすべてのキーが失われ、復元できません。この操作の後、各キーを入力し直す必要があります。",
+            "confirmCancel": "そのままにする",
+            "confirmOk": "了解しました — 置き換える",
+            "replaceFailed": "キーストアを置き換えられませんでした（{reason}）。何も変更されていません。",
+            "cause": {
+                "http": "サーバーが {status} を返しました",
+                "not-json": "応答が JSON ではありません",
+                "no-env": "応答にキー一覧が含まれていません",
+                "network": "リクエストが完了しませんでした（{detail}）",
+                "timeout": "リクエストが{seconds}秒でタイムアウトしました"
+            },
+            "writeFailed": "保存できませんでした（{reason}）。何も変更されていません。",
+            "retry": "再試行"
+        },
+        "unauthenticated": {
+            "title": "セッションの有効期限が切れました",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行"
+        },
+        "unavailable": {
+            "title": "キーサーバーに接続できません",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行",
+            "reason": "リクエストに応答がありませんでした（{code}）。"
+        }
     },
     "Index": {
         "title": "新しいアイデア"
@@ -204,9 +235,11 @@
             "extractStem": "ステム抽出",
             "addTrack": "トラック追加",
             "completeMusic": "編曲補完",
-            "musicBrief": "音楽ブリーフ"
+            "musicBrief": "音楽ブリーフ",
+            "tooltipMediaLibrary": "メディアライブラリ"
         },
         "toast": {
+            "ttsNeedsNormalize": "音声ノード {nodes} の上流に「数字を読み上げ用に変換」ノードがありません。数値・価格・日付が正しく読み上げられない可能性があります。テキストソースと音声ノードの間に追加してください。",
             "executing": "実行中...",
             "completed": "完了",
             "cancelled": "キャンセル済み",
@@ -494,7 +527,8 @@
                 "musicExtract": "ステム抽出",
                 "musicLego": "トラック追加",
                 "musicComplete": "編曲補完",
-                "musicBrief": "音楽ブリーフ"
+                "musicBrief": "音楽ブリーフ",
+                "normalizeTextVi": "数字を読み上げ用に変換"
             },
             "options": {
                 "portrait": "縦向き",
@@ -556,7 +590,8 @@
                 "addTrack": "トラック生成",
                 "completeMusic": "補完開始",
                 "musicBrief": "ブリーフ生成",
-                "applyOverlay": "オーバーレイを適用"
+                "applyOverlay": "オーバーレイを適用",
+                "normalizeTextVi": "正規化"
             },
             "params": {
                 "prompt": "プロンプト",
@@ -961,6 +996,37 @@
                 "endLabel": "終了（秒）",
                 "editOp": "オペを編集",
                 "removeOp": "オペを削除"
+            },
+            "addMediaLibrary": {
+                "title": "ライブラリから読み込む",
+                "searchPlaceholder": "必要なシーンを記述してください（例：日差しの入るリビング）",
+                "search": "検索",
+                "searching": "検索中…",
+                "importing": "クリップをファイルストアに取り込んでいます… 完了するとキャンバスに動画ノードとして表示されます。",
+                "results": "{count} 件のクリップが一致しました。ワークスペースに取り込むクリップを選んでください。",
+                "thinShelf": "この記述に合うクリップはありませんでした（フィルタを通過したクリップは {candidates} 件）。表現を変えるか条件を緩めてください。",
+                "unranked": "結果は意味順に並んでいません（ライブラリの埋め込みが未生成）。フィルタ条件は満たしていますが、順序は適合度を表しません。",
+                "error": "ライブラリの呼び出しに失敗しました。",
+                "missingConfig": "メディアライブラリがまだ接続されていません。",
+                "saveConfig": "保存して再検索",
+                "savingConfig": "保存中…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "search スコープを持つキー",
+                "failure": {
+                    "AUTH_REJECTED": "ライブラリのキーが拒否されました。MEDIA_LIBRARY_API_KEY を確認してください。",
+                    "MISSING_SCOPE": "キーに search 権限がありません。search スコープを付与してください。",
+                    "BAD_REQUEST": "ライブラリへのリクエストが不正でした。",
+                    "NOT_FOUND": "クリップが見つかりません（削除済み、またはこのキーでは見えません）。",
+                    "NOT_IMPLEMENTED": "ライブラリ側でこの経路がまだ有効化されていません。",
+                    "VERSION_MISMATCH": "ライブラリの契約バージョンが変わりました。推測せず停止しました。",
+                    "BAD_RESPONSE": "ライブラリの応答形式をこのバージョンは受け付けません。",
+                    "NETWORK_ERROR": "ライブラリに接続できませんでした。",
+                    "UPSTREAM_ERROR": "ライブラリがエラーを返しました。",
+                    "LOCAL_FAILURE": "お使いの端末側で処理を完了できませんでした。原因はアプリのログをご確認ください。",
+                    "STORE_UNREADABLE": "保存された API キーを読み取れないため、このサービスが設定済みかどうか判断できません。何も変更されていません — 設定を開いてください。"
+                },
+                "readFailed": "保存済みのキーを読み取れなかったため、何も変更していません。もう一度お試しください。",
+                "writeFailed": "キーを保存できませんでした。変更はありません。"
             }
         },
         "firstRun": {
@@ -976,6 +1042,31 @@
             "blocked": "準備できませんでした",
             "blockedReasonDownload": "ツールをダウンロードできませんでした。接続を確認してください。",
             "retry": "再試行"
+        },
+        "storeUnreadable": {
+            "title": "保存された API キーを読み取れませんでした",
+            "unchanged": "何も変更されていません。",
+            "reason": "サーバーが保存済みキーの一覧を返せませんでした（{reason}）。",
+            "toSettings": "設定を開く",
+            "cause": {
+                "http": "サーバーが {status} を返しました",
+                "not-json": "応答が JSON ではありません",
+                "no-env": "応答にキー一覧が含まれていません",
+                "network": "リクエストが完了しませんでした（{detail}）",
+                "timeout": "リクエストが{seconds}秒でタイムアウトしました"
+            },
+            "retry": "再試行"
+        },
+        "unauthenticated": {
+            "title": "セッションの有効期限が切れました",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行"
+        },
+        "unavailable": {
+            "title": "キーサーバーに接続できません",
+            "unchanged": "何も変更されていません。",
+            "retry": "再試行",
+            "reason": "リクエストに応答がありませんでした（{code}）。"
         }
     },
     "Upload": {

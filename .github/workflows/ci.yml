@@ -131,3 +131,66 @@ jobs:
 
       - name: Pre-merge acceptance check
         run: bash scripts/pre-merge-check.sh . --base "origin/${GITHUB_BASE_REF:-main}"
+
+      # Both guards below ran only when somebody typed them (zero references in
+      # this file, measured 31/08), and both had already let real drift through:
+      # PRODUCT-MAP.md advertised 22 delivered items while 26 dossiers were
+      # signed. They live on this job rather than a new one because it has
+      # already paid for checkout + setup-node, and because a seventh job would
+      # add a ninth actions/checkout and turn check-action-pins.sh red for a
+      # reason unrelated to its own change. Both scripts use bash and Node
+      # builtins only, so this job's missing `pnpm install` is not a problem.
+      - name: Roadmap ledger freshness
+        run: bash scripts/roadmap/check-roadmap-fresh.sh
+
+      - name: Product map freshness
+        run: node scripts/ci/check-product-map.mjs
+
+      # Freeze rule of the proof-slice plan (docs/roadmap.md, block plan-freeze):
+      # no working-state dossier outside the plan until every ★ row is done.
+      # Prints the completion ratio on every run — the plan's only dashboard.
+      - name: Plan freeze
+        run: node scripts/roadmap/check-plan-freeze.mjs
+      - name: Plan freeze guard still has teeth
+        run: bash scripts/roadmap/check-plan-freeze-teeth.sh
+      # The three living documents must keep carrying the plan's numbers. The
+      # signed-dossier count is COUNTED on the tree here, not grepped.
+      - name: Plan docs match the plan
+        run: bash scripts/roadmap/check-plan-docs.sh
+      - name: Plan docs guard still has teeth
+        run: bash scripts/roadmap/check-plan-docs-teeth.sh
+
+      # Four steps, not one. The teeth mode of check-gate-guards-job.sh extracts the
+      # command for each needle with `tail -1`, so a single combined `a && b && c`
+      # line makes every needle resolve to the same row and only the last one is
+      # ever proven. One step per mode keeps each needle addressable.
+      - name: READMEs match the plugin manifest
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh readme
+      - name: CLAUDE.md lists the manifest origin ids
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh claude
+      - name: No new orphan plugin icon
+        # `origin/main`, not a `${{ }}` expression: the teeth mode of
+        # check-gate-guards-job.sh EXTRACTS this exact string and RUNS it in a shell,
+        # where a GitHub expression is not a value but a brace-expansion accident. The
+        # cost is that a PR targeting some other base compares its icon set against
+        # main, which is the comparison we actually want anyway.
+        run: bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main
+      - name: Live-docs guard still has teeth
+        run: bash scripts/plugins/check-live-docs-manifest-teeth.sh
+
+      # `vitest list` needs node_modules, and this job had none — hence the two
+      # steps above it. They go HERE rather than on `unit-tests`, which already
+      # has the dependencies, because check-gate-guards-job.sh deep-equals the
+      # five other jobs against merge-base: the cheaper placement would trip a
+      # guard this repo wrote for itself. `pnpm/action-setup` is not counted by
+      # check-action-pins.sh, which tracks actions/checkout (8) and
+      # docker/login-action (1) only.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Eval filters match real tests
+        run: node scripts/ci/check-eval-filters.mjs

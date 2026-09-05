@@ -1,0 +1,278 @@
+schema_version: 1
+feature_slug: cong-tu-canh-minh
+
+# T2, mười tiêu chí. KHÔNG criterion nào mang tag (cross-layer): gói này không
+# chạm UI, mọi When/Then chạy hoàn toàn ở lớp script/CI.
+#
+# HAI LUẬT ĐO, cả hai lấy từ khuôn repo đã có chứ không tự nghĩ:
+#
+# 1. Mọi bộ kiểm mới chứng minh RĂNG bằng script `*-teeth.sh` theo đúng hình dạng
+#    `scripts/roadmap/check-roadmap-guard-teeth.sh`: `--case <tên>` địa chỉ hoá,
+#    MỘT MÃ THOÁT MỖI CA, in token `CASE <tên>: PASS|FAIL` để eval grep, và tên ca
+#    lạ thì THOÁT 2 kèm danh sách hợp lệ chứ không bỏ qua. Lý do ghi ngay trong
+#    file đó: gộp N ca sau một mã thoát làm "ca chưa hề viết" trông y hệt "ca đã
+#    qua", và cả hai đều xanh.
+#
+# 2. Ô về CI KHÔNG assert bằng cách đọc YAML. Nó theo khuôn
+#    `scripts/ci/check-vitest-job.sh <shape|no-softening|teeth>`: rút lệnh RA TỪ
+#    ci.yml rồi CHẠY lệnh đó trên cây đã phá. Đọc YAML là đo chỉ dẫn; chạy lệnh
+#    rút ra từ YAML là đo hành vi.
+#
+# `paths` khai trên mọi eval để round sau carry-forward phần diff không chạm.
+# Suite commands (`feature_loop.suite_keys`) LUÔN chạy lại.
+
+evals:
+  # ---------- A. Bộ kiểm bản đồ sản phẩm ----------
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.pmap_teeth_missing_slug
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE missing-slug: PASS`. Ca này dựng bản sao cây,
+      xoá MỘT slug đã ký khỏi khối `## Đã giao` của PRODUCT-MAP.md, rồi khẳng
+      định bộ kiểm thoát KHÁC 0 và thông điệp chứa ĐÚNG TÊN slug vừa xoá —
+      không phải câu chung "bản đồ lệch". Assert trên nội dung chuỗi, không
+      trên mã thoát đơn thuần: một bộ kiểm luôn-đỏ cũng cho mã thoát khác 0.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.pmap_teeth_count
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE count-mismatch: PASS`. Ca sửa số trong nút
+      mermaid `Đã giao<br/>N việc` thành một số sai, rồi khẳng định thông điệp
+      nêu CẢ HAI con số (số ghi trong bản đồ VÀ số đếm được từ hồ sơ). Nêu một
+      số là chưa đủ — người đọc phải biết lệch bao nhiêu và về phía nào. Đây
+      chính là trôi đã xảy ra thật: bản đồ ghi 22 khi có 26 hồ sơ ký.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.pmap_teeth_opportunity
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE opportunity-mismatch: PASS`. Ca thêm một thư
+      mục `_acceptance/<x>/` chỉ có opportunity.md (không contract.md) vào bản
+      sao mà KHÔNG cập nhật bản đồ, rồi khẳng định bộ kiểm đỏ nêu cả hai số.
+      Nửa đàn áp nằm ở E5: cây thật phải xanh, nếu không thì một bộ kiểm
+      luôn-đỏ cũng qua được ca này.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.pmap_teeth_unreadable
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa CẢ HAI token `CASE artifact-missing: PASS` và
+      `CASE artifact-unreadable: PASS`. FAIL-CLOSED, hai hình dạng: (a) xoá hẳn
+      PRODUCT-MAP.md; (b) giữ file nhưng đổi tiêu đề khối / đổi dạng nút mermaid
+      để bộ kiểm không tìm thấy vật cần đọc. Cả hai PHẢI thoát khác 0 và nói rõ
+      VẬT NÀO không đọc được. Đây là ca quan trọng nhất của bộ kiểm: một bộ kiểm
+      không tìm thấy vật cần kiểm thì chưa kiểm gì cả, và thoát 0 ở đó là lời
+      nói dối tệ hơn im lặng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.pmap_check
+    paths: ["scripts/ci/check-product-map.mjs", "PRODUCT-MAP.md", "_acceptance/**"]
+    expected: >-
+      exit 0 trên CÂY THẬT. ĐỐI CHỨNG DƯƠNG cho cả bốn ca đỏ ở E1–E4: một bộ
+      kiểm luôn-trả-khác-0 sẽ qua sạch bốn ca kia và chỉ ô này bắt được. Đồng
+      thời đây là phép đo sống của bất biến — nó đỏ vào ngày ai đó ký một hồ sơ
+      mà quên làm mới bản đồ, tức đúng việc gói này sinh ra để làm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Vá lỗ mù của guard lộ trình ----------
+  - id: E6
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_duplicate
+    paths: ["scripts/roadmap/roadmap-drift.mjs", "scripts/roadmap/check-roadmap-guard-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE ledger-duplicate: PASS`. Ca nhân đôi một dòng
+      sổ cái trong bản sao rồi khẳng định guard ĐỎ và nêu đích danh slug bị
+      trùng. CHIỀU ĐỎ ĐÃ ĐO TRƯỚC KHI VIẾT MÃ, 31/08: trên cây thật hiện tại,
+      sổ cái CÓ dòng trùng `normalize-text-vi` (hai dòng, hai ngày) mà
+      check-roadmap-fresh.sh vẫn báo xanh — nên ca này chạy trên guard hôm nay
+      sẽ FAIL, và đó là bằng chứng lỗ có thật chứ không phải suy luận.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.roadmap_fresh
+    paths: ["scripts/roadmap/roadmap-drift.mjs", "docs/roadmap.md", "_acceptance/**"]
+    expected: >-
+      exit 0 trên CÂY THẬT. Hai việc trong một: đối chứng dương cho E6, VÀ bằng
+      chứng dòng trùng `normalize-text-vi` đang tồn tại đã được dọn. Không dọn
+      thì luật mới ở E6 làm chính ô này đỏ ngay khi gói hạ cánh — tức gói việc
+      này tự làm đỏ CI của chính nó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Cắm điện vào CI ----------
+  - id: E8
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.gate_guards_job_teeth
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0. Ô này RÚT LỆNH RA TỪ ci.yml (parse khối job `acceptance-gate` theo
+      thụt lề, không match theo tên step — step đổi tên không được phép trốn)
+      rồi CHẠY chính lệnh đó trên một bản sao đã phá (bản đồ thiếu một slug).
+      Khẳng định: lệnh rút ra thoát KHÁC 0. Cố ý KHÔNG assert bằng cách đọc YAML
+      thấy có chuỗi tên script — đó là đo chỉ dẫn; chạy lệnh rút ra mới là đo
+      hành vi. Khuôn lấy từ scripts/ci/check-vitest-job.sh vốn đã giải đúng bài
+      này cho job vitest.
+      CẶP HAI CHIỀU TRÊN CÙNG CHUỖI RÚT LỆNH (thiếu ở bản nháp đầu): chạy lệnh
+      rút ra Y NGUYÊN trên cây LÀNH đòi exit 0, RỒI trên bản phá đòi khác 0. Chỉ
+      có vế âm là không phân biệt được "guard bắt lỗi" với "lệnh nào cũng hỏng":
+      ci.yml gõ `--strict` mà script không biết cờ đó thì vế âm vẫn xanh, và CI
+      đỏ trên MỌI PR ngay lượt merge đầu. Kèm ca `always-red-command`: chèn một
+      cờ rác vào bản sao ci.yml, khẳng định chính ô E8 phải ĐỎ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.gate_guards_job_shape
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0 cho CẢ HAI chế độ `shape` và `no-softening`. `shape`: khối job
+      acceptance-gate có step gọi cả hai guard. `no-softening`: trong khối đó
+      KHÔNG có `continue-on-error`, không `|| true`, không `set +e` bao quanh
+      hai lệnh guard — một guard bị làm mềm là một guard đã tắt mà vẫn trông như
+      đang bật. CHIỀU ĐỎ: thêm `|| true` vào một trong hai step thì `no-softening`
+      phải đỏ và nêu đích danh step nào.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.gate_guards_job_no_new_job
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0; đếm số job cấp cao trong ci.yml === 6 và tên chúng khớp tập đã
+      biết (lint, typecheck, build, unit-tests, sdk-tests, acceptance-gate).
+      KHÔNG hồi quy: gói này thêm STEP chứ không thêm JOB — job mới là trả lại
+      lần nữa chi phí checkout + setup-node mà job acceptance-gate đã trả xong.
+      CHIỀU ĐỎ: thêm một job thứ bảy thì ô này đỏ nêu tên job thừa.
+      VẾ THỨ HAI của AC-7 (thiếu ở bản nháp đầu): năm job kia DEEP-EQUAL với
+      chính chúng ở merge-base, so bằng bộ phân tích YAML chứ không chuỗi thô,
+      đỏ thì nêu tên job VÀ khoá đã đổi. Đếm-và-so-tên không nói gì về thân job:
+      gắn `continue-on-error: true` vào `lint` cho "đỡ ồn" vẫn 6 job, vẫn đúng
+      năm cái tên, và E9 chỉ soi khối acceptance-gate nên không thấy.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Suite verify thôi tự đốt vòng ----------
+  - id: E11
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.suite_keys_split
+    paths: ["_acceptance/config.yaml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0; BA khẳng định trên _acceptance/config.yaml, đọc bằng bộ phân tích
+      YAML chứ không grep: (1) feature_loop.suite_keys CHỨA
+      `executors.test.build` và `executors.test.typecheck` rời nhau; (2) nó
+      KHÔNG chứa `executors.test.build_typecheck`; (3) `executors.test.build_typecheck`
+      VẪN TỒN TẠI trong executors — bảy hồ sơ đã ký tham chiếu nó
+      (dependency-refresh-2026-07, per-plugin-origin, oneflow-plugin-prefix,
+      measure-harness, pnpm-build-approvals, task-metering, sdk-distribution-rename),
+      xoá là làm hỏng bảy bộ bằng chứng. Khẳng định (3) là nửa đàn áp: một bản
+      sửa "dọn dẹp" xoá luôn key gộp sẽ qua (1) và (2).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.a11y_wrappers_dist_dir
+    paths: ["scripts/onboarding/check-a11y-proto.sh", "scripts/media-library/check-a11y-proto.sh"]
+    expected: >-
+      exit 0; MA TRẬN HAI FILE, số assert bằng số file: CẢ HAI wrapper a11y đặt
+      NEXT_DIST_DIR riêng trước khi dựng dev server. ĐỐI CHỨNG DƯƠNG là bản
+      media-library vốn đã đúng từ trước — một phép đo chỉ nhìn file onboarding
+      không phân biệt được "đã sửa" với "đọc nhầm file". Đo hôm nay trước khi
+      sửa: onboarding 0 lần, media-library 1 lần. CHIỀU ĐỎ: gỡ NEXT_DIST_DIR
+      khỏi một trong hai thì ô đỏ và nêu đích danh file.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.pmap_teeth_extra_slug
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa CẢ HAI token `CASE extra-slug: PASS` và
+      `CASE status-downgraded: PASS`. CHIỀU NGƯỢC của E1: (a) chèn một mục
+      `` (`slug`) `` vào khối `## Đã giao` mà `_acceptance/<slug>/` không tồn
+      tại; (b) hạ `status` của một hồ sơ đang ký về `draft` nhưng để mục cũ nằm
+      lại trên bản đồ. Cả hai PHẢI đỏ nêu đích danh slug thừa. Repo này đã rút
+      một hồ sơ một lần thật (`normalize-text-vi`, 26/08) — kịch bản không phải
+      giả định.
+      THÊM MỘT RÀNG BUỘC FIXTURE: ca `missing-slug` của E1 phải xoá một slug CÒN
+      xuất hiện chỗ khác trong PRODUCT-MAP.md (nút mermaid hoặc liên kết văn
+      xuôi). Xoá một slug chỉ có mặt đúng một lần thì ca đó không phân biệt được
+      "đọc trong khối" với "grep cả file", và một bộ kiểm grep cả file sẽ qua.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.pmap_teeth_source_buckets
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh"]
+    expected: >-
+      exit 0; MA TRẬN BỐN Ô, số assert bằng số ô của bản kê. Bộ kiểm liệt kê MỌI
+      thư mục `_acceptance/*/` và phân loại vào đúng bốn ô đóng — đã ký · status
+      khác · chỉ có opportunity · KHÔNG PHÂN LOẠI ĐƯỢC. Ba ca đỏ cho ô thứ tư:
+      `contract-unparsable` (frontmatter YAML hỏng), `status-unknown` (`status`
+      ngoài tập đóng, gồm cả `"signed-off"` có nháy và `Signed-off` hoa đầu),
+      `dir-empty` (thiếu cả contract.md lẫn opportunity.md). Cả ba phải đỏ NÊU
+      TÊN THƯ MỤC, không bỏ qua im lặng.
+      Đây là lỗ fail-OPEN nằm ngay trong bộ kiểm được bán là fail-closed: AC-4
+      chỉ canh phía bản đồ, phía NGUỒN không có bất biến nào. Một hồ sơ mới ký
+      có frontmatter lệch bị xếp thầm vào "chưa ký" — nó rơi khỏi tập cần-có-mặt,
+      số đếm vẫn khớp, và E1..E5 xanh toàn bộ trong khi bản đồ thiếu đúng hồ sơ đó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.gate_guards_job_reachable
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0; chế độ `reachable`. Khẳng định: (1) hai step guard KHÔNG mang `if:`
+      nào; (2) job `acceptance-gate` không mang `if:` và không nằm sau `needs:`
+      một job có điều kiện; (3) trigger `pull_request` của workflow không có
+      `paths`/`paths-ignore` loại trừ `PRODUCT-MAP.md`, `docs/roadmap.md` hay
+      `_acceptance/**`.
+      Vì sao ô này tồn tại: E8/E9/E10 đo NỘI DUNG khối job, không ô nào đo job có
+      CHẠY trên PR không. Cắm `if: github.ref == 'refs/heads/main'` vào step thì
+      lệnh vẫn rút ra được, vẫn thoát khác 0 trên bản phá, khối vẫn không có
+      `|| true`, vẫn đúng 6 job — cả ba ô xanh sạch trong khi guard không bao giờ
+      chạy trên PR, tức đúng nguyên trạng 0-tham-chiếu mà gói này sinh ra để đóng.
+      CHIỀU ĐỎ: bản sao ci.yml cắm `if: false` vào step guard phải đỏ nêu đích
+      danh step và điều kiện.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- E. Cắt ngang ----------
+  - id: E13
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.pmap_teeth_all
+    paths: ["scripts/ci/check-product-map-teeth.sh", "scripts/roadmap/check-roadmap-guard-teeth.sh"]
+    expected: >-
+      exit 0; chạy TRỌN bộ ca của cả hai teeth script và khẳng định
+      case-completeness: mỗi ca khai trong `--list` đều có token
+      `CASE <tên>: PASS` trong đầu ra, và số token bằng số ca khai. Đây là ô
+      chống "ca chưa hề viết trông y hệt ca đã qua" — chính lớp lỗi mà chú thích
+      đầu check-roadmap-guard-teeth.sh ghi rằng repo đã trả giá một lần.
+      THÊM: gọi với một `--case` không tồn tại phải thoát 2 kèm danh sách hợp
+      lệ, KHÔNG thoát 0 — một tên gõ sai mà thoát 0 biến eval thành xanh vĩnh
+      viễn, đúng lớp fail-open mà bộ kiểm bản đồ sinh ra để chặn.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

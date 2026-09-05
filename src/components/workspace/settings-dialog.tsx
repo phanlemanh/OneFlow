@@ -12,10 +12,21 @@ import {
     Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -31,7 +42,6 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { apiGet, apiPut } from "@/lib/api/client";
 import { openExternalUrl } from "@/lib/desktop/open-external";
 import { logger } from "@/lib/logger";
 import type {
@@ -39,14 +49,21 @@ import type {
     PluginEnvVar,
 } from "@/lib/plugins/plugin-env-manifest-schema";
 import { pluginDisplayName } from "@/lib/plugins/plugin-id";
+import type { EnvReadFailure } from "@/lib/settings/env-client";
+import {
+    putEnvMap,
+    readEnvForBrowser,
+    replaceUnreadableStore,
+} from "@/lib/settings/env-client";
+import {
+    readFailureText,
+    writeFailureText,
+} from "@/lib/settings/read-failure-text";
+import { OPEN_SETTINGS_EVENT } from "@/lib/settings/settings-events";
+import { cn } from "@/lib/utils";
 
 const navBtnClass =
     "h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-zinc-700 transition-all duration-200";
-
-interface EnvResponse {
-    env: Record<string, string>;
-    pluginEnv?: PluginEnvDecl[];
-}
 
 interface Row {
     key: string;
@@ -296,6 +313,27 @@ export function SettingsDialog() {
     const [customRows, setCustomRows] = useState<Row[]>([]);
     // Keyed by env key for declared rows, `custom:${index}` for custom rows.
     const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+    /**
+     * Why the store could not be read, or null when it could.
+     *
+     * This used to be a `logger.error` and nothing else: the screen rendered an
+     * empty form with a working Save, and the next save wrote that emptiness
+     * over every stored key. Holding the reason in state is what lets the
+     * screen say so and refuse.
+     */
+    const [blocked, setBlocked] = useState<EnvReadFailure | null>(null);
+    const [confirming, setConfirming] = useState(false);
+    const [replaceError, setReplaceError] = useState<string | null>(null);
+    /**
+     * One-shot latch for the destructive write.
+     *
+     * A double click on a confirm button is the ordinary way "exactly one
+     * write" becomes two, and a `saving` boolean cannot stop it: state set
+     * inside an async callback has not settled by the time the second click
+     * dispatches. A ref has.
+     */
+    const replacing = useRef(false);
+    const tStore = useTranslations("Settings.storeUnreadable");
 
     const groups = useMemo(
         () => buildEnvCardGroups(decls, t("sharedSectionTitle")),
@@ -324,18 +362,81 @@ export function SettingsDialog() {
     const fetchEnv = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await apiGet<EnvResponse>("/api/settings/env");
-            applyEnv(data.env ?? {}, data.pluginEnv ?? []);
-        } catch (error) {
-            logger.error("Failed to load settings:", error);
+            const read = await readEnvForBrowser();
+            if (read.state !== "ok") {
+                // Every shape of failure lands here, not just the one the
+                // server labels: a proxy 502 and an HTML error page never
+                // carry the store-unreadable code.
+                setBlocked(read);
+                return;
+            }
+            setBlocked(null);
+            setReplaceError(null);
+            applyEnv(read.env, read.pluginEnv);
         } finally {
             setLoading(false);
         }
     }, [applyEnv]);
 
+    const confirmReplace = useCallback(async () => {
+        if (replacing.current) return;
+        replacing.current = true;
+        try {
+            const out = await replaceUnreadableStore();
+            if (!out.ok && out.reason === "replace-refused") {
+                // The server just told us our premise was wrong: the store
+                // reads fine and nothing was written. Re-check the premise
+                // rather than reporting a fault that does not exist.
+                setConfirming(false);
+                await fetchEnv();
+                return;
+            }
+            if (!out.ok) {
+                // `replaceUnreadableStore` never reads first, so it can only
+                // fail on the write; narrowing keeps the reason a plain string
+                // rather than the read-failure union.
+                if (out.reason === "unauthenticated") {
+                    // The session expired mid-wipe. Nothing was written, and
+                    // the truthful card is the quiet one, not a replace error.
+                    setConfirming(false);
+                    setBlocked({ state: "unauthenticated" });
+                    return;
+                }
+                const reason =
+                    out.reason === "write-failed"
+                        ? writeFailureText(tStore, out.detail)
+                        : readFailureText(tStore, {
+                              // `replaceUnreadableStore` never reads, so this
+                              // arm is unreachable; keep it honest rather than
+                              // inventing a cause.
+                              code: "network",
+                              detail: out.read.state,
+                          });
+                setReplaceError(tStore("replaceFailed", { reason }));
+                return;
+            }
+            setConfirming(false);
+            await fetchEnv();
+        } finally {
+            replacing.current = false;
+        }
+    }, [fetchEnv, tStore]);
+
     useEffect(() => {
         if (open) void fetchEnv();
     }, [open, fetchEnv]);
+
+    /*
+     * The blocked on-canvas surfaces have no way to repair the store, so the
+     * link they offer is their ONLY way forward. This listener is what makes
+     * that link real; without it the dispatch goes nowhere and the user sits in
+     * a card whose single control does nothing.
+     */
+    useEffect(() => {
+        const onRequest = () => setOpen(true);
+        window.addEventListener(OPEN_SETTINGS_EVENT, onRequest);
+        return () => window.removeEventListener(OPEN_SETTINGS_EVENT, onRequest);
+    }, []);
 
     const updateCustomRow = (index: number, patch: Partial<Row>) => {
         setCustomRows((prev) =>
@@ -366,13 +467,34 @@ export function SettingsDialog() {
         }
         setSaving(true);
         try {
-            const data = await apiPut<EnvResponse>("/api/settings/env", {
-                env,
-            });
-            applyEnv(data.env ?? {}, decls);
+            const out = await putEnvMap(env);
+            if (!out.ok) {
+                logger.error("Failed to save settings:", out);
+                if (out.reason === "unauthenticated") {
+                    // Same card the read half shows for a 401, and the sign-in
+                    // seam has already fired inside the client.
+                    setBlocked({ state: "unauthenticated" });
+                } else if (out.reason === "read-failed") {
+                    // The store broke between opening the screen and saving.
+                    // `blocked` was captured at fetch time, so without this the
+                    // screen would keep offering a Save that can never land.
+                    setBlocked(out.read);
+                } else if (out.reason === "write-failed") {
+                    toast.error(
+                        tStore("writeFailed", {
+                            reason: writeFailureText(tStore, out.detail),
+                        }),
+                    );
+                } else {
+                    // A merge-save never claims the store is unreadable, so the
+                    // server has no premise to refuse. Re-reading is still the
+                    // truthful response if it ever does.
+                    await fetchEnv();
+                }
+                return;
+            }
+            applyEnv(env, decls);
             toast.success(t("saved"));
-        } catch (error) {
-            logger.error("Failed to save settings:", error);
         } finally {
             setSaving(false);
         }
@@ -403,10 +525,46 @@ export function SettingsDialog() {
                     <DialogDescription>{t("description")}</DialogDescription>
                 </DialogHeader>
 
-                {loading ? (
+                {/*
+                 * `!blocked` matters. A retry sets `loading`, and swapping the
+                 * whole card for a spinner takes away the sentence that makes
+                 * the card safe — "nothing has been changed" — at the exact
+                 * moment the user acted on it. Keeping the card and disabling
+                 * its button says the same thing and stays put.
+                 */}
+                {loading && !blocked ? (
                     <div className="flex justify-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                     </div>
+                ) : blocked ? (
+                    <ReadStateNotice
+                        read={blocked}
+                        t={t}
+                        retrying={loading}
+                        onRetry={() => void fetchEnv()}
+                    >
+                        {/*
+                         * The destructive way out exists ONLY for a store that
+                         * is really unreadable. Offering it for an expired
+                         * session or a proxy 502 was the defect: the store is
+                         * fine, and the button erases it.
+                         */}
+                        {blocked.state === "store-unreadable" ? (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setConfirming(true)}
+                            >
+                                {tStore("escape")}
+                            </Button>
+                        ) : null}
+                        {replaceError ? (
+                            <p className="pt-2 text-xs text-destructive">
+                                {replaceError}
+                            </p>
+                        ) : null}
+                    </ReadStateNotice>
                 ) : (
                     <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
                         {groups.map((group) => (
@@ -523,9 +681,16 @@ export function SettingsDialog() {
                 )}
 
                 <DialogFooter>
+                    {/*
+                     * Present and disabled, never hidden. Hiding it teaches
+                     * nobody that saving is what got blocked, and it moves
+                     * every control below between renders, so keyboard focus
+                     * lands somewhere different depending on a failure the
+                     * user cannot see.
+                     */}
                     <Button
                         type="button"
-                        disabled={saving || loading}
+                        disabled={saving || loading || Boolean(blocked)}
                         onClick={save}
                     >
                         {saving ? (
@@ -535,6 +700,38 @@ export function SettingsDialog() {
                     </Button>
                 </DialogFooter>
             </DialogContent>
+
+            <AlertDialog open={confirming} onOpenChange={setConfirming}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {tStore("confirmTitle")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {tStore("confirmBody")}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>
+                            {tStore("confirmCancel")}
+                        </AlertDialogCancel>
+                        {/*
+                         * The repo's own destructive variant, not a
+                         * hand-copied class list: a hand-copied one dropped
+                         * both dark-mode branches and the focus ring, which
+                         * is exactly what the dark-theme a11y floor reads.
+                         */}
+                        <AlertDialogAction
+                            className={cn(
+                                buttonVariants({ variant: "destructive" }),
+                            )}
+                            onClick={confirmReplace}
+                        >
+                            {tStore("confirmOk")}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Dialog>
     );
 }

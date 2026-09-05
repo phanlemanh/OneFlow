@@ -1,0 +1,306 @@
+schema_version: 1
+feature_slug: repin-khong-chay-lai-eval
+
+# T2, mười bốn tiêu chí. KHÔNG criterion nào (cross-layer): mọi When/Then chạy ở lớp script,
+# sổ chạy JSONL và cấu hình.
+#
+# BA LUẬT ĐO CỦA VÒNG NÀY — cả ba rút từ lỗi CÓ THẬT của ba vòng trước trong phiên:
+#
+# 1. Bất biến đếm phải PHÂN BIỆT ĐƯỢC CẤU HÌNH SAI. Vòng trước ship `kê == đo + bỏ qua`
+#    — mỗi phần tử rơi vào đúng một nhánh nên nó hằng-đúng. Ở đây con số chịu lực là
+#    "dòng tính được > 0": một script trơ (xếp tất cả vào ông bà) in đúng mọi số khác
+#    nhưng KHÔNG in được số này.
+#
+# 2. Vế xanh trên vật RỖNG không chứng minh gì. Trên kho hôm nay 33/33 dòng repin thiếu
+#    `prev_sha`, nên nhánh chính của hàng rào chưa từng chạy trên dữ liệu thật — E6 đòi
+#    số tính được > 0, và điều đó chỉ đạt được sau khi chế độ `write` ghi một dòng thật.
+#
+# 3. Tập, không phải số. E4 so TẬP id (bị chạm và không bị chạm) vì một bộ giao trả về
+#    cả tập cũng in đúng con số đếm.
+
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.rkce_write_teeth
+    paths: ["scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 và stdout `CASE write-thieu-verified-commit: PASS`. Ca này chạy chế độ
+      `write` trên một hồ sơ fixture KHÔNG có `verified_commit` và đòi nó thoát KHÁC 0
+      nêu đích danh hồ sơ — chứ không lặng lẽ ghi một dòng repin thiếu `prev_sha`. Đây
+      là AC chịu lực nhất của hồ sơ: nghi thức ghim nằm trong kit mà kho không sở hữu,
+      nên nếu kho chỉ ĐỌC thì không dòng repin mới nào có `prev_sha` và hàng rào trơ
+      vĩnh viễn. Đối chứng dương nay do CHÍNH ô này chạy, không đi mượn: lệnh gồm
+      hai lượt — `teeth --case healthy` (`write` trên hồ sơ đủ dữ liệu phải ghi được
+      dòng có `prev_sha` đúng bằng `verified_commit` cũ) rồi `teeth --case
+      write-thieu-verified-commit`. Bản vòng 4 chỉ chạy nửa ĐỎ và mượn nửa xanh của E8,
+      nên gỡ hẳn `prev_sha` khỏi bộ ghi — tức xoá trọn AC-1 — vẫn để E1 xanh; đã tái
+      hiện 03/09 trên bản sao. Và bản sửa ĐẦU của vòng 5 vẫn hỏng theo cùng lối: ca
+      `healthy` khớp chuỗi `prev_sha=<12 ký tự>` trên **stdout**, mà `console.log` in ra
+      từ biến cục bộ ngay cả khi khoá ấy không bao giờ vào log — đo THÔNG ĐIỆP chứ không
+      đo VẬT. Nay ca ấy đòi thêm `"prev_sha":"<40 hex>"` có mặt trong chính run-log;
+      kiểm răng 03/09: gỡ `prev_sha` khỏi `appendLog` → E1 thoát 1, và đầu ra đỏ in
+      đúng dòng stdout lừa mắt bên cạnh khoá vắng mặt.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.rkce_newlines_have_prev
+    paths:
+      - "scripts/ci/check-repin-eval-coverage.sh"
+      - "_acceptance"
+    expected: >-
+      exit 0 và stdout ghim số dòng repin MỚI so với `origin/main` cùng số dòng thiếu
+      `prev_sha` trong đó (kỳ vọng 0). Luật là DELTA, cùng khuôn chế độ `orphans` của
+      hàng rào icon: 33 dòng lịch sử ở base KHÔNG bị đòi, chỉ dòng thêm mới. Đòi tuyệt
+      đối là làm CI đỏ vì quá khứ. Chiều đỏ nay do CHÍNH ô này chạy, không đi
+      mượn: lệnh gồm hai lượt — `newlines origin/main` trên kho thật (xanh) và `teeth
+      --case newlines-thieu-prev` trên fixture có dòng repin MỚI thiếu `prev_sha` (đỏ,
+      nêu đích danh slug). Bản vòng 2 khai chiều đỏ nằm ở ca `ong-ba`, nhưng ca ấy đo
+      chế độ `check` chứ không đo `newlines` — một khẳng định âm-tính-một-mình, đúng
+      thứ MEASURE-BIRTH-CLAUSE cấm. Chế độ này cũng đếm dòng MỚI không đọc được rồi
+      dừng, thay vì `continue` im lặng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.rkce_paths_law
+    paths: ["scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 và stdout in MA TRẬN TOÀN PHẦN bốn hình dạng × hai chiều = **tám dòng**:
+      đường dẫn trần · glob (`scripts/**`) · thư mục trần (`_acceptance`) · tiền tố có
+      `*`, mỗi hình dạng một ca CHẠM và một ca KHÔNG CHẠM, mỗi dòng nêu mục `paths` nào
+      khớp file nào. Hình dạng thứ ba là chỗ đau: chính `evals.yaml` của hồ sơ này khai
+      `paths: ["_acceptance"]`, và minimatch thuần chỉ khớp đúng chuỗi ấy — mọi mục kiểu
+      thư mục trong 357 eval đang khai `paths` sẽ thành KHÔNG BAO GIỜ bị chạm, và hàng
+      rào under-report ở đúng lớp hồ sơ đông nhất mà vẫn xanh.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.rkce_plan
+    paths: ["scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 và stdout in HAI TẬP id — bị chạm và không bị chạm — cho một fixture CÓ TÊN
+      với tập eval biết trước và cặp sha biết trước; so bằng phép so tập, không phải
+      chuỗi-có-mặt. Và một ca thứ hai: thêm ĐÚNG MỘT file vào diff phải làm ĐÚNG MỘT id
+      chuyển từ tập sau sang tập trước. Chỉ đếm số thì một bộ giao trả về CẢ TẬP cũng in
+      đúng con số ấy và vẫn thoả luật "eval không khai `paths` luôn có mặt".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.rkce_check
+    paths:
+      - "scripts/ci/check-repin-eval-coverage.sh"
+      - "_acceptance"
+    self_referential: true
+    expected: >-
+      exit 0 trên kho thật. `check` đọc mọi hồ sơ đã ký; với mỗi dòng repin CÓ `prev_sha`
+      thì tính `git diff prev_sha..sha`, giao với `paths` từng eval theo luật ở AC-3, rồi
+      đòi mỗi eval bị chạm có một dòng
+      `{"kind":"eval","eval":<id>,"sha":<sha ấy hoặc hậu duệ>,"exit_code":0}` trong CHÍNH
+      `run-log.jsonl` của hồ sơ — `exit_code: 0`, không phải "có dòng eval là được"
+      (xem AC-13). Hình dạng và đường dẫn ấy khai ở đây TRƯỚC
+      khi viết mã: một bộ đọc tra sai chỗ vẫn làm mọi fixture tự dựng xanh, và bằng chứng
+      vẫn nói "chạy trên kho thật, exit 0". Chiều đỏ ở ca `nuot-eval` của E8. PHẠM VI `paths` thu
+      hẹp 03/09 sau chữ ký (owner chốt): bỏ mục thư mục trần `_acceptance`, chỉ giữ mã
+      của hàng rào. Lý do là một BẾ TẮC TỰ-QUY-CHIẾU: ô này CHẠY chính `check`, mà mọi
+      lần ghim đều ghi vào `_acceptance/**` — kể cả dòng ghim của nó — nên lần ghim nào
+      cũng «chạm» ô này, và `check` chỉ xanh được khi ô này đã có dòng xanh tại sha ấy.
+      CÁI GIÁ, khai thẳng: kết luận của `check` CÓ phụ thuộc nội dung hồ sơ, nên từ nay
+      một lần ghim chỉ đụng hồ sơ sẽ không còn buộc chạy lại ô này. Đó là đánh đổi có
+      chủ ý, không phải sơ suất — lối kia (miễn trừ ô tự-quy-chiếu ngay trong luật hàng
+      rào) là đổi mã sản phẩm sau chữ ký và đã để lại cho một hồ sơ riêng.
+      HOÀN NGUYÊN 04/09 (hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi`, AC-10): mục
+      `_acceptance` trở lại, và bế tắc tự-quy-chiếu nay được xử bằng cờ khai
+      `self_referential: true` ngay trên ô đo. Phép thu hẹp 03/09 mua yên tĩnh bằng cách
+      bán độ phủ thật; không hoàn nguyên thì bế tắc chỉ đang bị giấu, không phải đã hết.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.rkce_check_min
+    paths:
+      - "scripts/ci/check-repin-eval-coverage.sh"
+      - "scripts/ci/repin-eval-coverage.mjs"
+      - "_acceptance"
+    self_referential: true
+    expected: >-
+      exit 0 và stdout ghim TÁM số độc lập: hồ sơ đã quét · dòng repin đọc được · **dòng
+      tính được (phải > 0)** · dòng ông bà · eval bị nuốt · chạy lại nhưng ĐỎ · chạy lại
+      không rõ kết quả (cộng hạng không kết luận được). Sàn ấy nay được ÉP chứ
+      không chỉ được in: lệnh chạy `check --min-computable 1`, và vòng 3 đã bắt được đúng
+      chỗ hở này — bản cũ in số 0 rồi thoát 0, tức lời hứa chịu lực nhất của ô đo được
+      thoả bởi một lượt chạy không chứng minh gì. Chiều đỏ là ca `san-tinh-duoc`: một
+      fixture chỉ có dòng ông bà thì `check` trần XANH (đúng — kho chưa re-pin lần nào có
+      quyền bằng 0) còn `--min-computable 1` phải ĐỎ nêu `tinh duoc = 0`; sàn là lời khai
+      của người gọi về KHO CỦA HỌ, không phải luật phổ quát nhét vào trong chế độ. Chế độ này cũng TỪ CHỐI chạy trên
+      clone nông: ở đó mọi sha cũ đều không phân giải được nên dòng nào cũng rơi vào hạng
+      ông bà và hàng rào xanh mà không đo gì — checkout mặc định của CI là depth 1. Con số thứ ba là ô đo thật sự:
+      bốn số kia đều thoả bởi một script chỉ đếm dòng rồi xếp TẤT CẢ vào nhánh ông bà
+      (hôm nay ông bà = tổng = 33, nuốt = 0), nên chúng không phân biệt được "phát hiện
+      `prev_sha` chạy đúng" với "phát hiện `prev_sha` là no-op". `> 0` chỉ đạt được sau
+      khi chế độ `write` đã ghi ít nhất một dòng thật trên nhánh này — tức nó buộc AC-1
+      phải hoạt động chứ không chỉ tồn tại. Dùng chung lệnh với E5; tách criterion vì
+      "in đủ năm số, số thứ ba > 0" là lời hứa riêng với người đọc log CI.
+      HOÀN NGUYÊN 04/09 (hồ sơ `hang-rao-doc-nham-loi-thanh-khong-co-gi`, AC-10): mục
+      `_acceptance` trở lại, và bế tắc tự-quy-chiếu nay được xử bằng cờ khai
+      `self_referential: true` ngay trên ô đo. Phép thu hẹp 03/09 mua yên tĩnh bằng cách
+      bán độ phủ thật; không hoàn nguyên thì bế tắc chỉ đang bị giấu, không phải đã hết.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.rkce_readers_bytewise
+    paths:
+      - "scripts/ci/check-repin-eval-coverage.sh"
+      - "scripts/recheck-evidence.cjs"
+      - "scripts/pre-merge-check.sh"
+    expected: >-
+      exit 0. Chế độ `readers` chạy `pre-merge-check.sh . --base origin/main` HAI lượt
+      trên cây thật — một với một dòng repin có `prev_sha`, một với dòng ấy đã gỡ trường
+      đó — rồi đòi đầu ra hai lượt GIỐNG NHAU TỪNG BYTE, và in số violation của cả hai.
+      Đo QUAN HỆ trước/sau, không phải "cả hai chấp nhận" trên kho dùng-rồi-bỏ: bên đọc
+      bỏ qua trường lạ nên "chấp nhận" là hằng-đúng và không nội dung `prev_sha` nào làm
+      nó đỏ được. ĐỐI CHỨNG DƯƠNG bắt buộc, chứng minh phép thử thấy được đỏ: **gỡ khoá
+      `sha`** khỏi dòng repin phải làm cả hai bên đọc ĐỎ. Bản đầu của hợp đồng khai chiều
+      đỏ là "ghi `prev_sha` sai kiểu" — tự mâu thuẫn với chính tiền đề của feature.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.rkce_teeth
+    paths: ["scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 và ĐỦ BA MƯƠI dòng `CASE <tên>: PASS` cùng chốt `OK: 30/30 ca` — `healthy`
+      (đối chứng dương, và cũng chứng minh `write` ghi `prev_sha` đúng bằng
+      `verified_commit` cũ) · `nuot-eval` (đỏ, nêu đích danh slug + `run_id` + id eval) ·
+      `da-chay-lai` (XANH — phân biệt "bắt được việc nuốt" với "đỏ mọi thứ") · `ong-ba`
+      (dòng cũ không `prev_sha` → xanh và được đếm) · `khong-khai-paths` (eval không khai
+      `paths` → vào hạng mục KHÔNG KẾT LUẬN ĐƯỢC, không vào "bị nuốt") ·
+      `paths-thu-muc-tran` · `paths-glob` · `write-thieu-verified-commit` ·
+      `plan-tap-id` · `plan-them-mot-file` · `write-thieu-suites` · `write-lan-do` ·
+      `write-prev-bang-sha` · `diem-vao-duong-dan-la` · `write-giu-dong-cu` ·
+      `chay-lai-do` · `log-hong` · `newlines-thieu-prev` · `so-khop-lech` ·
+      `so-khop-rong` · `san-tinh-duoc` · `base-khong-phan-giai` · `base-thieu-file` · `diff-that-bai` · `shallow-do-loi` · `tu-quy-chieu-khai` · `tu-quy-chieu-quen-khai` · `tu-quy-chieu-dem-giam` · `paths-e5e6-hoan-nguyen` · `plan-diff-that-bai` (chin ca cuoi them 04/09 boi ho so `hang-rao-doc-nham-loi-thanh-khong-co-gi`). Dòng chốt nay ĐẾM lúc chạy (`want` tự cộng
+      theo vế xanh/đỏ được yêu cầu) thay vì mang một chuỗi viết tay: vòng 3 bắt được nó
+      khai «7 đối chứng dương + 11 phép phá» trong khi thực tế là 6 + 12, và `TOTAL`
+      không thể bắt vì `TOTAL` nói có bao nhiêu ca chứ không nói ca thuộc loại nào.
+      `TOTAL` cũng thôi được gõ tay — nó ĐẾM từ danh sách `KNOWN`. Đã kiểm răng của bộ răng: thước no-op → 4 ca
+      phá đỏ; bộ giao trả CẢ TẬP → ba đối chứng dương (`da-chay-lai`, `khong-khai-paths`,
+      `plan-tap-id`) đỏ. Mọi ca dựng trên kho git dùng-rồi-bỏ (`mktemp -d` +
+      `git init`), KHÔNG chạm cây thật — vòng trước một ca ghi vật thăm dò vào cây thật
+      và gây đua với ô đo anh em chạy song song. Lượt `--case` lẻ in `PARTIAL: n/30` và
+      KHÔNG in `OK:` (đo 02/09: `PARTIAL: 1/30`); tên ca lạ → thoát 2. `healthy` truyền
+      `suites_json` tường minh `[0,0,0]` — trước vòng 2 nó gọi `write` KHÔNG truyền, tức
+      ca đối chứng dương đang ban phước cho đúng đường bịa mà AC-10 cấm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.rkce_resign_wave
+    expected: >-
+      exit 0 — không hồ sơ đã ký NÀO KHÁC còn mang bằng chứng có trước code của nhánh
+      này. Đo 02/09 bằng mô phỏng: chạm vùng gated làm **3** hồ sơ hoá ôi (`scripts/ci/`
+      → 3 · `scripts/acceptance/` → 4 · `scripts/plugins/` → 3), nên vòng này kèm một sự
+      kiện re-pin và lane ấy là việc CUỐI CÙNG trước lượt verify. Con số 3 bác một giả
+      định mang từ vòng trước (`scripts/ci/**` → 0): hai hồ sơ vừa ký không khai phạm vi
+      hẹp nên dùng phạm vi mặc định. KHÔNG khai `paths` → luôn chạy lại.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.rkce_write_refusals
+    paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 cho cả BA lượt — `write-thieu-suites`, `write-lan-do`, `write-prev-bang-sha` —
+      mỗi lượt in `CASE <tên>: PASS` rồi `PARTIAL: 1/30`. Mỗi ca đòi `write` thoát khác 0,
+      in đúng lý do của nó, và run-log KHÔNG thêm dòng nào. Đã kiểm răng 02/09 bằng cách
+      thay từng phép từ chối trong lõi bằng `if (false)`: ca tương ứng đỏ (`write-thieu-suites`
+      → "dau ra khong neu 'khong co mac dinh'"; `write-prev-bang-sha` → "mong do, nhung
+      thoat 0"). Ba lượt tách rời chứ không một lượt `teeth` đầy đủ: E8 đã chạy cả bộ, ô
+      này đo ĐÍCH DANH ba phép từ chối nên một ca khác đỏ không được phép nhuộm nó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.rkce_entrypoint
+    paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0, in `CASE diem-vao-duong-dan-la: PASS` rồi `PARTIAL: 1/30`. Ca chép lõi sang
+      một thư mục CÓ DẤU CÁCH dưới `mktemp -d` (tức dưới `/tmp`, vốn là symlink tới
+      `/private/tmp` trên macOS) rồi gọi một mode không tồn tại; đòi `usage:` trên stderr và
+      mã thoát khác 0. Đối chứng đã chạy: bản dùng `import.meta.url === argv[1]` nguyên văn
+      thoát **0 và không in gì** ở đúng fixture này — đó là lý do ca phải nằm dưới symlink,
+      chạy ở `$PWD` thường thì cả hai bản đều xanh và ô đo vô nghĩa.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.rkce_gateway
+    paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0 cho cả HAI lượt — `write-giu-dong-cu` và `log-hong` — mỗi lượt in `CASE <tên>:
+      PASS` rồi `PARTIAL: 1/30`. Ca thứ nhất dựng run-log giữ một dòng repin hợp lệ và
+      KHÔNG kết thúc bằng `\n`, gọi `write`, rồi đòi `check` đọc được **hai** dòng repin
+      (`dong repin: 2`) và nhận ra dòng mới `R9` — trước khi vá, hai dòng hàn làm một và
+      `check` in `dong repin: 0 … OK` thoát 0. Ca thứ hai thêm một dòng cụt và đòi `check`
+      DỪNG nêu `khong doc duoc` + tên hồ sơ. Đã kiểm răng 02/09: gỡ chốt xuống dòng →
+      `write-giu-dong-cu` đỏ ("dau ra khong neu 'dong repin: 2'"); gỡ phép từ chối →
+      `log-hong` đỏ. Đối chứng dương là các ca xanh còn lại của E8, chứng minh cửa mới không
+      đơn giản đỏ mọi thứ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.rkce_exit_code
+    paths: ["scripts/ci/repin-eval-coverage.mjs", "scripts/ci/check-repin-eval-coverage.sh"]
+    expected: >-
+      exit 0, in `CASE chay-lai-do: PASS` rồi `PARTIAL: 1/30`. Ca dựng một pin tính được có
+      chạm E1, thêm dòng chạy lại `exit_code: 1`, và đòi `check` ĐỎ với thông điệp `DA chay
+      lai nhung DO` nêu đích danh `E1`. Đối chứng dương là ca `da-chay-lai` (cùng fixture,
+      `exit_code: 0` → xanh, `eval bi nuot: 0`) — cặp hai chiều trên cùng một vật, nên vế
+      xanh không thể đến từ "hàng rào không nhìn thấy gì". Đã kiểm răng 02/09: đổi điều kiện
+      `o.exit_code === 0` thành `true` → ca này "mong do, nhung thoat 0".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.rkce_so_khop_total
+    paths: ["scripts/ci/check-repin-eval-coverage.sh", "_acceptance/repin-khong-chay-lai-eval/evals.yaml"]
+    expected: >-
+      exit 0 cho cả BA lượt. Lượt một chạy `so-khop-total` trên chính hồ sơ này: nó quét
+      mọi `PARTIAL: n/N` và `OK: n/N ca` trong **hai** file mô tả bộ răng ấy —
+      `evals.yaml` và `s4-args.json` — đòi từng `N` bằng số ca thật, và in bốn số: file
+      đã quét · con số tìm được · số lệch · số ca hiện có. PHẠM VI khai thẳng, vì nó là
+      chỗ đã sai hai lần: một file duy nhất là QUÁ HẸP (`s4-args.json` nằm trong cây với
+      bảy con số cũ trong khi phép quét báo sạch), còn cả thư mục thì QUÁ RỘNG —
+      `evidence-report.md` và `opportunity.md` mang `OK: n/N ca` nói về bộ đo KHÁC, và
+      đo 03/09 nó đẻ ra 14 lệch giả. Mẫu chỉ nêu HÌNH DẠNG, nên danh sách file mới là
+      thứ nêu CHỦ THỂ. Số viết bằng CHỮ ("mười bốn ca") vẫn ngoài tầm — xem Known limits. Hai lượt sau
+      là hai chiều đỏ trên fixture: `so-khop-lech` (một con số 99 giả trong fixture → đỏ, nêu cả 99
+      lẫn số thật) và `so-khop-rong` (không con số nào → đỏ với chữ `dang do KHONG GI`).
+      Ca thứ ba ấy là phần chịu lực: một bộ quét không khớp gì sẽ in một lượt sạch, đúng
+      hình dạng «xanh trên không có gì» mà hồ sơ này tồn tại để diệt. ĐO KHAI SINH có
+      thật, không dựng: lần chạy ĐẦU TIÊN của chế độ này trên kho thật đã ĐỎ, bắt hai chỗ
+      còn ghi 14 sau khi bộ răng lên 18 ca — hai `expected` mà lệnh không bao giờ thoả
+      được, tức người chấm đang tung đồng xu chứ không đo. GIỚI HẠN của chính chế độ này,
+      khai thẳng: nó quét theo MẪU nên không phân biệt được một con số đang KHẲNG ĐỊNH
+      với một con số đang được TRÍCH DẪN làm phản ví dụ — viết `1/99` trong văn xuôi sẽ
+      làm nó đỏ. Cái giá là văn xuôi phải nói số bằng chữ; đổi lại không con số nào nói
+      về bộ răng mà thoát khỏi phép kiểm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

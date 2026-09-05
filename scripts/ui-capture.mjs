@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 /* ui-capture.reference.mjs — REFERENCE implementation of `config:capture.ui`.
  *
@@ -21,7 +21,14 @@ import { dirname } from "node:path";
  * The dependency lives in YOUR package.json, not in the plugin.
  *
  * Usage: node scripts/ui-capture.mjs <url> <out.png> [--wait <ms>] [--full] [--w <px>] [--h <px>]
+ *          [--lang <tag>] [--require <text>]
  * Set CHROME_PATH if Chrome/Chromium isn't at a default location.
+ *
+ * --lang / --require exist because a headless profile carries neither a
+ * NEXT_LOCALE cookie nor a matching Accept-Language, so this app renders its
+ * fallback locale and the frame still LOOKS valid — measured 2026-08-21: the
+ * same route that answers `lang="vi"` to curl came back `lang="en"` here. A
+ * capture tool that cannot refuse to write is a report, not a measurement.
  */
 import puppeteer from "puppeteer-core";
 
@@ -30,7 +37,7 @@ const flag = (n, d) => {
     const i = args.indexOf(n);
     return i >= 0 ? args[i + 1] : d;
 };
-const VAL_FLAGS = ["--wait", "--w", "--h", "--html"];
+const VAL_FLAGS = ["--wait", "--w", "--h", "--html", "--lang", "--require"];
 const pos = [];
 for (let i = 0; i < args.length; i++) {
     if (VAL_FLAGS.includes(args[i])) {
@@ -51,6 +58,8 @@ const waitMs = Number(flag("--wait", 600));
 const width = Number(flag("--w", 390)); // mobile-first default — adjust per persona
 const height = Number(flag("--h", 844));
 const fullPage = args.includes("--full");
+const lang = flag("--lang", null);
+const require_ = flag("--require", null);
 
 const CANDIDATES = [
     process.env.CHROME_PATH,
@@ -83,10 +92,81 @@ const browser = await puppeteer.launch({
 try {
     const page = await browser.newPage();
     await page.setViewport({ width, height });
+
+    // Locale has to be forced on BOTH channels before the first navigation:
+    // the app reads the NEXT_LOCALE cookie first and falls back to
+    // Accept-Language, and a fresh headless profile carries neither.
+    if (lang) {
+        await page.setExtraHTTPHeaders({ "Accept-Language": lang });
+        const { origin } = new URL(url);
+        const cookie = { name: "NEXT_LOCALE", value: lang, url: origin };
+        if (typeof browser.setCookie === "function")
+            await browser.setCookie(cookie);
+        else await page.setCookie(cookie);
+    }
+
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
     await new Promise((r) => setTimeout(r, waitMs));
-    await page.screenshot({ path: out, fullPage });
-    console.log(`saved ${out}`);
+
+    // Refuse to write rather than write a frame of the wrong page. A saved PNG
+    // is indistinguishable from a correct one once it reaches an evidence
+    // folder, so the check belongs here, before the file exists.
+    let refused = false;
+    if (require_ || lang) {
+        const seen = require_
+            ? await page.evaluate(() => document.body.innerText)
+            : "";
+        const htmlLang = await page.evaluate(
+            () => document.documentElement.lang,
+        );
+        // Two independent reasons to refuse, checked together because they fail
+        // together. The text check alone let a wrong-locale frame through
+        // whenever --require happened to name a locale-independent string (a
+        // product name, a number, a brand token): the lang was READ, put in the
+        // error message, and never actually asserted (S4 round 5 finding).
+        // A capture tool that cannot refuse to write is a report, not a
+        // measurement — and that holds for the locale exactly as for the text.
+        const missingText = require_ ? !seen.includes(require_) : false;
+        const wrongLang = lang
+            ? (htmlLang || "").toLowerCase() !== lang.toLowerCase()
+            : false;
+        if (missingText || wrongLang) {
+            // Remove any earlier frame sitting at this path. Refusing to WRITE
+            // is not enough when the target already exists: a later run that
+            // refuses would leave the previous, correct-looking frame in place,
+            // and any step that only checks "the artifact is there" would file
+            // a stale capture as this round's evidence.
+            const stale = [out, flag("--html", null)].filter(Boolean);
+            for (const path of stale) {
+                try {
+                    rmSync(path, { force: true });
+                } catch {
+                    /* nothing to remove */
+                }
+            }
+            const why = [
+                missingText
+                    ? `page does not contain ${JSON.stringify(require_)}`
+                    : null,
+                wrongLang
+                    ? `html lang=${JSON.stringify(htmlLang || "")} but --lang ${JSON.stringify(lang)}`
+                    : null,
+            ]
+                .filter(Boolean)
+                .join("; ");
+            console.error(
+                `ui-capture: REFUSED — ${why}. Nothing written; ` +
+                    `${stale.length} stale target(s) removed.`,
+            );
+            process.exitCode = 3;
+            refused = true;
+        }
+    }
+
+    if (!refused) {
+        await page.screenshot({ path: out, fullPage });
+        console.log(`saved ${out}`);
+    }
 
     // --html <path>: also dump the rendered DOM with every same-origin
     // stylesheet inlined.
@@ -97,7 +177,7 @@ try {
     // clean sheet it never actually measured — the exact shape of a green that
     // means nothing. Inlining the CSS text is what makes the measurement real.
     const htmlOut = flag("--html", null);
-    if (htmlOut) {
+    if (htmlOut && !refused) {
         const html = await page.evaluate(() => {
             const css = Array.from(document.styleSheets)
                 .map((sheet) => {

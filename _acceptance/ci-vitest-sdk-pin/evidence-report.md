@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 91da1a4e32ce3da92f5ab52d3a43d8b2aeb1a507
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh 2026-08-07
 ---
 
@@ -313,3 +313,17 @@ report, `run-log.jsonl`, and the contract's `status:` line.
 - [ ] Optional: retire or re-cut AC-9 / E9's "38 + 1" numerals, now 36 + 3 in the
       tree — the mechanism is fine, the prose is stale
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 9 ô đo bị chạm, cả 9 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

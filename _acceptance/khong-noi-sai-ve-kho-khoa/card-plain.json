@@ -1,0 +1,95 @@
+{
+  "feature_plain": "Khi không đọc được kho khoá API, mọi màn hình phải nói ĐÚNG chuyện gì đã xảy ra — phiên hết hạn, mất kết nối, hay kho thật sự hỏng — và chỉ đề nghị xoá kho khi kho hỏng thật.",
+  "scope_plain": "Hoãn sang hồ sơ sau: cách hợp nhất khoá vẫn nằm ở trình duyệt, nên một lượt ghi không kèm cờ vẫn xoá sạch kho lành.",
+  "analyst_plain": "",
+  "decisions_plain": [
+    {
+      "id": "d-20260903T063359Z-28140",
+      "p": "Vòng này chỉ sửa phần máy chủ kiểm tra trước khi xoá kho và phần giao diện phân biệt bốn kiểu sự cố đọc — không đụng cách hợp nhất khoá."
+    },
+    {
+      "id": "d-20260903T063359Z-9094",
+      "p": "Nhận vào cả ba mảnh: phân biệt phiên hết hạn, báo cho vỏ ứng dụng mở đăng nhập, và đặt trần 30 giây."
+    },
+    {
+      "id": "d-20260903T063359Z-12464",
+      "p": "Chỉ một chỗ trong sản phẩm phát tín hiệu «cần đăng nhập lại»; hai nơi cùng gọi vào đó."
+    },
+    {
+      "id": "d-20260903T063359Z-11545",
+      "p": "Bị từ chối quyền KHÔNG hiện lời mời đăng nhập lại — mời sai là nói sai lý do người dùng bị chặn."
+    },
+    {
+      "id": "d-20260903T063359Z-25605",
+      "p": "KHÔNG làm trong vòng này: lỗi lưu khoá vẫn hiện dấu tích xanh «đã lưu» — tách thành hồ sơ riêng."
+    },
+    {
+      "id": "d-20260903T063359Z-11458",
+      "p": "KHÔNG làm đường đo giá trị: vòng này đi ra từ Cổng 2 của hồ sơ trước, không có hồ sơ cơ hội."
+    },
+    {
+      "id": "d-20260903T064830Z-20690",
+      "p": "Dựng bản bấm được riêng để duyệt giao diện bằng mắt, kèm hai hướng để chọn thay vì máy tự quyết."
+    },
+    {
+      "id": "d-20260903T073742Z-6612",
+      "p": "Sửa chữ trong tiêu chí cho khớp mã thật: lượt ghi hết giờ TRẢ VỀ kết quả, không ném lỗi."
+    },
+    {
+      "id": "d-20260903T075136Z-10092",
+      "p": "Tách việc rút tín hiệu đăng-nhập-lại khỏi việc phân loại lỗi đọc, dù cả hai phục vụ cùng một tiêu chí."
+    },
+    {
+      "id": "d-20260903T075136Z-26631",
+      "p": "Ba việc độc lập chạy song song, năm việc còn lại chạy lần lượt."
+    },
+    {
+      "id": "d-20260903T075136Z-1688",
+      "p": "Phép đo trần thời gian dựng bề mặt THẬT của node, không chỉ đo lời hứa của hàm."
+    },
+    {
+      "id": "d-20260903T083706Z-19005",
+      "p": "Cổng duyệt kế hoạch đi qua bằng suy diễn từ lệnh chạy tiếp, không phải bằng một câu duyệt tường minh."
+    },
+    {
+      "id": "d-20260903T083706Z-3923",
+      "p": "Thi công tuần tự trong phiên chính, KHÔNG mở nhánh song song — tránh cái bẫy đã làm hỏng thư viện phụ thuộc."
+    },
+    {
+      "id": "d-20260903T160000Z-7741",
+      "p": "Bảng «trạng thái nào ra tấm thẻ nào» nằm ở MỘT chỗ dùng chung, không chép cho từng màn hình."
+    },
+    {
+      "id": "d-20260903T160100Z-8812",
+      "p": "Sửa hai bộ đo của hồ sơ trước thay vì giữ chúng xanh — chúng đang khẳng định đúng cái lỗi vừa được sửa."
+    },
+    {
+      "id": "d-20260903T170000Z-4471",
+      "p": "Đóng lỗ «node không có nút Thử lại» bằng cách gom về một chỗ dựng duy nhất, không phải thêm một tham số."
+    },
+    {
+      "id": "d-20260903T170100Z-9920",
+      "p": "Trần 30 giây nay phủ cả phần thân phản hồi — trước đó chỉ phủ tới lúc máy chủ bắt đầu trả lời."
+    },
+    {
+      "id": "d-20260903T170200Z-3318",
+      "p": "Phép đo chữ nghĩa dựng đúng tấm thẻ sẽ ship và chạy cả hai ngôn ngữ, thay vì tự dựng nút rồi tự tìm lại."
+    },
+    {
+      "id": "d-20260903T180000Z-6602",
+      "p": "Gộp ba bộ dịch lý-do-sự-cố làm một, để lần sau thêm chi tiết chỉ có thể sót ở một chỗ."
+    },
+    {
+      "id": "d-20260903T180100Z-1174",
+      "p": "Bộ đo chữ nghĩa dùng từ điển mẫu có giá trị duy nhất — từ điển thật có nhiều câu giống hệt nhau nên không phân biệt được."
+    },
+    {
+      "id": "d-20260903T180200Z-5548",
+      "p": "Bản mẫu đi qua đúng bảng ánh xạ của bản ship, nên sàn tiếp cận đo được màu thật."
+    },
+    {
+      "id": "d-20260903T183000Z-7013",
+      "p": "Vòng đo thứ ba đạt, nhưng còn hai phát hiện chạm thẳng tiêu chí AC-5 — để người quyết ở cổng này."
+    }
+  ]
+}
