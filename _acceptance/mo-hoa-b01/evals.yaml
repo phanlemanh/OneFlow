@@ -1,0 +1,169 @@
+schema_version: 1
+feature_slug: mo-hoa-b01
+
+# T2, mười một tiêu chí, lớp script + tài liệu. Không (cross-layer), không judgment (bài học
+# lat-cat-chung-minh: J1 bị hai chốt của kit chặn nhau, gỡ ở Cổng 2). Mỗi ca răng một khoá
+# executor riêng (khuôn lcm_*): case chưa cài và case đã qua không được trông giống nhau sau một
+# mã thoát. Chiều đỏ của mỗi ô đo nằm trong chính ca răng nó gọi (measure-birth: cùng fixture,
+# thông điệp ghim); ca răng nào cũng chạy đối chứng dương trước khi phá, và phá ĐÚNG MỘT biến
+# (gap-probe 05/09 P1).
+
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.mhb_teeth_image
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/fork-identity.conf", "docker-compose.yml", "README.md", "docs/README_ZH.md", "docs/README_JA.md"]
+    expected: >-
+      exit 0 và stdout có ba token: `CASE image-upstream: PASS` (đổi `image:` của bản sao compose về
+      `ghcr.io/tong-io/tongflow:latest` → guard đỏ ghim `ảnh container`), `CASE conf-remote-lech: PASS`
+      (conf khai `repo=ai-do/kho-khac` trong khi remote là phanlemanh/OneFlow → guard đỏ ghim
+      `conf lệch remote` và in CẢ HAI giá trị) và `CASE readme-image-missing: PASS` (xoá chuỗi ảnh khỏi
+      lệnh docker run của TỪNG README, ba lượt, mỗi lượt ghim `<README> thiếu chuỗi ảnh` đúng tên file).
+      Đối chứng dương: cùng fixture chưa phá thoát 0.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.mhb_teeth_compose_build
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "docker-compose.yml", "README.md", "docs/README_ZH.md", "docs/README_JA.md"]
+    expected: >-
+      exit 0 và stdout `CASE compose-no-build: PASS` — comment dòng `build: .` trong bản sao compose
+      → guard đỏ ghim `compose thiếu build:`; và `CASE readme-no-build-cmd: PASS` — xoá
+      `docker compose up -d --build` khỏi TỪNG README (ba lượt) → guard đỏ ghim
+      `<README> thiếu docker compose up -d --build` đúng tên file mỗi lượt.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.mhb_teeth_release
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", ".github/workflows/desktop-release.yml", "CLAUDE.md"]
+    expected: >-
+      exit 0 và stdout có NĂM token, mỗi ca phá đúng một biến: `CASE tag-trigger-back: PASS` (chèn lại
+      `tags: ["v*"]` dưới `push:` → `desktop-release còn trigger tags`), `CASE prepare-if-gone: PASS`
+      (xoá `if: startsWith(github.ref, 'refs/tags/')` → `desktop-release prepare thiếu if tags`),
+      `CASE disarmed-header-gone: PASS` (xoá chữ DISARMED → `desktop-release thiếu header DISARMED`),
+      `CASE claude-not-released-gone: PASS` (xoá `Not currently released` → `Release checklist thiếu Not currently released`),
+      `CASE claude-builds-line-back: PASS` (thêm lại câu tag builds `OneFlow-mac-universal.dmg` →
+      `Release checklist nói ngược hành vi`).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.mhb_teeth_community
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "CONTRIBUTING.md", "SECURITY.md", ".github/ISSUE_TEMPLATE/bug_report.yml", ".github/ISSUE_TEMPLATE/config.yml", ".github/ISSUE_TEMPLATE/feature_request.yml", ".github/FUNDING.yml"]
+    expected: >-
+      exit 0 và stdout có NĂM token: `CASE discord-back: PASS` (thêm `discord.gg/...` vào bản sao CONTRIBUTING →
+      `định danh upstream ngoài miễn trừ — CONTRIBUTING.md:<dòng>`), `CASE email-back: PASS` (thêm
+      `security@tongflow.com` vào bản sao SECURITY → `định danh upstream ngoài miễn trừ — SECURITY.md:<dòng>`),
+      `CASE funding-back: PASS` (tạo lại `.github/FUNDING.yml` → `FUNDING.yml còn đó`),
+      `CASE clone-upstream: PASS` (trả lệnh clone về `tong-io/tongflow.git` → `CONTRIBUTING.md:<dòng>`),
+      `CASE issue-template-not-fork: PASS` (xoá URL fork khỏi TỪNG template, ba lượt → `<template> không trỏ fork`).
+      Ba ca đầu là chiều should-NOT-fire của AC-4 (lint W1).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.mhb_teeth_badges
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "README.md", "docs/README_ZH.md", "docs/README_JA.md", "sdk/pyproject.toml"]
+    expected: >-
+      exit 0 và stdout có BỐN token: `CASE badge-upstream: PASS` (trả badge stars `shields.io/github/stars/tong-io/tongflow`
+      vào bản sao README_ZH → `badge stars/release còn ở docs/README_ZH.md`), `CASE release-badge-back: PASS`
+      (thêm badge `github/v/release` vào bản sao README → `badge stars/release còn ở README.md`),
+      `CASE ci-badge-gone: PASS` (xoá badge CI khỏi TỪNG README, ba lượt → `<README> thiếu badge CI của fork`),
+      `CASE pypi-badge-wrong-dist: PASS` (đổi `pypi/v/oneflow-sdk` thành `pypi/v/tongflow` trong bản sao README
+      → `badge PyPI không trỏ oneflow-sdk` — tên gói ĐỌC từ pyproject, không ghim hằng).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.mhb_teeth_ratchet
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/fork-identity-allow.txt", "SECURITY.md", "NOTICE.md"]
+    expected: >-
+      exit 0 và stdout có cả hai chiều của bánh cóc trên cùng fixture cộng ma trận toàn phần của lớp:
+      `CASE clean: PASS` in ba dòng miễn trừ tối thiểu CÓ TÊN (`NOTICE.md|fork of \[TongFlow\](…tong-io/tongflow)`,
+      `.github/workflows/desktop-release.yml|app\.tongflow\.com`, `.github/workflows/desktop-release.yml|TongFlow-(mac|win)`)
+      — không phải một con số N; `CASE hit-outside: PASS` (thêm `https://github.com/tong-io/tongflow/issues`
+      vào bản sao SECURITY → `định danh upstream ngoài miễn trừ — SECURITY.md:<dòng>`);
+      `CASE class-matrix: PASS` với dòng `8/8 mẫu` — MỖI mẫu regex của lớp một lượt chèn hit vào một file
+      lành ngoài miễn trừ, mỗi lượt ghim `định danh upstream ngoài miễn trừ — <file>:<dòng>`; số lượt = số
+      mẫu khai trong guard, ghim hằng 8 ở đây (gỡ một mẫu khỏi guard thì ma trận in 7/8 và đỏ);
+      `CASE stale-exemption: PASS` (thêm dòng `README.md|business@tongflow\.com|thử` vào bản sao bản miễn
+      trừ, không có hit → `miễn trừ ôi — README.md|business@tongflow\.com`).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.mhb_teeth_all
+    paths: ["scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/check-fork-identity.sh", "scripts/fork/check-prototype-lane.sh", "scripts/fork/check-suite-key.sh"]
+    expected: >-
+      exit 0; dòng tổng `PASS: 28/28 ca` với mẫu số đọc từ `${#CASES[@]}`; mỗi ca một token
+      `CASE <tên>: PASS` (28 token, đúng danh sách ca ở design §6); `--case bogus` thoát 2 với `ca lạ`;
+      `--selftest-fail` in `FAIL` và thoát ≠ 0. Chiều đỏ của phép đếm: gỡ một phần tử khỏi CASES trong
+      bản sao thì tổng in 27/27 chứ không phải 28/28 — con số 28 do E7 ghim, không do script tự khai.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.mhb_wiring
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "scripts/fork/check-fork-identity.sh", "scripts/fork/check-suite-key.sh", "_acceptance/config.yaml"]
+    expected: >-
+      exit 0: mode `shape` liệt kê needle `check-fork-identity.sh` là một step trong job Acceptance Gate;
+      mode `reachable` chạy được lệnh rút từ ci.yml; mode `teeth` in `RED của check-fork-identity.sh:
+      ảnh container` sau khi phá bản sao compose trong cây thăm dò, và token ấy VẮNG trong log xanh
+      (guard-của-guard tự kiểm); `check-suite-key.sh fork_identity check-fork-identity.sh` in
+      `OK: executors.script.fork_identity là suite key và gọi check-fork-identity.sh` — đọc YAML theo CẤU TRÚC
+      (khoá nằm trong feature_loop.suite_keys VÀ executors.script.fork_identity tồn tại VÀ lệnh gọi đúng script),
+      không grep chuỗi; chiều đỏ: `CASE suite-key-dangling: PASS` (đổi tên khoá executor trong bản sao config →
+      `suite key fork_identity không trỏ executor nào`). Chiều đỏ của needle: gỡ nó khỏi GUARD_NEEDLES trong bản
+      sao → mode shape không còn nêu tên nó (E8 khẳng định TÊN, không chỉ exit).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.mhb_existing_guards
+    paths: ["README.md", "docs/README_ZH.md", "docs/README_JA.md", "CLAUDE.md", "docs/roadmap.md", "STATUS.md", "config/official-plugins.json", ".github/workflows/desktop-release.yml", ".github/workflows/docker-publish.yml", "docs/plugins.md", "public/plugins"]
+    expected: >-
+      exit 0 và stdout có ĐỦ 11 token, một cho MỖI lệnh (11 ↔ 11, không dựa exit 0):
+      (1) `OK: 3 READMEs each list exactly the 39 plugins`, (2) `OK: CLAUDE.md lists exactly the 4 origin ids`,
+      (3) `OK: no new orphan` của mode orphans, (4) `OK: CLAUDE.md describes scripts/plugins/check-manifest-unmoved.sh`,
+      (5) `docs/plugins.md: documents the oneflow convention` của check-prefix-docs, (6) `action pins: at or above`,
+      (7) `dry-run guard present`, (8) `plan-freeze: ★`, (9) `✅ check-plan-docs`, (10) `✅ docs/roadmap.md khớp`,
+      (11) `✅ PRODUCT-MAP.md khớp`. Ô TÁI DÙNG phép đo đã có — chiều đỏ của từng guard sống trong răng của
+      chính nó (check-live-docs-manifest-teeth.sh, check-plan-docs-teeth.sh, check-roadmap-guard-teeth.sh,
+      check-product-map-teeth.sh), không sinh phép đo mới ở đây.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.mhb_teeth_notice
+    paths: ["scripts/fork/check-fork-identity.sh", "scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/fork-identity-allow.txt", "NOTICE.md", "sdk/pyproject.toml"]
+    expected: >-
+      exit 0 và stdout có BA token, mỗi ca một biến: `CASE notice-dist-gone: PASS` (bản sao NOTICE mất
+      `oneflow-sdk` → `NOTICE không nêu oneflow-sdk`; tên đọc từ `[project] name` của pyproject — đổi pyproject
+      trong bản sao thành `name = "x-sdk"` thì token đổi theo, phép đo là QUAN HỆ), `CASE notice-unchanged-back: PASS`
+      (thêm lại câu `consumed unchanged from upstream` → `NOTICE còn consumed unchanged from upstream`), `CASE notice-attribution-gone: PASS`
+      (xoá URL kho upstream khỏi bản sao NOTICE → `miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]…` —
+      bánh cóc chiều hai cắn đúng chỗ ghi công AGPL). Trên cây lành guard in `OK: ghi công upstream còn ở NOTICE.md`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.mhb_prototype_lane
+    paths: ["scripts/fork/check-prototype-lane.sh", "scripts/fork/check-fork-identity-teeth.sh", "_acceptance/mo-hoa-b01/opportunity.md"]
+    expected: >-
+      exit 0 và stdout có `OK: base_commit 5547aff2 là tổ tiên của main` (trên checkout PR không có nhánh `main` cục bộ thì in `origin/main` — script giải theo thứ tự main rồi origin/main, không giải được thì exit 2 «không kết luận», S4 vòng 1), `OK: 13/13 file của diff có hàng trong bảng nợ`
+      (chạy thật trên hồ sơ) và `CASE debt-table-missing: PASS` (xoá hàng `docs/README_JA.md` khỏi bản sao
+      opportunity → guard đỏ ghim `thiếu hàng nợ cho docs/README_JA.md`). Chiều should-NOT-fire (lint W1):
+      bản sao đủ 13 hàng thì guard thoát 0 — chính là lượt chạy thật.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

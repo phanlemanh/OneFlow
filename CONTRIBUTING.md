@@ -17,8 +17,8 @@ Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful and construc
 ## Development Setup
 
 ```bash
-git clone https://github.com/tong-io/tongflow.git
-cd tongflow
+git clone https://github.com/phanlemanh/OneFlow.git
+cd OneFlow
 pnpm install
 
 cp .env.example .env       # fill in your API keys / tokens
@@ -51,8 +51,8 @@ Comments in code must be in English. File names use kebab-case; React components
 
 ## Reporting Bugs & Requesting Features
 
-Use [GitHub Issues](https://github.com/tong-io/tongflow/issues) with the provided
-templates. For questions, join our [Discord](https://discord.gg/K7V8az94Zf).
+Use [GitHub Issues](https://github.com/phanlemanh/OneFlow/issues) with the provided templates. For questions,
+open a [Discussion](https://github.com/phanlemanh/OneFlow/discussions).
 
 ## License
 

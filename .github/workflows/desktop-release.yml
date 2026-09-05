@@ -1,16 +1,30 @@
 name: Desktop Release
 
-# Cut a release by pushing a tag, e.g.:
-#   git tag v0.2.0 && git push origin v0.2.0
-# The desktop app is a Pake (Tauri) shell that loads https://app.tongflow.com —
-# see desktop/README.md. Jobs upload the installers to a DRAFT GitHub Release
-# which the final job flips public (required under "Immutable releases", which
-# rejects asset uploads to an already-public release).
-# workflow_dispatch is a dry run: installers land in Actions artifacts, no release.
+# DISARMED 2026-08-26 — the tag trigger is removed ON PURPOSE. Read before
+# restoring it.
+#
+# This workflow builds a Pake (Tauri) shell around https://app.tongflow.com and
+# publishes installers named `TongFlow-*`. That is upstream's hosted studio and
+# upstream's brand: users who install these sign in to tong-io's service, with
+# their OAuth going there, not to anything this fork runs.
+#
+# It used to trigger on `tags: v*`. So does docker-publish.yml, which is the ONLY
+# way this fork publishes its container image. The two were therefore welded
+# together: publishing a Docker image required pushing a `v*` tag, and that same
+# tag also cut third-party-branded desktop installers pointing at upstream. There
+# was no way to do one without the other.
+#
+# Removing the tag trigger breaks that weld. Docker publishing keeps working;
+# desktop installers are simply not produced by this fork any more. Manual runs
+# stay available and are a dry run — every release-creating step below is gated on
+# `startsWith(github.ref, 'refs/tags/')`, which is false for workflow_dispatch on a
+# branch, so installers land in Actions artifacts and no GitHub Release is touched.
+#
+# RESTORE ONLY AFTER the desktop app stops being a shell for app.tongflow.com.
+# Until then, restoring the trigger re-welds Docker publishing to shipping another
+# organisation's branded installer. See the Release checklist in CLAUDE.md, which
+# is kept in sync with this file.
 on:
-    push:
-        tags:
-            - "v*"
     workflow_dispatch:
 
 concurrency:
