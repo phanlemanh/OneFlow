@@ -7,7 +7,7 @@ reason:
 verified_by: separated grader pass (same session; subagent dispatch disabled by session policy — see Known limits)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 9e1387715d61a9b855628db8243b862e6d5a17de
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh 2026-08-18
 ---
 
@@ -270,3 +270,17 @@ criteria.
 - [ ] Confirm you accept the `allowBuilds` version floor being recorded rather
       than closed (a `packageManager` pin would close it; held out of scope)
 - [ ] Fill `human_signoff` in frontmatter
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

@@ -6,3 +6,4 @@
 {"ts":"2026-08-07T01:27:54Z","round":1,"evalId":"E6","run_id":"ci-actions-bump-E6-20260807T012737Z","exit_code":0,"cmd":"ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-ghcr-untouched.sh"}
 {"ts":"2026-08-07T01:28:14Z","round":1,"evalId":"E7","run_id":"ci-actions-bump-E7-20260807T012801Z","exit_code":0,"cmd":"ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-dispatch-run.sh desktop"}
 {"ts":"2026-08-07T01:28:24Z","round":1,"evalId":"E8","run_id":"ci-actions-bump-E8-20260807T012824Z","exit_code":0,"cmd":"ACCEPTANCE_SLUG=ci-actions-bump bash scripts/ci/check-workflow-drift.sh origin/main"}
+{"ts":"2026-09-05T10:15:00Z","kind":"repin","run_id":"repin-merge-20260905T101500Z","sha":"96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e","prev_sha":"a788985b3b30c7072dcfd95bc65db1f83b940984","suites_exit":[0,0,0,0,0,0,0,0]}

@@ -7,7 +7,7 @@ reason:
 verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 72870b0fe0bd4c8a8e4574f5b865f4404cc40450
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Phan Le Manh 2026-08-31
 ---
 
@@ -274,3 +274,17 @@ Chi tiết ở `review-findings.md`.
 7. **Đây là đổi hành vi thật, người dùng sẽ thấy.** Lưu một tên khoá rỗng nay làm
    **hỏng cả lượt lưu** thay vì lặng lẽ bỏ nó. Đổi im lặng lấy kêu to, có chủ ý:
    nếu cho qua, ta tạo ra một kho mà chính bộ đọc của ta từ chối ở lần đọc kế.
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 10 ô đo bị chạm, cả 10 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

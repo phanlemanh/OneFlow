@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh 2026-08-28
 ---
 
@@ -255,3 +255,17 @@ cứng; nội dung khẳng định không đổi, nên báo cáo này vẫn ch�
 ### Re-pin lần 1 — 2026-08-28, do merge `origin/main` (6516eaa) mang vào thay đổi gated dưới `scripts/`; chữ ký Cổng 2 ngày 28/08 GIỮ NGUYÊN — lane mới chỉ chuyển mốc ghim, không phán quyết lại
 run_id: repin-gate-tooling-t1-20260828T054500Z
 sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 12 lệnh exit 0
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 12 ô đo bị chạm, cả 12 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

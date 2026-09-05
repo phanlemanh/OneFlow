@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: cb2fab21e07988883da528d72e5c5a62219ef058
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Phan Le Manh 2026-09-04
 ---
 
@@ -228,3 +228,17 @@ none — every multi-run eval is uniform
 Round 1: các ma trận eval E1, E3-E7, E9-E13 còn hở nửa (nội suy tiêu đề thay vì khẳng định số ca, thẻ tự dựng thay vì mount surface thật, khẳng định giá trị thay vì quan hệ state→khoá) — không đóng đủ chiều đỏ, quay lại implementation để viết lại eval + fix hành vi tương ứng.
 Round 2: toàn bộ 13 eval (E1-E13) PASS trên mã hiện tại; lệnh suite không gắn eval `pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json` thoát mã 1 — generated ABI lệch cây đã commit. Verdict: REJECT.
 Round 3: `pnpm gen:abi` được chạy lại và cây generated (`src/generated/abi`, `sdk/tongflow/_data/tongflow.abi.json`) được đồng bộ với commit đã verify; toàn bộ 13 eval (E1-E13) và bảy lệnh suite hồi quy đều PASS trên cùng một cây. Verdict: PASS.
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

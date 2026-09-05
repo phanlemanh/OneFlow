@@ -64,3 +64,4 @@
 {"ts":"2026-09-03T11:05:00Z","sha":"cb2fab21e079","round":3,"evalId":"SUITE-gen_abi","run_id":"minted-khong-noi-sai-ve-kho-khoa-SUITE-gen_abi-r3","exit_code":0,"cmd":"pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"}
 {"ts":"2026-09-03T11:05:00Z","sha":"cb2fab21e079","round":3,"kind":"baseline","evals_hash":"8eb7448557153fd73eaf8d139caf1c9946f45d141fc646e148e5d41ddf38fab9","non_discriminating":[],"carried_from_round":null}
 {"ts":"2026-09-03T11:05:00Z","sha":"cb2fab21e079","round":3,"kind":"round-tally","verdict":"PASS","expected":20,"returned":20,"blocked":0}
+{"ts":"2026-09-05T10:15:00Z","kind":"repin","run_id":"repin-merge-20260905T101500Z","sha":"96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e","prev_sha":"cb2fab21e07988883da528d72e5c5a62219ef058","suites_exit":[0,0,0,0,0,0,0,0]}

@@ -8,7 +8,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 0928f8a74c2c3f564efccbb06fdf0feae705077a
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh Phan 2026-08-18
 ---
 
@@ -271,3 +271,17 @@ Round 2: this attempt was retried after an earlier same-round pass ended BLOCKED
 ### Re-pin lần 1 — 2026-08-18, do merge `origin/main` mang vào ba file ngoài gói này (`package.json`, `pnpm-workspace.yaml`, `scripts/pnpm/check-build-approvals.sh`); mã của gói này không đổi một byte so với mốc cũ
 run_id: repin-scan-with-block-imports-20260818T085452Z
 sha: 0928f8a74c2c3f564efccbb06fdf0feae705077a · suites: 6 lệnh exit 0
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 15 ô đo bị chạm, cả 15 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.
