@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: be5426e3199bac5febf168f1607a9f456b5b7dcc
+verified_commit: a21840da44f3dc922c530d90d09666d8081f434a
 human_signoff: Manh 2026-08-27
 ---
 
@@ -407,3 +407,13 @@ nên chúng phải đổi sang đọc giá trị từ cây. Mã của gói này 
 
 Cả mười ô đo chạy lại, cả mười exit 0, kèm tám lệnh làn máy. Cây sạch trước và sau, HEAD không đổi.
 Lần này phiên điều phối KHÔNG ghi gì trong lúc đo — lần 4 đã hỏng đúng vì thế.
+
+### Re-pin lần 6 — 05/09/2026, do sửa hai ca răng của `check-plan-freeze-teeth.sh` sau khi ký A1
+
+run_id: repin-a1-20260905T140000Z
+sha: a21840da44f3dc922c530d90d09666d8081f434a · suites: 8 lệnh exit 0
+
+Ký Cổng Đáng của `skill-1-footage-kho-clip` (A1) làm hai ca răng `kiem-co-hoi` đỏ trên CI: chúng
+mượn trạng thái chưa-ký từ cây thật thay vì tự dựng. Sửa cho chúng tự gỡ ký trong bản sao — một file
+dưới `scripts/roadmap/**`, nên mốc lần 5 (`be5426e`) hỏng theo glob. Mã của gói này không đổi.
+Cả mười ô đo chạy lại, cả mười exit 0; cây sạch trước và sau, phiên điều phối không ghi gì trong lúc đo.
