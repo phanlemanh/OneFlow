@@ -18,6 +18,13 @@
 # grep is never used with -q inside a pipeline: -q closes the pipe early and under
 # pipefail a real match reads as no match (see scripts/ci/check-ghcr-untouched.sh).
 set -euo pipefail
+# No arguments: a guard that swallows a stray flag and exits 0 cannot be told
+# apart from "any command is broken" by the guard-of-guard (teeth mode of
+# scripts/ci/check-gate-guards-job.sh).
+if [ $# -gt 0 ]; then
+    echo "check-fork-identity: không nhận tham số nào — nhận được: $*" >&2
+    exit 2
+fi
 
 ROOT="${FORK_IDENTITY_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
 cd "$ROOT"
