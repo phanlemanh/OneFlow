@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 99b7c61d1c6711ade7242cd008fd2f07111649b8
+verified_commit: be5426e3199bac5febf168f1607a9f456b5b7dcc
 human_signoff: Manh 2026-08-27
 ---
 
@@ -395,3 +395,15 @@ file với thời điểm chạy từng lệnh. Ba file ấy nằm ngoài mọi 
 như chắc không đổi — nhưng một mốc ghim là lời khai «cây tại commit này đã được đo», và khai thế
 khi cây có file chưa commit là khai sai. Làn ghi ở đây là làn thứ hai, chạy trên cây sạch tại
 `99b7c61`, sạch cả trước lẫn sau.
+
+### Re-pin lần 5 — 05/09/2026, do `lat-cat-chung-minh` sửa tiếp `scripts/roadmap/**` sau khi ký Cổng 2
+
+run_id: repin-lcm-20260905T093000Z
+sha: be5426e3199bac5febf168f1607a9f456b5b7dcc · suites: 8 lệnh exit 0
+
+Mốc lần 4 (`99b7c61`) hỏng vì việc KÝ kéo theo một dây sửa: hồ sơ thành cái thứ 37 được ký nên
+tài liệu, sổ cái và bản đồ phải theo, và ba ca răng ghim con số của hôm trước đỏ thật ngay hôm ấy —
+nên chúng phải đổi sang đọc giá trị từ cây. Mã của gói này vẫn không đổi; staleness theo GLOB.
+
+Cả mười ô đo chạy lại, cả mười exit 0, kèm tám lệnh làn máy. Cây sạch trước và sau, HEAD không đổi.
+Lần này phiên điều phối KHÔNG ghi gì trong lúc đo — lần 4 đã hỏng đúng vì thế.
