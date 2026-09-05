@@ -1,70 +1,70 @@
 ## Trong hợp đồng
 
-- **check-prototype-lane.sh resolves bare `main`, which does not exist on any PR checkout — the teeth case debt-table-missing (and thus the CI step at ci.yml:189) goes red on every pull request**
-  file: `scripts/fork/check-prototype-lane.sh:18`
-  severity: high
-  AC: AC-11
-  `MAIN="${PROTOTYPE_LANE_MAIN:-main}"` and `git merge-base --is-ancestor "$base" "$MAIN" 2>/dev/null` use the bare ref name `main`. Git ref DWIM tries refs/heads/main and refs/remotes/main but never refs/remotes/origin/main, so the check only works when a LOCAL branch named main exists. Verified: (1) the real Acceptance Gate job on PR #99 (run 33951234133) checks out `git checkout --progress --force refs/remotes/pull/99/merge` — detached HEAD, no local `main`; (2) a clone of this branch with `origin/main` present (5f1e4db) but no local `main` reproduces it: `bash scripts/fork/check-prototype-lane.sh mo-hoa-b01` → `FAIL: base_commit 5547aff2 không phải tổ tiên của main` exit 1, and `check-fork-identity-teeth.sh --case debt-table-missing` → `FAIL CASE debt-table-missing: đối chứng dương đỏ`. The new ci.yml step `Fork identity guard still has teeth` runs the full teeth suite (including debt-table-missing), so CI will fail on the PR for this very branch and on every future PR. The failure is also mis-attributed: `2>/dev/null` swallows git's `Not a valid object name` and the script reports it as a broken ancestry relation (exit 1) instead of `cannot conclude` (exit 2). Every sibling guard in the repo uses `origin/main` (check-live-docs-manifest-synced.sh:34, check-gate-guards-job.sh:189). Fix: default to `origin/main` (or `git rev-parse --verify main || origin/main`) and treat an unresolvable ref as exit 2. No CI run exists yet for this branch (gh run list shows none for b01/open-source-rebrand), so this has not been caught.
-  source: bugs
+### Teeth harness: positive control (green_control) failure is swallowed — case still reports PASS / exit 0
+- file: `scripts/fork/check-fork-identity-teeth.sh:315`
+- severity: high
+- source: bugs
+- AC: AC-7
 
-- **Teeth case image-upstream pins a token that also appears on the healthy tree — its message assertion is vacuous**
-  file: `scripts/fork/check-fork-identity-teeth.sh:122`
-  severity: low
-  AC: AC-7
-  `case_image-upstream` does `expect_red image-upstream "ảnh container"`. The guard prints `OK: ảnh container của compose là …` when green and `FAIL: ảnh container — compose có image: …` when red, so `grep -F "ảnh container"` succeeds in both states; only the exit-code half of expect_red still measures anything. check-gate-guards-job.sh already documents this exact trap for the same guard and pins `ảnh container — compose có image:` instead (RED_TOKEN comment). Pin the FAIL phrasing here too so the case proves the guard went red for ITS OWN reason (the class-scan hit on `ghcr.io/tong-io` in docker-compose.yml would otherwise satisfy the case on its own).
-  source: bugs
+Detail: run_one invokes each case as `if "case_$name"; then` (line 315). In bash, a function executed as an `if` condition runs with `set -e` ignored for its ENTIRE body, so the `return 1` from green_control (lines 92-98) does not stop the case — the perturbation is applied anyway, the guard goes red (for the perturbation's reason on top of whatever was already red), expect_red finds its token, and the case is counted PASS. 24 of the 28 cases call `green_control` bare (e.g. lines 118, 147, 160, 240); only conf-remote-lech / suite-key-dangling / debt-table-missing use an explicit `|| { ...; return 1; }`. Reproduced: `FORK_IDENTITY_CONF=<conf with repo=ai-do/kho-khac> bash scripts/fork/check-fork-identity-teeth.sh --case image-upstream` prints `FAIL CASE image-upstream: đối chứng dương đỏ trên fixture chưa phá` on stderr yet `CASE image-upstream: PASS` on stdout, exit 0; same for `--case hit-outside`. This is exactly the borrowed-red class the file header says one-case-one-assertion exists to exclude: the `mhb_teeth_*` evals and the CI step 'Fork identity guard still has teeth' cannot distinguish 'guard caught the perturbation' from 'fixture was already red'. Mitigation today is only that the sibling CI step runs check-fork-identity.sh on the same tree. Fix: `green_control <case> || return 1` in every case (or run the case outside an `if`: `"case_$name"; rc=$?` under `set +e`).
 
-- **Hình dạng 3 — ca `conf-remote-lech` ghim tiền tố `remote=` rỗng trong khi AC-1/E1 hứa guard in CẢ HAI giá trị**
-  file: `scripts/fork/check-fork-identity-teeth.sh:130`
-  severity: medium
-  AC: AC-7
-  AC-1 (contract.md:32) và E1 expected (evals.yaml:20-21) hứa khi conf lệch remote guard "đỏ nêu cả hai giá trị". Dòng 130 chỉ grep `'conf lệch remote — conf=ai-do/kho-khac remote='` — giá trị conf được ghim, giá trị remote thì không (chuỗi kết thúc ngay sau `remote=`). Đã tái lập: sửa bản sao guard dòng 83 thành `fail "conf lệch remote — conf=$REPO remote="` (bỏ hẳn `$remote_path`) → `--case conf-remote-lech` vẫn `PASS`. Quan hệ "giá trị remote in ra == đường dẫn remote thật" không được đo dù ca này cố ý chạy trên kho thật (comment dòng 122-123) và giá trị mong đợi tính được ngay tại chỗ (`git remote get-url origin` → `phanlemanh/oneflow`).
-  source: measurement
+Rationale: AC-7 đòi mọi ca của check-fork-identity-teeth.sh thật sự xanh và mỗi ca đỏ phải ghim đúng thông điệp của đúng phép kiểm nó phá; ở đây phần lớn ca báo PASS dù đối chứng dương (fixture ban đầu) đã hỏng, tức PASS giả không phản ánh đúng phép kiểm.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Docs now route users to GitHub Discussions, but Discussions is disabled on phanlemanh/OneFlow**
-  Người dùng thấy gì: Support links in the docs now point to a GitHub Discussions page that isn't turned on for this project, so clicking it leads to a dead page instead of getting help.
-  file: `README.md`
-  severity: high
-  Đề xuất: known-limits
-
-- **CODE_OF_CONDUCT.md still routes conduct reports to upstream's mailbox; file sits outside the guard's declared scope**
-  Người dùng thấy gì: The Code of Conduct still lists the original project's email for reporting concerns, not this fork's own contact, so a report sent there would reach the wrong team.
-  file: `CODE_OF_CONDUCT.md`
+- **Community links redirect to GitHub Discussions, but Discussions is disabled on phanlemanh/OneFlow**
+  Người dùng thấy gì: Nút liên hệ cộng đồng dẫn tới trang Thảo luận trên GitHub nhưng trang đó chưa được bật cho kho này, nên người dùng bấm vào hiện đang gặp trang báo không tồn tại.
+  file: `.github/ISSUE_TEMPLATE/config.yml`
   severity: medium
   Đề xuất: known-limits
 
-- **New CI step introduces first CI-path dependency on PyYAML; branch has never run on GitHub**
-  Người dùng thấy gì: This change hasn't been run through the real GitHub checks yet, so there's a chance the automated checks unexpectedly fail the first time a pull request triggers them.
-  file: `.github/workflows/ci.yml`
-  severity: low
-  Đề xuất: known-limits
-
-- **Hình dạng 1 — E8 ghim chuỗi chỉ tồn tại trong NGUỒN của guard-của-guard, không có trong đầu ra của cả mode shape lẫn mode teeth**
-  Người dùng thấy gì: A check meant to prove a safety guard is truly wired into automated testing reports success based on a coincidental text match rather than confirming the guard failed for its own specific reason, so a future accidental weakening of that guard could go unnoticed.
-  file: `_acceptance/mo-hoa-b01/evals.yaml`
-  severity: high
-  Đề xuất: known-limits
-
-- **Hình dạng 3 — ca `clean` đếm N=3 dòng miễn trừ tối thiểu trong khi E6 hứa BA DÒNG CÓ TÊN («không phải một con số N»); vế đỏ `miễn trừ tối thiểu vắng` không có ca răng nào**
-  Người dùng thấy gì: One of the automated checks confirms three expected exceptions exist only by counting them, not by confirming they're the right three, so a wrong exception could quietly take the place of a correct one without being caught.
-  file: `scripts/fork/check-fork-identity-teeth.sh`
+- **check-fork-identity.sh silently falls back to the real conf/allow-list when an explicit override path does not exist**
+  Người dùng thấy gì: Khi ai đó cấu hình sai đường dẫn tuỳ chỉnh cho công cụ kiểm tra định danh, công cụ âm thầm chuyển sang đo dữ liệu gốc mà không báo hiệu gì, khiến kết quả kiểm tra trông có vẻ đúng dù không đo đúng thứ được yêu cầu.
+  file: `scripts/fork/check-fork-identity.sh`
   severity: medium
   Đề xuất: known-limits
 
-- **Hình dạng 1 — check-suite-key.sh khẳng định "executor gọi đúng script" bằng phép chứa-chuỗi trên VĂN BẢN lệnh, không chạy lệnh**
-  Người dùng thấy gì: A check meant to confirm the release process really runs the correct verification script only looks for the script's name inside a text description, not whether it's actually executed, so a misconfigured entry could pass this check while doing nothing.
-  file: `scripts/fork/check-suite-key.sh`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 6 (gần nhất) — răng ghim cứng định danh fork của tác giả `phanlemanh/OneFlow` trong khi guard và chính răng đã suy REPO từ conf**
-  Người dùng thấy gì: Some of the automated tests hardcode this exact project's name and address rather than reading them from configuration, so if the project is ever renamed or re-forked, those specific tests would need manual updates instead of adapting on their own.
+- **fixture() leaks temp dirs in looping cases — only the last probe of a case is cleaned**
+  Người dùng thấy gì: Công cụ kiểm tra nội bộ để sót lại một số thư mục tạm trên máy sau khi chạy; không ảnh hưởng tới phần mềm mà người dùng cuối thấy.
   file: `scripts/fork/check-fork-identity-teeth.sh`
   severity: low
   Đề xuất: wont-fix
 
-⚠ Cụm ngoài vùng phủ: 2/10 lỗi rơi vào file không bộ đo nào phủ (CODE_OF_CONDUCT.md, _acceptance/mo-hoa-b01/evals.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+- **Hình 3 — E10/E5 hứa QUAN HỆ (tên gói đọc từ pyproject) nhưng ca răng chỉ assert chuỗi vắng; guard ghim hằng `oneflow-sdk` vẫn qua răng**
+  Người dùng thấy gì: Nếu sau này có người vô tình ghi cứng tên gói phần mềm thay vì lấy đúng từ nơi khai báo chính thức, bộ kiểm tra tự động hiện nay sẽ không phát hiện ra sai sót đó.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Hình 1 — E7/E8 expected ghim những phép kiểm mà cmd không hề chạy (`--case bogus`, `--selftest-fail`, gỡ phần tử CASES → 27/27, gỡ needle khỏi GUARD_NEEDLES); verifier chỉ có thể «đạt» bằng cách đọc mã nguồn**
+  Người dùng thấy gì: Một số lời hứa kiểm tra tự động trong hồ sơ nghiệm thu hiện chỉ được xác nhận bằng cách đọc mã nguồn chứ chưa thật sự được máy chạy thử, nên vài kịch bản đó thiếu bằng chứng chạy độc lập.
+  file: `_acceptance/mo-hoa-b01/evals.yaml`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Hình 3 (gần Hình 1) — check-suite-key.sh khẳng định «executor GỌI script» bằng phép chứa-chuỗi trên văn bản lệnh; executor chỉ NHẮC tên script vẫn xanh**
+  Người dùng thấy gì: Bộ kiểm tra xác nhận một bước máy có thật sự chạy công cụ kiểm tra định danh chỉ bằng cách tìm tên công cụ đó xuất hiện trong dòng lệnh, nên một dòng lệnh chỉ nhắc tên mà không chạy thật vẫn có thể được coi là hợp lệ.
+  file: `scripts/fork/check-suite-key.sh`
+  severity: medium
+  Đề xuất: wont-fix
+
+- **Hình 6 (gần nhất) — răng ghim cứng định danh fork của tác giả `phanlemanh/OneFlow` ở ba ca dù đã suy REPO_RAW từ conf**
+  Người dùng thấy gì: Một vài kịch bản kiểm tra nội bộ vẫn ghi cứng tên kho của tác giả thay vì đọc từ cấu hình, nên nếu chạy trên một bản sao đã đổi sang kho khác, các kịch bản đó có thể báo sai mà không phải do lỗi thật của công cụ.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: wont-fix
+
+## Chưa phân loại (triage-failed)
+
+phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ.
+
+### Hình 5 — E6 hứa ba dòng miễn trừ tối thiểu CÓ TÊN («không phải một con số N») nhưng case_clean assert đếm N=3 + một tên; hai dòng desktop-release không được ghim, vế đỏ `miễn trừ tối thiểu vắng` không có ca răng
+- file: `scripts/fork/check-fork-identity-teeth.sh:114`
+- severity: medium
+- source: measurement
+
+Detail: E6 expected (evals.yaml:89-91) liệt kê ba dòng có tên: `NOTICE.md|fork of…`, `.github/workflows/desktop-release.yml|app\.tongflow\.com`, `.github/workflows/desktop-release.yml|TongFlow-(mac|win)` và nhấn «không phải một con số N». case_clean dòng 113-114 chỉ `grep -c '^miễn trừ tối thiểu:'` rồi `[ $n -eq 3 ]`, dòng 115 grep đúng MỘT tên (`NOTICE.md|`). Đã tái lập trên bản sao HEAD: đổi MIN_EXEMPT[2] trong guard (dòng 142) từ `desktop-release.yml|TongFlow-(mac|win)` sang `CLAUDE.md|app\.tongflow\.com` (một dòng allow-list khác) → `CASE clean: PASS`. Guard dòng 136-138 tự ghi «A count alone cannot tell attribution kept from something else exempted» — răng lại đo đúng bằng count. Thêm nữa: ba dòng có tên nằm trong `$probe/.out` (bị rm ở cleanup), stdout của `--case clean` chỉ có `CASE clean: PASS`, nên ô đo E6 (mhb_teeth_ratchet, config.yaml:379) cũng không quan sát được chúng. Nhánh đỏ `fail "miễn trừ tối thiểu vắng"` (guard dòng 152) không có ca nào trong CASES phá tới.
+
+Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).
