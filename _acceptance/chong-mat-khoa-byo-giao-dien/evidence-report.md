@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4d8dd32cf734bcc668e1d465850d97f88be737bb
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -292,3 +292,17 @@ none — round này không có eval nào mang field `runs` > 1 (không có eval 
 Round 1: 14/14 eval PASS (E1, E13, E2, E3, E4, E5, E6, E7, E11, E14, E8, E12, E9, E10) nhưng `pnpm typecheck` — lệnh suite bắt buộc không gắn eval — exit 2 (TS6053: hai file thiếu dưới `build/kkt-gate/types/**` bị tsconfig include pattern quét trúng). Verdict REJECT. Trả về implementation để dọn build tạm / loại trừ khỏi tsconfig include trước khi verify lại.
 Round 2: 13/13 eval đo được ở round này PASS (E10 không có trong dữ liệu round này) nhưng `pnpm typecheck` vẫn exit 2 — lần này TS6053 báo bốn file thiếu dưới `.next/types/**` của worktree (`app/workspace/page.ts`, `cache-life.d.ts`, `routes.d.ts`, `validator.ts`), một nguyên nhân khác round 1 (build output/`.next` chưa sinh đủ hoặc bị dọn giữa chừng, không phải cùng lỗi include pattern của round 1). Verdict REJECT. Trả về implementation: đảm bảo `.next` được build/generate types đầy đủ trước khi `tsc --noEmit` chạy trong cùng worktree, rồi verify lại.
 Round 3: 13/13 eval PASS, và `pnpm build && pnpm typecheck` cùng toàn bộ lệnh suite khác đều exit 0 — TS6053 đã được sửa. Verdict PASS.
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 10 ô đo bị chạm, cả 10 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

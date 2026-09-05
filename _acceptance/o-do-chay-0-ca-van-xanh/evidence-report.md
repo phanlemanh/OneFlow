@@ -7,7 +7,7 @@ reason:
 verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 3537bb94033d402a04578419897cf2c38c3b15f4
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -320,3 +320,17 @@ Chi tiết ở `review-findings.md`.
    lai chuyển tiếp bộ lọc qua biến môi trường thay vì đối số sẽ không khớp dấu hiệu nào
    và bị bỏ qua im lặng. AC-13 đóng cửa "bộ bọc lạ được gọi kèm chuỗi trần"; nó không
    đóng được mọi hình dạng chưa ai nghĩ ra.
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 8 ô đo bị chạm, cả 8 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

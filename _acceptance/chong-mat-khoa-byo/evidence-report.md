@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: ed44f5067ac441a11cad6127fc76f67a07871e9b
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Phan Le Manh 2026-08-31
 ---
 
@@ -170,3 +170,17 @@ none — every multi-run eval is uniform (không eval nào mang `runs` > 1 round
 Round 1–2: dữ liệu không có trong đầu vào của vòng này — không tái tạo, không suy diễn.
 Round 3: cả 8 eval máy và suite hồi quy đều xanh, nhưng scope-triage cho review-findings KHÔNG chạy được → verdict ép về PENDING-JUDGMENT (triage_failed), chờ người xem lại review-findings.md.
 Round 4 (vòng này): E3/E4 sửa để ca cuối gọi THẬT readEnvStore/loadEnvStore thay vì so hằng số nội bộ của chính file test, E6 thêm đối chứng sha256 trên đĩa cho ca refuse-and-leave, E8 mở rộng chạy cả hai file route test (route.test.ts + route.unreadable.test.ts) để phủ đủ bốn điều AC-8 tuyên; scope-triage lần này chạy xong và phân loại đủ mọi finding — cả 8 eval máy và toàn bộ lệnh suite hồi quy đều xanh (exit 0), verdict PASS.
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, 8 ô đo bị chạm, cả 8 chạy lại và exit 0.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.
