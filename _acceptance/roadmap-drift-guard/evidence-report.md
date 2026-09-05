@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: b5be36486c9e8d53db889b19fe15239f72e01320
+verified_commit: 99b7c61d1c6711ade7242cd008fd2f07111649b8
 human_signoff: Manh 2026-08-27
 ---
 
@@ -373,3 +373,25 @@ Cả mười ô đo được **chạy lại** chứ không chỉ dời mốc —
 Cả mười exit 0. Làn máy do một phiên tươi chạy tuần tự tám lệnh tại `b5be364`, cây sạch trước và
 sau. Lần này re-pin là việc CUỐI trước vòng verify: lần 2 ghim xong rồi còn commit tiếp vào đúng
 vùng vừa ghim, nên mốc ấy hỏng ngay trong ngày.
+
+### Re-pin lần 4 — 05/09/2026, do `lat-cat-chung-minh` sửa tiếp `scripts/roadmap/**` qua bốn vòng S4
+
+run_id: repin-lcm-20260905T064500Z
+sha: 99b7c61d1c6711ade7242cd008fd2f07111649b8 · suites: 8 lệnh exit 0
+
+Mốc lần 3 (`b5be364`) hỏng vì ba commit sau đó lại chạm `scripts/roadmap/**`: F5 buộc một hồ sơ
+park phải niêm yết và mang chữ ký, ba chỗ ghim hằng số trong bộ kiểm tài liệu đổi thành quan hệ
+tính trên cây, và F3 thôi đòi riêng `park` sau khi nó và F5 chặn nhau. Mã của gói này không đổi —
+không commit nào chạm `roadmap-drift.mjs` hay `check-roadmap-fresh.sh`; staleness ở đây theo GLOB,
+không theo hành vi.
+
+Cả mười ô đo được **chạy lại** chứ không chỉ dời mốc — luật `repin-khong-chay-lai-eval` ký 03/09.
+Cả mười exit 0, kèm tám lệnh làn máy.
+
+Ghi thêm vì nó là bài học chứ không phải thủ tục: **làn đo đầu tiên của lần này đã bị BỎ.** Cả 18
+mã thoát đều 0, nhưng phiên điều phối ghi thẻ Cổng 2 và trang bằng chứng vào cùng cây GIỮA LÚC đo,
+nên những số ấy không thuộc về commit định ghim. Chính phiên tươi phát hiện, bằng cách so mtime ba
+file với thời điểm chạy từng lệnh. Ba file ấy nằm ngoài mọi `paths` của hồ sơ này nên kết quả gần
+như chắc không đổi — nhưng một mốc ghim là lời khai «cây tại commit này đã được đo», và khai thế
+khi cây có file chưa commit là khai sai. Làn ghi ở đây là làn thứ hai, chạy trên cây sạch tại
+`99b7c61`, sạch cả trước lẫn sau.
