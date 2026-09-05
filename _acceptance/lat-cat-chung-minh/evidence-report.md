@@ -1,14 +1,16 @@
 ---
 schema_version: 2
 feature_slug: lat-cat-chung-minh
-verdict: PASS
+verdict: PENDING-JUDGMENT
 failed_evals: []
-reason:
+reason: "18 ô đo máy (E1-E18) đều exit 0 với run_id có dòng trong run-log.jsonl. Ô phán đoán J1 KHÔNG đủ chuẩn bằng chứng máy: hội đồng ba lens đều đề xuất PASS và có dòng `kind: panel` kèm phiếu trong run-log, nhưng bộ tổng hợp tự đặt `run_id: minted-...-J1-r4` mà KHÔNG ghi dòng máy mang mã ấy, và `verifier: judge-panel (...)` không phải script path lẫn config:<key>. Chốt bằng chứng bắt đúng hai điểm đó. Không tự đặt dòng run-log cho một mã máy chưa từng ghi, nên J1 để người quyết ở Cổng 2 — đúng đường kit dành cho ô phán đoán."
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: 27e27f1fddf467ed85aa0c009ebc8d9db985a249
-human_signoff:
+human_signoff: Phan Le Manh 2026-09-05
+human_override:
+  J1: PASS — owner nhận đề xuất của hội đồng ba lens tại Cổng 2 ngày 05/09; ô phán đoán này vốn dành cho người quyết, và bằng chứng máy của nó không đủ chuẩn L2 nên người quyết là đường đúng chứ không phải đường vòng.
 ---
 
 # Evidence Report: lat-cat-chung-minh
@@ -33,9 +35,9 @@ human_signoff:
 | E16 | AC-2 | script | PASS |
 | E17 | AC-16 | script | PASS |
 | E18 | AC-17 | script | PASS |
-| J1 | AC-2 | judgment | PASS |
+| J1 | AC-2 | judgment | PENDING-JUDGMENT (hội đồng đề xuất PASS) |
 
-Verdict tổng thể là PASS: toàn bộ 18 eval máy (E1-E18) và judgment J1 đều PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), tám lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test, sdk pytest, verify:plugins, gen:abi) đều xanh, và review-findings.md không còn finding CONFIRMED nào trong hợp đồng — mục "Trong hợp đồng" rỗng ở vòng này. Ba finding trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa. Review vòng này phát hiện 16 finding mới nhưng toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1 (xem review-findings.md, mục "Ngoài hợp đồng — người quyết ở Gate 2"); trong đó 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml) — cần người quyết mở rộng hợp đồng hay rút phạm vi.
+Verdict tổng thể là PENDING-JUDGMENT, và owner đã quyết J1 tại Cổng 2 ngày 05/09 (xem `human_override`). Toàn bộ 18 eval máy (E1-E18) PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), tám lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test, sdk pytest, verify:plugins, gen:abi) đều xanh, và review-findings.md không còn finding CONFIRMED nào trong hợp đồng — mục "Trong hợp đồng" rỗng ở vòng này. Ba finding trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa. Review vòng này phát hiện 16 finding mới nhưng toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1 (xem review-findings.md, mục "Ngoài hợp đồng — người quyết ở Gate 2"); trong đó 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml) — cần người quyết mở rộng hợp đồng hay rút phạm vi.
 
 ## Evidence
 
@@ -231,11 +233,11 @@ Verdict tổng thể là PASS: toàn bộ 18 eval máy (E1-E18) và judgment J1 
       ✓ CASE khong-ho-so-ky: PASS
 
 - eval: J1
-  run_id: minted-lat-cat-chung-minh-J1-r4
+  run_id: (không có — bộ tổng hợp tự đặt `minted-lat-cat-chung-minh-J1-r4` nhưng KHÔNG ghi dòng máy mang mã ấy; dòng thật trong run-log.jsonl là `kind: panel`, không mang run_id)
   verifier: judge-panel (domain-correctness, operational-feasibility, spec-alignment)
   verified_at: 2026-09-05T06:30:00Z
-  verdict: PASS
-  proposal: PASS
+  verdict: PENDING-JUDGMENT — người quyết ở Cổng 2
+  proposal: PASS (ba lens đều PASS; phiếu nguyên văn ở dòng `kind: panel` của run-log.jsonl)
   output: |
     - domain-correctness: PASS — Ca bon thong diep chan (F1 "mo ngoai ke hoach — them vao Ngoai le voi ly do co ten, hoac park"; F2 "chua ky"/"chua ky Cong Dang (can decision va decided_by)"/"con nguong de xuat — go het [de xuat] roi moi tinh"; F3 "nam trong Xep lai sau ma ho so chua dong (can decision: park hoac kill, hoac stage: archived)"; F4 "khong co ly do co ten (nhan "X"; hop le: ...)" va "thieu ngay hoac ai quyet") deu neu dung slug/gia tri sai va dieu kien can de sua, khong chi nem ma loi tran; guard con co dong chung "Sua roadmap hoac ho so (khong sua guard) roi chay lai" o cuoi moi lan that bai.
     - operational-feasibility: PASS — Ca bon thong diep chan trong check-plan-freeze.mjs deu neu ro CAI GI sai va goi y VIEC can lam, khong chi la ma loi tran: F1 "mo ngoai ke hoach — them vao Ngoai le voi ly do co ten, hoac park"; F2 "✅ nhung ho so <slug> chua ky" (va nhanh opportunity con noi ro "can decision va decided_by"); F3 "nam trong Xep lai sau ma ho so chua dong (opportunity.md can decision: park hoac kill, hoac stage: archived)"; F4 "khong co ly do co ten (nhan '<x>'; hop le: mat-du-lieu, bao-mat, chan-★)" liet ke luon gia tri hop le. Ca bon deu co dong trailer chung "Sua docs/roadmap.md hoac ho so (khong sua guard) roi chay lai" cung cap.
@@ -302,22 +304,22 @@ không phải quyết gì. Điền lại từ chính dữ liệu vòng 4; không
 
 | # | Phát hiện | Owner chọn |
 |---|---|---|
-| Ngoài-1 | Teeth fixtures pin today's snapshot values — the doc updates the sibling guard mandates turn CI red (high) · `scripts/roadmap/check-plan-docs-teeth.sh:60` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-2 | check-product-map.mjs leaves the `draft` / "Chờ duyệt phạm vi" bucket unchecked — the fail-open its own header rails against (medium) · `scripts/ci/check-product-map.mjs:209` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
-| Ngoài-3 | Broken or missing opportunity frontmatter is binned as "opportunity-only" instead of unclassified (medium) · `scripts/ci/check-product-map.mjs:141` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-4 | Guard root is overridable by ambient env, deviating from the repo's cwd-based fixture pattern; one seam is never exercised (low) · `scripts/roadmap/check-plan-docs.sh:15` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-5 | CI runs four new guard steps but package.json exposes an alias for only two (low) · `package.json:40` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-6 | check-plan-docs.sh aborts silently (no FAIL line, 15 checks unreported) when signed contracts carry no approved_at (high) · `scripts/roadmap/check-plan-docs.sh:44` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-7 | check-product-map.mjs never checks the `draft` bucket — a draft dossier is invisible and the checker stays green (high) · `scripts/ci/check-product-map.mjs:210` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
-| Ngoài-8 | check-product-map.mjs classifies `decision: kill` / `stage: archived` as "still under consideration", contradicting check-plan-freeze.mjs in the same PR (medium) · `scripts/ci/check-product-map.mjs:175` | **chưa quyết** — máy đề xuất: mở hợp đồng mới |
-| Ngoài-9 | check-plan-docs.sh swallows check-roadmap-fresh.sh's output and reports any failure cause as "guard sổ cái đỏ" (medium) · `scripts/roadmap/check-plan-docs.sh:143` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-10 | check-plan-freeze.mjs isOpen() treats a dossier with neither contract.md nor opportunity.md as closed, so F1 never sees it (low) · `scripts/roadmap/check-plan-freeze.mjs:193` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-11 | Hình dạng 5 — AC-17(b) tuyên một quan hệ HAI vế (mẫu số + tổng tử số) nhưng teeth chỉ đo vế mẫu số (high) · `scripts/roadmap/check-plan-docs-teeth.sh:87` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-12 | Hình dạng 3 — lời hứa gỡ băng là QUAN HỆ (≥ 85%) nhưng assert duy nhất là chuỗi ở mốc 100% (high) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-13 | Hình dạng 5 — AC-17(c) tuyên một luật CÓ ĐIỀU KIỆN hai nhánh, teeth chỉ có ca cho nhánh cho phép (medium) · `scripts/roadmap/check-plan-docs-teeth.sh:105` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-14 | Hình dạng 3 — case_go_bang ghim mẫu số 20 mà chính guard tính được, nên van an toàn mở là teeth đỏ oan (medium) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-15 | Hình dạng 4 — E9 khai một chiều đỏ không tồn tại: gỡ tên khỏi GUARD_NEEDLES thì mode shape vẫn XANH (medium) · `_acceptance/lat-cat-chung-minh/evals.yaml:103` | **chưa quyết** — máy đề xuất: ghi Known limits |
-| Ngoài-16 | Hình dạng 3 — ca dựng để chứng minh «đếm trên cây, đừng grep hằng số» lại ghim hằng số 36/37 trong khẳng định của chính nó (low) · `scripts/roadmap/check-plan-docs-teeth.sh:100` | **chưa quyết** — máy đề xuất: ghi Known limits |
+| Ngoài-1 | Teeth fixtures pin today's snapshot values — the doc updates the sibling guard mandates turn CI red (high) · `scripts/roadmap/check-plan-docs-teeth.sh:60` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-2 | check-product-map.mjs leaves the `draft` / "Chờ duyệt phạm vi" bucket unchecked — the fail-open its own header rails against (medium) · `scripts/ci/check-product-map.mjs:209` | **mở hợp đồng mới** — owner quyết 05/09 |
+| Ngoài-3 | Broken or missing opportunity frontmatter is binned as "opportunity-only" instead of unclassified (medium) · `scripts/ci/check-product-map.mjs:141` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-4 | Guard root is overridable by ambient env, deviating from the repo's cwd-based fixture pattern; one seam is never exercised (low) · `scripts/roadmap/check-plan-docs.sh:15` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-5 | CI runs four new guard steps but package.json exposes an alias for only two (low) · `package.json:40` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-6 | check-plan-docs.sh aborts silently (no FAIL line, 15 checks unreported) when signed contracts carry no approved_at (high) · `scripts/roadmap/check-plan-docs.sh:44` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-7 | check-product-map.mjs never checks the `draft` bucket — a draft dossier is invisible and the checker stays green (high) · `scripts/ci/check-product-map.mjs:210` | **mở hợp đồng mới** — owner quyết 05/09 |
+| Ngoài-8 | check-product-map.mjs classifies `decision: kill` / `stage: archived` as "still under consideration", contradicting check-plan-freeze.mjs in the same PR (medium) · `scripts/ci/check-product-map.mjs:175` | **mở hợp đồng mới** — owner quyết 05/09 |
+| Ngoài-9 | check-plan-docs.sh swallows check-roadmap-fresh.sh's output and reports any failure cause as "guard sổ cái đỏ" (medium) · `scripts/roadmap/check-plan-docs.sh:143` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-10 | check-plan-freeze.mjs isOpen() treats a dossier with neither contract.md nor opportunity.md as closed, so F1 never sees it (low) · `scripts/roadmap/check-plan-freeze.mjs:193` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-11 | Hình dạng 5 — AC-17(b) tuyên một quan hệ HAI vế (mẫu số + tổng tử số) nhưng teeth chỉ đo vế mẫu số (high) · `scripts/roadmap/check-plan-docs-teeth.sh:87` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-12 | Hình dạng 3 — lời hứa gỡ băng là QUAN HỆ (≥ 85%) nhưng assert duy nhất là chuỗi ở mốc 100% (high) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-13 | Hình dạng 5 — AC-17(c) tuyên một luật CÓ ĐIỀU KIỆN hai nhánh, teeth chỉ có ca cho nhánh cho phép (medium) · `scripts/roadmap/check-plan-docs-teeth.sh:105` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-14 | Hình dạng 3 — case_go_bang ghim mẫu số 20 mà chính guard tính được, nên van an toàn mở là teeth đỏ oan (medium) · `scripts/roadmap/check-plan-freeze-teeth.sh:407` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-15 | Hình dạng 4 — E9 khai một chiều đỏ không tồn tại: gỡ tên khỏi GUARD_NEEDLES thì mode shape vẫn XANH (medium) · `_acceptance/lat-cat-chung-minh/evals.yaml:103` | **ghi Known limits** — owner quyết 05/09 |
+| Ngoài-16 | Hình dạng 3 — ca dựng để chứng minh «đếm trên cây, đừng grep hằng số» lại ghim hằng số 36/37 trong khẳng định của chính nó (low) · `scripts/roadmap/check-plan-docs-teeth.sh:100` | **ghi Known limits** — owner quyết 05/09 |
 
 ## Analyst
 
