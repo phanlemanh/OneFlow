@@ -188,7 +188,6 @@ Sign in with Google or WeChat and start creating — the cloud studio manages pl
 > These run **on your own machine** — no cloud account, no GPU, no round-trip. See [ADR-0011](docs/adr/0011-local-first-execution.md).
 
 - [oneflow-api-ffmpeg](https://github.com/phanlemanh/oneflow-api-ffmpeg) — transcoding, muxing, media pipelines
-- [oneflow-api-pyscenedetect](https://github.com/phanlemanh/oneflow-api-pyscenedetect) — shot-boundary detection for splitting clips
 
 ### GPU/CPU plugins
 
