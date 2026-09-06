@@ -4,6 +4,16 @@
 
 **Editing:** Follow existing patterns; keep PRs narrowly scoped; no secrets in git. **Comments in code:** English only.
 
+## Resume here (the plan spans many sessions)
+
+The plan of record is the `plan-freeze` block in [`docs/roadmap.md`](docs/roadmap.md) (16 ★ rows, frozen until 16/16 ★ and ≥ 85% of rows are ✅). STATUS.md says *where we are*; the block says *what is next*. At the start of a session:
+
+1. Run `/acceptance-gate:start` (dossiers waiting for a signature, work in progress) **and** `pnpm plan:check` (the ★ ratio). The start card does not know the plan; the plan checker does not know the card — read both.
+2. A row whose slug has a dossier in a working state (contract not `signed-off`, or an opportunity decided `build`) is the work in progress: resume it with `/feature-loop:feature-loop <slug>`, in its own worktree (one worktree, one session).
+3. Otherwise the next machine work is the **first ⬜ row of lane B in table order**. Lane A rows are owner-only; their due weeks are in [the design §6.1](docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md).
+4. Never tick a row by hand. ✅ is legal only once the backing dossier is signed (guard F2); leave ◐ alone — the checker will print it after the 09/10 checkpoint (decision 06/09), typing it makes evidence go stale between two human gates.
+5. An idea with no dossier yet is a **seed**: while frozen it is a named row in the «Xếp lại sau» table, nothing else. It gets a dossier only after the checkpoint (guard F1 blocks any working-state dossier outside the plan).
+
 ## Directory conventions
 
 - **`src/lib/`** = business code, organized by domain subdirectory (`abi/`, `task/`, `workflow/`, `plugin-executor/`, `plugins/`, `file/`, `upload/`, `schema/`, `api/`, `runtime/`, `settings/`, `director/`). May hold state, perform I/O, or be server-only. (Drizzle DB schema lives separately under [`src/db/`](src/db/), e.g. the `tasks` table in [`src/db/workspace.schema.ts`](src/db/workspace.schema.ts).)
