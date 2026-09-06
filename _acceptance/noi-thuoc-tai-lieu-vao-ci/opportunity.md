@@ -74,18 +74,23 @@ Lệnh đo lại: `git grep -c "check-live-docs-manifest" .github/workflows/ci.y
 
 ## Ngưỡng chết / ngưỡng UAT
 
-- Câu hỏi phép đo trả lời: `[đề xuất]` Sau khi bật, một PR làm ba README lệch manifest có bị chặn **mà không cần ai gõ tay** không?
-- Kết quả nào là SỐNG: `[đề xuất]` Một PR thử nghiệm cố ý xoá một mục README làm job `Acceptance Gate` **đỏ**, và thông điệp nêu đích danh id lẫn tên file — quan sát trên chính GitHub Actions, không phải trên máy.
-- Kết quả nào là CHẾT: `[đề xuất]` Bật xong CI đỏ vì nợ có sẵn ở `main` mà không ai gây ra, hoặc bật xong vẫn phải gõ tay mới biết lệch.
-- Timebox: `[đề xuất]` một buổi. Vượt là dấu hiệu việc này đã hoá thành "sửa hàng rào" chứ không còn là "cắm điện cho hàng rào".
+- Câu hỏi phép đo trả lời: Sau khi bật, một PR làm ba README lệch manifest có bị chặn **mà không cần ai gõ tay** không?
+- Kết quả nào là SỐNG: Một PR thử nghiệm cố ý xoá một mục README làm job `Acceptance Gate` **đỏ**, và thông điệp nêu đích danh id lẫn tên file — quan sát trên chính GitHub Actions, không phải trên máy.
+- Kết quả nào là CHẾT: Bật xong CI đỏ vì nợ có sẵn ở `main` mà không ai gây ra, hoặc bật xong vẫn phải gõ tay mới biết lệch.
+- Timebox: một buổi. Vượt là dấu hiệu việc này đã hoá thành "sửa hàng rào" chứ không còn là "cắm điện cho hàng rào".
 
 ## Ghi chú phạm vi
 
 **Đây là việc nội bộ của bộ công cụ, không có người dùng cuối.** Người ký Cổng Đáng
 hoàn toàn có thể thay cả khối ngưỡng trên bằng một dòng `Không đo được — <lý do>`;
 khuôn cho phép, và ngưỡng đề xuất ở trên là ngưỡng **kỹ thuật** chứ không phải ngưỡng
-giá trị. Tôi để dạng `[đề xuất]` vì phép thử "PR thử nghiệm bị chặn thật trên
+giá trị. Tôi đề xuất bốn ngưỡng trên vì phép thử "PR thử nghiệm bị chặn thật trên
 Actions" là quan sát được và rẻ, nên nó vẫn mua được điều gì đó.
+
+**Chốt 2026-09-07 — Phan Le Manh.** Người ký chọn lối chốt ngưỡng (không phải lối
+"Không đo được") và giữ NGUYÊN VĂN cả bốn đề xuất; tiền tố `[đề xuất]` đã gỡ. Từ đây
+bốn dòng trên là hằng số của phiên nghiệm thu — đổi phép đo sau khi đã thấy số phải
+ghi `[SUPERSEDED …]` và quay lại Cổng Đáng.
 
 **Bốn lỗ đã biết của chính hai thước** (ghi trong Known limits của
 [`dang-ky-fork-openai`](../dang-ky-fork-openai/contract.md), owner chấp nhận tại Cổng 2
