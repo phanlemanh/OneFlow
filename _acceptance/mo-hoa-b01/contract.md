@@ -104,3 +104,13 @@ hàm giữ nguyên vì chúng không có bệnh. Ai thêm một lệnh SAU một
 Nó đến từ vòng 2 khi bước phân loại phạm vi không chạy được, không từ một ô đo nào đỏ:
 11/11 ô đo xanh tại `b24bd89`.
 
+## Ký lại — 07/09/2026, sau finding volume
+
+Chữ người ký gõ, nguyên văn: «ký». Chữ ký đầu đứng trên bằng chứng vòng 2 và chưa thấy một
+finding high ngoài hợp đồng mà vòng 3 mới lộ ra: đổi khoá volume trong `docker-compose.yml`
+làm người tự host mất dữ liệu khi `git pull && docker compose up -d`. Người ký chọn lối
+«giữ khoá volume cũ», đã sửa tại `6cb2253` (mục ĐÃ SỬA trong `review-findings.md`). Bảy mục
+Known limits và hình 5 treo ở trên giữ nguyên định đoạt. Lúc ký lại, phán quyết máy mới nhất
+là REJECT của vòng 3 (toàn chuyện sổ sách sau chữ ký, đã sửa tại `54568bf`); vòng 4 chạy
+sau chữ ký này để evidence ghim đúng HEAD cuối — lưới trước merge đòi chuỗi PASS của máy.
+
