@@ -8,7 +8,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 446a27c13b715b6a8967dea523b64024797a4850
+verified_commit: b24bd890997a214e4d014065d31af8260a90f80f
 human_signoff:
 ---
 
@@ -210,3 +210,26 @@ none — không có eval nào có runs > 1 round này.
 
 Round 1: E1-E7, E10, E11 xanh trên fixture teeth; E8, E9 xanh — carry-forward sang round 2 vì delta không chạm paths của hai eval này.
 Round 2: bước phân loại phạm vi (scope-triage) không chạy được — toàn bộ finding chuyển sang mục "Chưa phân loại" trong review-findings.md, verdict giữ PENDING-JUDGMENT chờ người xem lại thủ công.
+Round 3 (07/09): sửa finding HIGH «Trong hợp đồng» của AC-7 rồi chạy lại cả 11 ô đo — 11/11 exit 0 tại `b24bd89`.
+
+## Round 3 — đóng finding nuốt lỗi của bộ răng
+
+**Finding:** `run_one` gọi mỗi ca bằng `if "case_$name"; then`. Bash bỏ qua errexit trong TOÀN THÂN một hàm chạy ở vị trí điều kiện, nên `return 1` của `green_control` không dừng ca lại: ca vẫn phá fixture, guard vẫn đỏ (vì lý do khác), `expect_red` vẫn thấy token, và ca được đếm PASS. 24 trên 28 ca mang bệnh này.
+
+**Bệnh thứ hai cùng gốc, đo thêm khi sửa:** 5 lời gọi `expect_red` nằm TRONG vòng `for` không phải lệnh cuối hàm, nên một vòng thất bại bị vòng sau ghi đè.
+
+**Sửa:** thêm `|| return 1` vào 25 lời gọi `green_control` + 5 `expect_red` trong vòng lặp. 18 `expect_red` là lệnh cuối hàm giữ nguyên — giá trị trả về của chúng đã là giá trị trả về của hàm, không có bệnh.
+
+**Đối chứng hai chiều, đo thật:**
+
+| Chiều | Trước sửa | Sau sửa |
+|---|---|---|
+| cây lành, cả bộ răng | 28/28 PASS, exit 0 | 28/28 PASS, exit 0 |
+| conf phá (`repo=ai-do/kho-khac`), ca `image-upstream` | exit 0, in `CASE image-upstream: PASS` | exit 1, không in PASS |
+| cùng conf phá, ca `hit-outside` | exit 0, in PASS | exit 1, không in PASS |
+| cùng conf phá, ca `readme-image-missing` | — | exit 1, không in PASS |
+
+Chiều đỏ trước đây không cắn; nay cắn, và chiều xanh không đổi.
+
+**Known limit còn lại:** ai thêm một lệnh SAU một `expect_red` cuối hàm sẽ tái tạo đúng bệnh này ở chỗ đó. Phạm vi sửa cố ý hẹp theo đúng chỗ đo được là hỏng.
+

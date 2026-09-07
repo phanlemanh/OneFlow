@@ -1,6 +1,13 @@
 ## Trong hợp đồng
 
-### Teeth harness: positive control (green_control) failure is swallowed — case still reports PASS / exit 0
+### [ĐÃ SỬA 07/09 — `b24bd89`] Teeth harness: positive control (green_control) failure is swallowed — case still reports PASS / exit 0
+
+> **Trạng thái 07/09: ĐÓNG.** Sửa ở `b24bd89` — thêm `|| return 1` vào 25 lời gọi
+> `green_control` và 5 `expect_red` nằm trong vòng lặp. Đo thêm được một bệnh thứ hai
+> cùng gốc (expect_red trong `for` bị vòng sau ghi đè) và sửa luôn. Đối chứng hai chiều:
+> cây lành vẫn 28/28 exit 0; với conf phá thì `image-upstream` chuyển từ «exit 0 + in PASS»
+> sang «exit 1 + không in PASS». Chi tiết trong `evidence-report.md` mục Round 3.
+
 - file: `scripts/fork/check-fork-identity-teeth.sh:315`
 - severity: high
 - source: bugs
