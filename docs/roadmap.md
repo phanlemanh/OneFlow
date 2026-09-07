@@ -179,6 +179,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 | desktop 0.1d và S5; ja.json 76 khoá; gói nợ fork; 1.4 TTS; 1.7 KG; S6 | ngoài lát cắt | — |
 | oneflow-api-vercel-gateway | mở khi phiên âm của cổng hết beta VÀ Phase 2 mục 4 bắt đầu, HOẶC phiên nghiệm thu cho thấy U1 trượt vì nhập nhiều khoá | — |
 | hàng rào chặn model đã khai tử | đọc trường deprecated_at từ catalog công khai thay vì bảng tay | — |
+| hợp nhất hạ tầng: OneFlow về chung Vercel · Supabase · Render.com với artifact platform và crm onehub | owner nêu 07/09; Postgres đã là Phase 2 mục 2, nhưng vướng ADR-0011 — executor chạy subprocess venv nên serverless không nhận; mở sau mốc tái hoạch | — |
 
 **Ngoại lệ mở giữa lúc băng**
 | slug | lý do | ngày | ai quyết |
