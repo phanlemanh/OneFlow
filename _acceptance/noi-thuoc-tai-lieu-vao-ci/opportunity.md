@@ -112,3 +112,22 @@ thước nói dối về đúng thứ nó canh; (1) (3) (4) tách ra được.
 **Ngoài phạm vi mọi hướng:** màn hình không cảnh báo gì về vòng đời model — lái-thử
 người-lạ 01/09 tìm ra, và đó là đề tài của `dang-ky-fork-openai` chứ không phải của
 việc cắm điện này. Nó xứng đáng hồ sơ riêng.
+
+## Kết quả đo sau ship (Cổng Giá trị, 2026-09-07)
+
+Phiên nghiệm thu: [`uat-session.md`](uat-session.md). Verdict **release**, người ký
+Phan Le Manh.
+
+| Thước | Ngưỡng đã khai | Số đo được | Kết |
+|---|---|---|---|
+| PR làm README lệch bị chặn tự động | job `Acceptance Gate` đỏ trên GitHub Actions, nêu đích danh id và tên file | PR #104: đỏ sau 29 giây, không ai gõ gì; `FAIL: README.md does not list oneflow-api-pyscenedetect`; 5 job khác xanh | **SỐNG** |
+| Không đỏ vì nợ có sẵn trên `main` | CI xanh khi không ai gây lệch | 5/5 lượt gần nhất xanh, muộn nhất 06/09 | không CHẾT |
+
+Điều đáng mang sang vòng sau: giả định (4) của hồ sơ này — «bật thước không làm hồ sơ
+đã ký nào phải ký lại» — vẫn là giả định SAI đã trả giá đúng một lần. Mọi lần chạm
+`.github/workflows/ci.yml` sau này vẫn kéo theo một đợt re-pin, vì `.github/**` không
+được miễn T1.
+
+Điều KHÔNG đo được ở phiên này: chấm kín thoái hoá (phòng một người), và câu ràng buộc
+«khi hàng rào cản một PR gấp của chính anh, anh sửa README hay tắt thước?» chưa có câu
+trả lời. Nếu có ai từng tắt thước cho nhanh, đó là dữ liệu của vòng sau.

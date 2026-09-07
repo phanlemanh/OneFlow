@@ -3,10 +3,10 @@ schema_version: 1
 slug: noi-thuoc-tai-lieu-vao-ci
 feature: Nối hai thước tài-liệu-sống ↔ manifest vào CI
 owner: Manh
-stage: scheduled
-verdict:
-decided_by:
-decided_at:
+stage: held
+verdict: release
+decided_by: Phan Le Manh
+decided_at: 2026-09-07T00:24:51Z
 ---
 
 # Phiên nghiệm thu — Cổng Giá trị
@@ -42,7 +42,7 @@ nên nó không mua được gì. Cái nó KHÔNG thay thế được là câu r
 
 | Người | Điểm/nhận xét kín | Câu ràng buộc: sẽ để hàng rào này chặn PR thật của chính mình chứ? |
 |---|---|---|
-| Phan Le Manh |  |  |
+| Phan Le Manh | (không thu — phòng một người, nghi thức thoái hoá) | chưa trả lời |
 
 > Câu ràng buộc đã dịch cho vòng nội bộ. Bản gốc hỏi "gửi cho khách nào, khi nào" —
 > công cụ nội bộ không có khách, nên câu tương đương là: khi hàng rào cản một PR gấp
@@ -82,5 +82,14 @@ thành công không chứng minh được điều ngược lại.
 
 ## Quyết định Cổng Giá trị
 
-- **verdict = ** Căn cứ:
-- Bước kế:
+- **verdict = release** (giao rộng). Người ký: Phan Le Manh, 2026-09-07.
+- Chữ người ký gõ, nguyên văn: «Đồng ý theo khuyến nghị».
+- Căn cứ: cả hai vế đo được trên đúng mặt phẳng ngưỡng đòi, không còn ô CHƯA ĐO.
+  Vế SỐNG đo trên GitHub Actions thật (PR #104, job đỏ 29 giây, log gọi đích danh id
+  và tên file, năm job khác xanh). Vế CHẾT không xảy ra (5/5 lượt CI gần nhất xanh).
+- Người ký biết và chấp nhận hai điều chưa chắc: (a) vòng này không có nhật ký
+  lái-thử người-lạ, nên điều kiện «đã chạy sau flag» vào phiên bằng lời khai;
+  (b) điểm mù của AC-2 vẫn mở — phép quét ba chuỗi cấm không bắt được một step nuốt
+  mã thoát qua ống dẫn (ghi trong sổ quyết định 02/09).
+- Bước kế: hàng rào ở lại trong CI, vòng đóng. Không có artifact phát hành —
+  việc này là dây nối trong cổng nghiệm thu, không phải thứ người dùng cuối tải về.
