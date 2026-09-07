@@ -69,7 +69,7 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   severity: high
   Đề xuất: fix — người ký chọn 07/09 lối «giữ khoá volume cũ» (service vẫn `oneflow`, ba README sửa dòng `docker run -v` cho khớp). Lối `name: tongflow-data` bị loại: Compose đặt tên volume thật là `<project>_<khoá>`, `name:` trần không khớp volume cũ. Đo lại: guard PASS, răng 28/28 exit 0.
 
-- **[VÒNG 4] Đổi tên service compose `tongflow` → `oneflow` làm self-host cũ không lên được (container mồ côi giữ cổng 3000)**
+- **[VÒNG 4 — ĐÃ SỬA 07/09 `b8ca06a`] Đổi tên service compose `tongflow` → `oneflow` làm self-host cũ không lên được (container mồ côi giữ cổng 3000)**
   Người dùng thấy gì: Người tự host bản cũ khi nâng cấp lên bản mới có thể gặp lỗi cổng bị chiếm, ứng dụng mới không khởi động được trong khi bản cũ vẫn âm thầm chạy ngầm chiếm chỗ.
   file: `docker-compose.yml`
   severity: medium

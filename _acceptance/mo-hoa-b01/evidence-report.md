@@ -288,6 +288,6 @@ append NGUYÊN VĂN từ kết quả workflow, không viết tay.
 
 | Mức | Nội dung | Xử |
 |---|---|---|
-| medium | đổi tên service compose `tongflow` → `oneflow`: self-host cũ `git pull && docker compose up -d` để lại container mồ côi giữ cổng 3000, bản mới không lên (hai agent cùng tìm ra, gộp một) | **chờ người ký quyết** — cùng lớp với vụ volume đã xử ở `6cb2253` |
+| medium | đổi tên service compose `tongflow` → `oneflow`: self-host cũ `git pull && docker compose up -d` để lại container mồ côi giữ cổng 3000, bản mới không lên (hai agent cùng tìm ra, gộp một) | **đã sửa tại `b8ca06a`** — người ký chọn giữ tên service `tongflow`, cùng lối với khoá volume ở `6cb2253`; vòng 5 chạy sau |
 | low | guard định danh fork đỏ trên mọi fork của contributor (so conf với remote origin) | known-limits (đề xuất máy) |
 | low | `check-prototype-lane.sh` ưu tiên `main` cục bộ trước `origin/main`, main cũ cho FAIL sai thay vì exit 2 | known-limits (đề xuất máy) |
