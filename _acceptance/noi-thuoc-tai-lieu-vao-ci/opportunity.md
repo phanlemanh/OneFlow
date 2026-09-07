@@ -131,3 +131,35 @@ Phan Le Manh.
 Điều KHÔNG đo được ở phiên này: chấm kín thoái hoá (phòng một người), và câu ràng buộc
 «khi hàng rào cản một PR gấp của chính anh, anh sửa README hay tắt thước?» chưa có câu
 trả lời. Nếu có ai từng tắt thước cho nhanh, đó là dữ liệu của vòng sau.
+
+## Nợ mang sang, do chính phiên nghiệm thu 07/09 sinh ra
+
+Bước sau chữ ký đòi vẽ lại bản đồ sản phẩm. Vẽ xong thì **bộ vẽ** (sống trong bộ đồ
+nghề cài ngoài) và **bộ kiểm** (chép vào kho, chạy trong cổng) bất đồng năm chỗ:
+
+| # | Bộ vẽ nói | Bộ kiểm nói |
+|---|---|---|
+| 1 | `lat-cat-chung-minh` thuộc nhóm đã giao (36 mục) | không hồ sơ nào ở trạng thái đó (35 mục) |
+| 2 | `skill-1-footage-kho-clip` là "sắp mở vòng" | là "đang cân nhắc cơ hội" |
+| 3 | khối rỗng thì bỏ đi | khối "Đang cân nhắc cơ hội" phải luôn có mặt |
+| 4 | khối rỗng thì bỏ đi | khối "Đã giao — chờ phiên nghiệm thu" phải luôn có mặt |
+| 5 | hồ sơ đã ký Cổng Giá trị sang nhóm "đã nghiệm thu giá trị" | **không đọc `uat-session.md` chút nào** |
+
+Chỗ (5) không phải bất đồng, nó là **mù**: bộ kiểm trong cổng vẫn nói bản đồ khớp
+trong khi bản đồ chưa ghi chữ ký vừa đặt xuống. Một thước xanh trên đúng thứ nó không
+nhìn thấy còn tệ hơn không có thước. Hệ quả đo được hôm nay: bản đồ vẫn xếp hồ sơ này
+vào "chờ phiên nghiệm thu" sau khi phiên đã họp và đã ký.
+
+Nguyên nhân nằm trong chú thích của chính bộ kiểm: bộ vẽ cố ý KHÔNG được chép vào kho
+vì chép là đóng băng một bản rồi trôi thành fork, "leaving two different rulers for
+one thing". Quyết định ấy tránh fork cho bộ **vẽ**, và đổi lại biến bộ **kiểm** thành
+đúng cái fork đó.
+
+**Owner quyết 07/09, một chữ: «Giữ».** Bản đồ giữ hình dạng cũ; sửa bộ kiểm là việc
+riêng, không nhét vào phiên nghiệm thu.
+
+**Nợ này chưa có ô cơ hội riêng, và đó là điều cố ý.** Mở một hồ sơ mới lúc này làm
+guard đóng băng kế hoạch đỏ («mở ngoài kế hoạch», hiện ★ 2/16). Khối Ngoại lệ chỉ nhận
+ba lý do có tên — mất-dữ-liệu · bảo-mật · chặn-★ — và món nợ này không thuộc lý do
+nào, nên lách vào đó là nói dối guard. Nó nằm đây cho tới khi kế hoạch gỡ băng, hoặc
+tới khi ai đó thấy nó đáng một dòng ★.

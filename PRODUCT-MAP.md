@@ -5,7 +5,7 @@
 
 ```mermaid
 flowchart TD
-  A["Đang cân nhắc cơ hội<br/>2 việc"] --> GD{"Cổng Đáng"}
+  A["Đang cân nhắc cơ hội<br/>1 việc"] --> GD{"Cổng Đáng"}
   GD --> B["Sắp mở vòng<br/>chưa có"]
   GD --> XL["Xếp lại sau<br/>3 việc"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
@@ -24,7 +24,6 @@ flowchart TD
 ## Đang cân nhắc cơ hội
 
 - Skill (`skill-1-footage-kho-clip`)
-- Bản đồ hai thước (`ban-do-hai-thuoc-lech-nhau`)
 
 ## Đang làm
 
