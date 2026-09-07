@@ -233,3 +233,33 @@ Chiều đỏ trước đây không cắn; nay cắn, và chiều xanh không đ
 
 **Known limit còn lại:** ai thêm một lệnh SAU một `expect_red` cuối hàm sẽ tái tạo đúng bệnh này ở chỗ đó. Phạm vi sửa cố ý hẹp theo đúng chỗ đo được là hỏng.
 
+## Vòng 3 — phán quyết REJECT, và nó đúng
+
+`verdict: REJECT`, `failed_evals: [E8, E9]`, `triage_failed: false`. Bước phân loại phạm vi
+**chạy được** ở vòng này — đó là điều vòng 2 không làm được, và là lý do vòng 2 dừng ở
+PENDING-JUDGMENT. Nguyên nhân khác nhau, không cùng lớp lỗi với ô hội đồng.
+
+**Bốn phát hiện kéo REJECT đều cùng một gốc: chữ ký được ghi mà sổ sách đi theo thì không.**
+Ký `status: signed-off` làm bốn guard đang chạy trong cổng đỏ ngay:
+
+| Guard | Lệch gì |
+|---|---|
+| `check-product-map.mjs` | hồ sơ còn ở nhóm «Đang làm», vắng ở «chờ phiên nghiệm thu» |
+| `check-roadmap-fresh.sh` | sổ cái thiếu hàng cho hồ sơ vừa ký; dòng B2 còn ⬜ |
+| `check-plan-docs.sh` | STATUS.md đề ngày cũ hơn hồ sơ; hai con số 37 còn lạc hậu |
+| `check-gate-guards-job.sh teeth` | dừng ở needle đầu vì cây không lành, nên bộ răng mới **chưa từng được chạy trong cổng** |
+
+Điểm cuối đáng ghi riêng: bộ răng fork-identity mà vòng này dựng ra **không hề được chứng minh
+trong cổng** ở HEAD đó — nó bị chặn trước khi tới lượt. Độ phủ mà hồ sơ quảng cáo là chưa có thật.
+
+**Đã sửa 07/09, năm chỗ:** bản đồ dời hồ sơ sang nhóm đúng và sửa hai nút mermaid · sổ cái thêm
+một hàng · dòng B2 tick ✅ · STATUS.md gạch nợ B2 kèm ngày ký và cập nhật ngày + số đếm · đoạn
+tỉ lệ trong lộ trình đổi 37 → 38. Đo lại: E8 exit 0, E9 exit 0, và bốn guard trên đều exit 0.
+
+**`run_log_write_failed: true`** ở vòng này — bộ tổng hợp tính xong rồi không ghi được sổ chạy.
+Các dòng của vòng 3 dưới đây do phiên điều phối ghi tay, không phải do workflow ghi.
+
+**Còn 10 phát hiện chưa xử**, trong đó một mục nặng nằm ngoài hợp đồng và chưa từng được người ký
+xem: đổi tên volume trong `docker-compose.yml` làm người đang tự host mất sạch dữ liệu khi họ
+`git pull && docker compose up -d`. Xem mục Known limits và tin mời cổng.
+
