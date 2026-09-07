@@ -5,10 +5,10 @@ slug: mo-hoa-b01
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [cli, docs]
-status: verified
-approved_by:
-approved_at:
-veto_state: mo
+status: signed-off
+approved_by: Phan Le Manh
+approved_at: 2026-09-07
+veto_state: dong-bang-chu-ky
 veto_opened_at: 2026-09-05T07:44:52Z
 design_doc: docs/superpowers/specs/2026-09-05-mo-hoa-b01-design.md
 ---
@@ -75,3 +75,32 @@ báo ghi công/thương hiệu `[NGÀNH: OpenTofu, Forgejo]`.
 - Sửa `scripts/ci/check-gate-guards-job.sh` (thêm needle) chạm `paths` của cong-tu-canh-minh và lat-cat-chung-minh: hai hồ sơ ấy chạy lại ô đo ở lần re-pin sau merge — đúng luật carry-forward.
 - Hai phiên có thể đứng cùng cây (STATUS.md, nghi thức phân vùng): hồ sơ này làm ở worktree riêng `/Users/manh-macmini/dev/oneflow-b2` trên nhánh `b01/open-source-rebrand`.
 - **Giới hạn đã biết (đo 05/09, ngoài hợp đồng):** bộ sinh bản đồ của kit (`product-map.mjs`, mọi bản trong cache 2.2.0 → 2.8.0) xếp cơ hội đã quyết `build` vào nhóm «Sắp mở vòng» và hồ sơ khai «Không đo được» vào «Đã giao», trong khi bộ kiểm vendored `scripts/ci/check-product-map.mjs` đòi nhóm «Đang cân nhắc cơ hội» và «Đã giao — chờ phiên nghiệm thu». Sinh lại bằng kit làm bộ kiểm đỏ 5 chỗ; hồ sơ này vá tay đúng mục «Đang làm» của PRODUCT-MAP.md để bộ kiểm xanh. Lệnh tái lập: `node ~/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.8.0/scripts/product-map.mjs --root . && node scripts/ci/check-product-map.mjs`. Không sửa ở đây — bộ kiểm thuộc hồ sơ cong-tu-canh-minh; việc của một hồ sơ hạ tầng cổng khác.
+
+## Known limits — người ký chấp nhận tại Cổng 2 (07/09/2026)
+
+Chữ người ký gõ, nguyên văn: «Ký». Bảy mục dưới đây nằm NGOÀI phạm vi duyệt ở Cổng 1;
+người ký nhận nguyên khuyến nghị của máy trên dòng lệnh.
+
+| # | Điều còn lại | Xử |
+|---|---|---|
+| 1 | Liên kết cộng đồng trỏ tới trang Thảo luận chưa bật cho kho này, người bấm gặp trang không tồn tại | known-limits |
+| 2 | `check-fork-identity.sh` âm thầm quay về conf/allow-list thật khi đường dẫn ghi đè không tồn tại | known-limits |
+| 3 | `fixture()` để sót thư mục tạm ở ca có vòng lặp; chỉ probe cuối được dọn | wont-fix |
+| 4 | E10/E5 hứa QUAN HỆ (tên gói đọc từ `pyproject`) nhưng ca răng chỉ assert chuỗi vắng | known-limits |
+| 5 | E7/E8 ghim những phép kiểm mà lệnh không chạy; verifier chỉ «đạt» bằng cách đọc mã | known-limits |
+| 6 | `check-suite-key.sh` khẳng định «executor GỌI script» bằng phép chứa-chuỗi | wont-fix |
+| 7 | Ba ca răng còn ghi cứng `phanlemanh/OneFlow` dù đã suy REPO_RAW từ conf | wont-fix |
+
+**Treo — chưa xử, người ký nêu tên:** hình 5. E6 hứa ba dòng miễn trừ tối thiểu CÓ TÊN
+(«không phải một con số N») nhưng `case_clean` assert đếm N=3 cộng một tên; hai dòng
+`desktop-release` không được ghim, và vế đỏ «miễn trừ tối thiểu vắng» chưa có ca răng.
+Mục này đến từ nhóm chưa-phân-loại mà thẻ Cổng 2 không tự đưa ra — nêu tay trong tin mời cổng.
+
+**Một Known limit sinh ra từ chính bản sửa vòng 3:** 18 lời gọi `expect_red` là lệnh cuối
+hàm giữ nguyên vì chúng không có bệnh. Ai thêm một lệnh SAU một trong số đó sẽ tái tạo
+đúng bệnh nuốt-lỗi đã sửa. Phạm vi sửa cố ý hẹp theo đúng chỗ đo được là hỏng.
+
+**Phán quyết máy là PENDING-JUDGMENT, không phải PASS**, và người ký biết điều đó khi ký.
+Nó đến từ vòng 2 khi bước phân loại phạm vi không chạy được, không từ một ô đo nào đỏ:
+11/11 ô đo xanh tại `b24bd89`.
+
