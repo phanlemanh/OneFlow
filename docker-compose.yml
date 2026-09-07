@@ -10,7 +10,12 @@
 # (persisted to /data/settings.json). Pass them here via a .env file or shell env.
 
 services:
-  oneflow:
+  # The service key keeps its pre-fork name for the same reason the volume keys
+  # below do: Compose names the container `<project>-<service>-1`, so renaming
+  # the key leaves an existing self-host's old container running as an orphan
+  # (restart: unless-stopped) holding port 3000, and the new one never starts.
+  # Keeping the key makes `git pull && docker compose up -d` an in-place recreate.
+  tongflow:
     image: ghcr.io/phanlemanh/oneflow:latest
     build: .
     ports:
