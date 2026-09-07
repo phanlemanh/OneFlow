@@ -263,3 +263,9 @@ Các dòng của vòng 3 dưới đây do phiên điều phối ghi tay, không 
 xem: đổi tên volume trong `docker-compose.yml` làm người đang tự host mất sạch dữ liệu khi họ
 `git pull && docker compose up -d`. Xem mục Known limits và tin mời cổng.
 
+**Mục nặng ấy đã xử 07/09 tại `6cb2253`** sau khi người ký chọn lối «giữ khoá volume cũ» (mục
+trong `review-findings.md` đánh dấu ĐÃ SỬA). Lối `name: tongflow-data` mà bàn giao gợi ý bị loại vì
+Compose đặt tên volume thật là `<project>_<khoá>`, nên `name:` trần không khớp volume cũ. Đo lại
+sau sửa: `check-fork-identity.sh` PASS, răng 28/28 exit 0, E2 exit 0. Phán quyết máy vẫn là của
+vòng 3 (REJECT) cho tới khi vòng 4 chạy trên `6cb2253`.
+

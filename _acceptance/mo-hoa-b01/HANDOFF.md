@@ -23,6 +23,10 @@ sản phẩm; commit `54568bf` sửa cả năm chỗ và đo lại: E8 exit 0, E
 
 ### Hai việc chờ người quyết
 
+> **Cập nhật 07/09 (phiên sau):** mục 1 đã xử tại `6cb2253` — người ký chọn «giữ khoá volume cũ»;
+> lối `name: tongflow-data` bị loại vì Compose thêm tiền tố project nên không khớp volume cũ.
+> Còn mục 2: ký lại + vòng 4. Lúc viết dòng này `github.com:443` lại đứt, `api.github.com` thông.
+
 1. **Đổi tên volume trong `docker-compose.yml` làm người tự host mất dữ liệu** (severity high,
    NGOÀI hợp đồng, **chưa từng được người ký xem** — vòng 2 không phân loại được nên nó chưa
    bao giờ lên bàn). Service `tongflow` → `oneflow` và hai volume `tongflow-data` /

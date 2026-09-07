@@ -63,6 +63,12 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   severity: low
   Đề xuất: wont-fix
 
+- **[ĐÃ SỬA 07/09 — `6cb2253`] Đổi khoá volume compose `tongflow-*` → `oneflow-*` làm người đang tự host mất sạch dữ liệu khi `git pull && docker compose up -d`**
+  Người dùng thấy gì: Ai đang tự host mà kéo bản mới rồi khởi động lại sẽ thấy ứng dụng lên như bản cài mới — cơ sở dữ liệu, tệp đã tải lên, mọi khoá API nhập trong phần Cài đặt và các plugin đã cài đều biến mất, không có lỗi hay cảnh báo nào; dữ liệu thật vẫn nằm trong volume cũ không còn được gắn.
+  file: `docker-compose.yml`
+  severity: high
+  Đề xuất: fix — người ký chọn 07/09 lối «giữ khoá volume cũ» (service vẫn `oneflow`, ba README sửa dòng `docker run -v` cho khớp). Lối `name: tongflow-data` bị loại: Compose đặt tên volume thật là `<project>_<khoá>`, `name:` trần không khớp volume cũ. Đo lại: guard PASS, răng 28/28 exit 0.
+
 ## Chưa phân loại (triage-failed)
 
 phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ.
