@@ -759,6 +759,7 @@ risk_tiers:
     # Vendored gate tooling = measuring stick, not product code; upgrading it must
     # not stale-invalidate signed feature evidence (exact paths, not globs).
     - "scripts/pre-merge-check.sh"
+    - "lib/eval-yaml.cjs" # vendored kit 2.9.0 — bộ đọc evals.yaml cho luật làn-eval (ADR 0014)
     # CẢ HAI bộ tên phải nằm đây cho tới khi commit đổi tên rời khỏi MỌI cửa sổ
     # diff. Kit 1.40.0 đổi `.js` -> `.cjs`; git ghi đổi tên vào diff PR như
     # «xoá đường cũ + thêm đường mới», nên nếu chỉ khai `.cjs` thì phía XOÁ nằm

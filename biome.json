@@ -33,6 +33,7 @@
             "!lib/ac-line.cjs",
             "!lib/md-section.cjs",
             "!lib/workspace-record.cjs",
+            "!lib/eval-yaml.cjs",
             "!_acceptance"
         ]
     },
