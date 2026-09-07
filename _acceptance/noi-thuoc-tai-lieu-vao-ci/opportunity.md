@@ -74,18 +74,23 @@ Lệnh đo lại: `git grep -c "check-live-docs-manifest" .github/workflows/ci.y
 
 ## Ngưỡng chết / ngưỡng UAT
 
-- Câu hỏi phép đo trả lời: `[đề xuất]` Sau khi bật, một PR làm ba README lệch manifest có bị chặn **mà không cần ai gõ tay** không?
-- Kết quả nào là SỐNG: `[đề xuất]` Một PR thử nghiệm cố ý xoá một mục README làm job `Acceptance Gate` **đỏ**, và thông điệp nêu đích danh id lẫn tên file — quan sát trên chính GitHub Actions, không phải trên máy.
-- Kết quả nào là CHẾT: `[đề xuất]` Bật xong CI đỏ vì nợ có sẵn ở `main` mà không ai gây ra, hoặc bật xong vẫn phải gõ tay mới biết lệch.
-- Timebox: `[đề xuất]` một buổi. Vượt là dấu hiệu việc này đã hoá thành "sửa hàng rào" chứ không còn là "cắm điện cho hàng rào".
+- Câu hỏi phép đo trả lời: Sau khi bật, một PR làm ba README lệch manifest có bị chặn **mà không cần ai gõ tay** không?
+- Kết quả nào là SỐNG: Một PR thử nghiệm cố ý xoá một mục README làm job `Acceptance Gate` **đỏ**, và thông điệp nêu đích danh id lẫn tên file — quan sát trên chính GitHub Actions, không phải trên máy.
+- Kết quả nào là CHẾT: Bật xong CI đỏ vì nợ có sẵn ở `main` mà không ai gây ra, hoặc bật xong vẫn phải gõ tay mới biết lệch.
+- Timebox: một buổi. Vượt là dấu hiệu việc này đã hoá thành "sửa hàng rào" chứ không còn là "cắm điện cho hàng rào".
 
 ## Ghi chú phạm vi
 
 **Đây là việc nội bộ của bộ công cụ, không có người dùng cuối.** Người ký Cổng Đáng
 hoàn toàn có thể thay cả khối ngưỡng trên bằng một dòng `Không đo được — <lý do>`;
 khuôn cho phép, và ngưỡng đề xuất ở trên là ngưỡng **kỹ thuật** chứ không phải ngưỡng
-giá trị. Tôi để dạng `[đề xuất]` vì phép thử "PR thử nghiệm bị chặn thật trên
+giá trị. Tôi đề xuất bốn ngưỡng trên vì phép thử "PR thử nghiệm bị chặn thật trên
 Actions" là quan sát được và rẻ, nên nó vẫn mua được điều gì đó.
+
+**Chốt 2026-09-07 — Phan Le Manh.** Người ký chọn lối chốt ngưỡng (không phải lối
+"Không đo được") và giữ NGUYÊN VĂN cả bốn đề xuất; tiền tố `[đề xuất]` đã gỡ. Từ đây
+bốn dòng trên là hằng số của phiên nghiệm thu — đổi phép đo sau khi đã thấy số phải
+ghi `[SUPERSEDED …]` và quay lại Cổng Đáng.
 
 **Bốn lỗ đã biết của chính hai thước** (ghi trong Known limits của
 [`dang-ky-fork-openai`](../dang-ky-fork-openai/contract.md), owner chấp nhận tại Cổng 2
@@ -107,3 +112,54 @@ thước nói dối về đúng thứ nó canh; (1) (3) (4) tách ra được.
 **Ngoài phạm vi mọi hướng:** màn hình không cảnh báo gì về vòng đời model — lái-thử
 người-lạ 01/09 tìm ra, và đó là đề tài của `dang-ky-fork-openai` chứ không phải của
 việc cắm điện này. Nó xứng đáng hồ sơ riêng.
+
+## Kết quả đo sau ship (Cổng Giá trị, 2026-09-07)
+
+Phiên nghiệm thu: [`uat-session.md`](uat-session.md). Verdict **release**, người ký
+Phan Le Manh.
+
+| Thước | Ngưỡng đã khai | Số đo được | Kết |
+|---|---|---|---|
+| PR làm README lệch bị chặn tự động | job `Acceptance Gate` đỏ trên GitHub Actions, nêu đích danh id và tên file | PR #104: đỏ sau 29 giây, không ai gõ gì; `FAIL: README.md does not list oneflow-api-pyscenedetect`; 5 job khác xanh | **SỐNG** |
+| Không đỏ vì nợ có sẵn trên `main` | CI xanh khi không ai gây lệch | 5/5 lượt gần nhất xanh, muộn nhất 06/09 | không CHẾT |
+
+Điều đáng mang sang vòng sau: giả định (4) của hồ sơ này — «bật thước không làm hồ sơ
+đã ký nào phải ký lại» — vẫn là giả định SAI đã trả giá đúng một lần. Mọi lần chạm
+`.github/workflows/ci.yml` sau này vẫn kéo theo một đợt re-pin, vì `.github/**` không
+được miễn T1.
+
+Điều KHÔNG đo được ở phiên này: chấm kín thoái hoá (phòng một người), và câu ràng buộc
+«khi hàng rào cản một PR gấp của chính anh, anh sửa README hay tắt thước?» chưa có câu
+trả lời. Nếu có ai từng tắt thước cho nhanh, đó là dữ liệu của vòng sau.
+
+## Nợ mang sang, do chính phiên nghiệm thu 07/09 sinh ra
+
+Bước sau chữ ký đòi vẽ lại bản đồ sản phẩm. Vẽ xong thì **bộ vẽ** (sống trong bộ đồ
+nghề cài ngoài) và **bộ kiểm** (chép vào kho, chạy trong cổng) bất đồng năm chỗ:
+
+| # | Bộ vẽ nói | Bộ kiểm nói |
+|---|---|---|
+| 1 | `lat-cat-chung-minh` thuộc nhóm đã giao (36 mục) | không hồ sơ nào ở trạng thái đó (35 mục) |
+| 2 | `skill-1-footage-kho-clip` là "sắp mở vòng" | là "đang cân nhắc cơ hội" |
+| 3 | khối rỗng thì bỏ đi | khối "Đang cân nhắc cơ hội" phải luôn có mặt |
+| 4 | khối rỗng thì bỏ đi | khối "Đã giao — chờ phiên nghiệm thu" phải luôn có mặt |
+| 5 | hồ sơ đã ký Cổng Giá trị sang nhóm "đã nghiệm thu giá trị" | **không đọc `uat-session.md` chút nào** |
+
+Chỗ (5) không phải bất đồng, nó là **mù**: bộ kiểm trong cổng vẫn nói bản đồ khớp
+trong khi bản đồ chưa ghi chữ ký vừa đặt xuống. Một thước xanh trên đúng thứ nó không
+nhìn thấy còn tệ hơn không có thước. Hệ quả đo được hôm nay: bản đồ vẫn xếp hồ sơ này
+vào "chờ phiên nghiệm thu" sau khi phiên đã họp và đã ký.
+
+Nguyên nhân nằm trong chú thích của chính bộ kiểm: bộ vẽ cố ý KHÔNG được chép vào kho
+vì chép là đóng băng một bản rồi trôi thành fork, "leaving two different rulers for
+one thing". Quyết định ấy tránh fork cho bộ **vẽ**, và đổi lại biến bộ **kiểm** thành
+đúng cái fork đó.
+
+**Owner quyết 07/09, một chữ: «Giữ».** Bản đồ giữ hình dạng cũ; sửa bộ kiểm là việc
+riêng, không nhét vào phiên nghiệm thu.
+
+**Nợ này chưa có ô cơ hội riêng, và đó là điều cố ý.** Mở một hồ sơ mới lúc này làm
+guard đóng băng kế hoạch đỏ («mở ngoài kế hoạch», hiện ★ 2/16). Khối Ngoại lệ chỉ nhận
+ba lý do có tên — mất-dữ-liệu · bảo-mật · chặn-★ — và món nợ này không thuộc lý do
+nào, nên lách vào đó là nói dối guard. Nó nằm đây cho tới khi kế hoạch gỡ băng, hoặc
+tới khi ai đó thấy nó đáng một dòng ★.
