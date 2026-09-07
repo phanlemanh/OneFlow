@@ -18,7 +18,9 @@ vi.mock("@/db", () => {
         getDb: async () => ({
             insert: () => ({ values }),
             update: () => ({ set: () => ({ where: async () => [{ id: 1 }] }) }),
-            select: () => ({ from: () => ({ where: () => ({ limit: async () => [] }) }) }),
+            select: () => ({
+                from: () => ({ where: () => ({ limit: async () => [] }) }),
+            }),
         }),
         workflows: {},
         tasks: {},

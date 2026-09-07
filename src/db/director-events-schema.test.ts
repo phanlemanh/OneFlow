@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -64,9 +64,7 @@ describe("director_events migration (AC-6)", () => {
     });
 
     it.each(MUST_BE_NULLABLE)("leaves %s nullable", (col) => {
-        const line = body
-            .split("\n")
-            .find((l) => l.includes(`\`${col}\``));
+        const line = body.split("\n").find((l) => l.includes(`\`${col}\``));
         expect(line, `column ${col} not found`).toBeDefined();
         expect(line).not.toContain("NOT NULL");
     });

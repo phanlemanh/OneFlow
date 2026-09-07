@@ -1,41 +1,41 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1778746777793,
-      "tag": "0000_burly_romulus",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1782985139446,
-      "tag": "0001_smart_morgan_stark",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1784993002256,
-      "tag": "0002_eager_frog_thor",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1785477464442,
-      "tag": "0003_clammy_blazing_skull",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1787752916842,
-      "tag": "0004_organic_toro",
-      "breakpoints": true
-    }
-  ]
+    "version": "7",
+    "dialect": "sqlite",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "6",
+            "when": 1778746777793,
+            "tag": "0000_burly_romulus",
+            "breakpoints": true
+        },
+        {
+            "idx": 1,
+            "version": "6",
+            "when": 1782985139446,
+            "tag": "0001_smart_morgan_stark",
+            "breakpoints": true
+        },
+        {
+            "idx": 2,
+            "version": "6",
+            "when": 1784993002256,
+            "tag": "0002_eager_frog_thor",
+            "breakpoints": true
+        },
+        {
+            "idx": 3,
+            "version": "6",
+            "when": 1785477464442,
+            "tag": "0003_clammy_blazing_skull",
+            "breakpoints": true
+        },
+        {
+            "idx": 4,
+            "version": "6",
+            "when": 1787752916842,
+            "tag": "0004_organic_toro",
+            "breakpoints": true
+        }
+    ]
 }

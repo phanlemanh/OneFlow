@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, readdirSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import Database from "better-sqlite3";
@@ -37,7 +37,10 @@ describe("migrator on a pre-D0 database (AC-11)", () => {
         const newest = files.at(-1);
         expect(newest, "no migrations found").toBeDefined();
         const older = files.slice(0, -1);
-        expect(older.length, "need at least one prior migration").toBeGreaterThan(0);
+        expect(
+            older.length,
+            "need at least one prior migration",
+        ).toBeGreaterThan(0);
 
         const dir = mkdtempSync(path.join(tmpdir(), "oneflow-d0-"));
         const db = new Database(path.join(dir, "old.db"));
@@ -46,9 +49,10 @@ describe("migrator on a pre-D0 database (AC-11)", () => {
         for (const f of older) applySql(db, f);
 
         // 2. With a user's workflow already in it.
-        db.prepare(
-            "INSERT INTO workflows (name, flow) VALUES (?, ?)",
-        ).run("kế hoạch cũ của tôi", JSON.stringify({ nodes: [], edges: [] }));
+        db.prepare("INSERT INTO workflows (name, flow) VALUES (?, ?)").run(
+            "kế hoạch cũ của tôi",
+            JSON.stringify({ nodes: [], edges: [] }),
+        );
         const before = db
             .prepare("SELECT count(*) AS n FROM workflows")
             .get() as { n: number };
