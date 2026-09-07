@@ -145,6 +145,7 @@ evals:
       Neu cau (1) truot: goi nay lam Director TE DI, dung ban ve "chi them, khong doi
       hanh vi" — dieu goi nay khong duoc phep lam.
     expected: "Ca hai cau CO. Bang chung la anh chup mot lan (output bo do + ket qua truy van), KHONG tai chay duoc trong CI vi can khoa API va dev server. Bo do doi chieu plugins/ voi frozen-config.json va thoat ma 2 khi lech — mot lan chay tren cau hinh khac la mot phep do ve mot Director khac (bai hoc 26/08: worktree rong cho 30/30 vi vocabulary rong nen moi plan chi con step text)"
+    inputs: ["_acceptance/director-wire-shape/evidence/baseline-2026-08-26.md", "_acceptance/director-wire-shape/evidence/baseline-2026-08-26.json", "_acceptance/director-wire-shape/golden/frozen-config.json", "_acceptance/director-wire-shape/contract.md"]
     evidence_required: [verifier, verified_at, output, notes]
 
   - id: E14b
@@ -159,4 +160,5 @@ evals:
       Ty le row con o `generated` (chua duoc va outcome) co < 10% khong?
       Va co xuat hien du ca `accepted`, `replaced`, `discarded` khong?
     expected: "Ty le mo coi < 10%, va ba kind outcome deu co mat. Day la nua ma script KHONG do duoc: chi UI goi /api/director/feedback. Neu mot kind vang mat thi mot nhanh quyet dinh khong duoc noi day — nhanh `discarded` la de sot nhat vi no di qua onOpenChange chu khong qua rieng nut Cancel"
+    inputs: ["_acceptance/director-wire-shape/evidence/e14-2026-08-26.md", "_acceptance/director-wire-shape/evidence/e14-d0-2026-08-26.json", "_acceptance/director-wire-shape/contract.md"]
     evidence_required: [verifier, verified_at, output, notes]
