@@ -139,6 +139,156 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   severity: medium
   Đề xuất: known-limits — người ký chấp nhận theo luật chặn xoáy: năm dòng miễn trừ `app.tongflow.com` không ghim ngữ cảnh; siết là việc của lần re-pin allow-list kế tiếp
 
+- **[VÒNG 7] Evidence ghim cd15d1d nhưng bốn file code có cổng đổi sau đó — bằng chứng không mô tả cây đang merge**
+  Người dùng thấy gì: Báo cáo bàn giao ghi mốc mã cũ hơn mã thực sự sẽ lên nhánh chính, nên người ký có thể đang duyệt trên một phiên bản không đúng với những gì thật sự được gộp.
+  file: `_acceptance/mo-hoa-b01/evidence-report.md`
+  severity: high
+  Đề xuất: đã xử ở lượt ghi này — evidence ghim lại HEAD sau vòng 8
+
+- **[VÒNG 7] evidence-report.md bỏ trống human_signoff + Known limits + Ngoài hợp đồng → cổng đi nhánh «xanh-sạch, KHÔNG mời ký» và bỏ qua luôn phép kiểm staleness**
+  Người dùng thấy gì: Vì báo cáo bàn giao còn thiếu vài mục, hệ thống tự động bỏ qua luôn bước dò xem mã có bị đổi sau khi ký hay không, nên rủi ro tương tự finding trước không được chặn lại.
+  file: `_acceptance/mo-hoa-b01/evidence-report.md`
+  severity: high
+  Đề xuất: đã xử ở lượt ghi này — điền `human_signoff`, Known limits và Ngoài hợp đồng vào evidence-report
+
+- **[VÒNG 7] Dòng sổ cái roadmap ghi «bộ răng 28 ca» / «24/28 ca» trong khi CASES hiện có 32 ca**
+  Người dùng thấy gì: Một dòng ghi chú trong lộ trình dự án nêu sai số lượng phép kiểm hiện có; không ảnh hưởng gì tới tính năng đang bàn giao, chỉ là tài liệu nội bộ bị lệch số.
+  file: `docs/roadmap.md`
+  severity: low
+  Đề xuất: đã sửa ở lượt ghi này — sổ cái ghi 32 ca (28 lúc ký, 4 thêm ở vòng 5–6)
+
+- **[VÒNG 7] Env override FORK_IDENTITY_CONF/FORK_IDENTITY_ALLOW trỏ file không tồn tại → âm thầm rơi về mặc định và PASS**
+  Người dùng thấy gì: Nếu ai đó gõ sai đường dẫn tới danh sách miễn trừ khi chạy công cụ kiểm định danh, công cụ sẽ âm thầm dùng danh sách mặc định thay vì báo lỗi rõ ràng — hạn chế này đã được người phụ trách biết và chấp nhận khi ký.
+  file: `scripts/fork/check-fork-identity.sh`
+  severity: medium
+  Đề xuất: trùng Known limit #2 đã ký — known-limits
+
+- **[VÒNG 7] Răng gọi `fixture` lặp trong vòng for mà không dọn probe cũ — rò 19 thư mục tạm mỗi lần chạy**
+  Người dùng thấy gì: Công cụ kiểm tra nội bộ để sót vài thư mục tạm sau mỗi lần chạy; không ảnh hưởng tới người dùng cuối, chỉ tích rác nhẹ trên máy chạy kiểm tra và người phụ trách đã chấp nhận không sửa.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: trùng Known limit #3 đã ký — wont-fix
+
+- **[VÒNG 7] `if expect_red …; then …; fi || return 1` — vế `|| return 1` chết, vòng class-matrix không dừng ở mẫu hỏng đầu tiên**
+  Người dùng thấy gì: Một đoạn logic 'dừng sớm' bên trong công cụ kiểm tra nội bộ không hoạt động như dự định, nhưng kết luận đúng/sai cuối cùng của phép kiểm không đổi — không ai bên ngoài nhận thấy khác biệt.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: wont-fix — phán quyết không sai, chỉ mất ý định dừng sớm
+
+- **[VÒNG 7] Hình 3/5 — case_clean assert đếm N=3 + một tên, trong khi E6 hứa BA dòng miễn trừ tối thiểu CÓ TÊN và vế đỏ «miễn trừ tối thiểu vắng» không có ca răng**
+  Người dùng thấy gì: Công cụ kiểm định danh mới đếm đủ số dòng miễn trừ chứ chưa xác nhận đúng tên hai dòng còn lại, và chưa có phép kiểm khi danh sách miễn trừ bị thiếu — người phụ trách đã biết và để treo việc này lúc ký.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: trùng hình 5 treo — known-limits
+
+- **[VÒNG 7] Hình 5 — E7/E8 tuyên chiều đỏ của phép đếm và của needle mà không lệnh nào trong executor chạy**
+  Người dùng thấy gì: Hai phép đo mô tả trong tài liệu kiểm tra thực ra không được máy chạy thật, người thẩm định chỉ đọc mã nguồn để kết luận đạt — hạn chế này đã được ghi nhận và chấp nhận trước khi ký.
+  file: `_acceptance/mo-hoa-b01/evals.yaml`
+  severity: medium
+  Đề xuất: trùng Known limit #5 đã ký — known-limits
+
+- **[VÒNG 7] Hình 5 — AC-5 hứa MỖI README ba điều kiện badge, răng chỉ có điểm-case cho 2 trong 3 điều kiện**
+  Người dùng thấy gì: Bộ kiểm tra tự động chưa thử đủ mọi kiểu lỗi huy hiệu có thể xảy ra ở từng bản ngôn ngữ của trang giới thiệu, nên một số kiểu lỗi huy hiệu trong tương lai có thể lọt qua mà không bị phát hiện.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: known-limits — răng badge phủ 2/3 điều kiện mỗi README
+
+- **[VÒNG 7] Hình 6 — răng ghi cứng `phanlemanh/OneFlow` dù đã suy REPO_RAW từ conf**
+  Người dùng thấy gì: Vài phép kiểm tra nội bộ vẫn giả định đúng kho gốc của tác giả thay vì đọc từ cấu hình; nếu sau này đổi sang kho khác, các phép kiểm này có thể báo lỗi sai chỗ — hạn chế đã được chấp nhận không sửa.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: trùng Known limit #7 đã ký — wont-fix
+
+- **[VÒNG 7] Hình 3 — «docker compose up -d --build» là đường chạy được, guard đo bằng grep -F toàn file**
+  Người dùng thấy gì: Cách công cụ xác minh lệnh cài đặt Docker trong tài liệu hướng dẫn có thể bị đánh lừa nếu sau này ai đó vô tình viết một câu phủ định gần đó trong README — rủi ro cho việc bảo trì tài liệu sau này, không phải lỗi ngay lúc bàn giao.
+  file: `scripts/fork/check-fork-identity.sh`
+  severity: low
+  Đề xuất: known-limits — guard grep toàn file, không neo vào khối lệnh
+
+- **[VÒNG 7] Hình 3 — «đúng một hàng trong bảng nợ» đếm bằng grep chuỗi trên toàn opportunity.md, không giới hạn vào bảng**
+  Người dùng thấy gì: Công cụ đếm hàng trong bảng ghi nợ kỹ thuật quét toàn bộ tài liệu thay vì chỉ đúng bảng đó, nên về sau có thể không phát hiện khi một dòng bị thiếu hoặc bị lặp ở đúng nơi cần kiểm tra.
+  file: `scripts/fork/check-prototype-lane.sh`
+  severity: low
+  Đề xuất: known-limits — đếm trên toàn opportunity.md, không giới hạn trong bảng
+
+- **[VÒNG 8] SECURITY.md declares private vulnerability reporting as the ONLY route, but it is disabled on the repo**
+  Người dùng thấy gì: Trang hướng dẫn báo lỗi bảo mật hiện chưa có kênh nào thật sự nhận được báo cáo — người phát hiện lỗ hổng sẽ không biết gửi cho ai.
+  file: `SECURITY.md`
+  severity: high
+  Đề xuất: CÀI ĐẶT KHO, việc của owner trước merge: bật Private vulnerability reporting (Settings → Security), không cần commit — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Every community link now points to GitHub Discussions, which is not enabled (404)**
+  Người dùng thấy gì: Bấm vào liên kết Hỏi đáp cộng đồng có thể dẫn tới một trang không tồn tại vì tính năng Thảo luận chưa được bật cho kho này.
+  file: `.github/ISSUE_TEMPLATE/config.yml`
+  severity: high
+  Đề xuất: CÀI ĐẶT KHO, việc của owner trước merge: bật Discussions (Settings → Features), không cần commit; trùng Known limit #1 — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] New ledger row is separated from the roadmap-ledger table by a blank line — it renders outside the table**
+  Người dùng thấy gì: Dòng mới thêm vào bảng lộ trình có thể hiển thị lệch định dạng, khiến người đọc tài liệu lộ trình khó nhận ra hàng mới.
+  file: `docs/roadmap.md`
+  severity: medium
+  Đề xuất: đã sửa ở lượt ghi này — xoá dòng trống trước hàng sổ cái — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] CODE_OF_CONDUCT.md still routes enforcement reports to upstream's business@tongflow.com**
+  Người dùng thấy gì: Nếu có người muốn báo cáo vi phạm quy tắc ứng xử trong cộng đồng, email liên hệ ghi trong tài liệu vẫn trỏ về tổ chức gốc thay vì đội ngũ hiện tại, nên báo cáo có thể không tới đúng người xử lý.
+  file: `CODE_OF_CONDUCT.md`
+  severity: medium
+  Đề xuất: nợ có tên — CODE_OF_CONDUCT.md không thuộc diện miễn T1 nên sửa là evidence ôi; sửa ở lượt kế cùng việc đưa file vào FILES của guard — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Teeth suite leaks a scratch dir per extra fixture() call (measured 8 dirs / class-matrix, ~22 per full run)**
+  Người dùng thấy gì: Mỗi lần chạy bộ tự kiểm tra nội bộ để sót lại vài tệp tạm không dọn dẹp trên máy — không ảnh hưởng gì tới người dùng sản phẩm.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: wont-fix — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Ledger prose says the teeth suite has 28 cases; the script declares and runs 32**
+  Người dùng thấy gì: Tài liệu lộ trình ghi nhầm số lượng ca kiểm tra nội bộ (28 thay vì 32) — chỉ là sai sót mô tả, không ảnh hưởng vận hành.
+  file: `docs/roadmap.md`
+  severity: low
+  Đề xuất: đã sửa ở lượt ghi này — sổ cái ghi 32 ca — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 5 — class-matrix quét đủ 8 mẫu nhưng chỉ trên MỘT file; chiều FILES của lớp không có ma trận, gỡ file khỏi FILES răng vẫn 32/32**
+  Người dùng thấy gì: Bộ tự kiểm tra nội bộ có thể không phát hiện được nếu định danh cũ của bên gốc lọt vào một vài tệp cấu hình cụ thể, dù nó vẫn bắt tốt ở phần lớn các tệp khác.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: high
+  Đề xuất: known-limits — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 2 — fixture tag-trigger-back viết tay đúng khuôn awk/grep của guard; trigger tags dạng flow-style hợp lệ vẫn xanh**
+  Người dùng thấy gì: Bộ tự kiểm tra có thể không phát hiện được nếu ai đó vô tình bật lại chế độ phát hành theo tag phiên bản bằng một cách viết cấu hình khác kiểu thông thường.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: known-limits — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 4 — E8 expected ghim token `RED của check-fork-identity.sh: ảnh container` mà không script nào in; vế đỏ của needle mới chỉ còn mã thoát + dòng tổng**
+  Người dùng thấy gì: Một số phép kiểm nội bộ được xác nhận bằng cách đọc mã thay vì thật sự chạy thử, nên có thể bỏ sót lỗi thực tế trong tương lai.
+  file: `_acceptance/mo-hoa-b01/evals.yaml`
+  severity: medium
+  Đề xuất: known-limits — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 4 — nhánh đỏ `ghi công upstream mất khỏi NOTICE.md` không ca răng nào ghim; notice-attribution-gone kích cả hai FAIL nhưng chỉ ghim bánh cóc**
+  Người dùng thấy gì: Khi phần ghi công tác giả gốc trong tệp NOTICE bị xoá, bộ tự kiểm tra vẫn báo lỗi đúng, nhưng thông điệp lỗi hiển thị chưa khớp sát với đúng chỗ hỏng, gây khó dò lỗi sau này.
+  file: `scripts/fork/check-fork-identity.sh`
+  severity: low
+  Đề xuất: known-limits — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 1 — check-suite-key.sh khẳng định «executor GỌI script» bằng `script not in str(cmd)`; đo chỉ dẫn, không chạy (đã ghi review-findings, wont-fix)**
+  Người dùng thấy gì: Bộ kiểm tra xác nhận một bước có gọi đúng kịch bản bằng cách so khớp văn bản đơn giản, nên vẫn có thể bị đánh lừa bởi một dòng lệnh viết khéo.
+  file: `scripts/fork/check-suite-key.sh`
+  severity: medium
+  Đề xuất: wont-fix — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 5 — case_clean đếm N=3 + ghim MỘT tên trong khi E6 hứa BA dòng miễn trừ có tên «không phải một con số N» (đã ghi review-findings, chưa phân loại)**
+  Người dùng thấy gì: Có ba dòng miễn trừ liên quan tới bản phát hành desktop mà bộ tự kiểm tra hiện chưa xác minh đầy đủ từng dòng — người ký đã ghi nhận đây là việc còn treo, cần được quyết định riêng ở một phiên sau.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: new-contract — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
+- **[VÒNG 8] Hình 6 — răng ghim cứng `phanlemanh/OneFlow` ở ba ca dù đã đọc REPO_RAW từ conf (đã ghi review-findings, wont-fix)**
+  Người dùng thấy gì: Vài ca kiểm tra nội bộ vẫn ghi cứng tên kho của tác giả thay vì tự suy ra từ cấu hình — chỉ gây ảnh hưởng nếu có người khác fork lại kho này để dùng dưới tên khác.
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: low
+  Đề xuất: wont-fix — theo luật chặn xoáy (nợ có tên, không vòng 9)
+
 ## Chưa phân loại (triage-failed)
 
 phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ.

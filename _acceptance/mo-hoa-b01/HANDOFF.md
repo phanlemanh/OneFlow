@@ -98,3 +98,14 @@ Chạy `dryRun: true` trước, rẻ và bắt lỗi tham số mà không tốn 
   trừ T1 mà không mang hồ sơ. Cái cũ nhất treo từ 01/09. Cần owner chọn lối.
 - **Cây `oneflow-roadmap`** không còn việc gì theo git, nhưng trí nhớ ghi thí điểm dây chuyền
   của nó đang chạy — hỏi trước khi gỡ.
+
+## Cập nhật cuối 07/09 (phiên tài khoản hai)
+
+Đã làm: volume + service compose giữ tên cũ (`6cb2253`, `b8ca06a`); AC-6 miễn trừ ghim một
+mention (`40dc80c`); AC-1/6/11 (`0d3c124`); bộ răng 32 ca. Vòng 4–8: xem evidence-report.md.
+Người ký duyệt luật chặn xoáy; contract có mục Amendment với 22 nợ có tên; evidence điền
+chữ ký và hai mục rỗng. Vòng 8 verdict `PASS`.
+
+Còn lại cho owner: PR #100 vẫn là nháp — chuyển sang sẵn sàng và merge là quyết định của owner.
+Nợ có tên nằm ở contract mục Amendment; hai lỗi bộ tổng hợp kit (run-log không tự ghi, Known
+limits/Ngoài hợp đồng rỗng) cần sửa ở kit, không ở hồ sơ.

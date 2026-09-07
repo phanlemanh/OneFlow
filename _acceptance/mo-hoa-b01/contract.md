@@ -114,3 +114,37 @@ Known limits và hình 5 treo ở trên giữ nguyên định đoạt. Lúc ký 
 là REJECT của vòng 3 (toàn chuyện sổ sách sau chữ ký, đã sửa tại `54568bf`); vòng 4 chạy
 sau chữ ký này để evidence ghim đúng HEAD cuối — lưới trước merge đòi chuỗi PASS của máy.
 
+## Amendment sau luật chặn xoáy — 07/09/2026
+
+Người ký duyệt trước vòng 7: sau vòng 7, finding TRONG hợp đồng còn lại thành nợ có tên ở đây và
+ký; finding NGOÀI hợp đồng thành known-limits có tên; không vòng thêm để vá. Lý do: vòng 4, 5, 6
+mỗi vòng lộ thêm lỗi mới của chính phép đo (vòng xoáy guard-của-guard), lối ra là thu phạm vi với
+nợ có tên. Vòng 7 không còn finding trong hợp đồng (ba lỗi AC-1/AC-6/AC-11 của vòng 6 đã sửa tại
+`0d3c124`); vòng 8 là vòng cực gọn gỡ BLOCKED hạ tầng (agent chết, đỏ dưới tải), mang theo 9 ô
+xanh của vòng 7. Bảy mục Known limits ở trên giữ nguyên. Nợ có tên thêm:
+
+- [vòng 4] guard định danh fork đỏ trên mọi fork của contributor (so conf với remote origin) — known-limits
+- [vòng 4] `check-prototype-lane.sh` ưu tiên `main` cục bộ trước `origin/main`, main cũ cho FAIL sai — known-limits
+- [vòng 5] hai dòng decisions.jsonl mang giờ địa phương gắn hậu tố Z — sử liệu, không sửa lùi
+- [vòng 5] hình 3: quan hệ conf → tên ảnh chưa có ca răng đổi conf — known-limits
+- [vòng 5] hình 3: tip của dòng Diff trong opportunity.md là hằng, guard không ràng với HEAD — known-limits
+- [vòng 6] năm dòng miễn trừ `app.tongflow.com` không ghim ngữ cảnh — known-limits
+- [vòng 7] hình 5 treo: ba dòng miễn trừ tối thiểu chỉ đếm N=3 và ghim một tên; vế đỏ «miễn trừ tối thiểu vắng» chưa có ca răng — known-limits
+- [vòng 7] `if expect_red …; fi || return 1` — vế `|| return 1` chết, vòng class-matrix không dừng sớm — wont-fix
+- [vòng 7] AC-5: răng badge phủ 2/3 điều kiện mỗi README — known-limits
+- [vòng 7] `docker compose up -d --build` đo bằng grep toàn file, không neo vào khối lệnh — known-limits
+- [vòng 7] «đúng một hàng» đếm bằng grep trên toàn opportunity.md, không giới hạn trong bảng — known-limits
+- [vòng 8] SECURITY.md declares private vulnerability reporting as the ONLY route, but it is disabled on the repo — CÀI ĐẶT KHO, việc của owner trước merge: bật Private vulnerability reporting (Settings → Security), không cần commit
+- [vòng 8] Every community link now points to GitHub Discussions, which is not enabled (404) — CÀI ĐẶT KHO, việc của owner trước merge: bật Discussions (Settings → Features), không cần commit; trùng Known limit #1
+- [vòng 8] CODE_OF_CONDUCT.md still routes enforcement reports to upstream's business@tongflow.com — nợ có tên — CODE_OF_CONDUCT.md không thuộc diện miễn T1 nên sửa là evidence ôi; sửa ở lượt kế cùng việc đưa file vào FILES của guard
+- [vòng 8] Teeth suite leaks a scratch dir per extra fixture() call (measured 8 dirs / class-matrix, ~22 per full run) — wont-fix
+- [vòng 8] Hình 5 — class-matrix quét đủ 8 mẫu nhưng chỉ trên MỘT file; chiều FILES của lớp không có ma trận, gỡ file khỏi FILES răng vẫn 32/32 — known-limits
+- [vòng 8] Hình 2 — fixture tag-trigger-back viết tay đúng khuôn awk/grep của guard; trigger tags dạng flow-style hợp lệ vẫn xanh — known-limits
+- [vòng 8] Hình 4 — E8 expected ghim token `RED của check-fork-identity.sh: ảnh container` mà không script nào in; vế đỏ của needle mới chỉ còn mã thoát + dòng tổng — known-limits
+- [vòng 8] Hình 4 — nhánh đỏ `ghi công upstream mất khỏi NOTICE.md` không ca răng nào ghim; notice-attribution-gone kích cả hai FAIL nhưng chỉ ghim bánh cóc — known-limits
+- [vòng 8] Hình 1 — check-suite-key.sh khẳng định «executor GỌI script» bằng `script not in str(cmd)`; đo chỉ dẫn, không chạy (đã ghi review-findings, wont-fix) — wont-fix
+- [vòng 8] Hình 5 — case_clean đếm N=3 + ghim MỘT tên trong khi E6 hứa BA dòng miễn trừ có tên «không phải một con số N» (đã ghi review-findings, chưa phân loại) — new-contract
+- [vòng 8] Hình 6 — răng ghim cứng `phanlemanh/OneFlow` ở ba ca dù đã đọc REPO_RAW từ conf (đã ghi review-findings, wont-fix) — wont-fix
+
+Chữ ký «ký» (mục Ký lại ở trên) áp cho evidence vòng 8 theo đúng luật này; `human_signoff` trong
+evidence-report ghi `Phan Le Manh 2026-09-07`.
