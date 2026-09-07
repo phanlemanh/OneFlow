@@ -1,0 +1,44 @@
+{
+ "feature_plain": "Ai tự host OneFlow theo README nhận về đúng bản của fork (ảnh Docker, link kho, badge, kênh hỗ trợ), gắn tag chỉ đẩy ảnh Docker chứ không cắt bộ cài desktop mang thương hiệu upstream, và một hàng rào trong CI giữ cho định danh không trôi ngược.",
+ "decisions": [],
+ "scope_plain": "Chưa cắt tag để ảnh Docker của fork tồn tại trên GHCR (owner quyết); chưa đổi tên bộ cài desktop và URL upstream trong workflow desktop (sẽ thay ở S5); chưa đụng bản sao luật URL trong engine (T3); tên plugin legacy và README của desktop để nguyên.",
+ "analyst_plain": "",
+ "decisions_plain": [
+  {
+   "id": "d-20260905T082000Z-mhb1",
+   "p": "Đã chọn hạ cánh nguyên bốn commit của nhánh cũ sau khi gộp bản chung — đổi lại phải trả ba khoản nợ nhánh bỏ sót (badge ZH/JA, lệnh clone, ảnh Docker chưa có) ngay trong việc này."
+  },
+  {
+   "id": "d-20260905T083000Z-mhb2",
+   "p": "KHÔNG làm đường đo riêng — ngưỡng khai không đo được; đường cài đặt đo tại phiên nghiệm thu của Skill #1 (B10)."
+  },
+  {
+   "id": "d-20260905T083500Z-mhb3",
+   "p": "KHÔNG làm đặc tả UX — việc này không có màn hình nào."
+  },
+  {
+   "id": "d-20260905T084000Z-mhb4",
+   "p": "KHÔNG cắt tag để có ảnh Docker — tài liệu nói thật rằng ảnh chỉ có sau bản phát hành đầu tiên, và compose dựng tại chỗ được ngay; đổi lại lệnh docker run một dòng còn 404 tới khi owner cắt tag."
+  },
+  {
+   "id": "d-20260905T084500Z-mhb5",
+   "p": "Giữ tên bộ cài và URL upstream trong workflow desktop (miễn trừ có lý do) — workflow này sẽ bị thay ở S5, không đổi tên."
+  },
+  {
+   "id": "d-20260905T085000Z-mhb6",
+   "p": "Đã chọn hàng rào quét cả LỚP định danh upstream với bản miễn trừ khai trước và bánh cóc hai chiều — đổi lại khi tài liệu đổi cách ghi công thì phải sửa bản miễn trừ (bánh cóc sẽ báo)."
+  },
+  {
+   "id": "d-20260905T085500Z-mhb7",
+   "p": "KHÔNG dùng ô phán đoán của hội đồng — bài học vòng trước: ô ấy không bao giờ đạt ở cổng bằng chứng; đổi lại «README đọc như cửa chính của fork» do owner tự đọc khi ký."
+  },
+  {
+   "id": "d-20260905T074452Z-3644",
+   "p": "Máy chốt bộ tiêu chí ở trạng thái V (cửa veto mở, không tốn một lượt duyệt) — đổi lại owner thấy phạm vi lần đầu ở cổng này."
+  },
+  {
+   "id": "d-20260905T082536Z-7530",
+   "p": "Vòng sửa 1 đã sửa ba lỗi trong hợp đồng: hàng rào làn prototype thôi đòi nhánh `main` cục bộ (checkout PR trên CI không có), hai ca răng thôi ghim thông điệp mơ hồ — đổi lại bảy phát hiện ngoài hợp đồng để nguyên chờ owner."
+  }
+ ]
+}

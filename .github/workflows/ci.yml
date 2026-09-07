@@ -178,6 +178,16 @@ jobs:
       - name: Live-docs guard still has teeth
         run: bash scripts/plugins/check-live-docs-manifest-teeth.sh
 
+      # Fork identity (mo-hoa-b01): the install path in the READMEs and compose
+      # must keep pointing at THIS fork's image and repo; upstream identity is
+      # allowed only where scripts/fork/fork-identity-allow.txt names it. Two
+      # steps so the teeth mode of check-gate-guards-job.sh can address the
+      # guard on its own.
+      - name: Fork identity stays the fork's
+        run: bash scripts/fork/check-fork-identity.sh
+      - name: Fork identity guard still has teeth
+        run: bash scripts/fork/check-fork-identity-teeth.sh
+
       # `vitest list` needs node_modules, and this job had none — hence the two
       # steps above it. They go HERE rather than on `unit-tests`, which already
       # has the dependencies, because check-gate-guards-job.sh deep-equals the

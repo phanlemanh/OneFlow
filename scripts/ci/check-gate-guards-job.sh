@@ -48,6 +48,8 @@ GUARD_NEEDLES=(
     "check-live-docs-manifest-synced.sh claude"
     "check-live-docs-manifest-synced.sh orphans"
     check-live-docs-manifest-teeth.sh
+    check-fork-identity.sh
+    check-fork-identity-teeth.sh
 )
 
 # Needles whose GREEN half runs (on the real repo, which has git history) but whose
@@ -59,6 +61,7 @@ TEETH_SKIP=(
     "check-live-docs-manifest-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
     "check-plan-freeze-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
     "check-plan-docs-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
+    "check-fork-identity-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
 )
 teeth_skipped() {
     local n="$1" e
@@ -241,6 +244,9 @@ teeth)
         "check-eval-filters.mjs|KHÔNG ca thử nào khớp"
         "check-live-docs-manifest-synced.sh readme|does not list"
         "check-live-docs-manifest-synced.sh claude|no origin entry for"
+        # The healthy log prints "OK: ảnh container của compose là …", so the token
+        # must be the FAIL phrasing only — "ảnh container" alone matches green.
+        "check-fork-identity.sh|ảnh container — compose có image:"
     )
     red_token_for() {
         local e
@@ -303,6 +309,13 @@ teeth)
     cp docs/strategy/vision.md "$probe/t/docs/strategy/"
     cp docs/README_ZH.md docs/README_JA.md "$probe/t/docs/"
     cp config/official-plugins.json "$probe/t/config/"
+    # check-fork-identity.sh reads these (mo-hoa-b01); without them its red half
+    # would fail on a missing file, not on the drift the perturbation plants.
+    cp docker-compose.yml CONTRIBUTING.md SECURITY.md NOTICE.md "$probe/t/"
+    mkdir -p "$probe/t/.github/ISSUE_TEMPLATE" "$probe/t/.github/workflows" "$probe/t/sdk"
+    cp .github/ISSUE_TEMPLATE/*.yml "$probe/t/.github/ISSUE_TEMPLATE/"
+    cp .github/workflows/desktop-release.yml "$probe/t/.github/workflows/"
+    cp sdk/pyproject.toml "$probe/t/sdk/"
     # node_modules so the eval-filter guard fails on a BROKEN FILTER rather than
     # on a missing tool. Without it that guard went "red" for the wrong reason
     # and this mode credited a red that proved nothing — the vague-red trap the
@@ -361,6 +374,15 @@ stray = root / "_acceptance" / "teeth-probe-freeze"
 stray.mkdir(parents=True, exist_ok=True)
 (stray / "contract.md").write_text(
     "---\nschema_version: 1\nslug: teeth-probe-freeze\nstatus: draft\n---\n", encoding="utf-8")
+# Point compose back at upstream's image -> check-fork-identity.sh must go red on
+# ITS OWN check (mo-hoa-b01). The fork image is derived from the conf the guard
+# itself reads, not pinned here.
+conf = (root / "scripts" / "fork" / "fork-identity.conf").read_text(encoding="utf-8")
+repo_lc = next(l.split("=", 1)[1].strip() for l in conf.splitlines() if l.startswith("repo=")).lower()
+dc = root / "docker-compose.yml"
+t5 = dc.read_text(encoding="utf-8")
+assert f"ghcr.io/{repo_lc}:latest" in t5, "fixture anchor moved: compose image"
+dc.write_text(t5.replace(f"ghcr.io/{repo_lc}:latest", "ghcr.io/tong-io/tongflow:latest", 1), encoding="utf-8")
 PERTURB
 
     # First line that reads like a verdict, for the log above. A red whose reason
