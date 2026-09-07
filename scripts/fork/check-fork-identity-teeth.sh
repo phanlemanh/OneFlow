@@ -108,14 +108,14 @@ expect_red() { # <case> <token>
 }
 
 case_clean() {
-    fixture; green_control clean
+    fixture; green_control clean || return 1
     local n
     n="$(grep -c '^miễn trừ tối thiểu:' "$probe/.out" || true)"
     [ "$n" -eq 3 ] || { echo "FAIL CASE clean: cần 3 dòng miễn trừ tối thiểu có tên, thấy $n" >&2; return 1; }
     grep -F 'miễn trừ tối thiểu: NOTICE.md|' "$probe/.out" >/dev/null || { echo "FAIL CASE clean: thiếu dòng miễn trừ NOTICE" >&2; return 1; }
 }
 case_image-upstream() {
-    fixture; green_control image-upstream
+    fixture; green_control image-upstream || return 1
     replace_in "$probe/docker-compose.yml" "image: $IMAGE:latest" "image: ghcr.io/tong-io/tongflow:latest"
     # The FAIL phrasing only — "ảnh container" alone also appears in the green OK line.
     expect_red image-upstream "ảnh container — compose có image: ghcr.io/tong-io/tongflow:latest"
@@ -138,66 +138,66 @@ case_conf-remote-lech() {
 case_readme-image-missing() {
     local r
     for r in "${READMES[@]}"; do
-        fixture; green_control readme-image-missing
+        fixture; green_control readme-image-missing || return 1
         replace_in "$probe/$r" "$IMAGE:latest" "$IMAGE:v0"
-        expect_red readme-image-missing "$r thiếu chuỗi ảnh"
+        expect_red readme-image-missing "$r thiếu chuỗi ảnh" || return 1
     done
 }
 case_compose-no-build() {
-    fixture; green_control compose-no-build
+    fixture; green_control compose-no-build || return 1
     replace_in "$probe/docker-compose.yml" "    build: ." "    # build: ."
     expect_red compose-no-build "compose thiếu build:"
 }
 case_readme-no-build-cmd() {
     local r
     for r in "${READMES[@]}"; do
-        fixture; green_control readme-no-build-cmd
+        fixture; green_control readme-no-build-cmd || return 1
         delete_line_with "$probe/$r" "docker compose up -d --build"
-        expect_red readme-no-build-cmd "$r thiếu docker compose up -d --build"
+        expect_red readme-no-build-cmd "$r thiếu docker compose up -d --build" || return 1
     done
 }
 case_tag-trigger-back() {
-    fixture; green_control tag-trigger-back
+    fixture; green_control tag-trigger-back || return 1
     insert_after_line "$probe/.github/workflows/desktop-release.yml" "on:" $'    push:\n        tags:\n            - "v*"'
     expect_red tag-trigger-back "desktop-release còn trigger tags"
 }
 case_prepare-if-gone() {
-    fixture; green_control prepare-if-gone
+    fixture; green_control prepare-if-gone || return 1
     delete_line_with "$probe/.github/workflows/desktop-release.yml" "if: startsWith(github.ref, 'refs/tags/')"
     expect_red prepare-if-gone "desktop-release prepare thiếu if tags"
 }
 case_disarmed-header-gone() {
-    fixture; green_control disarmed-header-gone
+    fixture; green_control disarmed-header-gone || return 1
     replace_in "$probe/.github/workflows/desktop-release.yml" "DISARMED" "Disarmed"
     expect_red disarmed-header-gone "desktop-release thiếu header DISARMED"
 }
 case_claude-not-released-gone() {
-    fixture; green_control claude-not-released-gone
+    fixture; green_control claude-not-released-gone || return 1
     replace_in "$probe/CLAUDE.md" "Not currently released" "Not currently shipped"
     expect_red claude-not-released-gone "Release checklist thiếu Not currently released"
 }
 case_claude-builds-line-back() {
-    fixture; green_control claude-builds-line-back
+    fixture; green_control claude-builds-line-back || return 1
     append_line "$probe/CLAUDE.md" '- [ ] Tag the release; desktop-release.yml builds `OneFlow-mac-universal.dmg` into a draft GitHub Release.' >/dev/null
     expect_red claude-builds-line-back "Release checklist nói ngược hành vi"
 }
 case_discord-back() {
-    fixture; green_control discord-back
+    fixture; green_control discord-back || return 1
     local n; n="$(append_line "$probe/CONTRIBUTING.md" 'Chat with us on https://discord.gg/K7V8az94Zf')"
     expect_red discord-back "định danh upstream ngoài miễn trừ — CONTRIBUTING.md:$n"
 }
 case_email-back() {
-    fixture; green_control email-back
+    fixture; green_control email-back || return 1
     local n; n="$(append_line "$probe/SECURITY.md" 'Or email security@tongflow.com')"
     expect_red email-back "định danh upstream ngoài miễn trừ — SECURITY.md:$n"
 }
 case_funding-back() {
-    fixture; green_control funding-back
+    fixture; green_control funding-back || return 1
     printf 'custom: ["mailto:business@example.invalid"]\n' >"$probe/.github/FUNDING.yml"
     expect_red funding-back "FUNDING.yml còn đó"
 }
 case_clone-upstream() {
-    fixture; green_control clone-upstream
+    fixture; green_control clone-upstream || return 1
     replace_in "$probe/CONTRIBUTING.md" "git clone https://github.com/phanlemanh/OneFlow.git" "git clone https://github.com/tong-io/tongflow.git"
     local n; n="$(grep -n 'git clone https://github.com/tong-io/tongflow.git' "$probe/CONTRIBUTING.md" | head -1 | cut -d: -f1)"
     expect_red clone-upstream "định danh upstream ngoài miễn trừ — CONTRIBUTING.md:$n"
@@ -205,39 +205,39 @@ case_clone-upstream() {
 case_issue-template-not-fork() {
     local t
     for t in "${TEMPLATES[@]}"; do
-        fixture; green_control issue-template-not-fork
+        fixture; green_control issue-template-not-fork || return 1
         python3 - "$probe/$t" <<'PY'
 import sys,re; p=sys.argv[1]; s=open(p,encoding='utf-8').read()
 t=re.sub(r'github\.com/phanlemanh/OneFlow','example.invalid/elsewhere',s,flags=re.I); assert t!=s; open(p,'w',encoding='utf-8').write(t)
 PY
-        expect_red issue-template-not-fork "$t không trỏ fork"
+        expect_red issue-template-not-fork "$t không trỏ fork" || return 1
     done
 }
 case_badge-upstream() {
-    fixture; green_control badge-upstream
+    fixture; green_control badge-upstream || return 1
     insert_after "$probe/docs/README_ZH.md" 'alt="License"' '    <a href="https://github.com/example/x/stargazers"><img src="https://img.shields.io/github/stars/example/x?style=flat" alt="GitHub Stars" /></a>'
     expect_red badge-upstream "badge stars/release còn ở docs/README_ZH.md"
 }
 case_release-badge-back() {
-    fixture; green_control release-badge-back
+    fixture; green_control release-badge-back || return 1
     insert_after "$probe/README.md" 'alt="License"' '    <a href="https://github.com/phanlemanh/OneFlow/releases"><img src="https://img.shields.io/github/v/release/phanlemanh/OneFlow?logo=github" alt="Latest Release" /></a>'
     expect_red release-badge-back "badge stars/release còn ở README.md"
 }
 case_ci-badge-gone() {
     local r
     for r in "${READMES[@]}"; do
-        fixture; green_control ci-badge-gone
+        fixture; green_control ci-badge-gone || return 1
         delete_line_with "$probe/$r" "ci.yml/badge.svg"
-        expect_red ci-badge-gone "$r thiếu badge CI của fork"
+        expect_red ci-badge-gone "$r thiếu badge CI của fork" || return 1
     done
 }
 case_pypi-badge-wrong-dist() {
-    fixture; green_control pypi-badge-wrong-dist
+    fixture; green_control pypi-badge-wrong-dist || return 1
     replace_in "$probe/README.md" "shields.io/pypi/v/$DIST" "shields.io/pypi/v/some-other-dist"
     expect_red pypi-badge-wrong-dist "badge PyPI không trỏ $DIST ở README.md"
 }
 case_hit-outside() {
-    fixture; green_control hit-outside
+    fixture; green_control hit-outside || return 1
     local n; n="$(append_line "$probe/SECURITY.md" 'See https://github.com/tong-io/tongflow/issues for history.')"
     expect_red hit-outside "định danh upstream ngoài miễn trừ — SECURITY.md:$n"
 }
@@ -255,19 +255,19 @@ case_class-matrix() {
         'https://img.shields.io/pypi/v/tongflow'
     )
     local expected=8 hit=0 s n
-    fixture; green_control class-matrix
+    fixture; green_control class-matrix || return 1
     local declared; declared="$(sed -n 's/.*mẫu: \([0-9]*\).*/\1/p' "$probe/.out" | head -1)"
     [ "$declared" = "$expected" ] || { echo "FAIL CASE class-matrix: guard khai $declared mẫu, răng ghim $expected" >&2; return 1; }
     for s in "${samples[@]}"; do
         fixture
         n="$(append_line "$probe/SECURITY.md" "matrix probe: $s")"
-        if expect_red class-matrix "định danh upstream ngoài miễn trừ — SECURITY.md:$n"; then hit=$((hit + 1)); fi
+        if expect_red class-matrix "định danh upstream ngoài miễn trừ — SECURITY.md:$n"; then hit=$((hit + 1)); fi || return 1
     done
     echo "class-matrix: $hit/$expected mẫu"
     [ "$hit" -eq "$expected" ]
 }
 case_stale-exemption() {
-    fixture; green_control stale-exemption
+    fixture; green_control stale-exemption || return 1
     append_line "$probe/scripts/fork/fork-identity-allow.txt" 'README.md|business@tongflow\.com|thử' >/dev/null
     set +e
     FORK_IDENTITY_ROOT="$probe" FORK_IDENTITY_ALLOW="$probe/scripts/fork/fork-identity-allow.txt" bash "$GUARD" >"$probe/.out" 2>&1
@@ -277,17 +277,17 @@ case_stale-exemption() {
     grep -F 'miễn trừ ôi — README.md|business@tongflow\.com' "$probe/.out" >/dev/null || { echo "FAIL CASE stale-exemption: token vắng" >&2; cat "$probe/.out" >&2; return 1; }
 }
 case_notice-dist-gone() {
-    fixture; green_control notice-dist-gone
+    fixture; green_control notice-dist-gone || return 1
     replace_in "$probe/NOTICE.md" "$DIST" "some-other-dist"
     expect_red notice-dist-gone "NOTICE không nêu $DIST"
 }
 case_notice-unchanged-back() {
-    fixture; green_control notice-unchanged-back
+    fixture; green_control notice-unchanged-back || return 1
     append_line "$probe/NOTICE.md" 'The SDK is consumed unchanged from upstream.' >/dev/null
     expect_red notice-unchanged-back "NOTICE còn consumed unchanged from upstream"
 }
 case_notice-attribution-gone() {
-    fixture; green_control notice-attribution-gone
+    fixture; green_control notice-attribution-gone || return 1
     replace_in "$probe/NOTICE.md" "https://github.com/tong-io/tongflow" "https://example.invalid/upstream"
     expect_red notice-attribution-gone 'miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]'
 }
