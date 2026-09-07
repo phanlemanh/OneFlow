@@ -17,6 +17,12 @@ Detail: run_one invokes each case as `if "case_$name"; then` (line 315). In bash
 
 Rationale: AC-7 đòi mọi ca của check-fork-identity-teeth.sh thật sự xanh và mỗi ca đỏ phải ghim đúng thông điệp của đúng phép kiểm nó phá; ở đây phần lớn ca báo PASS dù đối chứng dương (fixture ban đầu) đã hỏng, tức PASS giả không phản ánh đúng phép kiểm.
 
+- **[VÒNG 5 — TRONG HỢP ĐỒNG AC-6 — ĐÃ SỬA 07/09 `40dc80c`] Class scan exempts a whole LINE, so upstream links smuggled onto an exempted line pass silently**
+  Người dùng thấy gì: —
+  file: `scripts/fork/check-fork-identity.sh`
+  severity: high
+  Đề xuất: fix — người ký chọn sửa 07/09: cắt đoạn đã miễn trừ rồi quét lại phần còn lại của dòng; ca răng `exempt-line-smuggle`; E7 ghim 29/29. Tái hiện trước sửa: exit 0; sau sửa: FAIL đúng thông điệp, exit 1.
+
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
@@ -84,6 +90,30 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   file: `scripts/fork/check-prototype-lane.sh`
   severity: low
   Đề xuất: known-limits
+
+- **[VÒNG 5 — sổ sách] Signed dossier whose evidence report carries no human_signoff and empty Known-limits sections — pre-merge gate misclassifies it as machine-cleared and skips the staleness rule**
+  Người dùng thấy gì: Công cụ duyệt tự động có thể hiển thị hồ sơ này là 'đã xong, không cần xem lại' dù báo cáo thật sự còn thiếu chữ ký và mục ghi chú hạn chế — người xem báo cáo dễ tin nhầm mọi việc đã hoàn tất.
+  file: `_acceptance/mo-hoa-b01/evidence-report.md`
+  severity: high
+  Đề xuất: fix ở lượt ghi evidence cuối: điền `human_signoff` và hai mục Known limits / Ngoài hợp đồng vào evidence-report từ contract và file này (lỗi bộ tổng hợp kit để hai mục rỗng)
+
+- **[VÒNG 5] decisions.jsonl timestamps are non-monotonic — two entries carry local time with a Z suffix**
+  Người dùng thấy gì: Nhật ký thời điểm phê duyệt bị ghi lệch thứ tự do nhầm múi giờ, khiến ai đọc lại sau này có thể hiểu sai trình tự các lần ký, dù kết quả phê duyệt thực tế không đổi.
+  file: `_acceptance/mo-hoa-b01/decisions.jsonl`
+  severity: low
+  Đề xuất: known-limits — hai dòng là sử liệu, không sửa lùi; dòng mới dùng UTC thật
+
+- **[VÒNG 5 — máy không phân loại được] Hình 3: quan hệ conf → tên ảnh (AC-1) không được đo — token đỏ của E1 bỏ phần `$IMAGE` và không ca nào đổi conf rồi đòi ảnh suy ra đổi theo**
+  Người dùng thấy gì: —
+  file: `scripts/fork/check-fork-identity-teeth.sh`
+  severity: medium
+  Đề xuất: known-limits — cùng họ hình 3 với mục #4 đã ký; không mở thêm ca răng ở vòng chốt
+
+- **[VÒNG 5 — máy không phân loại được] Hình 3 (quan hệ chưa đo): tip của dòng `Diff: <base>...<tip>` là hằng viết tay, guard chỉ đối chiếu base, không đối chiếu tip với nhánh đang kiểm**
+  Người dùng thấy gì: —
+  file: `scripts/fork/check-prototype-lane.sh`
+  severity: low
+  Đề xuất: known-limits — guard chỉ đối chiếu base; ràng tip với HEAD là việc của lần re-pin bảng nợ kế tiếp
 
 ## Chưa phân loại (triage-failed)
 

@@ -25,7 +25,7 @@ sản phẩm; commit `54568bf` sửa cả năm chỗ và đo lại: E8 exit 0, E
 
 > **Cập nhật 07/09 (phiên sau):** mục 1 đã xử tại `6cb2253` — người ký chọn «giữ khoá volume cũ»;
 > lối `name: tongflow-data` bị loại vì Compose thêm tiền tố project nên không khớp volume cũ.
-> Mục 2: đã ký lại tại `cd15d1d`, vòng 4 PASS tại đó nhưng lộ thêm finding đổi tên service (container mồ côi); người ký chọn giữ tên service, sửa tại `b8ca06a`, vòng 5 chạy sau. Lúc viết dòng này `github.com:443` lại đứt, `api.github.com` thông.
+> Mục 2: đã ký lại tại `cd15d1d`, vòng 4 PASS tại đó nhưng lộ thêm finding đổi tên service (container mồ côi); người ký chọn giữ tên service, sửa tại `b8ca06a`, vòng 5 chạy sau. Vòng 5 PENDING-JUDGMENT (phân loại thiếu mục) và lộ AC-6 high trong hợp đồng (miễn trừ cả dòng) — sửa tại `40dc80c`, người ký khai vòng 6 là vòng chốt. Lúc viết dòng này `github.com:443` lại đứt, `api.github.com` thông.
 
 1. **Đổi tên volume trong `docker-compose.yml` làm người tự host mất dữ liệu** (severity high,
    NGOÀI hợp đồng, **chưa từng được người ký xem** — vòng 2 không phân loại được nên nó chưa

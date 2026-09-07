@@ -291,3 +291,26 @@ append NGUYÊN VĂN từ kết quả workflow, không viết tay.
 | medium | đổi tên service compose `tongflow` → `oneflow`: self-host cũ `git pull && docker compose up -d` để lại container mồ côi giữ cổng 3000, bản mới không lên (hai agent cùng tìm ra, gộp một) | **đã sửa tại `b8ca06a`** — người ký chọn giữ tên service `tongflow`, cùng lối với khoá volume ở `6cb2253`; vòng 5 chạy sau |
 | low | guard định danh fork đỏ trên mọi fork của contributor (so conf với remote origin) | known-limits (đề xuất máy) |
 | low | `check-prototype-lane.sh` ưu tiên `main` cục bộ trước `origin/main`, main cũ cho FAIL sai thay vì exit 2 | known-limits (đề xuất máy) |
+
+## Vòng 5 — PENDING-JUDGMENT vì phân loại thiếu mục, và một lỗi TRONG hợp đồng
+
+Chạy trên `fbe0df7` (sau sửa tên service). 11/11 ô đo exit 0, 20 lệnh, 40 agent, không BLOCKED.
+Verdict **PENDING-JUDGMENT**: bước phân loại phạm vi trả thiếu mục ở ba finding (bộ tổng hợp
+coi là «phân loại không đầy đủ», không ai REJECT). 21 dòng run-log append nguyên văn từ kết quả
+(commit `bfe8817` chỉ chứa các dòng ấy; sổ chữ ghi ở commit kế).
+
+**Một finding TRONG hợp đồng (AC-6, high), phiên điều phối đã tái hiện:** guard so miễn trừ với
+cả dòng, nên mention thượng nguồn thứ hai chèn lên dòng ghi công đã miễn trừ vẫn xanh. Người ký
+chọn sửa: `40dc80c` cắt đoạn đã miễn trừ rồi quét lại phần còn lại của dòng; thêm ca răng
+`exempt-line-smuggle`; E7 ghim 29/29. Chiều đỏ đo trên bản sao: FAIL đúng thông điệp, exit 1.
+
+**Ngoài hợp đồng, mới ở vòng này:** (1) evidence-report thiếu `human_signoff` và hai mục
+Known limits / Ngoài hợp đồng rỗng nên lưới trước merge đọc hồ sơ là «xanh-sạch, không mời ký»
+— lỗi bộ tổng hợp kit, xử bằng tay ở lượt ghi evidence cuối; (2) hai dòng decisions.jsonl mang
+giờ địa phương gắn hậu tố Z — giữ làm sử liệu, known-limits; (3) hình 3: quan hệ conf → tên ảnh
+chưa có ca răng đổi conf; (4) hình 3: tip của dòng Diff trong opportunity.md là hằng, guard không
+ràng với HEAD. Hai mục sau máy không phân loại được; đề xuất known-limits. Bảy finding còn lại
+trùng Known limits đã ký.
+
+Người ký đã nói vòng 6 là vòng chốt: finding ngoài hợp đồng còn lại sau vòng 6 ghi known-limits
+có tên rồi điền chữ ký, không vòng 7.
