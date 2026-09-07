@@ -18,15 +18,15 @@ SLUG=mo-hoa-b01
 
 CASES=(
     clean
-    image-upstream conf-remote-lech readme-image-missing
+    image-upstream conf-remote-lech readme-image-missing readme-image-outside-run
     compose-no-build readme-no-build-cmd
     tag-trigger-back prepare-if-gone disarmed-header-gone claude-not-released-gone claude-builds-line-back
     discord-back email-back funding-back clone-upstream issue-template-not-fork
     badge-upstream release-badge-back ci-badge-gone pypi-badge-wrong-dist
-    hit-outside class-matrix stale-exemption exempt-line-smuggle
+    hit-outside class-matrix stale-exemption exempt-line-smuggle class-mixed-case
     notice-dist-gone notice-unchanged-back notice-attribution-gone
     suite-key-dangling
-    debt-table-missing
+    debt-table-missing debt-table-duplicate
 )
 
 READMES=(README.md docs/README_ZH.md docs/README_JA.md)
@@ -141,6 +141,17 @@ case_readme-image-missing() {
         fixture; green_control readme-image-missing || return 1
         replace_in "$probe/$r" "$IMAGE:latest" "$IMAGE:v0"
         expect_red readme-image-missing "$r thiếu chuỗi ảnh" || return 1
+    done
+}
+case_readme-image-outside-run() {
+    # The image string mentioned in prose but NOT inside the docker run block
+    # must still be red — the check is anchored to the block, not the file.
+    local r
+    for r in "${READMES[@]}"; do
+        fixture; green_control readme-image-outside-run || return 1
+        replace_in "$probe/$r" "$IMAGE:latest" "$IMAGE:v0"
+        append_line "$probe/$r" "Note: the published image is $IMAGE:latest" >/dev/null
+        expect_red readme-image-outside-run "$r thiếu chuỗi ảnh" || return 1
     done
 }
 case_compose-no-build() {
@@ -274,6 +285,13 @@ case_exempt-line-smuggle() {
         'fork of [TongFlow](https://github.com/tong-io/tongflow) (chat: https://discord.gg/K7V8az94Zf)'
     expect_red exempt-line-smuggle "chung dòng với mục đã miễn trừ — NOTICE.md:"
 }
+case_class-mixed-case() {
+    # Repo paths and domains are case-insensitive; a mixed-case upstream link
+    # is a live mention and must be a hit.
+    fixture; green_control class-mixed-case || return 1
+    local n; n="$(append_line "$probe/SECURITY.md" 'See https://github.com/Tong-io/TongFlow/issues for history.')"
+    expect_red class-mixed-case "định danh upstream ngoài miễn trừ — SECURITY.md:$n"
+}
 case_stale-exemption() {
     fixture; green_control stale-exemption || return 1
     append_line "$probe/scripts/fork/fork-identity-allow.txt" 'README.md|business@tongflow\.com|thử' >/dev/null
@@ -316,6 +334,18 @@ case_debt-table-missing() {
     PROTOTYPE_LANE_OPP="$probe/_acceptance/$SLUG/opportunity.md" bash "$LANE" "$SLUG" >"$probe/.out" 2>&1 || rc=$?
     [ "$rc" -ne 0 ] || { echo "FAIL CASE debt-table-missing: vẫn xanh" >&2; return 1; }
     grep -F 'thiếu hàng nợ cho docs/README_JA.md' "$probe/.out" >/dev/null || { echo "FAIL CASE debt-table-missing: token vắng" >&2; cat "$probe/.out" >&2; return 1; }
+}
+case_debt-table-duplicate() {
+    fixture
+    PROTOTYPE_LANE_OPP="$probe/_acceptance/$SLUG/opportunity.md" bash "$LANE" "$SLUG" >"$probe/.out" 2>&1 || { echo "FAIL CASE debt-table-duplicate: đối chứng dương đỏ" >&2; cat "$probe/.out" >&2; return 1; }
+    python3 - "$probe/_acceptance/$SLUG/opportunity.md" <<'PY'
+import sys; p=sys.argv[1]; L=open(p,encoding='utf-8').read().split('\n')
+i=next(i for i,l in enumerate(L) if '| `docs/README_JA.md` |' in l); L.insert(i+1, L[i]); open(p,'w',encoding='utf-8').write('\n'.join(L))
+PY
+    local rc=0
+    PROTOTYPE_LANE_OPP="$probe/_acceptance/$SLUG/opportunity.md" bash "$LANE" "$SLUG" >"$probe/.out" 2>&1 || rc=$?
+    [ "$rc" -ne 0 ] || { echo "FAIL CASE debt-table-duplicate: vẫn xanh" >&2; return 1; }
+    grep -F 'hàng nợ cho docs/README_JA.md — cần đúng một' "$probe/.out" >/dev/null || { echo "FAIL CASE debt-table-duplicate: token vắng" >&2; cat "$probe/.out" >&2; return 1; }
 }
 
 run_one() {

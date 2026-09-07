@@ -57,10 +57,16 @@ changed="$(git diff --name-only "$range" 2>/dev/null)" || die "git diff $range t
 total=0; covered=0
 while IFS= read -r f; do
     total=$((total + 1))
-    if grep -F -- "| \`$f\` |" "$OPP" >/dev/null; then
+    # AC-11 promises exactly ONE row per file — presence alone lets a file carry
+    # two contradictory decisions (round-6 finding).
+    nrows="$(grep -cF -- "| \`$f\` |" "$OPP" || true)"
+    if [ "$nrows" -eq 1 ]; then
         covered=$((covered + 1))
-    else
+    elif [ "$nrows" -eq 0 ]; then
         echo "FAIL: thiếu hàng nợ cho $f"
+        fails=$((fails + 1))
+    else
+        echo "FAIL: $nrows hàng nợ cho $f — cần đúng một"
         fails=$((fails + 1))
     fi
 done <<<"$changed"

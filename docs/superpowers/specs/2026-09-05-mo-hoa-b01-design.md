@@ -82,6 +82,7 @@ ghim một thông điệp chỉ chứng được một nửa). Ca lạ → exit 
 | ảnh | `image-upstream` | `image:` compose → upstream | `ảnh container` |
 | ảnh | `conf-remote-lech` | `repo=` trong conf | `conf lệch remote` + cả hai giá trị |
 | ảnh | `readme-image-missing` | xoá chuỗi ảnh khỏi lệnh docker run, từng README | `<README> thiếu chuỗi ảnh` |
+| ảnh | `readme-image-outside-run` | chuỗi ảnh chỉ còn trong văn xuôi, không trong khối docker run (vòng 6, AC-1) | `<README> thiếu chuỗi ảnh` |
 | compose | `compose-no-build` | comment `build: .` | `compose thiếu build:` |
 | compose | `readme-no-build-cmd` | xoá `docker compose up -d --build`, từng README | `<README> thiếu docker compose up -d --build` |
 | phát hành | `tag-trigger-back` | thêm `tags: ["v*"]` dưới `push:` | `desktop-release còn trigger tags` |
@@ -102,11 +103,13 @@ ghim một thông điệp chỉ chứng được một nửa). Ca lạ → exit 
 | lớp | `class-matrix` | mỗi mẫu regex một lượt chèn vào một file lành, 8/8 | `định danh upstream ngoài miễn trừ — <file>:<dòng>` cho từng mẫu, tổng `8/8 mẫu` |
 | lớp | `stale-exemption` | thêm dòng miễn trừ không có hit | `miễn trừ ôi — README.md|business@tongflow\.com` |
 | lớp | `exempt-line-smuggle` | chèn mention thượng nguồn thứ hai lên dòng NOTICE đã miễn trừ (thêm ở vòng 5, finding AC-6) | `chung dòng với mục đã miễn trừ — NOTICE.md:` |
+| lớp | `class-mixed-case` | chèn link thượng nguồn viết hoa thường lẫn lộn vào SECURITY.md (vòng 6, AC-6) | `định danh upstream ngoài miễn trừ — SECURITY.md:<dòng>` |
 | NOTICE | `notice-dist-gone` | xoá `oneflow-sdk` | `NOTICE không nêu oneflow-sdk` |
 | NOTICE | `notice-unchanged-back` | thêm lại `consumed unchanged from upstream` | `NOTICE còn consumed unchanged from upstream` |
 | NOTICE | `notice-attribution-gone` | xoá URL kho upstream khỏi NOTICE | `miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]…` |
 | dây | `suite-key-dangling` | đổi tên khoá `executors.script.fork_identity` trong bản sao config | `suite key fork_identity không trỏ executor nào` |
 | prototype | `debt-table-missing` | xoá hàng `docs/README_JA.md` khỏi bản sao opportunity | `thiếu hàng nợ cho docs/README_JA.md` |
+| prototype | `debt-table-duplicate` | nhân đôi hàng `docs/README_JA.md` trong bản sao opportunity (vòng 6, AC-11) | `hàng nợ cho docs/README_JA.md — cần đúng một` |
 
 ## 7. Guard làn prototype: `scripts/fork/check-prototype-lane.sh <slug>`
 

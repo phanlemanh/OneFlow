@@ -103,7 +103,7 @@ outside=0
 exempt=0
 for f in "${FILES[@]}"; do
     for pat in "${PATTERNS[@]}"; do
-        hits="$(grep -nE -- "$pat" "$f" || true)"
+        hits="$(grep -inE -- "$pat" "$f" || true)"  # -i: repo paths, PyPI names and mail domains are case-insensitive
         [ -n "$hits" ] || continue
         while IFS= read -r h; do
             lineno="${h%%:*}"
@@ -116,15 +116,15 @@ for f in "${FILES[@]}"; do
             residue="$text"
             for i in "${!allow_files[@]}"; do
                 [ "${allow_files[$i]}" = "$f" ] || continue
-                if printf '%s\n' "$text" | grep -E -- "${allow_regex[$i]}" >/dev/null; then
+                if printf '%s\n' "$text" | grep -iE -- "${allow_regex[$i]}" >/dev/null; then
                     matched=1
                     allow_hits[$i]=$((allow_hits[$i] + 1))
                     while IFS= read -r frag; do
                         [ -n "$frag" ] && residue="${residue//"$frag"/}"
-                    done < <(printf '%s\n' "$text" | grep -oE -- "${allow_regex[$i]}")
+                    done < <(printf '%s\n' "$text" | grep -ioE -- "${allow_regex[$i]}")
                 fi
             done
-            if [ "$matched" -eq 1 ] && printf '%s\n' "$residue" | grep -E -- "$pat" >/dev/null; then
+            if [ "$matched" -eq 1 ] && printf '%s\n' "$residue" | grep -iE -- "$pat" >/dev/null; then
                 outside=$((outside + 1))
                 fail "định danh upstream ngoài miễn trừ, chung dòng với mục đã miễn trừ — $f:$lineno: $(printf '%s' "$residue" | sed 's/^[[:space:]]*//' | cut -c1-100)"
             elif [ "$matched" -eq 1 ]; then
@@ -184,8 +184,11 @@ else
     fail "compose thiếu build: — docker compose up -d --build không dựng được trước tag đầu tiên"
 fi
 for r in "${READMES[@]}"; do
-    if grep -F -- "$IMAGE:latest" "$r" >/dev/null; then
-        ok "$r có chuỗi ảnh $IMAGE:latest"
+    # The image must sit INSIDE a `docker run` block (a line starting with
+    # `docker run`, continued while lines end in `\`) — a mention elsewhere in
+    # the README does not install anything (round-6 finding, AC-1).
+    if awk -v img="$IMAGE:latest" 'BEGIN{f=0;found=0} { if ($0 ~ /^docker run/) f=1; if (f && index($0, img)) found=1; if (f && $0 !~ /\\$/) f=0 } END{exit found?0:1}' "$r"; then
+        ok "$r có chuỗi ảnh $IMAGE:latest trong lệnh docker run"
     else
         fail "$r thiếu chuỗi ảnh $IMAGE:latest trong lệnh docker run"
     fi
