@@ -109,14 +109,25 @@ for f in "${FILES[@]}"; do
             lineno="${h%%:*}"
             text="${h#*:}"
             matched=0
+            # An exemption pins ONE mention, not the whole line: strip every
+            # fragment the allow regex matched and re-test the residue against
+            # the pattern, so a second upstream mention smuggled onto an
+            # exempted line is still a hit (round-5 finding, AC-6).
+            residue="$text"
             for i in "${!allow_files[@]}"; do
                 [ "${allow_files[$i]}" = "$f" ] || continue
                 if printf '%s\n' "$text" | grep -E -- "${allow_regex[$i]}" >/dev/null; then
                     matched=1
                     allow_hits[$i]=$((allow_hits[$i] + 1))
+                    while IFS= read -r frag; do
+                        [ -n "$frag" ] && residue="${residue//"$frag"/}"
+                    done < <(printf '%s\n' "$text" | grep -oE -- "${allow_regex[$i]}")
                 fi
             done
-            if [ "$matched" -eq 1 ]; then
+            if [ "$matched" -eq 1 ] && printf '%s\n' "$residue" | grep -E -- "$pat" >/dev/null; then
+                outside=$((outside + 1))
+                fail "định danh upstream ngoài miễn trừ, chung dòng với mục đã miễn trừ — $f:$lineno: $(printf '%s' "$residue" | sed 's/^[[:space:]]*//' | cut -c1-100)"
+            elif [ "$matched" -eq 1 ]; then
                 exempt=$((exempt + 1))
             else
                 outside=$((outside + 1))

@@ -103,10 +103,10 @@ evals:
     cmd: config:executors.script.mhb_teeth_all
     paths: ["scripts/fork/check-fork-identity-teeth.sh", "scripts/fork/check-fork-identity.sh", "scripts/fork/check-prototype-lane.sh", "scripts/fork/check-suite-key.sh"]
     expected: >-
-      exit 0; dòng tổng `PASS: 28/28 ca` với mẫu số đọc từ `${#CASES[@]}`; mỗi ca một token
-      `CASE <tên>: PASS` (28 token, đúng danh sách ca ở design §6); `--case bogus` thoát 2 với `ca lạ`;
+      exit 0; dòng tổng `PASS: 29/29 ca` với mẫu số đọc từ `${#CASES[@]}`; mỗi ca một token
+      `CASE <tên>: PASS` (29 token, đúng danh sách ca ở design §6 cộng `exempt-line-smuggle` thêm ở vòng 5); `--case bogus` thoát 2 với `ca lạ`;
       `--selftest-fail` in `FAIL` và thoát ≠ 0. Chiều đỏ của phép đếm: gỡ một phần tử khỏi CASES trong
-      bản sao thì tổng in 27/27 chứ không phải 28/28 — con số 28 do E7 ghim, không do script tự khai.
+      bản sao thì tổng in 28/28 chứ không phải 29/29 — con số 29 do E7 ghim, không do script tự khai.
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E8

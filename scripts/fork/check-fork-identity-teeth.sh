@@ -23,7 +23,7 @@ CASES=(
     tag-trigger-back prepare-if-gone disarmed-header-gone claude-not-released-gone claude-builds-line-back
     discord-back email-back funding-back clone-upstream issue-template-not-fork
     badge-upstream release-badge-back ci-badge-gone pypi-badge-wrong-dist
-    hit-outside class-matrix stale-exemption
+    hit-outside class-matrix stale-exemption exempt-line-smuggle
     notice-dist-gone notice-unchanged-back notice-attribution-gone
     suite-key-dangling
     debt-table-missing
@@ -265,6 +265,14 @@ case_class-matrix() {
     done
     echo "class-matrix: $hit/$expected mẫu"
     [ "$hit" -eq "$expected" ]
+}
+case_exempt-line-smuggle() {
+    # A second upstream mention appended to a line that is ALREADY exempted for
+    # another mention must still be a hit — the exemption pins one fragment.
+    fixture; green_control exempt-line-smuggle || return 1
+    replace_in "$probe/NOTICE.md" 'fork of [TongFlow](https://github.com/tong-io/tongflow)' \
+        'fork of [TongFlow](https://github.com/tong-io/tongflow) (chat: https://discord.gg/K7V8az94Zf)'
+    expect_red exempt-line-smuggle "chung dòng với mục đã miễn trừ — NOTICE.md:"
 }
 case_stale-exemption() {
     fixture; green_control stale-exemption || return 1

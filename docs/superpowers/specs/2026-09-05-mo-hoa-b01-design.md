@@ -101,6 +101,7 @@ ghim một thông điệp chỉ chứng được một nửa). Ca lạ → exit 
 | lớp | `hit-outside` | thêm URL upstream vào SECURITY | `định danh upstream ngoài miễn trừ — SECURITY.md:<dòng>` |
 | lớp | `class-matrix` | mỗi mẫu regex một lượt chèn vào một file lành, 8/8 | `định danh upstream ngoài miễn trừ — <file>:<dòng>` cho từng mẫu, tổng `8/8 mẫu` |
 | lớp | `stale-exemption` | thêm dòng miễn trừ không có hit | `miễn trừ ôi — README.md|business@tongflow\.com` |
+| lớp | `exempt-line-smuggle` | chèn mention thượng nguồn thứ hai lên dòng NOTICE đã miễn trừ (thêm ở vòng 5, finding AC-6) | `chung dòng với mục đã miễn trừ — NOTICE.md:` |
 | NOTICE | `notice-dist-gone` | xoá `oneflow-sdk` | `NOTICE không nêu oneflow-sdk` |
 | NOTICE | `notice-unchanged-back` | thêm lại `consumed unchanged from upstream` | `NOTICE còn consumed unchanged from upstream` |
 | NOTICE | `notice-attribution-gone` | xoá URL kho upstream khỏi NOTICE | `miễn trừ ôi — NOTICE.md|fork of \[TongFlow\]…` |
