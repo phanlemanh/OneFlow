@@ -45,6 +45,7 @@ import {
     saveWorkflow,
     updateWorkflow,
 } from "@/lib/api/workspace";
+import { provenanceFields } from "@/lib/director/provenance";
 import { logger } from "@/lib/logger";
 import {
     exportWorkflow,
@@ -152,6 +153,7 @@ export function WorkflowTitleMenu() {
                 description: tempDescription,
                 flow: { nodes, edges },
                 executable,
+                ...provenanceFields(useFlow.getState().directorRunId),
             };
 
             if (workflowId && !isSaveAsMode) {

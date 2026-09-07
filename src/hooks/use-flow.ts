@@ -75,6 +75,14 @@ export interface FlowState {
     workflowName: string;
     workflowId: number | null;
     workflowDescription: string;
+    /**
+     * Provenance of the graph on the canvas: the Director run whose plan was
+     * applied, or null for a hand-built graph. Sent with the next save so
+     * `workflows.director_run_id` answers "which plan produced this"
+     * (director-wire-shape AC-7). Cleared whenever the workflow identity
+     * changes — a loaded or brand-new workflow is not that plan any more.
+     */
+    directorRunId: string | null;
 
     selectedNodes: Node[];
     comboMode: boolean;
@@ -88,6 +96,7 @@ export interface FlowState {
     setWorkflowName: (name: string) => void;
     setWorkflowId: (id: number | null) => void;
     setWorkflowDescription: (description: string) => void;
+    setDirectorRunId: (id: string | null) => void;
 
     computeMap: Map<string, () => void>;
     registerCompute: (id: string, fn: () => void) => void;
@@ -124,6 +133,7 @@ export const useFlow = create<FlowState>((set, get) => ({
     workflowName: "",
     workflowId: null,
     workflowDescription: "",
+    directorRunId: null,
     // Multi-select compose mode tracking
     comboMode: false,
     comboSelectedIds: new Set<string>(),
@@ -544,8 +554,15 @@ export const useFlow = create<FlowState>((set, get) => ({
         });
     },
 
+    setDirectorRunId: (id) => {
+        set({ directorRunId: id });
+    },
+
     setWorkflowId: (id) => {
-        set({ workflowId: id });
+        // A different workflow identity means the canvas is no longer the
+        // Director plan that set the provenance; the saved row already holds
+        // it, so dropping the in-memory copy loses nothing.
+        set({ workflowId: id, directorRunId: null });
         const state = get();
         debouncedSaveWorkflowMeta({
             id: id,

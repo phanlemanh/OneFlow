@@ -24,6 +24,8 @@ export interface SaveWorkflowRequest {
     description?: string;
     flow: Record<string, unknown>;
     executable?: ExecutableWorkflow;
+    /** Director run that produced this graph; absent for a hand-built one. */
+    directorRunId?: string;
 }
 
 export interface SaveWorkflowResponse {

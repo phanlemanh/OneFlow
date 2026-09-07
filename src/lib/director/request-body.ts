@@ -25,6 +25,12 @@ export const MAX_CANVAS_NODES = 60;
  *  nodes carrying large literals is the same problem as many small ones. */
 export const MAX_CANVAS_BYTES = 32_000;
 
+const encoder = new TextEncoder();
+/** UTF-8 byte length — the unit MAX_CANVAS_BYTES is written in. */
+export function utf8ByteLength(text: string): number {
+    return encoder.encode(text).length;
+}
+
 export interface DirectorRequestBody {
     prompt: string;
     turns?: { role: "user" | "assistant"; text: string }[];
@@ -115,7 +121,11 @@ export function parseDirectorBody(
                 },
             };
         }
-        if (JSON.stringify(canvas).length > MAX_CANVAS_BYTES) {
+        // Measured in UTF-8 bytes, as the constant and the message promise.
+        // `.length` counts UTF-16 code units, which under-counts every
+        // non-ASCII character — a Vietnamese canvas could exceed the byte cap
+        // while looking half its size (S4 round-1 finding, AC-9).
+        if (utf8ByteLength(JSON.stringify(canvas)) > MAX_CANVAS_BYTES) {
             return {
                 ok: false,
                 error: {

@@ -108,6 +108,10 @@ export default function DirectorPrompt() {
                 const flow = useFlow.getState();
                 flow.setNodes(parsed.nodes);
                 flow.setEdges(parsed.edges);
+                // The graph now on the canvas IS this run's plan; the next
+                // save carries the id (AC-7). Null when the server predates
+                // runIds — the save then looks hand-built, which is honest.
+                flow.setDirectorRunId(result.runId ?? null);
                 if (parsed.name) flow.setWorkflowName(parsed.name);
                 if (parsed.description) {
                     flow.setWorkflowDescription(parsed.description);

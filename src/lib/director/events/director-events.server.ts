@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { directorEvents } from "@/db/schema";
 import type { DirectorErrorCode } from "@/lib/director/director-core";
@@ -77,9 +77,36 @@ export async function patchOutcome(
     );
     if (!decision.allowed || !current) return decision;
 
-    await db
+    // The single-shot rule must live in the statement, not in the read above:
+    // two requests for the same runId can both observe `generated` at the
+    // await boundary, and a plain `WHERE id = ?` would let the second one
+    // overwrite the first. Only a row STILL `generated` takes the patch; zero
+    // rows changed means someone else got there first (S4 round-1, AC-5).
+    const result = await db
         .update(directorEvents)
         .set({ kind: decision.kind })
-        .where(eq(directorEvents.id, current.id));
+        .where(
+            and(
+                eq(directorEvents.id, current.id),
+                eq(directorEvents.kind, GENERATED),
+            ),
+        );
+    if (rowsChanged(result) === 0) {
+        return { allowed: false, reason: "ALREADY_PATCHED" };
+    }
     return decision;
+}
+
+/**
+ * Rows a write touched, across the two sqlite drivers this app runs on
+ * (better-sqlite3 reports `changes`, libsql `rowsAffected`). Unknown shape →
+ * undefined, and the caller keeps the pre-existing behaviour rather than
+ * inventing a rejection the driver never reported.
+ */
+function rowsChanged(result: unknown): number | undefined {
+    if (typeof result !== "object" || result === null) return undefined;
+    const r = result as { changes?: unknown; rowsAffected?: unknown };
+    if (typeof r.changes === "number") return r.changes;
+    if (typeof r.rowsAffected === "number") return r.rowsAffected;
+    return undefined;
 }

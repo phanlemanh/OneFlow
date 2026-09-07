@@ -87,6 +87,19 @@ describe("AC-9 — new fields are optional, and caps are per field", () => {
         expect(e.message).toContain("bytes");
     });
 
+    it("counts canvas bytes in UTF-8, not UTF-16 code units", () => {
+        // Same character count both times: ASCII stays under the cap, the
+        // two-byte Vietnamese letter crosses it. A `.length` check passes
+        // both — that is the bug this pair pins.
+        const chars = Math.floor(MAX_CANVAS_BYTES / 2) + 64;
+        const ascii = { nodes: [{ data: { text: "x".repeat(chars) } }] };
+        const viet = { nodes: [{ data: { text: "ă".repeat(chars) } }] };
+        expect(ok({ prompt: "p", canvas: ascii }).prompt).toBe("p");
+        const e = rejection({ prompt: "p", canvas: viet });
+        expect(e.field).toBe("canvas");
+        expect(e.message).toContain("bytes");
+    });
+
     it("rejects wrong shapes for each new field", () => {
         expect(rejection({ prompt: "p", turns: "no" }).field).toBe("turns");
         expect(rejection({ prompt: "p", canvas: [] }).field).toBe("canvas");
