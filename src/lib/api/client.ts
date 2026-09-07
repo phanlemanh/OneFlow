@@ -3,6 +3,35 @@ import { showErrorToast } from "@/components/ui/error-toast";
 import { getClientTranslator } from "@/i18n/client";
 
 /**
+ * How long any client-side request may hang before it is aborted.
+ *
+ * Exported so a second caller cannot pick its own number: `env-client.ts` needs
+ * the same ceiling, and two ceilings that drift apart are two behaviours the
+ * user experiences as one.
+ */
+export const DEFAULT_TIMEOUT_MS = 30000;
+
+/**
+ * Fires the cancelable shell seam for an unauthenticated response. Returns true
+ * when a shell handled it itself (called `preventDefault` — e.g. raised its own
+ * sign-in dialog), so the caller suppresses its own message.
+ *
+ * Exported because a SECOND caller needs it. Copying the dispatch into
+ * `env-client.ts` would put the event name and the `cancelable` contract in two
+ * places — the same "each surface rolled its own" mechanism that produced the
+ * key-store defect this dossier exists to close.
+ *
+ * 401 only. A 403 is *authenticated but forbidden*; asking the shell to re-auth
+ * for it tells the user something untrue about why they were refused.
+ */
+export function notifyUnauthorized(): boolean {
+    if (typeof window === "undefined") return false;
+    return !window.dispatchEvent(
+        new CustomEvent("tf:unauthorized", { cancelable: true }),
+    );
+}
+
+/**
  * Request configuration options
  */
 interface FetchOptions extends Omit<RequestInit, "body"> {
@@ -27,7 +56,7 @@ interface FetchOptions extends Omit<RequestInit, "body"> {
      */
     parseJson?: boolean;
     /**
-     * Response timeout in milliseconds, defaults to 30000
+     * Response timeout in milliseconds, defaults to DEFAULT_TIMEOUT_MS
      */
     timeout?: number;
 }
@@ -122,7 +151,7 @@ export async function apiClient<T = unknown>(
         successMessage,
         errorMessage,
         parseJson = true,
-        timeout = 30000,
+        timeout = DEFAULT_TIMEOUT_MS,
         ...fetchOptions
     } = options;
 
@@ -164,17 +193,8 @@ export async function apiClient<T = unknown>(
                     response.status === 401
                         ? t("unauthorized")
                         : t("accessDenied");
-                // Cancelable seam for embedding shells: preventDefault means
-                // the shell surfaced the 401 itself (e.g. a sign-in dialog),
-                // so the default toast is suppressed.
                 const handledByShell =
-                    response.status === 401 &&
-                    typeof window !== "undefined" &&
-                    !window.dispatchEvent(
-                        new CustomEvent("tf:unauthorized", {
-                            cancelable: true,
-                        }),
-                    );
+                    response.status === 401 && notifyUnauthorized();
                 if (handledByShell) {
                     errorToastShown = true;
                 } else if (shouldShowErrorToast) {

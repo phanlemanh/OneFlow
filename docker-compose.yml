@@ -1,19 +1,30 @@
-# Self-host TongFlow web with Docker Compose.
+# Self-host OneFlow web with Docker Compose.
 #   docker compose up -d   →   http://localhost:3000
 #
-# Uses the prebuilt GHCR image by default. To build locally instead, comment out
-# `image:` and uncomment `build: .`.
+# `image:` names the fork's GHCR image, which the release workflow publishes when a
+# `v*` tag is cut; `build: .` sits next to it so `docker compose up -d --build`
+# (or a plain `up` while the image is not available locally) builds from this
+# checkout — the stack comes up before the first tagged release exists.
 #
 # All API keys are optional — you can also set them in-app under Settings
 # (persisted to /data/settings.json). Pass them here via a .env file or shell env.
 
 services:
+  # The service key keeps its pre-fork name for the same reason the volume keys
+  # below do: Compose names the container `<project>-<service>-1`, so renaming
+  # the key leaves an existing self-host's old container running as an orphan
+  # (restart: unless-stopped) holding port 3000, and the new one never starts.
+  # Keeping the key makes `git pull && docker compose up -d` an in-place recreate.
   tongflow:
-    image: ghcr.io/tong-io/tongflow:latest
-    # build: .
+    image: ghcr.io/phanlemanh/oneflow:latest
+    build: .
     ports:
       - "3000:3000"
     volumes:
+      # Volume keys keep their pre-fork names on purpose: Compose names the real
+      # volume `<project>_<key>`, so renaming the key would leave an existing
+      # self-host's SQLite DB, uploads, /data/settings.json and plugin venvs
+      # behind in the old volume and bring the app up as a fresh install.
       - tongflow-data:/data
       - tongflow-plugins:/plugins
     environment:

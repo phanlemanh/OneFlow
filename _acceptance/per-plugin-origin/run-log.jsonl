@@ -10,3 +10,4 @@
 {"ts":"2026-08-07T02:03:56Z","round":2,"evalId":"E11","run_id":"per-plugin-origin-E11-20260807T020356Z","exit_code":0,"cmd":"pnpm lint:check"}
 {"ts":"2026-08-07T02:03:56Z","round":2,"evalId":"E12","run_id":"per-plugin-origin-E12-20260807T020356Z","exit_code":0,"cmd":"pnpm verify:plugins"}
 {"ts":"2026-08-07T02:04:05Z","round":2,"evalId":"E10","run_id":"per-plugin-origin-E10-20260807T020405Z","exit_code":0,"cmd":"pnpm build && pnpm typecheck"}
+{"ts":"2026-09-05T10:15:00Z","kind":"repin","run_id":"repin-merge-20260905T101500Z","sha":"96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e","prev_sha":"f7306bfa6c17c4e2ff656b66036b0d369c60648d","suites_exit":[0,0,0,0,0,0,0,0]}

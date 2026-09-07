@@ -1,0 +1,213 @@
+schema_version: 1
+feature_slug: khong-noi-sai-ve-kho-khoa
+
+# T3. Chín tiêu chí AC-1..AC-9, mười ba ô đo. MỘT Ô ĐO = MỘT TỆP TEST TRỌN VẸN,
+# không ô nào dùng `-t` (check-eval-filters.mjs tồn tại vì đúng lớp lỗi đó).
+# Mỗi `expected` khai CHIỀU ĐỎ cùng fixture + thông điệp ghim (MEASURE-BIRTH-CLAUSE).
+# Ba ô carry từ hồ sơ trước dùng lại khoá executor cũ, không đổi tệp test cũ.
+
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.knsk_route_replace_premise
+    paths: ["src/app/api/settings/env/route.ts", "src/lib/settings/env-store.server.ts", "src/app/api/settings/env/route.replace-premise.test.ts"]
+    expected: >-
+      exit 0. Gọi handler PUT THẬT trên một thư mục tạm trỏ bằng TONGFLOW_DATA_DIR;
+      fixture kho lành PHẢI sinh bằng `saveEnvStore()` (bộ ghi thật), không viết tay.
+      Ma trận toàn phần trục A × cờ bật, số ca ghim hằng = 3: (a) kho `ok` có N≥2 khoá
+      + cờ → 409, body `code: ENV_STORE_REPLACE_REFUSED`, `state: "ok"`, và sha256
+      tệp kho TRƯỚC = SAU; (b) kho `absent` + cờ → 409, `state: "absent"`, tệp KHÔNG
+      tồn tại sau lượt; (c) kho `unreadable` (ghi rác thô) + cờ → 200, đọc lại ra `{}`.
+      Cộng ca đua: GET đọc ra unreadable, rồi `saveEnvStore` sửa kho, rồi PUT có cờ →
+      409 (a) — không luật riêng. Đối chứng dương: PUT KHÔNG cờ trên kho `ok` vẫn ghi.
+      CHIỀU ĐỎ: gỡ nhánh `replaceUnreadable && state !== "unreadable"` → ca (a) đỏ với
+      thông điệp nêu SỐ KHOÁ còn lại (0 thay vì N) và sha đã đổi — không chỉ mã HTTP;
+      ca (b) đỏ nêu «file created». CHIỀU ĐỎ THỨ HAI: đổi `code` sang chuỗi khác → (a)
+      đỏ nêu đúng chuỗi mong đợi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.knsk_env_client_taxonomy
+    paths: ["src/lib/settings/env-client.ts", "src/lib/settings/__fixtures__/read-failures.ts", "src/lib/settings/env-client.taxonomy.test.ts"]
+    expected: >-
+      exit 0. Ma trận toàn phần CHÍN tín hiệu (mở rộng fixture read-failures.ts của
+      hồ sơ trước, thêm 401 · 403; KHÔNG gồm quá-trần — đo ở E4), số ghim hằng = 9, mỗi ca một khẳng định
+      trên `state` VÀ trên `reason.code` (không thu về một bit): 200+env → ok ·
+      503+ENV_STORE_UNREADABLE → store-unreadable với reason từ body · 401 →
+      unauthenticated · 403 → unavailable/http/403 · 500 → unavailable/http/500 ·
+      502-html → unavailable/http/502 · not-json → unavailable/not-json · env sai hình →
+      unavailable/no-env · fetch ném → unavailable/network. Đối chứng dương: 503 KHÔNG
+      kèm code → unavailable, không phải store-unreadable (tín hiệu dương phải đủ cả
+      hai vế). CHIỀU ĐỎ: thu về `if (!response.ok) unreadable` cũ → ĐÚNG 7 ca đỏ (mọi
+      ca trừ 200 và 503+code), mỗi thông điệp nêu tên tín hiệu và state nhận được.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.knsk_env_client_seam
+    paths: ["src/lib/settings/env-client.ts", "src/lib/api/client.ts", "src/lib/settings/env-client.seam.test.ts"]
+    expected: >-
+      exit 0. Lắng `window` bằng listener thật: (a) đọc nhận 401 → đúng 1 sự kiện
+      `tf:unauthorized`, `cancelable === true`; (b) 403 → 0 sự kiện; (c) 503+code → 0;
+      (d) listener gọi `preventDefault()` → `notifyUnauthorized()` trả true (vỏ đã xử).
+      Khẳng định thêm: env-client gọi helper export từ `src/lib/api/client.ts` (spy trên
+      module), không dispatch inline; (e) `apiClient` nhận 401 → spy `notifyUnauthorized`
+      gọi đúng 1 lần (một chỗ định nghĩa, hai bên gọi). CHIỀU ĐỎ: gỡ lời gọi helper ở nhánh 401 → (a) đỏ
+      «expected 1 dispatch, got 0»; đổi điều kiện thành `status === 401 || 403` → (b)
+      đỏ «expected 0, got 1».
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.knsk_env_client_timeout
+    paths: ["src/lib/settings/env-client.ts", "src/lib/api/client.ts", "src/lib/settings/env-client.timeout.test.ts"]
+    expected: >-
+      exit 0. `vi.useFakeTimers()`, `fetch` trả Promise không bao giờ resolve: (a)
+      `readEnvForBrowser` sau 30 001 ms → `unavailable`, `reason.code: "timeout"`; (b)
+      `put()` (qua `saveEnvKeys`) sau 30 001 ms → TRẢ VỀ `{ok: false, reason:
+      "write-failed", detail: {code: "timeout"}}`, promise ĐÃ settle (resolve, KHÔNG
+      reject — thêm throw sẽ rơi vào catch của abi-node-shell:253 thành phase
+      "invalid"); (c) tại 29 999 ms cả hai vẫn pending (trần đúng số, không sớm);
+      (d) render `abi-node-shell` với fetch treo, nhập khoá, 30 001 ms → phase ≠ `verifying`
+      VÀ ≠ `verified` (KHÔNG khẳng định về `saved-unverified` — Ngoài-3/7 đã descope). Hằng dùng chung:
+      khẳng định giá trị import từ client.ts, không literal 30000 trong env-client.
+      CHIỀU ĐỎ: gỡ AbortController khỏi `put()` → (b) treo, đỏ theo timeout của test
+      (5 s) nêu «put never settled»; đổi return thành throw → (d) đỏ «phase invalid after
+      timeout» (khoá bị đổ oan), không phải «verified».
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.knsk_surfaces_matrix
+    paths: ["src/components/settings/store-unreadable-notice.tsx", "src/components/workspace/settings-dialog.tsx", "src/components/workspace/nodes/base/abi-node-shell.tsx", "src/components/workspace/nodes/add/media-library-config-panel.tsx", "src/components/workspace/store-read-states.test.tsx"]
+    expected: >-
+      exit 0. Ma trận toàn phần 3 bề mặt × 4 state = 12 ca, số ghim hằng, mỗi ca BỐN
+      khẳng định riêng với thông điệp nêu bề mặt + state: (1) số nút phá huỷ đếm bằng
+      getAllByRole theo nhãn «Thay kho…» = 1 ở ĐÚNG (Cài đặt, store-unreadable), 0 ở
+      11 ô còn lại; (2) số nút Thử lại = 0 ở 3 ô ok, 1 ở 9 ô còn lại; (3) tấm chặn có
+      `data-testid` theo state (store-unreadable-notice / unauthenticated-notice /
+      unavailable-notice) và tiêu đề là QUAN HỆ với catalogue, locale ghim tường minh (en
+      VÀ vi): `title === messages[locale][khoá của chính state]` VÀ `title !==
+      messages[locale][storeUnreadable.title]`; (4)
+      `fetch.mock.calls.filter(method === "PUT").length === 0` ở 9 ô không-ok. Đối
+      chứng dương: 3 ô ok có form và 0 tấm chặn. CHIỀU ĐỎ: gỡ điều kiện bề-mặt-là-Cài-
+      đặt khỏi nút phá huỷ → ĐÚNG 2 ca đỏ (node prompt, ML panel × store-unreadable),
+      thông điệp nêu bề mặt; trỏ state mới về khoá `storeUnreadable.title` → ĐÚNG 3 ca đỏ
+      nêu state + khoá.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.knsk_retry_wire
+    paths: ["src/components/settings/store-unreadable-notice.tsx", "src/components/workspace/settings-dialog.tsx", "src/components/workspace/nodes/base/abi-node-shell.tsx", "src/components/workspace/nodes/add/media-library-config-panel.tsx", "src/components/workspace/store-read-states-retry.test.tsx"]
+    expected: >-
+      exit 0. Đếm lời gọi, không đếm nhãn: (a) từ state unavailable, bấm Thử lại →
+      `readEnvForBrowser` được gọi thêm ĐÚNG 1 lần; (b) hai `fireEvent.click` trong
+      cùng `act` khi lượt đọc chưa resolve → vẫn 1 lần, nút có `disabled`; (c) lượt đọc
+      lại trả ok → form hiện, tấm chặn biến mất; (d) trả unauthenticated → tấm chặn
+      đổi sang testid unauthenticated. Cả ba bề mặt (3 × ca a). CHIỀU ĐỎ: gỡ chốt
+      disabled → (b) đỏ «expected 1 read, got 2».
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.knsk_replace_refused_wire
+    paths: ["src/components/workspace/settings-dialog.tsx", "src/lib/settings/env-client.ts", "src/components/workspace/settings-dialog.replace-refused.test.tsx"]
+    expected: >-
+      exit 0. Mock fetch theo chuỗi: GET → 503+code (blocked) → người dùng bấm phá
+      huỷ → xác nhận → PUT có cờ → 409 `ENV_STORE_REPLACE_REFUSED` → GET → 200 với
+      env {A:"1"}. Khẳng định: (a) đúng 1 PUT rồi đúng 1 GET SAU nó (thứ tự trên
+      mock.calls); (b) form hiện với ô A="1"; (c) 0 `role="alert"`, 0 tấm chặn; (d)
+      0 toast lỗi. Đối chứng dương: PUT trả 200 → form rỗng (đường cũ AC-11 hồ sơ
+      trước vẫn sống). CHIỀU ĐỎ: bỏ lượt đọc lại sau 409 → (a) đỏ «expected GET after
+      PUT, got 0»; hiển thị 409 thành lỗi → (c) đỏ nêu alert tìm thấy.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.knsk_seam_guard
+    paths: ["src/lib/api/client.ts", "src/lib/settings/env-client.ts", "scripts/settings/check-unauthorized-seam.sh"]
+    expected: >-
+      exit 0. Guard cấu trúc: chuỗi `notifyUnauthorized(` xuất hiện ở ĐÚNG hai tệp
+      nguồn ngoài test (client.ts nơi định nghĩa + gọi, env-client.ts nơi gọi) và chuỗi
+      `new CustomEvent("tf:unauthorized"` xuất hiện ĐÚNG MỘT LẦN trong toàn cây nguồn
+      ngoài test (`grep -c` trên client.ts = 1, in số đếm — đếm LẦN, không đếm tệp). Nửa
+      đàn áp: bỏ qua `*.test.ts(x)` và `src/ext/**`. Đầu ra in đủ danh sách tệp đếm được.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.knsk_seam_guard_teeth
+    paths: ["scripts/settings/check-unauthorized-seam.sh", "scripts/settings/check-unauthorized-seam-teeth.sh"]
+    expected: >-
+      exit 0. Răng của E8 trên BẢN SAO cây: (1) cây thật → 0; (2) chèn một
+      `new CustomEvent("tf:unauthorized"` vào env-client.ts → exit 1 nêu tên tệp; (3)
+      chèn caller thứ ba vào một tệp component → exit 1 nêu tên tệp; (4) làm rỗng
+      client.ts → exit 2 (guard hết vật đo phải nói ra, không xanh); (5) chèn CustomEvent
+      thứ HAI vào chính client.ts → exit 1 nêu số đếm 2. CHIỀU ĐỎ: nới grep bỏ qua
+      `src/components/**` → ca (3) đỏ; đổi đếm-lần về đếm-tệp → ca (5) xanh giả = đỏ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.kkt_gd_one_reader
+    paths: ["src/lib/settings/env-client.ts", "src/components/workspace/settings-dialog.tsx", "src/components/workspace/nodes/add/media-library-config-panel.tsx", "src/components/workspace/nodes/base/abi-node-shell.tsx", "scripts/settings/check-one-env-reader.sh"]
+    expected: >-
+      exit 0. Carry guard E11 hồ sơ trước, nguyên trạng: `/api/settings/env` ở đúng
+      một tệp nguồn ngoài test. Vòng này chạm cả ba bề mặt nên PHẢI chạy lại, không
+      carry-forward. Răng của nó (E14 cũ) không chạy lại — script không đổi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.knsk_i18n_render
+    paths: ["src/components/settings/store-unreadable-notice.tsx", "src/i18n/messages/en.json", "src/i18n/messages/vi.json", "src/components/workspace/store-read-states-i18n.test.tsx"]
+    expected: >-
+      exit 0. Dựng tấm chặn ở hai state mới dưới NextIntlClientProvider với messages
+      `en`: tiêu đề + câu «chưa có gì bị thay đổi» + nhãn Thử lại đọc được BẰNG giá
+      trị tra từ en.json theo khoá (đọc từ tệp), KHÁC giá trị vi.json; dưới `vi` → đúng
+      chuỗi vi.json. 2 state × 3 khoá = 6 khẳng định. CHIỀU ĐỎ: ghi cứng một nhãn →
+      đỏ nêu ĐÚNG TÊN KHOÁ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.kkt_gd_locale_parity
+    paths: ["src/i18n/messages/en.json", "src/i18n/messages/ja.json", "src/i18n/messages/ko.json", "src/i18n/messages/vi.json", "src/i18n/messages/zh.json", "src/i18n/locale-parity.test.ts"]
+    expected: >-
+      exit 0. Carry parity guard hồ sơ trước: năm tệp parity trên tập khoá phẳng,
+      allowlist `ja` là TẬP đóng băng (không lớn lên), không khoá mới nào của namespace
+      `Settings.storeUnreadable` / `Workspace.storeUnreadable` (mở rộng cho hai state
+      mới) nằm trong allowlist. Chạy lại vì năm tệp locale đổi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.knsk_a11y_proto
+    paths: ["src/components/proto/khong-noi-sai-ve-kho-khoa-proto.tsx", "src/app/proto/[slug]/page.tsx", "scripts/settings/check-a11y-read-states.sh", "tsconfig.json"]
+    expected: >-
+      exit 0. axe-core trong Chrome thật trên 4 trang = 2 state mới (unauthenticated,
+      unavailable) × 2 giao diện (sáng/tối), 0 vi phạm critical/serious. Wrapper RIÊNG
+      (`check-a11y-read-states.sh`, cổng 3196, `NEXT_DIST_DIR=build/knsk-a11y`) —
+      KHÔNG sửa `check-a11y-proto.sh` của hồ sơ trước. Nửa đàn áp: đọc lại
+      `data-proto-state`, `class="dark"` VÀ `data-proto-component="store-unreadable-notice"`
+      từ DOM — đếm 2 state phân biệt × 2 theme, và cả 4 trang đều mount component THẬT.
+      CHIỀU ĐỎ: đổi một tên state trong STATES thành chuỗi không tồn tại → đỏ
+      «rendered state 'unknown:…', asked for '…'» từ vòng đọc-lại, không từ axe; thay
+      import component bằng markup inline → đỏ «component marker missing on page N».
+    evidence_required: [run_id, exit_code, verifier, verified_at, output, artifact]

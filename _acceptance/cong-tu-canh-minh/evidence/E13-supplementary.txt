@@ -1,0 +1,15 @@
+=== E13 phần lệnh khai KHÔNG chạy — đo bổ sung ===
+
+--- (a) trọn bộ ca của teeth script LỘ TRÌNH ---
+  ✓ CASE case-isolation: PASS
+
+✅ răng: 11/11 case — mỗi case một mã thoát riêng
+exit=
+
+--- (b) case-completeness: số token PASS phải BẰNG số ca khai trong --list ---
+   check-product-map-teeth.sh                     khai=11  PASS=11  BẰNG
+   check-roadmap-guard-teeth.sh                   khai=11  PASS=11  BẰNG
+
+--- (c) --case không tồn tại phải thoát 2 ---
+   check-product-map-teeth.sh                     exit=2  ĐÚNG
+   check-roadmap-guard-teeth.sh                   exit=2  ĐÚNG

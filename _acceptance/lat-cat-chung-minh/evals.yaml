@@ -1,0 +1,235 @@
+schema_version: 1
+feature_slug: lat-cat-chung-minh
+
+# T2, mười lăm tiêu chí, lớp script + tài liệu. Không (cross-layer). Mỗi case răng một khoá
+# executor riêng (bài học stale_scope_* / roadmap_teeth_*): case chưa cài và case đã qua
+# không được trông giống nhau sau một mã thoát. Chiều đỏ của mỗi eval máy nằm trong chính
+# case răng nó gọi (khuôn MEASURE-BIRTH: cùng fixture, thông điệp ghim).
+
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.lcm_teeth_clean
+    paths: ["docs/roadmap.md", "scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE clean: PASS`. Ca này đòi dòng tỉ lệ khớp `★ [0-9]+/16 · tổng
+      [0-9]+/[0-9]+` trên cây thật — một guard in 0/0 cũng xanh nhưng không qua được ca này.
+      **Mẫu số KHÔNG ghim hằng 20**: ca ngoai-le-hop-le (E5) chứng minh nó tăng theo số dòng
+      Ngoại lệ; ghim `/20` ở đây là đúng thứ làm guard đỏ oan ngày owner mở ngoại lệ đầu tiên
+      (gap-probe 04/09 P0). Chiều đỏ của phép đếm: case khoi-hong (E8) cùng fixture.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.lcm_teeth_o_moi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE o-moi-ngoai-ke-hoach: PASS` — guard đỏ F1 nêu `la-ngoai-ke-hoach mở ngoài kế hoạch`; đối chứng dương là case clean cùng fixture.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.lcm_teeth_tick_noi_doi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout có cả `CASE tick-noi-doi: PASS` (F2 nêu `skill-system-v1 chưa ký`) lẫn `CASE tin-theo-loi: PASS` (xanh, in `tin theo lời … A2` — A2 là dòng slug `—` không mang chỉ dẫn kiểm; A1 thì NGƯỢC LẠI, nó mang `kiểm:` nên ca kiem-co-hoi khẳng định A1 **không** được nằm trong danh sách ấy).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.lcm_teeth_park
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/timeline-view/opportunity.md"]
+    expected: >-
+      exit 0 và stdout có `CASE park-khong-that: PASS` (F3 nêu `timeline-view nằm trong Xếp lại
+      sau mà hồ sơ chưa đóng`) lẫn `CASE kill-hop-le: PASS` — chiều XANH: một hồ sơ `decision: kill`
+      niêm yết trong bảng và đủ hai trường người thì guard thoát 0 và không gọi tên nó. Trước vòng 3,
+      F3 đòi riêng `park` nên `kill` không có chỗ nào hợp lệ: không niêm yết thì F5 đỏ, niêm yết thì F3 đỏ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.lcm_teeth_ngoai_le
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout có CẢ HAI chiều trên cùng fixture: `CASE ngoai-le-tran: PASS` (lý do rác
+      `tien-tay` → F4 nêu `không có lý do có tên`) và `CASE ngoai-le-hop-le: PASS` (một dòng
+      ngoại lệ `bảo-mật` đủ ngày + ai quyết cho một slug đang mở ngoài kế hoạch → guard thoát 0,
+      KHÔNG F1 cho slug ấy, và mẫu số in ra tăng đúng một). Nửa xanh là van an toàn của luật
+      đóng băng — nó phải chứng minh được là mở, không chỉ là chặn (gap-probe 04/09 P0).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.lcm_teeth_go_bang
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE go-bang: PASS` — ca chiều ngược: 16/16 ★ + 20/20 →
+      `plan-freeze: ★ 16/16 · tổng 20/20 (100%) · GỠ BĂNG`, và hồ sơ lạ không còn làm đỏ. Đây là
+      ca chịu lực: không có nó, một guard khoá vĩnh viễn qua mọi ca khác.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.lcm_teeth_checkpoint
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout có `CASE checkpoint-note: PASS` (NOTE `đã qua mốc tái hoạch 2026-10-09`, exit 0) và `CASE checkpoint-done: PASS` (không NOTE).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.lcm_teeth_khoi_hong
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE khoi-hong: PASS` — bốn hình dạng F0 trên bốn fixture riêng (thiếu marker → `marker` · mất khoá `checkpoint:` → `header thiếu khoá` · bớt một dấu ngăn cột → `cột, cần` · trạng thái `X` → `ngoài ⬜ ◐ ✅`), mọi hình dạng đều `VIOLATION [plan-freeze] F0`, fail-closed.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.lcm_wiring
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "_acceptance/config.yaml", "scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-suite-key.sh"]
+    expected: >-
+      exit 0; mode shape phải tìm thấy **cả bốn** tên hồ sơ này thêm vào hằng số `GUARD_NEEDLES`
+      (`check-plan-freeze.mjs`, `check-plan-freeze-teeth.sh`, `check-plan-docs.sh`,
+      `check-plan-docs-teeth.sh`) bên cạnh các tên có sẵn — gỡ một tên khỏi hằng số thì shape
+      FAIL nêu đúng tên ấy: `[hang-rao-doc-nham-loi-thanh-khong-co-gi#F2]`. KHÔNG ghim con số
+      trong dòng OK: dòng ấy viết "cả hai guard" từ thời hằng số có hai tên và nay đã mười một,
+      nhưng nó là stdout ĐÃ GHI vào bằng chứng của hai hồ sơ đã ký (`cong-tu-canh-minh` E9,
+      `o-do-chay-0-ca-van-xanh` E10), nên hồ sơ này không sửa nó — ghi ngoài hợp đồng; mode teeth in
+      `lệnh dưới phép thử … check-plan-freeze.mjs` và, với TỪNG needle trong tập PHÁ, một dòng
+      `đỏ vì: <câu đỏ của chính needle ấy>` — bảy dòng, bảy câu khác nhau, trong đó
+      `check-plan-docs.sh` phải đỏ vì `FAIL: STATUS.md đề ngày` chứ không vì `FAIL: guard sổ cái đỏ`
+      (đỏ đi mượn). Ba chiều đỏ của chính phép ghim này: gỡ phép phá STATUS.md · bỏ khai RED_TOKEN
+      cho một needle đang PHÁ · ghim một token cũng khớp trên cây lành — cả ba đều làm mode FAIL.
+      Bất biến `KÊ=PHÁ+BỎ QUA` giữ nguyên; mode suite-keys xanh.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.plan_freeze_teeth_all
+    paths: ["scripts/roadmap/check-plan-freeze-teeth.sh", "scripts/roadmap/check-plan-freeze.mjs"]
+    expected: >-
+      exit 0 và dòng cuối `✅ răng: 20/20 case — mỗi case một mã thoát riêng`; kèm `CASE case-isolation: PASS` (tên lạ bị từ chối exit 2, selftest-fail in FAIL).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.lcm_pmap
+    paths: ["scripts/ci/check-product-map.mjs", "scripts/ci/check-product-map-teeth.sh", "PRODUCT-MAP.md", "_acceptance/director-v2/opportunity.md", "_acceptance/timeline-view/opportunity.md", "_acceptance/staleness-ho-so-thieu-paths/opportunity.md"]
+    expected: >-
+      exit 0; checker in NGUYÊN VĂN `xếp lại sau: 3 hồ sơ, 3 mục trên bản đồ, nút mermaid 3` — ba giá trị đúng quan hệ AC-11 hứa, in ra để đối chiếu được chứ không nằm im trong bụng checkBucket — rồi `✅ PRODUCT-MAP.md khớp với _acceptance/`, và răng in `CASE parked-opportunity: PASS` (chiều đỏ: cơ hội park bị xếp vào "cân nhắc").
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.lcm_docs
+    paths: ["STATUS.md", "docs/strategy/vision.md", "docs/roadmap.md", "scripts/roadmap/check-plan-docs.sh", "scripts/roadmap/roadmap-drift.mjs", "scripts/roadmap/check-roadmap-fresh.sh"]
+    expected: >-
+      exit 0 và dòng cuối `✅ check-plan-docs: tài liệu khớp kế hoạch`, không dòng `FAIL:` nào.
+      Số hồ sơ phải là số **tính được**: script đếm contract mang `status: signed-off` trên cây
+      rồi so với con số trong STATUS.md và in cả hai — grep một hằng số thì hồ sơ thứ 37 ký xong
+      mà ô vẫn xanh (gap-probe 04/09 P1). `paths` gồm cả bộ đọc sổ cái vì AC-12 hứa "guard sổ cái
+      xanh": không khai thì carry-forward bỏ qua ô này đúng lúc bộ đọc ấy đổi
+      (`[dang-ky-fork-openai#F1]`). Chiều đỏ thường trực: E15.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.lcm_teeth_builtins
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh"]
+    expected: >-
+      exit 0 và stdout `CASE builtins-only: PASS` — bản sao guard chạy TỪ TRONG cây tạm (không có
+      `node_modules` ở cấp cha nào) vẫn in `plan-freeze:`; bản sao thêm `import … from "clsx"` thì
+      CHẾT `ERR_MODULE_NOT_FOUND`, chứng minh cây tạm cô lập thật; lưới grep có đối chứng dương
+      (mẫu phải khớp ≥1 dòng `import … from "node:"`); cờ rác → exit 2 kèm `không nhận tham số`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-14
+    executor: script
+    cmd: config:executors.script.lcm_teeth_kiem_co_hoi
+    paths: ["scripts/roadmap/check-plan-freeze.mjs", "scripts/roadmap/check-plan-freeze-teeth.sh", "_acceptance/skill-1-footage-kho-clip/opportunity.md"]
+    expected: >-
+      exit 0 và stdout có CẢ HAI ca: `CASE kiem-co-hoi: PASS` (A1 ✅ khi cơ hội thiếu `decision`
+      hoặc `decided_by` → F2 nêu `skill-1-footage-kho-clip chưa ký Cổng Đáng`; đủ ba trường
+      người VÀ đã gỡ hết `[đề xuất]` → xanh, A1 không nằm trong "tin theo lời") và
+      `CASE kiem-co-hoi-de-xuat: PASS` (đủ ba trường người nhưng mục Ngưỡng còn `[đề xuất]` →
+      vẫn F2, nêu `còn ngưỡng đề xuất`). Vế thứ hai là vế mang toàn bộ ngưỡng của lát cắt: thiếu
+      nó thì A1 ✅ trong khi chưa vạch nào được chốt (gap-probe 04/09 P1).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-15
+    executor: script
+    cmd: config:executors.script.lcm_docs_teeth
+    paths: ["scripts/roadmap/check-plan-docs.sh", "scripts/roadmap/check-plan-docs-teeth.sh"]
+    expected: >-
+      exit 0 và dòng cuối `✅ răng tài liệu: 9/9 case`; bốn ca phá trên bản sao (lùi ngày
+      STATUS.md · trả lại nháy ngược ở đoạn tỉ lệ · xoá đoạn định vị khỏi vision.md · thêm một
+      hồ sơ ký mới mà không sửa STATUS.md) đều làm `check-plan-docs.sh` đỏ **đúng phép kiểm nêu
+      tên**, ca lành xanh. Ca thứ tư là ca chịu lực: nó phân biệt "đếm trên cây" với "grep hằng
+      số" — bản grep sẽ xanh ở ca đó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.lcm_teeth_o_moi_co_hoi
+    paths:
+      - scripts/roadmap/check-plan-freeze.mjs
+      - scripts/roadmap/check-plan-freeze-teeth.sh
+    expected: >-
+      exit 0 và stdout `CASE o-moi-co-hoi-hong: PASS` — nửa CHỈ-CÓ-CƠ-HỘI của AC-2, đường mà E2
+      không đi (stray_dossier chỉ viết contract.md, tức chỉ chạm nhánh fail-closed). Ba hình dạng
+      từng thoát 0 xanh đều phải ĐỎ và gọi đúng tên slug: frontmatter thiếu `---` đóng ·
+      `stage: Discovery` viết hoa · `stage: prototype` ngoài danh sách. Chiều ngược trên cùng
+      đường mã: một cơ hội `decision: park` vẫn XANH và không bị F1 gọi tên.
+    evidence_required:
+      - run_id
+      - exit_code
+      - verifier
+      - verified_at
+      - output
+  - id: E17
+    criterion: AC-16
+    executor: script
+    cmd: config:executors.script.lcm_teeth_park_ky
+    paths:
+      - scripts/roadmap/check-plan-freeze.mjs
+      - scripts/roadmap/check-plan-freeze-teeth.sh
+    expected: >-
+      exit 0 và stdout có `CASE park-chua-ky: PASS` (gỡ `decided_by` của một hồ sơ đã park →
+      F5 nêu `timeline-view khai park nhưng thiếu decided_by`) lẫn `CASE park-ngoai-bang: PASS`
+      (một hồ sơ park KHÔNG có dòng trong bảng Xếp lại sau → F5 nêu đúng slug; rồi thêm đúng
+      dòng ấy vào bảng → guard XANH và không còn gọi tên nó). Trước F5, cả hai hình dạng đều
+      thoát 0 xanh: F1 bỏ qua vì hồ sơ đã đóng, F3 chỉ đi theo các dòng CÓ trong bảng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E18
+    criterion: AC-17
+    executor: script
+    cmd: config:executors.script.lcm_docs_quan_he
+    paths:
+      - scripts/roadmap/check-plan-docs.sh
+      - scripts/roadmap/check-plan-docs-teeth.sh
+    expected: >-
+      exit 0 và stdout có cả bốn ca. `ngay-tien` là ca chịu lực: đẩy ngày STATUS.md lên tương
+      lai phải XANH — bản ghim hằng số đỏ SAI HƯỚNG ở đúng ca này. `ti-le-lech`: ký hồ sơ thứ 37
+      và sửa STATUS.md cho khớp, chỉ còn đoạn tỉ lệ lệch → FAIL nêu `khai 'trên 36 hồ sơ' nhưng
+      cây đếm được 37`. `adr-da-co`: ADR-0013 có thật trên cây thì roadmap được phép nhắc → XANH.
+      `khong-ho-so-ky`: cây không có hồ sơ ký nào phải cho FAIL CÓ TÊN và các phép kiểm sau vẫn
+      chạy (`OK: roadmap 1.6 trỏ B7` vẫn in) — không tắt ngang vì `grep` không khớp dưới `set -e`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

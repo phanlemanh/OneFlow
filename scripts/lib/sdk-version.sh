@@ -28,7 +28,27 @@
 # `git rev-parse`: the repo root is two levels above scripts/lib/. A cwd-derived
 # root is wrong from inside the plugin clone; a git-derived one is wrong from
 # inside any other repo. The file's own path is neither.
-_SDK_VERSION_DEFAULT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+#
+# BASH_SOURCE alone is not enough: it is a bash array and does not exist under
+# zsh, which is the login shell on macOS and the shell some verifier agents get.
+# There, `dirname ""` yields "." and `cd ./../..` from sdk/ silently resolved the
+# root to the repo's PARENT, then reported the real pyproject.toml as missing.
+# Measured 2026-08-27 (S4 round 15): identical commands passed under bash and
+# aborted under zsh, so two evals came back BLOCKED while their siblings ran.
+# zsh names the file being sourced in the `%x` prompt escape; it is reached
+# through eval so bash never parses the zsh-only substitution.
+_sdk_version_self="${BASH_SOURCE[0]:-}"
+if [ -z "$_sdk_version_self" ] && [ -n "${ZSH_VERSION:-}" ]; then
+    _sdk_version_self="$(eval 'printf %s "${(%):-%x}"')"
+fi
+# No anchor resolved means no root. Leaving this empty makes both readers below
+# refuse by name; guessing a root is the fail-open this file exists to prevent.
+if [ -n "$_sdk_version_self" ]; then
+    _SDK_VERSION_DEFAULT_ROOT="$(cd "$(dirname "$_sdk_version_self")/../.." && pwd)"
+else
+    _SDK_VERSION_DEFAULT_ROOT=""
+fi
+unset _sdk_version_self
 
 sdk_version() {
     local root
@@ -59,4 +79,33 @@ sdk_spec() {
     local v
     v=$(sdk_version) || return $?
     printf 'oneflow-sdk==%s\n' "$v"
+}
+
+# The reading ENGINE's requirement specifier, derived from the same file for the
+# same reason. normalize-text-vi pins vietnormalizer exactly, because a patch
+# release there changes how a number is spoken.
+#
+# Added 2026-08-22 after a review found the derivation re-implemented in three
+# scripts and twelve config keys, in two incompatible regex dialects — a pin
+# written `vietnormalizer == 0.2.3` matched in one and not the other. This
+# file's own header calls that "the failure family this repo already paid for";
+# the second copy had simply been written anyway (S4 round 7 finding).
+reader_pin() {
+    local root
+    root="${SDK_VERSION_ROOT:-$_SDK_VERSION_DEFAULT_ROOT}"
+    [ -n "$root" ] || { echo "sdk-version: no repo root resolved at source time" >&2; return 2; }
+    local toml="$root/sdk/pyproject.toml"
+    [ -f "$toml" ] || { echo "sdk-version: no such file: $toml" >&2; return 2; }
+
+    # Tolerant of the whitespace a formatter may introduce around `==`, then
+    # re-emitted in the canonical form. Matching only the tight spelling is how
+    # one dialect went silently blind while its sibling still matched.
+    local v
+    v=$(grep -oE '"vietnormalizer[[:space:]]*==[[:space:]]*[0-9]+(\.[0-9]+)+"' "$toml" \
+        | head -1 | tr -d '" ' | sed 's/vietnormalizer==//')
+    case "$v" in
+        [0-9]*.[0-9]*) ;;
+        *) echo "sdk-version: could not parse a vietnormalizer pin out of $toml (got '$v')" >&2; return 2 ;;
+    esac
+    printf 'vietnormalizer==%s\n' "$v"
 }

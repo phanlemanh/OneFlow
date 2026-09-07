@@ -9,6 +9,11 @@ status: signed-off
 approved_by: Manh
 approved_at: 2026-07-28
 time_human_minutes: {gate1: 10, gate2: 15}
+# The merge commit that carried this feature into main (PR #27).
+# scripts/acceptance/own-range.sh turns it into the commit range this
+# feature's evals ask over, so re-running on a later branch still grades
+# this feature's own diff instead of the whole branch.
+landed_merge: 84e93e1
 ---
 
 # Acceptance Contract: stale-scope-by-paths
@@ -131,10 +136,16 @@ vào [`check-stale-scoping.sh`](../../scripts/acceptance/check-stale-scoping.sh)
 trên git fixture như 14 case anh em, nên miễn nhiễm trạng thái pin của repo thật —
 đó là khác biệt khiến nó ổn định còn golden thì không.
 
-[`check-stale-golden.sh`](../../scripts/acceptance/check-stale-golden.sh) và fixture
-của nó **giữ nguyên trên cây**: xoá là chạm `scripts/**`, kích lại treadmill staleness
-cho toàn bộ pin vừa ghim. Chúng là code chết cho tới khi contract kế dọn — ghi ở đây
-để người sau không tưởng đó là guard đang có hiệu lực.
+`check-stale-golden.sh` và fixture của nó **được giữ lại trên cây vào 06/08**, vì
+lúc đó xoá là chạm `scripts/**` và kích lại treadmill staleness cho toàn bộ pin vừa
+ghim. Chúng là code chết kể từ lượt descope này.
+
+**Cập nhật 27/08 — cả ba mảnh ĐÃ ĐƯỢC XOÁ** ([PR #76](https://github.com/phanlemanh/OneFlow/pull/76)):
+guard, fixture, và key `stale_scoping_golden`. Lý do hoãn ở trên hết hiệu lực từ
+`97b5b12` (17/08), khi fork `STALE-DIFF-SCOPE-GUARD` khiến một commit chỉ chạm
+`scripts/**` không làm cũ pin nào — đo được: commit chỉ sửa guard đó sinh 0 stale
+violation. Việc dọn thuộc hồ sơ [`gate-tooling-t1`](../gate-tooling-t1/contract.md)
+(item 0.8b), và guard `check-golden-dead-code-absent.sh` canh để ba mảnh không bò lại.
 
 ## Coverage
 

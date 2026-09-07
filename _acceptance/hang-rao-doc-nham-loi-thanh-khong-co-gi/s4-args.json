@@ -1,0 +1,274 @@
+{
+ "generated_at": "2026-09-03T23:15:33Z",
+ "generated_sha": "8654dcecf2d836e771045c1c96f8af4feb2d63fc",
+ "mainBranchInfo": {
+  "branch": "main",
+  "source": "remote"
+ },
+ "slug": "hang-rao-doc-nham-loi-thanh-khong-co-gi",
+ "round": 2,
+ "riskTier": "T2",
+ "evals": [
+  {
+   "id": "E1",
+   "criterion": "AC-1",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case base-khong-phan-giai",
+   "expected": "exit 0, in `CASE base-khong-phan-giai: PASS`. Ca dựng một kho dùng-rồi-bỏ rồi chạy\n`newlines` với một tên nhánh không tồn tại; đòi thoát KHÁC 0, thông điệp chứa NGUYÊN\nVĂN tên base ấy, **và hai khẳng định nữa chứng minh chốt nằm TRƯỚC mọi lượt đọc\ntệp**: số dòng `FAIL` in ra bằng **0**, và KHÔNG có dòng tổng kết `dong run-log moi\nso ...` nào. Thiếu hai vế ấy thì một bản quét hết rồi mới dừng ở cuối vẫn xanh — nó\nin 1674 dòng mới và 25 lỗi giả y như hiện trạng, và ngưỡng 25 → 0 của hồ sơ cơ hội\nchưa hề được đo. Đo hiện trạng trước khi sửa: cùng lệnh in `dong run-log moi\nso refs/heads/khong-ton-tai: 1674` rồi 25 dòng FAIL — mỗi dòng đổ lỗi cho một hồ sơ\nkhông liên quan. Chiều đỏ của ô này là chính hiện trạng ấy, đã chạy được.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_base_ref"
+  },
+  {
+   "id": "E2",
+   "criterion": "AC-2",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case base-thieu-file",
+   "expected": "exit 0, in `CASE base-thieu-file: PASS`. ĐỐI CHỨNG DƯƠNG của E1, và nó chịu lực\nthật: phép từ chối ở E1 rất dễ viết quá tay thành \"mọi lượt `show` rỗng đều là lỗi\",\nvà một bản như thế vẫn làm E1 xanh. Ca này chạy `newlines` với base PHÂN GIẢI ĐƯỢC\ntrên một hồ sơ mà `run-log.jsonl` chưa tồn tại ở base ấy, và đòi chế độ chạy bình\nthường, mọi dòng tính là mới. Đã kiểm răng: siết phép từ chối thành \"rỗng cũng là\nlỗi\" → ca này đỏ, E1 vẫn xanh.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_base_absent"
+  },
+  {
+   "id": "E3",
+   "criterion": "AC-3",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case diff-that-bai",
+   "expected": "exit 0, in `CASE diff-that-bai: PASS`. Ca dựng một dòng repin mà `prev`/`sha` qua\nđược `cat-file -t` nhưng phép so hai mốc thất bại, rồi đòi `check` DỪNG nêu cặp sha\n— thay vì trả danh sách file rỗng và tính lần ghim ấy là ĐÃ ĐO. Chiều đỏ: khôi phục\n`|| \"\"` → ca đỏ với \"mong do, nhung thoat 0\".",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_diff_must"
+  },
+  {
+   "id": "E4",
+   "criterion": "AC-4",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh check --min-computable 1 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case ong-ba",
+   "expected": "exit 0 trên kho thật, và dòng tổng kết in số dòng rơi vào hạng \"ông bà\" (đo 03/09:\n25 trên 52 dòng repin). Hạng ấy là miễn trừ CỐ Ý cho dòng lịch sử không có\n`prev_sha` — giữ nguyên, nhưng phải đếm được: một hạng miễn trừ không có số là chỗ\nmọi thứ hỏng trôi vào mà không con số nào đổi. Ô này CHẠY chính chế độ `check` nên\nkhai `self_referential: true` theo AC-8.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh",
+    "_acceptance"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_check_counts"
+  },
+  {
+   "id": "E5",
+   "criterion": "AC-5",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case shallow-do-loi",
+   "expected": "exit 0, in `CASE shallow-do-loi: PASS`. Ca làm lệnh dò clone nông THẤT BẠI (không\nphải trả \"false\"), rồi đòi `check` DỪNG thay vì giả định kho đầy đủ. Cùng lớp với\nE1 và E3: một lượt dò hỏng đang được đọc thành một câu trả lời. Chiều đỏ: bỏ phép\ntừ chối → ca đỏ.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_shallow_probe"
+  },
+  {
+   "id": "E6",
+   "criterion": "AC-6",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth",
+   "expected": "exit 0 cho HAI lượt: hàng rào mới chạy trên kho thật (xanh) và ca fixture có khối\neval mang cùng một khoá hai lần (ĐỎ). Vế thứ nhất KHÔNG chứng minh gì — đo 03/09\ncho 0/34 tệp có khoá lặp, vì ca thật duy nhất vừa được vá ở nhánh trước; nó chỉ\nchứng minh hàng rào không đỏ oan trên dữ liệu lành. Vế thứ hai là toàn bộ bằng\nchứng. Ca thật đã xảy ra trên hồ sơ ĐÃ KÝ `noi-thuoc-tai-lieu-vao-ci`: `expected`\nhai lần trong khối E2, nên bằng chứng đã ký mô tả một phép đo đã bị rút.",
+   "executor": "script",
+   "paths": [
+    "scripts/acceptance/check-eval-key-dupes.sh",
+    "_acceptance"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_dupkey"
+  },
+  {
+   "id": "E7",
+   "criterion": "AC-7",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-neu-dich-danh",
+   "expected": "exit 0, in `CASE khoa-trung-neu-dich-danh: PASS`. Ca đòi thông điệp đỏ chứa ĐỦ BA\nthứ: tên hồ sơ · tên khoá bị lặp · số dòng. Và một khẳng định cấu trúc: hàng rào\nKHÔNG gọi `yaml.safe_load` (grep mã nguồn) — dùng chính bộ đọc nuốt khoá để bắt lỗi\nnuốt khoá là vô nghĩa, và đó là phép đo duy nhất ngăn ai đó \"đơn giản hoá\" nó về\n`safe_load` ở vòng sau.",
+   "executor": "script",
+   "paths": [
+    "scripts/acceptance/check-eval-key-dupes.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_dupkey_msg"
+  },
+  {
+   "id": "E8",
+   "criterion": "AC-8",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-khai",
+   "expected": "exit 0, in `CASE tu-quy-chieu-khai: PASS`. Ca dựng một hồ sơ fixture có ô đo khai\n`self_referential: true` và một lần ghim chạm `paths` của ô ấy, rồi đòi `check`\nXANH — ô được miễn khỏi tập phải-chạy-lại. Khai, KHÔNG đoán: nhận diện bằng cách dò\ntên script trong lệnh là đúng bệnh mà hồ sơ cơ hội này gọi tên (nhận diện theo hình\ndạng chuỗi thay vì theo chủ thể được khai), nên ca này cố ý dùng một lệnh KHÔNG\nchứa tên hàng rào — bản \"đoán từ lệnh\" sẽ trượt ở đây.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_selfref_declared"
+  },
+  {
+   "id": "E9",
+   "criterion": "AC-9",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh check --min-selfref 5 && bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-dem-giam",
+   "expected": "exit 0 trên kho thật, và dòng tổng kết có thêm MỘT HẠNG CÓ TÊN cho ô tự-quy-chiếu\nkèm số đếm. **Số ấy phải được GHIM, không để trôi:** ô này đòi hạng ấy **≥ 5** và\nđòi đầu ra nêu đích danh tập rơi vào đó — E4/E9/E10 của hồ sơ này cộng E5/E6 của\n`repin-khong-chay-lai-eval` sau khi E10 hoàn nguyên `paths`. Chiều đỏ: gỡ MỘT dòng\nkhai `self_referential` thì số phải giảm đúng một. Không ghim số thì một cài đặt in\n`tu-quy-chieu: 0` — vì đọc sai khoá, hoặc vì việc hoàn nguyên chưa xong — vẫn làm ô\nnày xanh, đúng nghĩa \"một phép miễn trừ im lặng không phân biệt được với một phép đo\nbị quên\" mà AC-9 tự viết ra. Ô này cũng chạy `check` nên tự khai\n`self_referential: true`.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh",
+    "_acceptance"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_selfref_bucket"
+  },
+  {
+   "id": "E10",
+   "criterion": "AC-10",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case tu-quy-chieu-quen-khai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case paths-e5e6-hoan-nguyen",
+   "expected": "exit 0 cho HAI lượt. Lượt một: ca fixture `tu-quy-chieu-quen-khai` — cùng fixture\nnhư E8 nhưng BỎ dòng khai, đòi `check` ĐỎ. Hướng của phép quên là tiêu chí duy nhất\nđáng cân khi chọn cơ chế miễn trừ, nên nó phải có ô đo riêng chứ không nằm trong\nvăn xuôi. Lượt hai: khẳng định `paths` của E5 và E6 trong\n`_acceptance/repin-khong-chay-lai-eval/evals.yaml` ĐÃ HOÀN NGUYÊN, chứa lại mục\n`_acceptance` — phép thu hẹp 03/09 mua yên tĩnh bằng cách bán độ phủ; không hoàn\nnguyên thì bế tắc chỉ đang bị giấu, và ô này sẽ xanh trên một kho đã bị làm mù.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh",
+    "_acceptance"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_selfref_forget"
+  },
+  {
+   "id": "E11",
+   "criterion": "AC-11",
+   "cmd": "bash scripts/acceptance/check-resign-wave.sh hang-rao-doc-nham-loi-thanh-khong-co-gi origin/main",
+   "expected": "exit 0 — không hồ sơ đã ký NÀO KHÁC còn mang bằng chứng có trước code của nhánh\nnày. Vòng này chạm `scripts/ci/**` VÀ thêm một file mới dưới `scripts/acceptance/**`;\nđo 03/09 trên nhánh trước cho thấy chạm `scripts/acceptance/` làm 4 hồ sơ hoá ôi.\nNên vòng này kèm một sự kiện re-pin, và lane ấy là việc CUỐI CÙNG trước lượt verify.\nKHÔNG khai `paths` → ô này luôn chạy lại, đúng mặc định an toàn.",
+   "executor": "script",
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_resign_wave"
+  },
+  {
+   "id": "E12",
+   "criterion": "AC-12",
+   "cmd": "bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-diff-that-bai && bash scripts/ci/check-repin-eval-coverage.sh teeth --case plan-tap-id",
+   "expected": "exit 0 cho HAI lượt. Lượt một: ca `plan-diff-that-bai` — chạy `plan` với một tham\nchiếu KHÔNG phân giải được, đòi thoát KHÁC 0, thông điệp nêu NGUYÊN VĂN cặp tham\nchiếu, **và** KHÔNG in dòng `BI CHAM (0): (rong)` — thiếu vế sau thì một bản dừng ở\ncuối vẫn xanh trong khi vẫn kịp bảo người vận hành «không cần chạy lại gì». Lượt\nhai: ca `plan-tap-id` (đã có từ trước) vẫn XANH — đối chứng dương chứng minh phép\ntừ chối không viết quá tay thành \"mọi lượt plan đều lỗi\". Đo 04/09 trước khi sửa:\n`plan repin-khong-chay-lai-eval deadbeefdeadbeef HEAD` in `0 file doi` ·\n`BI CHAM (0): (rong)` rồi thoát 0 — chiều đỏ đã chạy được trên kho thật.",
+   "executor": "script",
+   "paths": [
+    "scripts/ci/repin-eval-coverage.mjs",
+    "scripts/ci/check-repin-eval-coverage.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.hrdn_plan_diff_must"
+  }
+ ],
+ "suiteCommands": [
+  "bash scripts/acceptance/preflight-verify-env.sh",
+  "pnpm build && pnpm typecheck",
+  "pnpm lint:check",
+  "pnpm test",
+  "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q",
+  "pnpm verify:plugins",
+  "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
+ ],
+ "diffBase": "ee4e3784e0c555fcb3a50a3896f28ed4c956c86f",
+ "repoRoot": "/Users/manh-macmini/dev/oneflow",
+ "personasPath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.7.0/skills/acceptance/references/judge-personas.md",
+ "templatePath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.7.0/skills/acceptance/references/evidence-report-template.md",
+ "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
+ "contractPath": "/Users/manh-macmini/dev/oneflow/_acceptance/hang-rao-doc-nham-loi-thanh-khong-co-gi/contract.md",
+ "invokedAt": "2026-09-03T23:15:33Z",
+ "invokedSha": "8654dcecf2d836e771045c1c96f8af4feb2d63fc",
+ "evalsHash": "067fca6cbde4ef4386550c695088291a5f779fe11d0d40580b65dcf4f6eb35aa",
+ "runBaseline": false,
+ "carriedEvals": [
+  {
+   "id": "E6",
+   "runId": "minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E6-r1",
+   "fromRound": 1,
+   "verifiedAt": "2026-09-03T22:14:55Z",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh && bash scripts/acceptance/check-eval-key-dupes.sh --teeth"
+  },
+  {
+   "id": "E7",
+   "runId": "minted-hang-rao-doc-nham-loi-thanh-khong-co-gi-E7-r1",
+   "fromRound": 1,
+   "verifiedAt": "2026-09-03T22:14:55Z",
+   "cmd": "bash scripts/acceptance/check-eval-key-dupes.sh --teeth --case khoa-trung-neu-dich-danh"
+  }
+ ]
+}

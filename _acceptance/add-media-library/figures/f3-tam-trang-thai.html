@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F3 · Ma trận trạng thái của node — add-media-library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f7f7f8;
+      --color-ink:    #1a0033;
+      --color-muted:  #4f4a63;
+      --color-soft:   #66607a;
+      --font-sans:    'Geist', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', 'Lora', serif;
+      --font-mono:    'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+    .lede {
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: var(--color-muted);
+      max-width: 72ch;
+      margin-bottom: 1.5rem;
+    }
+    .lede strong { font-weight: 600; color: var(--color-ink); }
+    svg { width: 100%; min-width: 1080px; display: block; }
+    footer {
+      margin-top: 1.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(26,0,51,0.12);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      color: var(--color-soft);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">F3 · add-media-library · Cổng 1</p>
+    <h1>Ma trận trạng thái của node — và lời văn từng ô</h1>
+    <p class="lede">Cổng 1 vốn duyệt UI trên bản bấm được; ở đây design-pass bị bỏ, nên người ký duyệt <strong>lời văn ngay trên hình này</strong>. Khung hình hài là sơ đồ, không phải bản dựng thật — thứ cần đọc kỹ là câu người dùng sẽ thấy. <strong>Tám ô theo danh sách trong đề bài</strong>; AC-15 kê bảy trạng thái — đề bài thêm ô «rỗng/chờ gõ» và không kê ô «xong» (ô «xong» chính là <code>videoNode</code> ở F1).</p>
+
+    <svg viewBox="0 0 1280 800" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ma trận tám trạng thái của node nạp-từ-kho, mỗi ô kèm câu người dùng đọc được">
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ==================== 01 · THIẾU CẤU HÌNH ==================== -->
+      <text x="40" y="98" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">01</text>
+      <text x="68" y="98" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Thiếu cấu hình</text>
+      <rect x="40" y="112" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="40" y="112" width="276" height="22" fill="#ececed"/>
+      <line x1="40" y1="134" x2="316" y2="134" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="52" y="127" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="304" y="127" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="52" y="146" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.15)"/>
+      <rect x="240" y="146" width="64" height="20" rx="4" fill="rgba(26,0,51,0.18)"/>
+      <text x="272" y="160" fill="#66607a" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Tìm</text>
+      <rect x="52" y="178" width="252" height="52" rx="4" fill="rgba(26,0,51,0.05)" stroke="rgba(26,0,51,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="64" y="200" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">MEDIA_LIBRARY_API_KEY</text>
+      <text x="64" y="218" fill="#66607a" font-size="9" font-family="'Geist', sans-serif">chưa có trong kho khoá BYO</text>
+      <rect x="40" y="268" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="40" y="268" width="2" height="80" fill="#4f4a63"/>
+      <text x="52" y="284" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="52" y="302" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Chưa gọi được media-library: thiếu biến</text>
+      <text x="52" y="318" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">MEDIA_LIBRARY_API_KEY. Thêm khoá rồi mở</text>
+      <text x="52" y="334" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">lại node — phần studio còn lại vẫn chạy.</text>
+      <text x="40" y="364" fill="#66607a" font-size="12" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">«gọi đích danh biến, không nói “chưa cấu hình dịch vụ”»</text>
+
+      <!-- ==================== 02 · RỖNG · CHỜ GÕ ==================== -->
+      <text x="348" y="98" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">02</text>
+      <text x="376" y="98" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Rỗng · chờ gõ</text>
+      <rect x="348" y="112" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="348" y="112" width="276" height="22" fill="#ececed"/>
+      <line x1="348" y1="134" x2="624" y2="134" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="360" y="127" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="612" y="127" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="360" y="146" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.30)"/>
+      <line x1="372" y1="151" x2="372" y2="161" stroke="#1a0033" stroke-width="1.2"/>
+      <rect x="380" y="154" width="96" height="5" rx="2" fill="rgba(26,0,51,0.12)"/>
+      <rect x="548" y="146" width="64" height="20" rx="4" fill="#1a0033"/>
+      <text x="580" y="160" fill="#f7f7f8" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Tìm</text>
+      <rect x="360" y="178" width="252" height="52" rx="4" fill="#f7f7f8" stroke="rgba(26,0,51,0.15)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="452" y="200" width="68" height="6" rx="3" fill="rgba(26,0,51,0.10)"/>
+      <rect x="348" y="268" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="348" y="268" width="2" height="80" fill="#4f4a63"/>
+      <text x="360" y="284" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="360" y="302" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Mô tả cảnh bạn cần, ví dụ: phòng khách</text>
+      <text x="360" y="318" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">ngập nắng, máy lia chậm. Nhấn Tìm để</text>
+      <text x="360" y="334" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">lấy clip từ kho.</text>
+
+      <!-- ==================== 03 · ĐANG TÌM ==================== -->
+      <text x="656" y="98" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">03</text>
+      <text x="684" y="98" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Đang tìm</text>
+      <rect x="656" y="112" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="656" y="112" width="276" height="22" fill="#ececed"/>
+      <line x1="656" y1="134" x2="932" y2="134" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="668" y="127" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="920" y="127" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="668" y="146" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.30)"/>
+      <rect x="680" y="154" width="140" height="5" rx="2" fill="rgba(26,0,51,0.35)"/>
+      <rect x="856" y="146" width="64" height="20" rx="4" fill="rgba(26,0,51,0.35)"/>
+      <circle cx="878" cy="156" r="2.5" fill="#f7f7f8"/>
+      <circle cx="888" cy="156" r="2.5" fill="#f7f7f8"/>
+      <circle cx="898" cy="156" r="2.5" fill="#f7f7f8"/>
+      <rect x="668" y="180" width="76" height="50" rx="4" fill="rgba(26,0,51,0.07)"/>
+      <rect x="756" y="180" width="76" height="50" rx="4" fill="rgba(26,0,51,0.07)"/>
+      <rect x="844" y="180" width="76" height="50" rx="4" fill="rgba(26,0,51,0.07)"/>
+      <rect x="656" y="268" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="656" y="268" width="2" height="80" fill="#4f4a63"/>
+      <text x="668" y="284" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="668" y="302" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Đang tìm trong kho…</text>
+      <text x="668" y="318" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Có thể mất vài giây.</text>
+
+      <!-- ==================== 04 · CÓ KẾT QUẢ ==================== -->
+      <text x="964" y="98" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">04</text>
+      <text x="992" y="98" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Có kết quả</text>
+      <rect x="964" y="112" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="964" y="112" width="276" height="22" fill="#ececed"/>
+      <line x1="964" y1="134" x2="1240" y2="134" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="976" y="127" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="1228" y="127" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="976" y="146" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.30)"/>
+      <rect x="988" y="154" width="120" height="5" rx="2" fill="rgba(26,0,51,0.35)"/>
+      <rect x="1164" y="146" width="64" height="20" rx="4" fill="#1a0033"/>
+      <text x="1196" y="160" fill="#f7f7f8" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Tìm</text>
+      <rect x="976" y="180" width="76" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.25)"/>
+      <rect x="976" y="180" width="76" height="28" rx="4" fill="rgba(26,0,51,0.12)"/>
+      <rect x="982" y="214" width="52" height="12" rx="3" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="1008" y="223" fill="#b800b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">CC-BY</text>
+      <rect x="1064" y="180" width="76" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.25)"/>
+      <rect x="1064" y="180" width="76" height="28" rx="4" fill="rgba(26,0,51,0.12)"/>
+      <rect x="1070" y="214" width="52" height="12" rx="3" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="1096" y="223" fill="#b800b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">STOCK</text>
+      <rect x="1152" y="180" width="76" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.25)"/>
+      <rect x="1152" y="180" width="76" height="28" rx="4" fill="rgba(26,0,51,0.12)"/>
+      <rect x="1158" y="214" width="52" height="12" rx="3" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="1184" y="223" fill="#b800b8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle">RF</text>
+      <rect x="964" y="268" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="964" y="268" width="2" height="80" fill="#4f4a63"/>
+      <text x="976" y="284" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="976" y="302" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">8 clip khớp mô tả. Chọn một clip để nạp</text>
+      <text x="976" y="318" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">về workspace.</text>
+      <text x="976" y="336" fill="#66607a" font-size="9" font-family="'Geist', sans-serif">Nhãn quyền trên mỗi thẻ là bắt buộc hiện.</text>
+
+      <!-- ==================== 05 · KỆ MỎNG ==================== -->
+      <text x="40" y="426" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">05</text>
+      <text x="68" y="426" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Kệ mỏng</text>
+      <rect x="40" y="440" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="40" y="440" width="276" height="22" fill="#ececed"/>
+      <line x1="40" y1="462" x2="316" y2="462" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="52" y="455" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="304" y="455" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="52" y="474" width="180" height="20" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.30)"/>
+      <rect x="64" y="482" width="132" height="5" rx="2" fill="rgba(26,0,51,0.35)"/>
+      <rect x="240" y="474" width="64" height="20" rx="4" fill="#1a0033"/>
+      <text x="272" y="488" fill="#f7f7f8" font-size="9" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Tìm</text>
+      <rect x="52" y="508" width="252" height="50" rx="4" fill="#f7f7f8" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="138" y="524" width="80" height="6" rx="3" fill="rgba(26,0,51,0.15)"/>
+      <rect x="156" y="538" width="44" height="6" rx="3" fill="rgba(26,0,51,0.10)"/>
+      <rect x="40" y="596" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="40" y="596" width="2" height="80" fill="#4f4a63"/>
+      <text x="52" y="612" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="52" y="630" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Không clip nào dựng được thẻ cho mô tả</text>
+      <text x="52" y="646" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">này (kho có 37 clip qua bộ lọc). Thử mô</text>
+      <text x="52" y="662" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">tả khác hoặc nới yêu cầu.</text>
+      <text x="40" y="692" fill="#66607a" font-size="12" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">«không có gì hợp» — chữ phải khác hẳn ô 08 «hỏng»</text>
+
+      <!-- ==================== 06 · KẾT QUẢ KHÔNG XẾP HẠNG ==================== -->
+      <text x="348" y="426" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">06</text>
+      <text x="376" y="426" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Kết quả không xếp hạng</text>
+      <rect x="348" y="440" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="348" y="440" width="276" height="22" fill="#ececed"/>
+      <line x1="348" y1="462" x2="624" y2="462" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="360" y="455" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="612" y="455" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="360" y="474" width="252" height="22" rx="4" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.2"/>
+      <text x="372" y="489" fill="#b800b8" font-size="9" font-family="'Geist Mono', monospace">! CHƯA XẾP HẠNG THEO NGỮ NGHĨA</text>
+      <rect x="360" y="508" width="118" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.25)"/>
+      <rect x="360" y="508" width="118" height="28" rx="4" fill="rgba(26,0,51,0.12)"/>
+      <rect x="366" y="542" width="52" height="10" rx="3" fill="rgba(26,0,51,0.06)" stroke="rgba(26,0,51,0.25)" stroke-width="0.8"/>
+      <rect x="494" y="508" width="118" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.25)"/>
+      <rect x="494" y="508" width="118" height="28" rx="4" fill="rgba(26,0,51,0.12)"/>
+      <rect x="500" y="542" width="52" height="10" rx="3" fill="rgba(26,0,51,0.06)" stroke="rgba(26,0,51,0.25)" stroke-width="0.8"/>
+      <rect x="348" y="596" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="348" y="596" width="2" height="80" fill="#4f4a63"/>
+      <text x="360" y="612" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="360" y="630" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Kết quả chưa xếp hạng theo ngữ nghĩa:</text>
+      <text x="360" y="646" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">kho đang thiếu embedding. Danh sách vẫn</text>
+      <text x="360" y="662" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">đúng bộ lọc, thứ tự không phản ánh độ hợp.</text>
+
+      <!-- ==================== 07 · ĐANG NẠP ==================== -->
+      <text x="656" y="426" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">07</text>
+      <text x="684" y="426" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Đang nạp</text>
+      <rect x="656" y="440" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="656" y="440" width="276" height="22" fill="#ececed"/>
+      <line x1="656" y1="462" x2="932" y2="462" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="668" y="455" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="920" y="455" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="668" y="474" width="118" height="50" rx="4" fill="#ffffff" stroke="#1a0033" stroke-width="1.4"/>
+      <rect x="668" y="474" width="118" height="28" rx="4" fill="rgba(26,0,51,0.18)"/>
+      <rect x="674" y="508" width="52" height="10" rx="3" fill="rgba(26,0,51,0.06)" stroke="rgba(26,0,51,0.25)" stroke-width="0.8"/>
+      <rect x="802" y="474" width="118" height="50" rx="4" fill="#ffffff" stroke="rgba(26,0,51,0.12)"/>
+      <rect x="802" y="474" width="118" height="28" rx="4" fill="rgba(26,0,51,0.06)"/>
+      <rect x="668" y="540" width="252" height="6" rx="3" fill="rgba(26,0,51,0.10)"/>
+      <rect x="668" y="540" width="152" height="6" rx="3" fill="rgba(26,0,51,0.45)"/>
+      <text x="668" y="566" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">tải bytes qua URL ký → kho file</text>
+      <rect x="656" y="596" width="276" height="80" rx="4" fill="#ececed"/>
+      <rect x="656" y="596" width="2" height="80" fill="#4f4a63"/>
+      <text x="668" y="612" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="668" y="630" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Đang nạp clip về kho file của bạn…</text>
+      <text x="668" y="646" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Xong sẽ hiện thành node video trên canvas.</text>
+
+      <!-- ==================== 08 · LỖI CÓ TÊN ==================== -->
+      <text x="964" y="426" fill="#66607a" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.10em">08</text>
+      <text x="992" y="426" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Lỗi có tên</text>
+      <rect x="964" y="440" width="276" height="140" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="964" y="440" width="276" height="22" fill="#ececed"/>
+      <line x1="964" y1="462" x2="1240" y2="462" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <text x="976" y="455" fill="#1a0033" font-size="9" font-weight="600" font-family="'Geist', sans-serif">Nạp từ kho</text>
+      <text x="1228" y="455" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">add/media-library</text>
+      <rect x="976" y="472" width="252" height="26" rx="4" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="984" y="478" width="36" height="14" rx="3" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="0.8"/>
+      <text x="1002" y="489" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">401</text>
+      <text x="1028" y="489" fill="#1a0033" font-size="9" font-family="'Geist', sans-serif">khoá không được chấp nhận</text>
+      <rect x="976" y="504" width="252" height="26" rx="4" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="984" y="510" width="36" height="14" rx="3" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="0.8"/>
+      <text x="1002" y="521" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">403</text>
+      <text x="1028" y="521" fill="#1a0033" font-size="9" font-family="'Geist', sans-serif">khoá thiếu scope search</text>
+      <rect x="976" y="536" width="252" height="26" rx="4" fill="rgba(26,0,51,0.04)" stroke="rgba(26,0,51,0.20)" stroke-width="0.8"/>
+      <rect x="984" y="542" width="36" height="14" rx="3" fill="#ffffff" stroke="rgba(26,0,51,0.35)" stroke-width="0.8"/>
+      <text x="1002" y="553" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">0.2</text>
+      <text x="1028" y="553" fill="#1a0033" font-size="9" font-family="'Geist', sans-serif">lệch contracts_version</text>
+      <text x="976" y="574" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">phân loại theo mã HTTP + trường error</text>
+      <rect x="964" y="596" width="276" height="128" rx="4" fill="#ececed"/>
+      <rect x="964" y="596" width="2" height="128" fill="#4f4a63"/>
+      <text x="976" y="612" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CÂU NGƯỜI DÙNG ĐỌC</text>
+      <text x="976" y="630" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">401 — Khoá media-library không được</text>
+      <text x="976" y="646" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY.</text>
+      <text x="976" y="666" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">403 — Khoá thiếu quyền search. Xin cấp</text>
+      <text x="976" y="682" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">scope search cho khoá này.</text>
+      <text x="976" y="702" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">Lệch phiên bản — ghim 0.2, dịch vụ trả</text>
+      <text x="976" y="718" fill="#1a0033" font-size="10" font-family="'Geist', sans-serif">0.3.1. Đã dừng, không đoán dữ liệu.</text>
+
+      <!-- ==================== CHÚ GIẢI ==================== -->
+      <line x1="40" y1="752" x2="1240" y2="752" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="768" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+      <rect x="152" y="760" width="14" height="10" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="172" y="769" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Khung hình hài — sơ đồ, không phải bản dựng thật</text>
+
+      <rect x="480" y="760" width="14" height="10" rx="2" fill="#ececed"/>
+      <rect x="480" y="760" width="2" height="10" fill="#4f4a63"/>
+      <text x="500" y="769" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Lời văn Cổng 1 duyệt</text>
+
+      <rect x="676" y="760" width="14" height="10" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.2"/>
+      <text x="696" y="769" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Thứ hợp đồng bắt buộc hiện: nhãn quyền · dải cảnh báo</text>
+
+      <text x="1060" y="769" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.08em">CẢ HAI NỀN SÁNG/TỐI · AXE-CORE 0 LỖI</text>
+    </svg>
+
+    <footer>AC-1 · AC-4 · AC-5 · AC-6 · AC-8 · AC-15 — bù cho QĐ-5 (bỏ design-pass vì owner vắng)</footer>
+  </div>
+</body>
+</html>

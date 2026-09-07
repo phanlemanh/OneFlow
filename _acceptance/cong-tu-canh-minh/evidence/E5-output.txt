@@ -1,0 +1,3 @@
+   đã giao: 27 hồ sơ ký, 27 mục trên bản đồ, nút mermaid 27
+   cơ hội: 2 hồ sơ, 2 mục trên bản đồ, nút mermaid 2
+✅ PRODUCT-MAP.md khớp với _acceptance/ — không có trôi.

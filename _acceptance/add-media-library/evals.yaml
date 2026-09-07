@@ -1,0 +1,290 @@
+schema_version: 1
+feature_slug: add-media-library
+
+# T3. Bảy criterion mang tag (cross-layer) — AC-1, AC-3, AC-5, AC-6, AC-9, AC-12,
+# AC-13 — vì When/Then của chúng đi qua server (đọc kho khoá, gọi REST, ghi kho
+# file, ghi bản đồ node). Mỗi criterion đó mang CẢ một eval `layer: backend-effect`
+# chứng minh nửa server trên nonce riêng, LẪN một ui-check khẳng định dấu vết
+# server-derived trên màn hình. ui-check một mình không bao giờ đủ cho criterion
+# xuyên lớp.
+#
+# Mọi test chạy với MỘT MÁY CHỦ GIẢ CỤC BỘ dựng đúng hình dạng hợp đồng thật của
+# media-library (đọc từ packages/contracts/src/ ngày 19/08) — không eval nào gọi
+# mạng ra ngoài, nên vòng verify chạy được cả khi không có instance library.
+#
+# `paths` khai trên mọi eval máy/ui để round sau carry-forward được phần diff không
+# chạm. Suite commands luôn chạy lại.
+#
+# LUẬT TAG (cross-layer) dùng trong hồ sơ này, viết ra để khỏi bị đọc là bất nhất:
+# tag đánh dấu criterion cần CẢ bằng chứng lớp UI LẪN bằng chứng lớp server. AC-11
+# và AC-14 chạy hoàn toàn phía server nên KHÔNG mang tag — eval của chúng là
+# test/script, không có nguy cơ "ui-check một mình gánh criterion xuyên lớp".
+#
+# NGOÀI 29 eval này, mỗi vòng verify còn chạy bộ `feature_loop.suite_keys` của repo:
+# build+typecheck · lint · unit · sdk pytest · verify:plugins · gen_abi_clean. Người
+# ký ở Cổng 1 nên đọc 29 eval là phần RIÊNG của feature, không phải toàn bộ cổng.
+
+evals:
+  # ---------- A. Không phụ thuộc cứng (bảo đảm #2) ----------
+  - id: E1
+    criterion: AC-1
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_config
+    paths: ["src/lib/media-library/config.server.ts", "src/lib/settings/env-store.server.ts"]
+    expected: "exit 0; với kho khoá thiếu MEDIA_LIBRARY_URL, kết quả trả về nêu ĐÍCH DANH chuỗi 'MEDIA_LIBRARY_URL' (assert trên nội dung chuỗi, không phải trên một boolean), thiếu cả hai thì nêu CẢ HAI tên. NỬA ĐÀN ÁP — nửa gánh việc: với cả hai biến đã đặt, cùng đường code đó KHÔNG được báo thiếu; một hàm luôn-trả-thiếu sẽ qua được vế xanh và chính là lỗi bị canh. (Vế 'không lời gọi mạng nào' KHÔNG đo ở đây — spy fetch trong test đơn vị của config.server là hằng đúng vì nơi đó vốn không có fetch; vế đó do E26 gánh, chạy qua route)"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E2
+    criterion: AC-1
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E2-step1.png"
+      - "Assert: tên biến còn thiếu hiện NGUYÊN VĂN trên màn hình (đọc được bằng mắt trong ảnh), không phải câu chung chung 'chưa cấu hình dịch vụ'"
+    expected: "khung hình nêu đúng tên biến còn thiếu; một thông điệp không chứa tên biến là FAIL kể cả khi nó lịch sự hơn"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E3
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.aml_no_boot_dependency
+    paths: ["src/lib/media-library/**", "src/app/**", "src/components/workspace/**"]
+    expected: "exit 0; quét đồ thị import THẬT (parse AST, phân giải specifier thành ĐƯỜNG DẪN nên import tương đối `../../lib/media-library/...` bị bắt y như alias `@/`; allow-list là danh sách file CHÍNH XÁC chứ không phải tiền tố tên file tự miễn trừ) và khẳng định module src/lib/media-library/** CHỈ được nhập bởi các file đã khai — không layout, không page, không instrumentation, không provider toàn cục. RĂNG: chạy lại trên fixture có thêm một dòng import từ src/app/workspace/page.tsx thì guard PHẢI exit khác 0 và nêu đúng đường dẫn vi phạm; một guard chỉ grep tên package sẽ xanh trên fixture đó"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-2
+    executor: ui-check
+    steps:
+      - "Kho khoá RỖNG; mở {url}/workspace → chụp _acceptance/add-media-library/evidence/E4-step1.png"
+      - "Thêm một node KHÁC (add ảnh) từ bảng chọn → chụp _acceptance/add-media-library/evidence/E4-step2.png"
+      - "Assert: không banner lỗi toàn cục, không toast, console không có lỗi chưa bắt"
+    expected: "studio dùng được bình thường khi chưa hề cấu hình library; ĐIỀU KHIỂN DƯƠNG trước: khung hình phải cho thấy node mới THẬT SỰ được thêm, nếu không thì một trang trắng cũng không có lỗi"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- B. Tìm trong kho ----------
+  - id: E5
+    criterion: AC-3
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_client
+    paths: ["src/lib/media-library/client.server.ts", "src/lib/media-library/types.ts"]
+    expected: "exit 0; máy chủ giả GHI LẠI request thật và test assert từng phần: method POST, đường dẫn /v1/search, header Authorization đúng chuỗi 'Bearer <key>' (khớp regex neo ^Bearer , đúng như auth.ts của library), body có intent người dùng gõ, media_type='video', limit<=20. NỬA ĐÀN ÁP: máy chủ giả trả 401 khi thiếu header — một adapter quên header phải làm test ĐỎ, không phải trả mảng rỗng lặng lẽ"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-3
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=searching → chụp _acceptance/add-media-library/evidence/E6-step0.png"
+      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E6-step1.png"
+      - "Assert: khung đang-tìm nói rõ đang chờ và nút bị khoá; khung kết quả có thẻ kèm ảnh thu nhỏ, caption và dòng đếm — hai khung phải phân biệt được bằng mắt"
+    expected: "thẻ hiện trên node kèm ảnh thu nhỏ, caption và dòng đếm số clip khớp; danh sách rỗng hoặc thiếu caption là FAIL"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E7
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_aml_node
+    paths: ["src/components/workspace/nodes/add/add-media-library-node.tsx", "src/components/workspace/nodes/add/media-card-list.tsx"]
+    expected: "exit 0; với cards=[] và candidates=12, thành phần render thông điệp KỆ MỎNG, và test assert thông điệp đó KHÁC thông điệp lỗi (so hai chuỗi, không so 'có hiện gì đó'). NỬA ĐÀN ÁP — nửa gánh việc: một lỗi 500 thật KHÔNG được render thông điệp kệ mỏng; gộp hai trạng thái vào một câu là đúng lỗi bị canh"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E8
+    criterion: AC-5
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_client
+    paths: ["src/lib/media-library/client.server.ts"]
+    expected: "exit 0; response có warnings:['embedding_unavailable'] thì adapter mang MẢNG ĐÓ nguyên văn ra ngoài (assert phần tử, không assert boolean 'có cảnh báo'). NỬA ĐÀN ÁP: response sạch phải cho warnings rỗng — một adapter luôn báo suy-giảm cũng qua được vế xanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E9
+    criterion: AC-5
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=unranked → chụp _acceptance/add-media-library/evidence/E9-step1.png"
+      - "Mở {url}/proto/add-media-library?state=results → chụp _acceptance/add-media-library/evidence/E9-step2.png"
+      - "Assert: khung 1 có dải nói rõ kết quả không xếp hạng theo ngữ nghĩa; khung 2 KHÔNG có dải đó"
+    expected: "hai khung hình khác nhau nhìn thấy được; một 200 kèm cảnh báo không được trình y hệt một 200 sạch"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E10
+    criterion: AC-6
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_client
+    paths: ["src/lib/media-library/client.server.ts", "src/lib/media-library/errors.ts"]
+    expected: "exit 0; MA TRẬN TOÀN PHẦN tám ca, số assert BẰNG số ca: 401 · 403 (error='forbidden: cần scope search') · 400 (error='bad_request') · 404 · 500 thân trần · 501 (error='not_implemented') · thân trả về là HTML không phải JSON · đứt mạng (fetch reject). Mỗi ca cho ra một mã lỗi RIÊNG của OneFlow, assert từng phần tử chứ không assert 'có lỗi'. Vế bắt buộc thứ hai: KHÔNG ca nào trong tám ca cho ra mã kệ-mỏng — đây chính là kịch bản 501-đọc-nhầm-thành-kho-rỗng. RĂNG — trường hợp quyết định: một 403 mà thân câu tiếng Việt bị thay bằng chuỗi vô nghĩa PHẢI vẫn phân loại đúng là thiếu-scope, vì phân loại đọc mã HTTP + trường error chứ không regex câu chữ; một adapter regex vào 'cần scope' sẽ đỏ đúng ở đây"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E11
+    criterion: AC-6
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=error → chụp _acceptance/add-media-library/evidence/E11-step1.png"
+      - "Mở {url}/proto/add-media-library?state=thin-shelf → chụp _acceptance/add-media-library/evidence/E11-step2.png"
+      - "Assert: hai khung mang hai câu KHÁC NHAU; khung lỗi gọi đúng tên nguyên nhân và nêu tên biến khoá, khung kệ mỏng nói về kho chứ không nói về hỏng"
+    expected: "lỗi và kệ mỏng đọc ra hai việc-phải-làm khác nhau; hai khung mang cùng một thông điệp là FAIL"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- C. Thẻ Media Card (bảo đảm #3) ----------
+  - id: E12
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.aml_no_domain_vocab
+    paths: ["src/**"]
+    expected: "exit 0; PHẠM VI QUÉT SUY TỪ CỬA SỔ DIFF merge-base(origin/main,HEAD)..HEAD — mọi file thêm hoặc sửa dưới src/ — chứ KHÔNG từ một danh sách tên file viết tay (một danh sách tay không bao giờ chứa file mà impl chưa đặt tên); guard khẳng định cửa sổ KHÔNG RỖNG trước, vì cửa sổ rỗng làm mọi lời khai vắng-mặt thành vô nghĩa. Trong phạm vi đó, đỏ khi thấy: (a) một trong 18 chuỗi từ vựng lĩnh vực (noi-that, ngoai-canh, flycam, tien-ich, cong-truong, duong-pho, du-an, phan-khu, cung-truc, cung-layout, cung-tang, cung-toa, dung-can, render-3d, scale-model, real-model, full-noi-that, co-ban); (b) MA TRẬN 8 TRƯỜNG — khai báo union đóng cho bất kỳ trường nào trong provenance, scene_kind, entity.kind, entity.specificity, energy, interior_state, license_label, slot_role (một lượt grep RIÊNG cho từng trường và từng literal, không dùng alternation gộp; con số in ra suy từ ${#FIELDS[@]}/${#VOCAB[@]} chứ không viết cứng; phép kiểm union khớp CẢ nháy đơn lẫn nháy kép). RĂNG: chạy lại trên bản sao có cắm scene_kind === 'noi-that' vào một file MỚI chưa từng có tên trong bất kỳ danh sách nào của hồ sơ này, guard PHẢI exit khác 0 và in đúng đường dẫn + số dòng; một guard neo vào danh sách tay sẽ xanh trên fixture đó và đó chính là lỗ hổng bị bịt"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.unit_aml_node
+    paths: ["src/components/workspace/nodes/add/media-card-list.tsx", "src/lib/media-library/types.ts"]
+    expected: "exit 0; thẻ mang provenance='generated:acme@deadbeef' (dạng MỞ của hợp đồng) và scene_kind='mot-loai-chua-tung-co' vẫn render đủ caption + ảnh thu nhỏ, không throw, không hiện 'undefined'. Thẻ entity=null cũng render bình thường. NỬA ĐÀN ÁP: một cài đặt dùng union đóng sẽ ném hoặc bỏ trắng trên chính hai giá trị đó"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E14
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.unit_aml_node
+    paths: ["src/components/workspace/nodes/add/media-card-list.tsx"]
+    expected: "exit 0; thẻ có license_label='Phối cảnh 3D' thì CHUỖI ĐÓ có mặt trong cây render (assert nội dung, không assert 'có một chip nào đó'). NỬA ĐÀN ÁP: thẻ KHÔNG có license_label thì không render chip rỗng — nhãn bắt buộc-khi-có không được biến thành ô trống luôn-hiện"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- D. Nạp bytes (bảo đảm #1) ----------
+  - id: E15
+    criterion: AC-9
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_import
+    paths: ["src/lib/media-library/import.server.ts", "src/lib/file/file-utils.ts", "src/lib/file/storage.server.ts"]
+    expected: "exit 0; trên nonce riêng: adapter gọi GET /v1/assets/:id (máy chủ giả ghi nhận), tải bytes từ urls.original, và file_key sinh ra ĐỌC LẠI ĐƯỢC từ kho với sha256 TRÙNG sha256 của bytes máy chủ giả phát ra — round-trip THẬT trong import-roundtrip.server.test.ts: TONGFLOW_DATA_DIR trỏ thư mục tạm, driver production ghi file thật, readUploadFileByFileKey đọc lại bằng đường code KHÁC. GIỚI HẠN đã khai: chỉ phủ driver đĩa cục bộ; driver của cloud shell (@ext/storage-driver) không được phủ ở đây. NỬA ĐÀN ÁP — nửa gánh việc: khi urls.original trả 404 thì KHÔNG file_key nào được tạo và KHÔNG file rỗng nào bị bỏ lại trong kho; một cài đặt lưu trước-kiểm-sau sẽ đỏ đúng ở đây"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E16
+    criterion: AC-9
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=importing → chụp _acceptance/add-media-library/evidence/E16-step1.png"
+      - "Mở {url}/proto/add-media-library?state=imported → chụp _acceptance/add-media-library/evidence/E16-step2.png"
+      - "Assert: khung 1 nói rõ đang nạp và thẻ đang nạp bị khoá; khung 2 là trạng thái SAU khi nạp — nói clip đã nằm trong kho file của người dùng và hiện node video mới, KHÔNG phải danh sách thẻ trước khi nạp"
+    expected: "trạng thái đang-nạp phân biệt được với đang-chọn, thẻ đang nạp không bấm lại được, VÀ khung 2 cho thấy chặng SAU khi nạp (clip đã ở kho file, node video mới) chứ không phải danh sách trước khi nạp. Round 2 FAIL đúng ở đây: step 2 trỏ state=results — màn hình TRƯỚC khi nạp — nên chặng mà tiêu chí này tồn tại để chứng minh chưa từng được chụp. E15 gánh nửa server chứng minh bytes thật sự về kho"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  - id: E17
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.unit_aml_import
+    paths: ["src/lib/media-library/import.server.ts"]
+    expected: "exit 0; urls.original dạng http:// (khi cấu hình KHÔNG phải localhost) bị từ chối kèm lý do gọi đúng tên; phản hồi vượt trần kích thước bị cắt và báo; phản hồi treo quá hạn chờ bị huỷ — ĐO THẬT: stub giữ body mở (hangBytes), MEDIA_LIBRARY_DOWNLOAD_TIMEOUT_MS hạ deadline xuống 300ms, assert kết thúc dưới 10s và kho KHÔNG còn file nào; nửa đàn áp: cùng deadline đó một body hoàn tất vẫn phải nạp được. PHẠM VI: AC-10 đòi CẮT, không đòi gọi đúng tên nguyên nhân — việc treo hiện báo LOCAL_FAILURE là lỗi đã xác nhận, triage xếp NGOÀI hợp đồng, để Cổng 2. ĐIỀU KHIỂN DƯƠNG bắt buộc trong cùng test: một URL https dưới trần PHẢI thành công — nếu không, một hàm từ chối tất cả cũng qua được cả ba vế"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E18
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.unit_aml_ext
+    paths: ["src/lib/media-library/import.server.ts", "src/app/api/uploads/[...path]/route.ts"]
+    expected: "exit 0; ba bậc suy đuôi chạy đúng thứ tự: URL có '.webm' → key đuôi webm; URL không đuôi + Content-Type 'video/mp4' → mp4; không đuôi + Content-Type vô nghĩa → mp4 mặc định. Và với key sinh ra, bảng Content-Type của /api/uploads phải trả kiểu phát được — ĐO THẬT trong extension-serving.server.test.ts: lưu bytes qua saveFile rồi GỌI handler GET của route uploads và đọc header Content-Type; nửa đàn áp: một đuôi mà thang từ chối (.svg) không được phục vụ như video, và key chưa từng ghi phải 404. NỬA ĐÀN ÁP — nửa gánh việc: URL '.webm' KHÔNG được thành .mp4; một cài đặt luôn gán mp4 qua được hai bậc sau và hỏng đúng bậc đầu"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- E. Giao cho canvas ----------
+  - id: E19
+    criterion: AC-12
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_wiring
+    paths: ["src/lib/workflow/flow-connection-shared.ts", "src/lib/workflow/exporter.ts", "src/components/workspace/types.tsx"]
+    expected: "exit 0; ĐỐI XỨNG HAI BẢN SAO: test đọc CẢ ADD_NODE_OUTPUT_TYPE (flow-connection-shared.ts) LẪN typeMap trong exporter.getAddNodeOutputType và khẳng định hai bảng khớp nhau trên MỌI khoá, và addMediaLibraryNode->videoNode có trong cả hai. Rồi: cạnh addMediaLibraryNode->videoNode qua được validator (gọi THẬT getEffectiveOutputType, kèm nửa đàn áp: addImageNode/addTextNode phải ra modality của CHÚNG, nếu không thì một hàm luôn trả videoNode cũng qua), và exporter xuất ra node dữ liệu mang fileKeys (gọi THẬT exportWorkflow rồi assert dataNodes không rỗng TRƯỚC khi soi nội dung — exporter bỏ qua node không phân giải được và vẫn trả về một workflow rỗng trông hợp lệ). GIỚI HẠN: vế đối xứng hai bảng vẫn đọc VĂN BẢN NGUỒN của exporter vì getAddNodeOutputType là private. NỬA ĐÀN ÁP: sửa chỉ MỘT trong hai bảng phải làm test đỏ — hai bản sao lệch nhau là lỗi đã có sẵn trong repo, đây là cái bẫy được đặt"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E20
+    criterion: AC-12
+    executor: ui-check
+    steps:
+      - "Mở {url}/workspace, thêm node nạp-từ-kho từ bảng chọn → chụp _acceptance/add-media-library/evidence/E20-step1.png"
+      - "Assert: node hiện trên canvas với tiêu đề nạp-từ-kho và có một handle nguồn bên phải"
+    expected: "node đăng ký thành công và render được trên canvas THẬT (không phải proto); E19 gánh nửa chứng minh modality đúng"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- F. Ranh giới có phiên bản (bảo đảm #7) ----------
+  - id: E21
+    criterion: AC-13
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_client
+    paths: ["src/lib/media-library/client.server.ts", "src/lib/media-library/version.ts"]
+    expected: "exit 0; contracts_version='1.0.0' → từ chối, thông điệp chứa CẢ '0.2' (dòng ghim) LẪN '1.0.0' (nhận được); '0.3.0' → cũng từ chối (0.x lấy minor làm trục phá vỡ); '0.2.5' → chấp nhận. NỬA ĐÀN ÁP — nửa gánh việc: '0.2.0' PHẢI đi lọt; một hàm luôn từ chối qua được cả ba vế đỏ và làm node chết hẳn"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E22
+    criterion: AC-13
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=version-mismatch → chụp _acceptance/add-media-library/evidence/E22-step1.png"
+      - "Assert: màn hình LỆCH PHIÊN BẢN hiện câu của chính mã VERSION_MISMATCH (khác hẳn câu khoá-bị-từ-chối của AC-6), KHÔNG hiện danh sách thẻ nào"
+    expected: "trạng thái từ-chối-có-tên không render dữ liệu đoán theo hình dạng cũ. Khung này đi qua ĐƯỜNG THẬT: proto gọi failureMessageKey(code) rồi t() y như node, nên thiếu bản dịch VERSION_MISMATCH sẽ ĐỎ. Round 3 FAIL đúng ở đây: proto render một hằng chuỗi viết cứng mang câu AUTH_REJECTED dưới cái tên 'error', nên đường lệch-phiên-bản chưa từng được vẽ. E21 gánh nửa server"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- G. Ranh giới hạng + sàn giao diện ----------
+  - id: E23
+    criterion: AC-14
+    executor: script
+    # Cố ý liệt kê chính TẬP BỊ CẤM: nếu thu hẹp paths về file của feature thì một
+    # round sau thêm file dưới sdk/** vẫn carry-forward được eval này khi còn xanh.
+    cmd: config:executors.script.aml_tier_boundary
+    paths: ["config/tongflow.abi.json", "src/generated/abi/**", "sdk/**", "src/db/**"]
+    expected: "exit 0; cửa sổ diff là merge-base(origin/main, HEAD)..HEAD và guard tự khẳng định cửa sổ KHÔNG RỖNG trước (cửa sổ rỗng làm mọi lời khai vắng-mặt thành vô nghĩa). Trong cửa sổ đó: src/lib/workflow/** CÓ bị chạm (đúng hai path T3 mà feature này khai là chạm) và KHÔNG file nào dưới config/tongflow.abi.json, src/generated/abi/**, sdk/**, src/db/** bị chạm"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E24
+    criterion: AC-15
+    executor: script
+    cmd: config:executors.script.aml_a11y_proto
+    paths: ["src/components/workspace/nodes/add/add-media-library-node.tsx", "src/components/workspace/nodes/add/media-card-list.tsx", "src/components/proto/**", "src/app/globals.css"]
+    expected: "exit 0 trên MƯỜI trạng thái x nền sáng/tối (thêm 'imported' cho AC-9 và 'version-mismatch' cho AC-13); guard đọc TỪNG trang và assert CẢ HAI TRỤC: data-proto-state khớp state được hỏi, VÀ lớp bọc lấy từ tham số theme có mặt đúng chỗ (dark có, sáng không), rồi đếm 10 sáng + 10 tối. Round 3 FAIL đúng ở trục thứ hai: nửa nền tối chỉ được khẳng định bằng THAM SỐ URL, nên nếu lớp bọc theme hỏng thì 10 URL tối thành 10 lượt quét lại trang sáng mà guard vẫn tuyên đủ — proto giờ trả 'unknown:<tên>' cho state lạ thay vì lặng lẽ rơi về idle, nên gõ sai một tên case sẽ ĐỎ thay vì quét idle 18 lần. axe-core 0 vi phạm mức critical/serious, tính cả tương phản. Chạy axe TRONG Chrome thật vì bảng màu dùng oklch()/color-mix() mà jsdom không phân giải được (bài học byo-key-onboarding 07/08: cổng jsdom báo PASS trong khi axe tìm ra 11 vi phạm serious). Script exit 3 chứ không phải 0 khi không tới được trang nào — dev server chết không được đọc thành sạch"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- Sinh sau lượt phản biện context sạch (gap-probe P0 + 3 P1) ----------
+  - id: E26
+    criterion: AC-10
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.unit_aml_route
+    paths: ["src/app/api/media-library/**", "src/lib/media-library/**"]
+    expected: "exit 0; đo QUAN HỆ CALL-SITE, không đo hàm: test gọi chính handler của POST /api/media-library/import (import route rồi gọi, không gọi import.server trực tiếp). Máy chủ giả trả urls.original='http://169.254.169.254/latest/meta-data/' → route PHẢI từ chối, gọi đúng tên lý do, và KHÔNG file_key nào được tạo. Cùng test gánh vế 'không lời gọi mạng nào' của AC-1: với kho khoá RỖNG, gọi handler của route search và assert spy fetch ghi nhận ĐÚNG 0 lời gọi (ở đây fetch thật sự có thể xảy ra, khác với E1). ĐIỀU KHIỂN DƯƠNG bắt buộc cùng test: một urls.original https hợp lệ đi qua route PHẢI tạo được file_key — nếu không, một route hỏng hoàn toàn cũng qua được cả hai vế đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E27
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.aml_no_dormant_fetch
+    paths: ["src/**"]
+    expected: "exit 0; downloadAndSave() trong src/lib/file/file-utils.ts vẫn có ĐÚNG 0 caller trong toàn cây sau thay đổi (đường tải không kiểm scheme/host/kích thước phải ở nguyên trạng thái chết). Guard đếm caller bằng cách phân giải định danh THẬT: parse AST bằng TypeScript, khớp import theo ĐƯỜNG DẪN đã phân giải rồi tìm call site của tên CỤC BỘ mà import đó gắn — nên `{ downloadAndSave as dl }` rồi `dl(u)`, `ns.downloadAndSave(u)`, và file .mjs/.cjs/.js đều bị bắt (cả ba đều đi lọt bản grep cũ). In ra danh sách rỗng đó chứ không chỉ nói 'sạch'. GIỚI HẠN: không phải type-checker — một lời gọi qua giá trị truyền lòng vòng lúc chạy thì không thấy. RĂNG: chạy lại trên bản sao có cắm đúng MỘT caller thì guard PHẢI exit khác 0 và nêu đường dẫn + số dòng của caller đó"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E28
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.aml_fixture_provenance
+    paths: ["src/lib/media-library/__fixtures__/**", "src/lib/media-library/types.ts"]
+    expected: "exit 0; mỗi file fixture của máy chủ giả mang tiêu đề xuất xứ nêu ĐƯỜNG DẪN + SỐ DÒNG + NGÀY ĐỌC của hợp đồng nguồn (media-library packages/contracts/src/...), và tập TÊN TRƯỜNG của mỗi fixture khớp ĐÚNG bảng trường chép từ hợp đồng — thừa một trường hoặc thiếu một trường đều đỏ, nêu đích danh trường lệch. Đây là thứ CÓ THỂ đo được mà không nhập code của library (nạp zod của họ vào harness OneFlow là vi phạm bảo đảm #1 của ADR-0012); nó chặn fixture TRÔI, không chặn được fixture SAI TỪ ĐẦU — phần đó là giới hạn đã khai trong contract và là tiền đề Cổng 2. RĂNG: đổi tên một trường trong một fixture (license_label -> licenseLabel) thì guard PHẢI đỏ và gọi đúng tên trường"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E29
+    criterion: AC-1
+    executor: ui-check
+    steps:
+      - "Mở {url}/proto/add-media-library?state=missing-config → chụp _acceptance/add-media-library/evidence/E29-step1.png"
+      - "Assert: từ chính trạng thái thiếu-cấu-hình có ô nhập cho CẢ HAI biến và một nút lưu — người dùng có đường ra ngay tại chỗ, không phải đi tìm màn hình khác"
+    expected: "vòng ra tồn tại: người kẹt vì thiếu cấu hình nhìn thấy ngay chỗ nhập. E2 chứng minh thông điệp nêu đúng tên; eval này chứng minh CÓ ĐƯỜNG RA"
+    evidence_required: [run_id, exit_code, verifier, verified_at, screenshot]
+
+  # ---------- Judgment ----------
+  - id: E25
+    criterion: AC-15
+    executor: judgment
+    question: "Nhìn CHỈ bằng màn hình — không console, không log — đi qua năm chặng (chưa cấu hình → tìm → kệ mỏng / kết quả không xếp hạng → nạp → xong), một người ngồi cạnh có chỉ được người dùng đang ở đâu và đang tiến hay đang kẹt không? Và có chỗ nào node trình một kết quả SUY GIẢM (không xếp hạng ngữ nghĩa, kệ mỏng, lệch phiên bản) y hệt như một kết quả sạch không? Nêu đích danh chặng nào trả lời là không."
+    inputs: ["_acceptance/add-media-library/evidence/E2-step1.png", "_acceptance/add-media-library/evidence/E6-step0.png", "_acceptance/add-media-library/evidence/E6-step1.png", "_acceptance/add-media-library/evidence/E9-step1.png", "_acceptance/add-media-library/evidence/E9-step2.png", "_acceptance/add-media-library/evidence/E11-step2.png", "_acceptance/add-media-library/evidence/E16-step1.png", "_acceptance/add-media-library/evidence/E16-step2.png", "_acceptance/add-media-library/evidence/E22-step1.png", "contract.md"]
+    evidence_required: [judged_by, verdict, rationale]

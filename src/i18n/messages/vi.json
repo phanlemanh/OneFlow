@@ -38,7 +38,38 @@
         "customSectionTitle": "Biến tuỳ chỉnh",
         "customSectionHint": "Các biến chưa được plugin nào khai báo.",
         "getKey": "Lấy key",
-        "requiredHint": "Bắt buộc"
+        "requiredHint": "Bắt buộc",
+        "storeUnreadable": {
+            "title": "Không đọc được kho khoá đã lưu",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "reason": "Không đọc được tệp cài đặt ({reason}).",
+            "escape": "Thay kho khoá bằng kho trống…",
+            "confirmTitle": "Thay kho khoá bằng kho trống?",
+            "confirmBody": "Mọi khoá đang lưu sẽ mất và không khôi phục được. Sau bước này bạn phải nhập lại từng khoá.",
+            "confirmCancel": "Để nguyên",
+            "confirmOk": "Tôi hiểu — thay kho",
+            "replaceFailed": "Không thay được kho khoá ({reason}). Chưa có gì bị thay đổi.",
+            "cause": {
+                "http": "máy chủ trả về {status}",
+                "not-json": "phản hồi không phải JSON",
+                "no-env": "phản hồi không kèm danh sách khoá",
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá {seconds} giây không có trả lời"
+            },
+            "writeFailed": "Không lưu được ({reason}). Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
+        }
     },
     "Index": {
         "title": "Ý tưởng mới"
@@ -204,9 +235,11 @@
             "extractStem": "Tách track nhạc cụ",
             "addTrack": "Thêm track",
             "completeMusic": "Hoàn thiện",
-            "musicBrief": "Kế hoạch nhạc"
+            "musicBrief": "Kế hoạch nhạc",
+            "tooltipMediaLibrary": "Kho media"
         },
         "toast": {
+            "ttsNeedsNormalize": "Node giọng đọc {nodes} chưa có node “Đọc số thành chữ” ở phía trên — số, giá và ngày có thể bị đọc sai. Thêm node đó vào giữa nguồn chữ và node giọng đọc.",
             "executing": "Đang thực thi...",
             "completed": "Hoàn thành",
             "cancelled": "Đã huỷ",
@@ -494,7 +527,8 @@
                 "musicExtract": "Tách track nhạc cụ",
                 "musicLego": "Thêm track",
                 "musicComplete": "Hoàn thiện phối khí",
-                "musicBrief": "Kế hoạch nhạc"
+                "musicBrief": "Kế hoạch nhạc",
+                "normalizeTextVi": "Đọc số thành chữ"
             },
             "options": {
                 "portrait": "Dọc",
@@ -556,7 +590,8 @@
                 "addTrack": "Tạo track",
                 "completeMusic": "Hoàn thiện",
                 "musicBrief": "Tạo kế hoạch",
-                "applyOverlay": "Dán lên media"
+                "applyOverlay": "Dán lên media",
+                "normalizeTextVi": "Đọc thành chữ"
             },
             "params": {
                 "prompt": "Prompt",
@@ -1047,6 +1082,37 @@
                 "endLabel": "Kết thúc (giây)",
                 "editOp": "Sửa op",
                 "removeOp": "Xoá op"
+            },
+            "addMediaLibrary": {
+                "title": "Nạp từ kho",
+                "searchPlaceholder": "Mô tả cảnh bạn cần, ví dụ: phòng khách ngập nắng",
+                "search": "Tìm",
+                "searching": "Đang tìm…",
+                "importing": "Đang nạp clip về kho file của bạn… Xong sẽ hiện thành node video trên canvas.",
+                "results": "{count} clip khớp mô tả. Chọn một clip để nạp về workspace.",
+                "thinShelf": "Không clip nào dựng được thẻ cho mô tả này (kho có {candidates} clip qua bộ lọc). Thử mô tả khác hoặc nới yêu cầu.",
+                "unranked": "Kết quả chưa xếp hạng theo ngữ nghĩa: kho đang thiếu embedding. Danh sách vẫn đúng bộ lọc, thứ tự không phản ánh độ hợp.",
+                "error": "Lời gọi tới kho không thành công.",
+                "missingConfig": "Chưa nối với kho media.",
+                "saveConfig": "Lưu rồi tìm lại",
+                "savingConfig": "Đang lưu…",
+                "urlLabel": "https://kho.vidu.com",
+                "keyLabel": "Khoá có scope search",
+                "failure": {
+                    "AUTH_REJECTED": "Khoá media-library không được chấp nhận. Kiểm tra MEDIA_LIBRARY_API_KEY.",
+                    "MISSING_SCOPE": "Khoá thiếu quyền search — xin cấp scope search cho khoá này.",
+                    "BAD_REQUEST": "Yêu cầu gửi tới kho không hợp lệ.",
+                    "NOT_FOUND": "Không thấy clip — đã xoá, hoặc khoá này không thấy được nó.",
+                    "NOT_IMPLEMENTED": "Kho chưa nối đủ phụ thuộc cho lối gọi này.",
+                    "VERSION_MISMATCH": "Kho đổi phiên bản giao kèo. Đã dừng, không đoán hình dạng dữ liệu.",
+                    "BAD_RESPONSE": "Kho trả về hình dạng bản này không nhận.",
+                    "NETWORK_ERROR": "Không gọi được tới kho.",
+                    "UPSTREAM_ERROR": "Kho trả lỗi.",
+                    "LOCAL_FAILURE": "OneFlow không hoàn tất được việc này ở phía máy của bạn — xem log ứng dụng để biết nguyên nhân thật.",
+                    "STORE_UNREADABLE": "Không đọc được kho khoá đã lưu nên chưa rõ dịch vụ này đã cấu hình hay chưa. Chưa có gì bị thay đổi — hãy mở màn Cài đặt."
+                },
+                "readFailed": "Không đọc được kho khoá đang lưu nên chưa đổi gì — thử lại.",
+                "writeFailed": "Không lưu được khoá. Chưa có gì thay đổi."
             }
         },
         "firstRun": {
@@ -1062,6 +1128,31 @@
             "blocked": "Chưa chuẩn bị được",
             "blockedReasonDownload": "Không tải được công cụ về máy — kiểm tra kết nối mạng.",
             "retry": "Thử lại"
+        },
+        "storeUnreadable": {
+            "title": "Không đọc được kho khoá đã lưu",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "reason": "Máy chủ không trả về được danh sách khoá đang lưu ({reason}).",
+            "toSettings": "Mở màn Cài đặt",
+            "cause": {
+                "http": "máy chủ trả về {status}",
+                "not-json": "phản hồi không phải JSON",
+                "no-env": "phản hồi không kèm danh sách khoá",
+                "network": "yêu cầu không hoàn tất ({detail})",
+                "timeout": "yêu cầu quá {seconds} giây không có trả lời"
+            },
+            "retry": "Thử lại"
+        },
+        "unauthenticated": {
+            "title": "Phiên đăng nhập đã hết hạn",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại"
+        },
+        "unavailable": {
+            "title": "Không tới được máy chủ khoá",
+            "unchanged": "Chưa có gì bị thay đổi.",
+            "retry": "Thử lại",
+            "reason": "Yêu cầu không nhận được trả lời ({code})."
         }
     },
     "Upload": {

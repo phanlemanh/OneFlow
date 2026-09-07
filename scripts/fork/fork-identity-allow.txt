@@ -1,0 +1,26 @@
+# Exemptions for scripts/fork/check-fork-identity.sh — one per line:
+#   <file>|<regex>|<reason>
+# A hit of the upstream-identity class outside this list fails the guard. A line
+# here that no longer matches anything ALSO fails the guard (two-way ratchet), so
+# an exemption cannot outlive the text it was written for. Each regex pins the
+# CONTEXT of the mention (the link text around it), not merely the URL — a
+# per-file blanket exemption would let a new upstream link into the same file
+# unnoticed (teeth case clone-upstream caught exactly that on the first draft).
+README.md|fork of \[TongFlow\]\(https://github\.com/tong-io/tongflow\)|fork notice: attribution of the upstream project
+README.md|tong-io/tongflow/releases/latest\)|the note explains what the upstream installers are
+README.md|\[tong-io/tongflow\]\(https://github\.com/tong-io/tongflow\)|license section: dual-licensing belongs to the upstream copyright holder
+README.md|app\.tongflow\.com|the note explains where upstream installers sign in
+docs/README_ZH.md|\[TongFlow\]\(https://github\.com/tong-io/tongflow\)（|fork notice: attribution of the upstream project
+docs/README_ZH.md|tong-io/tongflow/releases/latest\)|the note explains what the upstream installers are
+docs/README_ZH.md|\[tong-io/tongflow\]\(https://github\.com/tong-io/tongflow\)|license section: dual-licensing belongs to the upstream copyright holder
+docs/README_ZH.md|app\.tongflow\.com|the note explains where upstream installers sign in
+docs/README_JA.md|\[TongFlow\]\(https://github\.com/tong-io/tongflow\)（|fork notice: attribution of the upstream project
+docs/README_JA.md|tong-io/tongflow/releases/latest\)|the note explains what the upstream installers are
+docs/README_JA.md|\[tong-io/tongflow\]\(https://github\.com/tong-io/tongflow\)|license section: dual-licensing belongs to the upstream copyright holder
+docs/README_JA.md|app\.tongflow\.com|the note explains where upstream installers sign in
+NOTICE.md|fork of \[TongFlow\]\(https://github\.com/tong-io/tongflow\)|AGPL attribution of the upstream project
+CONTRIBUTING.md|holder, \[tong-io/tongflow\]\(https://github\.com/tong-io/tongflow\)|dual-licensing contact belongs to the upstream copyright holder
+SECURITY.md|reported to \[tong-io/tongflow\]\(https://github\.com/tong-io/tongflow\) instead|upstream-only vulnerabilities are redirected upstream
+CLAUDE.md|app\.tongflow\.com|release checklist explains why desktop-release is disarmed
+.github/workflows/desktop-release.yml|app\.tongflow\.com|workflow is slated for replacement at S5, not rebrand
+.github/workflows/desktop-release.yml|TongFlow-(mac|win)|artefact names kept until S5 replaces the workflow

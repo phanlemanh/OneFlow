@@ -1,11 +1,11 @@
 name: Feature request
-description: Suggest an idea or improvement for TongFlow
+description: Suggest an idea or improvement for OneFlow
 labels: ["enhancement", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for suggesting a feature. Please check [discussions](https://github.com/tong-io/tongflow/discussions) and [existing issues](https://github.com/tong-io/tongflow/issues) first.
+        Thanks for suggesting a feature. Please check [discussions](https://github.com/phanlemanh/OneFlow/discussions) and [existing issues](https://github.com/phanlemanh/OneFlow/issues) first.
 
   - type: textarea
     id: problem

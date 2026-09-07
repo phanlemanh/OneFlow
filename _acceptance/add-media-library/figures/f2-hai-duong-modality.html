@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F2 · Hai đường cho modality — add-media-library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f7f7f8;
+      --color-ink:    #1a0033;
+      --color-muted:  #4f4a63;
+      --color-soft:   #66607a;
+      --font-sans:    'Geist', system-ui, sans-serif;
+      --font-serif:   'Instrument Serif', 'Lora', serif;
+      --font-mono:    'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1040px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+    .lede {
+      font-size: 0.86rem;
+      line-height: 1.5;
+      color: var(--color-muted);
+      max-width: 62ch;
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 860px; display: block; }
+    footer {
+      margin-top: 1.25rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(26,0,51,0.12);
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      color: var(--color-soft);
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">F2 · add-media-library · Cổng 1</p>
+    <h1>Hai đường cho modality, và vì sao chọn C</h1>
+    <p class="lede">Một add node lấy modality của mình từ đâu? Hôm nay chỉ có một câu trả lời chạy được: bảng tra tĩnh. Đường còn lại gọn hơn nhưng đổi ngữ nghĩa của cả bảy add node đang chạy, trong một file hạng T3.</p>
+
+    <svg viewBox="0 0 1040 680" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="So sánh hai phương án xác định modality của add node">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+        <marker id="arrow-dim" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="rgba(26,0,51,0.35)"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ===== Mũi tên (vẽ trước hộp) ===== -->
+      <!-- Nhánh trái · đã chọn -->
+      <path d="M392 104 H288 Q280 104 280 112 V170" fill="none" stroke="#e100e1" stroke-width="1.6" marker-end="url(#arrow-accent)"/>
+      <!-- Nhánh phải · không chọn -->
+      <path d="M648 104 H752 Q760 104 760 112 V170" fill="none" stroke="rgba(26,0,51,0.35)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+      <!-- Chuỗi trái -->
+      <path d="M280 232 V258" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M280 336 V362" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M280 440 V466" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- Chuỗi phải -->
+      <path d="M760 232 V258" fill="none" stroke="rgba(26,0,51,0.35)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+      <path d="M760 336 V362" fill="none" stroke="rgba(26,0,51,0.35)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+      <path d="M760 440 V466" fill="none" stroke="rgba(26,0,51,0.35)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#arrow-dim)"/>
+
+      <!-- Nhãn nhánh -->
+      <rect x="300" y="80" width="60" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="330" y="92" fill="#b800b8" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CHỌN</text>
+
+      <rect x="656" y="80" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="704" y="92" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KHÔNG CHỌN</text>
+
+      <!-- ===== Câu hỏi ===== -->
+      <polygon points="520,56 648,104 520,152 392,104" fill="#ffffff" stroke="#1a0033" stroke-width="1.2"/>
+      <text x="520" y="100" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Modality của add node</text>
+      <text x="520" y="116" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">lấy từ đâu?</text>
+
+      <!-- ===== CỘT TRÁI · C ===== -->
+      <rect x="120" y="176" width="320" height="56" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="280" y="200" fill="#1a0033" font-size="13" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">C — bảng tĩnh</text>
+      <text x="280" y="218" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">giai đoạn A đi đường này</text>
+
+      <rect x="120" y="264" width="320" height="72" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1.1"/>
+      <text x="280" y="290" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Thêm đúng một dòng vào bảng tra</text>
+      <text x="280" y="310" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">ADD_NODE_OUTPUT_TYPE[addMediaLibraryNode]</text>
+      <text x="280" y="326" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">= "videoNode"</text>
+
+      <rect x="120" y="368" width="320" height="72" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1.1"/>
+      <text x="280" y="394" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Request ghim loại ngay từ đầu</text>
+      <text x="280" y="414" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">media_type: "video"</text>
+      <text x="280" y="430" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">gửi kèm mọi lời gọi tìm</text>
+
+      <rect x="120" y="472" width="320" height="72" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1.1"/>
+      <text x="280" y="498" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Kết quả không bao giờ hiện</text>
+      <text x="280" y="514" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">thứ không nạp được</text>
+      <text x="280" y="532" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">không có nhánh nào nở sai modality</text>
+
+      <text x="280" y="580" fill="#4f4a63" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">«lát cắt, mở lại khi skill #2 cần ảnh»</text>
+
+      <!-- ===== CỘT PHẢI · E ===== -->
+      <rect x="600" y="176" width="320" height="56" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="760" y="200" fill="#4f4a63" font-size="13" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">E — handle động</text>
+      <text x="760" y="218" fill="#66607a" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">không dùng ở giai đoạn A</text>
+
+      <rect x="600" y="264" width="320" height="72" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="760" y="290" fill="#4f4a63" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Sửa getEffectiveOutputType</text>
+      <text x="760" y="310" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">đọc out:&lt;loại&gt; nếu là data node</text>
+      <text x="760" y="326" fill="#66607a" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">thêm một nhánh chung</text>
+
+      <rect x="600" y="368" width="320" height="72" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="760" y="394" fill="#4f4a63" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Đổi ngữ nghĩa dùng chung</text>
+      <text x="760" y="414" fill="#66607a" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">cho cả bảy add node đang chạy</text>
+      <text x="760" y="430" fill="#66607a" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">không chỉ node mới</text>
+
+      <rect x="600" y="472" width="320" height="72" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="760" y="498" fill="#4f4a63" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Nằm trong file hạng T3</text>
+      <text x="760" y="516" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">src/lib/workflow/**</text>
+      <text x="760" y="532" fill="#66607a" font-size="9" font-family="'Geist', sans-serif" text-anchor="middle">hôm nay không eval nào phủ</text>
+
+      <text x="760" y="580" fill="#66607a" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">«vẫn còn đó»</text>
+
+      <!-- ===== CHÚ GIẢI ===== -->
+      <line x1="40" y1="620" x2="1000" y2="620" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="636" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+      <rect x="152" y="646" width="14" height="10" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="172" y="655" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Đường đã chọn cho giai đoạn A</text>
+
+      <rect x="392" y="646" width="14" height="10" rx="2" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.20)" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="412" y="655" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Đường để ngỏ — chưa đóng, chưa dùng</text>
+
+      <text x="700" y="655" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.08em">AC-12 · SỔ QUYẾT ĐỊNH QĐ-2 + QĐ-6</text>
+    </svg>
+
+    <footer>AC-12 — sổ quyết định: QĐ-2 (giai đoạn A khoá media_type: video), QĐ-6 (descope ảnh/audio/floorplan)</footer>
+  </div>
+</body>
+</html>

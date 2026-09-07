@@ -1,0 +1,3 @@
+Driver: curl (HTML fetch) + scripts/ui-capture.mjs (puppeteer-core screenshot, headless).
+Neither exposes a network-request/console log API to this verifier session.
+networkObserved = n-a (driver)

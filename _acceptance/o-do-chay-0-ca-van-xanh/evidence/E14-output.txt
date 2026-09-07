@@ -1,0 +1,17 @@
+→ răng của check-eval-filters.mjs
+CASE clean: PASS
+CASE no-match: PASS
+CASE zero-executors: PASS
+CASE undercount: PASS
+CASE unparsable: PASS
+CASE list-broken: PASS
+    lọc answers 503 .* code      vitest=1 ca → bộ kiểm phải XANH (rc=0)
+    lọc answers 503 (code        vitest=0 ca → bộ kiểm phải ĐỎ (rc=1)
+    lọc unreadable               vitest=1 ca → bộ kiểm phải XANH (rc=0)
+    lọc khong-ton-tai-o-dau      vitest=0 ca → bộ kiểm phải ĐỎ (rc=1)
+CASE regex-semantics: PASS
+CASE unknown-wrapper: PASS
+CASE needle-missing: PASS
+cây chung sạch: _acceptance/config.yaml và scripts/ci/check-gate-guards-job.sh không đổi một byte
+
+✅ răng: 9/9 case — mỗi case một mã thoát riêng

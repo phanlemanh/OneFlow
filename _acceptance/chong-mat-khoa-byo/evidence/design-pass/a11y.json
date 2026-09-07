@@ -1,0 +1,35 @@
+{
+  "failOn": [
+    "critical",
+    "serious"
+  ],
+  "pages": [
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable-confirm",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=store-unreadable-confirm&theme=dark",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=panel-unreadable",
+      "violations": []
+    },
+    {
+      "url": "http://localhost:3198/proto/chong-mat-khoa-byo?state=panel-unreadable&theme=dark",
+      "violations": []
+    }
+  ],
+  "totals": {},
+  "blocking": 0,
+  "verdict": "PASS"
+}

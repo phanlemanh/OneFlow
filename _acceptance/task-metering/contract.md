@@ -9,6 +9,11 @@ status: signed-off
 approved_by: Manh
 approved_at: 2026-07-25
 time_human_minutes: {gate1: 0, gate2: 0}
+# The merge commit that carried this feature into main (PR #12).
+# scripts/acceptance/own-range.sh turns it into the commit range this
+# feature's evals ask over, so re-running on a later branch still grades
+# this feature's own diff instead of the whole branch.
+landed_merge: f335135
 ---
 
 # Acceptance Contract: task-metering

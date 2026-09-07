@@ -23,3 +23,4 @@
 {"ts":"2026-08-07T01:49:44Z","round":2,"evalId":"E13","run_id":"local-cpu-plugins-E13-20260807T014943Z","exit_code":0,"cmd":"bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_split_returns_video_parts_for_both_scenes"}
 {"ts":"2026-08-07T01:49:45Z","round":2,"evalId":"E14","run_id":"local-cpu-plugins-E14-20260807T014944Z","exit_code":0,"cmd":"bash scripts/plugins/run-local-plugin-tests.sh oneflow-api-pyscenedetect tests/test_split.py::test_missing_ffprobe_fails_loudly_naming_ffprobe"}
 {"ts":"2026-08-07T01:53:33Z","round":2,"evalId":"E4","run_id":"local-cpu-plugins-E4-20260807T014740Z","exit_code":0,"cmd":"bash scripts/plugins/check-venv-isolation.sh"}
+{"ts":"2026-09-05T10:15:00Z","kind":"repin","run_id":"repin-merge-20260905T101500Z","sha":"96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e","prev_sha":"a4c6eca33542e78037b05273a280237194415004","suites_exit":[0,0,0,0,0,0,0,0]}

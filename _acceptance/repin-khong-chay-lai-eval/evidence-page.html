@@ -1,0 +1,126 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · repin-khong-chay-lai-eval</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Làm độ trôi eval sau re-pin tính được và bắt được</h1><div class="sub">Trang bằng chứng · <span class="mono">repin-khong-chay-lai-eval</span> · tier T2</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>phiên VERIFY tuần tự (CLASSIFIER-FALLBACK sau BLOCKED vòng 3) + 3 lớp soi chỉ-đọc + 1 lượt soi xác nhận đối kháng</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:40Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:41Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:41Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:41Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:42Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:51:43Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:09Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:13Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:21Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:22Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-11</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:22Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-12</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:22Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-13</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:22Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-14</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">seq-verify-20260903T065140Z-r5</td><td class="mono">2026-09-03T06:52:23Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · script</h3><p class="crit">AC-1</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_write_teeth</b></span><span>verified_at <b>2026-09-03T06:51:40Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · script</h3><p class="crit">AC-2</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_newlines_have_prev</b></span><span>verified_at <b>2026-09-03T06:51:41Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · script</h3><p class="crit">AC-3</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_paths_law</b></span><span>verified_at <b>2026-09-03T06:51:41Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: luat khop paths dung o ca bon hinh dang, ca hai chieu</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · script</h3><p class="crit">AC-4</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_plan</b></span><span>verified_at <b>2026-09-03T06:51:41Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · script</h3><p class="crit">AC-5</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_check</b></span><span>verified_at <b>2026-09-03T06:51:42Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: khong re-pin nao nuot mot eval bi cham</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · script</h3><p class="crit">AC-6</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_check_min</b></span><span>verified_at <b>2026-09-03T06:51:43Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · script</h3><p class="crit">AC-7</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_readers_bytewise</b></span><span>verified_at <b>2026-09-03T06:52:09Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: them prev_sha khong doi ket luan cua ben doc; phep so chung minh duoc no thay khac biet</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · script</h3><p class="crit">AC-8</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_teeth</b></span><span>verified_at <b>2026-09-03T06:52:13Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: 21/21 ca — 6 doi chung duong + 15 phep pha</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · script</h3><p class="crit">AC-9</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_resign_wave</b></span><span>verified_at <b>2026-09-03T06:52:21Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: no feature other than repin-khong-chay-lai-eval carries stale evidence — the re-sign wave has cleared</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · script</h3><p class="crit">AC-10</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_write_refusals</b></span><span>verified_at <b>2026-09-03T06:52:22Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · script</h3><p class="crit">AC-11</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_entrypoint</b></span><span>verified_at <b>2026-09-03T06:52:22Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · script</h3><p class="crit">AC-12</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_gateway</b></span><span>verified_at <b>2026-09-03T06:52:22Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · script</h3><p class="crit">AC-13</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_exit_code</b></span><span>verified_at <b>2026-09-03T06:52:22Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · script</h3><p class="crit">AC-14</p>
+<div class="kv"><span>run_id <b>seq-verify-20260903T065140Z-r5</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.rkce_so_khop_total</b></span><span>verified_at <b>2026-09-03T06:52:23Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PARTIAL: 1/21 ca da chay — khong tuyen gi ve 20 ca chua chay</pre>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">Bốn vòng có findings vẽ một đường rõ: vòng 1–2 tìm lỗi trong **hành vi** của hàng rào
+(phá dữ liệu, chấp nhận lần chạy đỏ, chấp nhận bằng chứng bịa). Vòng 3–5 tìm lỗi trong
+**lời khai về** hàng rào — số viết tay, chiều đo đi mượn, phạm vi tự xưng quá rộng, đối
+chứng khớp trên thông điệp thay vì trên vật. Hành vi đứng yên ba vòng liên tiếp; cái còn
+trôi là lớp văn bản mô tả nó, và lớp ấy mới có đúng MỘT hàng rào (AC-14), sinh ra ở vòng
+4 và đã đỏ thật hai lần.
+Bài học đắt nhất, ghi lại vì nó suýt lọt: **&quot;chạy lại 14/14 xanh&quot; không bao giờ đủ để
+tuyên một phép sửa đã sống.** Ba phép sửa của vòng 4 đều có ô đo xanh; một trong ba không
+sửa gì cả. Chỉ phá thứ thật rồi xem ô đo có đỏ mới đủ — và đó chính là việc lượt soi xác
+nhận làm.</div>
+<h2>Variance (eval ngẫu nhiên)</h2><div class="flag fred">Không đo lặp. Ô đo của hồ sơ này tất định (script trên kho git dùng-rồi-bỏ), trừ
+`readers` vốn dựng worktree — chế độ ấy từng chập chờn hai lần ngày 02/09 và đã chốt bằng
+`worktree prune` + chọn dòng repin ĐƯỢC một section `### Re-pin` trích dẫn.</div>
+<h2>Vòng verify</h2><ul class="tl"><li>- **Vòng 1** — REJECT. Gap-probe + hội đồng ra 2 HIGH: `write` bịa bằng chứng (thiếu</li><li>`suites_json` thì mặc định `[0,0,0,0]`, tức dòng repin tự khai &quot;lane đã xanh&quot;), và</li><li>điểm vào im lặng thoát 0 dưới symlink. Owner mở phạm vi cho cả hai.</li><li>- **Vòng 2** — REJECT, 11/11 ô đo xanh. 13 finding, 3 HIGH, tất cả cùng MỘT gốc: run-log</li><li>bị coi như JSONL lỏng, mỗi chế độ mang dung sai riêng. `STOP-PATCHING-CLAUSE` kích</li><li>hoạt; owner chọn **đổi hình dạng** — một CỬA duy nhất cho mọi lượt đọc/ghi.</li><li>- **Vòng 3** — BLOCKED vì tải máy (xem trên). 14 finding vẫn thật; 4 cái tự kiểm được</li><li>đều đúng, và 3 trong 4 là con số viết tay trôi khỏi vật nó mô tả.</li><li>- **Vòng 4** — 14/14 ô đo xanh, 15 finding từ 3 lớp soi. **Hai HIGH do chính vòng 4 đẻ</li><li>ra**: cờ `--min-computable` bỏ qua âm thầm mọi đối số lạ (nên cái sàn chống</li><li>&quot;xanh-trên-không-có-gì&quot; tự nó thành không-có-gì), và E1 mượn nửa xanh của E8.</li><li>- **Vòng 5** — lượt soi xác nhận đối kháng **BÁC một trong ba phép sửa**: ca `healthy`</li><li>mới thêm khớp chuỗi `prev_sha=&lt;12 ký tự&gt;` trên **stdout**, mà `console.log` in ra từ</li><li>biến cục bộ ngay cả khi khoá ấy không vào log — đo THÔNG ĐIỆP chứ không đo VẬT. Gỡ</li><li>`prev_sha` khỏi bộ ghi vẫn để E1 xanh. Sửa: đòi `&quot;prev_sha&quot;:&quot;&lt;40 hex&gt;&quot;` có mặt trong</li><li>chính run-log. PASS.</li></ul>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

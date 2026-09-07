@@ -38,8 +38,14 @@ def test_tier_lists_are_disjoint_and_pinned():
     })
     # TIER_A_SLOTS pinned too (compose-overlay joined on 2026-08-02 --
     # deterministic CPU overlay, byte-identity evidence in the plugin repo's
-    # golden suite): same rule as the tier-B literal above, a silent
-    # addition or drop must go red here, not slide in unreviewed.
+    # golden suite): same rule as the tier-B literal above, a silent addition or
+    # drop must go red here, not slide in unreviewed.
+    #
+    # normalize-text-vi joined 2026-08-20 and left 2026-08-21 (Gate 2 round 5):
+    # deterministic, but its algorithm lives in the SDK while the cache key
+    # carries only sdk_major(), so a reader fix could not invalidate a single
+    # cached reading. Reason and re-add condition: node_cache.py. This literal
+    # going red is the guard working -- the pin lives in TWO files on purpose.
     assert TIER_A_SLOTS == frozenset({
         "compose-overlay", "concat-videos", "extract-audio",
         "remove-video-audio", "merge-video-audio", "get-first-frame",

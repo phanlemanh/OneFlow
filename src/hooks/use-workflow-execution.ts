@@ -23,6 +23,7 @@ import {
     TaskStatus,
     WorkflowStatus,
 } from "@/constants/task-status";
+import { useExportWarningToasts } from "@/hooks/use-export-warning-toast";
 import useFlow from "@/hooks/use-flow";
 import { useTaskStore } from "@/hooks/use-task";
 import { saveFromTask } from "@/lib/api/material";
@@ -85,6 +86,7 @@ export function useWorkflowExecution(
         t,
     } = args;
     const tToast = useTranslations("Workspace.toast");
+    const notifyExportWarnings = useExportWarningToasts();
 
     const setWorkflowExecutionStatus = useTaskStore(
         (state) => state.setWorkflowExecutionStatus,
@@ -416,6 +418,8 @@ export function useWorkflowExecution(
                 includeOriginalFlow: false,
             });
 
+            notifyExportWarnings(executable);
+
             const result = await saveWorkflow({
                 ...(workflowId ? { workflowId } : {}),
                 name: effectiveName,
@@ -450,6 +454,7 @@ export function useWorkflowExecution(
         setWorkflowName,
         setWorkflowDescription,
         handleExecute,
+        notifyExportWarnings,
         t,
     ]);
 

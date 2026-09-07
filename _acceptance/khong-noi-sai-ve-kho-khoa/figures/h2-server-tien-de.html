@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>H2 · Server kiểm tiền đề của cờ — khong-noi-sai-ve-kho-khoa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #f7f7f8;
+      --color-ink:    #1a0033;
+      --color-muted:  #4f4a63;
+      --color-accent: #e100e1;
+      --font-sans:  'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', 'Lora', serif;
+      --font-mono:  'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">H2 · cây quyết định + chuỗi client · Cổng 1 · khong-noi-sai-ve-kho-khoa</p>
+    <h1>Server kiểm tiền đề của cờ — ba trạng thái kho × cờ, rồi cuộc đua</h1>
+
+    <svg viewBox="0 0 1200 752" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0068cc"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ===== Connectors (drawn first) ===== -->
+      <!-- PUT tới → readEnvStore() -->
+      <line x1="600" y1="88" x2="600" y2="120" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- readEnvStore() → current.state? -->
+      <line x1="600" y1="160" x2="600" y2="184" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- state = ok : left tip → merge dot -->
+      <path d="M488,224 H368 Q360,224 360,232 V296" fill="none" stroke="#4f4a63" stroke-width="1.2"/>
+      <!-- state = absent : bottom tip → merge dot -->
+      <path d="M600,264 V280 Q600,288 592,288 H368 Q360,288 360,296" fill="none" stroke="#4f4a63" stroke-width="1.2"/>
+      <!-- merge dot → diamond A -->
+      <line x1="360" y1="296" x2="360" y2="316" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- state = unreadable : right tip → diamond B -->
+      <path d="M712,224 H832 Q840,224 840,232 V316" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- A (ok|absent) · cờ bật → 409 REFUSED (nhánh mới, accent) -->
+      <path d="M248,360 H184 Q176,360 176,368 V464" fill="none" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <!-- A · cờ tắt → 200 ghi -->
+      <path d="M472,360 H464 Q456,360 456,368 V464" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- B (unreadable) · cờ tắt → 409 UNREADABLE -->
+      <path d="M728,360 H736 Q744,360 744,368 V464" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <!-- B · cờ bật → 200, kho = {} -->
+      <path d="M952,360 H1016 Q1024,360 1024,368 V464" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- ===== Nodes ===== -->
+      <!-- Start oval: PUT tới -->
+      <rect x="500" y="40" width="200" height="48" rx="24" fill="#f7f7f8"/>
+      <rect x="500" y="40" width="200" height="48" rx="24" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="600" y="60" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PUT tới</text>
+      <text x="600" y="76" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">{env, replaceUnreadableStore?}</text>
+
+      <!-- Step: readEnvStore() -->
+      <rect x="500" y="120" width="200" height="40" rx="6" fill="#f7f7f8"/>
+      <rect x="500" y="120" width="200" height="40" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="600" y="144" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">readEnvStore()</text>
+
+      <!-- Diamond: current.state? -->
+      <polygon points="600,184 712,224 600,264 488,224" fill="#f7f7f8"/>
+      <polygon points="600,184 712,224 600,264 488,224" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="600" y="228" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">current.state ?</text>
+
+      <!-- Merge dot (ok + absent rejoin) -->
+      <circle cx="360" cy="296" r="4" fill="#1a0033"/>
+
+      <!-- Diamond A: cờ bật? (ok | absent) -->
+      <polygon points="360,316 472,360 360,404 248,360" fill="#f7f7f8"/>
+      <polygon points="360,316 472,360 360,404 248,360" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="360" y="356" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">cờ bật?</text>
+      <text x="360" y="370" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">replaceUnreadableStore</text>
+
+      <!-- Diamond B: cờ bật? (unreadable) -->
+      <polygon points="840,316 952,360 840,404 728,360" fill="#f7f7f8"/>
+      <polygon points="840,316 952,360 840,404 728,360" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="840" y="356" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">cờ bật?</text>
+      <text x="840" y="370" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">replaceUnreadableStore</text>
+
+      <!-- Exit E1 (focal): 409 ENV_STORE_REPLACE_REFUSED, không ghi -->
+      <rect x="64" y="464" width="224" height="56" rx="28" fill="#f7f7f8"/>
+      <rect x="64" y="464" width="224" height="56" rx="28" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="176" y="486" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">409 ENV_STORE_REPLACE_REFUSED</text>
+      <text x="176" y="504" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif" text-anchor="middle">KHÔNG GHI · state ∈ {ok, absent}</text>
+
+      <!-- Exit E2: 200 ghi -->
+      <rect x="344" y="464" width="224" height="56" rx="28" fill="#f7f7f8"/>
+      <rect x="344" y="464" width="224" height="56" rx="28" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="456" y="486" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">200</text>
+      <text x="456" y="504" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif" text-anchor="middle">saveEnvStore(env) · ghi hợp nhất</text>
+
+      <!-- Exit E3: 409 ENV_STORE_UNREADABLE -->
+      <rect x="632" y="464" width="224" height="56" rx="28" fill="#f7f7f8"/>
+      <rect x="632" y="464" width="224" height="56" rx="28" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="744" y="486" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">409 ENV_STORE_UNREADABLE</text>
+      <text x="744" y="504" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif" text-anchor="middle">KHÔNG GHI · nhánh cũ, giữ nguyên</text>
+
+      <!-- Exit E4: 200, kho = {} -->
+      <rect x="912" y="464" width="224" height="56" rx="28" fill="#f7f7f8"/>
+      <rect x="912" y="464" width="224" height="56" rx="28" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="1024" y="486" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">200 · kho = {}</text>
+      <text x="1024" y="504" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif" text-anchor="middle">saveEnvStore({}) · đường hợp lệ sống</text>
+
+      <!-- ===== Branch labels (masked, 6–10px off the stroke) ===== -->
+      <rect x="404" y="202" width="40" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="424" y="214" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">OK</text>
+
+      <rect x="452" y="266" width="56" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="480" y="278" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">ABSENT</text>
+
+      <rect x="732" y="202" width="80" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="772" y="214" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.12em">UNREADABLE</text>
+
+      <rect x="188" y="404" width="56" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="192" y="416" fill="#9c009c" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CỜ BẬT</text>
+
+      <rect x="392" y="404" width="52" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="440" y="416" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.12em">CỜ TẮT</text>
+
+      <rect x="756" y="404" width="56" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="760" y="416" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.12em">CỜ TẮT</text>
+
+      <rect x="960" y="404" width="52" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="1008" y="416" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.12em">CỜ BẬT</text>
+
+      <!-- ===== Chain (AC-7 + đua) ===== -->
+      <line x1="40" y1="552" x2="1160" y2="552" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="572" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">AC-7 + ĐUA · CHUỖI PHÍA CLIENT</text>
+      <text x="1160" y="572" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">kho unreadable lúc đọc · được sửa trước lúc ghi</text>
+
+      <!-- chain arrows -->
+      <line x1="152" y1="612" x2="184" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="296" y1="612" x2="328" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="440" y1="612" x2="472" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="584" y1="612" x2="616" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="728" y1="612" x2="760" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="872" y1="612" x2="904" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="1016" y1="612" x2="1048" y2="612" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- chain chips -->
+      <rect x="40" y="592" width="112" height="40" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="96" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">client đọc</text>
+
+      <rect x="184" y="592" width="112" height="40" rx="6" fill="rgba(26,0,51,0.05)" stroke="#4f4a63" stroke-width="1"/>
+      <text x="240" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">unreadable</text>
+
+      <rect x="328" y="592" width="112" height="40" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="384" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">tab khác sửa kho</text>
+
+      <rect x="472" y="592" width="112" height="40" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="528" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">bấm xác nhận</text>
+
+      <rect x="616" y="592" width="112" height="40" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="672" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">PUT có cờ</text>
+
+      <rect x="760" y="592" width="112" height="40" rx="6" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="816" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">409 REFUSED</text>
+
+      <rect x="904" y="592" width="112" height="40" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="960" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">client đọc lại</text>
+
+      <rect x="1048" y="592" width="112" height="40" rx="20" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="1104" y="616" fill="#1a0033" font-size="10" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">form có khoá</text>
+
+      <text x="600" y="660" fill="#4f4a63" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">Đua ra đúng kết cục mà không cần luật riêng.</text>
+
+      <!-- ===== Legend ===== -->
+      <line x1="40" y1="692" x2="1160" y2="692" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="708" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">LEGEND · HÌNH MANG LOẠI</text>
+
+      <rect x="40" y="724" width="24" height="12" rx="6" fill="rgba(26,0,51,0.03)" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="72" y="734" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">vào / ra (oval)</text>
+
+      <rect x="200" y="724" width="24" height="12" rx="2" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="232" y="734" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">bước</text>
+
+      <polygon points="332,730 344,724 356,730 344,736" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="368" y="734" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">quyết định</text>
+
+      <rect x="480" y="724" width="24" height="12" rx="2" fill="rgba(225,0,225,0.08)" stroke="#e100e1" stroke-width="1"/>
+      <text x="512" y="734" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">nhánh mới — chữ «KHÔNG GHI» nằm trong ô</text>
+
+      <rect x="760" y="724" width="24" height="12" rx="2" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="792" y="734" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">sự kiện ngoài (tab khác)</text>
+
+      <text x="1160" y="734" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">AC-1 · AC-7</text>
+    </svg>
+  </div>
+</body>
+</html>

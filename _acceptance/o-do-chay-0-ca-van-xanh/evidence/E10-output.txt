@@ -1,0 +1,2 @@
+OK: cả hai guard nằm trong job acceptance-gate; fetch-depth 0, Node 24, hai trigger còn nguyên
+OK: không có continue-on-error / || true / set +e trong job acceptance-gate

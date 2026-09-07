@@ -37,6 +37,7 @@ import { showErrorToast } from "@/components/ui/error-toast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useExportWarningToasts } from "@/hooks/use-export-warning-toast";
 import type { FlowState } from "@/hooks/use-flow";
 import { useFlow } from "@/hooks/use-flow";
 import {
@@ -86,6 +87,7 @@ export function WorkflowTitleMenu() {
 
     const t = useTranslations("Workspace.menu");
     const tIndex = useTranslations("Index");
+    const notifyExportWarnings = useExportWarningToasts();
 
     const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
     const [isSaveAsMode, setIsSaveAsMode] = useState(false);
@@ -142,6 +144,8 @@ export function WorkflowTitleMenu() {
                 description: tempDescription || "",
                 includeOriginalFlow: false,
             });
+
+            notifyExportWarnings(executable);
 
             const workflowData: Partial<SaveWorkflowRequest> = {
                 name: tempName,
@@ -220,6 +224,7 @@ export function WorkflowTitleMenu() {
                 description: workflowDescription || "",
                 includeOriginalFlow,
             });
+            notifyExportWarnings(executable);
             const text = JSON.stringify(executable, null, 2);
             const blob = new Blob([text], {
                 type: "application/json;charset=utf-8",

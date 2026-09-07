@@ -1,0 +1,231 @@
+schema_version: 1
+feature_slug: kho-khoa-toan-ven
+
+# T2, mười một tiêu chí. KHÔNG criterion nào mang tag (cross-layer): mọi When/Then
+# chạy trọn ở lớp kho (src/lib/settings + src/ext-default), không qua UI, không qua
+# route. Đó cũng là điều giữ gói này ở T2.
+#
+# HAI LUẬT ĐO:
+#
+# 1. Bộ thử chạy trên THƯ MỤC TẠM THẬT, không mock seam lưu trữ. `vitest.config.ts`
+#    trỏ `@ext -> src/ext-default` và `dataDir()` đọc `TONGFLOW_DATA_DIR`, nên các ca
+#    này đụng đúng bộ đọc/ghi mà một checkout thường ship. Chú thích đầu
+#    `env-store.server.test.ts` ghi vì sao — và đó cũng là điều làm AC-6 (tính nguyên
+#    tử) đo được thật thay vì đo một mock.
+#
+# 2. Chiều đỏ do `scripts/settings/check-env-store-teeth.sh` chứng minh, theo đúng
+#    hình dạng `check-roadmap-guard-teeth.sh`: `--case <tên>` địa chỉ hoá, MỘT MÃ
+#    THOÁT MỖI CA, in token `CASE <tên>: PASS|FAIL`, tên ca lạ → thoát 2. Nó vá NGƯỢC
+#    từng luật mới vào bản sao lưu của file thật rồi đòi bộ thử ĐỎ — kể cả ca `atomic`
+#    khôi phục `writeFileSync` cũ, nên chiều đỏ của tính nguyên tử là phép đo MÁY chứ
+#    không phải một lượt chạy tay không ai kiểm lại được.
+
+evals:
+  # ---------- A. Đọc: đổi được thì đổi ----------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_kkt_coerce_scalar
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. Kho trên đĩa `{"OPENAI_API_KEY":"sk-fake","PORT":8080,"DEBUG":true}` đọc
+      ra `state: "ok"` với ĐỦ BA khoá, giá trị `"8080"` và `"true"`. Assert trên TẬP
+      KHOÁ chứ không chỉ trên một khoá: đo hôm nay trước khi sửa, bốn khoá biến mất mà
+      trạng thái vẫn báo `ok`, nên một phép đo chỉ nhìn `OPENAI_API_KEY` sẽ xanh cả trên
+      bản hỏng. Chiều đỏ ở ca răng `coerce-scalar`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_kkt_refuse_structured
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. MA TRẬN BA DẠNG, số assert bằng số phần tử: `object`, `array`, `null` —
+      mỗi dạng một kho riêng, mỗi kho phải trả `state: "unreadable"`, `reason: "shape"`.
+      Và assert PHỦ ĐỊNH đi kèm: kết quả KHÔNG chứa chuỗi `"[object Object]"` ở bất kỳ
+      đâu — đó chính là cái bẫy `String(v)` sẽ tạo ra nếu ai đó "đơn giản hoá" bảng
+      quyết định thành đổi-tất. Chiều đỏ ở ca răng `refuse-structured`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_kkt_refuse_empty_key
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. Hai hình dạng, hai assert: khoá `""` và khoá `"   "` (toàn khoảng trắng).
+      Cả hai phải cho `unreadable` / `shape`, KHÔNG phải bị bỏ qua lặng như hôm nay.
+      Chiều đỏ ở ca răng `refuse-empty-key`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_kkt_all_strings_untouched
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. NỬA ĐÀN ÁP của cả E1–E3. Kho toàn chuỗi đọc ra `ok` với map so bằng
+      `toEqual` — y hệt nội dung trên đĩa, không khoá nào mất, không giá trị nào đổi.
+      Thiếu ô này thì một bản sửa luôn-trả-`unreadable`, hoặc một bản đổi-mọi-giá-trị
+      thành chuỗi rác, vẫn qua sạch ba ô trên. Chiều đỏ ở ca răng `all-strings`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Ghi qua lib: ném thay vì lọc ----------
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_kkt_save_throws
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. HAI khẳng định, và khẳng định thứ hai là cái đắt: (1) `saveEnvStore` ném
+      lỗi có thông điệp NÊU ĐÍCH DANH khoá phạm lỗi — assert trên nội dung chuỗi, không
+      chỉ trên việc có ném; (2) sau khi ném, file kho trên đĩa **không đổi một byte**
+      (so sha nội dung trước/sau). Vế (2) là thứ phân biệt "ném rồi vẫn kịp ghi hỏng"
+      với "ném và không chạm đĩa".
+      HAI FIXTURE, vì "không ghi gì" nghĩa khác nhau ở hai chỗ: kho ĐÃ CÓ → so sha nội
+      dung trước/sau; kho CHƯA CÓ (máy mới cài) → file đích vẫn phải VẮNG và thư mục dữ
+      liệu không có file tạm mồ côi. Phép so-sha một mình đòi file phải tồn tại nên nó bỏ
+      sót đúng ca máy-mới, và ca đó mới là lúc một `settings.json` rỗng mồ côi làm lần đọc
+      kế trả "kho rỗng" thay vì "chưa có kho". Chiều đỏ ở ca răng `save-throws`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Ghi xuống đĩa: nguyên tử ----------
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_kkt_atomic_reader
+    paths: ["src/ext-default/settings-store.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. Đây là khẳng định DUY NHẤT thật sự phân biệt hai cách ghi. Ghi một khối
+      lớn (≥ 4 MB) đè lên một kho cũ trọn vẹn, đồng thời một vòng đọc lấy nhiều mẫu;
+      MỌI mẫu phải hoặc bằng bản cũ, hoặc bằng bản mới. Assert phải nêu ra khi thấy mẫu
+      thứ ba (`độ dài <n>, không khớp cũ (<a>) lẫn mới (<b>)`), không chỉ đếm.
+      Người đọc chạy ở TIẾN TRÌNH HỆ ĐIỀU HÀNH RIÊNG, không phải một vòng lặp cùng
+      tiến trình: JS không xen giữa được một lượt ghi đồng bộ, nên người đọc cùng tiến
+      trình KHÔNG BAO GIỜ bắc qua và ô này sẽ xanh mà chưa đo gì.
+      BẮT BUỘC BẮC QUA: tập mẫu phải CHỨA ít nhất một mẫu cũ VÀ ít nhất một mẫu mới; in
+      ra `mẫu cũ=<a> mẫu mới=<b>`, không chỉ in tổng. Không bắc qua được → thoát KHÁC 0
+      với trạng thái KHÔNG KẾT LUẬN ĐƯỢC, KHÔNG phải PASS. Vì sao: "mọi mẫu đều hợp lệ"
+      thoả HẰNG ĐÚNG khi vòng đọc chạy trọn sau lượt ghi — 200 mẫu đều là bản mới cũng
+      qua, và khi đó ca răng `atomic` sẽ đỏ một cách khó hiểu vì bản cũ cũng "qua".
+      Chiều đỏ: ca răng `atomic` khôi phục `writeFileSync` cũ và đòi CHÍNH ô này ĐỎ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.unit_kkt_no_temp_left
+    paths: ["src/ext-default/settings-store.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. Nửa CẤU TRÚC của tính nguyên tử: sau một lượt ghi thành công, thư mục kho
+      chỉ còn `settings.json` — không file tạm sót lại. Và trong lúc ghi, file tạm quan
+      sát được nằm CÙNG thư mục với đích (đổi tên qua hai hệ thống file không nguyên
+      tử). Ô này một mình KHÔNG chứng minh được tính nguyên tử — bản `writeFileSync` cũ
+      cũng không để lại file tạm nào; nó chỉ có nghĩa khi đi cùng E6. Nêu ra đây để nó
+      không bị đọc thành "đã đo tính nguyên tử".
+      VÀ đường THẤT BẠI: bơm một lỗi ở bước ghi tạm hoặc bước đổi tên, rồi khẳng định
+      cũng không còn file tạm sót lại. Hai lời hứa "không để dấu vết" mà chỉ phủ đường
+      thành công là nửa lời hứa — và nửa bị bỏ chính là nửa hay xảy ra.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Bất biến kế thừa ----------
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.kkt_seam_signature
+    paths: ["src/ext-default/settings-store.ts"]
+    expected: >-
+      exit 0. Chữ ký hai hàm seam khớp NGUYÊN VĂN chuỗi đã ghim:
+      `export async function readSettingsBlob(): Promise<string | null>` và
+      `export async function writeSettingsBlob(blob: string): Promise<void>`.
+      Vỏ cloud có bản `src/ext/settings-store.ts` riêng, gitignored, ở repo khác — đổi
+      chữ ký làm nó hỏng ở nơi không bộ thử nào của repo này chạy tới. Chiều đỏ ở ca
+      răng `seam-signature`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.unit_kkt_run_path
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. Kho có `number`/`boolean`, `loadEnvStore()` trả ĐỦ mọi khoá đã đổi thành
+      chuỗi. VÀ nửa không được phá: kho THẬT SỰ hỏng (JSON sai cú pháp) vẫn thu về `{}`
+      chứ không ném — bất biến của hồ sơ trước, quyết định 2 của owner: kho hỏng KHÔNG
+      được chặn một lượt chạy. Hai assert trong một ô vì chúng là hai vế của cùng một
+      lời hứa; tách ra thì vế thứ hai dễ bị bỏ khi ai đó siết `loadEnvStore`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.unit_kkt_round_trip
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. VÒNG TRÒN MẤT VĨNH VIỄN đã đo: `readEnvStore` → `saveEnvStore` →
+      `readEnvStore`. Lần đọc thứ hai phải trả ĐỦ tập khoá của lần đầu, so bằng
+      `toEqual` trên cả map. Đo hôm nay trên bản chưa sửa: vòng này mất `PORT`, `DEBUG`,
+      `NESTED`, `NULLED` — với bản đã sửa, hai khoá đầu sống sót dưới dạng chuỗi và hai
+      khoá sau làm cả kho bị từ chối ở bước đọc đầu tiên, nên không lượt ghi đè nào xảy
+      ra. Cả hai kết cục đều là "không mất im lặng"; ô này khẳng định đúng điều đó.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- E. Cắt ngang ----------
+  - id: E11
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.kkt_teeth_all
+    paths: ["scripts/settings/check-env-store-teeth.sh", "src/lib/settings/env-store.server.ts", "src/ext-default/settings-store.ts"]
+    expected: >-
+      exit 0; chạy TRỌN bộ ca răng và khẳng định case-completeness: mỗi ca khai trong
+      `--list` đều có token `CASE <tên>: PASS`, và số token bằng số ca khai. Bảy ca, mỗi
+      ca vá NGƯỢC một luật mới vào bản sao lưu của file thật rồi đòi bộ thử ĐỎ:
+      `coerce-scalar`, `refuse-structured`, `refuse-empty-key`, `all-strings`,
+      `save-throws`, `seam-signature`, và `atomic` (khôi phục `writeFileSync` cũ, đòi E6
+      đỏ). Ca `atomic` là lý do bộ răng tồn tại: nó biến chiều đỏ của tính nguyên tử
+      thành phép đo MÁY thay vì một lượt chạy tay không ai kiểm lại được.
+      THÊM: gọi với một `--case` không tồn tại phải thoát 2 kèm danh sách hợp lệ — một
+      tên gõ sai mà thoát 0 biến ô này thành xanh vĩnh viễn.
+      HAI RÀNG BUỘC từ vòng phản biện, cả hai phải hiện trong đầu ra:
+      (a) CÁCH LY — vá vào `git worktree` riêng, KHÔNG vá file trong cây chung. Các ô
+      E1–E10 và E12 đọc đúng hai file đó và CHẠY SONG SONG: vá tại chỗ sẽ làm một ô khác
+      đỏ vì lý do không tái hiện được, và một lượt bị giết giữa chừng để lại cây mang mã
+      đã thoái lui rồi lần sau xanh giả. Kết thúc phải chạy `git diff --quiet` trên hai
+      file phạm vi và IN kết quả.
+      (b) KHÔNG NHẬN ĐỎ VU VƠ — mỗi ca khai TRƯỚC tên ca thử phải đỏ và mẫu thông điệp
+      phải xuất hiện; script assert CẢ HAI. Bộ thử không thu được ca nào, hoặc hỏng vì lỗi
+      cú pháp, → thoát 2 (không kết luận được), KHÔNG phải PASS: một bản vá `sed` làm hỏng
+      cú pháp cũng cho "bộ thử đỏ", và bảy ca sẽ PASS trên một bộ răng rỗng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.unit_kkt_empty_key_put
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0. HỒI QUY do chính AC-5 tạo ra, bắt được ở vòng phản biện. Nhập handler `PUT`
+      vào từ file thử ở LỚP KHO (không sửa file nào dưới `src/app/api/**`, nên vẫn T2),
+      gọi nó với `{"env":{"":"x","OPENAI_API_KEY":"sk-fake"}}`, rồi khẳng định BA điều:
+      (1) yêu cầu THẤT BẠI — không phải 2xx; (2) thông điệp NÊU ĐÍCH DANH khoá rỗng, để
+      người dùng sửa được; (3) kho trên đĩa **không đổi** — khoá hợp lệ KHÔNG được lưu một
+      nửa. Được-tất-hoặc-không-gì.
+      Vì sao ô này tồn tại: bộ lọc ở `route.ts` dòng 105 lọc theo KIỂU GIÁ TRỊ chứ không
+      lọc khoá, nên khoá rỗng lọt qua route và chạm `saveEnvStore`. Trước gói này, khoá
+      hợp lệ vẫn được lưu (khoá rỗng bị bỏ lặng). Đây là đổi hành vi có chủ ý — đổi im
+      lặng lấy kêu to — và nó phải có một ô đo, không được nằm im trong Known limits.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E12
+    criterion: AC-11
+    executor: test
+    cmd: config:executors.test.unit_kkt_no_regression
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts", "src/app/api/settings/env/route.ts"]
+    expected: >-
+      exit 0. Chạy TRỌN hai file thử của đường BYO — bộ mới cộng bộ đã ký của
+      `chong-mat-khoa-byo` — để chứng minh gói này không phá bất biến nào của hồ sơ
+      trước. Đặc biệt: bốn mã lý do `io | decode | parse | shape` không thêm mã thứ năm,
+      và `PUT` vẫn từ chối ghi đè kho không đọc được khi thiếu cờ. Một bản sửa
+      `coerceEnv` cẩu thả rất dễ làm ca `unreadable matrix` của hồ sơ trước đổi màu.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

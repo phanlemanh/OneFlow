@@ -3,10 +3,10 @@ schema_version: 1
 slug: timeline-view
 feature: Timeline như một cách nhìn trên đồ thị — sắp clip, trim, xuất phim dài
 owner: Manh
-stage: discovery
-decision:
-decided_by:
-decided_at:
+stage: decided
+decision: park
+decided_by: Phan Le Manh
+decided_at: 2026-09-04
 prototype:
   base_commit:
   disposition:
@@ -72,3 +72,7 @@ không thêm slot, không đụng `sdk/**` (giữ ngoài đường T3).
 - Editor video chuyên nghiệp (multi-track, keyframe, color grade) — DaVinci/CapCut đã có, không đánh. (bác 26/08)
 - Slot ABI mới hoặc field mới cho trim/transition — nếu giả định 2 sai thì QUAY LẠI Cổng Đáng, không lặng lẽ mở rộng. (bác 26/08)
 - Timeline cho audio/nhạc (kiểu Flow Music) — chưa có tín hiệu.
+
+## Cổng 0 — 04/09
+
+- **decision = park.** Căn cứ: khối kế hoạch lát cắt chứng minh (docs/roadmap.md) đóng băng việc mở hạng mục mới; hồ sơ này không nằm trên đường ★. Mở lại khi gỡ băng, hoặc qua bảng Ngoại lệ với lý do có tên.

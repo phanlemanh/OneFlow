@@ -1,0 +1,100 @@
+schema_version: 1
+feature_slug: roadmap-drift-guard
+# MỘT khoá config cho MỖI eval, cùng một harness với `--case` khác nhau.
+#
+# Sáu nhiễu nấp sau một mã thoát là sáu tiêu chí gộp thành một: một case chưa
+# từng được cài trông y hệt một case đã qua, và cả hai đều xanh. Đây là bài học
+# repo đã trả giá ở `stale-scope-by-paths` — ghi thành comment thường trực trong
+# `_acceptance/config.yaml` (~dòng 310). AC-7 tồn tại để bắt buộc chính hình dạng
+# này, nên bộ eval phải tự tuân theo nó trước.
+#
+# TRẠNG THÁI: mọi khoá `config:executors.script.roadmap_*` dưới đây CHƯA TỒN TẠI
+# trong `_acceptance/config.yaml`, và `check-roadmap-guard-teeth.sh` hôm nay chưa
+# nhận cờ `--case`. Cả hai hạ cánh trong lúc THI CÔNG (sau Cổng 1), đúng khuôn
+# `stale-scope-by-paths` đã dùng. Bộ AC này không thể pass bằng cách đứng yên.
+evals:
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_adr_uncited
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
+    expected: "exit 0; output chứa `CASE adr-uncited: PASS`. Bản sao vứt đi được thêm một ADR mà lộ trình không nhắc; guard phải ĐỎ VÀ thông điệp phải khớp `ADR-0099 không được nhắc lần nào trong docs/roadmap.md — \"<tiêu đề khác rỗng>\"`. Vòng 2 nâng: case này trước chỉ khẳng định đỏ/xanh, nên một bản sửa bỏ tiêu đề đi vẫn xanh — đột biến M-A chứng minh nay nó đỏ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_superseded_bare
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
+    expected: "exit 0; output chứa `CASE superseded-bare: PASS`. Một khối viện dẫn ADR-0005 bị gỡ tên ADR thay nó; guard phải ĐỎ, thông điệp khớp `viện dẫn ADR-0005 (đã bị ADR-0011 thay thế)` VÀ mang trích dẫn khối phạm lỗi khác rỗng, độ dài **≤ 110 ký tự**. Kiểm A phải VẪN XANH trong nhiễu này — nếu A cũng đỏ thì eval không chứng minh được B hoạt động, chỉ chứng minh cây bị hỏng. Vòng 2 nâng: nửa trích dẫn trước không ai giữ (đột biến M-B)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_superseded_paired
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
+    expected: "exit 0; output chứa `CASE superseded-paired: PASS`. NỬA SUPPRESSION: cùng khối đó nhưng CÓ nêu tên ADR thay thế bên cạnh id đã bị thay — kiểm B phải KHÔNG nổ. Không có case này thì một guard `exit 1` vô điều kiện qua được E2, và một guard kêu cả khi đã sửa đúng là guard người ta học cách bỏ qua"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_ledger_missing
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "_acceptance/*/contract.md"]
+    expected: "exit 0; output chứa `CASE ledger-missing: PASS`. Một hạng mục đã ký bị xoá khỏi khối `roadmap-ledger`; guard ĐỎ VÀ thông điệp gọi đúng tên slug `local-cpu-plugins` kèm cụm `chưa được phân loại trong sổ cái`. Vòng 2 nâng: trước chỉ khẳng định đỏ (đột biến M-C)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_ledger_stale
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "_acceptance/*/contract.md"]
+    expected: "exit 0; output chứa `CASE ledger-stale: PASS`. CHIỀU NGƯỢC của E4: sổ cái giữ dòng cho một hồ sơ không còn ở `status: signed-off`. Sổ cái phình ra cũng là trôi — một guard chỉ kiểm chiều thiếu sẽ để sổ cái tích xác cũ vô hạn. Thông điệp phải gọi đúng tên `a-feature-that-never-shipped` kèm cụm `không còn ở trạng thái ký` (vòng 2 nâng, đột biến M-C)"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_historical
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**"]
+    expected: "exit 0; output chứa `CASE historical-244cb0b: PASS`. Nhiễu KHÔNG synthetic: `docs/roadmap.md` đúng như nó đứng trên `main @ 244cb0b`, tức cú trôi ADR-0005/0011 có thật kéo dài hai tuần. Một guard chỉ từng đỏ trên nhiễu bịa không chứng minh được nó bắt được cú trôi ngoài đời"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_case_isolation
+    paths: ["scripts/roadmap/**"]
+    expected: "exit 0; output chứa `CASE case-isolation: PASS`. RĂNG CỦA RĂNG: chạy từng case riêng lẻ và khẳng định mỗi case sở hữu mã thoát riêng + token nhãn riêng; `--case <tên-không-tồn-tại>` phải bị TỪ CHỐI ồn ào (exit khác 0, in danh sách case hợp lệ) chứ không lặng lẽ thoát 0 — không có nửa này, một typo trong tên case biến eval thành no-op xanh vĩnh viễn; và (vòng 3) `--selftest-fail` phải thoát khác 0 kèm token `CASE selftest-fail: FAIL`, chứng minh bộ răng CÓ THỂ báo hỏng — một harness chỉ biết in PASS thuộc đúng họ fail-open với một cổng chỉ biết in xanh. Token nhãn phải xuất hiện ĐÚNG MỘT lần (`grep -c`, không phải `grep -q`) vì AC-7 nói \"đúng một\""
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.roadmap_drift_green
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "docs/adr/**", "_acceptance/*/contract.md"]
+    expected: "exit 0 trên cây KHÔNG bị đụng gì, và stdout in dòng đếm sổ cái `sổ cái: N hạng mục đã ký, N dòng trong sổ` với hai số BẰNG NHAU. Đây là chốt chặn duy nhất chống `exit 1` vô điều kiện: bỏ eval này thì bảy eval ĐỎ ở trên đều thoả được bằng một guard luôn nổ"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_supersede_source_single
+    paths: ["scripts/roadmap/**", "docs/adr/**"]
+    expected: "exit 0; output chứa `CASE supersede-source-single: PASS`. Thêm MỘT dòng thay-thế mới vào bảng `docs/adr/README.md` của bản sao vứt đi (không sửa gì trong guard) và khẳng định guard nhận ra quan hệ mới. Chống hồi quy về nguồn-sự-thật-thứ-hai: bản sửa sau rất dễ nhét một map cứng vào `roadmap-drift.mjs` cho nhanh, và eval này là thứ duy nhất sẽ kêu"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # E10 (AC-10) ĐÃ CẮT 2026-08-27 vòng 4 — xem Amendment của contract và
+  # decisions.jsonl. Id E10 CỐ Ý bỏ trống: run-log.jsonl đã có 3 vòng dòng E10,
+  # tái dùng id cho một eval khác sẽ làm hoà lẫn hai lịch sử.
+
+  # W1 (eval-coverage-lint, Cổng 1): AC-4/AC-5 là cặp đếm hai chiều, nên cả hai
+  # cần một nửa KHÔNG-nổ. E11 là nửa đó.
+  - id: E11
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.roadmap_teeth_ledger_paired
+    paths: ["scripts/roadmap/**", "docs/roadmap.md", "_acceptance/*/contract.md"]
+    expected: "exit 0; output chứa `CASE ledger-paired: PASS`. NỬA SUPPRESSION của E4/E5: một slug vừa ở `status: signed-off` vừa CÓ dòng trong sổ cái — kiểm C phải KHÔNG nổ, kể cả khi các slug khác quanh nó thay đổi. Không có case này, một guard nổ với MỌI cấu hình sổ cái vẫn qua được E4 lẫn E5"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

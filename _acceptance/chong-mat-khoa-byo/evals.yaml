@@ -1,0 +1,147 @@
+schema_version: 1
+feature_slug: chong-mat-khoa-byo
+
+# T3, phạm vi sau Amendment 1 (31/08): NỬA MÁY CHỦ, AC-1..AC-8, tám ô đo.
+# KHÔNG criterion nào mang tag (cross-layer) nữa — sáu tiêu chí giao diện và
+# media-library đã rời hợp đồng, nguyên văn nằm ở §Out of scope của contract.
+# Mười ô đo E9..E18 rời cùng chúng.
+#
+# KHÔNG eval nào dùng mock cho seam lưu trữ. `vitest.config.ts` alias
+# `@ext -> src/ext-default`, và `dataDir()` đọc `TONGFLOW_DATA_DIR`, nên mọi eval
+# tầng seam/lõi/API chạy trên MỘT THƯ MỤC TẠM THẬT: fixture là file thật, quyền
+# thật, byte thật. Chú thích trong chính `vitest.config.ts` ghi lại vì sao —
+# "which is how the AC-9 round trip ended up asserting against a mock".
+#
+# Đường file mới chọn theo GIÁ RE-PIN đã đo, không theo thói quen. Đối chiếu
+# `paths` đã khai của 14 hồ sơ: một file mới dưới `scripts/acceptance/**` kéo
+# `gate-tooling-t1` + `stale-scope-by-paths` vào wave re-pin, còn dưới
+# `scripts/settings/**` thì kéo THÊM 0 hồ sơ. Nên hai phép đo ban đầu định viết
+# bằng shell (đĩa-không-đổi, i18n) chuyển sang `executor: test` — chúng không cần
+# trình duyệt, và `test` vốn ưu tiên cao hơn `script`; còn E17 GIỮ shell dưới
+# `scripts/settings/` vì nó cần Chrome thật và phải tự dựng/dọn server.
+#
+# `paths` khai trên mọi eval để round sau carry-forward phần diff không chạm.
+# Suite commands (`feature_loop.suite_keys`) LUÔN chạy lại.
+#
+# MỌI eval "từ chối" đo HAI CHIỀU trên cùng fixture (MEASURE-BIRTH-CLAUSE): vật
+# lành → xanh, phá vật thật → đỏ với thông điệp ghim. Chiều đỏ ghi trong `expected`.
+
+evals:
+  # ---------- A. Seam — chỗ nuốt lỗi thứ hai ----------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.unit_byo_seam
+    paths: ["src/ext-default/settings-store.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0; trên MỘT thư mục tạm thật trỏ bằng TONGFLOW_DATA_DIR: (a) chưa có file
+      → readSettingsBlob() trả null; (b) file `chmod 000` → NÉM, và lỗi ném ra mang
+      code 'EACCES'; (c) đường dẫn là thư mục → NÉM với code 'EISDIR'. NỬA ĐÀN ÁP:
+      ca (a) phải trả null chứ không ném — một hàm luôn-ném sẽ qua được (b)(c) và
+      chính là lỗi bị canh. CHIỀU ĐỎ: khôi phục `catch { return null }` cũ thì (b)(c)
+      PHẢI đỏ với thông điệp nêu đúng chữ 'EACCES'/'EISDIR', không chỉ exit khác 0.
+      Ca (b) tự bỏ qua khi chạy dưới uid 0 (chmod không chặn được root) và phải NÊU
+      rõ nó bỏ qua — bỏ qua câm là xanh giả.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Lõi — một nguồn, ba trạng thái ----------
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.unit_byo_read_ok_absent
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0; kho chứa JSON object hợp lệ → readEnvStore() trả state 'ok' kèm map
+      ĐÚNG BẰNG nội dung đã ghi (so từng cặp khoá-giá trị, không chỉ so số lượng);
+      kho chưa có → trả state 'absent'. NỬA ĐÀN ÁP: 'absent' phải KHÁC 'unreadable'
+      — một hàm luôn-trả-'unreadable' qua được vế đầu. CHIỀU ĐỎ: đổi nhánh absent
+      thành 'unreadable' thì eval đỏ với thông điệp chứa chữ 'absent'.
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E3
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.unit_byo_read_unreadable
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0; MA TRẬN TOÀN PHẦN bốn nguyên nhân — số assert BẰNG số phần tử: io
+      (seam ném), parse (file chứa '{oops'), shape (file chứa '[1,2,3]'), decode
+      (decodeEnvStore ném). Cả bốn trả state 'unreadable', và `reason` PHÂN BIỆT
+      được bốn ca (bốn giá trị khác nhau, assert trên nội dung reason chứ không
+      trên một boolean). Ca cuối GỌI THẬT `readEnvStore` một lượt cho từng nguyên
+      nhân rồi đếm số `reason` phân biệt được — bản đầu chỉ so bảng hằng của
+      chính file test với literal của chính nó, nên xanh vĩnh viễn kể cả khi cả
+      bốn gộp làm một. CHIỀU ĐỎ đã đo 31/08: gộp bốn reason về `io` → 5 ca đỏ
+      (bản cũ VẪN xanh); cho ca `shape` trả `{}` như mã cũ → 2 ca đỏ nêu chữ 'shape'.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: test
+    cmd: config:executors.test.unit_byo_load_tolerant
+    paths: ["src/lib/settings/env-store.server.ts", "src/lib/settings/env-store.server.test.ts"]
+    expected: >-
+      exit 0; loadEnvStore() chạy qua CẢ SÁU trạng thái (ok, absent, io, parse,
+      shape, decode) và KHÔNG ném lần nào; trả map thật ở 'ok' và `{}` ở năm ca
+      còn lại — đúng hành vi trước gói việc này. Đây là eval chứng minh quyết định
+      2 (nhóm Đọc-để-chạy không đổi). MA TRẬN ĐỦ SÁU: ok · absent · io · parse ·
+      shape · decode — bản đầu thiếu ca `decode` nên một loadEnvStore để lỗi codec
+      thoát ra vẫn xanh. CHIỀU ĐỎ đã đo 31/08: cho nó ném ở ca `io` → 3 đỏ; cho nó
+      ném ở ca `decode` → 1 đỏ (bản cũ VẪN xanh).
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  # ---------- C. API — chỗ mất dữ liệu ----------
+  - id: E5
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.unit_byo_route_get
+    paths: ["src/app/api/settings/env/route.ts", "src/app/api/settings/env/route.unreadable.test.ts"]
+    expected: >-
+      exit 0; kho hỏng → GET trả status 503 và body có code === 'ENV_STORE_UNREADABLE'
+      (assert trên chuỗi code, không trên "có trường error"); kho CHƯA CÓ → GET trả
+      200 với env deep-equal {}. NỬA ĐÀN ÁP là vế absent: một route luôn-503 sẽ qua
+      vế đầu. CHIỀU ĐỎ: trả 200 ở ca hỏng thì eval đỏ nêu chữ '503'.
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E6
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.unit_byo_route_put_refuse
+    paths: ["src/app/api/settings/env/route.ts", "src/app/api/settings/env/route.unreadable.test.ts"]
+    expected: >-
+      exit 0; TRỌNG TÂM. Trên thư mục tạm THẬT: ghi một blob hỏng có nội dung biết
+      trước, đọc BYTES của file (sha256), gọi PUT không cờ với một map khác, rồi đọc
+      lại BYTES. Assert: status === 409 VÀ sha256 trước === sha256 sau. Hai vế phải
+      cùng có — một route trả 409 rồi vẫn ghi sẽ qua vế thứ nhất, và đó chính là lỗi
+      đang sửa. Đây là phép đo đã chạy trên `git config` ở §Context của hợp đồng.
+      CHIỀU ĐỎ: bỏ chốt chặn 409 (để PUT ghi như hôm nay) thì eval đỏ với thông điệp
+      nêu sha256 lệch, không chỉ nêu status.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.unit_byo_route_put_force
+    paths: ["src/app/api/settings/env/route.ts", "src/app/api/settings/env/route.unreadable.test.ts"]
+    expected: >-
+      exit 0; kho hỏng + PUT kèm replaceUnreadableStore:true → status 200; GET ngay
+      sau đó trả 200 với env deep-equal map vừa ghi và state của kho là 'ok'. CHIỀU
+      ĐỎ: để cờ không có tác dụng (vẫn 409) thì eval đỏ nêu chữ 'replaceUnreadableStore'.
+    evidence_required: [run_id, exit_code, verifier, verified_at]
+
+  - id: E8
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.unit_byo_route_no_regression
+    paths: ["src/app/api/settings/env/route.ts", "src/app/api/settings/env/route.test.ts"]
+    expected: >-
+      exit 0; kho 'ok' và kho 'absent': GET 200, PUT ghi được, và `verdicts` vẫn trả
+      về cho khoá đã đổi y như trước gói việc này. THÊM: PUT kèm cờ khi kho LÀNH thì
+      cờ BỊ BỎ QUA — kết quả giống hệt PUT không cờ (so deep-equal cả body lẫn nội
+      dung đĩa). Vế sau canh đúng thứ Notes hợp đồng nêu: cờ không được thành đường
+      ghi thứ hai. LỆNH CHẠY CẢ HAI FILE route test: ba trong bốn điều AC-8 tuyên
+      (GET, kho `absent`, cờ-bị-bỏ-qua có so đĩa) nằm ở `route.unreadable.test.ts`
+      trên thư mục tạm thật, chỉ vế PUT+verdicts nằm ở `route.test.ts` vốn mock kho.
+      Bản đầu chỉ trỏ file thứ hai và tuyên bốn điều nó không đo.
+      CHIỀU ĐỎ: cho cờ đi nhánh riêng khi kho lành thì eval đỏ.
+    evidence_required: [run_id, exit_code, verifier, verified_at]

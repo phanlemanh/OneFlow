@@ -1,0 +1,3 @@
+lệnh dưới phép thử (rút từ .github/workflows/ci.yml): bash scripts/roadmap/check-roadmap-fresh.sh
+lệnh dưới phép thử (rút từ .github/workflows/ci.yml): node scripts/ci/check-product-map.mjs
+OK: cả hai lệnh (rút từ .github/workflows/ci.yml) xanh trên cây lành và đỏ trên cây đã phá; cờ rác bị từ chối

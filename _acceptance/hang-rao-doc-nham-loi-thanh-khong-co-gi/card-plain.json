@@ -1,0 +1,59 @@
+{
+  "feature_plain": "Khi một phép kiểm của cổng nghiệm thu không lấy được dữ liệu nó cần, nó nói thẳng \"tôi không đo được\" và dừng, thay vì im lặng kết luận \"không có gì sai\" — và phép miễn trừ cho những ô tự chấm chính mình nay được khai ra và đếm được.",
+  "scope_plain": "Chỉ chạm một tệp hàng rào và thêm một hàng rào mới bắt tệp khai ô đo có khoá lặp; hai hàng rào còn lại, phép đếm luôn-đúng, và bộ quét thiếu ngữ cảnh để lại cho vòng sau.",
+  "analyst_plain": "Vòng này không đo lại mốc nền, nên không ô đo nào bị xếp vào diện không phân biệt được. Hai ô (bắt khoá lặp và thông điệp nêu đích danh) dùng lại kết quả vòng trước vì phần chúng kiểm không đổi.",
+  "decisions_plain": [
+    {
+      "id": "d-20260903T104429Z-24284",
+      "p": "KHÔNG làm phần mô tả giao diện — việc này không chạm màn hình nào; đổi lại người duyệt gặp cấu trúc lần đầu ngay trong mã."
+    },
+    {
+      "id": "d-20260903T104429Z-26757",
+      "p": "KHÔNG dựng bản bấm được để duyệt — không có giao diện nào để bấm."
+    },
+    {
+      "id": "d-20260903T104429Z-24952",
+      "p": "Chọn đặt một chốt ở đầu mỗi chế độ thay vì bọc lại cả chín chỗ đọc dữ liệu; đổi lại một chỗ đọc thêm sau này sẽ không tự được bảo vệ."
+    },
+    {
+      "id": "d-20260903T104429Z-27268",
+      "p": "Chọn bắt tác giả khai thẳng ô nào tự chấm chính mình, thay vì để máy đoán từ tên lệnh — quên khai thì hàng rào đỏ chứ không xanh; đổi lại tác giả phải nhớ khai."
+    },
+    {
+      "id": "d-20260903T104429Z-24170",
+      "p": "KHÔNG làm hai nhóm còn lại ở vòng này — một cái thuộc hàng rào khác, cái kia chưa có lời giải rõ và sẽ kéo cả hợp đồng theo nhịp phần mơ hồ nhất."
+    },
+    {
+      "id": "d-20260903T104429Z-6068",
+      "p": "KHÔNG chạm tệp lõi mượn từ bộ công cụ, dù nó là một trong ba chỗ của nhóm đã cắt."
+    },
+    {
+      "id": "d-20260903T104429Z-21722",
+      "p": "Coi việc trả lại vùng phủ đã bị thu hẹp hôm qua là một phần của tiêu chí, không phải việc dọn dẹp — không trả lại thì bế tắc chỉ đang bị giấu."
+    },
+    {
+      "id": "d-20260903T213609Z-31519",
+      "p": "Siết lệnh của một ô đo trước khi chốt phạm vi: lệnh cũ không khẳng định con số nào, nên một bản in ra số không vẫn đạt."
+    },
+    {
+      "id": "d-20260903T215222Z-1758",
+      "p": "Cho một ô đo chạy trọn bộ ca kiểm thay vì một ca lẻ — nếu không, ca chống báo động giả sẽ không bao giờ được chạy."
+    },
+    {
+      "id": "d-20260903T215606Z-32613",
+      "p": "Đếm phép miễn trừ theo LỜI KHAI trên mọi hồ sơ, thay vì hạ ngưỡng cho khớp con số đo được; đổi lại hạng này kể cả miễn trừ chưa có hiệu lực, nên mỗi cái đều được in đích danh."
+    },
+    {
+      "id": "d-20260903T221657Z-18152",
+      "p": "Sửa tay hai chỗ trong tệp tham số của lượt kiểm và khai to: tắt phép đo mốc nền theo quyết định trước đây của chủ kho, và gỡ dấu thừa khiến một lệnh kiểm hỏng vì cú pháp chứ không phải vì sản phẩm."
+    },
+    {
+      "id": "d-20260903T225710Z-7487",
+      "p": "Chủ kho trả thẻ ở lần duyệt trước và cho nâng phạm vi sửa ngay một lỗ: chế độ lập kế hoạch ghim đọc lỗi thành «không có gì đổi». Không sửa thì chính con số trong bộ tiêu chí là sai; đổi lại tốn thêm một vòng kiểm và một lần ghim lại."
+    },
+    {
+      "id": "d-20260903T225710Z-11936",
+      "p": "KHÔNG gộp thêm một lỗ nữa cách đó một dòng — chủ kho chỉ đích danh một cái; nới rộng âm thầm đúng là thứ khối «ngoài phạm vi» sinh ra để chặn. Đổi lại lỗ đó vẫn mở sau vòng này."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "feature_plain": "Khi một hồ sơ đã ký được ghim lại sang bản mã mới, máy nay chỉ ra được đúng những phép kiểm nào bị thay đổi ấy chạm tới mà chưa ai chạy lại — thay vì để chúng lặng lẽ đi qua.",
+  "scope_plain": "Máy chỉ CHỈ RA việc bỏ sót, không tự chạy lại giúp; 40 phép kiểm đang nợ từ trước để nguyên, co dần ở những lần ghim sau; và hàng rào này chưa được cắm vào lượt kiểm tự động.",
+  "analyst_plain": "Không có ghi chú phân tích cho vòng này.",
+  "decisions_plain": [
+    { "id": "d-20260902T133116Z-16759", "p": "KHÔNG làm phần mô tả giao diện — việc này không chạm màn hình nào, đổi lại người duyệt gặp cấu trúc lần đầu trong mã." },
+    { "id": "d-20260902T133117Z-3631", "p": "Chọn thêm một trường 'mốc cũ' vào dòng ghim thay vì đổi cấu trúc sổ chạy; đổi lại hai bên đọc hiện có không phải sửa gì." },
+    { "id": "d-20260902T133118Z-21075", "p": "Chọn để kho tự làm phép đối chiếu thay vì gọi công cụ của bộ kit; đổi lại kho phải tự bảo trì luật khớp đường dẫn." },
+    { "id": "d-20260902T133119Z-28890", "p": "KHÔNG làm việc tự chạy lại phép kiểm — máy chỉ chỉ ra; đổi lại người ghim vẫn phải tự chạy, nhưng máy không lặng lẽ đốt hàng chục lượt." },
+    { "id": "d-20260902T133120Z-254", "p": "KHÔNG dọn 40 phép kiểm đang nợ ở vòng này; đo thử 8 cái thì 0 cái đỏ, nên đây là nợ chứ chưa phải cháy." },
+    { "id": "d-20260902T133121Z-22900", "p": "KHÔNG cắm hàng rào vào lượt kiểm tự động ở vòng này; đổi lại nó chỉ chạy khi có người gõ — chính lỗ mà vòng trước vừa đóng cho hai thước khác." },
+    { "id": "d-20260902T133717Z-8773", "p": "Nhận cả 5 điểm thiếu mà lượt dò trước duyệt tìm ra, trong đó hai điểm chặn: không chỗ nào trong phạm vi GHI được mốc cũ, nên hàng rào sẽ trơ vĩnh viễn." },
+    { "id": "d-20260902T133718Z-7194", "p": "Chọn viết luật khớp đường dẫn vào hợp đồng TRƯỚC khi viết mã, và đòi cả bốn hình dạng có ca chạm lẫn ca không chạm." },
+    { "id": "d-20260902T135316Z-27741", "p": "Chọn BA hạng mục thay vì hai: phép kiểm không khai đường dẫn vào hạng 'không kết luận được' có tên kèm số, không bị gộp vào 'bỏ sót'." },
+    { "id": "d-20260902T135317Z-31001", "p": "Đổi luật 'đã chạy lại' từ 'cùng một lượt' sang 'chạy lại tại mốc ấy hoặc sau đó'; luật chặt hơn chỉ thoả được bằng cách bịa xuất xứ." },
+    { "id": "d-20260902T155847Z-21764", "p": "Chọn lấy dòng ghim ĐƯỢC một mục trong báo cáo trích dẫn, thay vì dòng đầu tiên tìm thấy; nếu không phép đo chập chờn." },
+    { "id": "d-20260902T155848Z-13812", "p": "Nâng bộ ca kiểm từ 8 lên 10 để bộ hoạch định có ca riêng; đổi lại bộ ca dài thêm." },
+    { "id": "d-20260902T161216Z-24529", "p": "Viết lại phép đổi mẫu đường dẫn thành một lượt, bỏ ký tự đệm — ký tự ấy hoá ra là một ký tự điều khiển vô hình." }
+  ],
+  "decisions": []
+}

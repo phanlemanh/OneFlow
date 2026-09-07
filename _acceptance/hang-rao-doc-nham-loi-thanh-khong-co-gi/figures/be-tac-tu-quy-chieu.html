@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bế tắc tự-quy-chiếu và bốn lối thoát</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --paper:       #f7f7f8;
+    --paper-2:     #ececed;
+    --node-fill:   #ffffff;
+    --ink:         #1a0033;
+    --muted:       #4f4a63;
+    --soft:        #66607a;
+    --rule:        rgba(26,0,51,0.12);
+    --rule-solid:  rgba(26,0,51,0.28);
+    --accent:      #e100e1;
+    --accent-text: #a600a6;
+    --accent-tint: rgba(225,0,225,0.08);
+    --font-sans:  'Geist', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', 'Lora', serif;
+    --font-mono:  'Geist Mono', ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:       #1a0033;
+      --paper-2:     #241041;
+      --node-fill:   #241041;
+      --ink:         #f7f7f8;
+      --muted:       #c0bacf;
+      --soft:        #a49cb8;
+      --rule:        rgba(247,247,248,0.12);
+      --rule-solid:  rgba(247,247,248,0.28);
+      --accent:      #ff5cff;
+      --accent-text: #ff9cff;
+      --accent-tint: rgba(255,92,255,0.12);
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+  }
+
+  .frame { max-width: 1100px; width: 100%; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 1.5rem;
+  }
+
+  svg { width: 100%; min-width: 900px; display: block; }
+
+  /* ---- SVG roles ---- */
+  .bg        { fill: var(--paper); }
+  .mask      { fill: var(--paper); }
+  .node      { fill: var(--node-fill); stroke: var(--ink); stroke-width: 1; }
+  .node-str  { fill: var(--node-fill); stroke: var(--ink); stroke-width: 1.4; }
+  .node-foc  { fill: var(--accent-tint); stroke: var(--accent); stroke-width: 1.4; }
+  .row-foc   { fill: var(--accent-tint); }
+  .bar-foc   { fill: var(--accent); }
+  .seq       { fill: var(--ink); }
+  .tag       { fill: none; stroke: var(--rule-solid); stroke-width: 0.8; }
+  .hair      { stroke: var(--rule); stroke-width: 1; }
+  .rule-s    { stroke: var(--rule-solid); stroke-width: 1; }
+  .ring      { fill: none; stroke: var(--accent); stroke-width: 1.6; }
+
+  .t-name    { fill: var(--ink);         font: 600 12px var(--font-sans); }
+  .t-body    { fill: var(--muted);       font: 400 10px var(--font-sans); }
+  .t-eye     { fill: var(--soft);        font: 500 9px var(--font-mono); letter-spacing: .14em; }
+  .t-eye-foc { fill: var(--accent-text); font: 500 9px var(--font-mono); letter-spacing: .14em; }
+  .t-sub     { fill: var(--muted);       font: 400 9px var(--font-mono); letter-spacing: .04em; }
+  .t-arrow   { fill: var(--accent-text); font: 400 9px var(--font-mono); letter-spacing: .06em; }
+  .t-seq     { fill: var(--paper);       font: 500 9px var(--font-mono); }
+
+  #arrow-accent polygon { fill: var(--accent); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Sơ đồ vòng tròn + bảng lối thoát · hàng rào ghim</p>
+  <h1>Bế tắc tự-quy-chiếu, và tại sao lối “khai tường minh” thắng</h1>
+
+  <svg viewBox="0 0 1040 1180" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Vòng tròn khép kín bốn bước gây bế tắc, bảng bốn lối thoát kèm hướng của phép quên, và lối đã chọn">
+    <defs>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6"/>
+      </marker>
+    </defs>
+
+    <rect class="bg" width="100%" height="100%"/>
+
+    <!-- ============ THE CLOSED RING (four arcs of one circle, R=216, C=520,312) ============ -->
+    <path class="ring" d="M 628 124.94 A 216 216 0 0 1 731.96 270.41" marker-end="url(#arrow-accent)"/>
+    <path class="ring" d="M 732.26 352 A 216 216 0 0 1 629.41 498.24" marker-end="url(#arrow-accent)"/>
+    <path class="ring" d="M 412 499.06 A 216 216 0 0 1 308.02 353.48" marker-end="url(#arrow-accent)"/>
+    <path class="ring" d="M 307.74 272 A 216 216 0 0 1 410.59 125.76" marker-end="url(#arrow-accent)"/>
+
+    <!-- closing-arc label: 18px clear of the stroke -->
+    <rect class="mask" x="278" y="164" width="88" height="16" rx="2"/>
+    <text class="t-arrow" x="322" y="176" text-anchor="middle">QUAY VỀ ĐẦU</text>
+
+    <!-- ============ STATION 1 — top ============ -->
+    <rect class="mask" x="412" y="56" width="216" height="80" rx="6"/>
+    <rect class="node" x="412" y="56" width="216" height="80" rx="6"/>
+    <circle class="seq" cx="428" cy="72" r="9"/>
+    <text class="t-seq" x="428" y="75" text-anchor="middle">1</text>
+    <text class="t-name" x="520" y="92"  text-anchor="middle">Ô đo chạy chính</text>
+    <text class="t-name" x="520" y="108" text-anchor="middle">hàng rào ghim</text>
+    <text class="t-sub"  x="520" y="126" text-anchor="middle">chế độ check</text>
+
+    <!-- ============ STATION 2 — right ============ -->
+    <rect class="mask" x="628" y="272" width="216" height="80" rx="6"/>
+    <rect class="node" x="628" y="272" width="216" height="80" rx="6"/>
+    <circle class="seq" cx="644" cy="288" r="9"/>
+    <text class="t-seq" x="644" y="291" text-anchor="middle">2</text>
+    <text class="t-name" x="736" y="308" text-anchor="middle">Mọi lần ghim ghi vào</text>
+    <text class="t-name" x="736" y="324" text-anchor="middle">hồ sơ nghiệm thu</text>
+    <text class="t-sub"  x="736" y="342" text-anchor="middle">_acceptance/** · cả dòng của nó</text>
+
+    <!-- ============ STATION 3 — bottom ============ -->
+    <rect class="mask" x="412" y="488" width="216" height="80" rx="6"/>
+    <rect class="node" x="412" y="488" width="216" height="80" rx="6"/>
+    <circle class="seq" cx="428" cy="504" r="9"/>
+    <text class="t-seq" x="428" y="507" text-anchor="middle">3</text>
+    <text class="t-name" x="520" y="524" text-anchor="middle">Ô đo tự rơi vào</text>
+    <text class="t-name" x="520" y="540" text-anchor="middle">tập «bị chạm»</text>
+    <text class="t-sub"  x="520" y="558" text-anchor="middle">theo diff của lần ghim</text>
+
+    <!-- ============ STATION 4 — left ============ -->
+    <rect class="mask" x="196" y="272" width="216" height="80" rx="6"/>
+    <rect class="node" x="196" y="272" width="216" height="80" rx="6"/>
+    <circle class="seq" cx="212" cy="288" r="9"/>
+    <text class="t-seq" x="212" y="291" text-anchor="middle">4</text>
+    <text class="t-name" x="304" y="308" text-anchor="middle">Hàng rào đòi ô ấy có</text>
+    <text class="t-name" x="304" y="324" text-anchor="middle">dòng xanh tại chính sha ấy</text>
+    <text class="t-sub"  x="304" y="342" text-anchor="middle">chế độ check</text>
+
+    <!-- ============ SEAL — the closure itself ============ -->
+    <rect class="mask"     x="432" y="268" width="176" height="88" rx="8"/>
+    <rect class="node-foc" x="432" y="268" width="176" height="88" rx="8"/>
+    <text class="t-eye-foc" x="520" y="292" text-anchor="middle">BẾ TẮC · 03/09</text>
+    <text class="t-name"    x="520" y="312" text-anchor="middle">Vòng khép kín</text>
+    <text class="t-sub"     x="520" y="330" text-anchor="middle">không bao giờ xanh lại</text>
+    <text class="t-sub"     x="520" y="344" text-anchor="middle">sau một lần hợp nhất</text>
+
+    <!-- ============ TABLE — four exits, direction of the mistake ============ -->
+    <line class="rule-s" x1="40" y1="612" x2="1000" y2="612"/>
+    <text class="t-eye" x="40" y="632">BỐN LỐI ĐÃ CÂN — TIÊU CHÍ LÀ HƯỚNG CỦA PHÉP QUÊN</text>
+
+    <text class="t-eye" x="60"  y="672">LỐI THOÁT</text>
+    <text class="t-eye" x="416" y="672">QUÊN KHAI THÌ HÀNG RÀO…</text>
+    <text class="t-eye" x="896" y="672">PHÁN QUYẾT</text>
+    <line class="rule-s" x1="40" y1="684" x2="1000" y2="684"/>
+
+    <!-- row 1 — chosen -->
+    <rect class="row-foc" x="40" y="684" width="960" height="64"/>
+    <rect class="bar-foc" x="40" y="684" width="4" height="64"/>
+    <text class="t-name" x="60"  y="712">Khai tường minh trong tệp khai ô đo</text>
+    <text class="t-sub"  x="60"  y="730">self_referential: true</text>
+    <text class="t-name" x="416" y="710">ĐỎ</text>
+    <text class="t-body" x="416" y="728">Ô ấy nằm trong tập phải-chạy-lại như cũ — hàng rào bắt được ngay.</text>
+    <text class="t-eye-foc" x="896" y="712">ĐÃ CHỌN</text>
+    <line class="hair" x1="40" y1="748" x2="1000" y2="748"/>
+
+    <!-- row 2 -->
+    <text class="t-name" x="60"  y="776">Đoán từ lệnh chạy</text>
+    <text class="t-sub"  x="60"  y="794">dò tên script trong lệnh chính</text>
+    <text class="t-name" x="416" y="774">XANH</text>
+    <text class="t-body" x="416" y="792">Ô tự biến mất khỏi tập; đúng bệnh «nhận diện theo hình dạng chuỗi».</text>
+    <text class="t-eye"  x="896" y="776">LOẠI</text>
+    <line class="hair" x1="40" y1="812" x2="1000" y2="812"/>
+
+    <!-- row 3 -->
+    <text class="t-name" x="60"  y="840">Loại sổ sách của nghi thức ghim khỏi diff</text>
+    <text class="t-name" x="416" y="838">KHÔNG CỨU ĐƯỢC CA HỢP NHẤT</text>
+    <text class="t-body" x="416" y="856">Diff của một lần hợp nhất vẫn kéo cả hồ sơ vào tập bị chạm — đo 03/09: 49 file.</text>
+    <text class="t-eye"  x="896" y="840">LOẠI</text>
+    <line class="hair" x1="40" y1="876" x2="1000" y2="876"/>
+
+    <!-- row 4 -->
+    <text class="t-name" x="60"  y="904">Biến thành luật quy trình</text>
+    <text class="t-name" x="416" y="902">KHÔNG ĐO ĐƯỢC</text>
+    <text class="t-body" x="416" y="920">Không có vật nào cho hàng rào đọc, nên không có chiều đỏ.</text>
+    <text class="t-eye"  x="896" y="904">LOẠI</text>
+    <line class="rule-s" x1="40" y1="940" x2="1000" y2="940"/>
+
+    <!-- ============ OUTCOME ============ -->
+    <rect class="mask"     x="40" y="976" width="960" height="128" rx="8"/>
+    <rect class="node-str" x="40" y="976" width="960" height="128" rx="8"/>
+    <rect class="tag" x="56" y="992" width="128" height="16" rx="2"/>
+    <text class="t-eye" x="120" y="1004" text-anchor="middle">SAU GAP-PROBE P0-1</text>
+    <text class="t-sub" x="984" y="1004" text-anchor="end">AC-8 · AC-9 · AC-10</text>
+    <text class="t-name" x="56" y="1032">Miễn trừ TOÀN PHẦN, kèm hai phép bù có tên</text>
+    <text class="t-body" x="56" y="1052">Không thu hẹp được về «chỉ khi lượt chạm đến từ hồ sơ nghiệm thu»: một thay đổi vào chính mã hàng rào dựng lại đúng vòng tròn ấy.</text>
+    <text class="t-body" x="56" y="1068">Phép bù 1 — ô tự-quy-chiếu vẫn chạy trong mọi lượt verify của hồ sơ sở hữu nó.</text>
+    <text class="t-body" x="56" y="1084">Phép bù 2 — sửa mã hàng rào làm bằng chứng hoá ôi; lưới staleness buộc một lượt verify mới, chính là chỗ phép đo sống.</text>
+
+    <!-- ============ LEGEND ============ -->
+    <line class="rule-s" x1="40" y1="1140" x2="1000" y2="1140"/>
+    <text class="t-eye" x="40" y="1158">CHÚ GIẢI</text>
+    <line class="ring" x1="144" y1="1154" x2="168" y2="1154"/>
+    <text class="t-sub" x="180" y="1158">Vòng khép kín — bốn bước, không lối ra</text>
+    <rect class="node-foc" x="480" y="1148" width="12" height="12" rx="2"/>
+    <text class="t-sub" x="500" y="1158">Lối đã chọn</text>
+    <text class="t-sub" x="1000" y="1158" text-anchor="end">Hoàn nguyên paths E5/E6 là một phần của AC-10</text>
+  </svg>
+</div>
+</body>
+</html>

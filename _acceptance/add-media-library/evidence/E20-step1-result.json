@@ -1,0 +1,33 @@
+{
+  "lang": "vi",
+  "nodeCountBefore": 6,
+  "nodeCountAfter": 7,
+  "clicked": {
+    "ok": true,
+    "candidateCount": 2,
+    "rect": {
+      "x": 788,
+      "y": 836,
+      "w": 40,
+      "h": 40
+    }
+  },
+  "nodeInfo": {
+    "found": true,
+    "headingText": "Nạp từ kho",
+    "handleCount": 1,
+    "handles": [
+      {
+        "cls": "react-flow__handle react-flow__handle-right nodrag nopan source connectable connectableend",
+        "id": "out:videoNode",
+        "isSource": true,
+        "posRight": true
+      }
+    ],
+    "isProtoPage": false,
+    "pathname": "/workspace"
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "failedRequests": []
+}

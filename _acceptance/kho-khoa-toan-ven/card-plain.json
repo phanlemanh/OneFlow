@@ -1,0 +1,39 @@
+{
+  "feature_plain": "Kho khoá API thôi âm thầm đánh rơi khoá khi đọc, và thôi để lại file hỏng khi ghi dở dang.",
+  "scope_plain": "Sáu nhánh để lại lần sau, đáng chú ý nhất là cửa lọc thứ ba ở tầng giao tiếp — sửa nó sẽ nâng gói lên mức cần thêm một cổng duyệt.",
+  "analyst_plain": "",
+  "decisions_plain": [
+    {
+      "id": "d-20260831T160000Z-4410",
+      "p": "Giá trị không phải chữ thì đổi thành chữ và giữ khoá; đường bị loại có lý do đo được — từ chối cả kho sẽ làm mọi khoá biến mất khỏi mọi lượt chạy."
+    },
+    {
+      "id": "d-20260831T160100Z-9265",
+      "p": "Cấu trúc lồng nhau và tên khoá rỗng vẫn bị từ chối, vì đổi chúng thành chữ chỉ tạo ra rác trông hợp lệ."
+    },
+    {
+      "id": "d-20260831T160200Z-3078",
+      "p": "KHÔNG sửa cửa lọc thứ ba ở tầng giao tiếp, để giữ gói ở mức hai cổng duyệt; đổi lại cửa đó vẫn lọc lặng."
+    },
+    {
+      "id": "d-20260831T160300Z-7791",
+      "p": "Thêm bộ kiểm chiều đỏ để đo bằng máy, kể cả phép đo khó nhất; đo trước cho thấy không tốn thêm lượt đóng dấu lại nào."
+    },
+    {
+      "id": "d-20260831T160400Z-5523",
+      "p": "KHÔNG làm phần khai trước về cấu trúc màn hình — gói này không chạm giao diện nào."
+    },
+    {
+      "id": "d-20260831T163000Z-8814",
+      "p": "Vá cả năm phát hiện của vòng phản biện ngay trong hồ sơ, trước khi viết dòng mã nào."
+    },
+    {
+      "id": "d-20260831T163100Z-2245",
+      "p": "Giữ việc từ chối tên khoá rỗng ở tầng lưu, vì cho qua thì chính bộ đọc của ta sẽ từ chối kho đó ở lần đọc kế; đổi lại là thay đổi hành vi thật."
+    },
+    {
+      "id": "d-20260831T173000Z-9107",
+      "p": "Phép đo cho tình huống tên khoá rỗng đo hành vi THẬT — tầng giao tiếp không bắt lỗi nên nó thoát ra thành ngoại lệ, không phải một phản hồi gọn; biến nó thành phản hồi gọn phải sửa tầng đó, tức nâng hạng gói."
+    }
+  ]
+}

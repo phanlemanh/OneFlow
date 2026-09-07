@@ -1,0 +1,5 @@
+→ răng: artifact-missing artifact-unreadable
+CASE artifact-missing: PASS
+CASE artifact-unreadable: PASS
+
+✅ răng: 2/2 case — mỗi case một mã thoát riêng

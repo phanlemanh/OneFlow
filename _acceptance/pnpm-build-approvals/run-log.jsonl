@@ -32,3 +32,4 @@
 {"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E15", "run_id": "pnpm-build-approvals-e15-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"}
 {"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E16", "run_id": "pnpm-build-approvals-e16-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"}
 {"ts": "2026-08-18T08:23:47Z", "round": 2, "evalId": "E17", "run_id": "pnpm-build-approvals-e17-20260818", "exit_code": 0, "cmd": "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"}
+{"ts":"2026-09-05T10:15:00Z","kind":"repin","run_id":"repin-merge-20260905T101500Z","sha":"96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e","prev_sha":"9e1387715d61a9b855628db8243b862e6d5a17de","suites_exit":[0,0,0,0,0,0,0,0]}

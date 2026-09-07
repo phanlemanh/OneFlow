@@ -1,13 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { type KeyVerdict, verifyKey } from "@/lib/onboarding/key-verify";
 import { loadPluginEnvDecls } from "@/lib/plugins/plugin-env-manifests.server";
+import { ENV_STORE_REPLACE_REFUSED } from "@/lib/settings/env-codes";
 import {
+    ENV_STORE_UNREADABLE,
     type EnvStore,
-    loadEnvStore,
+    readEnvStore,
     saveEnvStore,
 } from "@/lib/settings/env-store.server";
 
 export const runtime = "nodejs";
+
+function unreadableBody(reason: string) {
+    return {
+        error: `Không đọc được kho khoá đã lưu (${reason}).`,
+        code: ENV_STORE_UNREADABLE,
+    };
+}
 
 /**
  * GET /api/settings/env
@@ -16,8 +25,21 @@ export const runtime = "nodejs";
  * the settings dialog gets values and declarations in one fetch.
  */
 export async function GET() {
+    const read = await readEnvStore();
+    if (read.state === "unreadable") {
+        // 503, not 500: the store is a dependency in a bad state, not a defect
+        // in this handler. An empty 200 here is what the settings screen used
+        // to render as "you have no keys", one click away from losing them.
+        return NextResponse.json(unreadableBody(read.reason), {
+            status: 503,
+            headers: { "Cache-Control": "no-store" },
+        });
+    }
     return NextResponse.json(
-        { env: await loadEnvStore(), pluginEnv: loadPluginEnvDecls() },
+        {
+            env: read.state === "ok" ? read.env : {},
+            pluginEnv: loadPluginEnvDecls(),
+        },
         { headers: { "Cache-Control": "no-store" } },
     );
 }
@@ -89,8 +111,51 @@ export async function PUT(request: NextRequest) {
         ? requestedRaw.filter((k): k is string => typeof k === "string")
         : [];
 
-    const previous = await loadEnvStore();
+    const replaceUnreadable =
+        (body as { replaceUnreadableStore?: unknown })
+            ?.replaceUnreadableStore === true;
+
+    const current = await readEnvStore();
+    if (current.state === "unreadable" && !replaceUnreadable) {
+        // Refuse, and write nothing. The caller is asking to replace a store it
+        // cannot read, so it cannot know what it is replacing; the old bytes
+        // stay exactly as they are until someone says otherwise by name.
+        return NextResponse.json(
+            {
+                ...unreadableBody(current.reason),
+                error: `Không đọc được kho khoá đã lưu (${current.reason}); chưa ghi gì.`,
+            },
+            { status: 409 },
+        );
+    }
+
+    // The flag is a CLAIM about SERVER state, made by a caller that cannot see
+    // it. So the server checks the claim before acting on it.
+    //
+    // Accepting it unverified is how a transient failure on the browser side —
+    // an expired session, a proxy 502, a dropped connection — turns into an
+    // empty PUT that erases a store nothing was ever wrong with. The read above
+    // is already in hand; this costs no extra round trip.
+    //
+    // `absent` refuses too. "Replacing nothing with nothing is harmless" is
+    // true about the bytes and false about the premise, and it is the premise
+    // this branch exists to defend.
+    if (replaceUnreadable && current.state !== "unreadable") {
+        return NextResponse.json(
+            {
+                code: ENV_STORE_REPLACE_REFUSED,
+                state: current.state,
+                error: "Kho khoá vẫn đọc được; lệnh thay kho bị từ chối, chưa ghi gì.",
+            },
+            { status: 409 },
+        );
+    }
+
+    const previous = current.state === "ok" ? current.env : {};
     await saveEnvStore(env);
     const verdicts = await verifyChangedKeys(previous, env, requested);
-    return NextResponse.json({ env: await loadEnvStore(), verdicts });
+    // Echo what was just written rather than reading the store back: one less
+    // round trip, and one less place that can throw now that the seam reports
+    // real read failures instead of swallowing them.
+    return NextResponse.json({ env, verdicts });
 }

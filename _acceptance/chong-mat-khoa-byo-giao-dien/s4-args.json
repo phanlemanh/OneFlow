@@ -1,0 +1,319 @@
+{
+ "generated_at": "2026-09-01T14:36:40Z",
+ "generated_sha": "991a6f1e0d49cd3d57828ff39d2d2bdf6ccd0c96",
+ "mainBranchInfo": {
+  "branch": "main",
+  "source": "remote"
+ },
+ "slug": "chong-mat-khoa-byo-giao-dien",
+ "round": 1,
+ "riskTier": "T2",
+ "evals": [
+  {
+   "id": "E1",
+   "criterion": "AC-9",
+   "cmd": "pnpm vitest run src/lib/media-library/config.server.unreadable.test.ts",
+   "expected": "exit 0. Trên MỘT thư mục tạm thật trỏ bằng TONGFLOW_DATA_DIR (không mock seam,\ncùng lối `vitest.config.ts` đã alias `@ext -> src/ext-default`). FIXTURE KHO\nLÀNH PHẢI SINH BẰNG `saveEnvStore()` — bộ GHI thật của kho — chứ KHÔNG viết tay\nJSON theo khuôn mà bên đọc mong đợi: một fixture tự dựng đúng khuôn bên đọc thì\nphép đo chỉ chứng minh test và reader đồng ý với nhau, không chứng minh reader\nđọc được thứ app THẬT ghi ra. Chỉ ca hỏng mới ghi rác thô. Các ca: (a) kho lành,\nđủ hai giá trị → `ok: true`; (b) kho VẮNG, `process.env` cũng vắng →\n`kind: \"missing\"` và `missing` nêu đúng tên hai biến; (c) kho HỎNG (JSON rác),\n`process.env` vắng → `kind: \"store-unreadable\"` kèm `reason` phân biệt được\n(`parse`); (d) kho HỎNG nhưng `process.env` cấp ĐỦ cả hai → `ok: true` — dự\nphòng phải chạy TRƯỚC lời tuyên kho-hỏng; (e) kho HỎNG, `process.env` cấp\nMỘT PHẦN → `kind: \"store-unreadable\"`, KHÔNG phải `missing`.\nNỬA ĐÀN ÁP: ca (b) và ca (c) phải ra HAI `kind` KHÁC NHAU — một hàm luôn trả\n`store-unreadable` sẽ qua được (c)(e) và chính là lỗi đối xứng của lỗi đang sửa.\nCHIỀU ĐỎ: khôi phục `loadEnvStore()` cũ trong `resolveConfig` thì (c) và (e)\nPHẢI đỏ với thông điệp nêu đúng chữ `store-unreadable` — không chỉ exit khác 0;\nvà ca (d) phải VẪN xanh, nếu nó cũng đỏ thì bản vá đã hạ node dùng biến môi trường.\nCHIỀU ĐỎ THỨ HAI (khuôn writer): sửa một byte trong phong bì mà `saveEnvStore`\nsinh ra thì ca (a) PHẢI đỏ — chứng minh ca lành đang đọc đúng khuôn của bên GHI\nchứ không phải một khuôn test tự đặt.",
+   "executor": "test",
+   "paths": [
+    "src/lib/media-library/config.server.ts",
+    "src/lib/media-library/config.server.unreadable.test.ts"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_resolve_config"
+  },
+  {
+   "id": "E13",
+   "criterion": "AC-10",
+   "cmd": "pnpm vitest run src/lib/settings/env-client.test.ts",
+   "expected": "exit 0. Ô NỀN cho cả AC-10 lẫn AC-12: bộ đọc dùng chung mà ba bề mặt đều đi qua.\n14 ca — năm hình dạng lỗi × (báo `unreadable`, gửi 0 `PUT`), cộng đối chứng dương\nrằng kho LÀNH vẫn gửi đúng 1 `PUT` và lượt ghi đó HỢP NHẤT (không xoá khoá khác),\ncộng lượt ghi huỷ-diệt mang cờ + `env` rỗng và KHÔNG đọc trước.\nNỬA ĐÀN ÁP: thiếu đối chứng dương thì một `saveEnvKeys` không bao giờ ghi cũng xanh.\nCHIỀU ĐỎ đã chạy: thu cổng về `status === 503` → đỏ ĐÚNG 6 ca, mỗi ca nêu tên hình\ndạng. Ca `503` và `network` vẫn xanh vì chúng đi qua hai cổng khác (JSON parse và\n`try/catch` quanh `fetch`) — con số 6 là số ĐO ĐƯỢC, không phải số dự đoán.",
+   "executor": "test",
+   "paths": [
+    "src/lib/settings/env-client.ts",
+    "src/lib/settings/env-client.test.ts",
+    "src/lib/settings/__fixtures__/read-failures.ts"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_env_client"
+  },
+  {
+   "id": "E2",
+   "criterion": "AC-10",
+   "cmd": "pnpm vitest run src/components/workspace/settings-dialog.unreadable.test.tsx",
+   "expected": "exit 0. NĂM hình dạng lỗi đọc, mỗi hình dạng một ca, cùng một khẳng định:\n(1) 503 kèm `code: ENV_STORE_UNREADABLE`; (2) 500 thân JSON; (3) 502 thân HTML\n(`<html>...`); (4) 200 nhưng `env` là mảng; (5) `fetch` ném (`TypeError: fetch failed`).\nCả năm: (a) KHÔNG còn ô nhập nào của form khoá trong màn — đếm bằng\n`queryAllByRole(\"textbox\")` cộng input type=password, phải bằng 0 (form bị THAY,\nkhông bị phủ); (b) có phần tử `role=\"alert\"` chứa lý do đọc được VÀ câu \"chưa có\ngì bị thay đổi\"; (c) nút Lưu CÓ MẶT trong cây (`getByRole(\"button\", {name: Lưu})`\nkhông ném) và `disabled` — ẩn nó đi là TRƯỢT, chữ AC viết \"hiện diện nhưng không\nbấm được\"; (d) đúng MỘT nút thoát, đếm bằng `getAllByRole` trên nhãn thoát, độ dài 1.\n(e) đúng MỘT phần tử `[data-testid=\"store-unreadable-notice\"]` — màn Cài đặt phải\nrender CHÍNH component chia sẻ, không phải bản chép tay của nó; đây là dây nối\ngiữa sàn a11y đo trên bản mẫu (E9) và bề mặt thật, vì `paths` chỉ là gợi ý\ncarry-forward chứ không phải khẳng định.\nNỬA ĐÀN ÁP: một ca thứ sáu với 200 + `env` hợp lệ phải ra form BÌNH THƯỜNG (có ô\nnhập, nút Lưu bấm được, 0 tấm alert) — không có ca này thì một component luôn-chặn\ncũng xanh.\nCHIỀU ĐỎ: thu cổng `readEnvForBrowser` về `if (status === 503)` thì ca (2)(3)(4)(5)\nPHẢI đỏ, và thông điệp nêu đúng tên ca (\"500\", \"502-html\", \"shape\", \"network\") chứ\nkhông chỉ \"expected 1 to be 0\".",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/settings-dialog.tsx",
+    "src/components/settings/store-unreadable-notice.tsx",
+    "src/lib/settings/env-client.ts",
+    "src/components/workspace/settings-dialog.unreadable.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_settings_ui"
+  },
+  {
+   "id": "E3",
+   "criterion": "AC-10",
+   "cmd": "pnpm vitest run src/components/workspace/settings-dialog.unreadable-wire.test.tsx",
+   "expected": "exit 0. Đo DÂY NỐI, không đo pixel: với cả năm hình dạng lỗi ở E2, sau khi mở màn\nvà thử mọi lối tương tác còn lại (bấm nút Lưu đang tắt, gõ phím Enter trong màn),\n`fetch.mock.calls` chứa (a) đúng 1 lượt `GET /api/settings/env`, và (b) ĐÚNG 0 lượt\n`PUT` — lọc bằng `init?.method === \"PUT\"`, không lọc bằng chuỗi URL.\nNỬA ĐÀN ÁP: ca kho LÀNH phải cho ra đúng 1 `PUT` khi bấm Lưu — nếu không, phép đo\nnày cũng xanh trên một component không bao giờ ghi được gì.\nCHIỀU ĐỎ: gỡ thuộc tính `disabled` khỏi nút Lưu ở trạng thái kho-hỏng thì ca (b)\nPHẢI đỏ và thông điệp nêu số lượt PUT đếm được kèm thân yêu cầu.",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/settings-dialog.tsx",
+    "src/lib/settings/env-client.ts",
+    "src/components/workspace/settings-dialog.unreadable-wire.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_settings_wire"
+  },
+  {
+   "id": "E4",
+   "criterion": "AC-11",
+   "cmd": "pnpm vitest run src/components/workspace/settings-dialog.replace.test.tsx",
+   "expected": "exit 0. Từ trạng thái kho-hỏng: bấm nút thoát → (a) xuất hiện phần tử\n`role=\"alertdialog\"`; (b) nội dung của nó chứa CẢ HAI ý, kiểm bằng hai khẳng định\nRIÊNG trên chuỗi đọc được: \"mọi khoá đang lưu sẽ mất\" và \"không khôi phục được\" —\nkhông gộp thành một `toContain` dài, để biết ý nào rụng; (c) có nút huỷ và nút xác\nnhận, nút xác nhận mang class của `buttonVariants({variant:\"destructive\"})` (kiểm\nbằng `toHaveClass` trên một token của biến thể đó, vd `bg-destructive`) chứ không\nphải class chép tay; (d) sau khi xác nhận và `PUT` trả 200, màn về trạng thái BÌNH\nTHƯỜNG — ô nhập xuất hiện trở lại và tấm alert biến mất.\nNỬA ĐÀN ÁP: bấm nút HUỶ trong hộp phải đưa về đúng trạng thái kho-hỏng (tấm alert\ncòn, 0 ô nhập) — không có ca này thì một hộp thoại luôn-đóng-và-ghi cũng xanh.\nCHIỀU ĐỎ: đổi chữ trong hộp thành \"Bạn có chắc không?\" thì (b) PHẢI đỏ, và thông\nđiệp nêu đúng cụm bị thiếu.",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/settings-dialog.tsx",
+    "src/components/workspace/settings-dialog.replace.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_replace_ui"
+  },
+  {
+   "id": "E5",
+   "criterion": "AC-11",
+   "cmd": "pnpm vitest run src/components/workspace/settings-dialog.replace-wire.test.tsx",
+   "expected": "exit 0. Đếm trên `fetch.mock.calls` suốt cả chuỗi mở-màn → bấm-thoát → xác nhận:\n(a) tổng số lượt `PUT` bằng ĐÚNG 1; (b) lượt `PUT` duy nhất đó có\n`JSON.parse(body).replaceUnreadableStore === true`; (c) KHÔNG có lượt `PUT` nào\nthiếu cờ ở BẤT KỲ vị trí nào trước đó — khẳng định trên toàn mảng, không chỉ trên\nphần tử cuối; (d) BẤM ĐÚP nút xác nhận (hai `fireEvent.click` liên tiếp trong cùng\nmột `act`) vẫn cho tổng `PUT` bằng ĐÚNG 1.\nNỬA ĐÀN ÁP: ca huỷ hộp thoại phải cho tổng `PUT` bằng 0.\nCHIỀU ĐỎ: gỡ chốt một-chuyến (`useRef`) thì ca (d) PHẢI đỏ với thông điệp nêu số\nlượt PUT đếm được (2), không chỉ \"expected 2 to be 1\" trơ trọi. CHIỀU ĐỎ THỨ HAI:\ngửi thân thiếu `env` thì (b) PHẢI đỏ và thông điệp in NGUYÊN thân yêu cầu.",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/settings-dialog.tsx",
+    "src/components/workspace/settings-dialog.replace-wire.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_replace_wire"
+  },
+  {
+   "id": "E6",
+   "criterion": "AC-12",
+   "cmd": "pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal.test.tsx",
+   "expected": "exit 0. MA TRẬN TOÀN PHẦN 2 bề mặt × 5 hình dạng lỗi = **10 ca**, số ca ghim thành\nhằng trong tệp test và chính con số đó là một khẳng định. Năm hình dạng ĐÚNG như\nE2: 503 · 500 · 502-html · shape · network. Không được rút gọn về \"kho hỏng (503)\":\nGiven của AC-12 sau amendment 01/09 là MỌI lượt đọc không cho ra map dùng được, và\nmột bản vá `if (status === 503)` nội tuyến sẽ xanh ở ca 503 rồi gửi PUT ở bốn ca còn\nlại — đúng khuyết tật mà chính hồ sơ này gọi là \"nửa dễ xanh giả nhất\".\nMỗi ca khẳng định: (a) hiện `role=\"alert\"` nêu kho hỏng; (b) có lối sang màn Cài đặt\nđọc được; (c) KHÔNG có nút thoát — `queryAllByRole(\"button\")` lọc theo nhãn\nthoát/ghi-đè, độ dài PHẢI bằng 0; (d) 0 phần tử `role=\"alertdialog\"`; (e) đúng MỘT\n`[data-testid=\"store-unreadable-notice\"]` — bề mặt thật phải render CHÍNH component\nchia sẻ, không phải bản chép tay, vì sàn a11y của AC-14 chỉ đo bản mẫu.\nThông điệp lỗi của mọi khẳng định phải nêu CẢ tên bề mặt LẪN tên ca.\nNỬA ĐÀN ÁP: cùng hai bề mặt với kho LÀNH phải hiện form nhập như hôm nay và 0 tấm\nalert — nếu không, hai panel luôn-từ-chối cũng xanh.\nCHIỀU ĐỎ: thay bộ đọc chung ở `abi-node-shell` bằng `if (status === 503)` nội tuyến\nthì ĐÚNG 4 ca của bề mặt đó PHẢI đỏ (500 · 502-html · shape · network) và mỗi thông\nđiệp nêu tên bề mặt + tên ca — một ca đỏ duy nhất nghĩa là ma trận chưa toàn phần.",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/nodes/add/media-library-config-panel.tsx",
+    "src/components/workspace/nodes/base/abi-node-shell.tsx",
+    "src/components/settings/store-unreadable-notice.tsx",
+    "src/components/workspace/nodes/store-unreadable-refusal.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_panels_ui"
+  },
+  {
+   "id": "E7",
+   "criterion": "AC-12",
+   "cmd": "pnpm vitest run src/components/workspace/nodes/store-unreadable-refusal-wire.test.tsx",
+   "expected": "exit 0. CÙNG ma trận toàn phần của E6 — 2 bề mặt × 5 hình dạng = **10 khẳng định**,\nsố ca ghim thành hằng. Mỗi ca, sau khi thử mọi lối lưu còn hiện diện:\n`fetch.mock.calls.filter(c => c[1]?.method === \"PUT\").length === 0`. Khẳng định chạy\nRIÊNG từng (bề mặt, ca) và thông điệp nêu CẢ HAI.\nNỬA ĐÀN ÁP: kho lành, bấm Lưu trên từng bề mặt → đúng 1 `PUT` mỗi bề mặt.\nCHIỀU ĐỎ: khôi phục `abi-node-shell` về bản không kiểm `loaded.ok` thì cả 5 ca của\nbề mặt đó PHẢI đỏ, nêu số lượt PUT và thân yêu cầu đã gửi — đây chính là ca mà bản\nhiện tại trên `main` trượt.",
+   "executor": "test",
+   "paths": [
+    "src/components/workspace/nodes/add/media-library-config-panel.tsx",
+    "src/components/workspace/nodes/base/abi-node-shell.tsx",
+    "src/components/workspace/nodes/store-unreadable-refusal-wire.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_panels_wire"
+  },
+  {
+   "id": "E11",
+   "criterion": "AC-12",
+   "cmd": "bash scripts/settings/check-one-env-reader.sh",
+   "expected": "exit 0. Guard CẤU TRÚC cho quyết định load-bearing số 1: chuỗi `/api/settings/env`\nxuất hiện trong ĐÚNG MỘT tệp nguồn ngoài test, và tệp đó là\n`src/lib/settings/env-client.ts`. Ba bề mặt không được tự gọi endpoint nữa.\nVì sao cần guard này chứ không chỉ E6/E7: ma trận hành vi chứng minh ba bề mặt HÔM\nNAY xử lý đúng năm hình dạng; nó không ngăn bề mặt thứ tư ra đời với lối tự viết\nthứ tư — mà \"ba nơi tự viết ba lần, cả ba sai một kiểu riêng\" chính là cơ chế đã đẻ\nra khuyết tật này. Thước CE của Trục A đã đếm được **6 lời gọi ở 3 tệp** trên `main`\n(đo 01/09); guard này là con số đó co về 1 tệp.\nNỬA ĐÀN ÁP: guard phải BỎ QUA tệp `*.test.ts(x)` — nếu không nó chỉ đang cấm viết\ntest, và sẽ đỏ ngay cả trên cây đúng.\nCHIỀU ĐỎ: thêm lại một `fetch(\"/api/settings/env\")` vào `abi-node-shell.tsx` thì\nPHẢI đỏ, thông điệp nêu ĐÚNG đường dẫn tệp vi phạm.",
+   "executor": "script",
+   "paths": [
+    "src/lib/settings/env-client.ts",
+    "src/components/workspace/settings-dialog.tsx",
+    "src/components/workspace/nodes/add/media-library-config-panel.tsx",
+    "src/components/workspace/nodes/base/abi-node-shell.tsx",
+    "scripts/settings/check-one-env-reader.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.kkt_gd_one_reader"
+  },
+  {
+   "id": "E14",
+   "criterion": "AC-12",
+   "cmd": "bash scripts/settings/check-one-env-reader-teeth.sh",
+   "expected": "exit 0. RĂNG của guard E11 — chứng minh guard đó đỏ được, chứ không chỉ xanh.\nBa ca trên BẢN SAO của cây: (1) cây thật → exit 0; (2) chèn thêm một\n`fetch(\"/api/settings/env\")` vào `abi-node-shell.tsx` → exit 1 VÀ thông điệp phải\nNÊU TÊN tệp vi phạm; (3) làm rỗng `env-client.ts` → exit 2 (guard không còn gì để\nđo thì phải nói ra, chứ không được xanh).\nVì sao cần: E11 là một guard tĩnh, và một guard tĩnh xanh vĩnh viễn trông y hệt\nmột guard xanh vì grep gõ sai. Ô này là chỗ duy nhất chứng minh nó biết đỏ.\nCHIỀU ĐỎ: nới `grep` của guard để bỏ qua `src/components/**` thì ca (2) PHẢI đỏ.",
+   "executor": "script",
+   "paths": [
+    "scripts/settings/check-one-env-reader.sh",
+    "scripts/settings/check-one-env-reader-teeth.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.script.kkt_gd_one_reader_teeth"
+  },
+  {
+   "id": "E8",
+   "criterion": "AC-13",
+   "cmd": "pnpm vitest run src/i18n/locale-parity.test.ts",
+   "expected": "exit 0. So parity TOÀN BỘ năm tệp trên tập khoá phẳng: (a) mỗi locale ≠ en không\nthiếu khoá nào của en NGOÀI allowlist đóng băng gồm ĐÚNG 76 khoá `ja` (đo 01/09;\ncon số 76 ghim thành hằng trong tệp test và tự nó là một khẳng định — allowlist dài\n77 là TRƯỢT); (b) không locale nào có khoá thừa không có trong en; (c) không khoá\nMỚI nào của gói việc này (namespace `Settings.storeUnreadable` và\n`Workspace.storeUnreadable`) nằm trong allowlist — allowlist chỉ được chứa nợ cũ.\nNỬA ĐÀN ÁP: (a) phải đỏ khi thiếu khoá NGOÀI allowlist, và cũng phải đỏ khi\nallowlist chứa một khoá thực ra ĐÃ có mặt (nợ đã trả mà allowlist không co lại) —\nmột allowlist chỉ-lớn-lên là cách phép đo này tự vô hiệu hoá theo thời gian.\nCHIỀU ĐỎ: xoá một khoá mới khỏi `ja.json` thì PHẢI đỏ với thông điệp nêu ĐÚNG TÊN\nkhoá và tên locale, không chỉ số đếm.",
+   "executor": "test",
+   "paths": [
+    "src/i18n/messages/en.json",
+    "src/i18n/messages/ja.json",
+    "src/i18n/messages/ko.json",
+    "src/i18n/messages/vi.json",
+    "src/i18n/messages/zh.json",
+    "src/i18n/locale-parity.test.ts"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_locale_parity"
+  },
+  {
+   "id": "E12",
+   "criterion": "AC-13",
+   "cmd": "pnpm vitest run src/components/workspace/settings-i18n-render.test.tsx",
+   "expected": "exit 0. Ghim QUAN HỆ giữa chuỗi hiển thị và TỆP THÔNG ĐIỆP, thứ mà E8 cộng E2 vẫn\nkhông chứng minh được: E8 chỉ đọc năm tệp JSON, còn E2/E4/E6 khẳng định literal\ntiếng Việt — nên một nhãn ghi cứng tiếng Việt do call-site cấp thẳng làm CẢ HAI\nxanh trong khi người dùng en/ja/ko/zh thấy tấm chặn mất khoá bằng tiếng Việt. Đây\nkhông phải giả thuyết: `abi-node-shell.tsx:42` đang có sẵn `KEY_PROMPT_LABELS` ghi\ncứng tiếng Việt, và hợp đồng này đã descope việc dọn nó — nên khuôn đó có mặt ngay\ntrong tệp implementer sẽ sửa.\nDựng màn Cài đặt ở trạng thái kho-hỏng dưới `NextIntlClientProvider` với messages\n`en`, rồi khẳng định: (a) chuỗi tiêu đề đọc được BẰNG giá trị tra từ `en.json` theo\nđúng khoá (đọc từ tệp, không chép literal vào test); (b) chuỗi đó KHÁC giá trị\ntương ứng trong `vi.json`. Lặp cho cả hai khoá của tấm chặn.\nNỬA ĐÀN ÁP: cùng màn dưới messages `vi` phải ra ĐÚNG chuỗi `vi.json` — không có vế\nnày thì một component luôn trả `en` cũng xanh.\nCHIỀU ĐỎ: ghi cứng lại một nhãn (bỏ `t(...)`) thì PHẢI đỏ với thông điệp nêu ĐÚNG\nTÊN KHOÁ bị ghi cứng, không phải một so-sánh-chuỗi ẩn danh.",
+   "executor": "test",
+   "paths": [
+    "src/components/settings/store-unreadable-notice.tsx",
+    "src/components/workspace/settings-dialog.tsx",
+    "src/i18n/messages/en.json",
+    "src/i18n/messages/vi.json",
+    "src/components/workspace/settings-i18n-render.test.tsx"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output"
+   ],
+   "ref": "config:executors.test.kkt_gd_i18n_render"
+  },
+  {
+   "id": "E9",
+   "criterion": "AC-14",
+   "cmd": "bash scripts/settings/check-a11y-proto.sh",
+   "expected": "exit 0. axe-core trong Chrome THẬT (`scripts/a11y-scan.mjs --fail-on critical,serious`)\ntrên 6 trang = 3 trạng thái (`store-unreadable`, `store-unreadable-confirm`,\n`panel-unreadable`) × 2 giao diện (sáng/tối). 0 vi phạm `critical`/`serious`.\nWrapper tự dựng server riêng cổng 3197 với `NEXT_DIST_DIR=build/kkt-a11y` và tự dọn —\nKHÔNG mượn server của người khác, và không dùng `.next` chung vì `pnpm build` là một\nsuite key chạy SONG SONG, một lượt build hạ cánh giữa lúc quét sẽ xoá chunk server\nđang phát và CHỈ trang chết.\nNỬA ĐÀN ÁP — đây là nửa quan trọng nhất của ô này: wrapper ĐỌC LẠI `data-proto-state`\nkhỏi từng trang và so với state đã yêu cầu, VÀ đọc lại trục sáng/tối bằng sự hiện\ndiện của `class=\"dark\"`; đếm phải là 3 state PHÂN BIỆT × 2 theme phân biệt, không\nphải 6 lượt truy cập. Không có nửa này, một tên state gõ sai vẫn cho 6 lượt chụp\nCÙNG MỘT màn hình mà mọi con số vẫn đủ.\nBản mẫu render CHÍNH `store-unreadable-notice.tsx` (dấu\n`data-testid=\"store-unreadable-notice\"`), cùng component mà E2/E6 khẳng định ba bề\nmặt thật dùng — đó là dây nối khiến sàn a11y đo ở đây nói được điều gì đó về màn\nCài đặt, chứ không chỉ về bản mẫu.\nCHIỀU ĐỎ: đổi một tên state trong mảng `STATES` thành chuỗi không tồn tại thì wrapper\nPHẢI đỏ với thông điệp `rendered state 'unknown:<tên>', asked for '<tên>'` — và\n`a11y-scan.mjs` vẫn quét được 6 trang, tức exit khác 0 phải đến TỪ vòng đọc-lại chứ\nkhông từ lượt quét.",
+   "executor": "script",
+   "paths": [
+    "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx",
+    "src/app/proto/[slug]/page.tsx",
+    "scripts/settings/check-a11y-proto.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output",
+    "artifact"
+   ],
+   "ref": "config:executors.script.kkt_gd_a11y_proto"
+  },
+  {
+   "id": "E10",
+   "criterion": "AC-14",
+   "cmd": "bash scripts/settings/check-design-gate-proto.sh",
+   "expected": "exit 0, dòng cuối đọc `6/6 frames PASS the reference slop gate`.\nBọc TỰ CHỨA, cùng lý do với E9: lượt đầu chạy ô này qua đường chụp của bộ điều\nphối, bản chụp không bao giờ tới nơi, gate trả `no target file given` exit 4 —\nmột lỗi ARGS đọc ra như lỗi sản phẩm. Bọc tự chụp đầu vào thì chạy tay lặp lại\nđược, và không đỏ vì lý do chẳng liên quan tới cây. Bọc cũng ĐỌC LẠI\n`data-proto-state` như E9: thiếu vòng đó, một bản chụp âm thầm rơi về state khác\nvẫn được chấm và con số vẫn đủ sáu.\nverdict PASS trên 6 bản chụp HTML của cùng ma trận E9 (3 state × 2 theme).\nÔ đo THAM KHẢO, không phải bằng chứng a11y: gate chạy dưới jsdom và không parse nổi\nTailwind v4 (đo 31/08 trên bản chụp của hồ sơ cha: 188 cssRules trên 153KB CSS nội\ntuyến), nên mọi phần tử đọc ra là chữ đen trên nền trong suốt; toàn bộ luật của nó là\nba bộ dò slop thẩm mỹ (`cramped-padding`, `nested-cards`, `gradient-text`).\nNó ở đây để bắt slop, KHÔNG để chứng minh sàn tương phản — theo chữ AC-14, tiêu chí\nTRƯỢT khi E9 không PASS bất kể ô này xanh.\nCHIỀU ĐỎ: nhét hai thẻ card lồng nhau vào bản mẫu thì `nested-cards` PHẢI đỏ.",
+   "executor": "script",
+   "paths": [
+    "src/components/proto/chong-mat-khoa-byo-giao-dien-proto.tsx",
+    "scripts/settings/check-design-gate-proto.sh"
+   ],
+   "evidence_required": [
+    "run_id",
+    "exit_code",
+    "verifier",
+    "verified_at",
+    "output",
+    "artifact"
+   ],
+   "ref": "config:executors.script.kkt_gd_design_gate"
+  }
+ ],
+ "suiteCommands": [
+  "bash scripts/acceptance/preflight-verify-env.sh",
+  "pnpm build",
+  "pnpm typecheck",
+  "pnpm lint:check",
+  "pnpm test",
+  "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \\\"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\\\" python -m pytest -q",
+  "pnpm verify:plugins",
+  "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json"
+ ],
+ "diffBase": "1d66bc2532594fbbe65d9146528199c6a77ffbb7",
+ "repoRoot": "/Users/manh-macmini/dev/oneflow/.claude/worktrees/silly-snyder-11c815",
+ "personasPath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.5.0/skills/acceptance/references/judge-personas.md",
+ "templatePath": "/Users/manh-macmini/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.5.0/skills/acceptance/references/evidence-report-template.md",
+ "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
+ "contractPath": "/Users/manh-macmini/dev/oneflow/.claude/worktrees/silly-snyder-11c815/_acceptance/chong-mat-khoa-byo-giao-dien/contract.md",
+ "invokedAt": "2026-09-01T14:36:40Z",
+ "invokedSha": "991a6f1e0d49cd3d57828ff39d2d2bdf6ccd0c96",
+ "evalsHash": "5e9d1aefefe6209b96b381a2de7efbf741cd8391ec37f1a23d59c8453ff084f8",
+ "runBaseline": false
+}

@@ -41,6 +41,7 @@ import {
 export const NODE_TYPE_TO_ABI_FEATURE = {
     // transfer/
     genTextNode: "gen-text",
+    normalizeTextViNode: "normalize-text-vi",
     imageGenVideoNode: "image-gen-video",
     textGenVideoNode: "text-gen-video",
     imageGenModelNode: "image-gen-model",
@@ -161,6 +162,11 @@ const CONCAT_VIDEOS = { videos: collectAll() };
 export const NODE_TYPE_SOURCE_SPEC = {
     /* ---------------- transfer/ ---------------- */
     genTextNode: { text: textBatch() },
+    // Same spec as every TTS node below, and deliberately so: this slot sits
+    // directly upstream of them, so `split-text → normalize → speech` must keep
+    // ONE fan-out shape end to end. `normalize-text-vi.test.tsx` asserts the
+    // equality against textGenSpeechPresetNode rather than a copied literal.
+    normalizeTextViNode: { text: textBatch() },
     textGenVideoNode: { text: textBatch() },
     textGenImageNode: { text: textBatch() },
     textGenSpeechInstructNode: { text: textBatch() },

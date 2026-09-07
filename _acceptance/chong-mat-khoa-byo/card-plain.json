@@ -1,0 +1,27 @@
+{
+  "feature_plain": "Khi ứng dụng không đọc nổi kho khoá nhà cung cấp đã lưu, máy chủ nói thẳng ra và TỪ CHỐI ghi đè — nên lần lưu kế tiếp không còn xoá sạch khoá cũ trong im lặng.",
+
+  "scope_plain": "Chỉ nửa máy chủ. Phần giao diện và phần media-library đã rời hợp đồng này sau khi tìm ra hai lỗi nặng ở chúng; mã của chúng đã hoàn nguyên khỏi nhánh.",
+
+  "analyst_plain": "Bộ phân loại phạm vi KHÔNG chạy trọn vòng này. Nghĩa là không phát hiện nào bị máy tự xếp là 'trong hợp đồng' rồi tự sửa — cả mười đều chờ anh xem. Đừng đọc bảng 'ngoài hợp đồng' như một kết luận của máy; nó là trạng thái mặc định khi máy không phân loại được.",
+
+  "decisions_plain": [
+    {"id": "d-20260830T211905Z-5150", "p": "Chọn bắt máy phân biệt ba tình trạng kho ngay lúc biên dịch — đổi lại phải sửa cả bốn chỗ đang gọi tới kho, nhưng chỗ nào cố tình bỏ qua lỗi thì là một dòng có chủ ý chứ không phải tai nạn."},
+    {"id": "d-20260830T211905Z-5295", "p": "Chọn nhận mức rủi ro cao nhất — đổi lại thêm một lần anh duyệt kế hoạch, nhưng tránh được cách sửa tắt vốn chỉ là nuốt lỗi kiểu khác."},
+    {"id": "d-20260830T211905Z-6172", "p": "Chọn viết phép đo bằng bài kiểm đơn vị thay vì kịch bản shell — tránh được hai hồ sơ cũ phải ký lại oan."},
+    {"id": "d-20260830T211905Z-4558", "p": "KHÔNG làm bản sao lưu kho hỏng trước khi ghi đè — đổi lại người dùng bấm nút là mất khoá cũ thật. Với phạm vi hiện tại thì nút đó chưa tồn tại, nên điều này còn treo cho hợp đồng sau."},
+    {"id": "d-20260830T211905Z-7403", "p": "KHÔNG đụng đường chạy node — kho hỏng không được làm đứng cả những việc chạy trên máy vốn chẳng cần khoá nào. Đây là quyết định anh chốt, và một phép đo tồn tại riêng để chứng minh nó không bị lật."},
+    {"id": "d-20260830T211905Z-3130", "p": "Chọn thêm bước hỏi lại trước khi xoá kho — nay nằm ngoài phạm vi cùng phần giao diện."},
+    {"id": "d-20260830T214159Z-2825", "p": "Chọn đo tiếp cận bằng trình duyệt thật thay vì công cụ cũ, vì đo được là công cụ cũ không đọc nổi màu sắc thật — nay ra ngoài phạm vi cùng phần giao diện."},
+    {"id": "d-20260830T214159Z-3658", "p": "Chọn dựng bản mẫu ở mức khung tĩnh — nay ra ngoài phạm vi cùng phần giao diện."},
+
+    {"id": "d-20260830T220920Z-5805", "p": "Cho máy chủ trả thẳng danh sách khoá vừa ghi thay vì đọc lại đĩa — bớt một lượt đọc, đổi lại phản hồi có thể lệch nhẹ với đĩa ở ca tên khoá có khoảng trắng thừa. Có một mục trong khối 'ngoài hợp đồng' nói về đúng chỗ này."},
+    {"id": "d-20260830T222115Z-3486", "p": "KHÔNG thêm mã lỗi mới vào ranh giới media-library — nay ra ngoài phạm vi cùng phần đó."},
+    {"id": "d-20260830T232155Z-8135", "p": "Sửa ba khuyết tật vòng một: máy từ chối ghi đúng nhưng lại nói với người dùng rằng khoá của họ hỏng. Ba chỗ đó nay đã ra ngoài phạm vi, nhưng bài học đi vào hợp đồng sau."},
+    {"id": "d-20260830T232155Z-5193", "p": "Thêm phép đo chạm thứ người dùng thấy, không chỉ chạm lỗi được ném — đây là gốc của lần trượt vòng một."},
+    {"id": "d-20260830T232155Z-8199", "p": "Không sửa các phát hiện nằm ngoài phạm vi đã duyệt, để tránh vòng xoáy vá trong vùng chưa đặc tả."},
+    {"id": "d-20260831T005513Z-2506", "p": "Thu phạm vi về nửa máy chủ theo lựa chọn của anh — bỏ được hai lỗi nặng khỏi bản phát hành, đổi lại trải nghiệm còn thô: người dùng gặp form rỗng và một thông báo lỗi, chưa có tấm giải thích và đường thoát. Lỗ mất dữ liệu vẫn đóng, vì chốt chặn nằm ở máy chủ."},
+    {"id": "d-20260831T005513Z-3079", "p": "Ghi nhận rằng cách ghi tệp cài đặt hiện tại — cắt rồi ghi, không nguyên tử — chính là thứ tạo ra kho hỏng. Hồ sơ này chỉ giảm hậu quả; giảm tần suất là việc riêng."},
+    {"id": "d-20260831T005513Z-6913", "p": "Hai ô đỏ máy của vòng trước đã truy ra nguyên nhân và không phải hồi quy sản phẩm: một do công cụ giết lệnh giữa chừng, một do tải song song."}
+  ]
+}

@@ -19,6 +19,7 @@ def _slot_to_ident(slot: str) -> str:
 class NodeSlots:
     """ABI nodeSlot constants. Use these in @node_slot(...)"""
     GEN_TEXT: Final[str] = 'gen-text'
+    NORMALIZE_TEXT_VI: Final[str] = 'normalize-text-vi'
     SPLIT_TEXT: Final[str] = 'split-text'
     COMBINE_TEXT: Final[str] = 'combine-text'
     IMAGE_FUSION: Final[str] = 'image-fusion'
@@ -84,6 +85,7 @@ class NodeSlots:
 
 ALL_NODE_SLOTS: Final[tuple[str, ...]] = (
     'gen-text',
+    'normalize-text-vi',
     'split-text',
     'combine-text',
     'image-fusion',

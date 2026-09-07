@@ -1,0 +1,3 @@
+→ kiểm tra trôi giữa docs/roadmap.md, docs/adr/ và _acceptance/
+   sổ cái: 27 hạng mục đã ký, 27 dòng trong sổ
+✅ docs/roadmap.md khớp với docs/adr/ và _acceptance/ — không có trôi.

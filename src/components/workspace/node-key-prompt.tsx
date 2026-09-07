@@ -1,9 +1,13 @@
 "use client";
 
 import { AlertTriangle, Check, KeyRound, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { ReadStateNotice } from "@/components/settings/read-state-notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { EnvReadFailure } from "@/lib/settings/env-client";
+import { requestOpenSettings } from "@/lib/settings/settings-events";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,6 +39,19 @@ export type KeyPromptState =
      * broken (S4 round 1 finding).
      */
     | { phase: "saved-unverified"; reason: string }
+    /**
+     * The read did not produce a usable map, so this node must not write.
+     * Distinct from every phase above: those are all statements about a KEY,
+     * and this one is about the READ. Rendering it as `invalid` would tell the
+     * user their key is bad and invite them to type a new one — the overwrite
+     * this whole feature exists to prevent.
+     *
+     * It carries the WHOLE union rather than one shape. Only one of the three
+     * read failures means the store is broken, and only that one earns the
+     * destructive card; the phase was named `store-unreadable` while it
+     * covered all three, and the name was the bug.
+     */
+    | { phase: "read-failed"; read: EnvReadFailure }
     | { phase: "verified" };
 
 export interface NodeKeyPromptProps {
@@ -47,6 +64,10 @@ export interface NodeKeyPromptProps {
     value?: string;
     onChange?: (value: string) => void;
     onSave?: () => void;
+    /** Ask the surface to read again. Rendered in every non-ok read state. */
+    onRetry?: () => void;
+    /** That read is in flight; the card disables its button. */
+    retrying?: boolean;
 }
 
 export interface NodeKeyPromptLabels {
@@ -68,9 +89,48 @@ export function NodeKeyPrompt({
     value = "",
     onChange,
     onSave,
+    onRetry,
+    retrying = false,
 }: NodeKeyPromptProps) {
+    const t = useTranslations("Workspace");
     const inputId = `node-key-${envKey}`;
     const busy = state.phase === "verifying";
+
+    /*
+     * The blocked state returns EARLY, and that early return is the design.
+     * Rendering the input and the save button alongside a warning would leave
+     * the user a control that cannot work; worse, it would leave this surface
+     * holding a write path. The way forward from here is the settings screen,
+     * which is the only place that can replace a broken store — and there is
+     * deliberately no escape button here, because the function that builds
+     * that request is not reachable from this component.
+     */
+    if (state.phase === "read-failed") {
+        return (
+            <ReadStateNotice
+                read={state.read}
+                t={t}
+                onRetry={onRetry}
+                retrying={retrying}
+            >
+                {/*
+                 * The link to Settings appears ONLY when the store is really
+                 * broken, because Settings is the only place that can repair
+                 * one — and sending a user there for an expired session or a
+                 * dropped connection is advice that cannot help them.
+                 */}
+                {state.read.state === "store-unreadable" ? (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={requestOpenSettings}
+                    >
+                        {t("storeUnreadable.toSettings")}
+                    </Button>
+                ) : null}
+            </ReadStateNotice>
+        );
+    }
 
     return (
         <section

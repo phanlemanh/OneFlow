@@ -1,0 +1,18 @@
+E15 network capture (proto/normalize-text-vi?state=wired), origin http://localhost:3000, no api_base declared.
+
+XHR/fetch/document requests observed (all app-origin, all FAIL-eligible scope):
+GET /api/plugins/registry -> 200 OK (x3)
+GET /proto/normalize-text-vi?state=wired -> 200 OK (x2, document nav)
+GET /_next/static/media/22a5144ee8d83bca-s.p.woff2 -> 200 OK (static asset, note-only)
+GET /_next/static/media/7d4881bb7e1bf84d-s.p.woff2 -> 200 OK (static asset, note-only)
+GET /_next/static/css/app/layout.css -> 200 OK (static asset, note-only)
+GET /_next/static/css/app/proto/[slug]/page.css -> 200 OK (static asset, note-only)
+GET /_next/static/chunks/webpack.js -> 200 OK (static asset, note-only)
+GET /_next/static/chunks/main-app.js -> 200 OK (static asset, note-only)
+GET /_next/static/chunks/app-pages-internals.js -> 200 OK (static asset, note-only)
+GET /_next/static/chunks/app/proto/[slug]/page.js -> 200 OK (static asset, note-only)
+GET /_next/static/chunks/app/layout.js -> 200 OK (static asset, note-only)
+
+Console: no [error] entries. One [warn] "React Flow: parent container needs width/height" (dev-mode ReactFlow layout warning, not a network/app failure).
+
+Verdict: all FAIL-eligible (app-origin) requests returned 200. networkObserved = clean.

@@ -1,0 +1,111 @@
+=== E20 network dump (app-scope = http://localhost:3000) — run 2026-08-29, driver: puppeteer-core ===
+consoleErrors: []
+pageErrors: []
+failedRequests (status>=400 or requestfailed): []
+Note: response listener only recorded status>=400 this run (all app-scope traffic during
+navigation to /workspace and the toolbar click that added the addMediaLibraryNode
+returned <400 — none logged below). Prior run's full response list kept for reference:
+[
+  {
+    "url": "http://localhost:3000/workspace",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/css/app/layout.css?v=1787282701840",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/css/app/workspace/page.css?v=1787282701840",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/media/22a5144ee8d83bca-s.p.woff2",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/media/7d4881bb7e1bf84d-s.p.woff2",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/webpack.js?v=1787282701840",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app-pages-internals.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app/layout.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/main-app.js?v=1787282701840",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/_next/static/chunks/app/workspace/page.js",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/apple-touch-icon.png",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/apple-touch-icon.png",
+    "status": 304
+  },
+  {
+    "url": "http://localhost:3000/example.json",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/example.json",
+    "status": 304
+  },
+  {
+    "url": "http://localhost:3000/api/plugins/registry",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/feature/list",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/uploads/example-assets/two-scenes.mp4",
+    "status": 200
+  },
+  {
+    "url": "http://localhost:3000/api/uploads/example-assets/two-scenes.mp4",
+    "status": 206
+  },
+  {
+    "url": "http://localhost:3000/api/task/pending",
+    "status": 200
+  }
+]
+
+=== corroborating re-run, 2026-08-29, driver: mcp__Claude_Browser (live interactive tab, tabId "seed") ===
+Fresh navigate to http://localhost:3000/workspace, then read_network_requests right after load, then
+clicked the "Kho media" toolbar icon (same action as the puppeteer run above), then read_network_requests
+again and read_console_messages(onlyErrors=true).
+
+App-scope (dev_server.url=http://localhost:3000) requests on this /workspace load, all 200/206 OK:
+  GET /api/plugins/registry            -> 200
+  GET /example.json                    -> 200
+  GET /api/feature/list                -> 200
+  GET /api/uploads/example-assets/two-scenes.mp4 -> 206 Partial Content
+  GET /api/uploads/example-assets/two-scenes.mp4 -> 200
+  GET /api/task/pending                -> 200
+  (+ static _next/* chunks/css/fonts, all 200 — note-only)
+
+No new network requests fired after the toolbar click (adding an addMediaLibraryNode is pure client-side
+state, matches the node's own "Deliberately tab-less ... this node does one thing" doc comment — no fetch
+until the user actually searches).
+read_console_messages(onlyErrors=true) -> "No console logs."
+
+A handful of unrelated [FAILED: net::ERR_ABORTED] entries on /workspace?_rsc=... and
+/proto/add-media-library?...  showed up in one read_network_requests dump BEFORE the fresh navigate above —
+those are aborted Next.js RSC prefetches left in this long-lived tab's history from an earlier
+session/eval's navigation (distinct, earlier request IDs), not attributable to this eval's steps.
+
+networkObserved: clean

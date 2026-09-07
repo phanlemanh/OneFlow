@@ -3,10 +3,10 @@ schema_version: 1
 slug: director-v2
 feature: Director v2 — trí nhớ canvas, vá đồ thị, ước tính chi phí, option tự-chạy
 owner: Manh
-stage: discovery
-decision:
-decided_by:
-decided_at:
+stage: decided
+decision: park
+decided_by: Phan Le Manh
+decided_at: 2026-09-04
 prototype:
   base_commit:
   disposition:
@@ -32,18 +32,13 @@ Bốn hạng mục, thứ tự phát triển 1 → 2 → 5 → 3:
 4. Option tự-chạy: mặc định hỏi trước, opt-in auto, kèm cost estimate — giữ
    nguyên bất biến "Director không bao giờ tự thực thi" làm MẶC ĐỊNH.
 
-> **26/08 — tách hạ tầng:** nền wire-shape (trả plan qua wire, `director_events`, body
-> versioned) tách sang slug riêng [`director-wire-shape`](../director-wire-shape/opportunity.md)
-> theo [ADR-0013](../../docs/adr/0013-director-truong-ky.md); ô này giữ nguyên nghĩa 4 hạng
-> mục SẢN PHẨM và Cổng 0 riêng. Hạng mục 1–2 = làn D2, chỉ đi sau D0+D1.
-
 ## Giả định chốt sinh tử
 
 | # | Giả định | Nếu sai thì | Phép thử rẻ nhất | Trạng thái |
 |---|---|---|---|---|
-| 1 | Serialize đồ thị canvas hiện tại vào turns đủ nhỏ để không phá prompt cache byte-stable của vocabulary | Trí nhớ ngữ cảnh làm chi phí/latency tăng vọt, mục 1–2 chết | Đếm token một đồ thị 20 node serialize thử — **phép thử viết lại 26/08**: `MAX_TOKENS=16000` là trần ĐẦU RA (`director.server.ts:214`), không phải ngân sách đầu vào; trần thật đang chặn là `MAX_PROMPT_LENGTH=2000` (`route.ts:6`). So với ngưỡng chi phí/latency, đo tại giả định #4 của [`director-wire-shape`](../director-wire-shape/opportunity.md) | Chưa thử (đã sửa nền phép thử) |
+| 1 | Serialize đồ thị canvas hiện tại vào turns đủ nhỏ để không phá prompt cache byte-stable của vocabulary | Trí nhớ ngữ cảnh làm chi phí/latency tăng vọt, mục 1–2 chết | Đếm token một đồ thị 20 node serialize thử, so với budget 16k MAX_TOKENS | Chưa thử |
 | 2 | Vá đồ thị biểu đạt được trong DSL v1 (thêm/sửa/xoá bước) mà không cần DSL v2 | Phải nâng version DSL — việc phình sang compiler + few-shot + schema | Viết tay 3 kế hoạch "vá" bằng DSL hiện tại, xem compile được không | Chưa thử |
-| 3 | task-metering chiếu ngược được thành ước-tính-trước-khi-chạy (không chỉ đo-sau) | Mục 5 phải tự dựng bảng giá riêng — nặng hơn nhiều | **Đã kiểm 26/08 — SỐNG một nửa:** cơ chế đã tồn tại (`aggregateCogs(rows, rates)` — `src/lib/measure/cogs.ts:55`, gom per (plugin, slot), median/p95); thứ thiếu duy nhất là `RateTable` từ hoá đơn thật (điều kiện ③ G0). Giai đoạn 1 ước tính THỜI GIAN (estimateMs, không cần rate); ước tính TIỀN chờ RateTable | Kiểm một nửa 26/08 |
+| 3 | task-metering chiếu ngược được thành ước-tính-trước-khi-chạy (không chỉ đo-sau) | Mục 5 phải tự dựng bảng giá riêng — nặng hơn nhiều | Đọc schema task-metering, kiểm có đủ (slot, plugin) → chi phí không | Chưa thử |
 | 4 | Người dùng thật sự muốn opt-in tự chạy (không chỉ là feature parity) | Mục 3 là việc thừa, giữ mặc định hỏi là đủ | Hỏi 3–5 người dùng OneFlow đang trả tiền API của mình | Chưa thử |
 
 ## Ngưỡng chết / ngưỡng UAT
@@ -84,3 +79,12 @@ Bốn hạng mục, thứ tự phát triển 1 → 2 → 5 → 3:
 - Tự chạy làm MẶC ĐỊNH — bất biến không-tự-chạy giữ nguyên, auto chỉ là opt-in. (bác 26/08)
 - Timeline view — tách sang ô `timeline-view`, ngưỡng chết khác hẳn. (tách 26/08)
 - App di động — chưa có tín hiệu người dùng cần.
+
+## Cổng 0 — 04/09
+
+- **decision = park.** Căn cứ: khối kế hoạch lát cắt chứng minh (docs/roadmap.md) đóng băng việc mở hạng mục mới; hồ sơ này không nằm trên đường ★. Mở lại khi gỡ băng, hoặc qua bảng Ngoại lệ với lý do có tên.
+
+> **26/08 — tách hạ tầng:** nền wire-shape (trả plan qua wire, `director_events`, body
+> versioned) tách sang slug riêng [`director-wire-shape`](../director-wire-shape/opportunity.md)
+> theo [ADR-0013](../../docs/adr/0013-director-truong-ky.md); ô này giữ nguyên nghĩa 4 hạng
+> mục SẢN PHẨM và Cổng 0 riêng. Hạng mục 1–2 = làn D2, chỉ đi sau D0+D1.

@@ -1,0 +1,5 @@
+→ răng: unparsable
+CASE unparsable: PASS
+cây chung sạch: _acceptance/config.yaml và scripts/ci/check-gate-guards-job.sh không đổi một byte
+
+✅ răng: 1/1 case — mỗi case một mã thoát riêng

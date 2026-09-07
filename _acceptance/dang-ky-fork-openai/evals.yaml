@@ -1,0 +1,167 @@
+schema_version: 1
+feature_slug: dang-ky-fork-openai
+
+# T2, bảy tiêu chí. KHÔNG criterion nào mang tag (cross-layer): mọi When/Then chạy ở
+# lớp dữ liệu cấu hình, shell script và văn xuôi tài liệu — không qua UI, không qua route.
+#
+# BA ĐIỀU VỀ CÁCH ĐO Ở HỒ SƠ NÀY:
+#
+# 1. Bốn trong bảy ô dùng thước ĐÃ CÓ SẴN của kho. Chúng không phải phép đo mới nên
+#    không cần cặp sinh-thước; chiều đỏ của chúng do các feature trước chứng minh
+#    (check-manifest-guard-teeth.sh, và E3 hiện đang ĐỎ thật trên b96ef5b).
+#
+# 2. Hai ô dùng hàng rào MỚI (E4, E6) nên phải có cặp hai chiều: E5 là chiều đỏ,
+#    theo hình dạng `check-overlay-pin-derived.sh <mode>` — mode địa chỉ hoá, một mã
+#    thoát mỗi phép phá, thông điệp ghim ĐÍCH DANH id và tên file.
+#
+# 3. E8 KHÔNG phải `pre-merge-check clean`. Kho đã đo điều đó là bất khả từ trong một
+#    vòng verify (config.yaml:490, AC-11 amended 05/08, Cổng 2) — bộ kiểm luôn vi phạm
+#    trên chính feature đang bay. E8 hỏi nửa với-tới-được. Vế còn lại nằm ở Notes của
+#    hợp đồng làm việc-của-người, không giả vờ là AC.
+#
+# 4. E6 và E7 sinh ra TỪ phản biện context sạch (gap-probe, 5 finding). Hai lớp lỗi bị
+#    bắt: (a) `CLAUDE.md` viết id trong nháy ngược nên bộ rút hình-dạng-README sẽ rút 0
+#    phần tử rồi thoát 0 — xanh trên vật rỗng; (b) `public/plugins/` nằm trong Given của
+#    AC nhưng không nằm trong phép đo, mà đo xác nhận orphan của chính nhánh này CÓ THẬT.
+
+evals:
+  # ---------- A. Manifest và hàng rào đếm (thước có sẵn) ----------
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.lcp_manifest_counts
+    paths: ["config/official-plugins.json", "scripts/plugins/check-manifest-unmoved.sh"]
+    expected: >-
+      exit 0 và stdout nêu đúng `35 plain strings` cùng `4 origin entries`, liệt kê đủ
+      bốn id origin có `oneflow-api-openai`. Assert trên NỘI DUNG dòng OK, không chỉ mã
+      thoát: hàng rào được sửa số đếm ở chính commit này nên mã thoát 0 một mình không
+      phân biệt được "manifest đúng" với "hàng rào bị nới cho khớp".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.lcp_manifest_guard_teeth
+    paths:
+      - "scripts/plugins/check-manifest-unmoved.sh"
+      - "scripts/plugins/check-manifest-guard-teeth.sh"
+      - "config/official-plugins.json"
+    expected: >-
+      exit 0 và stdout `OK: the manifest guard is red for all 6 perturbations`. Đây là
+      ô trả lời nghi ngờ mà E1 để lại: hàng rào vừa bị sửa số đếm, ô này chứng minh nó
+      vẫn ĐỎ ở cả sáu kiểu phá chứ không bị làm cùn để cho commit này qua.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.civ_docs_guard_synced
+    paths:
+      - "CLAUDE.md"
+      - "scripts/plugins/check-manifest-unmoved.sh"
+      - "scripts/plugins/check-manifest-doc-synced.sh"
+    expected: >-
+      exit 0 và stdout `OK: CLAUDE.md describes ... 35 plain strings + 4 origin entry`.
+      Chiều đỏ KHÔNG cần dựng — nó đã xảy ra thật: trên b96ef5b ô này exit 1 với
+      `FAIL: CLAUDE.md does not state the plain-string count the guard enforces (35)`,
+      vì tôi sửa hàng rào mà quên CLAUDE.md:64. Thước tự grep con số ra khỏi hàng rào
+      nên nó không thể mục theo kiểu kỳ-vọng-đóng-băng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Tài liệu sống ↔ manifest (hàng rào MỚI) ----------
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.dkfo_readme_sync
+    paths:
+      - "README.md"
+      - "docs/README_ZH.md"
+      - "docs/README_JA.md"
+      - "config/official-plugins.json"
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+    expected: >-
+      exit 0 và stdout ghim SỐ id rút được TRÊN TỪNG README (39 mỗi file) cùng số manifest
+      (39) — không chỉ câu "OK". Ghim số là bắt buộc: bộ rút sai hình dạng sẽ rút 0 phần
+      tử, vòng lặp chạy 0 lần, exit 0 — xanh trên vật rỗng. Hàng rào đòi tập id BẰNG NHAU
+      hai chiều, và org khớp theo HÌNH DẠNG MỤC: chuỗi trần → org mặc định, object → org
+      của chính `origin` nó khai. Đây là chỗ CLAUDE.md tự thú "hand-maintained and silently
+      drift"; trước hồ sơ này không ai canh.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.dkfo_docs_teeth
+    paths:
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+      - "scripts/plugins/check-live-docs-manifest-teeth.sh"
+    expected: >-
+      exit 0 và stdout mang ĐỦ BẢY dòng `CASE <tên>: PASS` cùng dòng chốt `OK: 7/7 ca`
+      — `healthy` · `readme-missing` · `readme-extra` · `org-sai-chuoi-tran` ·
+      `org-sai-muc-origin` · `claude-stale-id` · `khong-tuyen-qua`. Ca `orphan-them-moi`
+      đã RÚT ở vòng 3: nó ghi vật thăm dò vào cây thật trong khi E7 quét đúng thư mục đó
+      song song. Nên chế độ `orphans` không có chiều đỏ — khai ở Known limits.
+      Phép khớp tên file/id chỉ đọc dòng bắt đầu bằng `FAIL:`; đo trên toàn stdout là
+      thoả vô điều kiện vì lượt lành luôn in `README.md: 39 id extracted` (finding
+      TRONG hợp đồng, S4 vòng 1). Đã kiểm phép sửa có răng: bỏ `${file}` khỏi thông điệp
+      → ca `readme-missing` đỏ với "a FAIL: line went out without naming
+      'docs/README_ZH.md'". `healthy` là đối chứng DƯƠNG trên cùng bản sao: thiếu nó thì một
+      hàng rào luôn-đỏ cũng "đạt" cả sáu ca phá. Hai ca org tách riêng vì luật org có HAI
+      nửa và nửa `org-sai-muc-origin` (mục fork trỏ ngược org mặc định) chính là nửa hồ sơ
+      này tồn tại để phục vụ — gộp một ca thì cài nhánh object thành no-op vẫn xanh. Mỗi
+      ca phá khẳng định hàng rào thoát KHÁC 0 VÀ thông điệp chứa ĐÍCH DANH id lẫn tên file;
+      tên ca lạ → thoát 2.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.dkfo_claude_origin_ids
+    paths:
+      - "CLAUDE.md"
+      - "config/official-plugins.json"
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+    expected: >-
+      exit 0 và stdout ghim `CLAUDE.md: 4 id` cùng danh sách bốn id — con số là phần chịu
+      lực, không phải trang trí. Bộ rút dùng hình dạng NHÁY NGƯỢC
+      (`(one|tong)flow-(modal|api)-<name>` trong backtick), KHÔNG dùng regex dòng README:
+      đo xác nhận 01/09 rằng `CLAUDE.md` chỉ viết id theo hình dạng đó, nên bộ rút README
+      áp lên nó rút được 0 phần tử và thoát 0 — chính lớp lỗi mà cặp răng ca `claude-stale-id`
+      của E5 chứng minh là đã đóng. Hai tập phải BẰNG NHAU với tập id `origin` của manifest.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.dkfo_icon_no_new_orphan
+    paths:
+      - "public/plugins"
+      - "config/official-plugins.json"
+      - "scripts/plugins/check-live-docs-manifest-synced.sh"
+    expected: >-
+      exit 0 và stdout ghim số file lạc ở base và ở HEAD — đo 01/09 là
+      `base 3 orphan · HEAD 3 orphan · added 0`. Luật là DELTA: `origin/main` đã có sẵn
+      ba `.svg` không ứng id nào trong manifest (`tongflow-modal-ffmpeg`,
+      `-pyscenedetect`, `-sensenova-u1`). `tongflow-api-openai.svg` KHÔNG nằm trong ba
+      file đó — ở base nó ứng với một id manifest hợp lệ, chỉ hoá lạc SAU khi nhánh này
+      thay mục ấy, nên nó là orphan do chính nhánh này sinh và đã xoá ở S3; đó là lý do
+      con số HEAD bằng con số base chứ không lớn hơn. Đòi 0 tuyệt đối là làm CI đỏ vì ba
+      lỗi có sẵn ngoài phạm vi; đòi KHÔNG-TĂNG bắt đúng lớp lỗi của nhánh này mà không
+      phạt quá khứ. GIỚI HẠN ĐÃ KHAI: ô này là khẳng định **chưa từng đỏ**. Ca phá của nó
+      (`orphan-them-moi`) bị RÚT ở vòng 3 vì nó ghi vật thăm dò vào cây THẬT trong khi bộ
+      điều phối chạy các ô máy song song — xem Known limits của hợp đồng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Cái giá nhánh này áp lên hồ sơ khác ----------
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.dkfo_resign_wave
+    expected: >-
+      exit 0 — không hồ sơ đã ký NÀO KHÁC còn mang bằng chứng có trước code của nhánh này.
+      Cụ thể: `conformance-l0` phải đã re-pin đúng khuôn (dòng `kind:"repin"` trong run-log,
+      `sha` khớp `verified_commit` mới, `suites_exit` toàn 0), vì tôi chạm
+      `scripts/plugins/**` nằm trong phạm vi hẹp của nó. Chiều đỏ KHÔNG cần dựng — ô này
+      hiện ĐỎ thật: `VIOLATION [conformance-l0]: evidence is stale`. KHÔNG khai `paths` →
+      luôn chạy lại mọi vòng, vì câu hỏi là về trạng thái CÂY chứ không về file nào đổi.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

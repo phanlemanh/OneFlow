@@ -1,0 +1,6 @@
+→ răng: contract-unparsable status-unknown dir-empty
+CASE contract-unparsable: PASS
+CASE status-unknown: PASS
+CASE dir-empty: PASS
+
+✅ răng: 3/3 case — mỗi case một mã thoát riêng

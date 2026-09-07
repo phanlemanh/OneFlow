@@ -1,0 +1,1 @@
+OK: suite_keys dùng build + typecheck rời, và khoá gộp vẫn còn trong executors

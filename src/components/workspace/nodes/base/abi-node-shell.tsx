@@ -7,6 +7,7 @@
  */
 
 import { useNodeId, useReactFlow, useStore } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 
 import {
@@ -29,6 +30,13 @@ import type { Task } from "@/hooks/use-task";
 import type { SourceSpec } from "@/lib/abi/sources";
 import { classifyFailure } from "@/lib/onboarding/failure-actions";
 import type { KeyVerdict } from "@/lib/onboarding/key-verify";
+import {
+    type EnvReadFailure,
+    readEnvForBrowser,
+    saveEnvKeys,
+    type WriteFailure,
+} from "@/lib/settings/env-client";
+import { writeFailureText } from "@/lib/settings/read-failure-text";
 import type { BaseNodeData } from "@/types/nodes";
 
 import { AbiHandles } from "./abi-handles";
@@ -38,8 +46,15 @@ import { BaseNodeShell } from "./base-node-shell";
 /* Inline key prompt                                                   */
 /* ------------------------------------------------------------------ */
 
-/** UI copy is Vietnamese, matching the repo locale. */
-const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
+/**
+ * UI copy is Vietnamese, matching the repo locale.
+ *
+ * The blocked-store copy is the exception and comes from the message catalogue
+ * instead — see `useKeyPromptLabels`. This file's remaining hardcoded strings
+ * are pre-existing i18n debt that `chong-mat-khoa-byo-giao-dien` explicitly
+ * declined to clean up; only strings that dossier ADDS go through next-intl.
+ */
+const KEY_PROMPT_BASE = {
     needsKey: "Bước này cần một khoá API",
     describe: (providerName) =>
         `Nhập khoá của ${providerName}. Khoá được lưu trên máy bạn và được thử ngay sau khi lưu.`,
@@ -49,7 +64,18 @@ const KEY_PROMPT_LABELS: NodeKeyPromptLabels = {
     invalid: "Khoá chưa dùng được",
     verified: "Khoá đã dùng được",
     savedUnverified: "Đã lưu khoá — chưa kiểm tra được",
-};
+} satisfies NodeKeyPromptLabels;
+
+/*
+ * The blocked-store copy used to be threaded through here as four more label
+ * props. It is not, any more: the card now reads its own namespace, because
+ * three states x four strings threaded through two prop bags is the drift
+ * vector this dossier exists to remove. Everything ABOVE stays a prop — those
+ * strings differ per surface; the read-state copy does not.
+ */
+function useKeyPromptLabels(): NodeKeyPromptLabels {
+    return KEY_PROMPT_BASE;
+}
 
 /** Failure messages that mean "a key is missing or was rejected". */
 const KEY_FAILURE_PATTERN =
@@ -96,35 +122,48 @@ function useProviderName(feature: string): string {
 }
 
 /**
- * Merges one key into the stored env map and returns the server's verdict for
- * it. The verdict is what the server got back from the provider — the UI never
- * declares success on its own.
+ * Merge one key into the store and return the server's verdict for it.
+ *
+ * Routed through `saveEnvKeys` rather than a local pair of fetches. The local
+ * version never checked whether the read succeeded, so an unreadable store
+ * produced `current.env === undefined` and it sent the PUT anyway — the server
+ * refused with a 409, but the request still left the browser, which is exactly
+ * what AC-12 forbids.
  */
 async function saveAndVerifyKey(
     envKey: string,
     value: string,
-): Promise<KeyVerdict> {
-    const loaded = await fetch("/api/settings/env", { cache: "no-store" });
-    const current = (await loaded.json()) as { env?: Record<string, string> };
-    const res = await fetch("/api/settings/env", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            env: { ...(current.env ?? {}), [envKey]: value },
-            // Explicit: probe THIS key even when its value is unchanged. A
-            // re-save of the same string used to come back with no verdict at
-            // all, which the UI could only render as "invalid" (S4 round 1
-            // finding) — the change-detection optimisation stays for the bulk
-            // settings dialog, but a key the user just typed is always asked.
-            verify: [envKey],
-        }),
-    });
-    if (!res.ok) throw new Error(`Không lưu được khoá (HTTP ${res.status}).`);
-    const saved = (await res.json()) as {
-        verdicts?: Record<string, KeyVerdict>;
-    };
+): Promise<
+    KeyVerdict | { readFailed: EnvReadFailure } | { writeFailed: WriteFailure }
+> {
+    const out = await saveEnvKeys({ [envKey]: value }, [envKey]);
+    if (!out.ok) {
+        if (out.reason === "read-failed") {
+            // The whole union travels. Collapsing it to one shape here is how
+            // an expired session reached the node as "your key store is
+            // broken" — and the card for that offers to erase the store.
+            return { readFailed: out.read };
+        }
+        // A failed WRITE is not a statement about the key. Throwing here landed
+        // in the catch below as `phase: "invalid"` — "Khoá chưa dùng được" —
+        // which invites the user to type a new key because the disk was full or
+        // the connection dropped.
+        // An expired session is a statement about the SESSION, so it travels
+        // as a read failure and renders the quiet card with a retry — not as
+        // `saved-unverified`, which tells the user the key was stored.
+        if (out.reason === "unauthenticated") {
+            return { readFailed: { state: "unauthenticated" } };
+        }
+        // `replace-refused` cannot reach here: only the destructive replace
+        // asks for it, and this path never does. Narrowing rather than casting
+        // keeps that a compiler-checked claim.
+        if (out.reason === "replace-refused") {
+            return { writeFailed: { code: "http", status: 409 } };
+        }
+        return { writeFailed: out.detail };
+    }
     return (
-        saved.verdicts?.[envKey] ?? {
+        out.verdicts[envKey] ?? {
             works: false,
             checked: false,
             detail: "Máy chủ không trả về kết quả kiểm tra khoá.",
@@ -132,22 +171,72 @@ async function saveAndVerifyKey(
     );
 }
 
-interface NodeKeyGate {
+/**
+ * The ONE place the key prompt is mounted.
+ *
+ * Exported so the evals mount what ships. Before this existed, the suite built
+ * its own `<NodeKeyPrompt …>` and passed `onRetry` itself — measuring a wiring
+ * the real node did not have, and reporting green while every blocked card on
+ * a node had no control on it at all. A stand-in surface proves things about
+ * the stand-in.
+ */
+export function NodeKeyGateSurface({
+    gate,
+    providerName,
+}: {
+    gate: NodeKeyGate;
+    providerName: string;
+}) {
+    const labels = useKeyPromptLabels();
+    if (!gate.envKey) return null;
+    return (
+        <NodeKeyPrompt
+            envKey={gate.envKey}
+            providerName={providerName}
+            state={gate.state}
+            labels={labels}
+            value={gate.value}
+            onChange={gate.setValue}
+            onSave={gate.save}
+            onRetry={gate.retry}
+            retrying={gate.retrying}
+        />
+    );
+}
+
+export interface NodeKeyGate {
     envKey: string | null;
     state: KeyPromptState;
     value: string;
     setValue: (value: string) => void;
     noteTask: (task: Task) => void;
     save: () => Promise<void>;
+    /** A retry is in flight. The card disables its button while this is true. */
+    retrying: boolean;
+    /**
+     * Read the store again from a blocked card.
+     *
+     * Part of the gate, not a prop the mount site may forget. A card that
+     * states a transient failure and offers nothing to press leaves the user
+     * with no way out at all — there is no destructive control on a node, and
+     * the link to Settings only makes sense when the store is really broken.
+     */
+    retry: () => Promise<void>;
 }
 
 /**
  * Needs-key state for one node. The prompt opens in place, on the node that
  * failed; the settings dialog is never part of this sequence.
  */
-function useNodeKeyGate(): NodeKeyGate {
+export function useNodeKeyGate(): NodeKeyGate {
+    const tStore = useTranslations("Workspace.storeUnreadable");
+    const writeFailedText = useCallback(
+        (cause: WriteFailure) => writeFailureText(tStore, cause),
+        [tStore],
+    );
     const [envKey, setEnvKey] = useState<string | null>(null);
     const [state, setState] = useState<KeyPromptState>({ phase: "needs-key" });
+    const [retrying, setRetrying] = useState(false);
     const [value, setValue] = useState("");
     const nodeId = useNodeId();
     const reactFlow = useReactFlow();
@@ -189,7 +278,17 @@ function useNodeKeyGate(): NodeKeyGate {
         setState({ phase: "verifying" });
         try {
             const verdict = await saveAndVerifyKey(envKey, value);
-            if (verdict.works) {
+            if ("writeFailed" in verdict) {
+                setState({
+                    phase: "saved-unverified",
+                    reason: writeFailedText(verdict.writeFailed),
+                });
+            } else if ("readFailed" in verdict) {
+                // Not a statement about the key. Saying "invalid" here would
+                // invite the user to type a new one, into a store that may not
+                // be readable at all.
+                setState({ phase: "read-failed", read: verdict.readFailed });
+            } else if (verdict.works) {
                 setState({ phase: "verified" });
             } else if (verdict.checked) {
                 // The provider was asked and said no — genuinely unusable.
@@ -208,7 +307,25 @@ function useNodeKeyGate(): NodeKeyGate {
         }
     }, [envKey, value]);
 
-    return { envKey, state, value, setValue, noteTask, save };
+    const retry = useCallback(async () => {
+        // Mark in flight BEFORE awaiting. A boolean set after the await has not
+        // settled when the second click dispatches, and N clicks then fire N
+        // concurrent reads whose last arrival wins — which is the shape the
+        // retry contract says is closed, and it held only on the settings
+        // screen because only that surface passed a busy flag.
+        setRetrying(true);
+        const read = await readEnvForBrowser();
+        setRetrying(false);
+        // A healthy read means the obstacle is gone: hand the form back rather
+        // than leaving a card that is no longer true on screen.
+        setState(
+            read.state === "ok"
+                ? { phase: "needs-key" }
+                : { phase: "read-failed", read },
+        );
+    }, []);
+
+    return { envKey, state, value, setValue, noteTask, save, retry, retrying };
 }
 
 export interface AbiNodeShellProps<F extends NodeSlot> {
@@ -321,17 +438,7 @@ export function AbiNodeShell<F extends NodeSlot>({
             setMissingPluginOpen={exec.setMissingPluginOpen}
         >
             {children}
-            {keyGate.envKey ? (
-                <NodeKeyPrompt
-                    envKey={keyGate.envKey}
-                    providerName={providerName}
-                    state={keyGate.state}
-                    labels={KEY_PROMPT_LABELS}
-                    value={keyGate.value}
-                    onChange={keyGate.setValue}
-                    onSave={keyGate.save}
-                />
-            ) : null}
+            <NodeKeyGateSurface gate={keyGate} providerName={providerName} />
             {autoHandles && (
                 <AbiHandles feature={feature} sourceSpec={sourceSpec} />
             )}

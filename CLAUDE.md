@@ -4,6 +4,17 @@
 
 **Editing:** Follow existing patterns; keep PRs narrowly scoped; no secrets in git. **Comments in code:** English only.
 
+## Resume here (the plan spans many sessions)
+
+The plan of record is the `plan-freeze` block in [`docs/roadmap.md`](docs/roadmap.md) (16 ★ rows, frozen until 16/16 ★ and ≥ 85% of rows are ✅). STATUS.md says *where we are*; the block says *what is next*. At the start of a session:
+
+1. Run `/acceptance-gate:start` (dossiers waiting for a signature, work in progress) **and** `pnpm plan:check` (the ★ ratio). The start card does not know the plan; the plan checker does not know the card — read both.
+2. A row whose slug has a dossier in a working state (contract not `signed-off`, or an opportunity decided `build`) is the work in progress: resume it with `/feature-loop:feature-loop <slug>`, in its own worktree (one worktree, one session).
+3. Otherwise the next machine work is the **first ⬜ row of lane B in table order**. Lane A rows are owner-only; their due weeks are in [the design §6.1](docs/superpowers/specs/2026-09-04-lat-cat-chung-minh-design.md).
+4. Never tick a row by hand. ✅ is legal only once the backing dossier is signed (guard F2); leave ◐ alone — the checker will print it after the 09/10 checkpoint (decision 06/09), typing it makes evidence go stale between two human gates.
+6. **Verify-round cap, declared before the round runs (owner decision 08/09, after `mo-hoa-b01` took 8 rounds):** T2 dossiers get at most **3** S4 rounds, T3 at most **4**. State "this is the last round" in the dossier *before* dispatching it. Findings that survive the last round become named debt — in-contract ones as an amendment section of `contract.md`, out-of-contract ones as Known limits — and the owner signs; no further rounds to patch the measurement. A round that ends BLOCKED for infrastructure reasons (an agent died, a command went red only under parallel load) is not a review round: re-run it compact, on the same HEAD, carrying every green eval via `carriedEvals` and re-running only the blocked ones. Rationale: rounds 4–8 of `mo-hoa-b01` cost ~17M agent tokens for two user-facing fixes; every other finding was a measurement of the measurement (see `_acceptance/mo-hoa-b01/contract.md`, Amendment).
+5. An idea with no dossier yet is a **seed**: while frozen it is a named row in the «Xếp lại sau» table, nothing else. It gets a dossier only after the checkpoint (guard F1 blocks any working-state dossier outside the plan).
+
 ## Directory conventions
 
 - **`src/lib/`** = business code, organized by domain subdirectory (`abi/`, `task/`, `workflow/`, `plugin-executor/`, `plugins/`, `file/`, `upload/`, `schema/`, `api/`, `runtime/`, `settings/`, `director/`). May hold state, perform I/O, or be server-only. (Drizzle DB schema lives separately under [`src/db/`](src/db/), e.g. the `tasks` table in [`src/db/workspace.schema.ts`](src/db/workspace.schema.ts).)
@@ -61,7 +72,8 @@
 - **The READMEs are hand-maintained and silently drift.** Registering a plugin does **not** update the docs. When you add one, also edit **all three** READMEs ([`README.md`](README.md), [`docs/README_ZH.md`](docs/README_ZH.md), [`docs/README_JA.md`](docs/README_JA.md)):
   - the **Official plugins** list (**GPU/CPU plugins** or **API plugins**) — one entry, ordered to match `official-plugins.json`;
   - the **capability matrix** — flip the node from ⬜ to ✅ if this is the first official plugin for that ABI slot (e.g. TripoSplat made `image-gen-model` / "Image → 3D" available).
-- **A fourth coupled constant:** [`scripts/plugins/check-manifest-unmoved.sh`](scripts/plugins/check-manifest-unmoved.sh) asserts the manifest holds exactly **36 plain string entries** under the upstream org **plus exactly three origin entries**, all under `phanlemanh` — `oneflow-modal-compose-overlay`, `oneflow-api-ffmpeg`, `oneflow-api-pyscenedetect`. It began as the `per-plugin-origin` feature's AC-6 (proof that adding the per-entry `origin` capability moved no plugin), was rewritten when the first fork landed (compose-overlay, 2026-08-03), and re-cut again when ADR-0011's first two plugins came off Modal (`local-cpu-plugins`, 2026-08-07) — so it is a snapshot of **three** PRs, not a standing invariant. Registering another plugin, or writing a **fourth** `{"id": ..., "origin": ...}` entry, turns it red — edit the counts and the id set inside the guard's `node -e` block (there is no `expected_count` variable any more), or retire the guard, rather than wondering why an unrelated PR failed an eval. Do not loosen it instead: [`check-manifest-guard-teeth.sh`](scripts/plugins/check-manifest-guard-teeth.sh) perturbs a copy of the manifest six ways and fails if the guard stays green.
+- **A fourth coupled constant:** [`scripts/plugins/check-manifest-unmoved.sh`](scripts/plugins/check-manifest-unmoved.sh) asserts the manifest holds exactly **35 plain string entries** under the upstream org **plus exactly four origin entries**, all under `phanlemanh` — `oneflow-modal-compose-overlay`, `oneflow-api-ffmpeg`, `oneflow-api-openai`, `oneflow-api-pyscenedetect`. It began as the `per-plugin-origin` feature's AC-6 (proof that adding the per-entry `origin` capability moved no plugin), was rewritten when the first fork landed (compose-overlay, 2026-08-03), and re-cut when ADR-0011's first two plugins came off Modal (`local-cpu-plugins`, 2026-08-07), re-cut again when the Vietnamese reader plugin registered (`normalize-text-vi`, 2026-08-20), re-cut BACK when that same plugin was **withdrawn** (2026-08-26) because the repository its `origin` named does not exist publicly, and re-cut a fifth time when the OpenAI plugin was forked (`dang-ky-fork-openai`, 2026-09-01) after OpenAI deprecated every model in its `transcribe` list — so it is a snapshot of **six** PRs, not a standing invariant. Registering another plugin, or writing a **fifth** `{"id": ..., "origin": ...}` entry, turns it red — edit the counts and the id set inside the guard's `node -e` block (there is no `expected_count` variable any more), or retire the guard, rather than wondering why an unrelated PR failed an eval. Do not loosen it instead: [`check-manifest-guard-teeth.sh`](scripts/plugins/check-manifest-guard-teeth.sh) perturbs a copy of the manifest six ways and fails if the guard stays green.
+- **A fifth coupled constant, and it reads the line above:** [`scripts/plugins/check-live-docs-manifest-synced.sh`](scripts/plugins/check-live-docs-manifest-synced.sh) has three modes — `readme` (the three READMEs list exactly the manifest's plugin set, each link's org matching its entry shape), `claude` (**the backticked ids in the bullet above must equal the manifest's `origin` ids**), and `orphans` (`public/plugins/*.svg` with no manifest entry must not grow against the base ref). So retiring the bullet above is no longer free: `claude` mode anchors on it — the one line that both names that guard and lists plugin ids — and deleting it turns this guard red too. Red direction lives in [`check-live-docs-manifest-teeth.sh`](scripts/plugins/check-live-docs-manifest-teeth.sh), 9 named cases; a `--case` run prints `PARTIAL: n/9` and deliberately claims nothing about the cases it skipped.
 - **Plugin ids are constrained to two kinds.** `^(one|tong)flow-(modal|api)-<name>$`, enforced in [`plugin-id.ts`](src/lib/plugins/plugin-id.ts), in [`official-manifest.ts`](src/lib/plugins/official-manifest.ts) (which **throws** while parsing the manifest), and in `sdk/tongflow/scan.py`'s `_detect_runner`. There is no `local` kind: the two plugins ADR-0011 brought onto this machine are named `oneflow-api-*` because adding a third kind means editing `sdk/**`, a t3 path, which escalates the whole change to T3 plus an SDK release train. The prefix is a **label in the picker**, not a backend selector — see [`docs/plugins.md` §5](docs/plugins.md).
 - **Where a plugin is fetched from:** an entry may be a plain string or `{"id": ..., "origin": ...}`; `origin` is a base URL like the top-level `org`. See [`docs/plugins.md` §10](docs/plugins.md) and the one resolver in [`src/lib/plugins/official-manifest.ts`](src/lib/plugins/official-manifest.ts).
 
@@ -90,7 +102,7 @@ Run before every commit; CI ([`.github/workflows/ci.yml`](.github/workflows/ci.y
 
 ## Release checklist
 
-Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **desktop app**. Release the SDK first whenever plugins depend on new types.
+Two independently-versioned artifacts: the **PyPI `oneflow-sdk` package** (import name stays `tongflow` — see [ADR-0008](docs/adr/0008-naming-and-distribution.md)) and the **desktop app**. Release the SDK first whenever plugins depend on new types.
 
 **SDK → PyPI** (publishing convention also in [`sdk/README.md`](sdk/README.md)):
 
@@ -101,9 +113,21 @@ Two independently-versioned artifacts: the **PyPI `tongflow` SDK** and the **des
 
 **Desktop app + GitHub release:**
 
-The desktop app is a Pake (Tauri) cloud shell for `https://app.tongflow.com` — see [`desktop/README.md`](desktop/README.md). Its version comes from the tag (`--app-version`); there is no desktop package.json.
+> **Not currently released.** [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml)
+> no longer triggers on `tags: v*` — tagging does **not** produce desktop installers.
+> The workflow builds a Pake (Tauri) shell around `https://app.tongflow.com`, which is
+> upstream's hosted studio: anyone installing those builds signs in to tong-io's
+> service. Making the desktop app a real local app is roadmap item **S5**; the trigger
+> stays off until then. The disarm comment at the top of that file is the authority —
+> keep this section in sync with it.
 
+- [ ] Tagging `vX.Y.Z` still publishes the **Docker image** via
+      [`docker-publish.yml`](.github/workflows/docker-publish.yml) (`ghcr.io/<owner>/<repo>`).
+      That is the only thing a tag ships today.
 - [ ] Update [`CHANGELOG.md`](CHANGELOG.md) (Keep a Changelog format) and the app version in [`package.json`](package.json) if it's cut.
-- [ ] Tag the release (`git tag vX.Y.Z`); [`.github/workflows/desktop-release.yml`](.github/workflows/desktop-release.yml) builds `OneFlow-mac-universal.dmg` and `OneFlow-win-x64.msi` into a draft GitHub Release and flips it public. Dry-run first via workflow_dispatch (artifacts only, no release) and manually verify OAuth sign-in (especially Google) in the built shell.
-- [ ] Add the CHANGELOG entry as the release notes.
+- [ ] Cut the GitHub Release by hand and paste the CHANGELOG entry as the release notes.
+- [ ] To smoke-test the desktop shell anyway, run the workflow via `workflow_dispatch`:
+      installers land in Actions artifacts and no Release is touched. Note the artifacts
+      are still named `TongFlow-*.dmg` / `.msi` — the workflow has not been rebranded,
+      because it is slated to be replaced rather than renamed (S5).
 - [ ] Note: root `package.json` stays `"private": true` — it is the app, not an npm library; never `npm publish` it.

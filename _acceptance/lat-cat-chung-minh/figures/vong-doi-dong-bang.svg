@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1280 960" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Sơ đồ trạng thái vòng đời luật đóng băng: trạng thái Còn băng chuyển sang GỠ BĂNG khi đủ 16 trên 16 sao và ít nhất 85 phần trăm tổng dòng; nhánh Ngoại lệ có tên với ba lý do; năm phán quyết F0 đến F4 của guard; mốc tái hoạch 09/10 chỉ in NOTE.">
+    <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Lora:ital,wght@0,400;1,400&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');</style>
+      <style>
+        svg {
+          --paper: #f7f7f8;
+          --paper-2: #ececed;
+          --node: #ffffff;
+          --ink: #1a0033;
+          --muted: #4f4a63;
+          --soft: #66607a;
+          --rule: rgba(26,0,51,0.12);
+          --zone: rgba(26,0,51,0.03);
+          --tagline: rgba(26,0,51,0.34);
+          --accent: #e100e1;
+          --accent-text: #a800a8;
+          --accent-tint: rgba(225,0,225,0.08);
+          --link: #0068cc;
+        }
+        @media (prefers-color-scheme: dark) {
+          svg {
+            --paper: #1a0033;
+            --paper-2: #241041;
+            --node: #2a1250;
+            --ink: #f7f7f8;
+            --muted: #c0bacf;
+            --soft: #a49cb8;
+            --rule: rgba(247,247,248,0.14);
+            --zone: rgba(247,247,248,0.04);
+            --tagline: rgba(247,247,248,0.38);
+            --accent: #ff5cff;
+            --accent-text: #ff8cff;
+            --accent-tint: rgba(255,92,255,0.12);
+            --link: #5aa9ff;
+          }
+        }
+      </style>
+
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--muted)"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/>
+      </marker>
+      <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="var(--link)"/>
+      </marker>
+    </defs>
+
+    <rect width="100%" height="100%" fill="var(--paper)"/>
+
+    <!-- ============ ZONE: bảng phán quyết của guard ============ -->
+    <rect x="520" y="440" width="656" height="416" rx="8"
+          fill="var(--zone)" stroke="var(--rule)" stroke-width="0.8"/>
+
+    <!-- ============ ARROWS (drawn before nodes) ============ -->
+
+    <!-- start dot → Còn băng -->
+    <line x1="96" y1="344" x2="124" y2="344" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+    <!-- Còn băng → GỠ BĂNG (transition tới hạn, accent) -->
+    <line x1="360" y1="344" x2="940" y2="344" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+
+    <!-- GỠ BĂNG → trạng thái kết thúc -->
+    <line x1="1176" y1="344" x2="1202" y2="344" stroke="var(--muted)" stroke-width="1.2"/>
+
+    <!-- Còn băng → Ngoại lệ có tên (đường sửa lỗi khẩn) -->
+    <line x1="208" y1="292" x2="208" y2="236" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="216" y="244" width="128" height="32" rx="2" fill="var(--paper)"/>
+    <text x="224" y="256" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">SỬA LỖI KHẨN</text>
+    <text x="224" y="270" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">MỞ NGOÀI KẾ HOẠCH</text>
+
+    <!-- Hệ quả 1 của ngoại lệ: cộng vào mẫu số của tỉ lệ -->
+    <path d="M 432,144 H 644 Q 652,144 652,152 V 272"
+          fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="472" y="104" width="152" height="32" rx="2" fill="var(--paper)"/>
+    <text x="548" y="116" fill="var(--link)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CỘNG VÀO MẪU SỐ</text>
+    <text x="548" y="130" fill="var(--link)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">CỦA TỈ LỆ</text>
+
+    <!-- Hệ quả 2 của ngoại lệ: nạp slug vào tập cho phép của F1 (hai lần bắc cầu) -->
+    <path d="M 432,196 H 456 Q 464,196 464,204 V 336 a 8,8 0 0,0 0,16 V 464 a 8,8 0 0,0 0,16 V 584 Q 464,592 472,592 H 516"
+          fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+    <rect x="472" y="388" width="140" height="32" rx="2" fill="var(--paper)"/>
+    <text x="480" y="400" fill="var(--link)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">NẠP SLUG VÀO TẬP</text>
+    <text x="480" y="414" fill="var(--link)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHO PHÉP CỦA F1</text>
+
+    <!-- Còn băng → guard chạy ở cổng merge -->
+    <path d="M 284,392 V 464 Q 284,472 292,472 H 516"
+          fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#arrow)"/>
+    <rect x="300" y="444" width="112" height="20" rx="2" fill="var(--paper)"/>
+    <text x="356" y="458" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">MỖI LẦN MERGE</text>
+
+    <!-- Mốc tái hoạch → Còn băng (nét đứt: chỉ nhắc) -->
+    <path d="M 208,560 V 392" fill="none" stroke="var(--muted)" stroke-width="1"
+          stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+    <rect x="72" y="448" width="128" height="32" rx="2" fill="var(--paper)"/>
+    <text x="192" y="460" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">CHỈ IN NOTE</text>
+    <text x="192" y="474" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">KHÔNG ĐỔI MÃ THOÁT</text>
+
+    <!-- ============ NODES ============ -->
+
+    <!-- Điểm bắt đầu -->
+    <circle cx="88" cy="344" r="6" fill="var(--ink)"/>
+    <text x="88" y="324" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">B1 MERGE</text>
+
+    <!-- Trạng thái: Còn băng -->
+    <rect x="128" y="296" width="232" height="96" rx="8" fill="var(--paper)"/>
+    <rect x="128" y="296" width="232" height="96" rx="8" fill="var(--node)" stroke="var(--ink)" stroke-width="1"/>
+    <rect x="144" y="308" width="88" height="16" rx="2" fill="none" stroke="var(--tagline)" stroke-width="0.8"/>
+    <text x="188" y="320" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TRẠNG THÁI</text>
+    <text x="244" y="352" fill="var(--ink)" font-size="16" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Còn băng</text>
+    <text x="244" y="368" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">F1 bật · hồ sơ mới bị chặn</text>
+
+    <!-- Điều kiện chuyển (chip trên cạnh) -->
+    <rect x="512" y="272" width="280" height="56" rx="6" fill="var(--paper)"/>
+    <rect x="512" y="272" width="280" height="56" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="652" y="292" fill="var(--accent-text)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">ĐIỀU KIỆN GỠ BĂNG</text>
+    <text x="652" y="314" fill="var(--ink)" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">16/16 ★  VÀ  ≥ 85% TỔNG DÒNG</text>
+
+    <!-- Trạng thái: GỠ BĂNG -->
+    <rect x="944" y="296" width="232" height="96" rx="8" fill="var(--paper)"/>
+    <rect x="944" y="296" width="232" height="96" rx="8" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+    <rect x="960" y="308" width="132" height="16" rx="2" fill="none" stroke="var(--accent)" stroke-width="0.8" opacity="0.5"/>
+    <text x="1026" y="320" fill="var(--accent-text)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">TRẠNG THÁI ĐÍCH</text>
+    <text x="1060" y="356" fill="var(--accent-text)" font-size="20" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">GỠ BĂNG</text>
+    <text x="1060" y="376" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">F1 tắt · F0 F2 F3 F4 vẫn chạy</text>
+
+    <!-- Trạng thái kết thúc -->
+    <circle cx="1216" cy="344" r="10" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.2"/>
+    <circle cx="1216" cy="344" r="5" fill="var(--ink)"/>
+
+    <!-- Nhánh: Ngoại lệ có tên -->
+    <rect x="128" y="80" width="304" height="152" rx="8" fill="var(--paper)"/>
+    <rect x="128" y="80" width="304" height="152" rx="8" fill="var(--node)" stroke="var(--ink)" stroke-width="1"/>
+    <rect x="144" y="96" width="164" height="16" rx="2" fill="none" stroke="var(--tagline)" stroke-width="0.8"/>
+    <text x="226" y="108" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LỐI THOÁT CÓ ĐIỀU KIỆN</text>
+    <text x="144" y="136" fill="var(--ink)" font-size="16" font-weight="600" font-family="'Geist', sans-serif">Ngoại lệ có tên</text>
+    <text x="144" y="152" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">BA LÝ DO — KHÔNG CÓ LÝ DO THỨ TƯ</text>
+    <rect x="144" y="164" width="96" height="20" rx="4" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="0.8"/>
+    <text x="192" y="177" fill="var(--ink)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">mất-dữ-liệu</text>
+    <rect x="248" y="164" width="80" height="20" rx="4" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="0.8"/>
+    <text x="288" y="177" fill="var(--ink)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">bảo-mật</text>
+    <rect x="336" y="164" width="72" height="20" rx="4" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="0.8"/>
+    <text x="372" y="177" fill="var(--ink)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">chặn-★</text>
+    <text x="144" y="208" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">một dòng: slug · lý do · ngày · ai quyết</text>
+
+    <!-- Nút phụ: Mốc tái hoạch 09/10 -->
+    <rect x="88" y="560" width="320" height="112" rx="8" fill="var(--paper)"/>
+    <rect x="88" y="560" width="320" height="112" rx="8" fill="var(--paper-2)"
+          stroke="var(--soft)" stroke-width="1" stroke-dasharray="4,3"/>
+    <rect x="104" y="576" width="152" height="16" rx="2" fill="none" stroke="var(--tagline)" stroke-width="0.8"/>
+    <text x="180" y="588" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KHÔNG PHẢI CỔNG CHẶN</text>
+    <text x="104" y="616" fill="var(--ink)" font-size="16" font-weight="600" font-family="'Geist', sans-serif">Mốc tái hoạch 09/10</text>
+    <text x="104" y="636" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">chỉ in NOTE, không đổi mã thoát</text>
+    <text x="104" y="652" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace">máy nhắc — người quyết, băng không tự tan</text>
+
+    <!-- ============ BẢNG PHÁN QUYẾT ============ -->
+    <text x="540" y="472" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">GUARD Ở CỔNG MERGE — NĂM PHÁN QUYẾT</text>
+    <text x="1156" y="472" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">MỖI PHÁN QUYẾT → THOÁT 1</text>
+
+    <!-- F0 -->
+    <rect x="540" y="516" width="40" height="24" rx="4" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.8"/>
+    <text x="560" y="532" fill="var(--muted)" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">F0</text>
+    <text x="600" y="532" fill="var(--ink)" font-size="12" font-family="'Geist', sans-serif">khối kế hoạch không đọc được — fail-closed</text>
+    <text x="1156" y="532" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">AC-8</text>
+
+    <line x1="536" y1="560" x2="1160" y2="560" stroke="var(--rule)" stroke-width="0.8"/>
+    <!-- F1 -->
+    <rect x="540" y="580" width="40" height="24" rx="4" fill="var(--paper)" stroke="var(--link)" stroke-width="1"/>
+    <text x="560" y="596" fill="var(--link)" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">F1</text>
+    <text x="600" y="596" fill="var(--ink)" font-size="12" font-family="'Geist', sans-serif">hồ sơ mở ngoài kế hoạch</text>
+    <text x="1156" y="596" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">AC-2 · AC-6</text>
+
+    <line x1="536" y1="624" x2="1160" y2="624" stroke="var(--rule)" stroke-width="0.8"/>
+    <!-- F2 -->
+    <rect x="540" y="644" width="40" height="24" rx="4" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.8"/>
+    <text x="560" y="660" fill="var(--muted)" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">F2</text>
+    <text x="600" y="660" fill="var(--ink)" font-size="12" font-family="'Geist', sans-serif">dấu ✅ nói dối — hồ sơ chưa ký, hoặc cơ hội chưa chốt vạch</text>
+    <text x="1156" y="660" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">AC-3 · AC-14</text>
+
+    <line x1="536" y1="688" x2="1160" y2="688" stroke="var(--rule)" stroke-width="0.8"/>
+    <!-- F3 -->
+    <rect x="540" y="708" width="40" height="24" rx="4" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.8"/>
+    <text x="560" y="724" fill="var(--muted)" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">F3</text>
+    <text x="600" y="724" fill="var(--ink)" font-size="12" font-family="'Geist', sans-serif">khai park mà hồ sơ chưa park</text>
+    <text x="1156" y="724" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">AC-4</text>
+
+    <line x1="536" y1="752" x2="1160" y2="752" stroke="var(--rule)" stroke-width="0.8"/>
+    <!-- F4 -->
+    <rect x="540" y="772" width="40" height="24" rx="4" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.8"/>
+    <text x="560" y="788" fill="var(--muted)" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">F4</text>
+    <text x="600" y="788" fill="var(--ink)" font-size="12" font-family="'Geist', sans-serif">ngoại lệ không có lý do có tên</text>
+    <text x="1156" y="788" fill="var(--soft)" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">AC-5</text>
+
+    <!-- ============ CHÚ GIẢI ============ -->
+    <line x1="40" y1="896" x2="1240" y2="896" stroke="var(--rule)" stroke-width="0.8"/>
+    <text x="40" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+
+    <rect x="140" y="910" width="12" height="12" rx="2" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+    <text x="160" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">đích: băng tan</text>
+
+    <line x1="332" y1="916" x2="356" y2="916" stroke="var(--muted)" stroke-width="1.2"/>
+    <text x="364" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">chuyển trạng thái</text>
+
+    <line x1="560" y1="916" x2="584" y2="916" stroke="var(--link)" stroke-width="1.2"/>
+    <text x="592" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">hệ quả của ngoại lệ</text>
+
+    <line x1="800" y1="916" x2="824" y2="916" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3"/>
+    <text x="832" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">chỉ nhắc, không chặn</text>
+
+    <rect x="1040" y="906" width="28" height="20" rx="4" fill="var(--paper)" stroke="var(--muted)" stroke-width="0.8"/>
+    <text x="1054" y="920" fill="var(--muted)" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">Fn</text>
+    <text x="1080" y="920" fill="var(--muted)" font-size="9" font-family="'Geist Mono', monospace">phán quyết → thoát 1</text>
+  </svg>

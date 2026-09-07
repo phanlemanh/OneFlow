@@ -1,0 +1,260 @@
+schema_version: 1
+feature_slug: o-do-chay-0-ca-van-xanh
+
+# T2, mười hai tiêu chí. KHÔNG criterion nào mang tag (cross-layer): mọi When/Then
+# chạy ở lớp script và cấu hình CI, không qua UI, không qua route.
+#
+# HAI LUẬT ĐO:
+#
+# 1. Chiều đỏ do `scripts/ci/check-eval-filters-teeth.sh` chứng minh, theo hình dạng
+#    `check-product-map-teeth.sh`: `--case <tên>` địa chỉ hoá và LẶP ĐƯỢC, một mã
+#    thoát mỗi ca, token `CASE <tên>: PASS|FAIL`, tên ca lạ → thoát 2.
+#
+# 2. Ô về CI KHÔNG assert bằng cách đọc YAML tìm chuỗi. Nó rút lệnh RA TỪ ci.yml rồi
+#    CHẠY lệnh đó trên cây đã phá — khuôn của `check-gate-guards-job.sh`, vốn đã giải
+#    đúng bài này cho hai guard trước.
+
+evals:
+  # ---------- A. Bộ kiểm bắt được ô đo rỗng ----------
+  - id: E1
+    criterion: AC-1
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_no_match
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE no-match: PASS`. Ca đổi chuỗi lọc của MỘT ô đo trong
+      bản sao `_acceptance/config.yaml` thành một tên không tồn tại, rồi khẳng định bộ
+      kiểm thoát KHÁC 0 và thông điệp nêu ĐÍCH DANH cả khoá ô đo lẫn chuỗi lọc — không
+      phải câu chung "có ô đo hỏng". Assert trên nội dung chuỗi, không trên mã thoát
+      đơn thuần: một bộ kiểm luôn-đỏ cũng cho mã thoát khác 0.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.evalfilter_check
+    paths: ["scripts/ci/check-eval-filters.mjs", "_acceptance/config.yaml"]
+    expected: >-
+      exit 0 trên CÂY THẬT, và stdout in ra SỐ Ô đã kiểm theo khuôn
+      `đã kiểm <n> ô đo lọc theo tên`. ĐỐI CHỨNG DƯƠNG cho mọi ca đỏ: một bộ kiểm
+      luôn-trả-khác-0 qua sạch E1 và E3–E5, chỉ ô này bắt được.
+      BA CON SỐ phải khớp bộ đếm độc lập, không chỉ "lớn hơn 0": tổng **33**, gọi thẳng
+      **23**, qua bộ bọc **10** (đo 31/08 trên cả hai nhóm). Trạng thái nguy hiểm hơn
+      ca 0 ô là ca ĐẾM THIẾU: một regex gom chỉ khớp dạng nháy đơn một dòng sẽ thấy 5
+      trên 33, in `đã kiểm 5 ô`, thoát 0 — E3 không kích vì khác 0, E6 vẫn xanh vì vẫn
+      có mặt cả hai nhóm, và 28 ô nằm ngoài hàng rào trong khi mọi đèn xanh. Chiều đỏ
+      ở ca răng `undercount` (E16).
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3
+    criterion: AC-3
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_empty
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE zero-executors: PASS`. Ca xoá HẾT ô đo lọc-theo-tên
+      khỏi bản sao cấu hình rồi khẳng định bộ kiểm ĐỎ, chứ không xanh.
+      Đây là cửa quan trọng nhất của cả gói: nếu khuôn lệnh đổi, bộ kiểm sẽ im lặng
+      phủ KHÔNG GÌ CẢ mà vẫn báo đạt — đúng lớp lỗi gói này sinh ra để chặn, tái sinh
+      bên trong chính nó. Thông điệp phải nói rõ là nó không tìm thấy ô nào, không
+      phải một lỗi chung.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_unparsable
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE unparsable: PASS`. Ca thay một lệnh có `-t` bằng một
+      dạng bộ kiểm không hiểu (vd `-t` không có chuỗi theo sau, hoặc lệnh không nêu
+      file nào), rồi khẳng định bộ kiểm ĐỎ NÊU TÊN KHOÁ. Bỏ qua một ô không hiểu được
+      chính là cách một ô hỏng lọt qua — im lặng ở đây tương đương im lặng ở chỗ gốc.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-5
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_list_broken
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE list-broken: PASS`. Ca làm `vitest list` hỏng (trỏ
+      bộ kiểm vào một cây không có `node_modules`) rồi khẳng định nó ĐỎ NÊU NGUYÊN
+      NHÂN. Tuyệt đối không được kết luận "không có ca nào tồn tại, nên không ô nào
+      khớp" — cách hiểu đó biến một lỗi công cụ thành một phán quyết về sản phẩm.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Nhận đúng cả hai khuôn lệnh ----------
+  - id: E6
+    criterion: AC-6
+    executor: script
+    cmd: config:executors.script.evalfilter_both_shapes
+    paths: ["scripts/ci/check-eval-filters.mjs", "_acceptance/config.yaml", "scripts/settings/run-one-test.sh"]
+    expected: >-
+      exit 0; MA TRẬN HAI KHUÔN, số assert bằng số khuôn. Bộ kiểm phải liệt kê được
+      cả ô gọi thẳng (`vitest run <file> -t`) LẪN ô qua bộ bọc (`run-one-test.sh`), và
+      đầu ra chi tiết phải nêu ĐỦ CẢ HAI NHÓM với số lượng từng nhóm.
+      Vì sao ô này tồn tại riêng: khuôn thứ hai do `kho-khoa-toan-ven` sinh ra ngày
+      hôm trước. Một bộ kiểm chỉ biết khuôn thứ nhất sẽ để MƯỜI ô đo mới nhất vô hình
+      — và nó vẫn xanh, vẫn in một con số trông hợp lý. Đối chiếu độc lập bằng
+      `grep -c` trên cấu hình.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-7
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_regex
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE regex-semantics: PASS`. MA TRẬN BỐN BỘ LỌC phủ CẢ HAI
+      chiều bất đồng, số assert bằng số ô: (1) khớp-regex-nhưng-không-khớp-chuỗi-con
+      (vd `answers 503 .* code`); (2) khớp-chuỗi-con-nhưng-không-khớp-regex; (3) khớp
+      cả hai; (4) không khớp cả hai. Mỗi ô THẬT SỰ chạy `vitest run -t` với chuỗi đó,
+      đọc số ca chạy được, rồi so với phán quyết của bộ kiểm — chuẩn đối chiếu là hành
+      vi thật của vitest, không phải một lời hứa trong văn xuôi.
+      Một chuỗi tự chọn, một chiều là không đủ: chiều còn lại chưa đo thì bộ kiểm có
+      thể kết luận một ô đo THẬT là rỗng rồi làm CI đỏ trên mọi PR, hoặc tha một ô rỗng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Cắm điện, và guard được canh ----------
+  - id: E8
+    criterion: AC-8
+    executor: script
+    cmd: config:executors.script.gate_guards_job_teeth
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh", "scripts/ci/check-eval-filters.mjs"]
+    expected: >-
+      exit 0. Chế độ `teeth` rút LỆNH RA TỪ ci.yml cho từng guard rồi chạy nó theo CẢ
+      HAI chiều trên cùng chuỗi rút ra: cây lành phải exit 0 TRƯỚC, rồi cây đã phá
+      phải khác 0. Gói này thêm guard thứ ba vào `GUARD_NEEDLES`, nên phép phá của
+      chế độ ấy phải bao gồm một bộ lọc hỏng trong bản sao `_acceptance/config.yaml`.
+      Chỉ có vế đỏ thì một cờ gõ sai cũng "đỏ" và CI sẽ đỏ trên MỌI PR sau khi merge.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-9
+    executor: script
+    cmd: config:executors.script.gate_guards_job_reachable
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0; chế độ `reachable`. Step mới không mang `if:`, job `acceptance-gate`
+      không mang `if:`/`needs:`, trigger `pull_request` không có `paths`/`paths-ignore`.
+      Đây là bất biến `cong-tu-canh-minh` đã dựng và đã chứng minh bằng thực nghiệm:
+      cắm `if:` vào một step guard thì `shape`, `no-softening` và `job-count` ĐỀU XANH,
+      chỉ `reachable` đỏ. Guard cắm điện mà không bao giờ chạy là nguyên trạng cần đóng.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.gate_guards_job_shape
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0 cho CẢ HAI chế độ `shape` và `no-softening`. `shape` đòi MỌI needle trong
+      `GUARD_NEEDLES` có step gọi nó — nên guard mới chỉ được bảo vệ khi đã khai vào
+      đó, và ô này chính là phép đo của việc khai ấy. `no-softening`: không
+      `continue-on-error`, không or-true, không `set +e` trong khối job.
+      CHIỀU ĐỎ: bỏ needle thứ ba khỏi danh sách thì `shape` vẫn xanh — nên ô này PHẢI
+      đi kèm một khẳng định độc lập rằng `GUARD_NEEDLES` có đủ ba phần tử; xem ca răng
+      `needle-missing`.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E11
+    criterion: AC-10
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_needle
+    paths: ["scripts/ci/check-gate-guards-job.sh", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE needle-missing: PASS`. Ca gỡ guard thứ ba khỏi
+      `GUARD_NEEDLES` trong bản sao rồi khẳng định điều đó bị PHÁT HIỆN. Vì sao cần ô
+      riêng: `shape` chỉ kiểm những needle ĐƯỢC KHAI, nên một guard bị gỡ khỏi danh
+      sách làm `shape` xanh trở lại — hàng rào biến mất mà mọi đèn vẫn xanh. Đây là
+      lớp lỗi "phép đo tự thoả" ở chính lớp canh guard.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Không hồi quy hạ tầng ----------
+  - id: E12
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.gate_guards_job_no_new_job
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-gate-guards-job.sh"]
+    expected: >-
+      exit 0; đúng 6 job, đúng tập tên, VÀ năm job `lint · typecheck · build ·
+      unit-tests · sdk-tests` deep-equal với merge-base (so bằng bộ phân tích YAML).
+      Gói này thêm step và thêm `pnpm/action-setup` vào `acceptance-gate` — job KHÔNG
+      nằm trong năm job đó. Ô này là cách chứng minh điều ấy bằng số. Nếu ai đó chọn
+      đường rẻ hơn là thêm step vào `unit-tests` (nơi đã sẵn `node_modules`), chính ô
+      này sẽ đỏ — đó là lý do thiết kế không chọn đường ấy.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.action_pins
+    paths: [".github/workflows/ci.yml", "scripts/ci/check-action-pins.sh"]
+    expected: >-
+      exit 0; vẫn ĐÚNG 8 site `actions/checkout` và 1 site `docker/login-action`. Gói
+      này thêm `pnpm/action-setup` chứ không thêm checkout, nên con số không được đổi.
+      Guard này thuộc hồ sơ KHÁC (`ci-actions-bump`) và là dạng ảnh-chụp: một PR thêm
+      job sẽ làm nó đỏ vì lý do không liên quan tới chính PR đó. Chạy nó ở đây là để
+      phát hiện ngay, không phải để người sau ngồi đoán vì sao một guard lạ chuyển đỏ.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_unknown_wrapper
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE unknown-wrapper: PASS`. Ca cắm vào bản sao cấu hình
+      một ô đo gọi vitest qua một script LẠ dưới `scripts/` (lệnh KHÔNG hề có `-t`),
+      rồi khẳng định bộ kiểm ĐỎ NÊU CẢ tên khoá LẪN tên script — không được xếp nó vào
+      nhóm không-lọc rồi bỏ qua im lặng.
+      Vì sao ô này tồn tại: `run-one-test.sh` mới ra đời HÔM QUA. Một bộ bọc thứ hai
+      tuần sau, sáu ô đo dùng nó, không lệnh nào có `-t` — bộ kiểm bỏ qua, in một con
+      số trông hợp lý, và xanh. Đó là lớp lỗi tái sinh y nguyên BÊN TRONG hàng rào vừa
+      dựng, nên tiêu chí gom phải là "gọi vitest" chứ không phải "có cờ -t".
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-2
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_undercount
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE undercount: PASS`. Ca dựng một bản sao cấu hình chứa
+      N ô đo viết ở ĐỦ các biến thể trích dẫn có thật trong repo (nháy đơn, nháy kép,
+      giá trị nhiều dòng), rồi khẳng định bộ kiểm báo ĐÚNG N. Đếm thiếu một ô là ĐỎ.
+      Đây là chiều đỏ của E2 và là ca chống trạng thái nguy hiểm nhất của cả gói: đếm
+      thiếu trông y hệt đếm đủ, vì cả hai đều thoát 0 và đều in một con số.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E17
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_clean
+    paths: ["scripts/ci/check-eval-filters.mjs", "scripts/ci/check-eval-filters-teeth.sh"]
+    expected: >-
+      exit 0 và stdout chứa `CASE clean: PASS`. ĐỐI CHỨNG DƯƠNG có mã thoát RIÊNG: bản
+      sao không bị phá gì thì bộ kiểm phải XANH. Thiếu ô này, một bộ răng đọc NGƯỢC mã
+      thoát (coi đỏ là đạt) sẽ qua sạch mọi ca đỏ khác — tám ca PASS trên một bộ răng
+      hoàn toàn sai chiều.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- E. Cắt ngang ----------
+  - id: E14
+    criterion: AC-12
+    executor: script
+    cmd: config:executors.script.evalfilter_teeth_all
+    paths: ["scripts/ci/check-eval-filters-teeth.sh", "scripts/ci/check-eval-filters.mjs"]
+    expected: >-
+      exit 0; chạy TRỌN bộ ca và khẳng định case-completeness: mỗi ca khai trong
+      `--list` đều có token `CASE <tên>: PASS`, và số token bằng số ca khai. Sáu ca:
+      `clean`, `no-match`, `zero-executors`, `unparsable`, `list-broken`,
+      `regex-semantics`, `needle-missing`.
+      THÊM: gọi với một `--case` không tồn tại phải thoát 2 kèm danh sách hợp lệ — một
+      tên gõ sai mà thoát 0 biến ô này thành xanh vĩnh viễn, tức đúng lớp lỗi cả gói
+      việc đang chống, nằm trong chính bộ răng của nó.
+      VÀ ràng buộc CÁCH LY: bộ răng vá vào bản sao trong thư mục tạm, không vá cấu
+      hình của cây chung; kết thúc phải khẳng định `git diff --quiet` trên
+      `_acceptance/config.yaml` và `scripts/ci/check-gate-guards-job.sh` rồi IN kết quả.
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]

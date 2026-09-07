@@ -212,6 +212,23 @@ export interface ExecutableWorkflow {
         nodes: Node[];
         edges: Edge[];
     };
+    /**
+     * Non-blocking findings from export-time policy checks. Machine-readable
+     * only — the human sentence lives in the i18n catalogs and is rendered by
+     * the UI layer, so zh/ja/ko/en users are not shown Vietnamese. Optional so
+     * executables saved before this field existed still type-check.
+     */
+    warnings?: WorkflowWarning[];
+}
+
+/**
+ * One export-time policy warning. `code` is a stable machine-readable
+ * identifier (e.g. the TTS-order rule); `nodeIds` names the offending nodes so
+ * the UI can point at them.
+ */
+export interface WorkflowWarning {
+    code: string;
+    nodeIds: string[];
 }
 
 /* ========================================================================== */

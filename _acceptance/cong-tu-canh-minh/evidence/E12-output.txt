@@ -1,0 +1,3 @@
+  ok  scripts/media-library/check-a11y-proto.sh
+  ok  scripts/onboarding/check-a11y-proto.sh
+OK: 2/2 wrapper a11y đặt NEXT_DIST_DIR riêng

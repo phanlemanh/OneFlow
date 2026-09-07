@@ -1,0 +1,162 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · lat-cat-chung-minh</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard</h1><div class="sub">Trang bằng chứng · <span class="mono">lat-cat-chung-minh</span> · tier T2</div>
+<div class="card" style="margin-top:12px"><span class="badge pass">PASS</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E1-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E2-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E3-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E4-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E5-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E6-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E7-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E8-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E9-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E10-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-11</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E11-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-12</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E12-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-13</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E13-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-14</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E14-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E15">E15</a></td><td>AC-15</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E15-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-2</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E16-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-16</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E17-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+<tr><td><a href="#E18">E18</a></td><td>AC-17</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-lat-cat-chung-minh-E18-r4</td><td class="mono">2026-09-05T06:30:00Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · script</h3><p class="crit">AC-1: Given docs/roadmap.md có khối plan-freeze, When guard đọc, Then đếm được đúng 20 dòng **bảng kế hoạch**, 16 dòng ★, ba bảng, header đủ bốn khoá plan/opened/unlock/checkpoint; và **mẫu số của tỉ lệ là số tính được = dòng bảng kế hoạch + dòng bảng Ngoại lệ**, không phải hằng 20.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E1-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_clean</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case clean
+  ✓ CASE clean: PASS</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · script</h3><p class="crit">AC-2: Given một thư mục `_acceptance/&lt;slug&gt;/` mới ở trạng thái mở (contract chưa signed-off, hoặc opportunity discovery/build/iterate) với slug ngoài ba bảng, When guard chạy trước gỡ băng, Then thoát 1 với `VIOLATION [plan-freeze] F1: &lt;slug&gt; mở ngoài kế hoạch`. **[amendment 04/09 — S4 vòng 1]** Hai hình dạng phải được đo RIÊNG: hồ sơ có `contract.md` (đường fail-closed) và hồ sơ **chỉ có `opportunity.md`** (đường khác hẳn, và là đường từng fail-OPEN). Ở đường thứ hai, «mở» phải suy từ tập trạng thái ĐÓNG (archived · park · kill) — liệt kê tập MỞ khiến frontmatter hỏng, `Discovery` viết hoa, hay `stage` lạ đều đọc thành «không có gì» rồi thoát 0.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E2-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_o_moi</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case o-moi-ngoai-ke-hoach
+  ✓ CASE o-moi-ngoai-ke-hoach: PASS</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · script</h3><p class="crit">AC-3: Given một dòng có slug đánh ✅ mà contract chưa signed-off, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug; và Given một dòng slug `—` không mang chỉ dẫn kiểm đánh ✅, Then guard không đỏ nhưng in dòng đó trong danh sách &quot;tin theo lời&quot;.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E3-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_tick_noi_doi</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE tick-noi-doi: PASS
+→ răng: case tin-theo-loi
+  ✓ CASE tin-theo-loi: PASS</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · script</h3><p class="crit">AC-4: Given một slug ở bảng Xếp lại sau có thư mục mà opportunity.md **chưa đóng bằng bất kỳ cách nào** (`decision: park`/`kill` hoặc `stage: archived`), When guard chạy, Then thoát 1 với mã F3 nêu đúng slug. **[amendment 04/09 — S4 vòng 3]** F3 không được đòi RIÊNG `park`: F5 buộc mọi hồ sơ đã đóng phải niêm yết ở bảng này, nên đòi `park` ở đây khiến `kill` và `archived` không có chỗ nào hợp lệ — không niêm yết thì F5 đỏ, niêm yết thì F3 đỏ.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E4-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_park</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE park-khong-that: PASS
+→ răng: case kill-hop-le
+  ✓ CASE kill-hop-le: PASS</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · script</h3><p class="crit">AC-5: Given một dòng Ngoại lệ với lý do ngoài {mất-dữ-liệu, bảo-mật, chặn-★} hoặc thiếu ngày/ai quyết, When guard chạy, Then thoát 1 với mã F4 — **[amendment 04/09 — S4 vòng 3]** lớp này có HAI phần tử nên cần HAI hình dạng đo: fixture của ca lý-do-sai mang ngày và người hợp lệ, nên nửa «thiếu ngày/ai quyết» chưa từng được chạy qua (xoá hẳn nhánh ấy khỏi guard mà 17/18 ca vẫn xanh); **và Given một dòng Ngoại lệ HỢP LỆ (lý do có tên + ngày + ai quyết) cho một slug đang mở ngoài kế hoạch, When guard chạy, Then thoát 0, slug ấy KHÔNG bị F1, và mẫu số tăng đúng một** — van an toàn của luật đóng băng phải chứng minh được là nó mở, không chỉ là nó chặn.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E5-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_ngoai_le</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE ngoai-le-thieu-ngay: PASS
+→ răng: case ngoai-le-hop-le
+  ✓ CASE ngoai-le-hop-le: PASS</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · script</h3><p class="crit">AC-6: Given mọi dòng ★ ✅ và ≥ 85% dòng ✅ với contract của mọi slug ★ signed-off, When guard chạy, Then in `GỠ BĂNG`, thoát 0, và một thư mục mở ngoài kế hoạch không còn làm guard đỏ.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E6-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_go_bang</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case go-bang
+  ✓ CASE go-bang: PASS</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · script</h3><p class="crit">AC-7: Given `PLAN_FREEZE_TODAY` sau ngày checkpoint và header không có `checkpoint_done`, When guard chạy, Then in NOTE mốc tái hoạch và mã thoát không đổi; Given có `checkpoint_done`, Then không in NOTE.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E7-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_checkpoint</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE checkpoint-note: PASS
+→ răng: case checkpoint-done
+  ✓ CASE checkpoint-done: PASS</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · script</h3><p class="crit">AC-8: Given khối thiếu marker, thiếu khoá header, sai số cột, hoặc trạng thái ngoài ⬜ ◐ ✅, When guard chạy, Then thoát 1 với mã F0 — fail-closed. **[amendment 04/09 — S4 vòng 1]** Bốn phần tử của lớp cần **bốn** hình dạng đo, mỗi hình dạng khẳng định thông điệp riêng của nó; một ca chạm đúng nhánh marker để ba nhánh die() kia chưa từng chạy.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E8-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_khoi_hong</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case khoi-hong
+  ✓ CASE khoi-hong: PASS</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · script</h3><p class="crit">AC-9: Given ci.yml, check-gate-guards-job.sh và config.yaml sau đấu dây, When chạy check-gate-guards-job.sh ở các mode shape, reachable, suite-keys, teeth, Then guard mới là một step có tên trong job Acceptance Gate, là một suite key, và mode teeth chứng minh nó đỏ trên cây đã phá. **[amendment 04/09 — S4 vòng 2]** «Đỏ» chưa đủ: mỗi needle trong tập PHÁ phải đỏ vì **phép kiểm của CHÍNH NÓ**. Cụ thể ba ràng buộc: (a) cây thăm dò mang một phép phá riêng cho từng needle — `check-plan-docs.sh` trước đây không có phép phá nào của mình và chỉ đỏ nhờ mượn phép phá nhân-đôi-dòng-sổ-cái của `check-roadmap-fresh.sh`, trong khi cả 15 phép kiểm riêng của nó vẫn OK ở CẢ HAI chiều; (b) vòng đỏ ghim câu đỏ của needle ấy, không chỉ `exit ≠ 0`; (c) câu đỏ đã ghim phải VẮNG trên cây lành — ghim `STATUS.md đề ngày` là vô nghĩa vì guard in `OK: STATUS.md đề ngày 04/09` lúc PASS, nên khẳng định đỏ khớp một dòng xanh.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E9-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_wiring</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  bỏ qua: check-plan-docs-teeth.sh — ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron
+OK: 11 lệnh (rút từ .github/workflows/ci.yml) xanh trên cây lành; 7 đỏ trên cây đã phá; 4 bỏ qua CÓ TÊN; cờ rác bị từ chối
+OK: executors.script.plan_freeze là một suite key (8 khoá trong làn máy)</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · script</h3><p class="crit">AC-10: Given check-plan-freeze-teeth.sh, When chạy toàn bộ, Then 20/20 case xanh, mỗi case một mã thoát và một token `CASE &lt;tên&gt;: PASS`; tên case lạ bị từ chối exit 2; `--selftest-fail` in FAIL. **[amendment 04/09 — S4 vòng 1]** Con số ấy phải được đối chiếu với **độ dài mảng `CASES`**, không phải in `$pass/$pass`: hai vế bằng nhau bằng cấu trúc thì không bao giờ tố được một ca đã bị xoá. Ca thứ 16 là `o-moi-co-hoi-hong`; ca 17–18 là `park-chua-ky` và `park-ngoai-bang` của AC-16; ca 19–20 là `ngoai-le-thieu-ngay` (nửa còn lại của AC-5) và `kill-hop-le` (chiều xanh của F3 sau khi nó thôi đòi riêng `park`) — nửa fail-open của AC-2 mà 15 ca cũ không chạm.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E10-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.plan_freeze_teeth_all</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE case-isolation: PASS
+
+✅ răng: 20/20 case — mỗi case một mã thoát riêng</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · script</h3><p class="crit">AC-11: Given ba cơ hội director-v2, timeline-view, staleness-ho-so-thieu-paths mang `decision: park` và PRODUCT-MAP.md sinh lại, When chạy check-product-map.mjs và case răng parked-opportunity, Then checker xanh với ô &quot;Xếp lại sau&quot; = 3 và case răng đỏ đúng chỗ.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E11-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_pmap</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>red</b></span></div>
+<pre class="out">CASE parked-opportunity: PASS
+
+✅ răng: 1/1 case — mỗi case một mã thoát riêng</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · script</h3><p class="crit">AC-12: Given STATUS.md, vision.md, roadmap.md sau hồ sơ này, When chạy check-plan-docs.sh, Then mọi phép kiểm OK (ngày 04/09, con trỏ, phân vùng phiên, đoạn định vị, S3 de facto, 1.5→B5, 1.6→B7, đoạn tỉ lệ không nháy ngược, không ADR-0013) và guard sổ cái xanh; và **số hồ sơ trong STATUS.md được ĐẾM TỪ CÂY** (số contract mang `status: signed-off`) rồi so bằng — lệch thì FAIL in cả hai số, chứ không grep một hằng số.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E12-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_docs</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">OK: guard sổ cái xanh
+✅ check-plan-docs: tài liệu khớp kế hoạch</pre>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · script</h3><p class="crit">AC-13: Given guard và teeth, When chạy guard trong thư mục không có node_modules, Then chỉ dùng `node:` builtins, vẫn chạy được, và guard từ chối tham số lạ với exit 2. **[amendment 04/09 — S4 vòng 1]** Phép đo phải là **phép GIẢI**, không phải phép grep, và guard phải được CHÉP vào cây tạm rồi chạy từ đó: Node giải specifier trần từ thư mục CỦA MODULE chứ không từ cwd, nên `cd &lt;cây tạm&gt; &amp;&amp; node &lt;đường dẫn thật trong kho&gt;` vẫn thấy `node_modules` của kho — khẳng định ấy đúng cho mọi guard, kể cả guard phụ thuộc node_modules, nên nó không đo gì. Chiều đỏ: một bản sao có thêm `import … from &quot;clsx&quot;` (gói CÓ trong `node_modules` của kho) phải chết `ERR_MODULE_NOT_FOUND` — vế này chứng minh cùng lúc rằng cây tạm thật sự cô lập và rằng import ngoài builtins thì đỏ. Grep giữ lại làm lưới thứ hai, kèm đối chứng dương.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E13-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_builtins</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case builtins-only
+  ✓ CASE builtins-only: PASS</pre>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge pass">PASS</span> &nbsp;E14 · script</h3><p class="crit">AC-14: Given dòng A1 mang ghi chú `kiểm: opportunity:skill-1-footage-kho-clip` và đánh ✅ trong khi opportunity ấy chưa có `decision` hoặc chưa có `decided_by`, When guard chạy, Then thoát 1 với mã F2 nêu đúng slug cơ hội; **và Given cơ hội đã đủ ba trường người nhưng mục Ngưỡng còn ít nhất một `[đề xuất]`, When guard chạy, Then vẫn thoát 1 với F2 nêu &quot;còn ngưỡng đề xuất&quot;** — Cổng Đáng có hai vế, chốt vạch và ký tên, thiếu vế nào cũng chưa phải đã ký; Given cả hai vế xong, Then A1 ✅ được nhận mà không vào danh sách &quot;tin theo lời&quot;.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E14-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_kiem_co_hoi</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE kiem-co-hoi: PASS
+→ răng: case kiem-co-hoi-de-xuat
+  ✓ CASE kiem-co-hoi-de-xuat: PASS</pre>
+</div>
+<div class="card eval" id="E15"><h3><span class="badge pass">PASS</span> &nbsp;E15 · script</h3><p class="crit">AC-15: Given check-plan-docs-teeth.sh, When chạy, Then 9/9 case xanh và bốn ca phá trên bản sao (lùi ngày STATUS.md · trả lại nháy ngược ở đoạn tỉ lệ · xoá đoạn định vị khỏi vision.md · thêm một hồ sơ ký mới mà không sửa STATUS.md) đều làm check-plan-docs.sh đỏ đúng phép kiểm, ca lành xanh, và mỗi ca một mã thoát riêng.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E15-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_docs_teeth</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE khong-ho-so-ky: PASS
+
+✅ răng tài liệu: 9/9 case</pre>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge pass">PASS</span> &nbsp;E16 · script</h3><p class="crit">AC-2: Given một thư mục `_acceptance/&lt;slug&gt;/` mới ở trạng thái mở (contract chưa signed-off, hoặc opportunity discovery/build/iterate) với slug ngoài ba bảng, When guard chạy trước gỡ băng, Then thoát 1 với `VIOLATION [plan-freeze] F1: &lt;slug&gt; mở ngoài kế hoạch`. **[amendment 04/09 — S4 vòng 1]** Hai hình dạng phải được đo RIÊNG: hồ sơ có `contract.md` (đường fail-closed) và hồ sơ **chỉ có `opportunity.md`** (đường khác hẳn, và là đường từng fail-OPEN). Ở đường thứ hai, «mở» phải suy từ tập trạng thái ĐÓNG (archived · park · kill) — liệt kê tập MỞ khiến frontmatter hỏng, `Discovery` viết hoa, hay `stage` lạ đều đọc thành «không có gì» rồi thoát 0.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E16-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_o_moi_co_hoi</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">→ răng: case o-moi-co-hoi-hong
+  ✓ CASE o-moi-co-hoi-hong: PASS</pre>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge pass">PASS</span> &nbsp;E17 · script</h3><p class="crit">AC-16: [nâng phạm vi 04/09 — owner quyết sau S4 vòng 2, thay cho nhãn «ghi Known limits»]** Given một hồ sơ mang `decision: park`/`kill` hoặc `stage: archived`, When guard chạy, Then thoát 1 với mã F5 nếu slug ấy **không có dòng trong bảng Xếp lại sau**, và thoát 1 với F5 nếu thiếu `decided_by` hoặc `decided_at`. Rời băng phải là một lần sửa KẾ HOẠCH CHUNG và phải mang tên người — cùng luật F4 đòi ở ngoại lệ và F2 đòi ở Cổng Đáng. Chiều ngược: một park niêm yết đủ và ký đủ thì guard xanh và F1 không đòi nó.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E17-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_teeth_park_ky</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE park-chua-ky: PASS
+→ răng: case park-ngoai-bang
+  ✓ CASE park-ngoai-bang: PASS</pre>
+</div>
+<div class="card eval" id="E18"><h3><span class="badge pass">PASS</span> &nbsp;E18 · script</h3><p class="crit">AC-17: [nâng phạm vi 04/09 — cùng quyết định]** Given check-plan-docs.sh, When chạy, Then ba phép kiểm sau là **quan hệ tính trên cây**, không phải hằng số chép vào guard: (a) ngày tiêu đề STATUS.md không cũ hơn `approved_at` mới nhất của hồ sơ đã ký; (b) đoạn tỉ lệ khai «trên N hồ sơ» với N = số contract `signed-off` đếm được, và các tử số cộng đúng N; (c) lệnh cấm nhắc `ADR-0013` chỉ áp khi `docs/adr/` chưa có ADR ấy. Và Given một cây không có hồ sơ ký nào, When chạy, Then in FAIL **có tên** rồi chạy tiếp các phép kiểm còn lại — không tắt ngang do `grep` không khớp dưới `set -e`.</p>
+<div class="kv"><span>run_id <b>minted-lat-cat-chung-minh-E18-r4</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.lcm_docs_quan_he</b></span><span>verified_at <b>2026-09-05T06:30:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">  ✓ CASE adr-da-co: PASS
+→ răng tài liệu: case khong-ho-so-ky
+  ✓ CASE khong-ho-so-ky: PASS</pre>
+</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: E1-E8, E10-E15 (script) và J1 (judgment) đều PASS trên cây HEAD (322e355); E9 (AC-9, `check-gate-guards-job.sh` ba mode + `check-plan-suite-key.sh`) không có kết quả vì agent thực thi bị skip/chết giữa chừng — không có run_id/exit_code/output để ghi, nên verdict tổng là BLOCKED. Lệnh suite `pnpm test` (không gắn eval) thoát 1 do 1 lỗi lẻ trong 905 test — ghi Known limits, không chặn AC nào.</li><li>Round 2: Chạy lại toàn bộ E1-E16 (script) + J1 (judgment) trên cây HEAD (581f6cf); mọi lệnh máy thoát 0, kể cả E9 (nay có run_id/output đầy đủ), và lệnh suite `pnpm test` cũng xanh (900 passed | 5 skipped) nên Known limits của round 1 không còn áp dụng. Tuy nhiên review-findings phát hiện 1 finding CONFIRMED trong hợp đồng ánh xạ vào AC-9: đo lại đúng cây thăm dò của mode teeth cho thấy `check-plan-docs.sh` xanh dưới MỌI phép phá dành riêng cho nó trong `check-gate-guards-job.sh`, và chỉ đỏ nhờ mượn phép phá &quot;nhân đôi dòng sổ cái&quot; vốn dành cho `check-roadmap-fresh.sh` — tức AC-9 chưa thật sự được chứng minh cho guard này dù lệnh E9 thoát 0. Verdict tổng vì vậy là REJECT (xem review-findings.md, mục &quot;Trong hợp đồng&quot;). Bước kế tiếp: thêm phép phá PERTURB riêng cho `check-plan-docs.sh` vào mode teeth của `check-gate-guards-job.sh` rồi verify lại.</li><li>Round 3: Toàn bộ E1-E18 (script — thêm E17/E16-liên-quan AC-2 và E18 mới cho AC-16/AC-17) và J1 (judgment) đều PASS trên cây HEAD (e9a56dc), cùng 8 lệnh suite hồi quy (build/typecheck, lint:check, test 900 passed | 5 skipped, sdk pytest 292 passed, verify:plugins, gen:abi, preflight-verify-env, check-plan-freeze.mjs) đều xanh, kể cả AC-9 (finding round 2 nay coi như đã sửa xong phần đó). Tuy nhiên review-findings phát hiện 3 finding CONFIRMED trong hợp đồng mới: AC-11 (case `parked-opportunity` chỉ khẳng định hai chuỗi `out_has` độc lập thay vì quan hệ slug↔ô — gỡ đúng nhánh phân loại park thật trong `check-product-map.mjs` mà case răng vẫn PASS), AC-5 (case teeth của F4 chỉ phủ nhánh &quot;lý do sai&quot;, chưa từng đo nhánh &quot;thiếu ngày/ai quyết&quot; — xoá hẳn nhánh đó trong guard mà 17/18 case vẫn xanh), và AC-15 (case `mat-dinh-vi` ghim một chuỗi cũng xuất hiện trên dòng OK của cây lành, nên assertion tụt về `is_red` trần, không chứng minh được nguyên nhân đỏ). Verdict tổng vì vậy vẫn REJECT (xem review-findings.md, mục &quot;Trong hợp đồng&quot;). Đây là vòng verify thứ 3 — theo quy tắc tối đa 3 vòng lặp tự động, bước kế tiếp là escalate lên người dùng thay vì tiếp tục vòng lặp implementation/verify.</li><li>Round 4: Toàn bộ E1-E18 (script) và J1 (judgment) đều PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), cùng 8 lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test 900 passed | 5 skipped, sdk pytest 292 passed, verify:plugins, gen:abi) đều xanh. Ba finding CONFIRMED trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa — mục &quot;Trong hợp đồng&quot; của review-findings.md nay rỗng. Review vòng này phát hiện 16 finding mới, toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1 (xem review-findings.md, mục &quot;Ngoài hợp đồng — người quyết ở Gate 2&quot;); 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml). Verdict tổng là PASS; escalate tiếp theo là quyết định của người ở Gate 2 (mở rộng hợp đồng hay rút phạm vi cho 2/16 finding ngoài vùng phủ), không phải một vòng verify nữa.</li></ul>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>

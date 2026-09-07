@@ -2,19 +2,20 @@
 
 ## Supported Versions
 
-TongFlow is under active development. Security fixes are applied to the latest
+OneFlow is under active development. Security fixes are applied to the latest
 release on the `main` branch. Please make sure you are running the most recent
 version before reporting an issue.
+
+Vulnerabilities in *upstream* TongFlow that are not present in this fork should
+be reported to [tong-io/tongflow](https://github.com/tong-io/tongflow) instead.
 
 ## Reporting a Vulnerability
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, report them privately so we can address the issue before it is disclosed:
-
-- Email **security@tongflow.com** with a description of the vulnerability, and
-- (Preferred) Use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-  via the **Security** tab of this repository.
+Instead, use GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
+via the **Security** tab of this repository. That channel is private, goes
+directly to the maintainer, and is the only reporting route for this fork.
 
 Please include:
 
@@ -31,8 +32,8 @@ Please include:
 
 ## Handling Secrets
 
-TongFlow integrates with several third-party providers (Modal, OpenAI, OpenRouter,
+OneFlow integrates with several third-party providers (Modal, OpenAI, OpenRouter,
 Gemini, PyPI, …). **Never commit real credentials.** Keep them in your local `.env`
 (which is gitignored); only `.env.example` with placeholder values is tracked. If you
-believe a secret has been exposed, rotate it immediately and notify us at the address
-above.
+believe a secret has been exposed, rotate it immediately and report it through the
+private channel above.

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F3 — Vì sao nửa "sáng" chưa bao giờ sáng</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --color-paper: #f7f7f8; --color-ink: #1a0033; }
+    body {
+      font-family: 'Geist', system-ui, sans-serif;
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2.5rem 2rem;
+    }
+    .frame { max-width: 1280px; width: 100%; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <svg viewBox="0 0 1200 992" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/>
+        </marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#e100e1"/>
+        </marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#0068cc"/>
+        </marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+      <!-- ================= HEADER ================= -->
+      <text x="40" y="40" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">F3 · SƠ ĐỒ NGUYÊN NHÂN, HAI LÀN · CỔNG 1</text>
+      <text x="40" y="76" fill="#1a0033" font-size="28" font-family="'Lora', 'Instrument Serif', serif">Vì sao nửa “sáng” chưa bao giờ sáng</text>
+      <text x="40" y="100" fill="#4f4a63" font-size="12" font-family="'Geist', sans-serif">design-pass Nhóm 2 #1 — lỗ trục sáng/tối lan sang 2 hồ sơ ĐÃ KÝ · 6 bước · chờ người duyệt gạch</text>
+
+      <!-- ================= LANE BANDS ================= -->
+      <rect x="40" y="136" width="1128" height="184" fill="rgba(26,0,51,0.03)"/>
+      <line x1="40" y1="136" x2="1168" y2="136" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <line x1="40" y1="320" x2="1168" y2="320" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <line x1="40" y1="504" x2="1168" y2="504" stroke="rgba(26,0,51,0.22)" stroke-width="1"/>
+      <line x1="176" y1="136" x2="176" y2="504" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+
+      <text x="40" y="168" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LÀN TRÊN</text>
+      <text x="40" y="188" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Cái máy chủ GỬI</text>
+      <text x="40" y="206" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">HTML trên dây</text>
+
+      <text x="40" y="352" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LÀN DƯỚI</text>
+      <text x="40" y="372" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">Cái trình duyệt VẼ</text>
+      <text x="40" y="390" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">DOM sau khi chạy</text>
+      <text x="40" y="404" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">script khởi động</text>
+
+      <!-- ================= ARROWS (before boxes) ================= -->
+      <path d="M 496 188 H 796" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M 496 268 H 796" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <path d="M 356 420 H 392" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M 560 420 H 596" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M 764 420 H 800" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <path d="M 968 420 H 1004" fill="none" stroke="#4f4a63" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- mũi tên "đo sai làn" — trọng tâm -->
+      <path d="M 1088 296 V 372" fill="none" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <rect x="984" y="336" width="96" height="16" rx="2" fill="#f7f7f8"/>
+      <text x="1032" y="348" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ĐO SAI LÀN</text>
+
+      <!-- ================= LANE 1 NODES ================= -->
+      <rect x="192" y="160" width="304" height="56" rx="6" fill="#ffffff"/>
+      <rect x="192" y="160" width="304" height="56" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="208" y="184" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">URL trần</text>
+      <text x="208" y="202" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">HTML: KHÔNG có class="dark"</text>
+
+      <rect x="192" y="240" width="304" height="56" rx="6" fill="#ffffff"/>
+      <rect x="192" y="240" width="304" height="56" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="208" y="264" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">URL ?theme=dark</text>
+      <text x="208" y="282" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">HTML: CÓ class="dark"</text>
+
+      <rect x="800" y="160" width="368" height="136" rx="6" fill="#ffffff"/>
+      <rect x="800" y="160" width="368" height="136" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1.2"/>
+      <rect x="812" y="176" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="820" y="188" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">6</text>
+      <text x="812" y="216" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">curl đọc LÀN TRÊN</text>
+      <text x="812" y="238" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">HTML hai URL KHÁC nhau → đếm ra 2 theme</text>
+      <text x="812" y="258" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">kết luận: 3 SÁNG + 3 TỐI</text>
+      <text x="812" y="280" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">→ CHO QUA</text>
+
+      <!-- ================= LANE 2 NODES ================= -->
+      <rect x="192" y="376" width="160" height="88" rx="6" fill="#ffffff"/>
+      <rect x="192" y="376" width="160" height="88" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="204" y="388" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="212" y="400" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+      <text x="204" y="428" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">script khởi động</text>
+      <text x="204" y="446" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">layout.tsx:34-42</text>
+
+      <rect x="396" y="376" width="160" height="88" rx="6" fill="#ffffff"/>
+      <rect x="396" y="376" width="160" height="88" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="408" y="388" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="416" y="400" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+      <text x="408" y="428" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">localStorage rỗng</text>
+      <text x="408" y="446" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">theme chưa được đặt</text>
+
+      <rect x="600" y="376" width="160" height="88" rx="6" fill="#ffffff"/>
+      <rect x="600" y="376" width="160" height="88" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="612" y="388" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="620" y="400" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+      <text x="612" y="428" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">OS ưa tối</text>
+      <text x="612" y="446" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">prefers-color-scheme</text>
+
+      <rect x="804" y="376" width="160" height="88" rx="6" fill="#ffffff"/>
+      <rect x="804" y="376" width="160" height="88" rx="6" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <rect x="816" y="388" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="824" y="400" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+      <text x="816" y="428" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">thêm .dark vào</text>
+      <text x="816" y="444" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">&lt;html&gt;</text>
+      <text x="816" y="458" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">class="dark"</text>
+
+      <rect x="1008" y="376" width="160" height="88" rx="6" fill="#ffffff"/>
+      <rect x="1008" y="376" width="160" height="88" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1.2"/>
+      <rect x="1020" y="388" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="1028" y="400" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">5</text>
+      <text x="1020" y="428" fill="#1a0033" font-size="11" font-weight="600" font-family="'Geist', sans-serif">CẢ HAI URL vẽ TỐI</text>
+      <text x="1020" y="446" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">kể cả nửa gọi là</text>
+      <text x="1020" y="460" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">"sáng"</text>
+
+      <!-- ================= PHÉP ĐO (chốt) ================= -->
+      <rect x="192" y="528" width="976" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="192" y="528" width="976" height="80" rx="6" fill="rgba(225,0,225,0.07)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="208" y="552" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PHÉP ĐO 01/09 — CHIỀU ĐỎ ĐÃ CHẠY</text>
+      <text x="208" y="576" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">URL trần VẼ RA &lt;html lang="en" class="dark"&gt;  ·  CÙNG URL đó, curl ĐẾM 0 LẦN class="dark"</text>
+      <text x="208" y="596" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">→ XANH GIẢ: 12 khung "đều qua cửa --require", 3 trạng thái bị quét HAI lượt trong TỐI</text>
+
+      <!-- ================= VÁ ================= -->
+      <text x="192" y="644" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">VÁ Ở CẢ HAI TẦNG</text>
+
+      <rect x="192" y="656" width="472" height="80" rx="6" fill="#ffffff"/>
+      <rect x="192" y="656" width="472" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="208" y="682" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tầng 1 — route bản mẫu</text>
+      <text x="208" y="702" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">ghim class gốc theo tham số ?theme khi tham số CÓ MẶT</text>
+      <text x="208" y="722" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">URL trần giữ nguyên hành vi cũ</text>
+
+      <rect x="696" y="656" width="472" height="80" rx="6" fill="#ffffff"/>
+      <rect x="696" y="656" width="472" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="712" y="682" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">Tầng 2 — wrapper a11y</text>
+      <text x="712" y="702" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace">đọc lại trục sáng/tối TỪ DOM ĐÃ RENDER</text>
+      <text x="712" y="722" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">ui-capture --html, không phải curl</text>
+
+      <!-- ================= BA HỒ SƠ ================= -->
+      <text x="192" y="776" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">CÙNG MỘT LỖ, BA HỒ SƠ</text>
+
+      <rect x="192" y="788" width="304" height="80" rx="6" fill="#ffffff"/>
+      <rect x="192" y="788" width="304" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+      <text x="208" y="814" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">hồ sơ này</text>
+      <text x="208" y="832" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">chong-mat-khoa-byo-giao-dien</text>
+      <text x="208" y="854" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ĐÃ VÁ — cả hai tầng</text>
+
+      <rect x="528" y="788" width="304" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="528" y="788" width="304" height="80" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="544" y="814" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">media-library</text>
+      <text x="544" y="832" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">hồ sơ ĐÃ KÝ</text>
+      <text x="544" y="854" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CÓ đọc lại — nhưng SAI LÀN (curl)</text>
+
+      <rect x="864" y="788" width="304" height="80" rx="6" fill="#f7f7f8"/>
+      <rect x="864" y="788" width="304" height="80" rx="6" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="880" y="814" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif">onboarding</text>
+      <text x="880" y="832" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace">hồ sơ ĐÃ KÝ</text>
+      <text x="880" y="854" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.06em">KHÔNG có phép đọc lại nào</text>
+
+      <!-- ================= LEGEND ================= -->
+      <line x1="40" y1="900" x2="1160" y2="900" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+      <text x="40" y="918" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.18em">CHÚ GIẢI</text>
+
+      <rect x="40" y="936" width="14" height="10" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="1"/>
+      <text x="62" y="945" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Bước đo được</text>
+
+      <rect x="200" y="936" width="14" height="10" rx="2" fill="rgba(26,0,51,0.02)" stroke="rgba(26,0,51,0.30)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="222" y="945" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Hồ sơ đã ký, chưa đo lại — việc cho người duyệt</text>
+
+      <rect x="560" y="936" width="14" height="10" rx="2" fill="rgba(225,0,225,0.07)" stroke="#e100e1" stroke-width="1.4"/>
+      <text x="582" y="945" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Chốt: phép đo 01/09</text>
+
+      <line x1="744" y1="941" x2="772" y2="941" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+      <text x="780" y="945" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Chỗ curl đo nhầm làn</text>
+
+      <rect x="960" y="934" width="16" height="16" rx="2" fill="#ffffff" stroke="rgba(26,0,51,0.30)" stroke-width="0.8"/>
+      <text x="968" y="946" fill="#1a0033" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">n</text>
+      <text x="984" y="945" fill="#4f4a63" font-size="9" font-family="'Geist', sans-serif">Bước thứ n trong 6</text>
+
+      <text x="40" y="974" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace">_acceptance/chong-mat-khoa-byo-giao-dien · design-pass Nhóm 2 #1 · 01/09/2026</text>
+    </svg>
+  </div>
+</body>
+</html>

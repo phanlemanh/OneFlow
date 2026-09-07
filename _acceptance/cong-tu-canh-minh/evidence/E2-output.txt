@@ -1,0 +1,4 @@
+→ răng: count-mismatch
+CASE count-mismatch: PASS
+
+✅ răng: 1/1 case — mỗi case một mã thoát riêng

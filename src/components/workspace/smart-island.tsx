@@ -10,7 +10,16 @@
  */
 
 import { useReactFlow } from "@xyflow/react";
-import { Box, FileText, Image, Link, Music, Type, Video } from "lucide-react";
+import {
+    Box,
+    FileText,
+    Image,
+    Library,
+    Link,
+    Music,
+    Type,
+    Video,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
@@ -250,6 +259,15 @@ export default function SmartIsland() {
                         tooltip={t("tooltipLink")}
                         onClick={() =>
                             addNodeAtViewportCenter({ type: "addLinkNode" })
+                        }
+                    />
+                    <IconButton
+                        icon={Library}
+                        tooltip={t("tooltipMediaLibrary")}
+                        onClick={() =>
+                            addNodeAtViewportCenter({
+                                type: "addMediaLibraryNode",
+                            })
                         }
                     />
                 </div>

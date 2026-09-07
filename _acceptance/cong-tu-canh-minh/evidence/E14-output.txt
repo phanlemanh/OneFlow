@@ -1,0 +1,5 @@
+→ răng: extra-slug status-downgraded
+CASE extra-slug: PASS
+CASE status-downgraded: PASS
+
+✅ răng: 2/2 case — mỗi case một mã thoát riêng

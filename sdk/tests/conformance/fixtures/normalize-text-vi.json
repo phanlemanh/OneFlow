@@ -1,0 +1,76 @@
+{
+    "case": "normalize-text-vi",
+    "note": "normalize-text-vi mounted as normalizeTextViNode: sourceSpec { text: textBatch() }, the SAME spec every TTS node uses. Two upstream strings must become exactly two plugin calls, each carrying one of them as a SCALAR — the reader sits directly upstream of speech, so a runtime that collected them into one array call would change what the voice receives. The fixture declares no sourceSpec of its own: the TS adapter reads NODE_TYPE_SOURCE_SPEC.normalizeTextViNode, so this compares the shipped classification against Python rather than a hand-written copy that could drift.",
+    "slot": "normalize-text-vi",
+    "stubOutput": {
+        "success": true,
+        "text": "stub"
+    },
+    "workflow": {
+        "name": "conformance-normalize-text-vi",
+        "version": "1.0",
+        "exportedAt": "2026-08-20T00:00:00Z",
+        "inputs": [],
+        "outputs": [],
+        "dataNodes": [
+            {
+                "id": "dn-src",
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": false,
+                "staticData": {
+                    "texts": ["Giá 1.999.000₫", "Khai trương 19/8/2026"]
+                },
+                "level": 0
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "exec-normalize",
+                "type": "normalizeTextViNode",
+                "feature": "normalize-text-vi",
+                "pluginId": "oneflow-conformance-stub",
+                "batchField": "text",
+                "bindings": {
+                    "text": {
+                        "kind": "handle",
+                        "consumerShape": "scalar",
+                        "sources": [
+                            {
+                                "fromNodeId": "dn-src",
+                                "fromField": "texts"
+                            }
+                        ],
+                        "targetHandle": "in:text"
+                    }
+                },
+                "outputs": [
+                    {
+                        "sourceField": "text",
+                        "nodeType": "textNode",
+                        "dataField": "texts",
+                        "expandEach": false
+                    }
+                ],
+                "dependencies": ["dn-src"],
+                "level": 1
+            }
+        ],
+        "executionLevels": [["dn-src"], ["exec-normalize"]],
+        "dataNodeEdges": []
+    },
+    "expectedCalls": [
+        {
+            "slot": "normalize-text-vi",
+            "input": {
+                "text": "Giá 1.999.000₫"
+            }
+        },
+        {
+            "slot": "normalize-text-vi",
+            "input": {
+                "text": "Khai trương 19/8/2026"
+            }
+        }
+    ]
+}

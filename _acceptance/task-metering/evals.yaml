@@ -1,5 +1,23 @@
 schema_version: 1
 feature_slug: task-metering
+# LỜI KHAI `paths` Ở ĐÂY LÀ MỘT PHẦN, VÀ CỐ Ý — không phải backfill bỏ dở.
+#
+# Ba eval thường trực (`pnpm test`, `pnpm build && typecheck`, `biome check .`)
+# chạy trên TOÀN CÂY, nên không có narrow scope nào trung thực cho chúng. Trước
+# 2026-08-28 chúng khai `src/**` + `scripts/**` + `config/**` + `drizzle/**`, và
+# lời khai đó sai theo CẢ HAI chiều: `scripts/**` khai THỪA (biome báo
+# `Checked 0 files` trên một guard shell), còn `sdk/**` khai THIẾU dù biome thật
+# sự đọc `sdk/**/*.json`.
+#
+# Đo trước khi gỡ (blind judge, cửa sổ a788985..d919b5e): 81 file gated đổi,
+# union loại ra đúng 9, 72 file còn lại rơi TRONG union và vẫn làm feature này
+# stale — lời khai tiết kiệm 0 vòng re-verify trong một tháng. Quét 33 commit
+# first-parent: không commit nào có toàn bộ file gated nằm ngoài union.
+#
+# `feature_scope` coi "khai một phần" là KHÔNG KHAI (AC-4 của stale-scope-by-paths),
+# nên feature này về whole-tree — đúng và trung thực. Các eval hẹp bên dưới GIỮ
+# `paths` để lời khai của chúng còn dùng được nếu về sau ba lệnh thường trực có
+# cách đo hẹp thật. Đừng "sửa" bằng cách khai lại `paths` cho ba eval đó.
 evals:
   # ---- Schema & migration -------------------------------------------------
   - id: E1
@@ -81,7 +99,6 @@ evals:
     criterion: AC-10
     executor: test
     cmd: config:executors.test.unit
-    paths: ["src/**", "vitest.config.ts", "package.json", "pnpm-lock.yaml"]
     expected: "exit 0; the whole vitest suite is green — the pre-existing 152 assertions plus the 10 new metering tests, proving status/result/error/SSE behaviour is unchanged"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -89,7 +106,6 @@ evals:
     criterion: AC-11
     executor: test
     cmd: config:executors.test.build_typecheck
-    paths: ["src/**", "tsconfig.json", "next.config.ts", "package.json", "pnpm-lock.yaml"]
     expected: "exit 0; next build succeeds and tsc --noEmit reports no errors (run sequentially — build rewrites .next/types that tsc reads)"
     evidence_required: [run_id, exit_code, verifier, verified_at]
 
@@ -97,6 +113,5 @@ evals:
     criterion: AC-11
     executor: test
     cmd: config:executors.test.lint
-    paths: ["src/**", "scripts/**", "config/**", "drizzle/**", "package.json", "pnpm-lock.yaml"]
     expected: "exit 0; biome check --error-on-warnings passes with no new warnings"
     evidence_required: [run_id, exit_code, verifier, verified_at]

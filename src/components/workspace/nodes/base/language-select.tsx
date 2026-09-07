@@ -12,7 +12,12 @@ import {
 
 // Qwen3-TTS `language` parameter values (English names).
 // Plugin defaults: clone → "Auto", preset/instruct → "Chinese".
-const LANGUAGES: { value: string; tKey: string }[] = [
+// Exported so tests can draw their values from the SHIPPED catalog instead of
+// retyping them. Two attempts to scope the TTS-order warning by language passed
+// their suites while failing open in production, because the tests supplied
+// language strings by hand and never used the ones a user can actually pick —
+// notably "Auto" (S4 rounds 7-9).
+export const LANGUAGES: { value: string; tKey: string }[] = [
     { value: "Auto", tKey: "auto" },
     { value: "Chinese", tKey: "zh" },
     { value: "English", tKey: "en" },

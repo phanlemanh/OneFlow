@@ -1,0 +1,29 @@
+# E15 network dump (dev_server.url = http://localhost:3000)
+# Driver: Claude Browser MCP (mcp__Claude_Browser__read_network_requests / read_console_messages)
+# Captured while /proto/normalize-text-vi?state=wired was open (post NEXT_LOCALE=vi cookie + reload)
+
+## Console (onlyErrors=true)
+No console logs.  (zero console.error entries across the session)
+
+## Console (all levels, for context)
+[info] React DevTools download hint (dev-only, expected)
+[warn] [React Flow]: The parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+  -> observed only while the browser tab was backgrounded (0x0 layout); node flipped to visibility:visible
+     and the warning did not recur once the tab was fronted and had real dimensions. Not a console.error.
+[log] task-store handler registration/unregistration noise (expected node lifecycle logging)
+[log] [Fast Refresh] rebuilding / done  (dev-mode HMR from files touched during this verify run, e.g. tsconfig.json checkout)
+
+## Network requests (all app-origin: http://localhost:3000)
+GET /api/plugins/registry -> 200 OK (x3, one per HMR reload)
+GET /proto/normalize-text-vi?state=wired&_rsc=<id> -> 200 OK [FAILED: net::ERR_ABORTED]  (x2)
+  -> RSC prefetch request cancelled mid-flight by a subsequent Fast Refresh reload
+     (client-initiated navigation abort, not a server error; status line was 200 OK).
+GET /proto/normalize-text-vi?state=wired -> 200 OK (x2, the actual page loads)
+GET /_next/static/** (webpack chunks, hot-update.js/json, css, fonts) -> 200 OK, all app/static-origin
+
+## Scoping verdict
+FAIL-eligible set = all requests above (single-origin app, dev_server.url = http://localhost:3000, no separate api_base configured).
+No request in the FAIL-eligible set returned status >= 500 or an unexpected 4xx.
+The two ERR_ABORTED entries are client-cancelled RSC prefetches superseded by Fast Refresh reloads
+triggered during this verify session (dev-mode HMR artifact), not connection errors or timeouts to the app.
+networkObserved = clean

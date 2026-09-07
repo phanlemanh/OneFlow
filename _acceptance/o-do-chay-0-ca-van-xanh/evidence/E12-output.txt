@@ -1,0 +1,2 @@
+OK: đúng 6 job, đúng tập tên đã biết
+OK: năm job còn lại deep-equal với merge-base 2dda3cc2

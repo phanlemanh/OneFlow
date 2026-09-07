@@ -38,7 +38,38 @@
         "customSectionTitle": "自定义变量",
         "customSectionHint": "未被任何已安装插件声明的变量。",
         "getKey": "获取 Key",
-        "requiredHint": "必填"
+        "requiredHint": "必填",
+        "storeUnreadable": {
+            "title": "无法读取已保存的 API 密钥",
+            "unchanged": "尚未更改任何内容。",
+            "reason": "无法读取设置文件（{reason}）。",
+            "escape": "用空的密钥库替换…",
+            "confirmTitle": "用空的密钥库替换吗？",
+            "confirmBody": "所有已保存的密钥都将丢失且无法恢复。此操作之后你需要重新输入每一个密钥。",
+            "confirmCancel": "保持不变",
+            "confirmOk": "我明白 — 替换",
+            "replaceFailed": "无法替换密钥库（{reason}）。尚未更改任何内容。",
+            "cause": {
+                "http": "服务器返回了 {status}",
+                "not-json": "响应不是 JSON",
+                "no-env": "响应未包含密钥列表",
+                "network": "请求未完成（{detail}）",
+                "timeout": "请求在 {seconds} 秒后超时"
+            },
+            "writeFailed": "无法保存（{reason}）。尚未更改任何内容。",
+            "retry": "重试"
+        },
+        "unauthenticated": {
+            "title": "登录会话已过期",
+            "unchanged": "没有任何内容被更改。",
+            "retry": "重试"
+        },
+        "unavailable": {
+            "title": "无法连接密钥服务器",
+            "unchanged": "没有任何内容被更改。",
+            "retry": "重试",
+            "reason": "请求没有得到响应（{code}）。"
+        }
     },
     "Index": {
         "title": "新创意"
@@ -204,9 +235,11 @@
             "extractStem": "分离音轨",
             "addTrack": "加轨",
             "completeMusic": "补全编曲",
-            "musicBrief": "音乐企划"
+            "musicBrief": "音乐企划",
+            "tooltipMediaLibrary": "媒体素材库"
         },
         "toast": {
+            "ttsNeedsNormalize": "语音节点 {nodes} 的上游缺少“数字转文字”节点——数字、价格、日期可能被误读。请在文本源与语音节点之间添加该节点。",
             "executing": "执行中...",
             "completed": "执行完成",
             "cancelled": "已取消",
@@ -494,7 +527,8 @@
                 "musicExtract": "分离音轨",
                 "musicLego": "添加乐轨",
                 "musicComplete": "补全编曲",
-                "musicBrief": "音乐企划"
+                "musicBrief": "音乐企划",
+                "normalizeTextVi": "数字转文字"
             },
             "options": {
                 "portrait": "竖屏",
@@ -556,7 +590,8 @@
                 "addTrack": "生成乐轨",
                 "completeMusic": "开始补全",
                 "musicBrief": "生成企划",
-                "applyOverlay": "应用叠加"
+                "applyOverlay": "应用叠加",
+                "normalizeTextVi": "规范化"
             },
             "params": {
                 "prompt": "提示词",
@@ -1047,6 +1082,37 @@
                 "endLabel": "结束（秒）",
                 "editOp": "编辑操作",
                 "removeOp": "删除操作"
+            },
+            "addMediaLibrary": {
+                "title": "从素材库载入",
+                "searchPlaceholder": "描述你需要的画面，例如：阳光充足的客厅",
+                "search": "搜索",
+                "searching": "搜索中…",
+                "importing": "正在把片段拉进你的文件库… 完成后会在画布上显示为视频节点。",
+                "results": "{count} 个片段与描述匹配。选择一个载入工作区。",
+                "thinShelf": "没有片段能匹配此描述（通过筛选的片段有 {candidates} 个）。换个说法或放宽条件试试。",
+                "unranked": "结果未按语义排序：素材库缺少向量。列表仍符合筛选条件，但顺序不代表匹配度。",
+                "error": "调用素材库失败。",
+                "missingConfig": "尚未连接媒体素材库。",
+                "saveConfig": "保存并重新搜索",
+                "savingConfig": "保存中…",
+                "urlLabel": "https://library.example.com",
+                "keyLabel": "具有 search 权限的密钥",
+                "failure": {
+                    "AUTH_REJECTED": "素材库密钥未被接受。请检查 MEDIA_LIBRARY_API_KEY。",
+                    "MISSING_SCOPE": "密钥缺少 search 权限，请为该密钥申请 search 范围。",
+                    "BAD_REQUEST": "发往素材库的请求不合法。",
+                    "NOT_FOUND": "找不到该片段（已删除，或此密钥看不到）。",
+                    "NOT_IMPLEMENTED": "素材库尚未接通此路径。",
+                    "VERSION_MISMATCH": "素材库更改了契约版本。已停止，不猜测数据结构。",
+                    "BAD_RESPONSE": "素材库返回的结构本版本无法接受。",
+                    "NETWORK_ERROR": "无法连接素材库。",
+                    "UPSTREAM_ERROR": "素材库返回错误。",
+                    "LOCAL_FAILURE": "OneFlow 在你本机这一侧没能完成此操作，具体原因请查看应用日志。",
+                    "STORE_UNREADABLE": "无法读取已保存的 API 密钥，因此无法确定此服务是否已配置。尚未更改任何内容 — 请打开设置。"
+                },
+                "readFailed": "无法读取已保存的密钥，因此未做任何更改，请重试。",
+                "writeFailed": "无法保存密钥，未做任何更改。"
             }
         },
         "firstRun": {
@@ -1062,6 +1128,31 @@
             "blocked": "准备失败",
             "blockedReasonDownload": "无法下载工具——请检查网络连接。",
             "retry": "重试"
+        },
+        "storeUnreadable": {
+            "title": "无法读取已保存的 API 密钥",
+            "unchanged": "尚未更改任何内容。",
+            "reason": "服务器无法返回已保存的密钥列表（{reason}）。",
+            "toSettings": "打开设置",
+            "cause": {
+                "http": "服务器返回了 {status}",
+                "not-json": "响应不是 JSON",
+                "no-env": "响应未包含密钥列表",
+                "network": "请求未完成（{detail}）",
+                "timeout": "请求在 {seconds} 秒后超时"
+            },
+            "retry": "重试"
+        },
+        "unauthenticated": {
+            "title": "登录会话已过期",
+            "unchanged": "没有任何内容被更改。",
+            "retry": "重试"
+        },
+        "unavailable": {
+            "title": "无法连接密钥服务器",
+            "unchanged": "没有任何内容被更改。",
+            "retry": "重试",
+            "reason": "请求没有得到响应（{code}）。"
         }
     },
     "Upload": {

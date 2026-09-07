@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a788985b3b30c7072dcfd95bc65db1f83b940984
+verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
 human_signoff: Manh 2026-08-07
 ---
 
@@ -308,3 +308,25 @@ Round 1 (re-verification after upstream code change)
       on each (n/a — this contract is T2 and has no judgment evals)
 - [ ] If verdict was PENDING-JUDGMENT: upgrade it to PASS (n/a — verdict is PASS)
 - [ ] Fill `human_signoff` in frontmatter + `time_human_minutes.gate2` in contract
+
+### Re-pin lần 1 — 2026-08-28, do gỡ `paths` khỏi ba eval thường trực (`pnpm test`, `build && typecheck`, `biome check .`) — feature về whole-tree cho trung thực; chạm `_acceptance/<slug>/` là mở lại phép soi staleness nên phải re-pin cùng lượt. Mã của gói không đổi một byte
+run_id: repin-measure-harness-20260828T043000Z
+sha: bee578e120584402211a6c38577f324c040e995b · suites: 7 lệnh exit 0
+
+### Re-pin lần 2 — 2026-08-28, do nhánh `fix/scoping-fixtures-diff-shape` thu hẹp fork `STALE-DIFF-SCOPE-GUARD` và thêm guard dưới `scripts/acceptance/**`: feature khai `paths` nay bị soi, và thay đổi gated của nhánh rơi vào vùng eval của hồ sơ này chạy qua. Mã sản phẩm không đổi — mọi suite chạy lại đều exit 0
+run_id: repin-measure-harness-20260828T053000Z
+sha: 8512c6e98c48ab3f4cab75dafa9493a0b1e36868 · suites: 7 lệnh exit 0
+
+### Re-pin — 05/09/2026, hợp nhất PR #97 vào `main`
+
+run_id: repin-merge-20260905T101500Z
+sha: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 8 lệnh exit 0
+
+Commit merge `96ee9b8` kéo mọi hồ sơ đã ký ra khỏi mốc của chúng theo đường dẫn. Một lượt làn
+máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc.
+
+Đợt này KHÔNG re-pin SÁU hồ sơ — `add-media-library`, `byo-key-onboarding`, `chong-doc-sai-em-ru`,
+`cong-tu-canh-minh`, `gate-scope-anchors`, `normalize-text-vi` — vì ô đo bị chạm của chúng ĐỎ, hoặc
+KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
+được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
+minh được.

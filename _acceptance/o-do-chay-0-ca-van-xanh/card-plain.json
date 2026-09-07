@@ -1,0 +1,39 @@
+{
+  "feature_plain": "Một phép kiểm không chạy thử điều gì sẽ không còn qua được chốt tự động nữa.",
+  "scope_plain": "Sáu nhánh để lại: không sửa 33 phép kiểm hiện có vì tất cả đang lành, không bọc từng phép kiểm, và không mở sang bộ lọc theo tên của làn Python vì chưa đo ra có thật.",
+  "analyst_plain": "",
+  "decisions_plain": [
+    {
+      "id": "d-20260831T190000Z-3391",
+      "p": "Dựng một bộ kiểm ở chốt tự động thay vì bọc từng phép kiểm; đổi lại phép kiểm vẫn báo đạt trong một vòng nghiệm thu, chỉ chốt mới chặn hợp nhất."
+    },
+    {
+      "id": "d-20260831T190100Z-7752",
+      "p": "KHÔNG sửa 33 phép kiểm hiện có — đo cho thấy tất cả đang lành. Phát hiện này làm gói việc nhỏ lại, và nó được ghi ra chứ không lặng lẽ bỏ."
+    },
+    {
+      "id": "d-20260831T190200Z-5518",
+      "p": "Hỏi chính công cụ thử nghiệm để lấy danh sách tên ca thay vì tự đọc file mà đoán; đổi lại bộ kiểm cần thư viện phụ thuộc nên phần kiểm nghiệm thu phải cài chúng."
+    },
+    {
+      "id": "d-20260831T190300Z-9064",
+      "p": "Cắm vào phần kiểm nghiệm thu chứ không phần chạy thử, dù phần chạy thử đã sẵn thư viện — vì guard của hồ sơ trước sẽ chặn đúng đường rẻ hơn ấy."
+    },
+    {
+      "id": "d-20260831T190400Z-2287",
+      "p": "Khai chốt mới vào danh sách được canh, để nó hưởng cùng lớp bảo vệ với hai chốt trước."
+    },
+    {
+      "id": "d-20260831T190500Z-6673",
+      "p": "KHÔNG làm phần khai trước về cấu trúc màn hình — gói này không chạm giao diện nào."
+    },
+    {
+      "id": "d-20260831T193000Z-8126",
+      "p": "Vá cả năm phát hiện của phản biện ngay trong hồ sơ, và đo bù nhóm mười phép kiểm đã bị bỏ sót."
+    },
+    {
+      "id": "d-20260831T193100Z-4903",
+      "p": "Gom theo 'có trao một cái tên cho công cụ thử nghiệm' chứ không theo 'có cờ lọc'; đổi lại một cách viết lệnh hợp lệ mới cũng sẽ làm chốt đỏ cho tới khi được khai."
+    }
+  ]
+}

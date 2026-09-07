@@ -17,7 +17,7 @@ from .serve import (
     serve_stream_from_spec,
 )
 
-__version__ = "0.2.18"
+__version__ = "0.2.23"
 
 # PyPI distribution name. Deliberately different from the import package name
 # (`tongflow`): this fork cannot publish under the upstream distribution, but
