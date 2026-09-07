@@ -153,7 +153,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 | A3 | ★ | Corpus ít nhất 10 clip thực địa kèm bản chép tay vào measure/wer-corpus | — | ⬜ | làn A · T9 |
 | A4 | ★ | Một lượt chạy thật kèm hoá đơn | — | ⬜ | làn A · T11 |
 | A5 | ★ | Tuyển 3 tới 5 người dùng đại diện cho phiên nghiệm thu | — | ⬜ | làn A · T13 |
-| A6 |  | Thu hồi token PyPI toàn tài khoản, cấp lại loại hẹp theo dự án | — | ⬜ | làn A · T6, trước B4 |
+| A6 |  | Thu hồi token PyPI toàn tài khoản, cấp lại loại hẹp theo dự án | — | ✅ | làn A · T6, trước B4 · xong 08/09: token All projects (26/07) thu hồi, token phạm vi oneflow-sdk cấp mới vào .env, xác thực bằng lần tải lên bỏ-qua-nếu-đã-có bản 0.2.23 (PyPI trả đã tồn tại, exit 0) |
 | A7 | ★ | Tạo kho công khai oneflow-api-compose-overlay | — | ⬜ | làn A · T8, trước B6 |
 | S1 |  | Hạ cánh bản vá t1-escape đòi artifact hồ sơ (2 commit sẵn) | t1-escape-doi-hoi-artifact-ho-so | ⬜ | Should; code có trước hợp đồng nên đi làn prototype keep |
 | S2 |  | Đăng ký plugin normalize-text-vi, đóng lỗ 1.3 | dang-ky-plugin-normalize-text-vi | ⬜ | Should; cần kho plugin công khai |
