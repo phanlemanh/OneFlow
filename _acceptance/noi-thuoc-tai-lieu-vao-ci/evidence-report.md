@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: a5ed5e0c879727c4cdcbbb18d738e4da35265a0a
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -215,3 +215,21 @@ máy chung cho cả đợt, 6 ô đo bị chạm, cả 6 chạy lại và exit 0
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 11 — 07/09/2026, do sửa hai ca răng của `check-plan-freeze-teeth.sh` ngày 05/09
+
+run_id: repin-uat-20260907T004500Z
+sha: a5ed5e0c879727c4cdcbbb18d738e4da35265a0a · prev: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e · suites: 7 lệnh exit 0
+
+Mốc cũ hỏng vì `a21840d` (05/09) chạm `scripts/roadmap/check-plan-freeze-teeth.sh`, một file
+dưới `scripts/**`. Đợt ghim lại hôm ấy chỉ ghim `roadmap-drift-guard`; hồ sơ này không nằm
+trong diff nào nên không ai thấy. Nó lộ ra hôm nay vì commit chữ ký Cổng Giá trị kéo hồ sơ
+vào diff. Mã của gói này không đổi một dòng.
+
+Cả chín ô đo chạy lại, cả chín exit 0 (bảy lệnh phân biệt). Cây sạch trước và sau.
+
+Một ghi chú về phép đo, vì nó suýt đọc thành hồi quy: lượt chạy ĐẦU của `gate_guards_job_teeth`
+đỏ, và nó đỏ đúng. Bộ răng ấy chạy các guard khác trên "cây lành" để phân biệt guard-bắt-lỗi với
+lệnh-hỏng; lúc đó cây không còn lành vì một hồ sơ vừa được mở ngoài kế hoạch đang băng. Gỡ hồ sơ
+ấy thì ô xanh. Ô đo không sai; cây sai, và ô đo nói đúng điều đó.
+
