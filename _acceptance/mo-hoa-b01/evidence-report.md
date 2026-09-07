@@ -314,3 +314,21 @@ trùng Known limits đã ký.
 
 Người ký đã nói vòng 6 là vòng chốt: finding ngoài hợp đồng còn lại sau vòng 6 ghi known-limits
 có tên rồi điền chữ ký, không vòng 7.
+
+## Vòng 6 — BLOCKED vì một agent chết, và ba lỗi TRONG hợp đồng
+
+Chạy trên `d2201cd`. 19/20 lệnh về, exit 0 cả; lệnh E8 không có kết quả vì agent chạy nó kết thúc
+mà không nộp StructuredOutput (sự cố hạ tầng agent, dòng run-log `kind: vang-mat`). Phiên điều
+phối chạy tay đúng lệnh E8 trên HEAD: exit 0. Không phương sai. 21 dòng run-log append nguyên văn.
+
+**Ba finding TRONG hợp đồng** (phiên điều phối tái hiện hai, mục thứ ba đọc mã): AC-6 lớp quét
+phân biệt hoa thường; AC-11 chỉ kiểm có mặt không đếm «đúng một hàng»; AC-1 chuỗi ảnh không neo
+vào lệnh docker run. Người ký chọn sửa cả ba tại `0d3c124` kèm ba ca răng, E7 ghim 32/32.
+
+**Luật chặn xoáy, người ký duyệt 07/09 trước vòng 7:** sau vòng 7, mọi finding TRONG hợp đồng còn
+lại chuyển thành amendment nợ có tên trong contract và ký; mọi finding NGOÀI hợp đồng thành
+known-limits có tên; không vòng 8. Lý do: vòng 4, 5, 6 mỗi vòng lộ thêm lỗi mới của chính phép đo
+(«vòng xoáy guard-của-guard»), lối ra là thu phạm vi với nợ có tên, không phải vá tiếp.
+
+**Ngoài hợp đồng, mới:** năm dòng miễn trừ `app.tongflow.com` không ghim ngữ cảnh — known-limits.
+Ba mục còn lại trùng Known limits đã ký (hình 5, suite-key, fixture rò).
