@@ -69,6 +69,22 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   severity: high
   Đề xuất: fix — người ký chọn 07/09 lối «giữ khoá volume cũ» (service vẫn `oneflow`, ba README sửa dòng `docker run -v` cho khớp). Lối `name: tongflow-data` bị loại: Compose đặt tên volume thật là `<project>_<khoá>`, `name:` trần không khớp volume cũ. Đo lại: guard PASS, răng 28/28 exit 0.
 
+- **[VÒNG 4] Đổi tên service compose `tongflow` → `oneflow` làm self-host cũ không lên được (container mồ côi giữ cổng 3000)**
+  Người dùng thấy gì: Người tự host bản cũ khi nâng cấp lên bản mới có thể gặp lỗi cổng bị chiếm, ứng dụng mới không khởi động được trong khi bản cũ vẫn âm thầm chạy ngầm chiếm chỗ.
+  file: `docker-compose.yml`
+  severity: medium
+  Đề xuất: known-limits
+- **[VÒNG 4] Guard định danh fork đỏ trên mọi fork của contributor (đối chiếu conf ↔ remote origin)**
+  Người dùng thấy gì: Người khác fork kho về tài khoản riêng của họ có thể thấy quy trình kiểm tra tự động báo lỗi ngay cả khi họ chưa làm gì sai.
+  file: `scripts/fork/check-fork-identity.sh`
+  severity: low
+  Đề xuất: known-limits
+- **[VÒNG 4] check-prototype-lane.sh ưu tiên `main` cục bộ trước `origin/main` — main cũ cho FAIL exit 1 sai thay vì exit 2**
+  Người dùng thấy gì: Trên máy một số kỹ sư nội bộ, công cụ kiểm tra nhánh phát triển có thể báo sai là không hợp lệ dù thực tế vẫn hợp lệ; hệ thống kiểm tra chính thức không bị ảnh hưởng, người dùng sản phẩm không thấy tác động.
+  file: `scripts/fork/check-prototype-lane.sh`
+  severity: low
+  Đề xuất: known-limits
+
 ## Chưa phân loại (triage-failed)
 
 phân loại phạm vi không chạy được — không lỗi nào bị máy tự sửa, người xem lại toàn bộ.
