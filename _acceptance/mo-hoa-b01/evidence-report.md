@@ -202,8 +202,8 @@ Nợ có tên thêm ở các vòng 4–8 (người ký chấp nhận theo luật
 - [vòng 7] AC-5: răng badge phủ 2/3 điều kiện mỗi README — known-limits
 - [vòng 7] `docker compose up -d --build` đo bằng grep toàn file, không neo vào khối lệnh — known-limits
 - [vòng 7] «đúng một hàng» đếm bằng grep trên toàn opportunity.md, không giới hạn trong bảng — known-limits
-- [vòng 8] SECURITY.md declares private vulnerability reporting as the ONLY route, but it is disabled on the repo — CÀI ĐẶT KHO, việc của owner trước merge: bật Private vulnerability reporting (Settings → Security), không cần commit
-- [vòng 8] Every community link now points to GitHub Discussions, which is not enabled (404) — CÀI ĐẶT KHO, việc của owner trước merge: bật Discussions (Settings → Features), không cần commit; trùng Known limit #1
+- [vòng 8] SECURITY.md declares private vulnerability reporting as the ONLY route, but it is disabled on the repo — ĐÃ BẬT 08/09 (owner bật Private vulnerability reporting, đo qua API: enabled=true)
+- [vòng 8] Every community link now points to GitHub Discussions, which is not enabled (404) — ĐÃ BẬT 08/09 (owner bật Discussions, đo qua API: has_discussions=true, trang trả 200; Known limit #1 hết hiệu lực)
 - [vòng 8] CODE_OF_CONDUCT.md still routes enforcement reports to upstream's business@tongflow.com — nợ có tên — CODE_OF_CONDUCT.md không thuộc diện miễn T1 nên sửa là evidence ôi; sửa ở lượt kế cùng việc đưa file vào FILES của guard
 - [vòng 8] Teeth suite leaks a scratch dir per extra fixture() call (measured 8 dirs / class-matrix, ~22 per full run) — wont-fix
 - [vòng 8] Hình 5 — class-matrix quét đủ 8 mẫu nhưng chỉ trên MỘT file; chiều FILES của lớp không có ma trận, gỡ file khỏi FILES răng vẫn 32/32 — known-limits

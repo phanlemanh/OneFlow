@@ -215,13 +215,13 @@ Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt 
   Người dùng thấy gì: Trang hướng dẫn báo lỗi bảo mật hiện chưa có kênh nào thật sự nhận được báo cáo — người phát hiện lỗ hổng sẽ không biết gửi cho ai.
   file: `SECURITY.md`
   severity: high
-  Đề xuất: CÀI ĐẶT KHO, việc của owner trước merge: bật Private vulnerability reporting (Settings → Security), không cần commit — theo luật chặn xoáy (nợ có tên, không vòng 9)
+  Đề xuất: ĐÃ BẬT 08/09 (owner bật Private vulnerability reporting, đo qua API: enabled=true) — theo luật chặn xoáy (nợ có tên, không vòng 9)
 
 - **[VÒNG 8] Every community link now points to GitHub Discussions, which is not enabled (404)**
   Người dùng thấy gì: Bấm vào liên kết Hỏi đáp cộng đồng có thể dẫn tới một trang không tồn tại vì tính năng Thảo luận chưa được bật cho kho này.
   file: `.github/ISSUE_TEMPLATE/config.yml`
   severity: high
-  Đề xuất: CÀI ĐẶT KHO, việc của owner trước merge: bật Discussions (Settings → Features), không cần commit; trùng Known limit #1 — theo luật chặn xoáy (nợ có tên, không vòng 9)
+  Đề xuất: ĐÃ BẬT 08/09 (owner bật Discussions, đo qua API: has_discussions=true, trang trả 200; Known limit #1 hết hiệu lực) — theo luật chặn xoáy (nợ có tên, không vòng 9)
 
 - **[VÒNG 8] New ledger row is separated from the roadmap-ledger table by a blank line — it renders outside the table**
   Người dùng thấy gì: Dòng mới thêm vào bảng lộ trình có thể hiển thị lệch định dạng, khiến người đọc tài liệu lộ trình khó nhận ra hàng mới.

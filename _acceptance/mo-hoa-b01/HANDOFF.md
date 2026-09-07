@@ -109,3 +109,5 @@ chữ ký và hai mục rỗng. Vòng 8 verdict `PASS`.
 Còn lại cho owner: PR #100 vẫn là nháp — chuyển sang sẵn sàng và merge là quyết định của owner.
 Nợ có tên nằm ở contract mục Amendment; hai lỗi bộ tổng hợp kit (run-log không tự ghi, Known
 limits/Ngoài hợp đồng rỗng) cần sửa ở kit, không ở hồ sơ.
+
+**08/09:** owner đã bật Discussions và Private vulnerability reporting (đo qua API), PR #100 chuyển sang sẵn sàng, mergeStateStatus CLEAN, 6/6 job xanh tại `787d03b`. Merge là quyết định của owner.
