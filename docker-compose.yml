@@ -16,8 +16,12 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - oneflow-data:/data
-      - oneflow-plugins:/plugins
+      # Volume keys keep their pre-fork names on purpose: Compose names the real
+      # volume `<project>_<key>`, so renaming the key would leave an existing
+      # self-host's SQLite DB, uploads, /data/settings.json and plugin venvs
+      # behind in the old volume and bring the app up as a fresh install.
+      - tongflow-data:/data
+      - tongflow-plugins:/plugins
     environment:
       MODAL_TOKEN_ID: ${MODAL_TOKEN_ID:-}
       MODAL_TOKEN_SECRET: ${MODAL_TOKEN_SECRET:-}
@@ -27,5 +31,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  oneflow-data:
-  oneflow-plugins:
+  tongflow-data:
+  tongflow-plugins:

@@ -227,7 +227,7 @@ Once a release has been published you can pull instead of building:
 
 ```bash
 docker run -d -p 3000:3000 \
-  -v oneflow-data:/data -v oneflow-plugins:/plugins \
+  -v tongflow-data:/data -v tongflow-plugins:/plugins \
   ghcr.io/phanlemanh/oneflow:latest
 ```
 
