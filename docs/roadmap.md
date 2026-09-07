@@ -180,6 +180,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 | oneflow-api-vercel-gateway | mở khi phiên âm của cổng hết beta VÀ Phase 2 mục 4 bắt đầu, HOẶC phiên nghiệm thu cho thấy U1 trượt vì nhập nhiều khoá | — |
 | hàng rào chặn model đã khai tử | đọc trường deprecated_at từ catalog công khai thay vì bảng tay | — |
 | hợp nhất hạ tầng: OneFlow về chung Vercel · Supabase · Render.com với artifact platform và crm onehub | owner nêu 07/09; Postgres đã là Phase 2 mục 2, nhưng vướng ADR-0011 — executor chạy subprocess venv nên serverless không nhận; mở sau mốc tái hoạch | — |
+| gỡ phụ thuộc thượng nguồn lúc chạy: mirror 35 plugin đang clone từ tài khoản cá nhân tong-io · plugin Modal pin oneflow-sdk thay tongflow==0.2.21 của PyPI thượng nguồn · vỏ desktop thôi trỏ app.tongflow.com · nút Discord trong app thôi trỏ server thượng nguồn | kiểm kê 07/09; điều kiện tiên quyết của dòng hợp nhất hạ tầng, không phải một phần của nó; guard định danh fork không quét src/ lẫn org của manifest nên bốn ô này lọt sau B01; mở sau mốc tái hoạch | — |
 
 **Ngoại lệ mở giữa lúc băng**
 | slug | lý do | ngày | ai quyết |
