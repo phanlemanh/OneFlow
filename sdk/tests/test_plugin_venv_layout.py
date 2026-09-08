@@ -143,3 +143,69 @@ def test_engine_emits_the_layout_manifest_the_typescript_side_reads(
         "the venv layout the engine writes drifted from "
         f"{MANIFEST.name}; regenerate it and re-run the TypeScript half"
     )
+
+
+def _sdk_install_cmd(calls: list[list[str]]) -> list[str]:
+    return next(c for c in calls if "install" in c and "-r" not in c)
+
+
+def test_installs_the_sdk_from_the_checkout_when_running_inside_one(
+    tmp_path: Path, monkeypatch
+) -> None:
+    # SDK_ROOT of a checkout has a pyproject.toml; the real one does.
+    assert (P.SDK_ROOT / "pyproject.toml").is_file()
+    calls = _provision(tmp_path, monkeypatch, ids=[SAFE_ID])
+    cmd = _sdk_install_cmd(calls)
+
+    assert str(P.SDK_ROOT) in cmd
+    assert not any("==" in part for part in cmd), (
+        "running from a checkout must not pin a PyPI version: during the window "
+        "between bumping and publishing, that pin does not resolve"
+    )
+
+
+def test_pins_the_pypi_version_when_not_running_from_a_checkout(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Positive control for the branch above — the site-packages path must
+    survive, which is what the comment at plugins.py:175 protected."""
+    monkeypatch.setattr(P, "SDK_ROOT", tmp_path / "not-a-checkout")
+    calls = _provision(tmp_path, monkeypatch, ids=[SAFE_ID])
+    cmd = _sdk_install_cmd(calls)
+
+    assert f"{P._sdk_distribution()}=={P._sdk_version()}" in cmd
+    assert str(tmp_path / "not-a-checkout") not in cmd
+
+
+def test_a_missing_published_version_names_both_ways_out(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(P, "SDK_ROOT", tmp_path / "not-a-checkout")
+
+    def failing_run(cmd: list[str], cwd: Path) -> tuple[int, str]:
+        if "venv" in cmd:
+            target = Path(cmd[-1])
+            (target / "bin").mkdir(parents=True, exist_ok=True)
+            (target / "pyvenv.cfg").write_text("x\n", encoding="utf-8")
+            (target / "bin" / "python").write_text("", encoding="utf-8")
+            return 0, ""
+        return 1, "ERROR: No matching distribution found for oneflow-sdk==9.9.9"
+
+    monkeypatch.setattr(P, "_run", failing_run)
+
+    with pytest.raises(RuntimeError) as e:
+        P.prepare_python_env(
+            [SAFE_ID],
+            tmp_path / "plugins",
+            tmp_path / "data",
+            auto_install=True,
+            log=lambda _m: None,
+        )
+    msg = str(e.value)
+    assert "No matching distribution" in msg, "the root cause must survive"
+    # Before this package the swallow made this window silent. Now it stops the
+    # run, so the message has to say what to do about it.
+    assert "checkout" in msg and "publish" in msg, (
+        "a version missing from the index must name both ways out; an exit code "
+        "alone leaves the reader stuck"
+    )

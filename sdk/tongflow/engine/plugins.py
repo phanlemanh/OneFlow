@@ -193,14 +193,36 @@ def _remove_legacy_shared_venv(root: Path, log: LogCb) -> None:
     shutil.rmtree(root, ignore_errors=True)
 
 
+def _running_from_checkout() -> bool:
+    """True when the SDK is imported from a repo checkout rather than
+    site-packages. ``pip install <SDK_ROOT>`` only works in the first case."""
+    return (SDK_ROOT / "pyproject.toml").is_file()
+
+
 def _install_sdk_into(py: Path, venv_dir: Path, log: LogCb) -> None:
-    dist, version = _sdk_distribution(), _sdk_version()
-    log(f"installing {dist}=={version} into {venv_dir.name}")
-    code, out = _run([str(py), "-m", "pip", "install", f"{dist}=={version}"], venv_dir)
-    if code != 0:
-        raise RuntimeError(
-            f"failed to install SDK into {venv_dir.name}: {out.strip()}"
+    if _running_from_checkout():
+        source, label = str(SDK_ROOT), f"the checkout at {SDK_ROOT}"
+    else:
+        dist, version = _sdk_distribution(), _sdk_version()
+        source, label = f"{dist}=={version}", f"{dist}=={version} from PyPI"
+
+    log(f"installing {label} into {venv_dir.name}")
+    code, out = _run([str(py), "-m", "pip", "install", source], venv_dir)
+    if code == 0:
+        return
+
+    detail = out.strip()
+    hint = ""
+    if not _running_from_checkout() and "No matching distribution" in detail:
+        # The release window: the running version is not on the index yet.
+        # Until 2026-09-08 this degraded to the ambient interpreter in silence.
+        hint = (
+            "\nThis version is not on the index yet. Two ways out: run the engine "
+            "from a checkout of the repo, or publish this version to PyPI."
         )
+    raise RuntimeError(
+        f"failed to install SDK into {venv_dir.name}: {detail}{hint}"
+    )
 
 
 def _ensure_venv_for(plugin_id: str, data_dir: Path, log: LogCb) -> Path:
