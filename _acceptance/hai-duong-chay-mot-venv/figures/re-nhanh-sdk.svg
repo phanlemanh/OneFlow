@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1160 776" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Lora:ital,wght@0,400;1,400&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');
+        @media (prefers-color-scheme: dark) {
+          .fp { fill: #1a0033; }
+          .fn { fill: #241041; }
+          .fi { fill: #f7f7f8; }
+          .fm { fill: #c0bacf; }
+          .fs { fill: #a49cb8; }
+          .fa { fill: #ff5cff; }
+          .fat { fill: #ff5cff; }
+          .fai { fill: #ff5cff; }
+          .si { stroke: #f7f7f8; }
+          .sm { stroke: #c0bacf; }
+          .ss { stroke: #a49cb8; }
+          .sr { stroke: rgba(247,247,248,0.16); }
+          .sa { stroke: #ff5cff; }
+        }
+      </style>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon class="fm" points="0 0, 8 3, 0 6" fill="#4f4a63"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon class="fa" points="0 0, 8 3, 0 6" fill="#e100e1"/>
+      </marker>
+    </defs>
+
+    <rect class="fp" width="100%" height="100%" fill="#f7f7f8"/>
+
+    <!-- ============ ĐƯỜNG NỐI (vẽ trước các nút) ============ -->
+    <line class="sm" x1="580" y1="112" x2="580" y2="148" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <path class="sm" d="M 364 216 L 264 216 Q 248 216 248 232 L 248 340" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect class="fp" x="284" y="188" width="52" height="18" rx="2" fill="#f7f7f8"/>
+    <text class="fm" x="310" y="201" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÓ</text>
+
+    <path class="sm" d="M 796 216 L 896 216 Q 912 216 912 232 L 912 340" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect class="fp" x="822" y="188" width="68" height="18" rx="2" fill="#f7f7f8"/>
+    <text class="fm" x="856" y="201" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">KHÔNG</text>
+
+    <line class="sm" x1="912" y1="440" x2="912" y2="564" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect class="fp" x="922" y="492" width="108" height="18" rx="2" fill="#f7f7f8"/>
+    <text class="fm" x="928" y="505" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" letter-spacing="0.08em">TRONG CỬA SỔ</text>
+
+    <!-- ============ ĐIỂM BẮT ĐẦU ============ -->
+    <rect class="fp" x="388" y="56" width="384" height="56" rx="28" fill="#f7f7f8"/>
+    <rect class="fn si" x="388" y="56" width="384" height="56" rx="28" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fi" x="580" y="89" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">engine cần cài SDK vào venv của một plugin</text>
+
+    <!-- ============ CÂU HỎI RẼ NHÁNH ============ -->
+    <polygon class="fp" points="580,152 796,216 580,280 364,216" fill="#f7f7f8"/>
+    <polygon class="fn si" points="580,152 796,216 580,280 364,216" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fi" x="580" y="210" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">engine đang chạy trong thư mục kho,</text>
+    <text class="fi" x="580" y="230" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">tức có tệp pyproject.toml của SDK?</text>
+
+    <!-- ============ NHÁNH CÓ ============ -->
+    <rect class="fp" x="112" y="344" width="272" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="112" y="344" width="272" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fi" x="248" y="382" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">cài SDK thẳng từ thư mục kho</text>
+    <text class="fi" x="248" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">đang chạy, không hỏi PyPI</text>
+    <text class="fm" x="248" y="422" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">pip install $SDK_ROOT</text>
+
+    <!-- ============ NHÁNH KHÔNG ============ -->
+    <rect class="fp" x="776" y="344" width="272" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="776" y="344" width="272" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fi" x="912" y="382" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">cài SDK từ PyPI, ghim đúng</text>
+    <text class="fi" x="912" y="400" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">phiên bản đang chạy</text>
+    <text class="fm" x="912" y="422" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">pip install oneflow-sdk==0.2.23</text>
+
+    <!-- ============ Ô CỬA SỔ THỜI GIAN ============ -->
+    <path class="sr" d="M 680 548 L 900 548" fill="none" stroke="rgba(26,0,51,0.32)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle class="fi" cx="908" cy="548" r="3" fill="#1a0033"/>
+    <rect class="fai sa" x="400" y="496" width="280" height="104" rx="6" fill="#e100e1" fill-opacity="0.06" stroke="#e100e1" stroke-opacity="0.55" stroke-width="1" stroke-dasharray="5,4"/>
+    <text class="fat" x="416" y="522" fill="#a300a3" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CỬA SỔ PHÁT HÀNH</text>
+    <text class="fm" x="416" y="548" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif">giữa lúc kho bump phiên bản</text>
+    <text class="fm" x="416" y="566" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif">và lúc bản ấy lên PyPI, lệnh</text>
+    <text class="fm" x="416" y="584" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif">ghim ở trên không giải được</text>
+
+    <!-- ============ NÚT NÉM LỖI ============ -->
+    <rect class="fp" x="776" y="564" width="272" height="124" rx="6" fill="#f7f7f8"/>
+    <rect class="fai sa" x="776" y="564" width="272" height="124" rx="6" fill="#e100e1" fill-opacity="0.07" stroke="#e100e1" stroke-width="1.4"/>
+    <rect class="sa" x="788" y="576" width="44" height="16" rx="2" fill="none" stroke="#e100e1" stroke-opacity="0.55" stroke-width="0.8"/>
+    <text class="fat" x="810" y="587" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">LỖI</text>
+    <text class="fi" x="912" y="616" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">engine ném lỗi, gọi tên</text>
+    <text class="fi" x="912" y="634" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">nguyên nhân và chỉ hai lối:</text>
+    <text class="fm" x="912" y="656" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">chạy engine từ thư mục kho,</text>
+    <text class="fm" x="912" y="674" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">hoặc publish bản ấy lên PyPI</text>
+
+    <!-- ============ GHI CHÚ ============ -->
+    <path class="sr" d="M 232 490 Q 256 470 250 450" fill="none" stroke="rgba(26,0,51,0.32)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle class="fi" cx="248" cy="446" r="2.5" fill="#1a0033"/>
+    <text class="fi" x="112" y="512" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">nhánh này không hỏi tới PyPI,</text>
+    <text class="fi" x="112" y="532" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif">nên cửa sổ phát hành không chạm tới</text>
+
+    <!-- ============ CHÚ GIẢI ============ -->
+    <line class="sr" x1="40" y1="728" x2="1120" y2="728" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+    <text class="fm" x="40" y="750" fill="#4f4a63" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.16em">CHÚ GIẢI</text>
+
+    <rect class="fn si" x="136" y="738" width="36" height="16" rx="8" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fm" x="184" y="750" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">điểm bắt đầu</text>
+
+    <polygon class="fn si" points="412,738 432,746 412,754 392,746" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fm" x="444" y="750" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">câu hỏi rẽ nhánh</text>
+
+    <rect class="fn si" x="664" y="738" width="36" height="16" rx="4" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text class="fm" x="712" y="750" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">việc engine làm</text>
+
+    <rect class="fai sa" x="892" y="738" width="36" height="16" rx="4" fill="#e100e1" fill-opacity="0.07" stroke="#e100e1" stroke-width="1.4"/>
+    <text class="fm" x="940" y="750" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">cửa sổ phát hành và lỗi có tên</text>
+  </svg>

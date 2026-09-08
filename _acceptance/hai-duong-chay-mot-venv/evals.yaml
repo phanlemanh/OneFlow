@@ -1,0 +1,132 @@
+schema_version: 1
+feature_slug: hai-duong-chay-mot-venv
+
+# T3, surface [sdk]. Moi eval la eval MAY tat dinh — khong khoa API, khong mang,
+# khong nguoi bam. Khong co eval judgment nao: bai toan nay la bo cuc thu muc va
+# ma thoat, khong co cho cho phan doan nghiep vu.
+#
+# KHUON DAT KHOA: mot key mot tieu chi, moi key la MOT pytest node-id rieng —
+# dung mau da co o executors.test.sdk_pytest_fingerprint_* (xem chu thich dong 76
+# cua _acceptance/config.yaml). Ly do: pytest thoat 4 khi node-id khong ton tai,
+# nen o do khong the "chay 0 ca ma van xanh" nhu bo loc theo ten cua vitest.
+#
+# `paths` khai tren moi eval de vong sau carry-forward duoc phan diff khong cham toi.
+#
+# LUU Y CHO NGUOI HIEN THUC: moi lenh `config:executors.*.hdc_*` duoi day CHUA TON
+# TAI trong _acceptance/config.yaml. Them chung la mot phan cua goi, va la dieu kien
+# qua Cong 1.
+
+evals:
+  # ---------- A. Bo cuc thu muc la hop dong chung ----------
+  - id: E1
+    criterion: AC-1
+    executor: test
+    cmd: config:executors.test.hdc_venv_per_plugin
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; sau khi cap phat hai plugin, TON TAI plugin-venv/<id>/pyvenv.cfg cho tung id, va KHONG ton tai plugin-venv/pyvenv.cfg o goc. CHIEU DO tren cung fixture: chay ham dung venv chung doi cu (mot venv tai goc) thi ca thu DO voi thong diep ghim ten goc — khong phai chi exit != 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E2
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.hdc_legacy_shared_removed
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; fixture cam san pyvenv.cfg + bin/ + lib/ NGAY TAI goc plugin-venv/ roi chay cap phat; sau do goc KHONG con pyvenv.cfg va co plugin-venv/<id>/ cho tung plugin. CHIEU DO tren cung fixture: bo buoc don thi ca thu DO voi thong diep ghim 'pyvenv.cfg con o goc'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # AC-3 la tieu chi (cross-layer): mot nua o engine Python, mot nua o app TypeScript.
+  # Mot eval mot phia la khong du — dung cai da xay ra la engine ghi mot dang, TS doc
+  # mot dang khac, va MOI phia rieng le deu xanh.
+  - id: E3a
+    criterion: AC-3
+    executor: test
+    cmd: config:executors.test.hdc_engine_leaves_per_plugin_layout
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; sau khi engine cap phat THAT, ca thu XUAT mot manifest ra tep: danh sach duong dan tuong doi da sap xep + id da dung cho tung venv. Khang dinh manifest co dung mot muc moi plugin va khong muc nao la pyvenv.cfg o goc. Manifest nay la DAU RA CUA WRITER, va la fixture cua E3b — khong ben nao go tay hinh dang cua ben kia. CHIEU DO tren cung fixture: cam pyvenv.cfg vao goc sau khi cap phat thi ca thu DO"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E3b
+    criterion: AC-3
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.hdc_ts_keeps_per_plugin_venvs
+    paths: ["src/lib/plugins/plugin-python-env.server.ts", "src/lib/plugins/plugin-venv-layout.test.ts"]
+    expected: "exit 0; NAP manifest do E3a xuat ra (khong go tay cay thu muc — fixture go tay dung khuon ben doc mong doi thi khong bat duoc ca hai phia trot khoi nhau ve anh xa id -> ten thu muc), dung lai dung cay ay, goi removeLegacySharedVenv() roi khang dinh MOI muc trong manifest VAN CON. CHIEU DO tren cung fixture: them pyvenv.cfg vao goc thi ca thu DO vi ca hai thu muc con bi xoa — do la trang thai truoc goi nay. CHIEU DO thu hai: doi anh xa id -> thu muc o phia Python thi E3b DO voi thong diep ghim ten thu muc lech"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E4
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.hdc_layout_constant_pinned
+    paths: ["scripts/plugins/check-venv-layout-pinned.sh", "sdk/tongflow/engine/plugins.py", "src/lib/plugins/plugin-python-env.server.ts"]
+    expected: "exit 0 tren cay lanh, VA in ra DUNG HAI gia tri trich duoc (mot moi phia). Guard FAIL-CLOSED: phia nao trich ra rong thi thoat khac 0 voi thong diep ghim ten phia khong tim thay — guard so hai chuoi rong roi thay khop la dung lop loi hong-ma-khong-keu ma goi nay dong"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E5
+    criterion: AC-4
+    executor: script
+    cmd: config:executors.script.hdc_layout_constant_teeth
+    paths: ["scripts/plugins/check-venv-layout-teeth.sh", "scripts/plugins/check-venv-layout-pinned.sh"]
+    expected: "exit 0; rang cua guard chay SAU ca xao tron tren BAN SAO va doi guard DO tung ca, moi ca mot thong diep ghim khac nhau: (1) doi doan duong dan ben Python; (2) doi doan duong dan ben TS; (3) xoa buoc don ben Python; (4) xoa buoc don ben TS; (5) XOA HAN hang duong dan ben Python — guard khong trich duoc gi, phai DO chu khong duoc so hai chuoi rong roi thoat 0; (6) XOA HAN hang ben TS, cung ly do. Hai ca cuoi la chieu fail-open ma bon ca doi-gia-tri khong phan biet duoc. In 6/6 PASS va thoat 0; kiem CA ma thoat LAN dong in — thoat 0 ma thieu dong in la rang DO"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- B. Duong lay SDK ----------
+  - id: E6
+    criterion: AC-5
+    executor: test
+    cmd: config:executors.test.hdc_sdk_from_checkout
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; khi SDK_ROOT/pyproject.toml TON TAI, lenh pip duoc dung chua duong dan SDK_ROOT va KHONG chua chuoi '=='. CHIEU DO tren cung fixture: bo nhanh checkout thi ca thu DO voi thong diep ghim ten hai dang lenh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E7
+    criterion: AC-6
+    executor: test
+    cmd: config:executors.test.hdc_sdk_from_pypi_pin
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; khi SDK_ROOT/pyproject.toml KHONG ton tai (fixture doi SDK_ROOT sang thu muc trong), lenh pip chua '<dist>==<version>' va KHONG chua duong dan SDK_ROOT. Day la doi chung DUONG cho E6: hai ca cung fixture, hai ket qua khac nhau, nen mot nhanh bi hong thi mot trong hai DO"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- C. Hong thi keu ----------
+  - id: E8
+    criterion: AC-7
+    executor: test
+    cmd: config:executors.test.hdc_provision_failure_raises
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; HAI ca tren cung fixture. Ca A: ep pip tra khac 0 vi ly do bat ky -> prepare_python_env NEM loi, thong diep chua nguyen nhan goc. Ca B: ep pip tra khac 0 vi phien ban dang chay khong co tren chi muc -> thong diep NEU CA HAI LOI ra (chay tu checkout, hoac publish ban ay); thong diep chi co ma thoat pip la ca thu DO. CHIEU DO tren cung fixture: dat lai cai except nuot loi thi ca A DO vi ham tra ve sys.executable thay vi nem — assertion phai la 'nem' chu khong phai 'khong bang sys.executable'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E9
+    criterion: AC-8
+    executor: test
+    cmd: config:executors.test.hdc_auto_install_false_keeps_ambient
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; auto_install=False tra ve anh xa moi plugin -> sys.executable va KHONG tao thu muc nao duoi data_dir. Day la o ghim che do owner quyet giu — no la doi chung DUONG cho E8: neu ai do bo luon nhanh nay thi E9 DO"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- D. Interpreter theo plugin ----------
+  - id: E10
+    criterion: AC-9
+    executor: test
+    cmd: config:executors.test.hdc_interpreter_per_plugin
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tongflow/engine/runner.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; prepare_python_env tra dict co dung mot khoa cho moi plugin_id, hai gia tri KHAC NHAU va moi gia tri nam trong venv cua chinh plugin do. CHIEU DO tren cung fixture: tra mot interpreter dung chung cho ca hai thi ca thu DO voi thong diep ghim hai duong dan bang nhau"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E10b
+    criterion: AC-9
+    layer: backend-effect
+    executor: test
+    cmd: config:executors.test.hdc_runner_uses_plugin_interpreter
+    paths: ["sdk/tongflow/engine/runner.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; ve THU HAI cua AC-9, thu ma E10 khong cham toi. Dung hai node cua hai plugin_id khac nhau, thay cho sinh tien trinh con bang mot bo ghi lai, roi khang dinh interpreter truyen cho TUNG node BANG dung pythons[plugin_id cua node do] va hai gia tri KHAC NHAU. CHIEU DO tren cung fixture: ghim mot interpreter co dinh o runner (vi du next(iter(pythons.values()))) thi ca thu DO voi thong diep ghim hai duong dan bang nhau — day dung la hinh dang refactor de con sot ma E10 van xanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- E. Bien duong dan ----------
+  - id: E11
+    criterion: AC-10
+    executor: test
+    cmd: config:executors.test.hdc_unsafe_plugin_id_rejected
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; ba id khong an toan ('../escape', '.hidden', chuoi rong) deu lam ham tinh thu muc NEM loi co ten, va sau ca thu khong co thu muc nao duoc tao ngoai goc. DOI CHUNG DUONG trong cung ca thu: mot id hop le ('oneflow-api-ffmpeg') phai tra ve duong dan nam duoi goc — assertion am tinh mot minh khong chung duoc gi"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
