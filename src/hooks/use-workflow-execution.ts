@@ -28,6 +28,7 @@ import useFlow from "@/hooks/use-flow";
 import { useTaskStore } from "@/hooks/use-task";
 import { saveFromTask } from "@/lib/api/material";
 import { saveWorkflow } from "@/lib/api/workspace";
+import { provenanceFields } from "@/lib/director/provenance";
 import { logger } from "@/lib/logger";
 import {
     getAbiNodeBySlot,
@@ -422,6 +423,7 @@ export function useWorkflowExecution(
 
             const result = await saveWorkflow({
                 ...(workflowId ? { workflowId } : {}),
+                ...provenanceFields(useFlow.getState().directorRunId),
                 name: effectiveName,
                 description: effectiveDescription || "",
                 flow: { nodes, edges },

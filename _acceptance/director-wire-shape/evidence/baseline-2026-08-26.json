@@ -1,0 +1,767 @@
+{
+  "summary": {
+    "measuredAt": "2026-08-26T10:54:22.096Z",
+    "frozenConfig": {
+      "repoHead": "4b9c1c7a97da1dde817e35ee240111d2cd6d889a",
+      "plugins": [
+        "oneflow-api-ffmpeg",
+        "oneflow-api-normalize-text-vi",
+        "oneflow-api-pyscenedetect",
+        "oneflow-modal-compose-overlay",
+        "tongflow-api-openai",
+        "tongflow-modal-ffmpeg",
+        "tongflow-modal-pyscenedetect"
+      ]
+    },
+    "total": 30,
+    "ok": 26,
+    "successRateWithin2Attempts": "86.7%",
+    "latencyMs": {
+      "p50": 16893,
+      "p95": 75069,
+      "max": 99707
+    },
+    "failureByCode": {
+      "PLAN_INVALID": 4
+    },
+    "compileIssueByCode": {
+      "UNKNOWN_INPUT_FIELD": 1,
+      "MISSING_REQUIRED_INPUT": 1,
+      "MODALITY_MISMATCH": 2,
+      "UNKNOWN_REF": 1
+    },
+    "byTier": {
+      "T1": {
+        "n": 8,
+        "ok": 5,
+        "rate": "62.5%"
+      },
+      "T2": {
+        "n": 12,
+        "ok": 12,
+        "rate": "100.0%"
+      },
+      "T3": {
+        "n": 6,
+        "ok": 5,
+        "rate": "83.3%"
+      },
+      "T4": {
+        "n": 4,
+        "ok": 4,
+        "rate": "100.0%"
+      }
+    },
+    "attemptsEstimate": {
+      "method": "UOC LUONG tu do tre: ms > 2x median cua cac lan thanh cong (29988ms)",
+      "likelyTwoAttempts": 10,
+      "rate": "33.3%",
+      "caveat": "KHONG phai so do that. Chi thay the duoc bang director_events.attempts (goi D0)."
+    },
+    "nodeInflation": {
+      "method": "so node chia so slot ky vong trong golden set; chi tinh cho lan thanh cong",
+      "median": 4,
+      "over3x": [
+        {
+          "id": "T1-01",
+          "nodes": 4,
+          "want": 1,
+          "ratio": 4
+        },
+        {
+          "id": "T1-02",
+          "nodes": 6,
+          "want": 1,
+          "ratio": 6
+        },
+        {
+          "id": "T1-03",
+          "nodes": 4,
+          "want": 1,
+          "ratio": 4
+        },
+        {
+          "id": "T1-05",
+          "nodes": 18,
+          "want": 1,
+          "ratio": 18
+        },
+        {
+          "id": "T1-06",
+          "nodes": 8,
+          "want": 1,
+          "ratio": 8
+        },
+        {
+          "id": "T2-03",
+          "nodes": 8,
+          "want": 2,
+          "ratio": 4
+        },
+        {
+          "id": "T2-04",
+          "nodes": 12,
+          "want": 2,
+          "ratio": 6
+        },
+        {
+          "id": "T2-05",
+          "nodes": 12,
+          "want": 2,
+          "ratio": 6
+        },
+        {
+          "id": "T2-09",
+          "nodes": 10,
+          "want": 3,
+          "ratio": 3.33
+        },
+        {
+          "id": "T2-10",
+          "nodes": 10,
+          "want": 1,
+          "ratio": 10
+        },
+        {
+          "id": "T2-11",
+          "nodes": 6,
+          "want": 2,
+          "ratio": 3
+        },
+        {
+          "id": "T2-12",
+          "nodes": 6,
+          "want": 2,
+          "ratio": 3
+        },
+        {
+          "id": "T3-01",
+          "nodes": 18,
+          "want": 4,
+          "ratio": 4.5
+        },
+        {
+          "id": "T3-03",
+          "nodes": 36,
+          "want": 7,
+          "ratio": 5.14
+        },
+        {
+          "id": "T4-01",
+          "nodes": 16,
+          "want": 1,
+          "ratio": 16
+        },
+        {
+          "id": "T4-02",
+          "nodes": 12,
+          "want": 1,
+          "ratio": 12
+        },
+        {
+          "id": "T4-03",
+          "nodes": 4,
+          "want": 1,
+          "ratio": 4
+        }
+      ],
+      "why": "Plan compile sach nhung phinh gap nhieu lan la 'dung cu phap, sai y dinh' — EVAL-1 hien khong bat duoc."
+    },
+    "NOT_MEASURED": [
+      "Ty le compile-0-issue o LUOT 1 — endpoint chi tra ket qua CUOI sau <=2 luot; logger.warn cung chi ghi ket qua cuoi. Can telemetry cua goi D0 (director_events.attempts).",
+      "Token in/out va cache read/write — chua co instrumentation."
+    ]
+  },
+  "results": [
+    {
+      "id": "T1-01",
+      "tier": "T1",
+      "prompt": "Viet 3 caption ngan quang cao mot can ho 2 phong ngu o Thu Duc, giong than thien, moi cai duoi 30 chu.",
+      "expect": [
+        "gen-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 10080,
+        "status": 200,
+        "nodes": 4,
+        "edges": 3,
+        "name": "Apartment ad captions",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 4
+      }
+    },
+    {
+      "id": "T1-02",
+      "tier": "T1",
+      "prompt": "Doi doan nay thanh chu de doc cho may doc: \"Gia chi tu 2,4 ty, tra truoc 15%, ban giao quy 3/2027\".",
+      "expect": [
+        "normalize-text-vi"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 9348,
+        "status": 200,
+        "nodes": 6,
+        "edges": 5,
+        "name": "Doc quang cao bat dong san",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 6
+      }
+    },
+    {
+      "id": "T1-03",
+      "tier": "T1",
+      "prompt": "Tao mot anh minh hoa phong khach can ho hien dai, tong am, co anh nang chieu qua cua so.",
+      "expect": [
+        "image-gen"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 4520,
+        "status": 200,
+        "nodes": 4,
+        "edges": 3,
+        "name": "Modern living room illustration",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 4
+      }
+    },
+    {
+      "id": "T1-04",
+      "tier": "T1",
+      "prompt": "Tach rieng phan tieng ra khoi video quay nha khach gui.",
+      "expect": [
+        "extract-audio"
+      ],
+      "result": {
+        "ok": false,
+        "ms": 33342,
+        "status": 422,
+        "code": "PLAN_INVALID",
+        "message": "UNKNOWN_INPUT_FIELD: \"videos\" is not an input of remove-video-audio; MISSING_REQUIRED_INPUT: required input \"video\" of remove-video-audio is not connected",
+        "issues": [
+          "UNKNOWN_INPUT_FIELD",
+          "MISSING_REQUIRED_INPUT"
+        ],
+        "likelyTwoAttempts": true
+      }
+    },
+    {
+      "id": "T1-05",
+      "tier": "T1",
+      "prompt": "Cat video tour can ho thanh tung canh rieng.",
+      "expect": [
+        "split-video"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 14217,
+        "status": 200,
+        "nodes": 18,
+        "edges": 17,
+        "name": "Cat Apartment Video Tour",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 18
+      }
+    },
+    {
+      "id": "T1-06",
+      "tier": "T1",
+      "prompt": "Lay khung hinh dau tien cua video lam anh bia.",
+      "expect": [
+        "get-first-frame"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 22202,
+        "status": 200,
+        "nodes": 8,
+        "edges": 7,
+        "name": "Video Cover Image",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 8
+      }
+    },
+    {
+      "id": "T1-07",
+      "tier": "T1",
+      "prompt": "Go tieng goc khoi doan video livestream nay.",
+      "expect": [
+        "remove-video-audio"
+      ],
+      "result": {
+        "ok": false,
+        "ms": 16893,
+        "status": 422,
+        "code": "PLAN_INVALID",
+        "message": "MODALITY_MISMATCH: field \"video\" expects videoNode; \"@s1\" produces textNode",
+        "issues": [
+          "MODALITY_MISMATCH"
+        ],
+        "likelyTwoAttempts": false
+      }
+    },
+    {
+      "id": "T1-08",
+      "tier": "T1",
+      "prompt": "Chuyen loi thoai trong file ghi am buoi tu van thanh van ban.",
+      "expect": [
+        "transcribe"
+      ],
+      "result": {
+        "ok": false,
+        "ms": 65288,
+        "status": 422,
+        "code": "PLAN_INVALID",
+        "message": "UNKNOWN_REF: \"@s0\" does not reference an earlier step",
+        "issues": [
+          "UNKNOWN_REF"
+        ],
+        "likelyTwoAttempts": true
+      }
+    },
+    {
+      "id": "T2-01",
+      "tier": "T2",
+      "prompt": "Tu mo ta san pham nay, viet kich ban 20 giay roi doc thanh giong nu mien Nam.",
+      "expect": [
+        "gen-text",
+        "normalize-text-vi",
+        "text-gen-speech-preset"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 10759,
+        "status": 200,
+        "nodes": 6,
+        "edges": 5,
+        "name": "Product 20s script with Southern female voice",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2
+      }
+    },
+    {
+      "id": "T2-02",
+      "tier": "T2",
+      "prompt": "Viet loi quang cao cho khoa hoc tieng Anh tre em, chuan hoa so va gia, roi tao giong doc truyen cam.",
+      "expect": [
+        "gen-text",
+        "normalize-text-vi",
+        "text-gen-speech-instruct"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 8765,
+        "status": 200,
+        "nodes": 8,
+        "edges": 7,
+        "name": "Quang cao khoa hoc tieng Anh tre em",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2.67
+      }
+    },
+    {
+      "id": "T2-03",
+      "tier": "T2",
+      "prompt": "Nghe file ghi am nay, tom tat y chinh khach hang quan tam, roi viet lai thanh 5 gach dau dong.",
+      "expect": [
+        "transcribe",
+        "gen-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 72974,
+        "status": 200,
+        "nodes": 8,
+        "edges": 7,
+        "name": "Tóm tắt ghi âm khách hàng",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 4
+      }
+    },
+    {
+      "id": "T2-04",
+      "tier": "T2",
+      "prompt": "Tao anh san pham ly giu nhiet mau xanh reu, roi dan gia 390.000d va logo len goc phai duoi.",
+      "expect": [
+        "image-gen",
+        "compose-overlay"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 9729,
+        "status": 200,
+        "nodes": 12,
+        "edges": 11,
+        "name": "San pham ly giu nhiet",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 6
+      }
+    },
+    {
+      "id": "T2-05",
+      "tier": "T2",
+      "prompt": "Ghep hai video tour tang 1 va tang 2 thanh mot, roi long nhac nen tu file am thanh toi gui.",
+      "expect": [
+        "concat-videos",
+        "merge-video-audio"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 63382,
+        "status": 200,
+        "nodes": 12,
+        "edges": 11,
+        "name": "Ghep video va long nhac nen",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 6
+      }
+    },
+    {
+      "id": "T2-06",
+      "tier": "T2",
+      "prompt": "Mo ta giup toi anh can ho nay co gi noi bat, roi viet mot caption ban hang dua tren mo ta do.",
+      "expect": [
+        "image-describe",
+        "gen-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 14994,
+        "status": 200,
+        "nodes": 4,
+        "edges": 3,
+        "name": "Apartment Highlights & Sales Caption",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2
+      }
+    },
+    {
+      "id": "T2-07",
+      "tier": "T2",
+      "prompt": "Chia bai viet dai ve du an nay thanh tung doan ngan, moi doan viet lai cho de doc hon.",
+      "expect": [
+        "split-text",
+        "gen-text",
+        "combine-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 10612,
+        "status": 200,
+        "nodes": 6,
+        "edges": 5,
+        "name": "Split & rewrite project article",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2
+      }
+    },
+    {
+      "id": "T2-08",
+      "tier": "T2",
+      "prompt": "Doc file PDF bang gia roi viet 3 phuong an tra gop de khach de hieu.",
+      "expect": [
+        "parse-document",
+        "gen-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 10233,
+        "status": 200,
+        "nodes": 4,
+        "edges": 3,
+        "name": "3 phuong an tra gop tu bang gia",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2
+      }
+    },
+    {
+      "id": "T2-09",
+      "tier": "T2",
+      "prompt": "Lay anh bia tu video, chinh sang hon mot chut, roi dan dong chu \"Mo ban dot 2\" len tren.",
+      "expect": [
+        "get-first-frame",
+        "image-edit",
+        "compose-overlay"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 45147,
+        "status": 200,
+        "nodes": 10,
+        "edges": 9,
+        "name": "Cover image with promo text",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 3.33
+      }
+    },
+    {
+      "id": "T2-10",
+      "tier": "T2",
+      "prompt": "Gop anh can ho va anh logo cong ty thanh mot anh quang cao duy nhat.",
+      "expect": [
+        "image-fusion"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 7336,
+        "status": 200,
+        "nodes": 10,
+        "edges": 9,
+        "name": "Apartment Ad Fusion",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 10
+      }
+    },
+    {
+      "id": "T2-11",
+      "tier": "T2",
+      "prompt": "Tu video livestream ban hang, tach tieng ra roi chep lai thanh van ban de toi luu.",
+      "expect": [
+        "extract-audio",
+        "transcribe"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 33853,
+        "status": 200,
+        "nodes": 6,
+        "edges": 5,
+        "name": "Transcribe livestream audio",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 3
+      }
+    },
+    {
+      "id": "T2-12",
+      "tier": "T2",
+      "prompt": "Viet 5 tieu de quang cao cho cua hang banh ngot, roi gop tat ca thanh mot danh sach goi y.",
+      "expect": [
+        "gen-text",
+        "combine-text"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 8973,
+        "status": 200,
+        "nodes": 6,
+        "edges": 5,
+        "name": "Tiêu đề quảng cáo tiệm bánh ngọt",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 3
+      }
+    },
+    {
+      "id": "T3-01",
+      "tier": "T3",
+      "prompt": "Tu video tour can ho toi upload: cat thanh tung canh, bo canh rung hoac toi, chep loi thoai co moc thoi gian, dan phu de va khung gia 2,4 ty len, roi xuat ban doc 9:16.",
+      "expect": [
+        "split-video",
+        "drop-video",
+        "transcribe-timestamp",
+        "compose-overlay"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 75069,
+        "status": 200,
+        "nodes": 18,
+        "edges": 18,
+        "name": "Apartment tour to 9:16 reel",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 4.5
+      }
+    },
+    {
+      "id": "T3-02",
+      "tier": "T3",
+      "prompt": "Tu buoi livestream 30 phut: tach tieng, chep lai loi, chon nhung doan noi ve gia va khuyen mai, cat dung nhung doan do, dan phu de, ghep lai thanh mot clip ngan.",
+      "expect": [
+        "extract-audio",
+        "transcribe-timestamp",
+        "split-video",
+        "compose-overlay",
+        "concat-videos"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 65437,
+        "status": 200,
+        "nodes": 14,
+        "edges": 14,
+        "name": "Livestream highlight: price & promo clip",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 2.8
+      }
+    },
+    {
+      "id": "T3-03",
+      "tier": "T3",
+      "prompt": "Lam mot clip gioi thieu du an: viet kich ban tu mo ta, chuan hoa so lieu, tao giong doc, tao 3 anh minh hoa, dan chu len tung anh, roi ghep tat ca thanh video co tieng.",
+      "expect": [
+        "gen-text",
+        "normalize-text-vi",
+        "text-gen-speech-preset",
+        "image-gen",
+        "compose-overlay",
+        "concat-videos",
+        "merge-video-audio"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 21607,
+        "status": 200,
+        "nodes": 36,
+        "edges": 35,
+        "name": "Project Intro Clip",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 5.14
+      }
+    },
+    {
+      "id": "T3-04",
+      "tier": "T3",
+      "prompt": "Tu file ghi am tu van khach hang, chep lai co moc gio, tom tat cac cau hoi khach hay hoi nhat, viet thanh kich ban FAQ, roi tao giong doc cho tung cau tra loi.",
+      "expect": [
+        "transcribe-timestamp",
+        "gen-text",
+        "split-text",
+        "text-gen-speech-preset"
+      ],
+      "result": {
+        "ok": false,
+        "ms": 99707,
+        "status": 422,
+        "code": "PLAN_INVALID",
+        "message": "MODALITY_MISMATCH: field \"audio\" expects audioNode; got literal text",
+        "issues": [
+          "MODALITY_MISMATCH"
+        ],
+        "likelyTwoAttempts": true
+      }
+    },
+    {
+      "id": "T3-05",
+      "tier": "T3",
+      "prompt": "Tu video quay nha bang dien thoai: cat canh, bo canh mo, lay khung dau moi canh lam anh, dan gia va dia chi len tung anh, gop thanh mot bo anh quang cao.",
+      "expect": [
+        "split-video",
+        "drop-video",
+        "get-first-frame",
+        "compose-overlay",
+        "arrange-group"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 65700,
+        "status": 200,
+        "nodes": 14,
+        "edges": 13,
+        "name": "House Tour Ad Photo Set",
+        "likelyTwoAttempts": true,
+        "nodeInflation": 2.8
+      }
+    },
+    {
+      "id": "T3-06",
+      "tier": "T3",
+      "prompt": "Doc bang gia PDF, viet kich ban ban hang 30 giay, chuan hoa gia va ngay ban giao, tao giong doc nu, tao anh nen can ho, dan gia len anh, ghep thanh video co loi doc.",
+      "expect": [
+        "parse-document",
+        "gen-text",
+        "normalize-text-vi",
+        "text-gen-speech-preset",
+        "image-gen",
+        "compose-overlay",
+        "merge-video-audio"
+      ],
+      "result": {
+        "ok": true,
+        "ms": 22555,
+        "status": 200,
+        "nodes": 18,
+        "edges": 18,
+        "name": "Apartment Sales Video from Price List",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2.57
+      }
+    },
+    {
+      "id": "T4-01",
+      "tier": "T4",
+      "prompt": "Tao mot video 10 giay tu dong ve can ho tu mo ta van ban nay.",
+      "expect": [
+        "text-gen-video"
+      ],
+      "note": "slot chua cai — ky vong MISSING_PLUGIN",
+      "result": {
+        "ok": true,
+        "ms": 12498,
+        "status": 200,
+        "nodes": 16,
+        "edges": 17,
+        "name": "Apartment Tour Video",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 16
+      }
+    },
+    {
+      "id": "T4-02",
+      "tier": "T4",
+      "prompt": "Lam video nguoi dai dien noi lip-sync theo doan ghi am nay.",
+      "expect": [
+        "audio-video-lip-sync"
+      ],
+      "note": "slot chua cai — ky vong MISSING_PLUGIN",
+      "result": {
+        "ok": true,
+        "ms": 19192,
+        "status": 200,
+        "nodes": 12,
+        "edges": 11,
+        "name": "Spokesperson Lip-sync Video",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 12
+      }
+    },
+    {
+      "id": "T4-03",
+      "tier": "T4",
+      "prompt": "Sang tac mot doan nhac nen vui tuoi 15 giay cho clip quang cao.",
+      "expect": [
+        "gen-music"
+      ],
+      "note": "slot chua cai — ky vong MISSING_PLUGIN",
+      "result": {
+        "ok": true,
+        "ms": 7915,
+        "status": 200,
+        "nodes": 4,
+        "edges": 3,
+        "name": "Cheerful Ad Background Music",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 4
+      }
+    },
+    {
+      "id": "T4-04",
+      "tier": "T4",
+      "prompt": "Nang do phan giai video tour len 4K cho net hon.",
+      "expect": [
+        "video-upscale"
+      ],
+      "note": "slot chua cai — ky vong MISSING_PLUGIN",
+      "result": {
+        "ok": true,
+        "ms": 23215,
+        "status": 200,
+        "nodes": 2,
+        "edges": 1,
+        "name": "Nang phan giai video tour len 4K",
+        "likelyTwoAttempts": false,
+        "nodeInflation": 2
+      }
+    }
+  ]
+}

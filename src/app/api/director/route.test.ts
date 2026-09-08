@@ -1,12 +1,21 @@
 import { describe, expect, it, vi } from "vitest";
 import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
 
-const { runDirectorMock } = vi.hoisted(() => ({
+const { runDirectorMock, recordGeneratedMock } = vi.hoisted(() => ({
     runDirectorMock: vi.fn(),
+    recordGeneratedMock: vi.fn(async () => {}),
 }));
 
 vi.mock("@/lib/director/director.server", () => ({
     runDirector: runDirectorMock,
+}));
+
+// The ledger is `server-only` and touches sqlite; the route's contract with it
+// is "called once per request, never throws into the response", which the
+// dedicated ledger tests cover. Here it is stubbed so these tests keep
+// asserting the HTTP envelope and nothing else.
+vi.mock("@/lib/director/events/director-events.server", () => ({
+    recordGenerated: recordGeneratedMock,
 }));
 
 import { POST } from "./route";

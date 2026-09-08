@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
@@ -190,6 +191,9 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
         const { vocab, slotDefaultPlugin } = buildDirectorCatalog();
         const client = new Anthropic({ apiKey });
 
+        // One id per user request, minted at the transport edge — the core
+        // takes it as a parameter so it stays deterministic under test.
+        const runId = randomUUID();
         const result = await generateWorkflow(
             prompt,
             async (turns) => {
@@ -245,6 +249,7 @@ export async function runDirector(prompt: string): Promise<DirectorResult> {
                 return response.parsed_output;
             },
             slotDefaultPlugin,
+            runId,
         );
 
         // PLAN_INVALID / MISSING_PLUGIN: the compiler's structured

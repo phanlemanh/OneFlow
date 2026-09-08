@@ -13,6 +13,23 @@ executors:
     # Sequential on purpose: next build rewrites .next/types while tsc reads them —
     # parallel suite runs race (lesson: artifact-platform radar-m1 S4-r1).
     build_typecheck: "pnpm build && pnpm typecheck"
+
+    # ---- director-wire-shape (goi D0 cua ADR-0013) ----
+    # Vitest chay theo FILE, khong theo ten test: mot test bi doi ten van chay,
+    # mot file bi xoa thi lenh do va nguoi doc thay ngay.
+    dws_error_envelope: "npx vitest run src/app/api/director/route.test.ts"
+    dws_event_written_server_side: "npx vitest run src/app/api/director/wire-shape.test.ts -t 'AC-4'"
+    dws_feedback_state_machine: "npx vitest run src/lib/director/events/director-events.test.ts"
+    dws_events_schema_shape: "npx vitest run src/db/director-events-schema.test.ts"
+    dws_workflow_run_provenance: "npx vitest run src/app/api/workspace/save/provenance.test.ts"
+    dws_body_backward_compatible: "npx vitest run src/lib/director/request-body.test.ts -t 'AC-8'"
+    dws_body_per_field_caps: "npx vitest run src/lib/director/request-body.test.ts -t 'AC-9'"
+    dws_migrator_on_old_db: "npx vitest run src/db/migrate-old-db.test.ts"
+    # director-wire-shape phan D (nang pham vi tai Cong 2, 08/09): duong ghi ket
+    # cuc tu giao dien. Chay ho thoai Radix that trong jsdom — hai su that nay la
+    # su that VE DAY NOI, khong ham thuan nao nhin thay duoc.
+    dws_outcome_not_reported_while_staged: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'reports nothing while the plan is only staged'"
+    dws_one_outcome_per_decision: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'exactly once'"
     lint: "pnpm lint:check"
     unit: "pnpm test"
     # Run through uv rather than the ambient python3. On macOS the ambient
@@ -324,6 +341,13 @@ executors:
     knsk_i18n_render: "pnpm vitest run src/components/workspace/store-read-states-i18n.test.tsx"
   script:
     verify_plugins: "pnpm verify:plugins"
+
+    # ---- director-wire-shape (goi D0 cua ADR-0013) ----
+    dws_wire_returns_plan: "bash scripts/acceptance/dws-wire-returns-plan.sh"
+    dws_old_client_unaffected: "bash scripts/acceptance/dws-old-client-unaffected.sh"
+    dws_expect_count_unchanged: "bash scripts/acceptance/dws-expect-count.sh"
+    dws_barrel_export: "bash scripts/acceptance/dws-barrel-export.sh"
+    dws_no_prompt_in_prod_log: "bash scripts/acceptance/dws-no-prompt-in-prod-log.sh"
     # --- cong-tu-canh-minh (31/08) ---
     # Bo kiem ban do + rang cua no. Dat o scripts/ci/ chu khong scripts/roadmap/
     # hay scripts/acceptance/ vi gia re-pin: 0 vs 1 vs 2 ho so (do tren paths da

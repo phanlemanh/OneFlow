@@ -83,3 +83,8 @@ Bốn hạng mục, thứ tự phát triển 1 → 2 → 5 → 3:
 ## Cổng 0 — 04/09
 
 - **decision = park.** Căn cứ: khối kế hoạch lát cắt chứng minh (docs/roadmap.md) đóng băng việc mở hạng mục mới; hồ sơ này không nằm trên đường ★. Mở lại khi gỡ băng, hoặc qua bảng Ngoại lệ với lý do có tên.
+
+> **26/08 — tách hạ tầng:** nền wire-shape (trả plan qua wire, `director_events`, body
+> versioned) tách sang slug riêng [`director-wire-shape`](../director-wire-shape/opportunity.md)
+> theo [ADR-0013](../../docs/adr/0013-director-truong-ky.md); ô này giữ nguyên nghĩa 4 hạng
+> mục SẢN PHẨM và Cổng 0 riêng. Hạng mục 1–2 = làn D2, chỉ đi sau D0+D1.

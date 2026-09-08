@@ -1,0 +1,43 @@
+{
+  "capturedAt": "2026-08-26",
+  "repoHead": "4b9c1c7a97da1dde817e35ee240111d2cd6d889a",
+  "branch": "feat/normalize-text-vi",
+  "abiSha256": "21c282eca0464c71",
+  "officialPluginsSha256": "f7f8eca35ca842a7",
+  "installedPlugins": {
+    "oneflow-api-ffmpeg": {
+      "sha": "e0b8df87ef542d4ac8323a1a909a9734005597fa",
+      "dirty": false
+    },
+    "oneflow-api-normalize-text-vi": {
+      "sha": "4b9c1c7a97da1dde817e35ee240111d2cd6d889a",
+      "dirty": false
+    },
+    "oneflow-api-pyscenedetect": {
+      "sha": "4dc7764a9bf32b037c9a1aed78f1b0a818aae9a9",
+      "dirty": false
+    },
+    "oneflow-modal-compose-overlay": {
+      "sha": "eabe8fd2f9cf732e46b6e463a6e9cbc8e15c25f5",
+      "dirty": false
+    },
+    "tongflow-api-openai": {
+      "sha": "7dc70849762d69afebabdcecfbead71bbe552376",
+      "dirty": false
+    },
+    "tongflow-modal-ffmpeg": {
+      "sha": "7227276a04398a5e313bd569ef68f2edc1da1262",
+      "dirty": false
+    },
+    "tongflow-modal-pyscenedetect": {
+      "sha": "d23886a61d497b7efb929d9ff417da209eea4c14",
+      "dirty": false
+    }
+  },
+  "note": "Vocabulary cua Director la HAM cua registry luc chay. Baseline chi so sanh duoc voi lan do khac khi cau hinh nay khop.",
+  "manifestEntries": 39,
+  "manifestHasNormalizePlugin": false,
+  "DISCREPANCY": "plugins/oneflow-api-normalize-text-vi CO tren dia nhung KHONG con trong config/official-plugins.json (rut 26/08 vi kho cong khai tra 404). Registry luc chay quet plugins/ tren dia, nen Director VAN thay slot normalize-text-vi trong khi manifest khong khai. Ghim ca hai; day la trang thai that cua may, khong phai loi do.",
+  "slotsOnDisk": 25,
+  "slotsNote": "25 slot khai boi 7 plugin tren dia; sau bo loc director-safe + SLOT_TO_NODE_TYPE + fixed-point con ~22 vao vocabulary."
+}

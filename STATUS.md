@@ -2,19 +2,20 @@
 
 > Trạng thái sống của repo — cập nhật cuối mỗi gói việc. Handoff giữa máy/agent đọc **file này + `_acceptance/`**, không đọc lịch sử chat.
 
-## Hiện trạng (2026-09-07, sau khi ký Cổng 2 của mở hoá B01 — dòng B2 của kế hoạch)
+## Hiện trạng (2026-09-08, sau khi ký Cổng 2 của D0 Director wire-shape — dòng B3 của kế hoạch)
 
 > Chỉ mục tính năng theo góc nhìn người dùng nằm ở [`docs/feature-index.md`](docs/feature-index.md).
 > File này giữ vai *đang ở đâu*; *làm gì tiếp* nằm ở **một chỗ duy nhất**: khối kế hoạch trong
 > [docs/roadmap.md](docs/roadmap.md), mục "Kế hoạch lát cắt chứng minh".
 
-- **38 hồ sơ đã ký** (guard sổ cái xanh 38/38, 07/09); 37 trên `main`, `mo-hoa-b01` đang ở PR #100. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
+- **39 hồ sơ đã ký** (guard sổ cái xanh 39/39, 08/09); 38 trên `main`, `director-wire-shape` đang ở PR #111. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
 - **Định vị ba tầng** ghi ở [vision.md](docs/strategy/vision.md) (04/09): nền tảng đa mục đích → năm trụ cột → lát cắt. Skill #1 là lát cắt chứng minh đầu tiên, không phải định nghĩa sản phẩm.
 - **Đóng băng mở hạng mục mới** từ khi `lat-cat-chung-minh` merge tới khi 16/16 ★ và ≥ 85% dòng ✅. Xem tỉ lệ: `pnpm plan:check`. Ngoại lệ chỉ ba lý do: mất-dữ-liệu · bảo-mật · chặn-★, và mỗi ngoại lệ cộng vào mẫu số.
 - **Máy dev đang cài 4 plugin:** `oneflow-api-ffmpeg`, `oneflow-api-openai` (phục vụ cả hai slot transcribe — S3 de facto xong), `oneflow-api-pyscenedetect`, `oneflow-modal-compose-overlay` (mắt Modal duy nhất còn lại trên chuỗi Skill #1 → B6).
 - **7 nhánh chưa về `main`** (đo 04/09): `feat/director-wire-shape` (11, → B3), `docs/director-lane-d` (5, nằm trong D0), `b01/open-source-rebrand` (4, → B2), `fix/t1-escape-doi-hoi-artifact-ho-so` (2, → S1), `chore/roadmap-alias-guard`, `draft/bo-phan-loai-token`, `chore/acceptance-ci-recheck-all` (park, giữ nguyên trên ổ).
 - **Kit gate, hai tầng phiên bản:** plugin cache **acceptance-gate 2.8.0 + feature-loop 2.8.0** (đo 04/09 qua `installed_plugins.json`); thước vendored trong `scripts/pre-merge-check.sh` là bản fork của repo. Hỏi "version nào" phải nêu cả hai — các con số kit cũ ở mục Lịch sử là sử liệu.
 - **Nền tảng:** fork TongFlow (AGPL-3.0). SDK `oneflow-sdk` 0.2.18 trên PyPI, import `tongflow`; 0.2.20 đi cùng B4.
+- **Làn D — Director trường kỳ ([ADR-0013](docs/adr/0013-director-truong-ky.md), 26/08):** khảo sát 26/08 vật chất hoá "agent là giao diện" thành nền trạng thái bốn tầng + học derived-first. Bằng chứng: [research-director-truong-ky-2026-08.md](docs/strategy/research-director-truong-ky-2026-08.md), [research-mo-hoa-2026-08.md](docs/strategy/research-mo-hoa-2026-08.md). Lộ trình: mục **Làn D** trong [roadmap.md](docs/roadmap.md) (xen kẽ, không nối đuôi). **Gói D0 đã hiện thực và ký Cổng 1** — [`_acceptance/director-wire-shape/`](_acceptance/director-wire-shape/opportunity.md), `status: implemented`, còn Cổng 2. Chi tiết bàn giao: [HANDOFF.md](_acceptance/director-wire-shape/HANDOFF.md).
 
 ## Feature đã ký (đọc `_acceptance/<slug>/` để biết chi tiết)
 

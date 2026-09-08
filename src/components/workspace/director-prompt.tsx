@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { showErrorToast } from "@/components/ui/error-toast";
 import { useFlow } from "@/hooks/use-flow";
 import type { DirectorErrorCode } from "@/lib/director/director-core";
+import { reportOutcome } from "@/lib/director/report-outcome";
 import { logger } from "@/lib/logger";
 import { parseWorkflowImportJson } from "@/lib/workflow/exporter";
 
@@ -46,6 +47,9 @@ interface DirectorSuccess {
     description: string;
     nodes: unknown[];
     edges: unknown[];
+    /** Present since director-wire-shape; optional so a response from an older
+     *  server still applies cleanly instead of failing the type guard. */
+    runId?: string;
 }
 
 interface DirectorErrorBody {
@@ -80,6 +84,11 @@ export default function DirectorPrompt() {
     // user-initiated cancel from a timeout or a genuine network failure,
     // both of which must still surface the UPSTREAM_ERROR toast.
     const userAbortedRef = useRef(false);
+    // Radix's AlertDialogAction is ALSO a close trigger, so confirming runs
+    // our onClick and then the root's onOpenChange(false) in the same event.
+    // Without this flag the dismissal branch would fire for a confirmed plan
+    // and report a second, contradictory outcome for the same run.
+    const decidedRef = useRef(false);
     // Bumped every time `apply` commits a new graph to the canvas. The
     // compiler lays generated nodes out at a fixed {x: 0, y: 0}-rooted grid,
     // unrelated to wherever the user last left the viewport, so an applied
@@ -104,6 +113,10 @@ export default function DirectorPrompt() {
                 const flow = useFlow.getState();
                 flow.setNodes(parsed.nodes);
                 flow.setEdges(parsed.edges);
+                // The graph now on the canvas IS this run's plan; the next
+                // save carries the id (AC-7). Null when the server predates
+                // runIds — the save then looks hand-built, which is honest.
+                flow.setDirectorRunId(result.runId ?? null);
                 if (parsed.name) flow.setWorkflowName(parsed.name);
                 if (parsed.description) {
                     flow.setWorkflowDescription(parsed.description);
@@ -165,9 +178,21 @@ export default function DirectorPrompt() {
 
                 setStatus("ready");
                 if (useFlow.getState().nodes.length > 0) {
+                    // Staged, not decided — and deliberately NOT reported. A
+                    // run may leave `generated` exactly once (AC-5), so
+                    // spending that single patch on "the dialog opened" would
+                    // make the user's real decision unrecordable: every later
+                    // `replaced` / `discarded` is refused with 409 and, since
+                    // reporting is fire-and-forget, dropped in silence. A plan
+                    // nobody decides on stays `generated`, which is precisely
+                    // what the orphan-rate threshold counts.
+                    decidedRef.current = false;
                     setPending(json);
                 } else {
+                    // Empty canvas takes the plan with no dialog — the user
+                    // accepted it by asking for it.
                     apply(json);
+                    reportOutcome(json.runId, "accepted");
                 }
             } catch {
                 // Fetch itself rejects (AbortError) for both a user cancel
@@ -269,7 +294,18 @@ export default function DirectorPrompt() {
             <AlertDialog
                 open={pending !== null}
                 onOpenChange={(v) => {
-                    if (!v) setPending(null);
+                    if (!v) {
+                        // Escape, Cancel, a click outside — and ALSO the
+                        // confirm button, which closes the dialog itself. Only
+                        // the first three are a dismissal; the flag tells them
+                        // apart, because `setPending(null)` from the confirm
+                        // handler has not flushed yet and `pending` still
+                        // reads as the staged plan here.
+                        if (!decidedRef.current) {
+                            reportOutcome(pending?.runId, "discarded");
+                        }
+                        setPending(null);
+                    }
                 }}
             >
                 <AlertDialogContent>
@@ -285,7 +321,11 @@ export default function DirectorPrompt() {
                         </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => {
-                                if (pending) apply(pending);
+                                if (pending) {
+                                    decidedRef.current = true;
+                                    apply(pending);
+                                    reportOutcome(pending.runId, "replaced");
+                                }
                             }}
                         >
                             {t("replaceConfirm")}

@@ -100,7 +100,7 @@ case_clean() {
     make_tree
     checker_is_green || return 1
     out_has 'đã kiểm [0-9]+ ô đo lọc theo tên' || return 1
-    out_has '33 ô đo' || return 1
+    out_has '38 ô đo' || return 1
 }
 
 # AC-1. One filter points at a name that does not exist.
@@ -145,7 +145,7 @@ s = s[:i] + extra + s[i:]
     # Bare and double-quoted forms must be counted too; a parser that only sees
     # single-quoted one-liners reports 33 instead of 36 and still exits 0.
     checker_is_green || return 1
-    out_has 'đã kiểm 3[4-9] ô đo' || return 1
+    out_has 'đã kiểm 4[0-9] ô đo' || return 1
 }
 
 # AC-4. A filter the checker cannot parse must be named, never skipped.
