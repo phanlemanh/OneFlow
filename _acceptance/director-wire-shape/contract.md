@@ -5,7 +5,7 @@ slug: director-wire-shape
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api, db]
-status: verified
+status: implemented
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-26T15:59:02Z
 time_human_minutes: {gate1: 15, gate2: 0}
