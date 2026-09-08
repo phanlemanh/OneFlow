@@ -6,8 +6,8 @@ owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api, db]
 status: implemented
-approved_by: phanlemanh@gmail.com
-approved_at: 2026-08-26T15:59:02Z
+approved_by: Phan Le Manh
+approved_at: 2026-09-08
 time_human_minutes: {gate1: 15, gate2: 0}
 ---
 
@@ -170,6 +170,9 @@ chỉ guard chạy được mới ngăn.
 giao diện thay vì hoãn sang hợp đồng khác. Hai tiêu chí AC-14 và AC-15 vào mục Criteria phần D,
 kèm bộ đo E15/E16 chạy hộp thoại thật. Trần vòng verify được nới đúng một vòng cho việc này:
 vòng 4 là vòng cuối, vẫn trong trần 4 vòng của hạng T3.
+
+Cổng 1 duyệt lần đầu ngày 26/08/2026 (13 tiêu chí, `phanlemanh@gmail.com`); duyệt lại cho phạm vi
+mở rộng ngày 08/09/2026 (Phan Le Manh), hai tiêu chí D nằm trong lần duyệt sau.
 
 Luật trần vòng verify (CLAUDE.md, owner duyệt 08/09) áp cho hồ sơ T3 này: vòng 3 đã được KHAI
 LÀ VÒNG CUỐI **trước khi** chạy (sổ quyết định `d-…-r3last`). Ba vòng đã sửa hết mọi lỗi trong
