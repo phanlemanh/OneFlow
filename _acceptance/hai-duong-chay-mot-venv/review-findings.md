@@ -1,83 +1,58 @@
 ## Trong hợp đồng
 
-- **AC-9 tests assert a substring, not the interpreter->venv relation; a fully wrong interpreter keeps both evals green**
-  file: `sdk/tests/test_plugin_venv_layout.py:246`
+- **Đo CHỈ DẪN thay vì ĐẦU RA — guard đếm chuỗi tên hàm, nên một dòng CHÚ THÍCH cũng được tính là call site (AC-4, E4/E5)**
+  file: `scripts/plugins/check-venv-layout-pinned.sh:61`
   severity: high
-  AC: AC-9
-  detail: `test_returns_one_interpreter_per_plugin_not_one_for_all` (line 246) and `test_runner_calls_each_plugin_with_its_own_interpreter` (line 389) both check only `assert pid in py` — the plugin id appears somewhere in the path string — plus `a != b`. Neither asserts the actual promise, `py == str(P._venv_python(P._venv_dir(P._venv_root(data_dir), pid)))`, even though both helpers are in the same module and the TypeScript half of this same package does use equality (`expect(dir).toBe(join(root, e.relative_dir))`). MEASURED, not inferred: copied sdk/ to a temp dir, changed `pythons[pid] = str(py)` in `prepare_python_env` to `pythons[pid] = str(plugins_dir / pid / "python")` — an interpreter entirely outside the plugin-venv tree, belonging to no venv — and ran the two eval node-ids: `2 passed in 0.04s`. So the two evals backing AC-9 cannot distinguish "each plugin runs its own venv's interpreter" from "each plugin runs some path that happens to contain its id".
-  source: bugs
+  AC: AC-4
+  Dòng 61 (`py_call=$(grep -cE '_remove_legacy_shared_venv\(' "$PY")`) và dòng 70 (`ts_call=$(grep -cE 'removeLegacySharedVenv\(' "$TS")`) đếm SỐ DÒNG có chứa chuỗi tên hàm, rồi kết luận `call sites = py_call - py_def`. `grep -c` không phân biệt lời gọi thật với một dòng đã bị comment hoặc một dòng chú thích chỉ nhắc tên. Lời hứa của AC-4 là «một phía đánh mất bước dọn venv đời cũ thì guard trả về khác 0», tức là một QUAN HỆ về luồng chạy (bước dọn CÓ được gọi trong đường cấp phát), nhưng phép đo là «chuỗi có mặt trên ≥ 2 dòng» — đúng lớp lỗi mà chính chú thích dòng 57–59 của guard tuyên là đã đóng («grepping the NAME stays green when only the CALL SITE is deleted... Demand both»).
 
-- **Shape 3 — assert "chuỗi có mặt" trong khi lời hứa là QUAN HỆ: runner test never compares against the mapping it claims is consulted**
-  file: `sdk/tests/test_plugin_venv_layout.py:388`
-  severity: medium
-  AC: AC-9
-  detail: AC-9 promises "`runner` tra ánh xạ ấy theo node" and E10b's `expected` states the assertion literally as "interpreter truyền cho TỪNG node BẰNG đúng pythons[plugin_id của node đó]" — an equality relation between two values. `test_runner_calls_each_plugin_with_its_own_interpreter` never obtains that mapping. It asserts only (a) `len(seen) == 2` (383), (b) `seen[0][1] != seen[1][1]` (384), and (c) `assert pid in py` (388-389) — a substring-presence check on the interpreter path. No `prepare_python_env(...)` result is captured and compared, so the relation the eval names is never measured. Concrete escape: a runner that stops consulting the dict and recomputes the path itself, e.g. `python=str(_venv_dir(_venv_root(data_dir), plugin_id) / "bin" / "python")`, produces two distinct strings each containing its own plugin id and passes all three assertions — while being exactly the "two sides compute the same path independently" drift this dossier exists to close. That recompute is silently wrong on the `auto_install=False` branch (plugins.py:320-321 returns `sys.executable` for every id), and no runner-level case exercises that branch. The fix shape is one line: capture `pythons = P.prepare_python_env(...)` (or spy on it) and assert `dict(seen) == {pid: pythons[pid] for pid in TWO_IDS}`.
-  source: measurement
+  ĐO TẬN TAY trên bản sao của cây này (cả hai phía đều XANH sai):
+  1) Thay `_remove_legacy_shared_venv(root, log)` ở `sdk/tongflow/engine/plugins.py:253` bằng `# TODO: re-enable _remove_legacy_shared_venv(root, log) later` → `bash scripts/plugins/check-venv-layout-pinned.sh --root <copy>` in `OK: ... both still remove the legacy shared venv`, rc=0.
+  2) Thay `removeLegacySharedVenv();` ở `src/lib/plugins/plugin-python-env.server.ts:229` bằng `// removeLegacySharedVenv(); disabled` → guard cũng in OK, rc=0.
+  Đây chính là thay đổi tái vũ trang vòng phá nhau mà guard tồn tại để chặn.
 
-- **Shape 3 — `assert pid in py` measures substring presence where the promise is "interpreter nằm trong venv của chính plugin đó"**
-  file: `sdk/tests/test_plugin_venv_layout.py:245`
-  severity: low
-  AC: AC-9
-  detail: E10's `expected` promises "mỗi giá trị nằm trong venv của chính plugin đó" — a containment relation between the returned interpreter path and `_venv_dir(root, pid)`. `test_returns_one_interpreter_per_plugin_not_one_for_all` asserts it as `assert pid in py` (245-246), a bare substring test on the whole path string. The file computes `root = P._venv_root(...)` and `_venv_dir` elsewhere but never joins them here, so any path that merely mentions the id passes: `/tmp/cache/oneflow-api-ffmpeg-shared/bin/python`, or a per-plugin venv relocated out from under `_venv_root` (the very root the shell guard pins), stays green. The two ids used happen not to be substrings of each other, so the check is not vacuous — but it is a weaker proposition than the one the eval states. `assert py == str(P._venv_python(P._venv_dir(root, pid)))` is the relation being claimed. The same substring form is repeated at line 389 in the runner test (see the finding above).
-  source: measurement
+  Chiều đỏ hiện có KHÔNG phân biệt được: `scripts/plugins/check-venv-layout-teeth.sh:48-49` (`c_py_call_drop` / `c_ts_call_drop`) xoá HẲN đoạn chữ (`s/.../pass/`, `s/.../;/`) chứ không comment nó ra, nên hai ca PASS đó chỉ chứng minh guard đỏ khi CHUỖI biến mất, không chứng minh guard đỏ khi LỜI GỌI biến mất. `evals.yaml` E5 khai hai ca này là «GIU dinh nghia xoa CHO GOI hai phia (lo hong vong 1)» — nhãn ấy mô tả một phép đo mạnh hơn phép đo thật.
 
-- **Shape 4 — assertion âm-tính-một-mình: TS unsafe-id cases use bare `.toThrow()` with no message pinned, while the Python twin pins it and documents why**
-  file: `src/lib/plugins/plugin-python-env.test.ts:57`
-  severity: low
-  AC: AC-10
-  detail: AC-10 is written as "đúng luật bên TS đã ép ở `venvDirFor`", so the TypeScript half of that rule is measured by this block. `it.each([...])("refuses %j", (bad) => { expect(() => venvDirFor(bad)).toThrow(); })` (54-59) accepts ANY thrown error. `venvDirFor` (plugin-python-env.server.ts:68-73) validates first and only then calls `VENV_ROOT()` → `dataDir()`; if a later change makes that resolution throw (this suite mutates `TONGFLOW_DATA_DIR` to a path under a regular file in the sibling describe at lines 113-119), all six cases stay green with the id validation entirely removed — the check cannot tell "rejected the id" from "crashed for an unrelated reason". The Python counterpart in this same package states that reasoning verbatim and pins the message (`assert "unsafe plugin id" in str(e.value)`, test_plugin_venv_layout.py:40-42) plus a positive control in the same test (47). Fix is symmetric: `.toThrow(/unsafe plugin id/)`. Note this block is pre-existing (unchanged by this diff) inside a file the diff modifies; it is the only measurement of the TS side of AC-10.
-  source: measurement
+  LƯU Ý phân biệt với nợ đã khai: `contract.md` §Out of scope đã rút AC-11 vì cùng lớp fail-open trên `ci.yml` (comment hoá step vẫn xanh), và rút AC-13 vì khẳng định âm-tính-một-mình. Ca này là chỗ THỨ BA của cùng lớp lỗi, nhưng nằm trên AC-4 — tiêu chí VẪN CÒN trong hợp đồng — và không được nêu trong Known limits.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Guard's CI-wiring assertion is fail-open on commented-out steps**
-  Người dùng thấy gì: Nếu ai vô tình tắt một bước kiểm tra trong quy trình CI bằng cách comment nó ra, công cụ canh gác vẫn báo "OK" thay vì cảnh báo — rủi ro này đã được ghi nhận là hạn chế đã biết và sản phẩm vẫn phát hành như hiện tại.
-  file: `scripts/plugins/check-venv-layout-pinned.sh`
-  severity: high
-  Đề xuất: known-limits
-
-- **Two runtimes share one venv but use different cache markers and different SDK install sources**
-  Người dùng thấy gì: Khi cả ứng dụng và luồng chạy workflow riêng đều chạm cùng một plugin, hệ thống có thể cài lại gói phần mềm nhiều lần không cần thiết, làm chậm việc chạy — chi phí này đã được chấp nhận như một hạn chế đã biết.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **No cross-process mutual exclusion on the now-shared per-plugin venv**
-  Người dùng thấy gì: Nếu một tác vụ đơn lẻ và một luồng công việc khác cùng chạm một plugin cùng lúc, việc cài đặt môi trường của plugin đó có thể xung đột và hỏng dở, khiến các tác vụ sau đó chạy plugin này báo lỗi khó hiểu.
-  file: `src/lib/plugin-executor/runners/generic.ts`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Engine caches the checkout SDK install on version alone and omits --upgrade**
-  Người dùng thấy gì: Trong môi trường phát triển chạy từ mã nguồn, nếu ai đó sửa danh sách thư viện của SDK mà quên tăng số phiên bản, môi trường cấp phát có thể vẫn dùng bản cũ và gây lỗi khó hiểu khi chạy plugin — đây là giới hạn đã biết của luồng phát triển nội bộ.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: low
-  Đề xuất: known-limits
-
-- **Guard's own CI-wiring assertion is fail-open: a commented-out step still passes**
-  Người dùng thấy gì: Nếu ai vô tình tắt một bước kiểm tra trong quy trình CI bằng cách comment nó ra, công cụ canh gác vẫn báo "OK" thay vì cảnh báo — rủi ro này đã được ghi nhận là hạn chế đã biết và sản phẩm vẫn phát hành như hiện tại.
-  file: `scripts/plugins/check-venv-layout-pinned.sh`
-  severity: high
-  Đề xuất: known-limits
-
-- **Unvalidated pluginId reaches git clone's destination path before the validation this diff adds**
-  Người dùng thấy gì: Một id plugin đặt tên cố ý xấu (ví dụ chứa "../") có thể khiến hệ thống tải mã nguồn plugin ra ngoài thư mục dành riêng cho plugin, trước khi các bước kiểm tra an toàn khác kịp chặn lại.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Both runtimes now write the same per-plugin venvs with divergent cache markers and no cross-process lock**
-  Người dùng thấy gì: Khi hai luồng chạy khác nhau cùng cấp phát môi trường cho cùng một plugin cùng lúc, chúng có thể ghi đè lẫn nhau và để lại một môi trường cài đặt dở dang, khiến tác vụ sau đó chạy plugin bị lỗi.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **sdk/README.md still documents the venv as shared after the layout change**
-  Người dùng thấy gì: Tài liệu sdk/README.md vẫn mô tả sai cách bố trí môi trường ảo dùng chung, có thể khiến người đọc tài liệu hiểu nhầm cấu trúc thư mục hiện tại.
+- **sdk/README.md vẫn quảng cáo "shared venv" — đúng cái model diff này xoá**
+  Người dùng thấy gì: Tài liệu hướng dẫn của SDK vẫn mô tả sai cách cấp phát môi trường Python (nói dùng chung một môi trường trong khi sản phẩm đã đổi sang mỗi plugin một môi trường riêng), có thể khiến người đọc tài liệu cấu hình nhầm.
   file: `sdk/README.md`
-  severity: low
+  severity: high
   Đề xuất: known-limits
 
-⚠ Cụm ngoài vùng phủ: 2/12 lỗi rơi vào file không bộ đo nào phủ (src/lib/plugin-executor/runners/generic.ts, sdk/README.md) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+- **Hai runtime nay dùng CHUNG thư mục venv nhưng mỗi bên một bộ marker cache riêng**
+  Người dùng thấy gì: Khi người dùng chuyển qua lại giữa chạy trên ứng dụng desktop và chạy dòng lệnh, hệ thống có thể âm thầm cài lại gói cho plugin nhiều lần hơn cần thiết, làm lần chạy đầu sau khi đổi cách dùng chậm hơn mong đợi.
+  file: `sdk/tongflow/engine/plugins.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Hai step guard mới vào job acceptance-gate nhưng không đăng ký trong GUARD_NEEDLES**
+  Người dùng thấy gì: Nếu sau này ai đó vô tình gỡ bỏ hai bước kiểm tra bố cục môi trường Python khỏi quy trình kiểm tra tự động, hệ thống cảnh báo phụ hiện có sẽ không phát hiện ra việc đó.
+  file: `.github/workflows/ci.yml`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Engine và app nay bất đồng về hành vi khi cấp phát venv hỏng; docs/plugins.md chỉ còn đúng cho một bên**
+  Người dùng thấy gì: Tài liệu hướng dẫn viết plugin mô tả một quy tắc xử lý lỗi cấp phát chung cho cả hai cách chạy, nhưng thực tế quy tắc đó nay chỉ đúng với một trong hai cách — có thể khiến người viết plugin hiểu nhầm điều gì xảy ra khi cài đặt thất bại.
+  file: `docs/plugins.md`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Engine preflight is now all-or-nothing: one plugin's venv failure aborts the whole workflow, including fully-cached runs and no-dependency plugins the TS twin deliberately excuses**
+  Người dùng thấy gì: Nếu một plugin bất kỳ trong quy trình gặp lỗi cài đặt, toàn bộ lượt chạy có thể dừng lại — kể cả khi kết quả cần dùng đã có sẵn trong bộ nhớ đệm và không cần cài thêm gì.
+  file: `sdk/tongflow/engine/plugins.py`
+  severity: medium
+  Đề xuất: known-limits
+
+- **The two new venv-layout guards are absent from GUARD_NEEDLES, so the meta-guard that exists to catch "a guard is not wired into CI" cannot see them being unwired**
+  Người dùng thấy gì: Nếu sau này ai đó vô tình gỡ bỏ hai bước kiểm tra bố cục môi trường Python khỏi quy trình kiểm tra tự động, hệ thống cảnh báo phụ hiện có sẽ không phát hiện ra việc đó.
+  file: `scripts/ci/check-gate-guards-job.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+⚠ Cụm ngoài vùng phủ: 4/7 lỗi rơi vào file không bộ đo nào phủ (sdk/README.md, .github/workflows/ci.yml, docs/plugins.md, scripts/ci/check-gate-guards-job.sh) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
