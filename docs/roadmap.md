@@ -140,7 +140,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 |---|---|---|---|---|---|
 | B1 | ★ | Hồ sơ kế hoạch + luật đóng băng + guard; STATUS.md, vision.md, roadmap; mở cơ hội của lát cắt | lat-cat-chung-minh | ✅ | hạng mục mới cuối cùng được nhận; vòng nội bộ, ngưỡng Không đo được |
 | B2 | ★ | Hạ cánh nhánh mở hoá b01: ba README, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ✅ | code có trước hợp đồng nên đi làn prototype keep; merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
-| B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, ADR Director trường kỳ về main, mục Làn D | director-wire-shape | ⬜ | T3 vì chạm src/db; soi Gate 1.5 đã qua chưa; director-v2 D1 D2 D4 đã park |
+| B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, [ADR-0013](adr/0013-director-truong-ky.md) về main, mục Làn D | director-wire-shape | ⬜ | T3 vì chạm src/db; soi Gate 1.5 đã qua chưa; director-v2 D1 D2 D4 đã park |
 | B4 | ★ | Engine dùng venv per-plugin như TS, bỏ fallback về sys.executable; SDK 0.2.20 và bump pin bốn plugin | hai-duong-chay-mot-venv | ⬜ | T3 vì chạm sdk, kèm train SDK; sau A6 |
 | B5 | ★ | Skill system v1: manifest tham số, template, orchestrator v1, nút skill, xem sửa kế hoạch; skill thứ hai giả lập không đụng engine | skill-system-v1 | ⬜ | T3 vì chạm src/app/api; dòng nền tảng |
 | B6 | ★ | Overlay chạy local (port khỏi Modal, cùng slot) kèm canvas 9:16 pad crop | overlay-chay-local | ⬜ | T2; sau A7 |
