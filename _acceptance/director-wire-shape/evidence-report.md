@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 6e1261ad41e5fe5009d0b2b3ef2ae237b86a70b4
+verified_commit: d6939560d2784fe505a01e1b65fa96c4d530ea94
 human_signoff: 
 ---
 
@@ -279,7 +279,45 @@ human_signoff:
 
 ## Known limits
 
+Nợ có tên theo luật trần vòng verify (CLAUDE.md, owner duyệt 08/09). Chi tiết từng mục ở
+`review-findings.md`; mục trong hợp đồng ở mục Amendment của `contract.md`.
+
+**Trong hợp đồng — hai mục, đều mức thấp:**
+
+- [thấp · AC-4] lượt chạy hỏng ghi sổ dưới một mã bịa tại chỗ, nên hàng sổ ấy không nối được với lượt cụ thể. Sửa đúng là thêm một trường vào kiểu trả về của lõi Director, chạm vùng ba vòng vừa đóng.
+- [thấp · AC-9] mã lỗi trả về cho canvas, turns và options đều là INVALID_PROMPT; tên trường vượt hạn có tính nhưng nằm ở một trường nội bộ chứ không trong thông điệp người đọc.
+
+**Phép đo tự nó — bảy mục.** Không mục nào làm sai hành vi sản phẩm, tất cả là chỗ phép đo hứa
+rộng hơn thứ nó thật sự kiểm:
+
+- [cao] hai script canh giấu bộ lọc tên ca ngay trong thân script, mà lọc không khớp thì thoát 0; bộ canh ô-đo-chạy-0-ca không nhìn thấy hai chỗ ấy vì chúng không khai lọc ra cấu hình.
+- [cao] E4 đo lời gọi hàm giả thay vì hàng thật trong sổ.
+- [cao] E16 tuyên bốn nhánh quyết định nhưng bộ lọc chỉ chạy ba; nhánh canvas rỗng không nằm trong lọc.
+- [cao] AC-1 khẳng định chuỗi nguồn có mặt trong khi lời hứa là quan hệ giữa các giá trị; fixture của nó viết tay đúng khuôn bên đọc.
+- [trung bình] AC-7 đo đối số truyền cho bộ dựng truy vấn giả, không đo giá trị cột thật.
+- [trung bình, thấp] bộ đo không-lọt-nhắc-ra-log đọc mã nguồn theo từng dòng nên lời gọi nhiều dòng lọt; bộ đo xuất khẩu bảng khẳng định chuỗi có mặt chứ không phải quan hệ.
+- [trung bình] mười khoá lệnh mới gọi `npx vitest` trong khi 71 khoá cũ đều dùng `pnpm vitest`, nên phiên bản không bị khoá theo lockfile.
+
+**Bộ đo vàng chạy tay — ba mục:** bốn kịch bản ghi cứng đường dẫn tuyệt đối tới một checkout
+khác, và chúng chép tay lược đồ kế hoạch thay vì nhập từ mã thật.
+
+**Chất lượng dữ liệu sổ sự kiện — bốn mục:** lượt hỏng ghi kind `generated` chứ không phải
+`failed`, nên có thể bị vá thành «đã nhận» về sau; `dslVersion` ghi số 0 giả vào cột không cho
+NULL; `attempts` rơi mất ở nhánh hỏng lần cuối dù đã tiêu hai lượt gọi mô hình; `options.useMemory`
+và phần tử `turns` vào thẳng cơ sở dữ liệu không qua kiểm ở biên.
+
 ## Ngoài hợp đồng
+
+Ba mục dưới đây là lỗi THẬT nằm NGOÀI phạm vi đã duyệt. Máy không tự sửa. Người quyết ở Cổng 2;
+chi tiết và khuyến nghị trong tin mời cổng.
+
+- [trung bình, nặng nhất về hệ quả] Khi việc dán kế hoạch lên canvas THẤT BẠI, máy khách vẫn báo là người dùng đã nhận hoặc đã thay thế. Người dùng thấy thông báo lỗi, canvas không đổi, nhưng sổ ghi «đã nhận». Vì luật một-lần, hàng sổ ấy không sửa lại được, nên chính con số tỉ lệ chấp nhận mà gói này sinh ra để đo bị thổi lên bởi những kế hoạch chưa bao giờ chạm canvas. Cách sửa nhỏ nhất: cho hàm dán trả về đúng hay sai và chỉ báo khi nó thành công.
+- [trung bình] `/api/director/feedback` không bọc lỗi cơ sở dữ liệu, nên hỏng sổ thoát ra ngoài phong bì lỗi mà chính tuyến ấy cam kết, và không có dòng log nào. Mọi tuyến khác trong kho đều bọc.
+- [trung bình] Hai script canh giấu bộ lọc tên ca trong thân script (xem Known limits) — máy đề xuất đưa lọc ra cấu hình như mười khoá kia đã làm.
+
+Máy đề xuất mở **một hợp đồng riêng** cho mục thứ nhất cùng lúc với mục AC-4 ở Known limits: cả
+hai đều là «chất lượng dữ liệu của sổ sự kiện», cần bộ đo riêng, và gói D0 hứa nền trạng thái
+phía máy chủ chứ không hứa độ chính xác của mọi nhánh ghi.
 
 ## Analyst
 
@@ -296,3 +334,7 @@ Round 1: code review flagged AC-7 as having no producer for `directorRunId` — 
 Round 2: all 13 machine evals (E1-E13) + 9 suite commands PASS, but code review confirms the same AC-7 gap is still present on the UPDATE branch (`src/app/api/workspace/save/route.ts:73`, `src/components/workspace/workflow-title-menu.tsx:160`) — no automated eval targets the update-existing-workflow path, so `failed_evals` stays empty even though AC-7 is not actually satisfied end-to-end; verdict REJECT pending a fix to the UPDATE branch and E14a/E14b remain UNCERTAIN pending fresh evidence.
 Round 3: all 13 machine evals (E1-E13) + 9 suite commands PASS on verified_commit 8c9a9e0 — AC-7 provenance coverage expanded 3→7 cases (`src/app/api/workspace/save/provenance.test.ts`), closing the UPDATE-branch gap round 2 flagged. E14a/E14b judge panel re-run fresh, both still UNCERTAIN — same missing-evidence class as round 2 (no fresh `run-baseline.mjs` run + `director_events` count delta for E14a; no real UI-session evidence for E14b). Verdict PENDING-JUDGMENT; this is round 3 of the 4 S4 rounds allowed for a T3 contract.
 Round 4: cap toi da 4 vong S4 cho T3 (CLAUDE.md, quyet dinh 08/09) — DAY LA VONG CUOI, khong con vong tu dong nao nua. E1-E13, E15, E16 carry-forward PASS (P1 — delta khong cham paths cua cac eval nay). E15 (AC-14) va E16 (AC-15) la hai o do MOI, thay cho hai muc Ngoai hop dong ma round 3 da neu ten (buoc "dang cho quyet" tieu mat luot va duy nhat; nut xac nhan ban hai ket cuc cho mot cu bam) — sau goi sua 08/09 bo bao cao "staged" khoi duong va va chan nut xac nhan ban hai ket cuc, E15/E16 do dieu do bang hop thoai Radix that trong jsdom. 9 lenh suite (preflight-verify-env, plan-freeze, build+typecheck, lint:check, pnpm test, sdk pytest, verify:plugins, gen:abi diff, fork-identity) deu xanh tren verified_commit 6e1261ad41e5fe5009d0b2b3ef2ae237b86a70b4. Baseline KHONG do lai round nay (P2 — evals.yaml khong doi tu lan baseline cuoi). E14a/E14b judge panel chay lai, ca ba lens moi item van UNCERTAIN — van thieu cung lop bang chung round 2/3 da neu (chua co lan chay run-baseline.mjs MOI + delta dem row director_events cho E14a; chua co bang chung phien UI THAT qua du ba nhanh cho E14b). Verdict PENDING-JUDGMENT. Theo luat tran vong verify (CLAUDE.md muc 6), cac finding con lai o vong nay (chi tiet trong review-findings.md — 1 trong-hop-dong AC-9, 12 ngoai-hop-dong) tro thanh no co ten: trong-hop-dong ghi vao Amendment cua contract.md, ngoai-hop-dong ghi vao Known limits — nguoi ky quyet dinh o Cong 2, khong co vong S4 thu nam de va tiep phep do.
+
+### Re-pin lần 1 — 2026-09-08, do hang so di kem 33->38 trong rang bo kiem o do, va dong B3 neu so hieu ADR-0013
+run_id: repin-20260908T071345Z-62406
+sha: d6939560d2784fe505a01e1b65fa96c4d530ea94 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0

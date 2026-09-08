@@ -182,6 +182,7 @@ sửa thêm ở vòng này:
 
 | AC | Mức | Điều còn lại | Vì sao nhận nợ |
 |---|---|---|---|
+| AC-9 | thấp | Mã lỗi cho canvas, turns và options đều là `INVALID_PROMPT`; tên trường vượt hạn nằm ở trường nội bộ `error.field` mà tuyến vứt bỏ, không nằm trong thông điệp người đọc | AC-9 hứa «thông điệp nêu ĐÚNG TÊN trường vượt hạn». Trường tên có được tính, và bộ đo khẳng định đúng nó, nên lời hứa đạt ở tầng dữ liệu nhưng chưa ở tầng thông điệp. Sửa là đổi chuỗi thông điệp của ba nhánh lỗi, chạm đúng vùng AC-8 khoá «giữ nguyên từng chữ» |
 | AC-4 | thấp | Lượt chạy HỎNG ghi sổ dưới một `runId` bịa tại chỗ (`crypto.randomUUID()` ở `route.ts`), nên hàng sổ của lượt hỏng không nối được với log, với một lần vá kết cục sau đó, hay với lượt thử lại | Nhánh thất bại của `DirectorResult` chưa mang `runId`; sửa đúng là thêm một trường vào kiểu trả về của lõi Director — chạm `src/lib/director/**`, tức mở lại vùng mà ba vòng vừa đóng. Hàng sổ vẫn được ghi và vẫn đếm được tỉ lệ hỏng; chỉ mất khả năng NỐI hàng ấy với lượt cụ thể |
 
 Ai nhận nợ này sửa ở gói D1 cùng lúc surface `attempts` cho nhánh hỏng — cả hai là cùng một

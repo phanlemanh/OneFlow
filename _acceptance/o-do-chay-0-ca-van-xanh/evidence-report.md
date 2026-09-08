@@ -7,7 +7,7 @@ reason:
 verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: d6939560d2784fe505a01e1b65fa96c4d530ea94
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -334,3 +334,7 @@ máy chung cho cả đợt, 8 ô đo bị chạm, cả 8 chạy lại và exit 0
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 2 — 2026-09-08, do hang so di kem 33->38 trong rang bo kiem o do, va dong B3 neu so hieu ADR-0013
+run_id: repin-20260908T071345Z-62406
+sha: d6939560d2784fe505a01e1b65fa96c4d530ea94 · suites: 9 lệnh exit 0 · evals: 17 eval máy exit 0
