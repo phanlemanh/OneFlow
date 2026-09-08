@@ -3,10 +3,10 @@ schema_version: 1
 slug: director-wire-shape
 feature: Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0 của ADR-0013)
 owner: Manh
-stage: scheduled
-verdict:
-decided_by:
-decided_at:
+stage: held
+verdict: release
+decided_by: Phan Le Manh
+decided_at: 2026-09-08T08:13:32Z
 ---
 
 # Phiên nghiệm thu — director-wire-shape (Cổng Giá trị)
@@ -102,5 +102,22 @@ Chấm kín và verdict vẫn là việc của người — máy chỉ dọn bà
 
 ## Quyết định Cổng Giá trị
 
-- **verdict = …** Căn cứ: …
-- Bước kế: …
+- **verdict = release** (Phan Le Manh, 2026-09-08). Căn cứ, theo thứ tự sức nặng:
+  1. **Ngưỡng Cổng 0 đạt trọn.** 5 prompt tiếng Việt → 5 row, 0 mồ côi, và không một phần
+     tử giao diện mới nào hiện ra. Đúng câu đã khai lúc ký: *người dùng không thấy gì thay
+     đổi, nhưng máy đã bắt đầu nhớ.*
+  2. **Cả hai ngưỡng CHẾT đo được đều không chạm.** Không trường response nào bị đổi;
+     migration sống trên db người dùng thật với 52 task còn nguyên.
+  3. **Chỗ E14b hoãn lại nay có bằng chứng sống.** Ba nhánh giao diện ghi đúng một kết cục,
+     đối chứng ở tầng mạng khớp một-một.
+- **Nợ có tên mà chữ ký này chấp nhận:** bộ golden 30 prompt chưa tái lập được
+  (`frozen-config.json` lỗi thời), nên **SỐNG-5** (tỉ lệ ≥ 86,7%) và **CHẾT-3** (p95 so mốc
+  75,1s) đi ra khỏi phiên **KHÔNG CÓ SỐ**. Người ký biết và vẫn giao. Ai dựng lại cấu hình
+  ghim thì đo nốt hai thước ấy; tới lúc đó chúng là lỗ hổng đã khai, không phải lỗ hổng bị
+  quên.
+- **Cờ vàng giữ nguyên trong hồ sơ:** không có Lái-thử Người-lạ, và khối «Chấm kín» trống —
+  phiên này không mời người dự. Ván lái là máy tự bấm, chứng minh đường dây chạy chứ không
+  chứng minh người lạ hiểu được.
+- Bước kế: nghi thức phát hành của repo. Gói D0 đã ở trên `main` (PR #111, merge `a512214`);
+  không có installer hay bản phát hành nào cần cắt cho gói này, nên «giao rộng» ở đây nghĩa
+  là hạng mục đóng và làn D mở tiếp sang D1/D2/D4 theo ADR-0013.
