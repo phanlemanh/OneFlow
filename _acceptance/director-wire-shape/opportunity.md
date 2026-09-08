@@ -192,3 +192,29 @@ là để lại một mìn: nhánh nào đổi transport trước mà chưa có 
 - HMAC/chữ ký plan — rủi ro chấp nhận thành văn tại ADR-0013 QĐ 5, chỉ mở lại theo điều
   kiện xét lại ghi ở đó. (bác 26/08)
 - Bảng `memories` + UI CRUD — wire-shape #5, gói riêng sau khi events chạy. (tách 26/08)
+
+## Kết quả phiên nghiệm thu (Cổng Giá trị, 08/09/2026)
+
+*(Hồ sơ đầy đủ: [`uat-session.md`](uat-session.md). **verdict = release**, Phan Le Manh.)*
+
+Đo trên `main` @ `500dc98`, db người dùng thật `data/tongflow.db`:
+
+| Thước đã khai | Số đo được | Kết |
+|---|---|---|
+| Ngưỡng Cổng 0: 5 prompt, UI không đổi, `count(*)` ≥ 5 | 5 prompt tiếng Việt → **5 row, 0 mồ côi**; không phần tử giao diện mới nào | SỐNG |
+| SỐNG-2 `pnpm test` xanh, expect cũ không đổi | 970 pass · exit 0 · 240 expect cũ nguyên | SỐNG |
+| SỐNG-3 / CHẾT-2 migrator trên db cũ | migration tự chạy trên db 4 bảng chạm lần cuối 02/09; `director_events` + 2 index sinh ra, **52 task cũ còn nguyên** | SỐNG |
+| CHẾT-1 đổi trường response cũ | không trường nào bị đổi; `planJson`/`runId`/`dslVersion` cộng thêm | KHÔNG CHẾT |
+| SỐNG-4 bộ golden 30 | **CHƯA ĐO** — `frozen-config.json` lỗi thời. Vế mồ côi đo rời: 0/5 = 0% | MỘT NỬA |
+| SỐNG-5 tỉ lệ ≥ 86,7% · CHẾT-3 p95 vs 75,1s | **CHƯA ĐO** — cùng đường đo với bộ golden | trống |
+
+**Vào retro, hai điều đáng nhớ hơn cả các con số:**
+
+1. **Ngưỡng viết ở Cổng Đáng đã cứu phiên này.** Câu «`count(*)` ≥ 5» viết ngày 26/08 là thứ
+   duy nhất biến một cảm giác («hình như nó ghi rồi») thành một phép đo cãi được. Ngưỡng nào
+   không quy được về một câu truy vấn thì phiên nghiệm thu không dùng được.
+2. **Hai thước chết vì hạ tầng đo, không vì sản phẩm.** `frozen-config.json` lỗi thời làm
+   SỐNG-5 và CHẾT-3 ra khỏi phiên không có số. Bộ đo ghim cũng cần bảo trì như mã sản phẩm;
+   ghim rồi bỏ đó thì tới lúc cần nó đã hết hạn. Xem thêm nợ E14a ở
+   [`contract.md`](contract.md), mục Amendment.
+
