@@ -10,8 +10,8 @@ flowchart TD
   GD --> XL["Xếp lại sau<br/>3 việc"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
-  GP --> DL["Đang làm<br/>1 việc"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>35 việc"]
+  GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
+  GB --> DG["Đã giao<br/>36 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>3 việc"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
 ```
@@ -27,7 +27,6 @@ flowchart TD
 
 ## Đang làm
 
-- Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0) (`director-wire-shape`)
 
 ## Đã giao — chờ phiên nghiệm thu
 
@@ -37,6 +36,7 @@ flowchart TD
 
 ## Đã giao
 
+- Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0) (`director-wire-shape`)
 - Node nạp-từ-kho — tìm trong media-library và nạp một asset về kho file thành file_key (`add-media-library`)
 - BYO-key onboarding — first run reaches a real result before asking for a key (`byo-key-onboarding`)
 - Cache L1 — node_fingerprint() and digest_form(), pure key computation (`cache-l1-fingerprint`)

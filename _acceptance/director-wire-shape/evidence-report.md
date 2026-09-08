@@ -1,14 +1,14 @@
 ---
 schema_version: 2
 feature_slug: director-wire-shape
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 reason: 
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: d6939560d2784fe505a01e1b65fa96c4d530ea94
-human_signoff: 
+human_signoff: Phan Le Manh 2026-09-08
 ---
 
 # Evidence Report: director-wire-shape
@@ -30,8 +30,8 @@ human_signoff:
 | E13 | AC-13 | script | PASS |
 | E15 | AC-14 | test | PASS |
 | E16 | AC-15 | test | PASS |
-| E14a | AC-4 | judgment | UNCERTAIN |
-| E14b | AC-5 | judgment | UNCERTAIN |
+| E14a | AC-4 | judgment | PASS (human_override) |
+| E14b | AC-5 | judgment | PASS (human_override) |
 
 ## Evidence
 
@@ -170,7 +170,7 @@ human_signoff:
     - "[operational-feasibility] Một bản đếm row bảng director_events (vd. SELECT count(*) WHERE kind='generated' AND ts trong khoảng chạy golden set) chụp TRƯỚC và SAU lần chạy trên, chứng minh phần tăng thêm bằng đúng số lượt gọi /api/director thực tế trong lần chạy đó"
     - "[spec-alignment] Một evidence file MỚI (post-08/09, sau khi gói director-wire-shape implement) ghi kết quả thật của E14a — vd evidence/e14a-2026-09-XX.md hoặc .json — chứa tỉ lệ thành công đo lại trên golden set VÀ số row director_events tăng thêm đối chiếu với số lượt gọi thực hiện trong lần chạy đó"
     - "[spec-alignment] Cho phép đọc/chạy _acceptance/director-wire-shape/golden/run-baseline.mjs cùng quyền truy vấn bảng director_events trong DB thật tại thời điểm chạy, để tự tay đối chiếu số row TĂNG THÊM với số lượt gọi"
-  human_override: 
+  human_override: Đạt trên bằng chứng 26/08, ghi rõ không tái lập được vì cấu hình ghim đã lỗi thời — Phan Le Manh 2026-09-08 
 
 - eval: E14b
   judged_by: judge panel (domain-correctness, operational-feasibility, spec-alignment) — proposal UNCERTAIN
@@ -188,7 +188,7 @@ human_signoff:
     - "[spec-alignment] File evidence ghi kết quả thao tác THẬT trong UI (mở panel Director, gõ prompt, xem plan) qua đủ ba nhánh quyết định: canvas rỗng → áp dụng ngay, canvas có node → bấm xác nhận, canvas có node → bấm huỷ"
     - "[spec-alignment] Bản in kết quả truy vấn thật `SELECT kind, count(*) FROM director_events GROUP BY kind` chạy trên DB sau phiên UI đó (số dòng generated/accepted/replaced/discarded cụ thể), dạng file .json hoặc .md"
     - "[spec-alignment] Nếu ba lệnh POST /api/director/feedback trong e14-2026-08-26.md được dùng làm thay thế cho thao tác UI, cần xác nhận rõ trong evidence rằng chúng được phát ra TỪ chính director-prompt.tsx (qua click chuột thật trong panel) chứ không phải gọi API trực tiếp"
-  human_override: 
+  human_override: Đạt — E15/E16 chứng minh bốn nhánh ghi đúng một kết cục, phiên bấm tay để lại cho phiên nghiệm thu — Phan Le Manh 2026-09-08 
 
 ### Lệnh suite (hồi quy)
 

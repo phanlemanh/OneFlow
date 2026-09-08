@@ -5,7 +5,7 @@ slug: director-wire-shape
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api, db]
-status: implemented
+status: signed-off
 approved_by: Phan Le Manh
 approved_at: 2026-09-08
 time_human_minutes: {gate1: 15, gate2: 0}
@@ -130,6 +130,25 @@ nếu chỉ client ghi thì mọi lượt người dùng bỏ giữa chừng bi�
   tiêu chí nghiệm thu của chính nó. (tách 26/08)
 
 ## Notes
+
+**Known limits — người ký nhận tại Cổng 2 (08/09/2026, Phan Le Manh).** Mười mục ngoài hợp
+đồng dưới đây ship như hiện trạng; chi tiết từng mục ở `review-findings.md` và mục Known limits
+của `evidence-report.md`:
+
+- Bộ răng canh bộ kiểm ô-đo ghim hằng số đi kèm — đã sửa trong chính gói này, giữ lại làm ghi chú.
+- Hai script canh giấu bộ lọc tên ca trong thân script, nên bộ canh ô-đo-chạy-0-ca không thấy.
+- E4 đo lời gọi hàm giả thay vì hàng thật trong sổ; E5 đo hàm quyết định thuần, không đo endpoint.
+- E16 tuyên bốn nhánh nhưng bộ lọc chỉ chạy ba; nhánh canvas rỗng ngoài lọc.
+- AC-1 khẳng định chuỗi nguồn có mặt thay vì quan hệ giữa các giá trị; fixture viết tay đúng khuôn bên đọc.
+- AC-7 đo đối số truyền cho bộ dựng truy vấn giả, không đo giá trị cột thật.
+- Bộ đo không-lọt-nhắc-ra-log đọc mã nguồn theo dòng nên lời gọi nhiều dòng lọt; bộ đo xuất khẩu bảng chỉ khẳng định chuỗi có mặt.
+- Bốn kịch bản đo vàng ghi cứng đường dẫn tuyệt đối tới một checkout khác và chép tay lược đồ kế hoạch.
+- Mười khoá lệnh mới gọi `npx vitest` trong khi 71 khoá cũ dùng `pnpm vitest`, nên không khoá theo lockfile.
+- `attempts` rơi mất ở nhánh hỏng lần cuối; `options.useMemory` và phần tử `turns` vào cơ sở dữ liệu không qua kiểm ở biên.
+
+**Hai mục chuyển thành hợp đồng mới**, không sửa trong gói này: máy khách báo «đã nhận» khi việc
+dán kế hoạch thất bại, và tuyến phản hồi kết cục không bọc lỗi cơ sở dữ liệu. Cả hai là chất
+lượng dữ liệu của sổ sự kiện, cần bộ đo riêng.
 
 **Bản sửa đi kèm, không tách:** `src/lib/director/dsl.ts:46` đổi
 `z.discriminatedUnion("kind", …)` → `z.union([…])`. EVAL-3 26/08 chứng minh `oneOf` bị OpenAI
