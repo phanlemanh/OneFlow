@@ -90,19 +90,16 @@ Thiết kế đầy đủ, gồm quét không gian tiêu chí: [`docs/superpower
   chấm, hoặc rỗng), When engine tính thư mục venv cho nó, Then nó **từ chối** bằng lỗi
   có tên và không tạo thư mục nào ngoài gốc — đúng luật bên TS đã ép ở `venvDirFor`.
 
-### F. Nâng phạm vi tại Cổng 2 vòng 2 (owner duyệt 08/09)
+### F. Nâng phạm vi tại Cổng 2 vòng 2, rồi thu lại sau vòng 4
 
-Ba tiêu chí dưới đây sinh ra từ ba mục ngoài hợp đồng mà owner chọn **sửa ngay**
-thay vì ghi Known limits. Chúng thừa nhận một điều: sau vòng 2, AC-3 và AC-4
-được *khẳng định* chứ chưa được *chứng minh*.
+Vòng 2 thêm ba tiêu chí vì hai tiêu chí về bố cục khi ấy được *khẳng định* chứ
+chưa được *chứng minh*. Sau vòng cuối, owner rút hai trong ba (09/09): bằng chứng
+cho thấy chính chúng là phép đo không có răng, và ký chúng là ký hai dòng nói
+dối. Lý do đo được ghi ở `## Out of scope`.
 
-- AC-11: Given cặp lệnh kiểm bố cục venv đã tồn tại, When một PR bất kỳ chạy CI,
-  Then cả `check-venv-layout-pinned.sh` lẫn `check-venv-layout-teeth.sh` **đều chạy**
-  như một bước của job `acceptance-gate` trong `.github/workflows/ci.yml`. Trước
-  vòng 3 chúng chỉ được gọi từ `_acceptance/config.yaml`, tức chỉ chạy trong vòng
-  verify của chính hồ sơ này — một lệnh kiểm không làm đỏ được PR tương lai thì
-  không mua được điều AC-4 tồn tại để mua. Kho đã trả giá cho đúng lỗi này một
-  lần: xem `scripts/ci/check-gate-guards-job.sh` dòng 6.
+Tiêu chí còn lại dưới đây ở lại, vì chiều đỏ của nó đã đo tận tay: đổi
+`venvDirFor` thêm một đoạn tiền tố thì ô đo đỏ và in cả hai đường dẫn.
+
 - AC-12: **(cross-layer)** Given manifest bố cục venv, When hai runtime đọc nó, Then nó
   **biểu diễn được** ánh xạ id → thư mục — `relative_dir` lấy từ hàm tính đường dẫn
   chứ không lấy lại từ tên thư mục đã quan sát — và ca thử bên TypeScript **gọi
@@ -110,10 +107,6 @@ thay vì ghi Known limits. Chúng thừa nhận một điều: sau vòng 2, AC-3
   `venvDirFor` thêm một đoạn tiền tố thì ô đo đỏ. Trước vòng 3, bên sinh lấy cả
   `plugin_id` lẫn `relative_dir` từ cùng một `p.name` nên ánh xạ lệch là điều
   **không biểu diễn được**, và bên đọc chưa từng chạm hàm nắm ánh xạ ấy.
-- AC-13: Given chú thích đầu module `plugins.py`, When ai đó đọc để biết hai runtime
-  thoả thuận gì, Then nó **không** còn mô tả mô hình venv chung đã bị gỡ, và lệnh
-  kiểm ở AC-4 làm đỏ khi nó tả sai. Chú thích đầu file chính là vật mà hai bên lẽ
-  ra thoả thuận qua — để nó nói dối là dựng lại cùng một cú trôi ở tầng trên.
 
 ## Trần vòng verify (khai TRƯỚC khi vòng chạy, CLAUDE.md mục 6)
 
@@ -193,6 +186,18 @@ thật trong kho hoặc từ chân ngành có tên.
   nhánh này là breaking change của gói đã trên PyPI.
 - **Đưa bố cục ra file khai báo cho cả hai runtime đọc.** Sạch về nguyên lý nhưng
   thêm một vật lúc chạy trên bề mặt T3, cho hai đoạn đường dẫn. YAGNI.
+- **Rút khỏi phạm vi sau vòng 4 (09/09): lời hứa lệnh kiểm chạy trong CI.** Vòng cuối đo
+  được: chú thích hoá hai step trong `ci.yml` bằng `#` thì guard vẫn in OK và thoát
+  0, vì nó `grep` file thô chứ không lọc theo dòng `run:` của một step thật. Đó là
+  lần thứ ba của lớp fail-open trong hồ sơ này. Hai step **vẫn ở lại** trong
+  `ci.yml` như một thay đổi thường, và khẳng định trong guard vẫn ở lại như một
+  lớp phòng hờ — nhưng nó **không còn là tiêu chí nghiệm thu**, vì nó không đo
+  được điều nó tuyên. Kho đã có cách đúng ở `scripts/ci/check-gate-guards-job.sh`
+  (strip về dòng `run:` trước khi khớp); dùng nó là việc của một hồ sơ khác.
+- **Rút khỏi phạm vi sau vòng 4 (09/09): lời hứa guard canh được chú thích đầu module.**
+  Ba chỗ chú thích **đã sửa và ở lại**. Điều bị rút là lời hứa rằng guard canh
+  được nó: guard chỉ cấm một cụm chữ, không hề đối chứng dương rằng mô tả đúng
+  còn đó — khẳng định âm-tính-một-mình, đúng lớp lỗi hồ sơ này khai là kẻ thù.
 - **Đo thời gian cài lần đầu.** Cô lập đổi lấy một bản SDK mỗi venv; giá ấy ADR-0011
   đã chấp nhận từ 07/08, không mở lại ở đây.
 
