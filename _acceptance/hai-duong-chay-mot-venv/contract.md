@@ -129,6 +129,16 @@ Lý do khai ở đây thay vì để mặc định: gói `mo-hoa-b01` tốn 8 v�
 chỉ vá phép đo của phép đo. Chính hồ sơ này chọn phương án guard, tức mở thêm một
 bề mặt dễ sinh vòng xoáy ấy.
 
+### Vòng 4 là VÒNG CUỐI — khai 09/09 trước khi dispatch
+
+Owner chọn lối «ship với giới hạn đã biết» sau khi luật chặn xoáy được áp ở vòng 3
+(hai vòng sửa cùng sinh lớp FAIL-OPEN). Vòng 4 sửa **đúng một khuyết điểm**: khẳng
+định AC-11 trong guard tự tắt khi `ci.yml` vắng. Kèm một ca răng cho chính đường ấy,
+và đối chiếu lại `expected` của E5/E8 cho khớp phép đo thật.
+
+Mọi finding sống sót vòng 4 thành **nợ có tên**: trong hợp đồng → mục Amendment
+dưới đây; ngoài hợp đồng → Known limits ở `## Notes`. **Không có vòng thứ năm.**
+
 ## Coverage
 
 Quét bằng `morphological-scan`, trục dựng từ đầu (preset `test-matrix` không khớp:
