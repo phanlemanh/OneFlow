@@ -57,8 +57,18 @@ fi
 # A definition alone proves nothing: round 1 found that grepping the NAME stays
 # green when only the CALL SITE is deleted, which is the change that actually
 # re-arms the cycle. Demand both, on both sides.
-py_def=$(grep -cE '^[[:space:]]*def _remove_legacy_shared_venv\(' "$PY" || true)
-py_call=$(grep -cE '_remove_legacy_shared_venv\(' "$PY" || true)
+# Strip COMMENT lines before counting. Round 6 measured the hole: the comment a
+# few lines above ("only the CALL SITE is deleted") was itself counted as a call
+# site, so deleting the real call while leaving that comment kept the guard
+# green. Counting a mention where the promise is "a live call" is the same
+# measure-the-easy-proxy shape this guard was written to catch elsewhere.
+# Strip inline comments too, not just whole-line ones: round 6's teeth case
+# proved a trailing `# _remove_legacy_shared_venv(...)` still counted. Cutting at
+# the first `#` can also cut a `#` inside a string literal — that direction is
+# safe, because it can only LOWER the count and make the guard fail closed.
+py_code=$(sed 's/#.*//' "$PY" || true)
+py_def=$(printf '%s\n' "$py_code" | grep -cE '^[[:space:]]*def _remove_legacy_shared_venv\(' || true)
+py_call=$(printf '%s\n' "$py_code" | grep -cE '_remove_legacy_shared_venv\(' || true)
 if [ "$py_def" -lt 1 ] || [ "$py_call" -lt 2 ]; then
     echo "FAIL: the PYTHON side lost its legacy-shared-venv removal" >&2
     echo "      definitions=$py_def call sites=$((py_call - py_def)) — need both" >&2
@@ -66,8 +76,10 @@ if [ "$py_def" -lt 1 ] || [ "$py_call" -lt 2 ]; then
     exit 1
 fi
 
-ts_def=$(grep -cE 'function removeLegacySharedVenv\(' "$TS" || true)
-ts_call=$(grep -cE 'removeLegacySharedVenv\(' "$TS" || true)
+# Same on the TypeScript side: strip `//` and `*` comment lines first.
+ts_code=$(sed -E 's#//.*##; s#^[[:space:]]*\*.*##' "$TS" || true)
+ts_def=$(printf '%s\n' "$ts_code" | grep -cE 'function removeLegacySharedVenv\(' || true)
+ts_call=$(printf '%s\n' "$ts_code" | grep -cE 'removeLegacySharedVenv\(' || true)
 if [ "$ts_def" -lt 1 ] || [ "$ts_call" -lt 2 ]; then
     echo "FAIL: the TYPESCRIPT side lost its legacy-shared-venv removal" >&2
     echo "      definitions=$ts_def call sites=$((ts_call - ts_def)) — need both" >&2

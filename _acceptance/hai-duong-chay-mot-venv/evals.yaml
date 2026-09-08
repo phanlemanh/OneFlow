@@ -75,7 +75,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_teeth
     paths: ["scripts/plugins/check-venv-layout-teeth.sh", "scripts/plugins/check-venv-layout-pinned.sh"]
-    expected: "exit 0; MUOI HAI ca xao tron tren BAN SAO, guard phai DO tung ca voi thong diep ghim khac nhau: doi duong dan hai phia; xoa TEN ham don hai phia; XOA HAN hang hai phia (chieu fail-open); GIU dinh nghia xoa CHO GOI hai phia (lo hong vong 1); dat lai mo ta cu vao chu thich va tieu de muc (AC-13); go step CI; va XOA HAN ci.yml (lo hong vong 3 — khang dinh AC-11 tung tu tat khi khong co CI de nhin). In 12/12 PASS va thoat 0; kiem CA ma thoat LAN dong in"
+    expected: "exit 0; MUOI BA ca xao tron tren BAN SAO, guard phai DO tung ca voi thong diep ghim: doi duong dan hai phia; xoa TEN ham don hai phia; XOA HAN hang hai phia (fail-open); GIU dinh nghia xoa CHO GOI hai phia; dat lai mo ta cu (hai ca, tieu chi da rut nhung ca van chay); go step CI va XOA HAN ci.yml (hai ca, tieu chi da rut nhung ca van chay); va ca 13 — XOA CHO GOI THAT nhung GIU chu thich nhac ten ham, lo hong vong 6: guard dem chu thich la cho goi. In 13/13 PASS va thoat 0; kiem CA ma thoat LAN dong in"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- B. Duong lay SDK ----------

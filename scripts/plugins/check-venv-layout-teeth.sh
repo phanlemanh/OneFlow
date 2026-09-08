@@ -54,6 +54,9 @@ c_py_banner_stale() { perl -pi -e 's/^# --- per-plugin venv/# --- shared venv/' 
 c_ci_drop()         { perl -pi -e 's{run: bash scripts/plugins/check-venv-layout-pinned.sh}{run: true}' "$1/$CI_REL"; }
 # Round 3: the assertion above used to evaporate when ci.yml was absent.
 c_ci_missing()      { rm -f "$1/$CI_REL"; }
+# Round 6: the real call was deleted while a COMMENT mentioning the function
+# stayed, and the count-based check read the comment as a call site.
+c_py_call_comment() { perl -pi -e 's/^(\s*)_remove_legacy_shared_venv\(root, log\)/$1pass  # _remove_legacy_shared_venv(root, log)/' "$1/$PY_REL"; }
 
 run_case "python-value-changed" "the two runtimes disagree" c_py_value
 run_case "ts-value-changed"     "the two runtimes disagree" c_ts_value
@@ -67,6 +70,7 @@ run_case "docstring-stale"      "still says it provisions a shared venv" c_py_do
 run_case "banner-stale"         "still reads '--- shared venv'" c_py_banner_stale
 run_case "ci-step-dropped"      "is not run by .github/workflows/ci.yml" c_ci_drop
 run_case "ci-file-missing"      "ci.yml not found at" c_ci_missing
+run_case "call-gone-comment-stays" "PYTHON side lost its legacy-shared-venv removal" c_py_call_comment
 
-echo "$pass/12 PASS"
-[ "$fail" -eq 0 ] && [ "$pass" -eq 12 ] || exit 1
+echo "$pass/13 PASS"
+[ "$fail" -eq 0 ] && [ "$pass" -eq 13 ] || exit 1
