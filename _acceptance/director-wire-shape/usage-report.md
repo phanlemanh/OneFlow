@@ -189,3 +189,56 @@
 - **claude-opus-5**: 3 agent · 76 calls · out 6,325 · in 152 · cache_read 9,197,629 · cache_create 388,807
 - **claude-haiku-4-5-20251001**: 22 agent · 44 calls · out 3,498 · in 396 · cache_read 1,880,374 · cache_create 763,734
 
+### S4 round 4 — wf_042bdde3-ab7 (43 agent, 60,607 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| triage | claude-sonnet-5 | 2 | 21,313 | 4 | 94,205 | 244 |
+| synthesize:report | claude-sonnet-5 | 4 | 7,567 | 8 | 363,408 | 359 |
+| judge:E14b:domain-correctness | claude-sonnet-5 | 2 | 3,048 | 4 | 122,097 | 42 |
+| review:bugs | claude-opus-5 | 33 | 2,998 | 66 | 4,110,491 | 414 |
+| review:conventions | claude-opus-5 | 31 | 2,752 | 62 | 3,597,509 | 348 |
+| refute:route.ts | claude-sonnet-5 | 13 | 2,440 | 26 | 1,229,235 | 141 |
+| refute:route.ts | claude-sonnet-5 | 18 | 2,346 | 36 | 1,747,789 | 165 |
+| refute:provenance.test.ts | claude-sonnet-5 | 9 | 2,075 | 18 | 779,976 | 68 |
+| refute:dws-wire-returns-plan.sh | claude-sonnet-5 | 10 | 1,799 | 20 | 912,024 | 93 |
+| refute:route.ts | claude-sonnet-5 | 22 | 1,772 | 44 | 2,072,072 | 185 |
+| refute:config.yaml | claude-sonnet-5 | 22 | 1,673 | 44 | 2,427,787 | 145 |
+| refute:director-core.ts | claude-sonnet-5 | 15 | 1,431 | 30 | 1,374,622 | 110 |
+| refute:director-events.test.ts | claude-sonnet-5 | 5 | 1,215 | 10 | 395,795 | 60 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 16 | 1,155 | 32 | 1,601,121 | 176 |
+| refute:eval3-direct-3providers.mjs | claude-sonnet-5 | 8 | 1,092 | 16 | 705,076 | 87 |
+| judge:E14a:spec-alignment | claude-sonnet-5 | 2 | 998 | 4 | 122,102 | 42 |
+| review:bugs | claude-opus-5 | 18 | 817 | 36 | 1,929,066 | 183 |
+| capture:provenance | claude-sonnet-5 | 2 | 739 | 4 | 83,951 | 21 |
+| refute:dws-expect-count.sh | claude-sonnet-5 | 10 | 618 | 20 | 860,277 | 75 |
+| machine:bash scripts/fork/check-fork-identity.sh | claude-haiku-4-5-20251001 | 2 | 515 | 18 | 86,759 | 13 |
+| refute:check-eval-filters-teeth.sh | claude-sonnet-5 | 11 | 493 | 22 | 990,181 | 92 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 404 | 18 | 86,743 | 31 |
+| review:measurement | claude-opus-5 | 18 | 337 | 36 | 1,811,756 | 185 |
+| refute:request-body.ts | claude-sonnet-5 | 13 | 330 | 26 | 1,172,989 | 99 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 9 | 218 | 18 | 772,057 | 68 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 180 | 18 | 86,747 | 11 |
+| review:conventions | claude-opus-5 | 13 | 99 | 26 | 1,226,835 | 185 |
+| review:measurement | claude-opus-5 | 23 | 77 | 46 | 2,869,657 | 401 |
+| refute:config.yaml | claude-sonnet-5 | 11 | 58 | 22 | 960,651 | 83 |
+| judge:E14b:operational-feasibility | claude-sonnet-5 | 2 | 8 | 4 | 122,099 | 35 |
+| judge:E14a:domain-correctness | claude-sonnet-5 | 2 | 7 | 4 | 122,102 | 48 |
+| judge:E14b:spec-alignment | claude-sonnet-5 | 2 | 7 | 4 | 122,097 | 41 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,784 | 16 |
+| judge:E14a:operational-feasibility | claude-sonnet-5 | 2 | 5 | 4 | 84,656 | 41 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 4 | 18 | 86,747 | 13 |
+| machine:bash scripts/acceptance/preflight-verify | claude-haiku-4-5-20251001 | 2 | 4 | 18 | 58,265 | 15 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 4 | 18 | 86,755 | 67 |
+| machine:node scripts/roadmap/check-plan-freeze.m | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,762 | 12 |
+| machine:cd sdk && . ../scripts/lib/sdk-version.s | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,830 | 26 |
+| review:measurement | <synthetic> | 1 | 0 | 0 | 0 | 185 |
+| capture:provenance | <synthetic> | 1 | 0 | 0 | 0 | 0 |
+| review:bugs | <synthetic> | 1 | 0 | 0 | 0 | 183 |
+| review:conventions | <synthetic> | 1 | 0 | 0 | 0 | 185 |
+
+- **claude-sonnet-5**: 24 agent · 212 calls · out 52,407 · in 424 · cache_read 19,238,369 · cache_create 1,880,826
+- **claude-opus-5**: 6 agent · 136 calls · out 7,080 · in 272 · cache_read 15,545,314 · cache_create 711,170
+- **claude-haiku-4-5-20251001**: 9 agent · 18 calls · out 1,120 · in 162 · cache_read 752,392 · cache_create 333,986
+- **<synthetic>**: 4 agent · 4 calls · out 0 · in 0 · cache_read 0 · cache_create 0
+
