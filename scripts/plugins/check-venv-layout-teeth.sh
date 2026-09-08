@@ -52,6 +52,8 @@ c_py_doc_stale()    { perl -pi -e 's/provision ONE VENV PER PLUGIN/provision a s
 c_py_banner_stale() { perl -pi -e 's/^# --- per-plugin venv/# --- shared venv/' "$1/$PY_REL"; }
 # AC-11: unwire the guard from CI and it must notice its own absence.
 c_ci_drop()         { perl -pi -e 's{run: bash scripts/plugins/check-venv-layout-pinned.sh}{run: true}' "$1/$CI_REL"; }
+# Round 3: the assertion above used to evaporate when ci.yml was absent.
+c_ci_missing()      { rm -f "$1/$CI_REL"; }
 
 run_case "python-value-changed" "the two runtimes disagree" c_py_value
 run_case "ts-value-changed"     "the two runtimes disagree" c_ts_value
@@ -64,6 +66,7 @@ run_case "ts-call-dropped"      "TYPESCRIPT side lost its legacy-shared-venv rem
 run_case "docstring-stale"      "still says it provisions a shared venv" c_py_doc_stale
 run_case "banner-stale"         "still reads '--- shared venv'" c_py_banner_stale
 run_case "ci-step-dropped"      "is not run by .github/workflows/ci.yml" c_ci_drop
+run_case "ci-file-missing"      "ci.yml not found at" c_ci_missing
 
-echo "$pass/11 PASS"
-[ "$fail" -eq 0 ] && [ "$pass" -eq 11 ] || exit 1
+echo "$pass/12 PASS"
+[ "$fail" -eq 0 ] && [ "$pass" -eq 12 ] || exit 1

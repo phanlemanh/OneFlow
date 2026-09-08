@@ -98,17 +98,26 @@ fi
 # scripts/ci/check-gate-guards-job.sh:6 records that the acceptance gate's own
 # two drift guards had ZERO references in ci.yml and PRODUCT-MAP.md drifted by
 # four slugs before anyone noticed. Assert our own wiring.
+# FAIL-CLOSED, and round 3 caught this line being the opposite. The first
+# version wrapped the whole check in `if [ -f "$CI" ]`, so a missing ci.yml made
+# the assertion evaporate and the guard still exit 0 — a check written to catch
+# "the guard does not run in CI" that quietly did nothing when there was no CI to
+# look at. Same class as the rmtree swallow round 1 found: the precondition being
+# absent is exactly when the answer matters most.
 CI="$ROOT/.github/workflows/ci.yml"
-if [ -f "$CI" ]; then
-    for script in check-venv-layout-pinned.sh check-venv-layout-teeth.sh; do
-        grep -qE "run:.*scripts/plugins/$script" "$CI" || {
-            echo "FAIL: $script is not run by .github/workflows/ci.yml" >&2
-            echo "      it would then run only inside this dossier's verify rounds," >&2
-            echo "      never on an ordinary PR — the drift it pins would go unseen" >&2
-            exit 1
-        }
-    done
-fi
+[ -f "$CI" ] || {
+    echo "FAIL: .github/workflows/ci.yml not found at $CI" >&2
+    echo "      cannot confirm these guards run on an ordinary PR, so refuse" >&2
+    exit 1
+}
+for script in check-venv-layout-pinned.sh check-venv-layout-teeth.sh; do
+    grep -qE "run:.*scripts/plugins/$script" "$CI" || {
+        echo "FAIL: $script is not run by .github/workflows/ci.yml" >&2
+        echo "      it would then run only inside this dossier's verify rounds," >&2
+        echo "      never on an ordinary PR — the drift it pins would go unseen" >&2
+        exit 1
+    }
+done
 
 echo "extracted 2 values:"
 echo "  python:     $py_const"

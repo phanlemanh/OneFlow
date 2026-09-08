@@ -75,7 +75,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_teeth
     paths: ["scripts/plugins/check-venv-layout-teeth.sh", "scripts/plugins/check-venv-layout-pinned.sh"]
-    expected: "exit 0; rang cua guard chay TAM ca xao tron tren BAN SAO va doi guard DO tung ca, moi ca mot thong diep ghim: (1) doi doan duong dan ben Python; (2) doi ben TS; (3) xoa TEN ham don ben Python; (4) xoa TEN ham don ben TS; (5) XOA HAN hang duong dan ben Python; (6) XOA HAN hang ben TS; (7) GIU dinh nghia, xoa CHO GOI ben Python; (8) GIU dinh nghia, xoa CHO GOI ben TS. Ca 5-6 la chieu fail-open; ca 7-8 la lo hong vong 1 tim ra — guard grep TEN ham van xanh khi chi cho goi bi xoa, luc vong pha nhau da tai vu trang. In 8/8 PASS va thoat 0; kiem CA ma thoat LAN dong in"
+    expected: "exit 0; MUOI HAI ca xao tron tren BAN SAO, guard phai DO tung ca voi thong diep ghim khac nhau: doi duong dan hai phia; xoa TEN ham don hai phia; XOA HAN hang hai phia (chieu fail-open); GIU dinh nghia xoa CHO GOI hai phia (lo hong vong 1); dat lai mo ta cu vao chu thich va tieu de muc (AC-13); go step CI; va XOA HAN ci.yml (lo hong vong 3 — khang dinh AC-11 tung tu tat khi khong co CI de nhin). In 12/12 PASS va thoat 0; kiem CA ma thoat LAN dong in"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- B. Duong lay SDK ----------
@@ -101,7 +101,7 @@ evals:
     executor: test
     cmd: config:executors.test.hdc_provision_failure_raises
     paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
-    expected: "exit 0; HAI ca tren cung fixture. Ca A: ep pip tra khac 0 vi ly do bat ky -> prepare_python_env NEM loi, thong diep chua nguyen nhan goc. Ca B: ep pip tra khac 0 vi phien ban dang chay khong co tren chi muc -> thong diep NEU CA HAI LOI ra (chay tu checkout, hoac publish ban ay); thong diep chi co ma thoat pip la ca thu DO. CHIEU DO tren cung fixture: dat lai cai except nuot loi thi ca A DO vi ham tra ve sys.executable thay vi nem — assertion phai la 'nem' chu khong phai 'khong bang sys.executable'"
+    expected: "exit 0; MOT ca: ep pip tra khac 0 voi thong diep 'No matching distribution' (tuc phien ban dang chay khong co tren chi muc) roi khang dinh prepare_python_env NEM RuntimeError, thong diep GIU nguyen nhan goc VA neu CA HAI LOI ra (chay tu checkout, hoac publish ban ay). Ban truoc cua dong nay khai HAI ca trong khi lenh chi chay MOT node-id — vong 3 bat dung cho do; nhanh that-bai chung di qua cung mot cau `if code != 0` nen mot ca phu duoc lop loi. CHIEU DO da do: dat lai cai except nuot loi thi ca thu DO voi 'DID NOT RAISE'"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E9
@@ -155,7 +155,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_teeth
     paths: ["scripts/plugins/check-venv-layout-teeth.sh", ".github/workflows/ci.yml"]
-    expected: "exit 0; trong MUOI MOT ca rang, ca `ci-step-dropped` doi step trong ban sao ci.yml thanh `run: true` va doi guard DO voi thong diep 'is not run by .github/workflows/ci.yml'. In 11/11 PASS va thoat 0"
+    expected: "exit 0; trong MUOI MOT ca rang, HAI ca noi ve CI: `ci-step-dropped` doi step trong ban sao thanh `run: true`, va `ci-file-missing` XOA HAN ci.yml — ca thu hai la lo hong vong 3, khi ay khang dinh tu tat va guard van xanh. Ca hai phai lam guard DO. In 12/12 PASS va thoat 0"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E14
