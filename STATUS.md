@@ -2,13 +2,13 @@
 
 > Trạng thái sống của repo — cập nhật cuối mỗi gói việc. Handoff giữa máy/agent đọc **file này + `_acceptance/`**, không đọc lịch sử chat.
 
-## Hiện trạng (2026-09-07, sau khi ký Cổng 2 của mở hoá B01 — dòng B2 của kế hoạch)
+## Hiện trạng (2026-09-08, sau khi ký Cổng 2 của D0 Director wire-shape — dòng B3 của kế hoạch)
 
 > Chỉ mục tính năng theo góc nhìn người dùng nằm ở [`docs/feature-index.md`](docs/feature-index.md).
 > File này giữ vai *đang ở đâu*; *làm gì tiếp* nằm ở **một chỗ duy nhất**: khối kế hoạch trong
 > [docs/roadmap.md](docs/roadmap.md), mục "Kế hoạch lát cắt chứng minh".
 
-- **38 hồ sơ đã ký** (guard sổ cái xanh 38/38, 07/09); 37 trên `main`, `mo-hoa-b01` đang ở PR #100. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
+- **39 hồ sơ đã ký** (guard sổ cái xanh 39/39, 08/09); 38 trên `main`, `director-wire-shape` đang ở PR #111. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
 - **Định vị ba tầng** ghi ở [vision.md](docs/strategy/vision.md) (04/09): nền tảng đa mục đích → năm trụ cột → lát cắt. Skill #1 là lát cắt chứng minh đầu tiên, không phải định nghĩa sản phẩm.
 - **Đóng băng mở hạng mục mới** từ khi `lat-cat-chung-minh` merge tới khi 16/16 ★ và ≥ 85% dòng ✅. Xem tỉ lệ: `pnpm plan:check`. Ngoại lệ chỉ ba lý do: mất-dữ-liệu · bảo-mật · chặn-★, và mỗi ngoại lệ cộng vào mẫu số.
 - **Máy dev đang cài 4 plugin:** `oneflow-api-ffmpeg`, `oneflow-api-openai` (phục vụ cả hai slot transcribe — S3 de facto xong), `oneflow-api-pyscenedetect`, `oneflow-modal-compose-overlay` (mắt Modal duy nhất còn lại trên chuỗi Skill #1 → B6).
