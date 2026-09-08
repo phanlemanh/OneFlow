@@ -77,6 +77,16 @@ export async function POST(request: NextRequest) {
                     flow: JSON.stringify(flow),
                     executable: executable ? JSON.stringify(executable) : null,
                     updatedAt: new Date(),
+                    // Provenance on the UPDATE path too: replacing a saved
+                    // workflow's graph with a Director plan is exactly the
+                    // edit-existing case AC-7 exists to make answerable, and
+                    // writing it only on INSERT loses it there. Absent means
+                    // "this save carries no NEW provenance" — the column keeps
+                    // the run that last produced this graph rather than being
+                    // erased by an unrelated rename.
+                    ...(typeof directorRunId === "string"
+                        ? { directorRunId }
+                        : {}),
                 })
                 .where(eq(workflows.id, workflowId));
 

@@ -1,132 +1,125 @@
+# Review Findings — director-wire-shape (round 2)
+
 ## Trong hợp đồng
 
-- **`patchOutcome` is select-then-update, not a conditional UPDATE — the single-shot invariant it advertises as a security property is not enforced**
-  file: `src/lib/director/events/director-events.server.ts:68`
+- **AC-7 provenance is only persisted on INSERT — the update path (existing workflowId) drops `directorRunId`**
+  file: `src/components/workspace/workflow-title-menu.tsx:160`
+  severity: medium
+  source: conventions
+  AC: AC-7
+  When a workflow is already loaded (`workflowId` set) and the user runs Director and confirms Replace, `apply()` sets `directorRunId` in the store but the next save goes through `updateWorkflow(workflowId, ...)` -> `PUT /api/workspace/[id]`, whose body type and `updateData` (src/app/api/workspace/[id]/route.ts:69-94) have no `directorRunId`; the `if (workflowId)` UPDATE branch of `POST /api/workspace/save` (src/app/api/workspace/save/route.ts:53-84) also never sets it. Only the INSERT branch (line 92-95) writes the column, and `provenance.test.ts` covers only that branch. Contract AC-7 says a workflow saved from a Director plan carries that run's id; for the replace-into-existing-workflow branch the column stays NULL (or keeps a stale earlier run id). The S4 round-1 review already flagged AC-7 as having no producer; the fix wired only the insert path.
+
+- **directorRunId is dropped on every UPDATE path — provenance lost whenever the workflow already has an id**
+  file: `src/app/api/workspace/save/route.ts:73`
   severity: high
-  AC: AC-5
-  detail: The doc comment on `decidePatch` says the single-shot rule is what keeps counts "measured rather than attacker-chosen" on an unauthenticated endpoint. But `patchOutcome` reads `kind` (line 68), awaits, then unconditionally `UPDATE ... WHERE id = ?` (line 81). Two concurrent POSTs for the same runId (which the client itself produces, see the replaced+discarded double-fire) both observe `generated` at the await boundary and both write; the last writer wins and the recorded outcome is whichever request landed second. The invariant needs to live in the statement: `UPDATE director_events SET kind = ? WHERE run_id = ? AND kind = 'generated'` and map `changes === 0` to ALREADY_PATCHED (after distinguishing UNKNOWN_RUN).
-  rationale: AC-5 requires a run be patched exactly once with any second patch rejected; the select-then-update race lets two concurrent requests for the same runId both observe the pre-patch state and both write, so the one-patch guarantee AC-5 promises is not actually enforced.
-
-- **AC-7 provenance has no producer: nothing in the client ever sends `directorRunId`, so `workflows.director_run_id` is always NULL**
-  file: `src/app/api/workspace/save/route.ts:20`
-  severity: medium
+  source: bugs
   AC: AC-7
-  detail: The save route accepts `directorRunId` and persists it, and provenance.test.ts covers the route in isolation. But `SaveWorkflowRequest` in src/lib/api/workspace.ts has no such field, neither caller (`workflow-title-menu.tsx:161`, `use-workflow-execution.ts:423`) passes it, and `apply()` in director-prompt.tsx discards `runId` after applying the graph — the flow store never holds it. Contract AC-7 ("workflow lưu từ kế hoạch Director sinh ra ... directorRunId mang runId") is therefore not met end-to-end; only the server half of the wire exists. Either wire the client (store runId in useFlow on apply, extend SaveWorkflowRequest, send it on save) or narrow AC-7 in the contract to the server-side column.
-  rationale: AC-7 explicitly requires that a workflow saved from a Director-generated plan carries directorRunId equal to that run's id; no client path ever sends the field, so the requirement is unmet end-to-end.
-
-- **`patchOutcome` select-then-update is not atomic; the single-shot anti-replay rule can be bypassed by concurrent POSTs**
-  file: `src/lib/director/events/director-events.server.ts:67`
-  severity: medium
-  AC: AC-5
-  detail: Lines 67-84 read the row, decide in JS, then `UPDATE ... WHERE id = ?` with no `kind='generated'` predicate. Two concurrent `/api/director/feedback` requests for the same runId (which the UI itself produces — see the replaced+discarded finding — and which the file's own comment calls an unauthenticated attacker surface) can both observe `generated` at their `await` points and both write, so the final kind is whichever UPDATE lands last, not the first outcome. Fix: `UPDATE director_events SET kind=? WHERE run_id=? AND kind='generated'` and derive ALREADY_PATCHED from `changes === 0`.
-  rationale: Duplicate of the atomicity finding above: AC-5's one-patch/second-rejected guarantee is not actually enforced by a select-then-update, since concurrent requests can race past the check.
-
-- **AC-7 provenance is never populated: no client sends `directorRunId` to /api/workspace/save**
-  file: `src/app/api/workspace/save/route.ts:92`
-  severity: medium
-  AC: AC-7
-  detail: The route accepts and stores `directorRunId` (lines 20, 92-95), but `grep -rn directorRunId src` outside tests hits only this route and the schema. `SaveWorkflowRequest` (src/lib/api/workspace.ts) has no such field and neither caller — src/components/workspace/workflow-title-menu.tsx:161 nor src/hooks/use-workflow-execution.ts:423 — passes it; `director-prompt.tsx` never stashes `runId` in the flow store after `apply`. Every workflow saved from a Director plan therefore gets NULL, indistinguishable from a hand-built graph, and the workflows→director_events join the schema comment promises resolves to nothing. provenance.test.ts only exercises the route, so this passes green.
-  rationale: Duplicate of the AC-7 finding above: the contract explicitly requires directorRunId to be populated end-to-end for a workflow saved from a Director plan, and no client caller ever sends it.
-
-- **`canvas` size cap counts UTF-16 code units, not bytes as the message and constant claim**
-  file: `src/lib/director/request-body.ts:118`
-  severity: low
-  AC: AC-9
-  detail: `JSON.stringify(canvas).length > MAX_CANVAS_BYTES` (line 118) compares string length; the rejection says 'at most 32000 bytes' and the constant is documented as 'total serialized bytes'. A canvas with non-ASCII literals (Vietnamese prompts are the norm here) can be up to ~3x the stated byte cap before rejection. Use `new TextEncoder().encode(...).byteLength` or `Buffer.byteLength` if the cap is meant in bytes.
-  rationale: AC-9 explicitly requires the per-field cap on canvas to be measured in total bytes; measuring UTF-16 string length instead means the byte cap AC-9 specifies is not what's actually enforced.
+  Only the INSERT branch (line ~92) writes `directorRunId`; the UPDATE branch at line 73 `.set({name, description, flow, executable, updatedAt})` ignores it, and `PUT /api/workspace/[id]` (src/app/api/workspace/[id]/route.ts:69-98, the endpoint `updateWorkflow` calls) neither reads nor sets it. Both client save paths send it (workflow-title-menu.tsx:156 via `updateWorkflow` when `workflowId && !isSaveAsMode`; use-workflow-execution.ts:424 via `saveWorkflow({workflowId, ...provenanceFields})`). Concrete failure: user opens a saved workflow (workflowId set), runs Director, confirms Replace -> `apply()` sets `directorRunId` but never touches `workflowId` -> Save -> server discards the id -> `workflows.director_run_id` stays NULL (or keeps a STALE id from an earlier Director save, since `provenanceFields(null)` sends nothing and nothing ever clears the column). Then `setWorkflowId(result.workflowId)` (title-menu:166, execution:433) wipes the in-memory copy, so the provenance is gone permanently. This is exactly the `canvas_was_empty=false` edit-existing case AC-7 exists to make answerable; provenance.test.ts only covers the insert path so it stays green.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **Client reports `staged` then `replaced`/`discarded`, but the state machine rejects any patch out of a non-`generated` row — replace/discard outcomes can never be recorded**
-  Người dùng thấy gì: Khi người dùng chọn Thay thế hoặc Bỏ qua sau khi xem kế hoạch Director đề xuất, lựa chọn đó hiện không được hệ thống ghi nhận — quyết định cuối cùng của người dùng có thể bị mất khỏi nhật ký.
+- **Replace click reports both `replaced` and `discarded`; the two fire-and-forget POSTs race and `discarded` can win**
+  Người dùng thấy gì: Khi bạn bấm Thay thế để áp dụng kế hoạch mới, hệ thống đôi khi lại ghi nhận nhầm thành bạn đã bỏ kế hoạch đó, làm sai số liệu dùng để cải thiện tính năng sau này.
   file: `src/components/workspace/director-prompt.tsx`
   severity: high
-  Đề xuất: new-contract
+  Đề xuất: known-limits
 
-- **`options.useMemory` is written to the ledger without being validated as a boolean — any truthy JSON value becomes `used_memory = 1`**
-  Người dùng thấy gì: Một giá trị bật/tắt trí nhớ không đúng định dạng trong yêu cầu có thể khiến hệ thống ghi nhầm là 'đã dùng trí nhớ', làm sai lệch số liệu theo dõi tính năng này sau này.
-  file: `src/lib/director/request-body.ts`
+- **`used_memory` is written from a client-supplied, unvalidated flag the server never consumes — violates the table's own 'NULL until measured' rule**
+  Người dùng thấy gì: Một cờ nội bộ ghi lại việc có dùng trí nhớ cá nhân hay không có thể bị ghi sai giá trị do dữ liệu gửi lên không được kiểm tra — nhưng tính năng trí nhớ cá nhân này chưa được bật cho người dùng nên chưa gây ảnh hưởng thực tế.
+  file: `src/app/api/director/route.ts`
   severity: medium
   Đề xuất: known-limits
 
-- **`/api/director/feedback` does not catch a thrown `patchOutcome`, so a DB failure surfaces as an envelope-less Next.js 500 instead of the `{error:{code,message}}` shape the Director routes commit to**
-  Người dùng thấy gì: Nếu việc ghi nhận phản hồi của người dùng gặp sự cố kỹ thuật, hệ thống có thể trả về một lỗi chung chung khó chẩn đoán thay vì thông báo rõ ràng — ảnh hưởng thấp vì giao diện hiện không hiển thị phản hồi này cho người dùng.
+- **Feedback route does not wrap DB access in try/catch — a ledger failure escapes as a bare 500 instead of the route's error envelope**
+  Người dùng thấy gì: Nếu việc ghi nhận bạn đã chấp nhận hay bỏ một kế hoạch gặp trục trặc hệ thống, bạn có thể thấy một lỗi chung chung khó hiểu thay vì thông báo rõ ràng.
   file: `src/app/api/director/feedback/route.ts`
+  severity: medium
+  Đề xuất: known-limits
+
+- **`director_events.workflow_id` lacks the FK-with-set-null the sibling tables use for the same column**
+  Người dùng thấy gì: Nếu một workflow bị xoá sau này, một số bản ghi lịch sử nội bộ của Director có thể vẫn trỏ tới workflow không còn tồn tại — chỉ ảnh hưởng việc dọn dẹp dữ liệu về sau, không ảnh hưởng bạn ngay bây giờ.
+  file: `src/db/workspace.schema.ts`
   severity: low
   Đề xuất: known-limits
 
-- **`staged` closes the run, so `replaced`/`discarded` are always rejected (409) and silently dropped**
-  Người dùng thấy gì: Sau khi kế hoạch được hiển thị lần đầu, các lựa chọn Thay thế/Bỏ qua sau đó của người dùng không được ghi nhận vào hệ thống — nhật ký quyết định của người dùng bị thiếu, ảnh hưởng đến việc cá nhân hoá về sau.
-  file: `src/components/workspace/director-prompt.tsx`
-  severity: high
-  Đề xuất: new-contract
-
-- **Confirm button fires `replaced` then `discarded` for the same runId (Radix Action = DialogClose)**
-  Người dùng thấy gì: Bấm nút Thay thế có nguy cơ bị ghi đè thành Bỏ qua ngay sau đó do cách nút xác nhận hoạt động, khiến một kế hoạch người dùng đã chấp nhận có thể bị ghi nhận sai là đã bị huỷ.
+- **`staged` closes the run, so `replaced` / `discarded` from the UI are always rejected with 409 and silently dropped**
+  Người dùng thấy gì: Trong một số luồng sử dụng, việc bạn chọn 'Thay thế' hoặc 'Bỏ' một kế hoạch gợi ý có thể không được ghi nhận đúng, làm mất tín hiệu phản hồi thật dùng để cải thiện tính năng sau này.
   file: `src/components/workspace/director-prompt.tsx`
   severity: high
   Đề xuất: known-limits
 
-- **Last-attempt PlanValidationError failure omits `attempts` although 2 model round-trips were consumed**
-  Người dùng thấy gì: Khi Director thử sinh kế hoạch nhiều lần rồi vẫn thất bại ở lần cuối, số lần thử thực tế không được lưu lại, làm sai lệch số liệu đo hiệu quả của tính năng sau này.
+- **Confirm button fires `replaced` then `discarded` for the same runId (Radix AlertDialog.Action is a DialogClose)**
+  Người dùng thấy gì: Khi bạn xác nhận Thay thế kế hoạch, hệ thống có thể ghi đè lại thành bạn đã bỏ kế hoạch đó ngay sau đó, làm sai lệch số liệu theo dõi hành vi người dùng.
+  file: `src/components/workspace/director-prompt.tsx`
+  severity: high
+  Đề xuất: known-limits
+
+- **Last-attempt PlanValidationError failure omits `attempts` although MAX_ATTEMPTS round-trips were consumed**
+  Người dùng thấy gì: Khi Director phải thử sinh kế hoạch nhiều lần trước khi thất bại hẳn, số lần thử thực tế có thể không được ghi lại đúng — đây là số liệu nội bộ để cải thiện chất lượng sau này, không ảnh hưởng đến những gì bạn thấy trên màn hình.
   file: `src/lib/director/director-core.ts`
   severity: medium
   Đề xuất: known-limits
 
-- **`accepted`/`replaced` reported even when `apply()` failed and the canvas was left untouched**
-  Người dùng thấy gì: Nếu việc áp dụng kế hoạch vào canvas thất bại, hệ thống vẫn có thể ghi nhận là người dùng đã chấp nhận/thay thế kế hoạch đó — số liệu không phản ánh đúng những gì người dùng thực sự nhận được.
+- **`accepted` / `replaced` are reported even when `apply()` failed and left the canvas untouched**
+  Người dùng thấy gì: Nếu việc áp dụng một kế hoạch gợi ý vào bản vẽ bị lỗi, hệ thống vẫn có thể ghi nhận là bạn đã chấp nhận kế hoạch đó dù thực tế không có gì thay đổi trên màn hình.
   file: `src/components/workspace/director-prompt.tsx`
   severity: medium
   Đề xuất: known-limits
 
-- **Hình dạng 1 — E4 đo lời GỌI recordGenerated (mock) thay vì ROW director_events; nửa SUPPRESSION abort vắng mặt**
-  Người dùng thấy gì: Phép kiểm tự động cho việc ghi nhận mỗi lượt dùng Director có thể báo 'đạt' ngay cả khi việc ghi dữ liệu thật sự bị lỗi, nên một sự cố thật ở khâu này có nguy cơ không bị phát hiện sớm.
-  file: `src/app/api/director/wire-shape.test.ts`
+- **`options.useMemory` is written to the ledger unvalidated — any truthy JSON value becomes used_memory = 1**
+  Người dùng thấy gì: Một tuỳ chọn liên quan tới cá nhân hoá (chưa bật cho người dùng) có thể bị ghi sai giá trị nếu dữ liệu gửi lên không đúng định dạng — hiện chưa ảnh hưởng vì tính năng đó chưa hoạt động.
+  file: `src/lib/director/request-body.ts`
+  severity: low
+  Đề xuất: known-limits
+
+- **Hình dạng 6 — đường dẫn hardcode ROOT: schema-diff.mjs import từ /Users/manh-macmini/dev/oneflow/node_modules**
+  Người dùng thấy gì: Một kịch bản đo lường nội bộ dùng đường dẫn cứng trên máy của một người; chạy lại trên máy khác có thể cho kết quả không phản ánh đúng mã đang kiểm tra — chỉ ảnh hưởng độ tin cậy của báo cáo nội bộ, không ảnh hưởng đến bạn.
+  file: `_acceptance/director-wire-shape/golden/schema-diff.mjs`
   severity: high
   Đề xuất: known-limits
 
-- **Hình dạng 1 — E5 đo hàm quyết định thuần decidePatch, không đo endpoint/row mà expected hứa**
-  Người dùng thấy gì: Bộ kiểm tra cho quy tắc chuyển trạng thái phản hồi (staged/accepted/replaced/discarded) mới chỉ kiểm tra logic trên giấy, chưa từng kiểm tra hành vi thật của máy chủ và cơ sở dữ liệu — một lỗi ở khâu ghi dữ liệu thật có thể lọt qua.
-  file: `src/lib/director/events/director-events.test.ts`
-  severity: high
-  Đề xuất: known-limits
-
-- **Hình dạng 5 — "exactly the four outcomes" nhưng ma trận lấy từ chính OUTCOME_KINDS, không có danh sách viết-trước hay assert đếm**
-  Người dùng thấy gì: Bài kiểm tra khẳng định có đúng bốn loại phản hồi hợp lệ nhưng lại tự lấy danh sách đó từ chính mã đang được kiểm tra, nên nếu danh sách bị thu hẹp sai ai đó cũng sẽ không được cảnh báo.
-  file: `src/lib/director/events/director-events.test.ts`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 2 — E11 tự viết bộ áp migration (readdir + split breakpoint) thay vì chạy migrator drizzle thật đọc _journal.json**
-  Người dùng thấy gì: Phép kiểm tra khả năng nâng cấp an toàn cho cơ sở dữ liệu cũ dùng một bộ áp thay đổi tự viết riêng thay vì công cụ nâng cấp thật của hệ thống, nên chưa chắc phản ánh đúng những gì sẽ xảy ra khi người dùng thật nâng cấp.
-  file: `src/db/migrate-old-db.test.ts`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Hình dạng 6 — các probe EVAL-2/EVAL-3 hardcode /Users/manh-macmini/dev/oneflow/.env và node_modules của tác giả**
-  Người dùng thấy gì: Một số kịch bản kiểm tra thủ công dùng đường dẫn riêng của máy người viết, nên chạy trên máy khác có thể cho kết quả không phản ánh đúng thực tế đang kiểm tra.
+- **Hình dạng 6 — đường dẫn hardcode ROOT: bộ eval3-*.mjs và oneof-vs-anyof.mjs đọc .env và node_modules của checkout tác giả**
+  Người dùng thấy gì: Nhiều kịch bản đo lường nội bộ dùng đường dẫn cứng của một máy cụ thể; chạy lại ở nơi khác có thể đo nhầm khoá và thư viện của máy đó — chỉ ảnh hưởng độ tin cậy của báo cáo kiểm thử nội bộ, không ảnh hưởng đến bạn.
   file: `_acceptance/director-wire-shape/golden/eval3-direct-3providers.mjs`
   severity: medium
   Đề xuất: known-limits
 
-- **Hình dạng 2 — schema-diff.mjs và eval3-*.mjs chép tay DirectorPlanSchema thay vì import từ src/lib/director/dsl.ts**
-  Người dùng thấy gì: Một số kịch bản kiểm tra chép tay lại định nghĩa dữ liệu thay vì lấy trực tiếp từ mã nguồn chính, nên khi mã nguồn chính thay đổi, các kịch bản này có thể không phát hiện ra và báo sai kết quả.
-  file: `_acceptance/director-wire-shape/golden/schema-diff.mjs`
-  severity: low
+- **Hình dạng 4 — âm-tính-một-mình: `vitest -t "AC-1"` / `-t "AC-2"` trong script thoát 0 khi không khớp ca nào, không có đối chứng số ca đã chạy**
+  Người dùng thấy gì: Một kịch bản kiểm tra tự động có thể báo 'đạt' ngay cả khi không thực sự chạy được ca kiểm tra nào bên trong, khiến đội ngũ tưởng nhầm là đã xác minh kỹ hơn thực tế — không ảnh hưởng đến trải nghiệm của bạn.
+  file: `scripts/acceptance/dws-wire-returns-plan.sh`
+  severity: high
   Đề xuất: known-limits
 
-- **Hình dạng 3 — E12 grep chuỗi "directorEvents" bất kỳ đâu trong schema.ts thay vì quan hệ "được export qua barrel"**
-  Người dùng thấy gì: Phép kiểm tra bảng dữ liệu mới có được khai báo đúng cách chỉ tìm một chuỗi ký tự bất kỳ trong tệp, nên có thể báo đạt dù bảng chưa thực sự được khai báo đúng cách.
+- **Hình dạng 1 — E4 đo LỜI GỌI mock thay vì ROW: recordGenerated không bao giờ chạy trên DB trong bất kỳ test nào**
+  Người dùng thấy gì: Bộ kiểm tra tự động cho việc mỗi lượt dùng Director ghi đúng một bản ghi lịch sử hiện chỉ kiểm tra lệnh gọi giả lập chứ chưa kiểm tra dữ liệu thật trong cơ sở dữ liệu, nên một lỗi ghi dữ liệu thật có thể lọt qua mà không bị phát hiện.
+  file: `src/app/api/director/wire-shape.test.ts`
+  severity: high
+  Đề xuất: known-limits
+
+- **Hình dạng 3 — AC-9 assert `error.field` (nội bộ) trong khi lời hứa là THÔNG ĐIỆP nêu tên trường, và route bỏ rơi `field`**
+  Người dùng thấy gì: Bộ kiểm tra hiện chưa đảm bảo chắc chắn rằng thông báo lỗi gửi tới bạn sẽ luôn nêu đúng tên trường vượt giới hạn nếu mã nguồn thay đổi sau này; hiện tại thông báo vẫn đúng, nhưng rủi ro này chưa được chặn tự động.
+  file: `src/lib/director/request-body.test.ts`
+  severity: high
+  Đề xuất: known-limits
+
+- **Hình dạng 1 — dws-no-prompt-in-prod-log đo VĂN BẢN NGUỒN theo dòng: logger.warn nhiều dòng (kiểu nhà đang dùng) chở `prompt` thoát lưới**
+  Người dùng thấy gì: Công cụ tự động rà soát để đảm bảo nội dung bạn nhập không lọt vào nhật ký hệ thống có một điểm mù với một số cách viết code nhiều dòng; hiện tại chưa bị lộ, nhưng rủi ro này chưa được chặn hoàn toàn tự động.
+  file: `scripts/acceptance/dws-no-prompt-in-prod-log.sh`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Hình dạng 3 — AC-7 assert chuỗi mình tự gửi quay lại, không đo quan hệ runId-của-Director → workflows.director_run_id**
+  Người dùng thấy gì: Bộ kiểm tra tự động cho việc lưu đúng nguồn gốc kế hoạch Director hiện chưa kiểm tra toàn bộ đường đi thực tế của dữ liệu, nên có thể bỏ sót các lỗi tương tự lỗi đã được phát hiện ở nơi khác trong hệ thống.
+  file: `src/app/api/workspace/save/provenance.test.ts`
+  severity: medium
+  Đề xuất: known-limits
+
+- **Hình dạng 3 — dws-barrel-export assert substring `directorEvents` có mặt, không phải quan hệ `export … from`**
+  Người dùng thấy gì: Công cụ tự động kiểm tra bảng dữ liệu mới có được khai báo đúng cách hiện chỉ tìm tên bảng xuất hiện ở đâu đó trong file, nên có thể báo đạt ngay cả khi việc khai báo thực tế chưa đúng — rủi ro nội bộ, không ảnh hưởng đến bạn ngay.
   file: `scripts/acceptance/dws-barrel-export.sh`
   severity: low
   Đề xuất: known-limits
 
-- **Hình dạng 3 — E13 regex một-dòng `logger.(warn|error|info)\([^)]*\bprompt\b` không bắt được lời gọi logger nhiều dòng đang có trong chính file bị đo**
-  Người dùng thấy gì: Phép kiểm tra đảm bảo nội dung người dùng nhập không lọt vào nhật ký hệ thống có một điểm mù kỹ thuật với các lời gọi ghi log viết trên nhiều dòng, nên một rò rỉ thực tế theo kiểu đó có nguy cơ không bị phát hiện.
-  file: `scripts/acceptance/dws-no-prompt-in-prod-log.sh`
-  severity: low
-  Đề xuất: known-limits
-
-⚠ Cụm ngoài vùng phủ: 4/20 lỗi rơi vào file không bộ đo nào phủ (_acceptance/director-wire-shape/golden/eval3-direct-3providers.mjs, _acceptance/director-wire-shape/golden/schema-diff.mjs, scripts/acceptance/dws-barrel-export.sh, scripts/acceptance/dws-no-prompt-in-prod-log.sh) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 5/19 lỗi rơi vào file không bộ đo nào phủ (_acceptance/director-wire-shape/golden/schema-diff.mjs, _acceptance/director-wire-shape/golden/eval3-direct-3providers.mjs, scripts/acceptance/dws-wire-returns-plan.sh, scripts/acceptance/dws-no-prompt-in-prod-log.sh, scripts/acceptance/dws-barrel-export.sh) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.

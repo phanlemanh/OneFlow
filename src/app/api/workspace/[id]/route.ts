@@ -71,6 +71,7 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             description?: string;
             flow?: { nodes: Node[]; edges: Edge[] };
             executable?: Record<string, unknown>;
+            directorRunId?: string;
         };
 
         const updateData: {
@@ -78,6 +79,7 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
             description?: string | null;
             flow?: string;
             executable?: string | null;
+            directorRunId?: string;
         } = {};
 
         if (body.name !== undefined) {
@@ -91,6 +93,13 @@ export async function PUT(request: NextRequest, context: { params: Params }) {
         }
         if (body.executable !== undefined) {
             updateData.executable = JSON.stringify(body.executable);
+        }
+        // This is the endpoint `updateWorkflow()` calls, so a Director plan
+        // applied over an already-saved workflow arrives here — not at
+        // /save (AC-7). Only a string is written: absent leaves the stored
+        // lineage alone, and a non-string is a caller bug, not a run id.
+        if (typeof body.directorRunId === "string") {
+            updateData.directorRunId = body.directorRunId;
         }
 
         const db = await getDb();
