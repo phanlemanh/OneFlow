@@ -343,8 +343,8 @@ def run_workflow(
     )
     # A host-supplied invoker dispatches to the plugin's own deployed function,
     # so there is no subprocess to host and no shared venv to provision.
-    python = (
-        ""
+    pythons: dict[str, str] = (
+        {}
         if invoker is not None
         else prepare_python_env(
             plugin_ids, plugins_dir, data_dir, auto_install=auto_install, log=log
@@ -524,7 +524,7 @@ def run_workflow(
                         raw = invoker(plugin_id, slot, business_input, plugin_dir, model)
                     else:
                         raw = invoke_plugin(
-                            python=python,
+                            python=pythons[plugin_id],
                             plugin_dir=plugin_dir,
                             entry_file=cfg.get("entryFile", "entry.py"),
                             plugin_id=plugin_id,

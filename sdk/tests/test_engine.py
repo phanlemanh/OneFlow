@@ -578,29 +578,13 @@ def test_paths_env_override(monkeypatch, tmp_path):
 # --- venv SDK install source (PyPI) -----------------------------------------
 
 
-def test_shared_venv_installs_sdk_from_pypi(monkeypatch, tmp_path):
-    import tongflow
-
-    calls = []
-
-    def fake_run(cmd, cwd):
-        calls.append(list(cmd))
-        return 0, ""
-
-    monkeypatch.setattr(plugins_mod, "_run", fake_run)
-    # Force the install path (no pre-existing venv python).
-    monkeypatch.setattr(plugins_mod, "_venv_python", lambda d: tmp_path / "nope")
-
-    plugins_mod._ensure_shared_venv(tmp_path / "data", lambda _m: None)
-
-    pip_installs = [c for c in calls if "install" in c]
-    # Installs the DISTRIBUTION name, which differs from the import package.
-    assert any(
-        f"{tongflow.__distribution__}=={tongflow.__version__}" in c
-        for c in pip_installs
-    )
-    # never installs from a local path
-    assert not any("--upgrade" in c for c in pip_installs)
+# `test_shared_venv_installs_sdk_from_pypi` lived here until 2026-09-08. It
+# pinned the shared venv AND asserted "never installs from a local path" — the
+# exact behaviour hai-duong-chay-mot-venv reverses, because running from a
+# checkout must install from the checkout. Its assertion survives under the
+# correct branch as
+# tests/test_plugin_venv_layout.py::test_pins_the_pypi_version_when_not_running_from_a_checkout,
+# which now has a positive counterpart for the checkout branch.
 
 
 # --- inline (zero-disk) end-to-end + mem:// chaining ------------------------

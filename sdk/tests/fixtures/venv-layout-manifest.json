@@ -1,0 +1,7 @@
+{
+  "root_has_pyvenv_cfg": false,
+  "entries": [
+    { "plugin_id": "oneflow-api-ffmpeg", "relative_dir": "oneflow-api-ffmpeg" },
+    { "plugin_id": "oneflow-api-pyscenedetect", "relative_dir": "oneflow-api-pyscenedetect" }
+  ]
+}
