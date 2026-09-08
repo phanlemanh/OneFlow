@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 7735f2ffbe35fdbf4837ef57df116854005d2e63
+verified_commit: b278980601a509e121f4568e3a87af7fe073c9cb
 human_signoff:
 ---
 
@@ -32,214 +32,216 @@ human_signoff:
 | E10b | AC-9 | test | PASS |
 | E11 | AC-10 | test | PASS |
 
-Mọi lệnh máy round này exit 0 (16 eval + 9 lệnh suite hồi quy). Verdict tổng round 6 là REJECT không phải vì lệnh nào thất bại, mà vì scope-triage xác nhận một finding TRONG HỢP ĐỒNG trên AC-4 (xem `review-findings.md` mục "Trong hợp đồng"): E4/E5 đo bằng `grep -c` đếm chuỗi tên hàm chứ không phân biệt lời gọi thật với một dòng đã comment/chú thích, nên guard xanh ngay cả khi bước dọn venv đời cũ bị vô hiệu hoá — đúng lớp lỗi mà AC-4 tuyên bố đã chặn. Chi tiết đo tận tay nằm trong review-findings.md.
-
 ## Evidence
 
 - eval: E1
-  run_id: minted-hai-duong-chay-mot-venv-E1-r6
+  run_id: minted-hai-duong-chay-mot-venv-E1-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_venv_per_plugin
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
     .                                                                        [100%]
-    1 passed in 0.05s
+    1 passed in 0.03s
 
 - eval: E2
-  run_id: minted-hai-duong-chay-mot-venv-E2-r6
+  run_id: minted-hai-duong-chay-mot-venv-E2-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_legacy_shared_removed
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-    1 passed in 0.02s
+    .                                                                        [100%]
+    1 passed in 0.01s
 
 - eval: E2b
-  run_id: minted-hai-duong-chay-mot-venv-E2b-r6
+  run_id: minted-hai-duong-chay-mot-venv-E2b-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_legacy_removal_failure_raises
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
+  output: |
+    1 passed in 0.02s
+
+- eval: E3a
+  run_id: minted-hai-duong-chay-mot-venv-E3a-r7
+  exit_code: 0
+  baseline: n-a
+  verifier: config:executors.test.hdc_engine_leaves_per_plugin_layout
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
-- eval: E3a
-  run_id: minted-hai-duong-chay-mot-venv-E3a-r6
-  exit_code: 0
-  baseline: n-a
-  verifier: config:executors.test.hdc_engine_leaves_per_plugin_layout
-  verified_at: 2026-09-09T05:39:00Z
-  output: |
-    1 passed in 0.02s
-
 - eval: E14
-  run_id: minted-hai-duong-chay-mot-venv-E14-r6
+  run_id: minted-hai-duong-chay-mot-venv-E14-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_engine_leaves_per_plugin_layout
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
+    .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E3b
-  run_id: minted-hai-duong-chay-mot-venv-E3b-r6
+  run_id: minted-hai-duong-chay-mot-venv-E3b-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_ts_keeps_per_plugin_venvs
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-          Tests  1 passed | 13 skipped (14)
-       Start at  05:38:34
-       Duration  197ms (transform 73ms, setup 0ms, import 80ms, tests 27ms, environment 0ms)
+    Tests  1 passed | 13 skipped (14)
+    Start at  06:19:08
+    Duration  148ms (transform 31ms, setup 0ms, import 28ms, tests 20ms, environment 0ms)
 
 - eval: E15
-  run_id: minted-hai-duong-chay-mot-venv-E15-r6
+  run_id: minted-hai-duong-chay-mot-venv-E15-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_ts_keeps_per_plugin_venvs
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-          Tests  1 passed | 13 skipped (14)
-       Start at  05:38:34
-       Duration  197ms (transform 73ms, setup 0ms, import 80ms, tests 27ms, environment 0ms)
+    Tests  1 passed | 13 skipped (14)
+    Start at  06:19:08
+    Duration  148ms (transform 31ms, setup 0ms, import 28ms, tests 20ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-hai-duong-chay-mot-venv-E4-r6
+  run_id: minted-hai-duong-chay-mot-venv-E4-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hdc_layout_constant_pinned
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-      python:     .tongflow,plugin-venv
-      typescript: .tongflow,plugin-venv
+    python:     .tongflow,plugin-venv
+    typescript: .tongflow,plugin-venv
     OK: both runtimes pin the same venv root, and both still remove the legacy shared venv
 
 - eval: E5
-  run_id: minted-hai-duong-chay-mot-venv-E5-r6
+  run_id: minted-hai-duong-chay-mot-venv-E5-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.hdc_layout_constant_teeth
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-    PASS [ci-step-dropped]
     PASS [ci-file-missing]
-    12/12 PASS
+    PASS [call-gone-comment-stays]
+    13/13 PASS
 
 - eval: E6
-  run_id: minted-hai-duong-chay-mot-venv-E6-r6
+  run_id: minted-hai-duong-chay-mot-venv-E6-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_sdk_from_checkout
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-    1 passed in 0.02s
+    .                                                                        [100%]
+    1 passed in 0.20s
 
 - eval: E7
-  run_id: minted-hai-duong-chay-mot-venv-E7-r6
+  run_id: minted-hai-duong-chay-mot-venv-E7-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_sdk_from_pypi_pin
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E8
-  run_id: minted-hai-duong-chay-mot-venv-E8-r6
+  run_id: minted-hai-duong-chay-mot-venv-E8-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_provision_failure_raises
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-    1 passed in 0.21s
+    .                                                                        [100%]
+    1 passed in 0.23s
 
 - eval: E9
-  run_id: minted-hai-duong-chay-mot-venv-E9-r6
+  run_id: minted-hai-duong-chay-mot-venv-E9-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_auto_install_false_keeps_ambient
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E10
-  run_id: minted-hai-duong-chay-mot-venv-E10-r6
+  run_id: minted-hai-duong-chay-mot-venv-E10-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_interpreter_per_plugin
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
     .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E10b
-  run_id: minted-hai-duong-chay-mot-venv-E10b-r6
+  run_id: minted-hai-duong-chay-mot-venv-E10b-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_runner_uses_plugin_interpreter
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
+    .                                                                        [100%]
     1 passed in 0.02s
 
 - eval: E11
-  run_id: minted-hai-duong-chay-mot-venv-E11-r6
+  run_id: minted-hai-duong-chay-mot-venv-E11-r7
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.hdc_unsafe_plugin_id_rejected
-  verified_at: 2026-09-09T05:39:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
   output: |
-    .....                                                                    [100%]
     5 passed in 0.02s
 
 ### Lệnh suite (hồi quy)
 
 - cmd: bash scripts/acceptance/preflight-verify-env.sh
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-bash_scripts_acceptance_preflight_verify-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-bash_scripts_acceptance_preflight_verify-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:00Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: node scripts/roadmap/check-plan-freeze.mjs
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-node_scripts_roadmap_check_plan_freeze_m-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-node_scripts_roadmap_check_plan_freeze_m-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:10Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: pnpm build && pnpm typecheck
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-build_typecheck-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-build_typecheck-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:20Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: pnpm lint:check
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-lint_check-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-lint_check-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:30Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: pnpm test
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-test-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-test-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:44Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:38:54Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: pnpm verify:plugins
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-verify_plugins-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-verify_plugins-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:39:04Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-gen_abi-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-gen_abi-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:39:14Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 - cmd: bash scripts/fork/check-fork-identity.sh
-  run_id: minted-hai-duong-chay-mot-venv-SUITE-bash_scripts_fork_check_fork_identity_sh-r6
+  run_id: minted-hai-duong-chay-mot-venv-SUITE-bash_scripts_fork_check_fork_identity_sh-r7
   exit_code: 0
-  verified_at: 2026-09-09T05:39:24Z
+  verified_at: 2026-09-09T06:20:00+07:00
 
 ## Known limits
 
@@ -247,14 +249,14 @@ Mọi lệnh máy round này exit 0 (16 eval + 9 lệnh suite hồi quy). Verdic
 
 ## Analyst
 
-carried tu round trước — baseline không đo lại round này.
+carried tu round trước — baseline không đo lại round này (P2: evals.yaml không đổi từ lần đo baseline cuối). Mọi field `baseline:` ở trên ghi `n-a` vì round này không đo lại — không kết luận được eval nào không-phân-biệt ở chính round 7; kết luận không-phân-biệt gần nhất (nếu có) thuộc round baseline trước, không lặp lại ở đây.
 
-none — every feature eval is red on baseline (discriminates)
+none — không có eval nào được đo baseline ở round này để xếp vào danh sách không-phân-biệt.
 
 ## Variance
 
-none — không có eval runs>1 round này (mọi eval `runs: 1`, không có `pass_rate` lệch).
+none — không có eval nào mang field runs > 1 trong vòng này; mọi eval là deterministic (0/1 hoặc 1/1).
 
 ## Iterations
 
-Round 6: mọi lệnh máy exit 0 (16 eval + 9 lệnh suite), nhưng scope-triage xác nhận 1 finding TRONG HỢP ĐỒNG trên AC-4 — E4/E5 đo bằng `grep -c` đếm chuỗi tên hàm, không phân biệt lời gọi thật với một dòng đã comment/chú thích (đo tận tay: comment-out `_remove_legacy_shared_venv(...)` ở Python và `removeLegacySharedVenv();` ở TypeScript đều để guard in OK/rc=0); verdict REJECT do finding này, không do lệnh nào exit khác 0. Quay lại triển khai để E4/E5 phân biệt được lời gọi thật khỏi chú thích/dòng đã vô hiệu hoá.
+Round 7: toàn bộ 16 eval máy (E1, E2, E2b, E3a, E14, E3b, E15, E4, E5, E6, E7, E8, E9, E10, E10b, E11) và toàn bộ 9 lệnh suite hồi quy đều PASS (exit 0) — nhưng review-findings vòng này lộ 2 lỗ hổng đo-chỉ-dẫn-thay-vì-đầu-ra map thẳng vào AC-4 (guard `check-venv-layout-pinned.sh` đếm chỗ gọi bằng grep văn bản, không phải hành vi thật, ở cả phía Python lẫn TypeScript) — cùng lúc round 7 đã vượt trần verify-round quy định ở CLAUDE.md (T2 tối đa 3, T3 tối đa 4) mà chưa có dòng "đây là vòng cuối" khai trước khi dispatch; verdict REJECT theo đúng quy tắc của template (vượt vòng cho phép → escalate cho người, không chạy thêm vòng đo để vá phép đo). Người quyết cần chọn: viết nợ có tên cho hai lỗ AC-4 (amendment trong contract.md, có chữ ký) rồi cho phép round tiếp theo là round CUỐI, hoặc quay lại implementation để sửa guard trước khi đo lại.
