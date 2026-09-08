@@ -132,6 +132,18 @@ và đối chiếu lại `expected` của E5/E8 cho khớp phép đo thật.
 Mọi finding sống sót vòng 4 thành **nợ có tên**: trong hợp đồng → mục Amendment
 dưới đây; ngoài hợp đồng → Known limits ở `## Notes`. **Không có vòng thứ năm.**
 
+### Lượt phát biểu lại — owner cho phép 09/09, KHÔNG phải vòng review thứ năm
+
+Sau khi rút AC-11 và AC-13, `evidence-report.md` mang `verdict: REJECT` nhắm vào
+hai tiêu chí không còn tồn tại, và `evals.yaml` đổi nên bằng chứng ôi theo luật
+staleness. Owner cho phép **một** lượt chạy nữa trên **đúng cây này** — mã sản
+phẩm không đổi một byte kể từ `ec9849c` — để có báo cáo khớp hợp đồng đã rút.
+
+**Ràng buộc cứng của lượt này, khai trước khi chạy:** mọi finding **ngoài hợp
+đồng** đi thẳng vào Known limits. **Không nâng phạm vi lần nào nữa.** Finding
+**trong hợp đồng** nếu có thì hồ sơ trả về làn sửa và owner quyết lại từ đầu —
+nhưng không có lượt phát biểu lại thứ hai.
+
 ## Coverage
 
 Quét bằng `morphological-scan`, trục dựng từ đầu (preset `test-matrix` không khớp:
