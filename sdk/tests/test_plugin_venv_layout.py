@@ -29,7 +29,9 @@ def test_venv_dir_puts_each_plugin_in_its_own_subdirectory(tmp_path: Path) -> No
     assert root == tmp_path / ".tongflow" / "plugin-venv"
 
 
-@pytest.mark.parametrize("bad", ["../escape", "a/b", ".hidden", ""])
+@pytest.mark.parametrize(
+    "bad", ["../escape", "a/b", ".hidden", "", "oneflow-api-ffmpeg\n"]
+)
 def test_venv_dir_rejects_unsafe_plugin_ids(tmp_path: Path, bad: str) -> None:
     root = P._venv_root(tmp_path)
 
@@ -374,3 +376,47 @@ def test_runner_calls_each_plugin_with_its_own_interpreter(
     )
     for pid, py in seen:
         assert pid in py, f"{pid} ran an interpreter from another plugin's venv"
+
+
+def test_a_failed_legacy_removal_raises_instead_of_provisioning_on_top(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The high finding of round 1, pinned.
+
+    `shutil.rmtree(root, ignore_errors=True)` returned as if it had succeeded.
+    The marker stayed at the root, per-plugin venvs were created underneath it,
+    and the next TypeScript run deleted the whole tree — the mutual-destruction
+    cycle, re-armed on a partial-failure path with no log line and no exception.
+    """
+    root = P._venv_root(tmp_path / "data")
+    (root / "bin").mkdir(parents=True)
+    (root / "pyvenv.cfg").write_text("home = /usr/bin\n", encoding="utf-8")
+
+    def refusing_rmtree(path, *a, ignore_errors=False, **kw):
+        # Honour the flag exactly as shutil.rmtree does. A fake that raises
+        # regardless cannot tell "production swallowed the failure" from
+        # "production never called rmtree" — the red direction would then be
+        # red for the wrong reason.
+        if ignore_errors:
+            return
+        raise PermissionError(13, "Permission denied", str(path))
+
+    monkeypatch.setattr(P.shutil, "rmtree", refusing_rmtree)
+    monkeypatch.setattr(P, "_run", _fake_run([]))
+
+    with pytest.raises(RuntimeError) as e:
+        P.prepare_python_env(
+            TWO_IDS,
+            tmp_path / "plugins",
+            tmp_path / "data",
+            auto_install=True,
+            log=lambda _m: None,
+        )
+    msg = str(e.value)
+    assert "legacy shared venv" in msg and "Permission denied" in msg
+    # And it must not have provisioned underneath the surviving marker.
+    for pid in TWO_IDS:
+        assert not (root / pid).exists(), (
+            f"{pid} was provisioned inside a root that still holds pyvenv.cfg — "
+            "the app will delete it on its next run"
+        )

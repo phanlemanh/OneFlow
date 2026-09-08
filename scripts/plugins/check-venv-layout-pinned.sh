@@ -54,16 +54,26 @@ if [ "$py_const" != "$ts_const" ]; then
     exit 1
 fi
 
-grep -q '_remove_legacy_shared_venv' "$PY" || {
+# A definition alone proves nothing: round 1 found that grepping the NAME stays
+# green when only the CALL SITE is deleted, which is the change that actually
+# re-arms the cycle. Demand both, on both sides.
+py_def=$(grep -cE '^[[:space:]]*def _remove_legacy_shared_venv\(' "$PY" || true)
+py_call=$(grep -cE '_remove_legacy_shared_venv\(' "$PY" || true)
+if [ "$py_def" -lt 1 ] || [ "$py_call" -lt 2 ]; then
     echo "FAIL: the PYTHON side lost its legacy-shared-venv removal" >&2
-    echo "      without it the app deletes every per-plugin venv on its next run" >&2
+    echo "      definitions=$py_def call sites=$((py_call - py_def)) — need both" >&2
+    echo "      without a CALL the app deletes every per-plugin venv on its next run" >&2
     exit 1
-}
-grep -q 'removeLegacySharedVenv' "$TS" || {
+fi
+
+ts_def=$(grep -cE 'function removeLegacySharedVenv\(' "$TS" || true)
+ts_call=$(grep -cE 'removeLegacySharedVenv\(' "$TS" || true)
+if [ "$ts_def" -lt 1 ] || [ "$ts_call" -lt 2 ]; then
     echo "FAIL: the TYPESCRIPT side lost its legacy-shared-venv removal" >&2
-    echo "      users upgrading from before 2026-08-07 keep a dead venv forever" >&2
+    echo "      definitions=$ts_def call sites=$((ts_call - ts_def)) — need both" >&2
+    echo "      without a CALL, users upgrading from before 2026-08-07 keep a dead venv" >&2
     exit 1
-}
+fi
 
 echo "extracted 2 values:"
 echo "  python:     $py_const"

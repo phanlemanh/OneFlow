@@ -116,7 +116,10 @@ def _venv_dir(root: Path, plugin_id: str) -> Path:
     leading dot, or an empty string would place a venv outside the root that
     eviction scans.
     """
-    if not _PLUGIN_ID_RE.match(plugin_id) or plugin_id.startswith("."):
+    # fullmatch, not match: Python's `$` also matches before a trailing
+    # newline, so `re.match` would accept "oneflow-api-ffmpeg\n" while the
+    # JavaScript rule this mirrors rejects it.
+    if not _PLUGIN_ID_RE.fullmatch(plugin_id) or plugin_id.startswith("."):
         raise ValueError(f"unsafe plugin id for a venv path: {plugin_id!r}")
     return root / plugin_id
 
@@ -190,7 +193,26 @@ def _remove_legacy_shared_venv(root: Path, log: LogCb) -> None:
     if not (root / "pyvenv.cfg").is_file():
         return
     log("removing the legacy shared venv; each plugin now gets its own")
-    shutil.rmtree(root, ignore_errors=True)
+    try:
+        shutil.rmtree(root)
+    except OSError as e:
+        # Never swallow this. A failed removal leaves pyvenv.cfg at the root,
+        # per-plugin venvs get created underneath it, and the next run of
+        # `ensurePluginPython` on the TypeScript side reads that marker and
+        # deletes the whole tree — the mutual-destruction cycle this module was
+        # rewritten to end, re-armed on a partial-failure path. The TypeScript
+        # twin's `rmSync(..., {force: true})` masks ENOENT only; a permission
+        # error still throws there, and it must throw here too.
+        raise RuntimeError(
+            f"could not remove the legacy shared venv at {root}: {e}. "
+            "Leaving it in place would make the app delete every per-plugin "
+            "venv on its next run. Remove it by hand, then retry."
+        ) from e
+    if (root / "pyvenv.cfg").exists():
+        raise RuntimeError(
+            f"the legacy shared venv marker survived removal at {root}; "
+            "refusing to provision on top of it"
+        )
 
 
 def _running_from_checkout() -> bool:

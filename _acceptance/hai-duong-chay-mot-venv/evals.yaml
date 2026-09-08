@@ -34,6 +34,14 @@ evals:
     expected: "exit 0; fixture cam san pyvenv.cfg + bin/ + lib/ NGAY TAI goc plugin-venv/ roi chay cap phat; sau do goc KHONG con pyvenv.cfg va co plugin-venv/<id>/ cho tung plugin. CHIEU DO tren cung fixture: bo buoc don thi ca thu DO voi thong diep ghim 'pyvenv.cfg con o goc'"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
+  - id: E2b
+    criterion: AC-2
+    executor: test
+    cmd: config:executors.test.hdc_legacy_removal_failure_raises
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
+    expected: "exit 0; ep shutil.rmtree nem PermissionError roi khang dinh prepare_python_env NEM RuntimeError co ghim ca 'legacy shared venv' lan nguyen nhan goc, VA khong plugin nao duoc cap phat ben duoi cai goc con mang pyvenv.cfg. Day la finding HIGH cua vong 1: ignore_errors=True tra ve nhu da thanh cong, de lai dau hieu o goc, roi lan chay TypeScript ke tiep xoa ca cay — vong pha nhau tai vu trang tren duong that-bai-mot-phan, khong log khong ngoai le. CHIEU DO tren cung fixture: dat lai ignore_errors=True thi ca thu DO"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
   # AC-3 la tieu chi (cross-layer): mot nua o engine Python, mot nua o app TypeScript.
   # Mot eval mot phia la khong du — dung cai da xay ra la engine ghi mot dang, TS doc
   # mot dang khac, va MOI phia rieng le deu xanh.
@@ -67,7 +75,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_teeth
     paths: ["scripts/plugins/check-venv-layout-teeth.sh", "scripts/plugins/check-venv-layout-pinned.sh"]
-    expected: "exit 0; rang cua guard chay SAU ca xao tron tren BAN SAO va doi guard DO tung ca, moi ca mot thong diep ghim khac nhau: (1) doi doan duong dan ben Python; (2) doi doan duong dan ben TS; (3) xoa buoc don ben Python; (4) xoa buoc don ben TS; (5) XOA HAN hang duong dan ben Python — guard khong trich duoc gi, phai DO chu khong duoc so hai chuoi rong roi thoat 0; (6) XOA HAN hang ben TS, cung ly do. Hai ca cuoi la chieu fail-open ma bon ca doi-gia-tri khong phan biet duoc. In 6/6 PASS va thoat 0; kiem CA ma thoat LAN dong in — thoat 0 ma thieu dong in la rang DO"
+    expected: "exit 0; rang cua guard chay TAM ca xao tron tren BAN SAO va doi guard DO tung ca, moi ca mot thong diep ghim: (1) doi doan duong dan ben Python; (2) doi ben TS; (3) xoa TEN ham don ben Python; (4) xoa TEN ham don ben TS; (5) XOA HAN hang duong dan ben Python; (6) XOA HAN hang ben TS; (7) GIU dinh nghia, xoa CHO GOI ben Python; (8) GIU dinh nghia, xoa CHO GOI ben TS. Ca 5-6 la chieu fail-open; ca 7-8 la lo hong vong 1 tim ra — guard grep TEN ham van xanh khi chi cho goi bi xoa, luc vong pha nhau da tai vu trang. In 8/8 PASS va thoat 0; kiem CA ma thoat LAN dong in"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- B. Duong lay SDK ----------
@@ -128,5 +136,5 @@ evals:
     executor: test
     cmd: config:executors.test.hdc_unsafe_plugin_id_rejected
     paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
-    expected: "exit 0; ba id khong an toan ('../escape', '.hidden', chuoi rong) deu lam ham tinh thu muc NEM loi co ten, va sau ca thu khong co thu muc nao duoc tao ngoai goc. DOI CHUNG DUONG trong cung ca thu: mot id hop le ('oneflow-api-ffmpeg') phai tra ve duong dan nam duoi goc — assertion am tinh mot minh khong chung duoc gi"
+    expected: "exit 0; NAM id khong an toan ('../escape', 'a/b', '.hidden', chuoi rong, va 'oneflow-api-ffmpeg\\n' co xuong dong cuoi) deu lam ham tinh thu muc NEM ValueError ghim chu 'unsafe plugin id'. Ca xuong-dong la lo hong vong 1: re.match voi $ nhan newline cuoi trong khi luat JavaScript ben TS tu choi — phai dung re.fullmatch. DOI CHUNG DUONG trong cung ca thu: id hop le 'oneflow-api-ffmpeg' phai tra ve duong dan nam duoi goc"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]

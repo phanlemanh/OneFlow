@@ -41,6 +41,10 @@ c_py_drop()   { perl -pi -e 's/_remove_legacy_shared_venv/_gone_/g' "$1/$PY_REL"
 c_ts_drop()   { perl -pi -e 's/removeLegacySharedVenv/gone/g' "$1/$TS_REL"; }
 c_py_erase()  { perl -pi -e 's/"\.tongflow"\s*\/\s*"plugin-venv"/_layout()/' "$1/$PY_REL"; }
 c_ts_erase()  { perl -pi -e 's/"\.tongflow",\s*"plugin-venv"/...layout()/' "$1/$TS_REL"; }
+# Keep the definition, delete only the CALL. Round 1 found the guard stayed
+# green here while the cycle was fully re-armed.
+c_py_call_drop() { perl -pi -e 's/^(\s*)_remove_legacy_shared_venv\(root, log\)/$1pass/' "$1/$PY_REL"; }
+c_ts_call_drop() { perl -pi -e 's/^(\s*)removeLegacySharedVenv\(\);/$1;/' "$1/$TS_REL"; }
 
 run_case "python-value-changed" "the two runtimes disagree" c_py_value
 run_case "ts-value-changed"     "the two runtimes disagree" c_ts_value
@@ -48,6 +52,8 @@ run_case "python-removal-gone"  "PYTHON side lost its legacy-shared-venv removal
 run_case "ts-removal-gone"      "TYPESCRIPT side lost its legacy-shared-venv removal" c_ts_drop
 run_case "python-const-erased"  "could not be read on the PYTHON side" c_py_erase
 run_case "ts-const-erased"      "could not be read on the TYPESCRIPT side" c_ts_erase
+run_case "python-call-dropped"  "PYTHON side lost its legacy-shared-venv removal" c_py_call_drop
+run_case "ts-call-dropped"      "TYPESCRIPT side lost its legacy-shared-venv removal" c_ts_call_drop
 
-echo "$pass/6 PASS"
-[ "$fail" -eq 0 ] && [ "$pass" -eq 6 ] || exit 1
+echo "$pass/8 PASS"
+[ "$fail" -eq 0 ] && [ "$pass" -eq 8 ] || exit 1
