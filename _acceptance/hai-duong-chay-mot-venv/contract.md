@@ -5,7 +5,7 @@ slug: hai-duong-chay-mot-venv
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk]
-status: verified
+status: draft
 approved_by: Phan Le Manh
 approved_at: 2026-09-08
 design_doc: docs/superpowers/specs/2026-09-08-hai-duong-chay-mot-venv-design.md
@@ -89,6 +89,31 @@ Thiết kế đầy đủ, gồm quét không gian tiêu chí: [`docs/superpower
 - AC-10: Given một id plugin không an toàn (chứa dấu phân cách, hoặc bắt đầu bằng dấu
   chấm, hoặc rỗng), When engine tính thư mục venv cho nó, Then nó **từ chối** bằng lỗi
   có tên và không tạo thư mục nào ngoài gốc — đúng luật bên TS đã ép ở `venvDirFor`.
+
+### F. Nâng phạm vi tại Cổng 2 vòng 2 (owner duyệt 08/09)
+
+Ba tiêu chí dưới đây sinh ra từ ba mục ngoài hợp đồng mà owner chọn **sửa ngay**
+thay vì ghi Known limits. Chúng thừa nhận một điều: sau vòng 2, AC-3 và AC-4
+được *khẳng định* chứ chưa được *chứng minh*.
+
+- AC-11: Given cặp lệnh kiểm bố cục venv đã tồn tại, When một PR bất kỳ chạy CI,
+  Then cả `check-venv-layout-pinned.sh` lẫn `check-venv-layout-teeth.sh` **đều chạy**
+  như một bước của job `acceptance-gate` trong `.github/workflows/ci.yml`. Trước
+  vòng 3 chúng chỉ được gọi từ `_acceptance/config.yaml`, tức chỉ chạy trong vòng
+  verify của chính hồ sơ này — một lệnh kiểm không làm đỏ được PR tương lai thì
+  không mua được điều AC-4 tồn tại để mua. Kho đã trả giá cho đúng lỗi này một
+  lần: xem `scripts/ci/check-gate-guards-job.sh` dòng 6.
+- AC-12: **(cross-layer)** Given manifest bố cục venv, When hai runtime đọc nó, Then nó
+  **biểu diễn được** ánh xạ id → thư mục — `relative_dir` lấy từ hàm tính đường dẫn
+  chứ không lấy lại từ tên thư mục đã quan sát — và ca thử bên TypeScript **gọi
+  `venvDirFor`** để dựng cây thay vì nối chuỗi thẳng. Chiều đỏ phải bắt được: đổi
+  `venvDirFor` thêm một đoạn tiền tố thì ô đo đỏ. Trước vòng 3, bên sinh lấy cả
+  `plugin_id` lẫn `relative_dir` từ cùng một `p.name` nên ánh xạ lệch là điều
+  **không biểu diễn được**, và bên đọc chưa từng chạm hàm nắm ánh xạ ấy.
+- AC-13: Given chú thích đầu module `plugins.py`, When ai đó đọc để biết hai runtime
+  thoả thuận gì, Then nó **không** còn mô tả mô hình venv chung đã bị gỡ, và lệnh
+  kiểm ở AC-4 làm đỏ khi nó tả sai. Chú thích đầu file chính là vật mà hai bên lẽ
+  ra thoả thuận qua — để nó nói dối là dựng lại cùng một cú trôi ở tầng trên.
 
 ## Trần vòng verify (khai TRƯỚC khi vòng chạy, CLAUDE.md mục 6)
 
