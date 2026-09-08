@@ -215,6 +215,37 @@ thật trong kho hoặc từ chân ngành có tên.
 
 ## Notes
 
+### Known limits — người ký chấp nhận 09/09/2026
+
+Sáu mục **ngoài hợp đồng** còn sống sau vòng cuối. Chúng là lỗi thật, nằm ngoài
+phạm vi đã duyệt ở Cổng 1, và người ký nhận chúng thay vì nâng phạm vi lần nữa:
+
+1. `sdk/README.md` (mô tả dài của gói trên PyPI) vẫn viết *"provision a shared
+   venv"* ở dòng 30 và 43 — đúng mô hình gói này xoá. Nặng hơn thường vì AC-8
+   trích đích danh `sdk/README.md:30` làm nguồn xác thực cho chế độ nó cam kết giữ.
+2. Hai runtime nay ghi chung một thư mục venv nhưng mỗi bên một bộ nhãn cache
+   (`sdk.version` + `req-<id>.hash` bên Python; `sdk.hash` + `requirements.hash`
+   bên TypeScript). Không bên nào đọc nhãn bên kia, nên mỗi lần đổi bên là một
+   lượt cài lại. Trước gói này hai bên phá nhau; nay chúng giẫm lên nhau.
+3. Hai step lệnh kiểm mới vào job `acceptance-gate` nhưng không đăng ký trong
+   `GUARD_NEEDLES` của `check-gate-guards-job.sh`, nên hàng rào canh-hàng-rào
+   không thấy chúng. (Hàng rào ấy tự nó cũng chưa chạy trong CI — xem sổ quyết
+   định, entry `revisit`.)
+4. `docs/plugins.md:291-296` phát biểu luật cấp-phát-hỏng như luật của "the
+   platform", nhưng sau gói này engine luôn ném còn app vẫn có nhánh nới cho
+   plugin không khai `requirements.txt`. Tài liệu tác giả plugin chưa sửa theo.
+5. Preflight của engine nay là tất-cả-hoặc-không: một plugin cấp phát hỏng làm
+   hỏng cả workflow, kể cả lượt chạy mà mọi node đều trúng cache và không cần
+   interpreter nào.
+6. Không có khoá liên-tiến-trình trên thư mục venv nay dùng chung; khoá hiện có
+   là một Map trong bộ nhớ của tiến trình app, không thấy được engine.
+
+Ba mục owner đã chọn **mở hợp đồng mới** ở Cổng 2 vòng 2 (bản cloud tách đôi theo
+scope · hai bộ nhãn cache · khoá liên-tiến-trình) trùng một phần với danh sách
+trên — chúng ở lại đây như Known limits cho tới khi hồ sơ riêng của chúng mở.
+
+### Nợ có tên từ Cổng 1
+
 Nợ có tên, người ký chấp nhận cùng gói:
 
 - Bản vá engine chưa tới tay người `pip install` cho tới một chuyến phát hành SDK sau.
@@ -226,3 +257,34 @@ Dòng B4 của roadmap lệch ba chỗ so với hiện trạng, ghi lại để 
 "SDK 0.2.20" đã xảy ra qua việc khác (PyPI ở 0.2.23); "bump pin bốn plugin" không phải
 việc trong kho này; "bỏ hai `return sys.executable`" gộp hai dòng khác bản chất, chỉ
 một trong hai là lớp lỗi gói này đóng.
+
+## Amendment sau vòng cuối — 09/09/2026
+
+Nợ **trong hợp đồng** mà người ký chấp nhận, theo luật trần vòng verify ở trên.
+
+- **AC-4, phần lệnh kiểm: `grep -c` đếm cả dòng CHÚ THÍCH là chỗ gọi.**
+  `check-venv-layout-pinned.sh` đòi `py_call >= 2` để chắc có cả định nghĩa lẫn
+  một chỗ gọi thật của `_remove_legacy_shared_venv`. Nhưng biểu thức đếm mọi dòng
+  chứa tên hàm — kể cả chú thích ở dòng 58 nói *"only the CALL SITE is deleted"*.
+  Xoá chỗ gọi thật mà để lại chú thích thì lệnh kiểm vẫn xanh. Đo ở vòng 6.
+  Đây là hình dạng **đo chỉ dẫn thay vì đo đầu ra**, cùng họ với ba lỗ trước của
+  chính lệnh kiểm này. Cách sửa đã biết và rẻ (loại dòng bắt đầu bằng `#` trước
+  khi đếm, hoặc lọc theo dòng thi hành như `check-gate-guards-job.sh` làm), nhưng
+  nó nằm ngoài trần vòng đã khai.
+
+  **Hai ca thử Python của AC-1/AC-2 không mang khuyết điểm này** — chúng dùng đẳng
+  thức và đã đo chiều đỏ tận tay. Điều bị nợ chỉ là **nửa lệnh-kiểm** của AC-4.
+
+### Điều sáu vòng đo được về chính bộ đo
+
+Sáu vòng, mọi vòng mọi ô đo xanh, mọi vòng hội đồng tìm ra lỗi thật. Sản phẩm hội
+tụ sau vòng 3; ba vòng cuối chỉ tìm ra phép đo yếu, và cả ba lần ở **cùng một công
+cụ** — lệnh kiểm bash dựng bằng `grep`. Nó đã bị bắt yếu ở bốn cách khác nhau:
+grep đúng giá trị đang mong đợi · thiếu chỗ gọi · step bị chú thích hoá · chú thích
+đếm thành chỗ gọi.
+
+Kết luận để lại cho hồ sơ sau: **`grep` trên văn bản không cõng nổi một tiêu chí
+nghiệm thu.** Lối «đổi khuôn» — chuyển khẳng định sang một ca thử thật, nơi tệp
+vắng là LỖI và quan hệ được so bằng đẳng thức — là lối đúng, và nó bị bỏ qua ở
+vòng 3 theo khuyến nghị của máy. Khuyến nghị ấy sai.
+
