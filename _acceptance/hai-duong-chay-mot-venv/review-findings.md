@@ -1,105 +1,81 @@
-# Review Findings: hai-duong-chay-mot-venv (round 3)
+# Review Findings: hai-duong-chay-mot-venv (round 4)
 
 ## Trong hợp đồng
 
-### The guard's own CI-wiring assertion (AC-11) silently skips when ci.yml is absent, and the teeth suite does not cover that path
-- file: `scripts/plugins/check-venv-layout-pinned.sh:102`
-- severity: low
+### AC-11 CI-wiring assertion stays green when the CI step is commented out (fail-open, same class the repo already fixed once)
+- file: `scripts/plugins/check-venv-layout-pinned.sh:114`
+- severity: high
 - AC: AC-11
 - source: bugs
 
-The AC-11 block is wrapped in `if [ -f "$CI" ]; then ... fi`. When `.github/workflows/ci.yml` is missing or has been moved/renamed, the whole "is this guard actually wired into CI?" check is skipped and the script still prints OK and exits 0 — the silent-green the file's own header says it exists to end.
+`grep -qE "run:.*scripts/plugins/$script" "$CI"` greps the RAW ci.yml, not the `run:` lines of a real step in a job that actually runs. MEASURED on this tree: copy `plugins.py`, `plugin-python-env.server.ts` and `ci.yml` into a temp root, prefix both the `- name:` and the `run:` lines of the two venv-layout steps with `# `, then run `bash scripts/plugins/check-venv-layout-pinned.sh --root <wd>` -> prints "OK: both runtimes pin the same venv root" and exits 0, while nothing runs in CI. The teeth suite does not cover it: `c_ci_drop` rewrites `run: bash ...` to `run: true` (value change) and `c_ci_missing` deletes the file (round-3 hole, fixed by ec9849c); the "present as text, absent as a step" vector is untested.
 
-The teeth suite does not catch it: `c_ci_drop` rewrites the `run:` line to `run: true` but leaves the file in place, so the deletion/rename case is untested. A `[ -f "$CI" ] || { echo "FAIL: missing $CI"; exit 1; }` (matching how `$PY` and `$TS` are handled at line 22-24) plus a twelfth teeth case that `rm`s the file would close it.
+This is precisely the reproduction the repo already recorded and closed elsewhere: `scripts/ci/check-gate-guards-job.sh` shape mode says "replacing a step with `# TODO: bat lai bash ...synced.sh readme` left this mode green while nothing ran (reproduced 2026-09-02)", and fixes it by piping the job block through `sed -n 's|^[[:space:]]*run:[[:space:]]*||p'` before grepping. The new guard reintroduces the pattern. The same hole also lets the steps be moved under an `if:`/`needs:` that never fires — `check-gate-guards-job.sh reachable` guards that for the acceptance-gate job, but nothing guards it for these two new steps because they were never added to `GUARD_NEEDLES` in `scripts/ci/check-gate-guards-job.sh`.
 
-Rationale: AC-11's own contract text says its purpose is to make the CI-wiring assertion fail-closed against future drift; a demonstrated silent skip when ci.yml is missing is a direct failure of that stated guarantee.
+Fix: extract the acceptance-gate job block by indentation, strip to `run:` lines, then match — and add a 13th teeth case that comments the step out.
 
-### Hình dạng 5 — tuyên quét LỚP fail-open nhưng ma trận chiều đỏ thiếu ô «ci.yml vắng mặt»: guard AC-11 tự tắt và vẫn xanh
-- file: `scripts/plugins/check-venv-layout-pinned.sh:102`
+### Hình dạng 3 — assert "chuỗi có mặt" trong khi lời hứa AC-9 là QUAN HỆ giữa interpreter và venv của plugin
+- file: `sdk/tests/test_plugin_venv_layout.py:246`
 - severity: high
+- AC: AC-9
+- source: measurement
+
+E10 hứa "moi gia tri nam trong venv cua chinh plugin do" và E10b hứa interpreter truyền cho từng node "BANG dung pythons[plugin_id cua node do]". Nhưng cả hai chỗ chỉ assert `assert pid in py` (dòng 246 trong test_returns_one_interpreter_per_plugin_not_one_for_all, và dòng 389 trong test_runner_calls_each_plugin_with_its_own_interpreter) — tức chuỗi plugin id có xuất hiện đâu đó trong chuỗi đường dẫn, không phải quan hệ `py == str(P._venv_python(P._venv_dir(P._venv_root(data_dir), pid)))`. Hàm tính quan hệ đó có sẵn ngay trong module (`_venv_dir` + `_venv_python`), và chính nửa TypeScript của gói này đã dùng kỷ luật bằng-đúng (`expect(dir).toBe(join(root, e.relative_dir))`), nên đây là lệch chuẩn trong cùng một gói.
+
+Đã đo (không suy diễn): sửa `prepare_python_env` thành `pythons[pid] = str(plugins_dir / pid / "python")` — một interpreter nằm HOÀN TOÀN ngoài cây plugin-venv, không thuộc venv nào — rồi chạy đúng hai node-id của E10 và E10b: `2 passed in 0.04s`. Baseline không sửa: `16 passed`. Nghĩa là hai ô đo của AC-9 vẫn xanh khi lời hứa "interpreter nằm trong venv của chính plugin" bị phá hoàn toàn; chúng chỉ còn chứng minh được `a != b` (hai chuỗi khác nhau) chứ không chứng minh được chuỗi nào trỏ vào venv nào.
+
+### Hình dạng 4 — khẳng định âm-tính-một-mình cho AC-13: guard chỉ cấm MỘT cụm chữ, không hề đối chứng dương rằng mô tả đúng còn đó
+- file: `scripts/plugins/check-venv-layout-pinned.sh:84`
+- severity: medium
+- AC: AC-13
+- source: measurement
+
+AC-13 được đo bằng hai lệnh grep phủ định duy nhất: dòng 84 `grep -q 'provision a shared venv'` trên 30 dòng đầu, và dòng 90 `grep -qE '^# --- shared venv'`. Không có bất kỳ khẳng định dương nào rằng docstring/banner thực sự mô tả mô hình một-venv-mỗi-plugin. Ca răng `c_py_doc_stale` chỉ thay đúng cụm `provision ONE VENV PER PLUGIN` -> `provision a shared venv`, tức chỉ thử lại đúng cái perturbation mà guard được viết ra để bắt; nó không phân biệt được "mô tả đúng" với "không có mô tả nào".
+
+Đã đo trên bản sao cây: thay TRỌN docstring module bằng `"""Plugin preflight: provisions a single shared virtualenv for all plugins."""` (đúng mô hình cũ mà AC-13 nói phải biến mất) và đổi banner `# --- per-plugin venv` thành `# --- venv`, rồi chạy `bash scripts/plugins/check-venv-layout-pinned.sh --root <bản sao>` -> in `OK: both runtimes pin the same venv root...`, EXIT=0. Xoá hẳn docstring cũng xanh. Vậy phép đo của AC-13 chỉ cấm được một chuỗi ký tự cụ thể, không đo được điều nó tuyên: "header là artifact hai runtime thoả thuận qua, và một header sai là cùng loại drift một tầng trên".
+
+### Hình dạng 3 — AC-11 hứa "guard chạy trên PR thường" nhưng chỉ assert một chuỗi có mặt trong ci.yml
+- file: `scripts/plugins/check-venv-layout-pinned.sh:114`
+- severity: medium
 - AC: AC-11
 - source: measurement
 
-Guard mở đầu bằng học thuyết fail-closed (dòng 8-9: «a side that yields nothing is an error, not a match») và ép đúng điều đó cho hai phía Python/TS: thiếu tệp → `exit 1` (dòng 22-25), trích ra rỗng → `exit 1` (dòng 39-49). Nhưng khối AC-11 ở dòng 102 lại bọc trong `if [ -f "$CI" ]; then ... fi` — không có nhánh `else`, không thoát khác 0. ĐÃ ĐO trên cây này: dựng một root chỉ có `sdk/tongflow/engine/plugins.py` + `src/lib/plugins/plugin-python-env.server.ts` (không có `.github/workflows/ci.yml`) rồi chạy `bash scripts/plugins/check-venv-layout-pinned.sh --root <wd>` → in «OK: both runtimes pin the same venv root» và EXIT=0. Tức là xoá/đổi tên tệp workflow — đúng cách mất nối dây mà AC-11 sinh ra để chặn — làm khẳng định AC-11 biến mất trong im lặng.
+Dòng 114 đo tự-đấu-dây bằng `grep -qE "run:.*scripts/plugins/$script" "$CI"` — chuỗi xuất hiện Ở BẤT KỲ ĐÂU trong ci.yml. Lời hứa của AC-11 (theo E12) là hành vi: step thực sự chạy trên một PR thường. Grep phẳng không phân biệt được một step sống với một dòng bị comment, một step nằm trong job có `if: false`, hay một dòng nằm trong khối chú thích. Kho này đã có cách đo đúng cho chính chuyện đó — `scripts/ci/check-gate-guards-job.sh` (và `check-vitest-job.sh`) parse khối job THEO THỤT LỀ chứ không grep — nên guard mới đi chệch chuẩn sẵn có.
 
-Bộ răng (`check-venv-layout-teeth.sh`) khai chính lớp này ở đầu tệp: «Cases 5 and 6 are the ones the four value-changing cases cannot see: a guard that extracts NOTHING ... exits 0. That is the failure mode this whole feature is about.» Đúng theo lớp đó thì mỗi nguồn guard đọc phải có MỘT ca xoá-hẳn: Python có `python-const-erased`, TS có `ts-const-erased`, nhưng nguồn thứ ba (ci.yml) chỉ có `ci-step-dropped` (dòng 66) — ca này chỉ đổi `run: bash scripts/plugins/check-venv-layout-pinned.sh` thành `run: true` trên BẢN SAO, tức ca đổi-giá-trị, không phải ca vắng-mặt. Số ca của lớp «fail-open khi nguồn biến mất» là 2 trong khi số phần tử là 3. Chạy `bash scripts/plugins/check-venv-layout-teeth.sh` in 11/11 PASS, EXIT=0 — bộ răng xanh trọn vẹn trong khi lỗ này còn nguyên.
-
-Rationale: Measured evidence shows the exact guard built to enforce AC-11 exits 0 silently when ci.yml is missing, directly contradicting AC-11's stated purpose of making CI-wiring loss turn a PR red.
+Đã đo trên bản sao cây: comment hai dòng của step pinned trong ci.yml (`        # run: bash scripts/plugins/check-venv-layout-pinned.sh`), rồi chạy `bash scripts/plugins/check-venv-layout-pinned.sh --root <bản sao>` -> `OK: ...`, EXIT=0. Hai ca răng về CI (`ci-step-dropped` đổi thành `run: true`, `ci-file-missing` xoá hẳn tệp) chỉ phủ hướng XOÁ chuỗi, nên chiều "vô hiệu hoá step mà giữ chuỗi" không có ca nào chạm tới.
 
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây là thật, nhưng nằm ngoài phạm vi đã duyệt ở Cổng 1 — người quyết, máy không tự sửa.
 
-- **sdk/README.md (the PyPI long description) still documents the removed shared-venv model**
-  Người dùng thấy gì: Tài liệu SDK công khai xuất bản trên PyPI vẫn mô tả cách cấp phát môi trường cũ (một môi trường dùng chung), nên người dùng cài SDK từ PyPI có thể làm theo hướng dẫn lỗi thời và gặp lỗi cấu hình.
-  file: `sdk/README.md`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Eval E5 still declares 8 teeth cases while the command it runs now prints 11/11**
-  Người dùng thấy gì: Một phép đo tự động dùng để xác nhận bộ kiểm chất lượng của tính năng còn hoạt động đúng đang so khớp với một kết quả cũ, nên lần kiểm tiếp theo có thể báo sai kết quả mà không ai để ý.
+- **E3a/E3b mô tả cơ chế "engine xuất manifest → TS đọc" không tồn tại; fixture là file gõ tay và E3a không khai nó trong paths**
+  Người dùng thấy gì: Tài liệu mô tả nội bộ của bộ kiểm thử tự động nói sai cách hai phần hệ thống trao đổi dữ liệu bố cục, nên một thay đổi liên quan trong tương lai có thể không được kiểm tra lại đầy đủ và lỗi có thể lọt qua mà không ai biết.
   file: `_acceptance/hai-duong-chay-mot-venv/evals.yaml`
   severity: medium
   Đề xuất: known-limits
 
-- **Plugin id from the workflow file is used to build a clone path before any validation**
-  Người dùng thấy gì: Nếu tên một plugin trong một luồng công việc được nhập vào không hợp lệ (ví dụ chứa ký tự đường dẫn lạ), hệ thống có thể tải plugin đó về sai vị trí trên máy trước khi phát hiện và chặn tên không hợp lệ.
-  file: `sdk/tongflow/engine/plugins.py`
+- **expected của E13 còn ghim "MUOI MOT ca rang" trong khi bộ răng nay có 12 ca — chính lớp đếm-chết vòng 3 đã bắt ở E5**
+  Người dùng thấy gì: Tài liệu kiểm thử ghi sai số lượng ca kiểm tra trong phần mô tả, khiến người đọc báo cáo khó biết chắc bộ kiểm tra đã chạy đủ hay chưa — không ảnh hưởng đến việc phần mềm chạy đúng hay sai.
+  file: `_acceptance/hai-duong-chay-mot-venv/evals.yaml`
   severity: medium
-  Đề xuất: new-contract
+  Đề xuất: known-limits
 
-- **New checkout-install path is cached by SDK version, while the mirrored TS twin caches by pyproject hash**
-  Người dùng thấy gì: Khi chạy công cụ từ mã nguồn phát triển (chưa phải bản chính thức), thêm một thư viện phụ thuộc mới cho công cụ có thể không được cài lại cho các plugin đã cấp phát trước đó, khiến plugin lỗi khi chạy mà không có cảnh báo rõ ràng.
+- **pluginId from the workflow file reaches `git clone` and a filesystem path before the validation this diff added**
+  Người dùng thấy gì: Một mã định danh plugin không hợp lệ vẫn có thể khiến hệ thống thử tải dữ liệu về sai vị trí trước khi bị từ chối, tạo rủi ro bảo mật nhỏ nếu nội dung workflow bị chỉnh sửa bởi người khác.
   file: `sdk/tongflow/engine/plugins.py`
   severity: medium
   Đề xuất: known-limits
 
-- **SDK install is cached on __version__ but the new checkout branch installs content that __version__ does not identify**
-  Người dùng thấy gì: Một thay đổi trong các thư viện phụ thuộc nội bộ của công cụ có thể không được áp dụng lại cho các plugin đã cấp phát khi chạy từ mã nguồn phát triển, khiến plugin gặp lỗi khó hiểu khi chạy thay vì được cài đặt lại đúng cách.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: high
-  Đề xuất: known-limits
-
-- **Both runtimes now write the same per-plugin venv with different cache markers, so each silently overwrites the other's SDK**
-  Người dùng thấy gì: Khi hai chương trình khác nhau cùng cấp phát môi trường cho cùng một plugin, mỗi bên có thể ghi đè lên môi trường bên kia vừa cài, khiến plugin chạy với phiên bản công cụ không như mong đợi mà không có cảnh báo.
+- **Both runtimes now write the same per-plugin venv with divergent cache markers and no cross-process lock**
+  Người dùng thấy gì: Khi hai phần của hệ thống chạy đồng thời trên cùng máy, việc chuẩn bị môi trường cho một plugin có thể bị chồng lấn nhau, khiến plugin đó lỗi khi chạy và cần cài đặt lại — sự cố hiếm gặp nhưng khó chẩn đoán.
   file: `sdk/tongflow/engine/plugins.py`
   severity: medium
   Đề xuất: known-limits
 
-- **pluginId from workflow JSON is concatenated into a filesystem path and a git URL without the validation the same module now applies to venv paths**
-  Người dùng thấy gì: Nếu tên một plugin được nhập vào không hợp lệ, hệ thống có thể tải plugin đó về từ một địa chỉ và ghi vào một vị trí trên máy nằm ngoài khu vực dự kiến, trước khi phát hiện tên không hợp lệ.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: medium
-  Đề xuất: new-contract
-
-- **The now-shared per-plugin venv has no cross-process lock; TypeScript's serialization is in-process only**
-  Người dùng thấy gì: Nếu hai chương trình cùng cấp phát môi trường cho cùng một plugin cùng lúc, quá trình cài đặt có thể chồng chéo và để lại một môi trường cài dở, khiến plugin báo lỗi khi chạy mà không rõ nguyên nhân.
-  file: `sdk/tongflow/engine/plugins.py`
-  severity: medium
-  Đề xuất: known-limits
-
-- **Legacy-venv detection diverges between the two runtimes: Python uses is_file(), TypeScript uses existsSync()**
-  Người dùng thấy gì: Trong một tình huống hiếm khi dữ liệu trên đĩa bị hỏng theo cách bất thường, hai chương trình có thể nhận định khác nhau về việc môi trường cũ cần dọn hay không, khiến toàn bộ môi trường đã cấp phát cho các plugin bị xoá ngoài ý muốn.
-  file: `sdk/tongflow/engine/plugins.py`
+- **E11's expected text pins eleven teeth cases while the same string demands 12/12**
+  Người dùng thấy gì: Tài liệu kiểm thử ghi sai số lượng ca kiểm tra trong phần mô tả, khiến người đọc báo cáo khó biết chắc bộ kiểm tra đã chạy đủ hay chưa — không ảnh hưởng đến việc phần mềm chạy đúng hay sai.
+  file: `_acceptance/hai-duong-chay-mot-venv/evals.yaml`
   severity: low
   Đề xuất: known-limits
 
-- **run_workflow's docstring still documents the removed shared venv, and the new AC-13 guard only inspects plugins.py**
-  Người dùng thấy gì: Một đoạn ghi chú giải thích cách hệ thống hoạt động ở một vị trí khác trong mã nguồn vẫn mô tả cách làm cũ đã bị thay thế, có thể khiến người đọc sau này hiểu sai cách hai phần hệ thống phối hợp.
-  file: `sdk/tongflow/engine/runner.py`
-  severity: low
-  Đề xuất: known-limits
-
-- **Hình dạng 5 — E8 khai HAI ca cho AC-7 nhưng lệnh chỉ chạy MỘT node-id, ca A («pip trả khác 0 vì lý do bất kỳ») không tồn tại**
-  Người dùng thấy gì: Phép đo dùng để xác nhận rằng lỗi cấp phát môi trường luôn được báo rõ ràng hiện chỉ kiểm tra một trong hai tình huống lỗi đã cam kết, nên nếu tình huống còn lại bị hỏng trong tương lai, phép đo có thể không phát hiện ra.
-  file: `_acceptance/hai-duong-chay-mot-venv/evals.yaml`
-  severity: high
-  Đề xuất: known-limits
-
-- **Hình dạng 5 — E5 ghim «In 8/8 PASS» cho bộ răng nay đã 11 phần tử: khẳng định đếm chết, chỉ còn mã thoát được đọc**
-  Người dùng thấy gì: Một phép đo tự động dùng để xác nhận bộ kiểm chất lượng của tính năng còn hoạt động đúng đang so khớp với một kết quả cũ, nên lần kiểm tiếp theo có thể báo sai kết quả mà không ai để ý.
-  file: `_acceptance/hai-duong-chay-mot-venv/evals.yaml`
-  severity: medium
-  Đề xuất: known-limits
-
-⚠ Cụm ngoài vùng phủ: 4/14 lỗi rơi vào file không bộ đo nào phủ (sdk/README.md, _acceptance/hai-duong-chay-mot-venv/evals.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
+⚠ Cụm ngoài vùng phủ: 3/9 lỗi rơi vào file không bộ đo nào phủ (_acceptance/hai-duong-chay-mot-venv/evals.yaml) — dừng và quyết: mở rộng hợp đồng hay rút phạm vi.
