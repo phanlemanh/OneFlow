@@ -50,7 +50,7 @@ evals:
     executor: test
     layer: backend-effect
     cmd: config:executors.test.hdc_ts_keeps_per_plugin_venvs
-    paths: ["src/lib/plugins/plugin-python-env.server.ts", "src/lib/plugins/plugin-venv-layout.test.ts"]
+    paths: ["src/lib/plugins/plugin-python-env.server.ts", "src/lib/plugins/plugin-python-env.test.ts", "sdk/tests/fixtures/venv-layout-manifest.json"]
     expected: "exit 0; NAP manifest do E3a xuat ra (khong go tay cay thu muc — fixture go tay dung khuon ben doc mong doi thi khong bat duoc ca hai phia trot khoi nhau ve anh xa id -> ten thu muc), dung lai dung cay ay, goi removeLegacySharedVenv() roi khang dinh MOI muc trong manifest VAN CON. CHIEU DO tren cung fixture: them pyvenv.cfg vao goc thi ca thu DO vi ca hai thu muc con bi xoa — do la trang thai truoc goi nay. CHIEU DO thu hai: doi anh xa id -> thu muc o phia Python thi E3b DO voi thong diep ghim ten thu muc lech"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
