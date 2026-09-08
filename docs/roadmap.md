@@ -162,8 +162,10 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 **Xếp lại sau**
 | slug | vì sao đông lạnh | nhánh |
 |---|---|---|
-| director-v2 | D1 D2 D4 sau lát cắt; D0 hạ cánh ở B3 | feat/director-wire-shape |
+| director-v2 | D1 D2 D4 sau lát cắt; D0 đã hạ cánh ở B3 và ký Cổng Giá trị 08/09 | — |
 | timeline-view | cơ hội chưa điền, không trên đường ★ | — |
+| luot-hong-khong-lan-nguoc-duoc | Ngoài-2 của D0, owner định đoạt «mở hợp đồng mới» tại Cổng 2 ngày 08/09: lượt Director bị lỗi được ghi bằng một mã lượt vứt đi và kind ở nguyên generated, không bao giờ thành failed, nên không lần ngược được về yêu cầu đã hỏng. Băng tới mốc tái hoạch 09/10 | — |
+| bao-ket-cuc-sai-khi-dan-that-bai | Ngoài-6 của D0, owner định đoạt «mở hợp đồng mới» tại Cổng 2 ngày 08/09: khi việc dán kế hoạch lên khung vẽ thất bại bên trong và lỗi bị nuốt, sổ vẫn ghi kết cục là đã nhận hoặc đã thay — người dùng thấy lỗi mà bản ghi nói thành công. Băng tới mốc tái hoạch 09/10 | — |
 | staleness-ho-so-thieu-paths | lỗ cổng đo được 31/08, giả thuyết chưa kiểm; mọi hồ sơ của kế hoạch khai đủ paths | — |
 | roadmap-alias-guard | nháp 10 tiêu chí và 9 phép đo, hạ tầng cổng | chore/roadmap-alias-guard |
 | bo-phan-loai-token | nháp, phục vụ đường lồng tiếng ngoài lát cắt | draft/bo-phan-loai-token |
