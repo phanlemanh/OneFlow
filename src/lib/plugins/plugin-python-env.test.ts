@@ -54,7 +54,16 @@ describe("venvDirFor", () => {
     it.each(["../../etc", "..", ".ssh", "a/b", "a\\b", ""])(
         "refuses %j, which would escape the venv root",
         (bad) => {
-            expect(() => venvDirFor(bad)).toThrow();
+            // Pin the message, as the Python twin does. A bare toThrow() cannot
+            // tell "rejected this id" from "crashed for an unrelated reason",
+            // which is the same negative-assertion-alone shape this package
+            // spent five verify rounds learning to avoid.
+            expect(() => venvDirFor(bad)).toThrow(/unsafe plugin id/);
+            // Positive control in the same case: the rule must still admit a
+            // real id, or a function that rejected everything would pass.
+            expect(
+                venvDirFor("oneflow-api-ffmpeg").endsWith("oneflow-api-ffmpeg"),
+            ).toBe(true);
         },
     );
 });

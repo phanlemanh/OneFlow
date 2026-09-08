@@ -242,8 +242,15 @@ def test_returns_one_interpreter_per_plugin_not_one_for_all(
         "both plugins share one interpreter — the whole point of the per-plugin "
         f"layout is lost at the call site ({a})"
     )
+    # EQUALITY, not `pid in py`. The substring form was measured green against an
+    # interpreter that belonged to no venv at all (`plugins_dir/<pid>/python`):
+    # the id appears in the string, so the assertion held while the promise did
+    # not. The promise is a RELATION — this interpreter is the one inside THIS
+    # plugin's venv — so the assertion has to name that relation.
+    root = P._venv_root(tmp_path / "data")
     for pid, py in pythons.items():
-        assert pid in py, f"{pid} runs an interpreter from another plugin's venv"
+        want = str(P._venv_python(P._venv_dir(root, pid)))
+        assert py == want, f"{pid}: got {py}, want the interpreter in its own venv {want}"
 
 
 def test_auto_install_false_keeps_the_ambient_interpreter(
@@ -385,8 +392,12 @@ def test_runner_calls_each_plugin_with_its_own_interpreter(
         "both nodes ran the same interpreter — the per-plugin layout is built "
         f"but not used at the call site ({seen[0][1]})"
     )
+    # Same reason as above: compare against the mapping this test claims runner
+    # consults, not against a substring of it.
+    root = P._venv_root(tmp_path / "data")
     for pid, py in seen:
-        assert pid in py, f"{pid} ran an interpreter from another plugin's venv"
+        want = str(P._venv_python(P._venv_dir(root, pid)))
+        assert py == want, f"{pid}: got {py}, want the interpreter in its own venv {want}"
 
 
 def test_a_failed_legacy_removal_raises_instead_of_provisioning_on_top(
