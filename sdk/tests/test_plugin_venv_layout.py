@@ -209,3 +209,168 @@ def test_a_missing_published_version_names_both_ways_out(
         "a version missing from the index must name both ways out; an exit code "
         "alone leaves the reader stuck"
     )
+
+
+def test_returns_one_interpreter_per_plugin_not_one_for_all(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.setattr(P, "_run", _fake_run([]))
+    pythons = P.prepare_python_env(
+        TWO_IDS,
+        tmp_path / "plugins",
+        tmp_path / "data",
+        auto_install=True,
+        log=lambda _m: None,
+    )
+
+    assert set(pythons) == set(TWO_IDS)
+    a, b = pythons[TWO_IDS[0]], pythons[TWO_IDS[1]]
+    assert a != b, (
+        "both plugins share one interpreter — the whole point of the per-plugin "
+        f"layout is lost at the call site ({a})"
+    )
+    for pid, py in pythons.items():
+        assert pid in py, f"{pid} runs an interpreter from another plugin's venv"
+
+
+def test_auto_install_false_keeps_the_ambient_interpreter(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The documented mode (sdk/README.md:30) the owner kept on 2026-09-08.
+
+    It is also the positive control for the test above: if someone removes this
+    branch while draining the silent fallback, this goes red.
+    """
+    monkeypatch.setattr(P, "_run", _fake_run([]))
+    data = tmp_path / "data"
+    pythons = P.prepare_python_env(
+        TWO_IDS,
+        tmp_path / "plugins",
+        data,
+        auto_install=False,
+        log=lambda _m: None,
+    )
+
+    assert pythons == {pid: sys.executable for pid in TWO_IDS}
+    assert not data.exists(), "auto_install=False must provision nothing"
+
+
+def _two_plugin_workflow(tmp_path: Path) -> tuple[Path, dict]:
+    """A workflow whose two executable nodes belong to two DIFFERENT plugins.
+
+    One plugin cannot show the bug: with a single id, "the interpreter for this
+    node" and "the one interpreter" are the same string.
+    """
+    plugins_dir = tmp_path / "plugins"
+    entry = (
+        "import json, sys\n"
+        'payload = json.loads(sys.stdin.read())\n'
+        'print(json.dumps({"success": True, "text": "x"}))\n'
+    )
+    for pid in TWO_IDS:
+        d = plugins_dir / pid
+        d.mkdir(parents=True)
+        (d / "entry.py").write_text(entry, encoding="utf-8")
+
+    dn = "dn-1"
+    nodes = [
+        {
+            "id": f"exec-{i}",
+            "type": "textNode",
+            "feature": "gen-text",
+            "pluginId": pid,
+            "bindings": {
+                "text": {
+                    "kind": "handle",
+                    "consumerShape": "scalar",
+                    "sources": [{"fromNodeId": dn, "fromField": "texts"}],
+                    "targetHandle": "in:text",
+                }
+            },
+            "outputs": [
+                {
+                    "sourceField": "text",
+                    "nodeType": "textNode",
+                    "dataField": "texts",
+                    "expandEach": False,
+                }
+            ],
+            "dependencies": [dn],
+            "level": 1,
+        }
+        for i, pid in enumerate(TWO_IDS)
+    ]
+    workflow = {
+        "name": "two-plugins",
+        "version": "1.0",
+        "inputs": [],
+        "outputs": [{"name": "out", "nodeId": "exec-0", "field": "text"}],
+        "dataNodes": [
+            {
+                "id": dn,
+                "type": "addTextNode",
+                "dataType": "text",
+                "isInput": True,
+                "inputName": "in_text",
+                "staticData": {"texts": ["hello"]},
+                "level": 0,
+            }
+        ],
+        "executableNodes": nodes,
+        "executionLevels": [[dn], [n["id"] for n in nodes]],
+        "dataNodeEdges": [],
+    }
+    return plugins_dir, workflow
+
+
+def test_runner_calls_each_plugin_with_its_own_interpreter(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The SECOND half of AC-9, which the test above cannot see.
+
+    A refactor can return a correct dict and still pass one interpreter to every
+    node — `python=next(iter(pythons.values()))` — and only a real run catches it.
+    """
+    from tongflow.engine import runner as R
+
+    plugins_dir, workflow = _two_plugin_workflow(tmp_path)
+    monkeypatch.setattr(P, "_run", _fake_run([]))
+    monkeypatch.setattr(
+        R,
+        "scan_manifest",
+        lambda _pd, _abi: {
+            "plugins": {
+                pid: {
+                    "localSubdir": pid,
+                    "entryFile": "entry.py",
+                    "methodsByNodeSlot": {"gen-text": {"methodName": "gen_text"}},
+                    "needsDeploy": False,
+                }
+                for pid in TWO_IDS
+            }
+        },
+    )
+
+    seen: list[tuple[str, str]] = []
+
+    def spy(**kw):
+        seen.append((kw["plugin_id"], kw["python"]))
+        return {"success": True, "text": "x"}
+
+    monkeypatch.setattr(R, "invoke_plugin", spy)
+
+    R.run_workflow(
+        workflow,
+        plugins_dir=plugins_dir,
+        data_dir=tmp_path / "data",
+        abi_path=None,
+        auto_install=True,
+    )
+
+    assert len(seen) == 2, f"expected both nodes to run, saw {seen}"
+    assert seen[0][1] != seen[1][1], (
+        "both nodes ran the same interpreter — the per-plugin layout is built "
+        f"but not used at the call site ({seen[0][1]})"
+    )
+    for pid, py in seen:
+        assert pid in py, f"{pid} ran an interpreter from another plugin's venv"
