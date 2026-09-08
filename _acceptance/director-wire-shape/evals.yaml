@@ -162,3 +162,20 @@ evals:
     expected: "Ty le mo coi < 10%, va ba kind outcome deu co mat. Day la nua ma script KHONG do duoc: chi UI goi /api/director/feedback. Neu mot kind vang mat thi mot nhanh quyet dinh khong duoc noi day — nhanh `discarded` la de sot nhat vi no di qua onOpenChange chu khong qua rieng nut Cancel"
     inputs: ["_acceptance/director-wire-shape/evidence/e14-2026-08-26.md", "_acceptance/director-wire-shape/evidence/e14-d0-2026-08-26.json", "_acceptance/director-wire-shape/contract.md"]
     evidence_required: [verifier, verified_at, output, notes]
+
+  - id: E15
+    criterion: AC-14
+    executor: test
+    cmd: config:executors.test.dws_outcome_not_reported_while_staged
+    paths: ["src/components/workspace/director-prompt.tsx"]
+    expected: "exit 0; dung ho thoai THAT cua Radix trong jsdom: sau khi mot ke hoach duoc dan len va ho thoai xac nhan mo ra, reportOutcome CHUA duoc goi lan nao. SUPPRESSION half da do: tren ban truoc goi sua nay ca do — no goi 1 lan voi 'staged'"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-15
+    executor: test
+    cmd: config:executors.test.dws_one_outcome_per_decision
+    paths: ["src/components/workspace/director-prompt.tsx"]
+    expected: "exit 0; ba nhanh quyet dinh, moi nhanh DUNG MOT loi goi va dung kind: xac nhan -> ('run-1','replaced'), huy -> ('run-1','discarded'), Escape -> ('run-1','discarded'); cong them nhanh canvas rong -> ('run-1','accepted'). SUPPRESSION half da do: tren ban truoc goi sua, xac nhan goi 3 lan va huy/Escape goi 2 lan"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+

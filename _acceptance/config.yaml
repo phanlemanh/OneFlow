@@ -343,6 +343,11 @@ executors:
     dws_expect_count_unchanged: "bash scripts/acceptance/dws-expect-count.sh"
     dws_barrel_export: "bash scripts/acceptance/dws-barrel-export.sh"
     dws_no_prompt_in_prod_log: "bash scripts/acceptance/dws-no-prompt-in-prod-log.sh"
+    # director-wire-shape phan D (nang pham vi tai Cong 2, 08/09): duong ghi ket
+    # cuc tu giao dien. Chay ho thoai Radix that trong jsdom — hai su that nay la
+    # su that VE DAY NOI, khong ham thuan nao nhin thay duoc.
+    dws_outcome_not_reported_while_staged: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'reports nothing while the plan is only staged'"
+    dws_one_outcome_per_decision: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'exactly once'"
     # --- cong-tu-canh-minh (31/08) ---
     # Bo kiem ban do + rang cua no. Dat o scripts/ci/ chu khong scripts/roadmap/
     # hay scripts/acceptance/ vi gia re-pin: 0 vs 1 vs 2 ho so (do tren paths da

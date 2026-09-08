@@ -82,6 +82,24 @@ Mốc so sánh: EVAL-0 26/08 cho **26/30 (86,7%)**, p95 **75,1s**, trên
   vào log luôn-bật; kỷ luật `logger.debug` chỉ ở development (`director.server.ts:271-276`)
   giữ nguyên. Cột `promptText` trong db là chuyện khác — nó nằm trên máy người dùng.
 
+### D. Đường ghi kết cục từ giao diện (nâng phạm vi 08/09, Cổng 1 duyệt lại)
+
+Hai tiêu chí này vào hợp đồng ở Cổng 2 ngày 08/09 theo lối «nâng phạm vi sửa ngay»: vòng 3 cho
+thấy nửa giao diện của AC-5 không thể đạt, nên E14b không chấm được và hồ sơ không ký được.
+Chúng nói về thứ CLIENT gửi đi; nửa máy chủ của cùng lời hứa vẫn là AC-5.
+
+- AC-14: Given canvas đã có node và một lượt Director vừa trả kế hoạch, When hộp thoại xác nhận
+  mở ra mà người dùng chưa quyết gì, Then client **chưa** gửi kết cục nào. Một lượt chỉ rời
+  `generated` đúng một lần (AC-5), nên tiêu lượt vá ấy cho việc «hộp thoại đã mở» làm quyết định
+  thật của người dùng vĩnh viễn không ghi được: mọi báo cáo sau đó bị từ chối 409 và bị nuốt lặng
+  vì đường gửi là bắn-rồi-quên. Kế hoạch không ai quyết thì ở nguyên `generated`, và đó đúng là
+  thứ ngưỡng tỉ lệ mồ côi đang đếm.
+- AC-15: Given hộp thoại xác nhận đang mở, When người dùng bấm xác nhận, hoặc huỷ, hoặc nhấn
+  Escape, Then client gửi **đúng một** kết cục cho lượt đó, và kết cục ấy khớp với hành động
+  (`replaced` khi xác nhận, `discarded` khi huỷ hay Escape). Nút xác nhận của thư viện hộp thoại
+  đồng thời là nút đóng, nên một cú bấm chạy cả nhánh xác nhận lẫn nhánh đóng; hai báo cáo mâu
+  thuẫn cho cùng một lượt sẽ đua nhau và cái tới trước quyết định sổ ghi gì.
+
 ## Coverage
 
 Quét hình thái; chân sản phẩm = [ADR-0013](../../docs/adr/0013-director-truong-ky.md) +
@@ -147,6 +165,11 @@ cấu hình ghim mà không *kiểm* nó. `run-baseline.mjs` nay đối chiếu 
 chỉ guard chạy được mới ngăn.
 
 ## Amendment sau vòng cuối — 08/09/2026
+
+**Nâng phạm vi tại Cổng 2 (08/09):** owner chọn lối «sửa ngay» cho hai lỗi ở đường ghi kết cục
+giao diện thay vì hoãn sang hợp đồng khác. Hai tiêu chí AC-14 và AC-15 vào mục Criteria phần D,
+kèm bộ đo E15/E16 chạy hộp thoại thật. Trần vòng verify được nới đúng một vòng cho việc này:
+vòng 4 là vòng cuối, vẫn trong trần 4 vòng của hạng T3.
 
 Luật trần vòng verify (CLAUDE.md, owner duyệt 08/09) áp cho hồ sơ T3 này: vòng 3 đã được KHAI
 LÀ VÒNG CUỐI **trước khi** chạy (sổ quyết định `d-…-r3last`). Ba vòng đã sửa hết mọi lỗi trong

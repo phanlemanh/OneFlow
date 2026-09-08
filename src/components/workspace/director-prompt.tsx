@@ -84,6 +84,11 @@ export default function DirectorPrompt() {
     // user-initiated cancel from a timeout or a genuine network failure,
     // both of which must still surface the UPSTREAM_ERROR toast.
     const userAbortedRef = useRef(false);
+    // Radix's AlertDialogAction is ALSO a close trigger, so confirming runs
+    // our onClick and then the root's onOpenChange(false) in the same event.
+    // Without this flag the dismissal branch would fire for a confirmed plan
+    // and report a second, contradictory outcome for the same run.
+    const decidedRef = useRef(false);
     // Bumped every time `apply` commits a new graph to the canvas. The
     // compiler lays generated nodes out at a fixed {x: 0, y: 0}-rooted grid,
     // unrelated to wherever the user last left the viewport, so an applied
@@ -173,10 +178,16 @@ export default function DirectorPrompt() {
 
                 setStatus("ready");
                 if (useFlow.getState().nodes.length > 0) {
-                    // Staged, not decided: the confirm dialog below resolves
-                    // this into `replaced` or `discarded`.
+                    // Staged, not decided — and deliberately NOT reported. A
+                    // run may leave `generated` exactly once (AC-5), so
+                    // spending that single patch on "the dialog opened" would
+                    // make the user's real decision unrecordable: every later
+                    // `replaced` / `discarded` is refused with 409 and, since
+                    // reporting is fire-and-forget, dropped in silence. A plan
+                    // nobody decides on stays `generated`, which is precisely
+                    // what the orphan-rate threshold counts.
+                    decidedRef.current = false;
                     setPending(json);
-                    reportOutcome(json.runId, "staged");
                 } else {
                     // Empty canvas takes the plan with no dialog — the user
                     // accepted it by asking for it.
@@ -284,11 +295,15 @@ export default function DirectorPrompt() {
                 open={pending !== null}
                 onOpenChange={(v) => {
                     if (!v) {
-                        // Dismissed without confirming — Escape, the Cancel
-                        // button, or a click outside all land here. A user who
-                        // walks away from a staged plan is a signal, not a
-                        // non-event.
-                        reportOutcome(pending?.runId, "discarded");
+                        // Escape, Cancel, a click outside — and ALSO the
+                        // confirm button, which closes the dialog itself. Only
+                        // the first three are a dismissal; the flag tells them
+                        // apart, because `setPending(null)` from the confirm
+                        // handler has not flushed yet and `pending` still
+                        // reads as the staged plan here.
+                        if (!decidedRef.current) {
+                            reportOutcome(pending?.runId, "discarded");
+                        }
                         setPending(null);
                     }
                 }}
@@ -307,6 +322,7 @@ export default function DirectorPrompt() {
                         <AlertDialogAction
                             onClick={() => {
                                 if (pending) {
+                                    decidedRef.current = true;
                                     apply(pending);
                                     reportOutcome(pending.runId, "replaced");
                                 }
