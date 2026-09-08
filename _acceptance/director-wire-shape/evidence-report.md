@@ -1,13 +1,13 @@
 ---
 schema_version: 2
 feature_slug: director-wire-shape
-verdict: REJECT
+verdict: PENDING-JUDGMENT
 failed_evals: []
 reason: 
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: af7659932fcba7867ac162bb5b77b39a4e0c8c25
+verified_commit: 8c9a9e028ccb577c315fd9c3cf1e2b7cf44f7fcc
 human_signoff: 
 ---
 
@@ -34,135 +34,135 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: minted-director-wire-shape-E1-r2
+  run_id: minted-director-wire-shape-E1-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.dws_wire_returns_plan
-  verified_at: 2026-09-08T05:29:40Z
+  verified_at: 2026-09-08T01:54:40Z
   output: |
     OK: success payload carries planJson, runId, dslVersion
 
 - eval: E2
-  run_id: minted-director-wire-shape-E2-r2
+  run_id: minted-director-wire-shape-E2-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.dws_old_client_unaffected
-  verified_at: 2026-09-08T05:29:45Z
+  verified_at: 2026-09-08T01:54:45Z
   output: |
     OK: name/description/nodes/edges unchanged; new fields are additive
 
 - eval: E3
-  run_id: minted-director-wire-shape-E3-r2
+  run_id: minted-director-wire-shape-E3-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_error_envelope
-  verified_at: 2026-09-08T05:30:13Z
+  verified_at: 2026-09-08T01:55:09Z
   output: |
-          Tests  14 passed (14)
-       Start at  05:30:13
-       Duration  226ms (transform 78ms, setup 0ms, import 133ms, tests 7ms, environment 0ms)
+         Tests  14 passed (14)
+      Start at  08:55:09
+      Duration  241ms (transform 105ms, setup 0ms, import 168ms, tests 7ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-director-wire-shape-E4-r2
+  run_id: minted-director-wire-shape-E4-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_event_written_server_side
-  verified_at: 2026-09-08T05:30:14Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
           Tests  3 passed | 4 skipped (7)
-       Start at  05:30:14
-       Duration  116ms (transform 21ms, setup 0ms, import 46ms, tests 4ms, environment 0ms)
+       Start at  08:55:08
+       Duration  138ms (transform 29ms, setup 0ms, import 59ms, tests 5ms, environment 0ms)
 
 - eval: E5
-  run_id: minted-director-wire-shape-E5-r2
+  run_id: minted-director-wire-shape-E5-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_feedback_state_machine
-  verified_at: 2026-09-08T05:30:13Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
          Tests  6 passed (6)
-        Start at  05:30:13
-        Duration  93ms (transform 13ms, setup 0ms, import 20ms, tests 2ms, environment 0ms)
+        Start at  08:55:08
+        Duration  94ms (transform 13ms, setup 0ms, import 19ms, tests 2ms, environment 0ms)
 
 - eval: E6
-  run_id: minted-director-wire-shape-E6-r2
+  run_id: minted-director-wire-shape-E6-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_events_schema_shape
-  verified_at: 2026-09-08T05:30:13Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
           Tests  24 passed (24)
-       Start at  05:30:13
-       Duration  87ms (transform 10ms, setup 0ms, import 17ms, tests 2ms, environment 0ms)
+       Start at  08:55:08
+       Duration  94ms (transform 13ms, setup 0ms, import 20ms, tests 3ms, environment 0ms)
 
 - eval: E7
-  run_id: minted-director-wire-shape-E7-r2
+  run_id: minted-director-wire-shape-E7-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_workflow_run_provenance
-  verified_at: 2026-09-08T05:30:12Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
-          Tests  3 passed (3)
-       Start at  05:30:12
-       Duration  319ms (transform 30ms, setup 0ms, import 227ms, tests 4ms, environment 0ms)
+          Tests  7 passed (7)
+       Start at  08:55:08
+       Duration  384ms (transform 40ms, setup 0ms, import 257ms, tests 8ms, environment 0ms)
 
 - eval: E8
-  run_id: minted-director-wire-shape-E8-r2
+  run_id: minted-director-wire-shape-E8-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_body_backward_compatible
-  verified_at: 2026-09-08T05:30:15Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
           Tests  4 passed | 6 skipped (10)
-       Start at  05:30:15
-       Duration  108ms (transform 20ms, setup 0ms, import 29ms, tests 2ms, environment 0ms)
+       Start at  08:55:08
+       Duration  155ms (transform 58ms, setup 0ms, import 75ms, tests 2ms, environment 0ms)
 
 - eval: E9
-  run_id: minted-director-wire-shape-E9-r2
+  run_id: minted-director-wire-shape-E9-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_body_per_field_caps
-  verified_at: 2026-09-08T05:30:14Z
+  verified_at: 2026-09-08T01:55:09Z
   output: |
           Tests  6 passed | 4 skipped (10)
-       Start at  05:30:14
-       Duration  88ms (transform 14ms, setup 0ms, import 20ms, tests 2ms, environment 0ms)
+       Start at  08:55:09
+       Duration  89ms (transform 15ms, setup 0ms, import 21ms, tests 2ms, environment 0ms)
 
 - eval: E10
-  run_id: minted-director-wire-shape-E10-r2
+  run_id: minted-director-wire-shape-E10-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.dws_expect_count_unchanged
-  verified_at: 2026-09-08T05:29:50Z
+  verified_at: 2026-09-08T01:54:50Z
   output: |
     OK: 240 expect() in pre-existing tests, unchanged
 
 - eval: E11
-  run_id: minted-director-wire-shape-E11-r2
+  run_id: minted-director-wire-shape-E11-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.test.dws_migrator_on_old_db
-  verified_at: 2026-09-08T05:30:13Z
+  verified_at: 2026-09-08T01:55:08Z
   output: |
-          Tests  1 passed (1)
-       Start at  05:30:13
-       Duration  96ms (transform 11ms, setup 0ms, import 18ms, tests 10ms, environment 0ms)
+         Tests  1 passed (1)
+      Start at  08:55:08
+      Duration  152ms (transform 29ms, setup 0ms, import 45ms, tests 12ms, environment 0ms)
 
 - eval: E12
-  run_id: minted-director-wire-shape-E12-r2
+  run_id: minted-director-wire-shape-E12-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.dws_barrel_export
-  verified_at: 2026-09-08T05:29:55Z
+  verified_at: 2026-09-08T01:54:55Z
   output: |
     OK: directorEvents reachable through src/db/schema.ts
 
 - eval: E13
-  run_id: minted-director-wire-shape-E13-r2
+  run_id: minted-director-wire-shape-E13-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.dws_no_prompt_in_prod_log
-  verified_at: 2026-09-08T05:30:00Z
+  verified_at: 2026-09-08T01:55:00Z
   output: |
     OK: prompt text only reaches logger.debug
 
@@ -170,93 +170,133 @@ human_signoff:
   judged_by: judge panel (domain-correctness, operational-feasibility, spec-alignment) — proposal UNCERTAIN
   verdict: UNCERTAIN
   votes:
-    - domain-correctness: UNCERTAIN — baseline-2026-08-26.md/.json chỉ là mốc EVAL-0 (Director v1, trước khi gói director-wire-shape/D0 tồn tại) — nó không chứa bất kỳ số liệu director_events nào (bảng đó chưa được ghi ở thời điểm capture này), nên câu (2) không có căn cứ để trả lời. Bốn file được cấp không bao gồm một lần chạy run-baseline.mjs MỚI (sau khi implement D0) hay bất kỳ ảnh chụp trạng thái director_events trước/sau, nên câu (1) cũng không kiểm chứng được là "vẫn >= 86,7%" hay đã hồi quy — con số 86,7% trong evidence là chính cái mốc gốc, không phải kết quả đối chiếu lại.
-    - operational-feasibility: UNCERTAIN — Câu (1) có căn cứ trong phạm vi cho phép: baseline-2026-08-26.json ghi successRateWithin2Attempts "86.7%" (26/30) trên summary.frozenConfig khớp đúng golden/frozen-config.json (cùng repoHead 4b9c1c7a97da1dde817e35ee240111d2cd6d889a, cùng 7 plugin) — đạt mốc >=86,7%. Nhưng câu (2) hoàn toàn không có căn cứ trong bốn file được phép đọc: baseline-2026-08-26.json/.md chỉ ghi ok/ms/status/nodes/edges cho từng prompt, không có bất kỳ số liệu nào về bảng director_events (không có field nào tên director_events, insert count, hay before/after delta) — đây là baseline EVAL-0 của Director v1 trước khi wiring D0, không phải bằng chứng verify AC-4 phần "mỗi lượt gọi sinh đúng một row".
-    - spec-alignment: UNCERTAIN — Bốn file input chỉ có baseline-2026-08-26.md/.json — đây chính là EVAL-0 (Director v1, TRƯỚC gói D0), dùng để LẬP ra mốc 86,7%, nên nó không thể vừa là mốc vừa là bằng chứng "chạy lại sau khi cài D0 vẫn đạt mốc". Cả hai file này không có bất kỳ dòng nào nhắc tới `director_events` (không cột, không đếm), nên câu (2) hoàn toàn không có căn cứ trong phạm vi input được cấp. Theo đúng luật của eval này, thiếu căn cứ trong danh sách input là lý do trả UNCERTAIN, không phải lý do tự đi tìm file khác.
-  rationale: Ba lens đều bỏ phiếu UNCERTAIN cho cùng lý do gốc — bốn file input được cấp (baseline-2026-08-26.md/.json) là mốc EVAL-0 của Director v1 trước gói director-wire-shape/D0, không chứa bất kỳ số liệu director_events nào, nên câu hỏi (2) về số row director_events tăng thêm đúng bằng số lượt gọi không có căn cứ để trả lời trong phạm vi cho phép.
+    - domain-correctness: UNCERTAIN — Input list chỉ có 4 file tĩnh từ mốc 26/08 (md, json, frozen-config, contract) — không có `golden/run-baseline.mjs`, không có log của một lần chạy thật hôm nay, và không có bằng chứng đếm row `director_events` trước/sau. Câu hỏi đòi CHẠY script và đọc số incremental của `director_events`, nhưng cả script lẫn output của một lần chạy sống (hoặc query DB) đều ngoài phạm vi input được liệt — nên không có căn cứ để trả lời (1) hay (2) cho lần chạy hiện tại; baseline 26/08 chỉ đúng bằng 86,7% (không phải "≥" một cách tự minh chứng cho hôm nay) và không hề đề cập số row director_events tăng thêm.
+    - operational-feasibility: UNCERTAIN — Câu hỏi đòi chạy `run-baseline.mjs` MỚI (tự đối chiếu plugins/ với frozen-config.json, thoát mã 2 nếu lệch) rồi đo tỉ lệ thành công và số row director_events tăng thêm — nhưng script đó, một dev server sống (cần ANTHROPIC_API_KEY), và số đếm director_events hiện tại đều KHÔNG nằm trong danh sách Input được phép đọc của eval này (chỉ có contract.md + hai file baseline 26/08 + frozen-config.json). Bốn file đó chỉ cho biết mốc SO SÁNH (26/30, 86,7%) và cấu hình cần khớp — không phải kết quả của lần chạy hôm nay. Tự chạy lệnh hay tự đọc thêm để tự cứu là phá tính độc lập của hội đồng, nên đây là UNCERTAIN theo đúng quy tắc "danh sách không đủ căn cứ".
+    - spec-alignment: UNCERTAIN — Cả bốn file input chỉ chứa EVAL-0 (baseline-2026-08-26.md/json) — mốc đo Director v1 chạy TRƯỚC gói D0, dùng làm điểm so sánh trong contract — và frozen-config.json ghim cấu hình plugin; không file nào trong danh sách là kết quả một lần chạy run-baseline.mjs SAU khi triển khai director-wire-shape, và không file nào chứa số row director_events. Tôi không được phép tự chạy lệnh (chạy nó đòi đọc mã nguồn, biến môi trường, DB sống — toàn bộ ngoài danh sách Input, đúng luật "ngoài danh sách là lý do UNCERTAIN, không phải lý do tự đi tìm file khác"), nên không có căn cứ trả lời (1) hay (2) bằng số.
+  rationale: Ba lens đều bỏ phiếu UNCERTAIN vì bốn file input (contract.md + hai file baseline-2026-08-26 + frozen-config.json) chỉ cho biết mốc SO SÁNH 86,7% (26/30) và cấu hình cần khớp, chứ không phải kết quả của một lần chạy run-baseline.mjs SAU khi director-wire-shape lên, và không file nào chứa số đếm director_events trước/sau — nên câu hỏi về phần director_events TĂNG THÊM đúng bằng số lượt gọi không có căn cứ để trả lời trong phạm vi cho phép.
   required_evidence:
-    - "[domain-correctness] Một file bằng chứng MỚI (vd. _acceptance/director-wire-shape/evidence/e14a-<ngày>.md hoặc .json) ghi kết quả thực tế của lệnh `node _acceptance/director-wire-shape/golden/run-baseline.mjs` chạy SAU khi director-wire-shape đã lên, gồm trường successRateWithin2Attempts (hoặc total/ok) để so với ngưỡng 86,7% — nếu script tự thoát mã 2 vì plugins/ lệch frozen-config.json thì cũng phải nêu rõ trong evidence đó."
-    - "[domain-correctness] Số đếm director_events TRƯỚC và SAU lần chạy golden-set đó (vd. `SELECT count(*) FROM director_events` chạy qua drizzle-kit studio hoặc psql, chụp lại hai con số before/after), để tính phần TĂNG THÊM và đối chiếu với số lượt gọi /api/director thực sự thực thi trong lần chạy (không nhất thiết là 30 nếu dùng --resume/--limit)."
-    - "[operational-feasibility] Một file evidence riêng cho AC-4/E14a (vd evidence/e14a-<ngày>.md hoặc .json) ghi rõ số row director_events TRƯỚC và SAU khi chạy run-baseline.mjs trên golden set, cho thấy phần TĂNG THÊM bằng đúng số lượt gọi /api/director thực hiện trong lần chạy đó"
-    - "[operational-feasibility] Output thật của một truy vấn DB (vd `select count(*) from director_events where kind='generated'`) chụp hai lần quanh lần chạy run-baseline.mjs, hoặc log của chính script nếu nó tự đối chiếu số row — hiện baseline-2026-08-26.json không chứa trường nào liên quan đến director_events nên không thể suy ra số này từ file đã cho"
-    - "[spec-alignment] Một file bằng chứng MỚI (vd evidence/e14a-<ngày>.md hoặc .json) là output thật của lệnh `node _acceptance/director-wire-shape/golden/run-baseline.mjs` chạy SAU khi gói D0 đã lên, đối chiếu plugins/ với golden/frozen-config.json (không thoát mã 2), và in ra successRateWithin2Attempts của lần chạy đó để so với 86,7%."
-    - "[spec-alignment] Trong cùng bằng chứng đó (hoặc file riêng), số đếm `SELECT COUNT(*) FROM director_events` chụp NGAY TRƯỚC và NGAY SAU lần chạy golden set, cùng số lượt gọi `/api/director` thực hiện trong lần chạy (vd 30 lượt) — để chứng minh phần TĂNG THÊM của director_events bằng đúng số lượt gọi."
+    - "[domain-correctness] Log/output thật của lệnh `node _acceptance/director-wire-shape/golden/run-baseline.mjs` chạy trên cấu hình khớp frozen-config.json (kèm exit code, để loại trừ trường hợp thoát mã 2 do lệch cấu hình) — hiện chưa có file nào trong scope chứa việc này."
+    - "[domain-correctness] Bằng chứng đếm row bảng `director_events` (query count trước và sau lần chạy, hoặc dump các row có runId mới sinh trong lần chạy đó) để đối chiếu phần TĂNG THÊM với đúng số lượt gọi /api/director trong lần chạy đó — cần truy cập DB/log server, ngoài 4 file input đã cho."
+    - "[operational-feasibility] Kết quả chạy thật `node _acceptance/director-wire-shape/golden/run-baseline.mjs` trên cấu hình khớp golden/frozen-config.json (không bị thoát mã 2), lưu thành file evidence mới (vd. _acceptance/director-wire-shape/evidence/eval-run-<ngay>.json) ghi rõ successRateWithin2Attempts của lần chạy này để so với mốc 86,7% ngày 26/08"
+    - "[operational-feasibility] Số đếm row bảng director_events (kind='generated') NGAY TRƯỚC và NGAY SAU loạt gọi của lần chạy trên — hai con số count(*) (vd. qua lệnh SQL/script đếm trước-sau) để tính phần TĂNG THÊM và đối chiếu đúng bằng số lượt gọi thực hiện trong run đó, không phải tổng lũy kế"
+    - "[spec-alignment] Một file evidence MỚI (ví dụ _acceptance/director-wire-shape/evidence/e14a-<ngày>.md hoặc .json) là kết quả thật của `node golden/run-baseline.mjs` chạy SAU khi gói director-wire-shape (D0) đã triển khai, đối chiếu plugins/ khớp frozen-config.json (thoát mã khác 0 nếu lệch) — phải nêu successRateWithin2Attempts số mới."
+    - "[spec-alignment] Trong cùng lần chạy đó, số liệu số row bảng director_events TĂNG THÊM (không phải tổng count(*)) so với trước khi chạy — ví dụ qua truy vấn `SELECT count(*) FROM director_events` chụp trước và sau, hoặc log server đếm insert — đối chiếu đúng bằng số lượt gọi /api/director trong golden set (30 lượt, hoặc số lượt thực chạy nếu dùng --limit/--resume)."
   human_override: 
 
 - eval: E14b
   judged_by: judge panel (domain-correctness, operational-feasibility, spec-alignment) — proposal UNCERTAIN
   verdict: UNCERTAIN
   votes:
-    - domain-correctness: UNCERTAIN — Ba file input chỉ chứng minh hai việc khác: (1) E14 gốc chạy bằng script `run-baseline.mjs` gọi thẳng `/api/director`, tự nhận diện là dụng cụ sai để đo tỉ lệ mồ côi (100% mồ côi là hiện tượng do dụng cụ, không phải do UI); (2) một lượt kiểm tay bằng `curl`/POST trực tiếp tới `/api/director/feedback` với đúng 1 runId qua 2 outcome (`accepted` rồi `discarded` bị từ chối 409), không phải thao tác trong giao diện, không phải 5 prompt, và không đi qua cả ba nhánh canvas rỗng/có-node-xác nhận/có-node-hủy như câu hỏi yêu cầu. Không có file nào trong danh sách input chứa kết quả truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` của một phiên UI thật, nên không thể chấm PASS hay FAIL cho AC-5/E14b.
-    - operational-feasibility: UNCERTAIN — Ba file được cấp chỉ chứa E14 (script `run-baseline.mjs` gọi thẳng `/api/director`, không phải UI) và một đoạn kiểm tay bằng ba lệnh `POST /api/director/feedback` trực tiếp (curl-style), không phải thao tác trong panel Director với 5 prompt tiếng Việt qua cả ba nhánh (canvas rỗng/xác nhận/hủy). Không có bằng chứng nào trong phạm vi cho thấy truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` đã thực sự được chạy sau một phiên UI như vậy, nên không thể xác nhận tỉ lệ `generated` mồ côi <10% hay đủ mặt accepted/replaced/discarded từ thao tác UI thật.
+    - domain-correctness: UNCERTAIN — The three files in scope contain only the original combined E14 golden-set script run (which the contract itself says cannot measure the orphan/outcome question) and a manual curl-style check that posted directly to /api/director/feedback — not a UI walkthrough. There is no evidence in scope of anyone opening the Director panel, typing 5 Vietnamese prompts across the three canvas branches (empty/apply, node+confirm, node+cancel), or a `SELECT kind, count(*) FROM director_events GROUP BY kind` result table.
+    - operational-feasibility: UNCERTAIN — Ba file input không chứa bằng chứng của phiên UI được câu hỏi mô tả (mở panel Director, gõ 5 prompt, đi qua cả ba nhánh canvas-rỗng/xác-nhận/huỷ) cũng không có kết quả truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind`. e14-2026-08-26.md chỉ ghi ba lệnh POST /api/director/feedback gọi trực tiếp (không qua UI), chỉ chứng minh "accepted" thành công và một lần vá thứ hai bị từ chối (409) — không có "replaced", không có "discarded" thành công, và tự văn bản gọi đây là "Đề nghị tách" E14b cho Cổng 1 kế tiếp chứ không phải bằng chứng đã thực thi. e14-d0-2026-08-26.json chỉ là số liệu script E14a (golden-set qua run-baseline.mjs), không liên quan UI.
     - spec-alignment: UNCERTAIN — Ba file cho phép không chứa kết quả truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` nào cả — e14-d0-2026-08-26.json chỉ là số liệu golden-set (T1-T4, ok/ms/nodes), không liên quan đến bảng director_events. Bằng chứng "đã kiểm bằng tay" trong e14-2026-08-26.md là gọi thẳng POST /api/director/feedback (accepted→200, discard lần hai→409, outcome sai→400), không phải thao tác TRONG GIAO DIỆN qua panel Director với 5 prompt và ba nhánh canvas-rỗng/canvas-có-node-xác-nhận/canvas-có-node-hủy như câu hỏi yêu cầu; nó cũng không phủ nhánh "replaced". Chính contract.md và evidence.md còn ghi rằng E14b (kiểm UI) là một đề nghị tách ra để ký ở Cổng 1, chưa xác nhận là đã thực thi với số đo cụ thể.
-  rationale: Ba lens đều bỏ phiếu UNCERTAIN vì bằng chứng hiện có (script run-baseline.mjs gọi thẳng API, và ba lệnh POST feedback thủ công) không phải thao tác thật trong panel Director qua 5 prompt và đủ ba nhánh canvas-rỗng/xác-nhận/hủy, và không có kết quả truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` của một phiên UI thật để tính tỉ lệ mồ côi hay xác nhận đủ ba kind outcome.
+  rationale: Ba lens đều bỏ phiếu UNCERTAIN vì bằng chứng hiện có chỉ là script run-baseline.mjs gọi thẳng /api/director và ba lệnh POST /api/director/feedback thủ công (không qua UI, chỉ ghi được "accepted" thành công, không có "replaced" hay "discarded" thành công) — không có phiên thao tác thật trong panel Director qua 5 prompt và đủ ba nhánh canvas-rỗng/xác-nhận/hủy, và không có kết quả truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` của một phiên UI thật.
   required_evidence:
-    - "[domain-correctness] Một file evidence mới (vd. evidence/e14b-<ngày>.md hoặc .json) ghi lại phiên thao tác THẬT trong giao diện: mở panel Director, gõ 5 prompt tiếng Việt, và đi qua đủ ba nhánh — canvas rỗng (áp dụng ngay), canvas có node rồi bấm Xác nhận, canvas có node rồi Hủy (Escape/click ra ngoài)"
-    - "[domain-correctness] Kết quả truy vấn thực tế `SELECT kind, count(*) FROM director_events GROUP BY kind` chạy SAU phiên UI đó (dump SQL hoặc ảnh chụp), cho thấy có mặt đủ ba kind accepted/replaced/discarded và tính được tỉ lệ `generated` chưa vá outcome trên tổng số row của riêng phiên này"
-    - "[domain-correctness] Nếu owner coi 3 lệnh POST /api/director/feedback thủ công trong contract.md là đủ thay thế UI, cần một xác nhận rõ ràng bằng văn bản của owner rằng thao tác qua API trực tiếp (không qua panel Director) được chấp nhận là bằng chứng cho AC-5, vì hiện contract nói rõ 'E14b (người, trong UI)' là một eval TÁCH RIÊNG chưa có evidence đính kèm trong bộ ba file được cấp"
-    - "[operational-feasibility] Một file evidence mới (vd. _acceptance/director-wire-shape/evidence/e14b-<ngày>.md) ghi lại phiên thao tác THẬT trong panel Director: ảnh chụp màn hình hoặc log thao tác cho thấy đã gõ 5 prompt tiếng Việt và đi qua đủ ba nhánh (canvas rỗng bấm áp dụng ngay; canvas có node rồi bấm XÁC NHẬN; canvas có node rồi HỦY bằng Escape/click ra ngoài)"
-    - "[operational-feasibility] Kết quả thực thi câu lệnh `SELECT kind, count(*) FROM director_events GROUP BY kind` chạy NGAY SAU phiên UI đó (không phải sau script run-baseline hay curl thủ công), kèm số liệu cho từng kind để tính tỉ lệ generated-chưa-vá và xác nhận có mặt accepted/replaced/discarded"
-    - "[spec-alignment] Kết quả thật của truy vấn SQL `SELECT kind, count(*) FROM director_events GROUP BY kind` (ảnh chụp hoặc output text) chạy SAU phiên thao tác UI, cho thấy tỉ lệ `generated` chưa vá outcome"
-    - "[spec-alignment] Một bản ghi/ảnh chụp phiên thao tác trong UI panel Director: gõ 5 prompt tiếng Việt và đi qua đúng ba nhánh — canvas rỗng (áp dụng ngay), canvas có node + bấm xác nhận, canvas có node + Escape/bấm ra ngoài (hủy)"
-    - "[spec-alignment] Bằng chứng nhánh outcome `replaced` thực sự được ghi vào director_events (hiện chỉ có accepted/discarded/invalid_outcome qua POST trực tiếp, thiếu replaced và thiếu đường đi qua UI thật)"
+    - "[domain-correctness] An E14b evidence artifact (e.g. _acceptance/director-wire-shape/evidence/e14b-*.md or similar) containing the actual output of `SELECT kind, count(*) FROM director_events GROUP BY kind` taken after a real UI session, with the orphan-rate percentage computed from it"
+    - "[domain-correctness] Proof the outcome rows were produced through actual Director-panel UI interaction (not direct POST to /api/director/feedback) covering all three decision branches: empty-canvas immediate apply, canvas-with-nodes then Confirm, canvas-with-nodes then Cancel (Escape or click-outside)"
+    - "[domain-correctness] A count breakdown showing all three of accepted, replaced, and discarded present as distinct kind rows — the current manual check in e14-2026-08-26.md only ever successfully recorded one 'accepted' row via direct API call; a second POST attempting 'discarded' on the same runId was rejected (409 ALREADY_PATCHED), so no discarded or replaced row was ever actually created or observed"
+    - "[operational-feasibility] Kết quả thực tế của truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` chạy SAU phiên UI (bảng số hoặc ảnh chụp terminal/DB client), cho thấy tỉ lệ row 'generated' chưa vá <10% trên tổng"
+    - "[operational-feasibility] Bằng chứng thao tác trong giao diện (ảnh chụp màn hình hoặc screen-recording) cho cả ba nhánh: (1) mở panel Director trên canvas RỖNG và bấm áp dụng ngay, (2) canvas CÓ NODE rồi bấm XÁC NHẬN, (3) canvas CÓ NODE rồi HUỶ bằng Escape hoặc bấm ra ngoài — mỗi nhánh gắn với một trong 5 prompt tiếng Việt đã gõ trực tiếp trong UI, không qua script/API call"
+    - "[operational-feasibility] Xác nhận rằng cả bốn kind xuất hiện trong kết quả GROUP BY, đặc biệt 'replaced' — hiện chưa có dòng bằng chứng nào cho outcome 'replaced' được kích hoạt qua UI"
+    - "[spec-alignment] Một file evidence riêng cho E14b (vd. _acceptance/director-wire-shape/evidence/e14b-<ngày>.md hoặc ảnh chụp) ghi lại phiên thao tác TRONG GIAO DIỆN: 5 prompt tiếng Việt gõ vào panel Director, đi qua đủ ba nhánh — canvas rỗng (áp dụng ngay), canvas có node + bấm xác nhận, canvas có node + Escape/bấm ra ngoài để huỷ"
+    - "[spec-alignment] Kết quả thô của truy vấn `SELECT kind, count(*) FROM director_events GROUP BY kind` chạy SAU phiên UI đó (output SQL hoặc ảnh chụp DB client), kèm số liệu tỉ lệ row `generated` chưa vá / tổng số row, và xác nhận có mặt đủ ba kind `accepted`, `replaced`, `discarded`"
   human_override: 
 
 ### Lệnh suite (hồi quy)
 
 - cmd: bash scripts/acceptance/preflight-verify-env.sh
-  run_id: minted-director-wire-shape-SUITE-bash_scripts_acceptance_preflight_verify-r2
+  run_id: minted-director-wire-shape-SUITE-bash_scripts_acceptance_preflight_verify-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:20Z
+  verified_at: 2026-09-08T01:55:15Z
 
 - cmd: node scripts/roadmap/check-plan-freeze.mjs
-  run_id: minted-director-wire-shape-SUITE-node_scripts_roadmap_check_plan_freeze_m-r2
+  run_id: minted-director-wire-shape-SUITE-node_scripts_roadmap_check_plan_freeze_m-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:22Z
+  verified_at: 2026-09-08T01:55:17Z
 
 - cmd: pnpm build && pnpm typecheck
-  run_id: minted-director-wire-shape-SUITE-build_typecheck-r2
+  run_id: minted-director-wire-shape-SUITE-build_typecheck-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:24Z
+  verified_at: 2026-09-08T01:55:19Z
 
 - cmd: pnpm lint:check
-  run_id: minted-director-wire-shape-SUITE-lint_check-r2
+  run_id: minted-director-wire-shape-SUITE-lint_check-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:28Z
+  verified_at: 2026-09-08T01:55:23Z
 
 - cmd: pnpm test
-  run_id: minted-director-wire-shape-SUITE-test-r2
+  run_id: minted-director-wire-shape-SUITE-test-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:30Z
+  verified_at: 2026-09-08T01:55:25Z
 
 - cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
-  run_id: minted-director-wire-shape-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r2
+  run_id: minted-director-wire-shape-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:50Z
+  verified_at: 2026-09-08T01:55:40Z
 
 - cmd: pnpm verify:plugins
-  run_id: minted-director-wire-shape-SUITE-verify_plugins-r2
+  run_id: minted-director-wire-shape-SUITE-verify_plugins-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:30:55Z
+  verified_at: 2026-09-08T01:55:50Z
 
 - cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
-  run_id: minted-director-wire-shape-SUITE-gen_abi-r2
+  run_id: minted-director-wire-shape-SUITE-gen_abi-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:31:00Z
+  verified_at: 2026-09-08T01:55:52Z
 
 - cmd: bash scripts/fork/check-fork-identity.sh
-  run_id: minted-director-wire-shape-SUITE-bash_scripts_fork_check_fork_identity_sh-r2
+  run_id: minted-director-wire-shape-SUITE-bash_scripts_fork_check_fork_identity_sh-r3
   exit_code: 0
-  verified_at: 2026-09-08T05:31:05Z
+  verified_at: 2026-09-08T01:55:55Z
 
 ## Known limits
 
+Nợ có tên, ghi theo luật trần vòng verify (vòng 3 khai trước là vòng cuối — CLAUDE.md, owner
+duyệt 08/09). Chi tiết từng mục nằm trong `review-findings.md`.
+
+**Trong hợp đồng** — một mục, chi tiết ở mục Amendment của `contract.md`:
+
+- [thấp · AC-4] lượt chạy hỏng ghi sổ dưới `runId` bịa tại chỗ nên không nối được với lượt cụ thể.
+
+**Phép đo tự nó** — bảy mục, tất cả là «phép đo của phép đo», không có mục nào làm sai hành vi
+sản phẩm:
+
+- [cao] E4/AC-4 đo LỜI GỌI hàm giả thay vì hàng thật trong sổ.
+- [cao] `dws-wire-returns-plan.sh` lọc theo tên ca bằng `vitest -t`; lọc không khớp thì thoát 0, và bộ canh `check-eval-filters.mjs` không thấy được vì lọc nằm trong script chứ không khai ở cấu hình.
+- [cao] AC-1 khẳng định CHUỖI NGUỒN có mặt trong khi lời hứa là QUAN HỆ giữa các giá trị.
+- [cao] fixture AC-1 viết tay đúng khuôn bên đọc, vòng lặp chỉ là tiếng vọng của hàm giả.
+- [cao] AC-9 khẳng định trường nội bộ `error.field` trong khi lời hứa là THÔNG ĐIỆP nêu tên trường.
+- [trung bình] AC-7 đo đối số truyền cho bộ dựng truy vấn giả, không đo giá trị cột thật.
+- [trung bình, thấp] `dws-no-prompt-in-prod-log` đọc mã nguồn theo từng dòng nên lời gọi nhiều dòng lọt; `dws-barrel-export` khẳng định chuỗi có mặt chứ không phải quan hệ xuất khẩu.
+
+**Bộ đo vàng chạy tay** — ba mục, chỉ ảnh hưởng người chạy lại bộ đo trên máy khác:
+
+- [cao, trung bình] `schema-diff.mjs` và bộ `eval3-*.mjs` ghi cứng đường dẫn tuyệt đối tới một checkout khác.
+- [trung bình] `golden/*.mjs` chép tay lược đồ kế hoạch thay vì nhập từ mã thật, và bản chép đã lệch.
+
+**Sổ sự kiện, chất lượng dữ liệu** — hai mục:
+
+- [trung bình] `/api/director/feedback` không bọc lỗi cơ sở dữ liệu nên hỏng sổ thoát ra ngoài phong bì lỗi và không có dòng log nào.
+- [trung bình] `used_memory` ghi theo cờ máy khách gửi lên trong khi máy chủ chưa dùng bộ nhớ — cột suy diễn đáng lẽ NULL cho tới khi đo được.
+
 ## Ngoài hợp đồng
+
+Bốn mục dưới đây là lỗi THẬT nằm NGOÀI phạm vi đã duyệt ở Cổng 1, đều ở lớp giao diện. Máy KHÔNG
+tự sửa (luật phân loại phạm vi). Người quyết ở Cổng 2 — chi tiết và đề xuất trong tin mời cổng:
+
+- [cao] Bước đánh dấu «đang chờ quyết» tiêu mất lượt vá duy nhất: bảng sổ chỉ cho phép rời trạng thái «vừa sinh» đúng một lần, mà máy khách đánh dấu ngay khi hộp thoại mở, nên kết cục thật (thay thế / bỏ) sau đó luôn bị từ chối và bị nuốt lặng. Mọi lượt chạy trên canvas có sẵn nội dung vĩnh viễn nằm ở «đang chờ quyết».
+- [cao] Nút xác nhận bắn HAI kết cục cho một cú bấm (thay thế, rồi bỏ) vì nút xác nhận của thư viện hộp thoại đồng thời là nút đóng; hai yêu cầu đua nhau và người đã xác nhận có thể bị ghi là đã bỏ.
+- [trung bình] `/api/director/feedback` thiếu bọc lỗi cơ sở dữ liệu (xem Known limits).
+- [trung bình] Lọc theo tên ca nằm trong script nên bộ canh ô-đo-chạy-0-ca không nhìn thấy (xem Known limits).
+
+Hai mục đầu là cùng một vùng: đường ghi kết cục từ giao diện. Máy đề xuất mở **một hợp đồng
+riêng** cho chúng thay vì nới phạm vi hồ sơ này — gói D0 hứa nền trạng thái phía máy chủ, và
+đường ghi kết cục phía giao diện là một lời hứa khác, cần bộ đo giao diện của riêng nó.
 
 ## Analyst
 
 carried tu round truoc — baseline khong do lai round nay
-none — baseline không đo lại round này (P2); mọi eval trong bảng trên ghi baseline: n-a.
+không có eval nào — baseline không đo lại vòng này (P2); mọi eval trong bảng trên ghi baseline: n-a.
 
 ## Variance
 
@@ -266,3 +306,4 @@ none — no stochastic (runs > 1) evals this round; every eval ran once (runs: 1
 
 Round 1: code review flagged AC-7 as having no producer for `directorRunId` — the workflow-save path only persisted it on INSERT, dropped on UPDATE; returned to implementation for wiring.
 Round 2: all 13 machine evals (E1-E13) + 9 suite commands PASS, but code review confirms the same AC-7 gap is still present on the UPDATE branch (`src/app/api/workspace/save/route.ts:73`, `src/components/workspace/workflow-title-menu.tsx:160`) — no automated eval targets the update-existing-workflow path, so `failed_evals` stays empty even though AC-7 is not actually satisfied end-to-end; verdict REJECT pending a fix to the UPDATE branch and E14a/E14b remain UNCERTAIN pending fresh evidence.
+Round 3: all 13 machine evals (E1-E13) + 9 suite commands PASS on verified_commit 8c9a9e0 — AC-7 provenance coverage expanded 3→7 cases (`src/app/api/workspace/save/provenance.test.ts`), closing the UPDATE-branch gap round 2 flagged. E14a/E14b judge panel re-run fresh, both still UNCERTAIN — same missing-evidence class as round 2 (no fresh `run-baseline.mjs` run + `director_events` count delta for E14a; no real UI-session evidence for E14b). Verdict PENDING-JUDGMENT; this is round 3 of the 4 S4 rounds allowed for a T3 contract.

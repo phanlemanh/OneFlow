@@ -5,7 +5,7 @@ slug: director-wire-shape
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api, db]
-status: implemented
+status: verified
 approved_by: phanlemanh@gmail.com
 approved_at: 2026-08-26T15:59:02Z
 time_human_minutes: {gate1: 15, gate2: 0}
@@ -145,3 +145,19 @@ compile. Hợp đồng này đã cảnh báo đúng điều đó ở mục Conte
 cấu hình ghim mà không *kiểm* nó. `run-baseline.mjs` nay đối chiếu `plugins/` với
 `frozen-config.json` và thoát mã 2 khi lệch. Cảnh báo trong tài liệu không ngăn được gì;
 chỉ guard chạy được mới ngăn.
+
+## Amendment sau vòng cuối — 08/09/2026
+
+Luật trần vòng verify (CLAUDE.md, owner duyệt 08/09) áp cho hồ sơ T3 này: vòng 3 đã được KHAI
+LÀ VÒNG CUỐI **trước khi** chạy (sổ quyết định `d-…-r3last`). Ba vòng đã sửa hết mọi lỗi trong
+hợp đồng có mức từ trung bình trở lên: AC-5 (đơn-shot nằm trong câu lệnh UPDATE), AC-7 (dấu vết
+kế hoạch đi đủ ba đường ghi), AC-9 (đếm byte UTF-8). Mục còn lại dưới đây là **nợ có tên**, không
+sửa thêm ở vòng này:
+
+| AC | Mức | Điều còn lại | Vì sao nhận nợ |
+|---|---|---|---|
+| AC-4 | thấp | Lượt chạy HỎNG ghi sổ dưới một `runId` bịa tại chỗ (`crypto.randomUUID()` ở `route.ts`), nên hàng sổ của lượt hỏng không nối được với log, với một lần vá kết cục sau đó, hay với lượt thử lại | Nhánh thất bại của `DirectorResult` chưa mang `runId`; sửa đúng là thêm một trường vào kiểu trả về của lõi Director — chạm `src/lib/director/**`, tức mở lại vùng mà ba vòng vừa đóng. Hàng sổ vẫn được ghi và vẫn đếm được tỉ lệ hỏng; chỉ mất khả năng NỐI hàng ấy với lượt cụ thể |
+
+Ai nhận nợ này sửa ở gói D1 cùng lúc surface `attempts` cho nhánh hỏng — cả hai là cùng một
+thay đổi kiểu.
+

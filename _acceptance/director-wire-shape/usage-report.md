@@ -125,3 +125,67 @@
 - **claude-fable-5-1**: 3 agent · 38 calls · out 2,736 · in 1,126 · cache_read 3,906,215 · cache_create 338,691
 - **claude-haiku-4-5-20251001**: 22 agent · 44 calls · out 3,154 · in 396 · cache_read 1,858,566 · cache_create 742,242
 
+### S4 round 3 — wf_a9f37fbd-b93 (55 agent, 66,628 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| triage | claude-sonnet-5 | 2 | 20,511 | 4 | 94,151 | 230 |
+| refute:oneof-vs-anyof.mjs | claude-sonnet-5 | 14 | 4,486 | 28 | 1,358,117 | 237 |
+| judge:E14b:spec-alignment | claude-sonnet-5 | 2 | 4,143 | 4 | 122,187 | 55 |
+| review:measurement | claude-opus-5 | 23 | 3,240 | 46 | 2,782,816 | 398 |
+| refute:eval3-direct-3providers.mjs | claude-sonnet-5 | 8 | 2,941 | 16 | 733,898 | 96 |
+| refute:dws-expect-count.sh | claude-sonnet-5 | 14 | 2,883 | 28 | 1,255,233 | 189 |
+| judge:E14b:domain-correctness | claude-sonnet-5 | 2 | 2,569 | 4 | 122,187 | 33 |
+| refute:dws-no-prompt-in-prod-log.sh | claude-sonnet-5 | 14 | 2,292 | 28 | 1,263,953 | 136 |
+| refute:route.ts | claude-sonnet-5 | 13 | 2,265 | 26 | 1,213,418 | 145 |
+| refute:provenance.test.ts | claude-sonnet-5 | 17 | 1,788 | 34 | 1,599,665 | 191 |
+| refute:route.ts | claude-sonnet-5 | 17 | 1,728 | 34 | 1,680,580 | 163 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 19 | 1,717 | 38 | 1,846,783 | 166 |
+| review:conventions | claude-opus-5 | 32 | 1,689 | 64 | 3,926,142 | 354 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 13 | 1,491 | 26 | 1,219,445 | 99 |
+| review:bugs | claude-opus-5 | 21 | 1,396 | 42 | 2,488,671 | 274 |
+| refute:dws-wire-returns-plan.sh | claude-sonnet-5 | 14 | 1,327 | 28 | 1,269,475 | 135 |
+| refute:dws-barrel-export.sh | claude-sonnet-5 | 15 | 1,101 | 30 | 1,354,157 | 126 |
+| refute:wire-shape.test.ts | claude-sonnet-5 | 20 | 848 | 40 | 1,960,381 | 150 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 2 | 788 | 18 | 86,784 | 14 |
+| refute:wire-shape.test.ts | claude-sonnet-5 | 15 | 783 | 30 | 1,408,779 | 172 |
+| refute:dws-wire-returns-plan.sh | claude-sonnet-5 | 8 | 761 | 16 | 680,143 | 78 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 16 | 677 | 32 | 1,507,129 | 127 |
+| refute:request-body.test.ts | claude-sonnet-5 | 16 | 665 | 32 | 1,471,522 | 125 |
+| refute:dws-wire-returns-plan.sh | claude-sonnet-5 | 11 | 518 | 22 | 1,016,033 | 111 |
+| machine:npx vitest run src/lib/director/request- | claude-haiku-4-5-20251001 | 2 | 496 | 18 | 86,774 | 16 |
+| machine:npx vitest run src/db/migrate-old-db.tes | claude-haiku-4-5-20251001 | 2 | 416 | 18 | 86,770 | 14 |
+| machine:npx vitest run src/lib/director/request- | claude-haiku-4-5-20251001 | 2 | 416 | 18 | 86,774 | 14 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 394 | 18 | 86,743 | 26 |
+| machine:bash scripts/acceptance/dws-wire-returns | claude-haiku-4-5-20251001 | 2 | 365 | 18 | 58,269 | 13 |
+| machine:npx vitest run src/app/api/director/rout | claude-haiku-4-5-20251001 | 2 | 352 | 18 | 86,768 | 14 |
+| judge:E14a:operational-feasibility | claude-sonnet-5 | 4 | 312 | 8 | 303,389 | 46 |
+| refute:route.ts | claude-sonnet-5 | 11 | 298 | 22 | 996,592 | 144 |
+| refute:director-prompt.tsx | claude-sonnet-5 | 18 | 270 | 36 | 1,737,087 | 233 |
+| judge:E14a:spec-alignment | claude-sonnet-5 | 3 | 231 | 6 | 217,071 | 69 |
+| machine:bash scripts/acceptance/dws-no-prompt-in | claude-haiku-4-5-20251001 | 2 | 212 | 18 | 86,767 | 11 |
+| refute:schema-diff.mjs | claude-sonnet-5 | 9 | 136 | 18 | 769,202 | 112 |
+| refute:route.ts | claude-sonnet-5 | 5 | 23 | 10 | 400,145 | 40 |
+| synthesize:report | claude-sonnet-5 | 5 | 20 | 10 | 502,152 | 339 |
+| judge:E14b:operational-feasibility | claude-sonnet-5 | 2 | 7 | 4 | 122,189 | 46 |
+| judge:E14a:domain-correctness | claude-sonnet-5 | 2 | 7 | 4 | 84,843 | 54 |
+| capture:provenance | claude-sonnet-5 | 2 | 7 | 4 | 83,951 | 18 |
+| machine:bash scripts/acceptance/dws-expect-count | claude-haiku-4-5-20251001 | 2 | 6 | 18 | 86,759 | 14 |
+| machine:npx vitest run src/lib/director/events/d | claude-haiku-4-5-20251001 | 2 | 6 | 18 | 86,769 | 12 |
+| machine:bash scripts/acceptance/dws-barrel-expor | claude-haiku-4-5-20251001 | 2 | 6 | 18 | 86,760 | 13 |
+| machine:npx vitest run src/db/director-events-sc | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,767 | 13 |
+| machine:bash scripts/acceptance/dws-old-client-u | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,765 | 12 |
+| machine:npx vitest run src/app/api/director/wire | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,777 | 13 |
+| machine:node scripts/roadmap/check-plan-freeze.m | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,762 | 13 |
+| machine:bash scripts/acceptance/preflight-verify | claude-haiku-4-5-20251001 | 2 | 5 | 18 | 86,757 | 17 |
+| machine:npx vitest run src/app/api/workspace/sav | claude-haiku-4-5-20251001 | 2 | 4 | 18 | 86,771 | 14 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 4 | 18 | 86,747 | 12 |
+| machine:bash scripts/fork/check-fork-identity.sh | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,759 | 14 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,755 | 58 |
+| machine:cd sdk && . ../scripts/lib/sdk-version.s | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,830 | 24 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 2 | 18 | 86,747 | 11 |
+
+- **claude-sonnet-5**: 30 agent · 311 calls · out 56,805 · in 622 · cache_read 28,393,857 · cache_create 2,295,064
+- **claude-opus-5**: 3 agent · 76 calls · out 6,325 · in 152 · cache_read 9,197,629 · cache_create 388,807
+- **claude-haiku-4-5-20251001**: 22 agent · 44 calls · out 3,498 · in 396 · cache_read 1,880,374 · cache_create 763,734
+
