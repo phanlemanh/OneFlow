@@ -129,17 +129,28 @@ def test_engine_emits_the_layout_manifest_the_typescript_side_reads(
     _provision(tmp_path, monkeypatch)
     root = P._venv_root(tmp_path / "data")
 
+    # `relative_dir` comes from the PATH FUNCTION, `plugin_id` from the id we
+    # asked for. Round 2 found both fields read back from the same observed
+    # directory name, which made "the mapping is wrong" a state the record could
+    # not express — and an eval cannot go red over something unrepresentable.
     observed = {
         "root_has_pyvenv_cfg": (root / "pyvenv.cfg").exists(),
         "entries": sorted(
             (
-                {"plugin_id": p.name, "relative_dir": p.name}
-                for p in root.iterdir()
-                if p.is_dir() and not p.name.startswith(".")
+                {
+                    "plugin_id": pid,
+                    "relative_dir": str(P._venv_dir(root, pid).relative_to(root)),
+                }
+                for pid in TWO_IDS
             ),
             key=lambda e: e["plugin_id"],
         ),
     }
+    # ...and the function must agree with what is actually on disk.
+    for e in observed["entries"]:
+        assert (root / e["relative_dir"]).is_dir(), (
+            f"_venv_dir says {e['relative_dir']} but nothing is there"
+        )
     committed = json.loads(MANIFEST.read_text(encoding="utf-8"))
     assert observed == committed, (
         "the venv layout the engine writes drifted from "

@@ -75,6 +75,41 @@ if [ "$ts_def" -lt 1 ] || [ "$ts_call" -lt 2 ]; then
     exit 1
 fi
 
+# AC-13: the module docstring is the artifact the two runtimes were supposed to
+# agree through, so it must not still describe the shared-venv model this commit
+# deleted. Anchored on the two phrases that ONLY the stale description uses —
+# "shared venv" still appears legitimately in the legacy-removal function, and
+# matching that would make the guard cry wolf on correct code.
+py_head=$(sed -n '1,30p' "$PY")
+if printf '%s' "$py_head" | grep -q 'provision a shared venv'; then
+    echo "FAIL: the PYTHON module docstring still says it provisions a shared venv" >&2
+    echo "      it provisions one venv per plugin; the header is the artifact the two" >&2
+    echo "      runtimes agree through, and a false one is the same drift one layer up" >&2
+    exit 1
+fi
+if grep -qE '^# --- shared venv' "$PY"; then
+    echo "FAIL: the PYTHON section banner still reads '--- shared venv'" >&2
+    echo "      that section builds one venv per plugin now" >&2
+    exit 1
+fi
+
+# AC-11: a guard that only runs when somebody types it cannot fail a future PR,
+# which is the entire point of pinning. The repo has already paid for this once:
+# scripts/ci/check-gate-guards-job.sh:6 records that the acceptance gate's own
+# two drift guards had ZERO references in ci.yml and PRODUCT-MAP.md drifted by
+# four slugs before anyone noticed. Assert our own wiring.
+CI="$ROOT/.github/workflows/ci.yml"
+if [ -f "$CI" ]; then
+    for script in check-venv-layout-pinned.sh check-venv-layout-teeth.sh; do
+        grep -qE "run:.*scripts/plugins/$script" "$CI" || {
+            echo "FAIL: $script is not run by .github/workflows/ci.yml" >&2
+            echo "      it would then run only inside this dossier's verify rounds," >&2
+            echo "      never on an ordinary PR — the drift it pins would go unseen" >&2
+            exit 1
+        }
+    done
+fi
+
 echo "extracted 2 values:"
 echo "  python:     $py_const"
 echo "  typescript: $ts_const"

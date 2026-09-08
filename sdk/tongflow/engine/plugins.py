@@ -1,12 +1,16 @@
 """Plugin preflight for the standalone engine.
 
 Given an exported workflow, collect the ``pluginId``s it needs, clone any that
-are missing, provision a shared venv (SDK + each plugin's ``requirements.txt``),
+are missing, provision ONE VENV PER PLUGIN (SDK + that plugin's ``requirements.txt``),
 and scan the plugins directory into a manifest the invoker uses.
 
 Mirrors the desktop app's behavior:
 - clone/update  -> ``plugins-install.server.ts`` (here via system ``git``)
-- shared venv   -> ``plugin-python-env.server.ts`` (hash-marker caching)
+- per-plugin venv -> ``plugin-python-env.server.ts`` (marker caching). The root
+  ``data/.tongflow/plugin-venv`` CONTAINS the venvs and is never itself one; a
+  ``pyvenv.cfg`` at the root is the pre-2026-08-07 shared venv and gets removed.
+  Both runtimes are pinned to that layout by
+  ``scripts/plugins/check-venv-layout-pinned.sh``.
 - manifest scan -> reuses :func:`tongflow.scan.scan`
 
 Plugin git URL convention matches ``official-plugins.server.ts``:
@@ -94,7 +98,7 @@ def ensure_plugins_present(
         _clone_plugin(pid, _git_url_for(pid, org, overrides), plugins_dir, log)
 
 
-# --- shared venv (mirrors plugin-python-env.server.ts) ----------------------
+# --- per-plugin venv (mirrors plugin-python-env.server.ts) -----------------
 
 
 # Mirrors `venvDirFor` in src/lib/plugins/plugin-python-env.server.ts. The two

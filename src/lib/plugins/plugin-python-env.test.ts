@@ -196,17 +196,27 @@ describe("legacy shared venv migration", () => {
         const data = mkdtempSync(join(tmpdir(), "venv-modern-"));
         process.env.TONGFLOW_DATA_DIR = data;
         const root = join(data, ".tongflow", "plugin-venv");
+
         for (const e of manifest.entries) {
-            const child = join(root, e.relative_dir);
-            mkdirSync(child, { recursive: true });
-            writeFileSync(join(child, "pyvenv.cfg"), "home = /usr/bin\n");
+            // Ask the function that OWNS the mapping on this side, rather than
+            // concatenating the string ourselves. Round 2 found this test never
+            // touched venvDirFor, so adding a path segment there — say
+            // join(VENV_ROOT(), "v2", id) — left the two runtimes maintaining
+            // parallel trees with every eval still green.
+            const dir = venvDirFor(e.plugin_id);
+            expect(
+                dir,
+                `${e.plugin_id}: the engine writes ${e.relative_dir}, this side wants ${dir}`,
+            ).toBe(join(root, e.relative_dir));
+            mkdirSync(dir, { recursive: true });
+            writeFileSync(join(dir, "pyvenv.cfg"), "home = /usr/bin\n");
         }
 
         removeLegacySharedVenv();
 
         for (const e of manifest.entries) {
             expect(
-                existsSync(join(root, e.relative_dir)),
+                existsSync(venvDirFor(e.plugin_id)),
                 `${e.plugin_id}: the engine wrote this venv and the app deleted it`,
             ).toBe(true);
         }

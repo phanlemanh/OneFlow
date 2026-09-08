@@ -188,6 +188,15 @@ jobs:
       - name: Fork identity guard still has teeth
         run: bash scripts/fork/check-fork-identity-teeth.sh
 
+      # The engine and plugin-python-env.server.ts write the same venv root with
+      # two meanings, and until 2026-09-08 the only thing holding them together
+      # was a code comment. Two steps so the teeth mode can address the guard on
+      # its own, matching every other pinning pair in this job.
+      - name: Venv layout pinned across both runtimes
+        run: bash scripts/plugins/check-venv-layout-pinned.sh
+      - name: Venv layout guard still has teeth
+        run: bash scripts/plugins/check-venv-layout-teeth.sh
+
       # `vitest list` needs node_modules, and this job had none — hence the two
       # steps above it. They go HERE rather than on `unit-tests`, which already
       # has the dependencies, because check-gate-guards-job.sh deep-equals the

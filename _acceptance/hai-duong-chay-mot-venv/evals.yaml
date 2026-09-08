@@ -138,3 +138,48 @@ evals:
     paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py"]
     expected: "exit 0; NAM id khong an toan ('../escape', 'a/b', '.hidden', chuoi rong, va 'oneflow-api-ffmpeg\\n' co xuong dong cuoi) deu lam ham tinh thu muc NEM ValueError ghim chu 'unsafe plugin id'. Ca xuong-dong la lo hong vong 1: re.match voi $ nhan newline cuoi trong khi luat JavaScript ben TS tu choi — phai dung re.fullmatch. DOI CHUNG DUONG trong cung ca thu: id hop le 'oneflow-api-ffmpeg' phai tra ve duong dan nam duoi goc"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  # ---------- F. Nang pham vi tai Cong 2 vong 2 ----------
+  # Lenh trung voi E4/E5/E3a/E3b — workflow dedupe theo cmd nen khong ton them
+  # luot chay; tach o do de anh xa AC -> bang chung doc duoc.
+  - id: E12
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.hdc_layout_constant_pinned
+    paths: ["scripts/plugins/check-venv-layout-pinned.sh", ".github/workflows/ci.yml"]
+    expected: "exit 0; guard tu khang dinh CHINH NO duoc chay: .github/workflows/ci.yml phai co step `run: bash scripts/plugins/check-venv-layout-pinned.sh` VA step cho check-venv-layout-teeth.sh. Truoc vong 3 ca hai chi duoc goi tu _acceptance/config.yaml, tuc chi chay trong vong verify cua chinh ho so nay — khong lam do duoc mot PR tuong lai"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E13
+    criterion: AC-11
+    executor: script
+    cmd: config:executors.script.hdc_layout_constant_teeth
+    paths: ["scripts/plugins/check-venv-layout-teeth.sh", ".github/workflows/ci.yml"]
+    expected: "exit 0; trong MUOI MOT ca rang, ca `ci-step-dropped` doi step trong ban sao ci.yml thanh `run: true` va doi guard DO voi thong diep 'is not run by .github/workflows/ci.yml'. In 11/11 PASS va thoat 0"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E14
+    criterion: AC-12
+    executor: test
+    cmd: config:executors.test.hdc_engine_leaves_per_plugin_layout
+    paths: ["sdk/tongflow/engine/plugins.py", "sdk/tests/test_plugin_venv_layout.py", "sdk/tests/fixtures/venv-layout-manifest.json"]
+    expected: "exit 0; nua ENGINE cua AC-12. `relative_dir` trong manifest lay tu HAM TINH DUONG DAN `_venv_dir(root, pid)`, `plugin_id` lay tu id da yeu cau — hai nguon KHAC NHAU, nen 'anh xa sai' la mot trang thai bieu dien duoc. Vong 2 tim ra ca hai truong doc lai tu cung mot p.na quan sat duoc, khien o do khong the do vi thu no do khong ton tai trong du lieu. Ca thu con khang dinh ham va dia thong nhau"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E15
+    criterion: AC-12
+    executor: test
+    layer: backend-effect
+    cmd: config:executors.test.hdc_ts_keeps_per_plugin_venvs
+    paths: ["src/lib/plugins/plugin-python-env.server.ts", "src/lib/plugins/plugin-python-env.test.ts", "sdk/tests/fixtures/venv-layout-manifest.json"]
+    expected: "exit 0; nua TYPESCRIPT cua AC-12. Ca thu GOI venvDirFor(plugin_id) — ham nam giu anh xa o phia nay — roi khang dinh no BANG join(root, relative_dir) cua manifest, truoc khi dung cay va kiem sinh ton. CHIEU DO DA DO 08/09: doi venvDirFor thanh join(VENV_ROOT(), 'v2', pluginId) thi ca thu DO va in ca hai duong dan. Truoc vong 3, ca thu noi chuoi thang nen kich ban ay giu nguyen mau xanh"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
+  - id: E16
+    criterion: AC-13
+    executor: script
+    cmd: config:executors.script.hdc_layout_constant_teeth
+    paths: ["scripts/plugins/check-venv-layout-teeth.sh", "sdk/tongflow/engine/plugins.py"]
+    expected: "exit 0; hai ca rang `docstring-stale` va `banner-stale` dat lai mo ta cu vao chu thich dau module va tieu de muc trong BAN SAO, roi doi guard DO. Neo tren HAI cum ma CHI ban mo ta cu dung — chu 'shared venv' van xuat hien hop le trong ham don venv doi cu, neo vao do la guard keu oan tren ma dung"
+    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+
