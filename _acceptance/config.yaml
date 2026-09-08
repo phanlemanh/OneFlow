@@ -363,6 +363,9 @@ executors:
     dws_expect_count_unchanged: "bash scripts/acceptance/dws-expect-count.sh"
     dws_barrel_export: "bash scripts/acceptance/dws-barrel-export.sh"
     dws_no_prompt_in_prod_log: "bash scripts/acceptance/dws-no-prompt-in-prod-log.sh"
+    # ---- hai-duong-chay-mot-venv (B4) ----
+    hdc_layout_constant_pinned: "bash scripts/plugins/check-venv-layout-pinned.sh"
+    hdc_layout_constant_teeth: "bash scripts/plugins/check-venv-layout-teeth.sh"
     # --- cong-tu-canh-minh (31/08) ---
     # Bo kiem ban do + rang cua no. Dat o scripts/ci/ chu khong scripts/roadmap/
     # hay scripts/acceptance/ vi gia re-pin: 0 vs 1 vs 2 ho so (do tren paths da
