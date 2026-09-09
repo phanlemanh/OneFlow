@@ -5,7 +5,7 @@ slug: hai-duong-chay-mot-venv
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [sdk]
-status: implemented
+status: signed-off
 approved_by: Phan Le Manh
 approved_at: 2026-09-08
 design_doc: docs/superpowers/specs/2026-09-08-hai-duong-chay-mot-venv-design.md
@@ -289,6 +289,10 @@ phạm vi đã duyệt ở Cổng 1, và người ký nhận chúng thay vì nâ
     khẳng định `endsWith(id)` thay vì quan hệ `dirname == root` như bản Python song
     sinh; quan hệ thật do E15 ghim bằng đẳng thức nên ca này chỉ là lớp phụ. Vòng 8 nêu.
 
+Mục Ngoài-2 của vòng 8 (hội đồng xác nhận không có lỗi mới; hai giới hạn nêu ra trùng
+mục 2 và 5 ở trên) — owner định đoạt «ghi Known limits» 09/09: không thêm mục, hai
+mục sẵn có là chỗ ghi.
+
 Vòng 8 còn nêu một mục ngoài hợp đồng đã **sửa ngay** trong cùng nhánh theo tiền lệ
 `a6ae8a0`: `check-eval-filters-teeth.sh` ghim «38 ô đo» trong khi gói thêm bộ lọc
 `-t` thứ 39 — đo đỏ (`--case clean` thoát 1) rồi bump lên 39, răng 9/9 xanh lại.
@@ -323,6 +327,19 @@ Nợ **trong hợp đồng** mà người ký chấp nhận, theo luật trần 
 
   **Các ca thử Python của AC-1/AC-2/AC-9 không mang khuyết điểm này** — chúng dùng
   đẳng thức và đã đo chiều đỏ tận tay.
+
+- **AC-7 — nợ có tên, người ký chấp nhận 09/09/2026 sau vòng 8 (lời owner: «AC-7:
+  Amendment nợ có tên»).** AC-7 hứa cho *cả lớp* «`pip install` trả khác 0 dưới
+  `auto_install=True` → `prepare_python_env` ném lỗi mang nguyên nhân, không trả
+  `sys.executable`». Ô đo duy nhất E8 chỉ đi qua **một nhánh**: `No matching
+  distribution` khi chạy ngoài checkout (nhánh `hint` riêng của `_install_sdk_into`).
+  Ba nhánh không có ca: pip hỏng với thông điệp khác khi chạy *từ checkout* (nhánh
+  mặc định của CI và mọi dev), `_ensure_plugin_requirements` trả khác 0, `python -m
+  venv` trả khác 0. Một refactor nuốt lỗi ở nhánh chung `if code != 0` vẫn giữ E8
+  xanh. Mã sản phẩm hiện *đúng* ở cả bốn nhánh (hội đồng đọc và xác nhận không có
+  catch-and-continue); điều bị nợ là **phủ nhánh của phép đo**, không phải phép đo
+  dối. Cách trả nợ: ba ca pytest cùng fixture của E8, mỗi ca ép một nhánh, kèm
+  chiều đỏ là đặt lại `except Exception: return sys.executable`.
 
 ### Điều bảy vòng đo được về chính bộ đo
 
