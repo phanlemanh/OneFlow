@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: fa92162064b30a54f09c722c2a0a3ed2ba1ee9f7
+verified_commit: 80b4cbec60ace54e1dad8d09a74c9fb365899b74
 human_signoff: Phan Le Manh 2026-09-09
 ---
 
@@ -242,6 +242,11 @@ human_signoff: Phan Le Manh 2026-09-09
   run_id: minted-hai-duong-chay-mot-venv-SUITE-bash_scripts_fork_check_fork_identity_sh-r8
   exit_code: 0
   verified_at: 2026-09-09T08:05:00+07:00
+
+### Re-pin lần 1 — 09/09/2026, do bump hằng số ăn khớp `scripts/ci/check-eval-filters-teeth.sh` (38 → 39, Ngoài-1 của vòng 8, owner định đoạt «nâng phạm vi sửa ngay») SAU mốc verify `fa92162`, và chữ ký Cổng 2 cùng lượt. File ấy không thuộc `paths` của ô đo nào trong hồ sơ này nên luật eval-lane không đòi chạy lại ô nào; mã sản phẩm của gói không đổi. Lane máy 9 lệnh suite chạy trên cây đã ký, mọi lệnh exit 0
+
+run_id: repin-hai-duong-chay-mot-venv-20260909T004305Z
+sha: 80b4cbec60ace54e1dad8d09a74c9fb365899b74 · prev_sha: fa92162064b30a54f09c722c2a0a3ed2ba1ee9f7 · suites: 9 lệnh exit 0
 
 ## Known limits
 
