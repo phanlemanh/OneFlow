@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 80b4cbec60ace54e1dad8d09a74c9fb365899b74
+verified_commit: 60013a4a6be5b5b60ec0d92d0545663c0f325d11
 human_signoff: Phan Le Manh 2026-09-09
 ---
 
@@ -243,11 +243,6 @@ human_signoff: Phan Le Manh 2026-09-09
   exit_code: 0
   verified_at: 2026-09-09T08:05:00+07:00
 
-### Re-pin lần 1 — 09/09/2026, do bump hằng số ăn khớp `scripts/ci/check-eval-filters-teeth.sh` (38 → 39, Ngoài-1 của vòng 8, owner định đoạt «nâng phạm vi sửa ngay») SAU mốc verify `fa92162`, và chữ ký Cổng 2 cùng lượt. File ấy không thuộc `paths` của ô đo nào trong hồ sơ này nên luật eval-lane không đòi chạy lại ô nào; mã sản phẩm của gói không đổi. Lane máy 9 lệnh suite chạy trên cây đã ký, mọi lệnh exit 0
-
-run_id: repin-hai-duong-chay-mot-venv-20260909T004305Z
-sha: 80b4cbec60ace54e1dad8d09a74c9fb365899b74 · prev_sha: fa92162064b30a54f09c722c2a0a3ed2ba1ee9f7 · suites: 9 lệnh exit 0
-
 ## Known limits
 
 ## Ngoài hợp đồng
@@ -279,3 +274,7 @@ Round 6: sửa AC-9 sang đẳng thức đường dẫn ở cả hai ca thử (P
 Round 7: REJECT với 2 finding HIGH trong hợp đồng, cùng hình dạng với round 6 nhưng khác dạng văn bản — guard đếm tên hàm trong docstring/string literal (Python) và trong JSDoc một dòng/string literal (TypeScript, chưa từng có ca răng nào) là chỗ gọi sống. Bảy round, bảy lỗ khác nhau trong cùng một guard dựng bằng `grep` trên văn bản — máy không tự chạy và không khuyên round 8, khuyến nghị duy nhất là rút AC-4.
 
 Round 8 (lượt phát biểu lại "lối A" — owner chọn sau round 7, khai trước khi dispatch: finding trong hợp đồng nếu có quay lại owner, máy không tự vá): guard AC-4 bị cắt về so hằng đường dẫn hai phía, rút ba khẳng định text-grep ("hàm dọn còn được gọi", "docstring đúng", "CI có chạy guard") khỏi cả AC-4 lẫn guard; ca răng rút từ 13 xuống còn 6 ca hằng-số (đổi giá trị · xoá hằng · xoá tệp, mỗi ca hai phía). Vòng dispatch thứ 8 này: toàn bộ 16 eval máy (E1, E2, E2b, E3a, E14, E3b, E15, E4, E5, E6, E7, E8, E9, E10, E10b, E11) PASS (exit 0), và toàn bộ 9 lệnh suite hồi quy PASS (exit 0). Hội đồng vẫn tìm ra 1 finding trong hợp đồng (medium, AC-7 — eval E8 chỉ phủ MỘT nhánh của lời hứa lớp "pip trả khác 0", thiếu ba nhánh còn lại) và 4 finding ngoài hợp đồng (1 high — hằng số ăn khớp trong `check-eval-filters-teeth.sh` chưa bump theo bộ lọc `-t` thứ 39 vừa thêm; 3 low). Theo ràng buộc đã khai trước dispatch, finding ngoài hợp đồng vào Known limits/review-findings; finding trong hợp đồng về owner tại Cổng 2, không tự vá thêm. Không eval nào đỏ, không judgment item nào UNCERTAIN — verdict PASS.
+
+### Re-pin lần 1 — 2026-09-09, do bump hằng số ăn khớp check-eval-filters-teeth.sh 38→39 (Ngoài-1 vòng 8, «nâng phạm vi sửa ngay») sau mốc fa92162, cùng lượt chữ ký Cổng 2; file không thuộc paths của ô đo nào, mã sản phẩm không đổi
+run_id: repin-20260909T004806Z-63825
+sha: 60013a4a6be5b5b60ec0d92d0545663c0f325d11 · suites: 9 lệnh exit 0 · evals: 16 eval máy exit 0
