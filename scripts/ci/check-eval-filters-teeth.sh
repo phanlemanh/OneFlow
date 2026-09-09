@@ -100,7 +100,7 @@ case_clean() {
     make_tree
     checker_is_green || return 1
     out_has 'đã kiểm [0-9]+ ô đo lọc theo tên' || return 1
-    out_has '38 ô đo' || return 1
+    out_has '39 ô đo' || return 1
 }
 
 # AC-1. One filter points at a name that does not exist.

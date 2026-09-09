@@ -281,6 +281,17 @@ phạm vi đã duyệt ở Cổng 1, và người ký nhận chúng thay vì nâ
 8. `runner.py:227/345` và `__main__.py:19` còn chữ «shared venv» trong chú thích
    nội bộ; `ci.yml` có một chú thích nói hai step này đăng ký `GUARD_NEEDLES` trong
    khi chưa (mục 3). Vòng 7 nêu, chưa sửa vì nằm ngoài diff lối A.
+9. `_clone_plugin` (`plugins.py:60`) và hai chỗ `plugins_dir / pid` khác dùng id
+   chưa qua `_PLUGIN_ID_RE`; `ensure_plugins_present` chạy TRƯỚC `prepare_python_env`
+   nên một id kiểu `../x` được clone ra ngoài `plugins_dir` rồi mới bị `_venv_dir` từ
+   chối. Mã có sẵn, gói này không chạm — vòng 8 nêu.
+10. Đối chứng dương phía TypeScript cho id an toàn (`plugin-python-env.test.ts:64`)
+    khẳng định `endsWith(id)` thay vì quan hệ `dirname == root` như bản Python song
+    sinh; quan hệ thật do E15 ghim bằng đẳng thức nên ca này chỉ là lớp phụ. Vòng 8 nêu.
+
+Vòng 8 còn nêu một mục ngoài hợp đồng đã **sửa ngay** trong cùng nhánh theo tiền lệ
+`a6ae8a0`: `check-eval-filters-teeth.sh` ghim «38 ô đo» trong khi gói thêm bộ lọc
+`-t` thứ 39 — đo đỏ (`--case clean` thoát 1) rồi bump lên 39, răng 9/9 xanh lại.
 
 Ba mục owner đã chọn **mở hợp đồng mới** ở Cổng 2 vòng 2 (bản cloud tách đôi theo
 scope · hai bộ nhãn cache · khoá liên-tiến-trình) trùng một phần với danh sách
