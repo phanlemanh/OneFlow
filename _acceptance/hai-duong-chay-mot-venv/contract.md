@@ -53,9 +53,10 @@ Thiết kế đầy đủ, gồm quét không gian tiêu chí: [`docs/superpower
   TypeScript chạy `ensurePluginPython` cho bất kỳ plugin nào, Then mọi thư mục venv
   per-plugin đã có **còn nguyên** — `removeLegacySharedVenv` không tìm thấy gì để xoá.
   Đây là ô sinh ra cả dòng B4: trước gói này nó xoá sạch.
-- AC-4: Given hằng đường dẫn được khai ở cả hai phía, When một phía đổi đoạn đường dẫn
-  hoặc đánh mất bước dọn venv đời cũ, Then guard ghim hằng số trả về khác 0 và gọi tên
-  phía bị lệch.
+- AC-4: Given hằng đường dẫn được khai ở cả hai phía, When một phía đổi đoạn đường dẫn,
+  hoặc khai theo cách guard không trích ra được hằng số, hoặc tệp của một phía vắng,
+  Then guard ghim hằng số trả về khác 0 và gọi tên phía bị lệch. *(Thu phạm vi 09/09
+  sau vòng 7: vế «đánh mất bước dọn venv đời cũ» rút khỏi guard — xem Out of scope.)*
 
 ### B. Đường lấy SDK
 
@@ -144,6 +145,29 @@ phẩm không đổi một byte kể từ `ec9849c` — để có báo cáo kh�
 **trong hợp đồng** nếu có thì hồ sơ trả về làn sửa và owner quyết lại từ đầu —
 nhưng không có lượt phát biểu lại thứ hai.
 
+### Vòng 5, 6, 7 — chạy theo lệnh owner, và điều chúng đo được
+
+Lượt phát biểu lại (vòng 5) tìm ra `assert pid in py` đo chuỗi thay vì đo quan hệ
+(AC-9) — sửa bốn dòng thành đẳng thức, owner gọi vòng 6. Vòng 6 tìm ra guard đếm
+dòng chú thích là chỗ gọi — sửa một dòng `sed`, owner gọi vòng 7. Vòng 7 tìm ra
+guard đếm docstring và string literal là chỗ gọi (Python), JSDoc và string literal
+(TypeScript, chưa từng có ca răng). Ba vòng, ba lỗ, **cùng một guard**, cùng một
+lớp: lời hứa là «một lời gọi *sống*», grep đo «tên *xuất hiện*». Máy khai trước
+vòng 6 rằng sẽ không khuyên vòng 7, và giữ lời.
+
+### Lối A — thu guard về việc grep làm được; lần dispatch thứ 8 là LƯỢT PHÁT BIỂU LẠI, khai 09/09 trước khi chạy
+
+Owner quyết sau vòng 7. Guard chỉ còn **so hằng đường dẫn** giữa hai phía — đúng
+«một guard buộc hằng số» chọn ở brainstorm 08/09. Ba khẳng định text-grep không
+gánh nổi rút khỏi AC-4 và khỏi guard: «hàm dọn venv đời cũ còn được gọi», «docstring
+đúng», «CI có chạy guard». Răng giảm từ 13 ca về 6 ca hằng-số. Đây là **cắt**, không
+phải vá: guard mất chức năng, không thêm lớp lọc nào.
+
+Lần dispatch thứ 8 chạy trên cây đã cắt để `verdict` khớp hợp đồng đã rút (thẻ Cổng
+2 từ chối ký trên REJECT). Ràng buộc như lượt phát biểu lại thứ nhất: finding ngoài
+hợp đồng → Known limits, không nâng phạm vi; finding trong hợp đồng → về owner, và
+máy **không** đề xuất vòng vá nào nữa, ở bất kỳ kết cục nào.
+
 ## Coverage
 
 Quét bằng `morphological-scan`, trục dựng từ đầu (preset `test-matrix` không khớp:
@@ -210,6 +234,18 @@ thật trong kho hoặc từ chân ngành có tên.
   Ba chỗ chú thích **đã sửa và ở lại**. Điều bị rút là lời hứa rằng guard canh
   được nó: guard chỉ cấm một cụm chữ, không hề đối chứng dương rằng mô tả đúng
   còn đó — khẳng định âm-tính-một-mình, đúng lớp lỗi hồ sơ này khai là kẻ thù.
+- **Rút khỏi phạm vi sau vòng 7 (09/09): lời hứa guard canh được chỗ gọi *sống* của
+  hàm dọn venv đời cũ.** Bảy vòng, bảy lỗ khác nhau, đều ở nửa này của guard: grep
+  đúng giá trị mong đợi · thiếu chỗ gọi · step CI bị chú thích hoá · chú thích `#`
+  đếm thành chỗ gọi · chú thích cuối dòng · docstring/string literal (Python) ·
+  JSDoc/string literal (TypeScript). Mỗi bản vá đóng một dạng văn bản và dạng kế
+  luôn còn, vì grep đo «tên xuất hiện» chứ không đo «lời gọi sống». Phía Python,
+  điều đó **đã được đo bằng ca thử thi hành thật** (E2b: gốc có `pyvenv.cfg` →
+  engine cấp phát → gốc sạch, per-plugin dựng lại; E3a xuất manifest sau khi cấp
+  phát thật). Phía TypeScript, `ensurePluginPython` và `removeLegacySharedVenv`
+  **không đổi một byte** trong gói này; không ô đo nào ở đây chứng minh cái trước
+  còn gọi cái sau — ghi thành Known limits. Cách đo đúng là một ca thử đọc *cấu
+  trúc* (`ast` / TypeScript compiler API), việc của một hồ sơ khác nếu cần.
 - **Đo thời gian cài lần đầu.** Cô lập đổi lấy một bản SDK mỗi venv; giá ấy ADR-0011
   đã chấp nhận từ 07/08, không mở lại ở đây.
 
@@ -239,6 +275,12 @@ phạm vi đã duyệt ở Cổng 1, và người ký nhận chúng thay vì nâ
    interpreter nào.
 6. Không có khoá liên-tiến-trình trên thư mục venv nay dùng chung; khoá hiện có
    là một Map trong bộ nhớ của tiến trình app, không thấy được engine.
+7. Phía TypeScript: không ô đo nào chứng minh `ensurePluginPython` còn gọi
+   `removeLegacySharedVenv` (mã ấy không đổi trong gói này; guard từng canh bằng
+   grep và bị chứng minh bảy lần là không canh được — rút 09/09 sau vòng 7).
+8. `runner.py:227/345` và `__main__.py:19` còn chữ «shared venv» trong chú thích
+   nội bộ; `ci.yml` có một chú thích nói hai step này đăng ký `GUARD_NEEDLES` trong
+   khi chưa (mục 3). Vòng 7 nêu, chưa sửa vì nằm ngoài diff lối A.
 
 Ba mục owner đã chọn **mở hợp đồng mới** ở Cổng 2 vòng 2 (bản cloud tách đôi theo
 scope · hai bộ nhãn cache · khoá liên-tiến-trình) trùng một phần với danh sách
@@ -262,29 +304,29 @@ một trong hai là lớp lỗi gói này đóng.
 
 Nợ **trong hợp đồng** mà người ký chấp nhận, theo luật trần vòng verify ở trên.
 
-- **AC-4, phần lệnh kiểm: `grep -c` đếm cả dòng CHÚ THÍCH là chỗ gọi.**
-  `check-venv-layout-pinned.sh` đòi `py_call >= 2` để chắc có cả định nghĩa lẫn
-  một chỗ gọi thật của `_remove_legacy_shared_venv`. Nhưng biểu thức đếm mọi dòng
-  chứa tên hàm — kể cả chú thích ở dòng 58 nói *"only the CALL SITE is deleted"*.
-  Xoá chỗ gọi thật mà để lại chú thích thì lệnh kiểm vẫn xanh. Đo ở vòng 6.
-  Đây là hình dạng **đo chỉ dẫn thay vì đo đầu ra**, cùng họ với ba lỗ trước của
-  chính lệnh kiểm này. Cách sửa đã biết và rẻ (loại dòng bắt đầu bằng `#` trước
-  khi đếm, hoặc lọc theo dòng thi hành như `check-gate-guards-job.sh` làm), nhưng
-  nó nằm ngoài trần vòng đã khai.
+- **AC-4 — ghi ở vòng 6 rằng guard đếm chú thích là chỗ gọi; đã thay bằng rút
+  phạm vi sau vòng 7.** Bản vá vòng 6 (`sed 's/#.*//'`) đóng dạng chú thích và vòng
+  7 mở ngay dạng docstring/string literal. Owner chọn lối A: nửa «gọi sống» của AC-4
+  rút hẳn (Out of scope), guard chỉ còn so hằng số. Không còn nợ trong hợp đồng ở
+  AC-4 — phần còn lại của nó đo bằng trích-so-sánh với chiều đỏ 6 ca.
 
-  **Hai ca thử Python của AC-1/AC-2 không mang khuyết điểm này** — chúng dùng đẳng
-  thức và đã đo chiều đỏ tận tay. Điều bị nợ chỉ là **nửa lệnh-kiểm** của AC-4.
+  **Các ca thử Python của AC-1/AC-2/AC-9 không mang khuyết điểm này** — chúng dùng
+  đẳng thức và đã đo chiều đỏ tận tay.
 
-### Điều sáu vòng đo được về chính bộ đo
+### Điều bảy vòng đo được về chính bộ đo
 
-Sáu vòng, mọi vòng mọi ô đo xanh, mọi vòng hội đồng tìm ra lỗi thật. Sản phẩm hội
-tụ sau vòng 3; ba vòng cuối chỉ tìm ra phép đo yếu, và cả ba lần ở **cùng một công
-cụ** — lệnh kiểm bash dựng bằng `grep`. Nó đã bị bắt yếu ở bốn cách khác nhau:
-grep đúng giá trị đang mong đợi · thiếu chỗ gọi · step bị chú thích hoá · chú thích
-đếm thành chỗ gọi.
+Bảy vòng, mọi vòng mọi ô đo xanh, mọi vòng hội đồng tìm ra lỗi thật. Sản phẩm hội
+tụ sau vòng 3; vòng 5 sửa một khẳng định chuỗi thành đẳng thức (AC-9); bốn vòng còn
+lại chỉ tìm ra phép đo yếu, và cả bốn lần ở **cùng một công cụ** — lệnh kiểm bash
+dựng bằng `grep`. Nó đã bị bắt yếu ở bảy cách khác nhau: grep đúng giá trị đang
+mong đợi · thiếu chỗ gọi · step bị chú thích hoá · chú thích đếm thành chỗ gọi ·
+chú thích cuối dòng · docstring/string literal · JSDoc/string literal phía TS.
 
 Kết luận để lại cho hồ sơ sau: **`grep` trên văn bản không cõng nổi một tiêu chí
-nghiệm thu.** Lối «đổi khuôn» — chuyển khẳng định sang một ca thử thật, nơi tệp
-vắng là LỖI và quan hệ được so bằng đẳng thức — là lối đúng, và nó bị bỏ qua ở
-vòng 3 theo khuyến nghị của máy. Khuyến nghị ấy sai.
+nghiệm thu khi lời hứa là một QUAN HỆ hay một TRẠNG THÁI SỐNG.** Nó chỉ cõng nổi
+một hằng số: hai chuỗi trích ra và so bằng — và đó là toàn bộ việc guard còn làm
+từ lối A. Lối «đổi khuôn» — chuyển khẳng định sang một ca thử thật, nơi tệp vắng
+là LỖI và quan hệ được so bằng đẳng thức — là lối đúng cho mọi thứ khác, và nó bị
+bỏ qua ở vòng 3 theo khuyến nghị của máy. Khuyến nghị ấy sai; máy còn khuyên «một
+vòng nữa» hai lần sau đó và sai cả hai.
 

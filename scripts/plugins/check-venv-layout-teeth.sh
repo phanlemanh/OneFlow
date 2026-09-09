@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Red-direction cases for check-venv-layout-pinned.sh.
 #
-# Cases 5 and 6 are the ones the four value-changing cases cannot see: a guard
-# that extracts NOTHING compares two empty strings, finds them equal, and exits
-# 0. That is the failure mode this whole feature is about.
+# Six cases, two per failure mode, one per side: the value drifts; the constant
+# is erased so extraction yields nothing (a guard that extracts NOTHING compares
+# two empty strings, finds them equal, and exits 0 — the failure mode this whole
+# feature is about); the file is gone. Cases for call-site liveness, docstring
+# and CI wiring were removed with the assertions they exercised (2026-09-09).
 #
 # No `trap EXIT`: under macOS bash 3.2 it has leaked a 0 exit out of a suite
 # that printed failures (see bash32-exit-trap-leaks-status). Check $? yourself.
@@ -13,16 +15,15 @@ GUARD="$(cd "$(dirname "$0")" && pwd)/check-venv-layout-pinned.sh"
 SRC="$(cd "$(dirname "$0")/../.." && pwd)"
 PY_REL="sdk/tongflow/engine/plugins.py"
 TS_REL="src/lib/plugins/plugin-python-env.server.ts"
-CI_REL=".github/workflows/ci.yml"
+TOTAL=6
 pass=0; fail=0
 
 run_case() {
     local name="$1" expect_msg="$2"; shift 2
     local wd; wd=$(mktemp -d)
-    mkdir -p "$wd/$(dirname "$PY_REL")" "$wd/$(dirname "$TS_REL")" "$wd/$(dirname "$CI_REL")"
+    mkdir -p "$wd/$(dirname "$PY_REL")" "$wd/$(dirname "$TS_REL")"
     cp "$SRC/$PY_REL" "$wd/$PY_REL"
     cp "$SRC/$TS_REL" "$wd/$TS_REL"
-    cp "$SRC/$CI_REL" "$wd/$CI_REL"
     "$@" "$wd"
     local out rc
     out=$(bash "$GUARD" --root "$wd" 2>&1); rc=$?
@@ -37,40 +38,19 @@ run_case() {
     echo "PASS [$name]"; pass=$((pass+1))
 }
 
-c_py_value()  { perl -pi -e 's/"plugin-venv"/"plugin-venv-x"/ if $. < 200' "$1/$PY_REL"; }
-c_ts_value()  { perl -pi -e 's/"plugin-venv"/"plugin-venv-x"/' "$1/$TS_REL"; }
-c_py_drop()   { perl -pi -e 's/_remove_legacy_shared_venv/_gone_/g' "$1/$PY_REL"; }
-c_ts_drop()   { perl -pi -e 's/removeLegacySharedVenv/gone/g' "$1/$TS_REL"; }
-c_py_erase()  { perl -pi -e 's/"\.tongflow"\s*\/\s*"plugin-venv"/_layout()/' "$1/$PY_REL"; }
-c_ts_erase()  { perl -pi -e 's/"\.tongflow",\s*"plugin-venv"/...layout()/' "$1/$TS_REL"; }
-# Keep the definition, delete only the CALL. Round 1 found the guard stayed
-# green here while the cycle was fully re-armed.
-c_py_call_drop() { perl -pi -e 's/^(\s*)_remove_legacy_shared_venv\(root, log\)/$1pass/' "$1/$PY_REL"; }
-c_ts_call_drop() { perl -pi -e 's/^(\s*)removeLegacySharedVenv\(\);/$1;/' "$1/$TS_REL"; }
-# AC-13: the module header must not describe the model this commit deleted.
-c_py_doc_stale()    { perl -pi -e 's/provision ONE VENV PER PLUGIN/provision a shared venv/ if $. < 30' "$1/$PY_REL"; }
-c_py_banner_stale() { perl -pi -e 's/^# --- per-plugin venv/# --- shared venv/' "$1/$PY_REL"; }
-# AC-11: unwire the guard from CI and it must notice its own absence.
-c_ci_drop()         { perl -pi -e 's{run: bash scripts/plugins/check-venv-layout-pinned.sh}{run: true}' "$1/$CI_REL"; }
-# Round 3: the assertion above used to evaporate when ci.yml was absent.
-c_ci_missing()      { rm -f "$1/$CI_REL"; }
-# Round 6: the real call was deleted while a COMMENT mentioning the function
-# stayed, and the count-based check read the comment as a call site.
-c_py_call_comment() { perl -pi -e 's/^(\s*)_remove_legacy_shared_venv\(root, log\)/$1pass  # _remove_legacy_shared_venv(root, log)/' "$1/$PY_REL"; }
+c_py_value()   { perl -pi -e 's/"plugin-venv"/"plugin-venv-x"/ if $. < 200' "$1/$PY_REL"; }
+c_ts_value()   { perl -pi -e 's/"plugin-venv"/"plugin-venv-x"/' "$1/$TS_REL"; }
+c_py_erase()   { perl -pi -e 's/"\.tongflow"\s*\/\s*"plugin-venv"/_layout()/' "$1/$PY_REL"; }
+c_ts_erase()   { perl -pi -e 's/"\.tongflow",\s*"plugin-venv"/...layout()/' "$1/$TS_REL"; }
+c_py_missing() { rm -f "$1/$PY_REL"; }
+c_ts_missing() { rm -f "$1/$TS_REL"; }
 
 run_case "python-value-changed" "the two runtimes disagree" c_py_value
 run_case "ts-value-changed"     "the two runtimes disagree" c_ts_value
-run_case "python-removal-gone"  "PYTHON side lost its legacy-shared-venv removal" c_py_drop
-run_case "ts-removal-gone"      "TYPESCRIPT side lost its legacy-shared-venv removal" c_ts_drop
 run_case "python-const-erased"  "could not be read on the PYTHON side" c_py_erase
 run_case "ts-const-erased"      "could not be read on the TYPESCRIPT side" c_ts_erase
-run_case "python-call-dropped"  "PYTHON side lost its legacy-shared-venv removal" c_py_call_drop
-run_case "ts-call-dropped"      "TYPESCRIPT side lost its legacy-shared-venv removal" c_ts_call_drop
-run_case "docstring-stale"      "still says it provisions a shared venv" c_py_doc_stale
-run_case "banner-stale"         "still reads '--- shared venv'" c_py_banner_stale
-run_case "ci-step-dropped"      "is not run by .github/workflows/ci.yml" c_ci_drop
-run_case "ci-file-missing"      "ci.yml not found at" c_ci_missing
-run_case "call-gone-comment-stays" "PYTHON side lost its legacy-shared-venv removal" c_py_call_comment
+run_case "python-file-missing"  "FAIL: missing" c_py_missing
+run_case "ts-file-missing"      "FAIL: missing" c_ts_missing
 
-echo "$pass/13 PASS"
-[ "$fail" -eq 0 ] && [ "$pass" -eq 13 ] || exit 1
+echo "$pass/$TOTAL PASS"
+[ "$fail" -eq 0 ] && [ "$pass" -eq "$TOTAL" ] || exit 1

@@ -67,7 +67,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_pinned
     paths: ["scripts/plugins/check-venv-layout-pinned.sh", "sdk/tongflow/engine/plugins.py", "src/lib/plugins/plugin-python-env.server.ts"]
-    expected: "exit 0 tren cay lanh, VA in ra DUNG HAI gia tri trich duoc (mot moi phia). Guard FAIL-CLOSED: phia nao trich ra rong thi thoat khac 0 voi thong diep ghim ten phia khong tim thay — guard so hai chuoi rong roi thay khop la dung lop loi hong-ma-khong-keu ma goi nay dong"
+    expected: "exit 0 tren cay lanh, VA in ra DUNG HAI gia tri trich duoc (mot moi phia) roi dong 'OK: both runtimes pin the same venv root'. Guard chi lam MOT viec (loi A, 09/09): trich hai hang duong dan va so bang; khong con doc cho goi, docstring, hay ci.yml. FAIL-CLOSED: phia nao trich ra rong hoac tep vang thi thoat khac 0 voi thong diep ghim ten phia — guard so hai chuoi rong roi thay khop la dung lop loi hong-ma-khong-keu ma goi nay dong"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   - id: E5
@@ -75,7 +75,7 @@ evals:
     executor: script
     cmd: config:executors.script.hdc_layout_constant_teeth
     paths: ["scripts/plugins/check-venv-layout-teeth.sh", "scripts/plugins/check-venv-layout-pinned.sh"]
-    expected: "exit 0; MUOI BA ca xao tron tren BAN SAO, guard phai DO tung ca voi thong diep ghim: doi duong dan hai phia; xoa TEN ham don hai phia; XOA HAN hang hai phia (fail-open); GIU dinh nghia xoa CHO GOI hai phia; dat lai mo ta cu (hai ca, tieu chi da rut nhung ca van chay); go step CI va XOA HAN ci.yml (hai ca, tieu chi da rut nhung ca van chay); va ca 13 — XOA CHO GOI THAT nhung GIU chu thich nhac ten ham, lo hong vong 6: guard dem chu thich la cho goi. In 13/13 PASS va thoat 0; kiem CA ma thoat LAN dong in"
+    expected: "exit 0; SAU ca xao tron tren BAN SAO, guard phai DO tung ca voi thong diep ghim ten phia: doi doan duong dan (Python / TS) -> 'the two runtimes disagree'; XOA HAN hang de trich ra rong (Python / TS) -> 'could not be read on the ... side'; XOA tep (Python / TS) -> 'FAIL: missing'. In 6/6 PASS va thoat 0; kiem CA ma thoat LAN dong in. Bay ca cu ve cho goi / docstring / CI da GO cung voi khang dinh chung do (loi A)"
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- B. Duong lay SDK ----------

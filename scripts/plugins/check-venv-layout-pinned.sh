@@ -5,6 +5,17 @@
 # the engine built ONE venv at the path the app treats as a directory OF venvs,
 # so each destroyed the other's work. A comment cannot fail; this can.
 #
+# This guard does ONE thing: read the path segments each side declares and
+# demand they are equal. It used to also assert that the legacy-venv removal was
+# still CALLED on both sides, that the module docstring was current, and that
+# ci.yml ran it. Seven verify rounds found seven distinct holes in those extra
+# assertions, every one of the same shape: a text grep can only see that a NAME
+# APPEARS, and "appears" is not "is live" — a comment, a docstring, a string
+# literal, a `# run:` line all satisfy it. No grep patch closes that gap, so the
+# owner withdrew those assertions on 2026-09-09 (contract, Out of scope). The
+# removal's liveness on the Python side is proven by tests that EXECUTE it
+# (sdk/tests/test_plugin_venv_layout.py); it is not this script's job.
+#
 # Fail-closed: a side that yields nothing is an error, not a match. Two empty
 # strings comparing equal is exactly the silent-green this package exists to end.
 set -euo pipefail
@@ -54,84 +65,7 @@ if [ "$py_const" != "$ts_const" ]; then
     exit 1
 fi
 
-# A definition alone proves nothing: round 1 found that grepping the NAME stays
-# green when only the CALL SITE is deleted, which is the change that actually
-# re-arms the cycle. Demand both, on both sides.
-# Strip COMMENT lines before counting. Round 6 measured the hole: the comment a
-# few lines above ("only the CALL SITE is deleted") was itself counted as a call
-# site, so deleting the real call while leaving that comment kept the guard
-# green. Counting a mention where the promise is "a live call" is the same
-# measure-the-easy-proxy shape this guard was written to catch elsewhere.
-# Strip inline comments too, not just whole-line ones: round 6's teeth case
-# proved a trailing `# _remove_legacy_shared_venv(...)` still counted. Cutting at
-# the first `#` can also cut a `#` inside a string literal — that direction is
-# safe, because it can only LOWER the count and make the guard fail closed.
-py_code=$(sed 's/#.*//' "$PY" || true)
-py_def=$(printf '%s\n' "$py_code" | grep -cE '^[[:space:]]*def _remove_legacy_shared_venv\(' || true)
-py_call=$(printf '%s\n' "$py_code" | grep -cE '_remove_legacy_shared_venv\(' || true)
-if [ "$py_def" -lt 1 ] || [ "$py_call" -lt 2 ]; then
-    echo "FAIL: the PYTHON side lost its legacy-shared-venv removal" >&2
-    echo "      definitions=$py_def call sites=$((py_call - py_def)) — need both" >&2
-    echo "      without a CALL the app deletes every per-plugin venv on its next run" >&2
-    exit 1
-fi
-
-# Same on the TypeScript side: strip `//` and `*` comment lines first.
-ts_code=$(sed -E 's#//.*##; s#^[[:space:]]*\*.*##' "$TS" || true)
-ts_def=$(printf '%s\n' "$ts_code" | grep -cE 'function removeLegacySharedVenv\(' || true)
-ts_call=$(printf '%s\n' "$ts_code" | grep -cE 'removeLegacySharedVenv\(' || true)
-if [ "$ts_def" -lt 1 ] || [ "$ts_call" -lt 2 ]; then
-    echo "FAIL: the TYPESCRIPT side lost its legacy-shared-venv removal" >&2
-    echo "      definitions=$ts_def call sites=$((ts_call - ts_def)) — need both" >&2
-    echo "      without a CALL, users upgrading from before 2026-08-07 keep a dead venv" >&2
-    exit 1
-fi
-
-# AC-13: the module docstring is the artifact the two runtimes were supposed to
-# agree through, so it must not still describe the shared-venv model this commit
-# deleted. Anchored on the two phrases that ONLY the stale description uses —
-# "shared venv" still appears legitimately in the legacy-removal function, and
-# matching that would make the guard cry wolf on correct code.
-py_head=$(sed -n '1,30p' "$PY")
-if printf '%s' "$py_head" | grep -q 'provision a shared venv'; then
-    echo "FAIL: the PYTHON module docstring still says it provisions a shared venv" >&2
-    echo "      it provisions one venv per plugin; the header is the artifact the two" >&2
-    echo "      runtimes agree through, and a false one is the same drift one layer up" >&2
-    exit 1
-fi
-if grep -qE '^# --- shared venv' "$PY"; then
-    echo "FAIL: the PYTHON section banner still reads '--- shared venv'" >&2
-    echo "      that section builds one venv per plugin now" >&2
-    exit 1
-fi
-
-# AC-11: a guard that only runs when somebody types it cannot fail a future PR,
-# which is the entire point of pinning. The repo has already paid for this once:
-# scripts/ci/check-gate-guards-job.sh:6 records that the acceptance gate's own
-# two drift guards had ZERO references in ci.yml and PRODUCT-MAP.md drifted by
-# four slugs before anyone noticed. Assert our own wiring.
-# FAIL-CLOSED, and round 3 caught this line being the opposite. The first
-# version wrapped the whole check in `if [ -f "$CI" ]`, so a missing ci.yml made
-# the assertion evaporate and the guard still exit 0 — a check written to catch
-# "the guard does not run in CI" that quietly did nothing when there was no CI to
-# look at. Same class as the rmtree swallow round 1 found: the precondition being
-# absent is exactly when the answer matters most.
-CI="$ROOT/.github/workflows/ci.yml"
-[ -f "$CI" ] || {
-    echo "FAIL: .github/workflows/ci.yml not found at $CI" >&2
-    echo "      cannot confirm these guards run on an ordinary PR, so refuse" >&2
-    exit 1
-}
-for script in check-venv-layout-pinned.sh check-venv-layout-teeth.sh; do
-    grep -qE "run:.*scripts/plugins/$script" "$CI" || {
-        echo "FAIL: $script is not run by .github/workflows/ci.yml" >&2
-        echo "      it would then run only inside this dossier's verify rounds," >&2
-        echo "      never on an ordinary PR — the drift it pins would go unseen" >&2
-        exit 1
-    }
-done
-
 echo "extracted 2 values:"
 echo "  python:     $py_const"
 echo "  typescript: $ts_const"
-echo "OK: both runtimes pin the same venv root, and both still remove the legacy shared venv"
+echo "OK: both runtimes pin the same venv root"
