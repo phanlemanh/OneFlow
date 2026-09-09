@@ -2,7 +2,13 @@
  * `plugin-python-env.server.ts` imports `"server-only"`, which throws outside a
  * Next.js server bundle — mocked away exactly as engine-delegate.test.ts does.
  */
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import {
+    existsSync,
+    mkdirSync,
+    mkdtempSync,
+    readFileSync,
+    writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
@@ -48,7 +54,16 @@ describe("venvDirFor", () => {
     it.each(["../../etc", "..", ".ssh", "a/b", "a\\b", ""])(
         "refuses %j, which would escape the venv root",
         (bad) => {
-            expect(() => venvDirFor(bad)).toThrow();
+            // Pin the message, as the Python twin does. A bare toThrow() cannot
+            // tell "rejected this id" from "crashed for an unrelated reason",
+            // which is the same negative-assertion-alone shape this package
+            // spent five verify rounds learning to avoid.
+            expect(() => venvDirFor(bad)).toThrow(/unsafe plugin id/);
+            // Positive control in the same case: the rule must still admit a
+            // real id, or a function that rejected everything would pass.
+            expect(
+                venvDirFor("oneflow-api-ffmpeg").endsWith("oneflow-api-ffmpeg"),
+            ).toBe(true);
         },
     );
 });
@@ -166,18 +181,53 @@ describe("legacy shared venv migration", () => {
         expect(existsSync(root)).toBe(false);
     });
 
-    it("leaves a root that already holds per-plugin venvs alone (legacy)", () => {
+    it("leaves every venv the engine wrote alone (legacy)", () => {
+        // The fixture is the ENGINE's output, not a tree typed here: the two
+        // sides drifting on the id -> directory mapping is the exact failure
+        // this package closes, and a hand-typed tree cannot see it. The Python
+        // half regenerates and re-asserts this file — see
+        // sdk/tests/test_plugin_venv_layout.py::test_engine_emits_the_layout_manifest_the_typescript_side_reads
+        const manifest = JSON.parse(
+            readFileSync(
+                new URL(
+                    "../../../sdk/tests/fixtures/venv-layout-manifest.json",
+                    import.meta.url,
+                ),
+                "utf8",
+            ),
+        ) as {
+            root_has_pyvenv_cfg: boolean;
+            entries: { plugin_id: string; relative_dir: string }[];
+        };
+        expect(manifest.root_has_pyvenv_cfg).toBe(false);
+        expect(manifest.entries.length).toBeGreaterThan(1);
+
         const data = mkdtempSync(join(tmpdir(), "venv-modern-"));
         process.env.TONGFLOW_DATA_DIR = data;
-
-        // The new layout has no pyvenv.cfg at the root — only inside each child.
         const root = join(data, ".tongflow", "plugin-venv");
-        const child = join(root, "some-plugin");
-        mkdirSync(child, { recursive: true });
-        writeFileSync(join(child, "pyvenv.cfg"), "home = /usr/bin\n");
+
+        for (const e of manifest.entries) {
+            // Ask the function that OWNS the mapping on this side, rather than
+            // concatenating the string ourselves. Round 2 found this test never
+            // touched venvDirFor, so adding a path segment there — say
+            // join(VENV_ROOT(), "v2", id) — left the two runtimes maintaining
+            // parallel trees with every eval still green.
+            const dir = venvDirFor(e.plugin_id);
+            expect(
+                dir,
+                `${e.plugin_id}: the engine writes ${e.relative_dir}, this side wants ${dir}`,
+            ).toBe(join(root, e.relative_dir));
+            mkdirSync(dir, { recursive: true });
+            writeFileSync(join(dir, "pyvenv.cfg"), "home = /usr/bin\n");
+        }
 
         removeLegacySharedVenv();
 
-        expect(existsSync(child)).toBe(true);
+        for (const e of manifest.entries) {
+            expect(
+                existsSync(venvDirFor(e.plugin_id)),
+                `${e.plugin_id}: the engine wrote this venv and the app deleted it`,
+            ).toBe(true);
+        }
     });
 });

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1160 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Lora:ital,wght@0,400;1,400&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;display=swap');
+        @media (prefers-color-scheme: dark) {
+          .fp { fill: #1a0033; }
+          .fn { fill: #241041; }
+          .fz { fill: #f7f7f8; }
+          .fi { fill: #f7f7f8; }
+          .fm { fill: #c0bacf; }
+          .fs { fill: #a49cb8; }
+          .fa { fill: #ff5cff; }
+          .fat { fill: #ff5cff; }
+          .si { stroke: #f7f7f8; }
+          .sm { stroke: #c0bacf; }
+          .ss { stroke: #a49cb8; }
+          .sr { stroke: rgba(247,247,248,0.16); }
+          .sa { stroke: #ff5cff; }
+        }
+      </style>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon class="fm" points="0 0, 8 3, 0 6" fill="#4f4a63"/>
+      </marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+        <polygon class="fa" points="0 0, 8 3, 0 6" fill="#e100e1"/>
+      </marker>
+    </defs>
+
+    <rect class="fp" width="100%" height="100%" fill="#f7f7f8"/>
+
+    <!-- ============ KHUNG A · HÔM NAY ============ -->
+    <rect class="fz sr" x="40" y="56" width="1080" height="320" rx="8" fill="#1a0033" fill-opacity="0.035" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+    <text class="fm" x="64" y="88" fill="#4f4a63" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.16em">HÔM NAY · HAI BÊN PHÁ NHAU</text>
+
+    <!-- vòng khép kín: từ bước 4 vòng lên trên rồi trở lại bước 1 -->
+    <path class="sa" d="M 988 176 L 988 140 Q 988 132 980 132 L 180 132 Q 172 132 172 140 L 172 176"
+          fill="none" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <rect class="fp" x="524" y="104" width="112" height="18" rx="2" fill="#f7f7f8"/>
+    <text x="580" y="117" fill="#a300a3" class="fat" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">VÒNG KHÉP KÍN</text>
+
+    <!-- các bước nối tiếp -->
+    <line class="sm" x1="284" y1="224" x2="330" y2="224" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <line class="sm" x1="556" y1="224" x2="602" y2="224" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <line class="sm" x1="828" y1="224" x2="874" y2="224" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- bước 1 -->
+    <rect class="fp" x="64" y="176" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="64" y="176" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="76" y="186" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="86" y="197" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+    <text class="fi" x="172" y="226" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">engine Python dựng một venv</text>
+    <text class="fi" x="172" y="244" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">dùng chung ngay tại gốc</text>
+    <text class="fm" x="172" y="262" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">data/.tongflow/plugin-venv</text>
+
+    <!-- bước 2 -->
+    <rect class="fp" x="336" y="176" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="336" y="176" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="348" y="186" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="358" y="197" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+    <text class="fi" x="444" y="226" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">thư mục gốc mang dấu hiệu</text>
+    <text class="fi" x="444" y="244" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">của một venv</text>
+    <text class="fm" x="444" y="262" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">pyvenv.cfg</text>
+
+    <!-- bước 3 -->
+    <rect class="fp" x="608" y="176" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="608" y="176" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="620" y="186" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="630" y="197" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+    <text class="fi" x="716" y="226" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">app TypeScript coi đó là</text>
+    <text class="fi" x="716" y="244" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">venv đời cũ, xoá cả gốc</text>
+    <text class="fm" x="716" y="262" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">rm -rf plugin-venv</text>
+
+    <!-- bước 4 -->
+    <rect class="fp" x="880" y="176" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="880" y="176" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="892" y="186" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="902" y="197" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+    <text class="fi" x="988" y="226" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">mọi venv riêng của từng</text>
+    <text class="fi" x="988" y="244" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">plugin mất sạch, âm thầm</text>
+
+    <!-- ghi chú A -->
+    <path class="sr" d="M 716 302 Q 660 292 586 278" fill="none" stroke="rgba(26,0,51,0.32)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle class="fi" cx="582" cy="277" r="2.5" fill="#1a0033"/>
+    <text class="fi" x="1096" y="306" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="end">chỗ hai bên gặp nhau chỉ được buộc bằng một dòng chú thích</text>
+    <text class="fi" x="1096" y="326" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="end">trong mã — chú thích không giữ nổi hai bên khỏi trôi khỏi nhau</text>
+
+    <!-- ============ KHUNG B · SAU BẢN VÁ ============ -->
+    <rect class="fz sr" x="40" y="408" width="1080" height="320" rx="8" fill="#1a0033" fill-opacity="0.035" stroke="rgba(26,0,51,0.12)" stroke-width="1"/>
+    <text class="fm" x="64" y="440" fill="#4f4a63" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.16em">SAU BẢN VÁ · VÒNG BỊ CẮT</text>
+
+    <!-- đường vòng cũ, nay đứt làm hai -->
+    <path class="sm" d="M 988 528 L 988 492 Q 988 484 980 484 L 640 484" fill="none" stroke="#4f4a63" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="4,5"/>
+    <path class="sm" d="M 520 484 L 180 484 Q 172 484 172 492 L 172 528" fill="none" stroke="#4f4a63" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="4,5"/>
+    <line class="sa" x1="562" y1="498" x2="578" y2="470" stroke="#e100e1" stroke-width="2.4" stroke-linecap="round"/>
+    <line class="sa" x1="582" y1="498" x2="598" y2="470" stroke="#e100e1" stroke-width="2.4" stroke-linecap="round"/>
+    <rect class="fp" x="524" y="440" width="112" height="18" rx="2" fill="#f7f7f8"/>
+    <text x="580" y="453" fill="#a300a3" class="fat" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">VÒNG BỊ CẮT</text>
+
+    <!-- các bước nối tiếp -->
+    <line class="sm" x1="284" y1="576" x2="330" y2="576" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <line class="sm" x1="556" y1="576" x2="602" y2="576" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <line class="sm" x1="828" y1="576" x2="874" y2="576" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- bước 1 -->
+    <rect class="fp" x="64" y="528" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="64" y="528" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="76" y="538" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="86" y="549" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">1</text>
+    <text class="fi" x="172" y="578" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">engine Python dựng venv</text>
+    <text class="fi" x="172" y="596" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">riêng cho từng plugin</text>
+    <text class="fm" x="172" y="614" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">plugin-venv/&lt;tên plugin&gt;/</text>
+
+    <!-- bước 2 -->
+    <rect class="fp" x="336" y="528" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="336" y="528" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="348" y="538" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="358" y="549" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">2</text>
+    <text class="fi" x="444" y="578" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">thư mục gốc không còn</text>
+    <text class="fi" x="444" y="596" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">dấu hiệu venv nào</text>
+    <text class="fm" x="444" y="614" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">không có pyvenv.cfg</text>
+
+    <!-- bước 3 -->
+    <rect class="fp" x="608" y="528" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="608" y="528" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="620" y="538" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="630" y="549" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">3</text>
+    <text class="fi" x="716" y="578" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">app TypeScript không tìm</text>
+    <text class="fi" x="716" y="596" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">thấy gì để xoá</text>
+    <text class="fm" x="716" y="614" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">rm -rf không chạy</text>
+
+    <!-- bước 4 -->
+    <rect class="fp" x="880" y="528" width="216" height="96" rx="6" fill="#f7f7f8"/>
+    <rect class="fn si" x="880" y="528" width="216" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect class="ss" x="892" y="538" width="20" height="16" rx="2" fill="none" stroke="#66607a" stroke-width="0.8"/>
+    <text class="fs" x="902" y="549" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">4</text>
+    <text class="fi" x="988" y="578" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">venv riêng của từng plugin</text>
+    <text class="fi" x="988" y="596" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">còn nguyên</text>
+
+    <!-- ghi chú B -->
+    <path class="sr" d="M 716 654 Q 660 644 586 630" fill="none" stroke="rgba(26,0,51,0.32)" stroke-width="1" stroke-dasharray="4,3"/>
+    <circle class="fi" cx="582" cy="629" r="2.5" fill="#1a0033"/>
+    <text class="fi" x="1096" y="658" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="end">nay chỗ ấy được một lệnh kiểm ghim: hai bên khai lệch</text>
+    <text class="fi" x="1096" y="678" fill="#1a0033" font-size="14" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="end">hằng đường dẫn thì lệnh kiểm báo đỏ, không đợi người đọc mã</text>
+
+    <!-- ============ CHÚ GIẢI ============ -->
+    <line class="sr" x1="40" y1="752" x2="1120" y2="752" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+    <text class="fm" x="40" y="774" fill="#4f4a63" font-size="10" font-family="'Geist Mono', monospace" letter-spacing="0.16em">CHÚ GIẢI</text>
+
+    <line class="sm" x1="136" y1="770" x2="164" y2="770" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <text class="fm" x="176" y="774" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">bước nối tiếp</text>
+
+    <line class="sa" x1="376" y1="770" x2="404" y2="770" stroke="#e100e1" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+    <text class="fm" x="416" y="774" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">vòng khép kín hôm nay</text>
+
+    <line class="sa" x1="682" y1="778" x2="692" y2="762" stroke="#e100e1" stroke-width="2.4" stroke-linecap="round"/>
+    <line class="sa" x1="694" y1="778" x2="704" y2="762" stroke="#e100e1" stroke-width="2.4" stroke-linecap="round"/>
+    <text class="fm" x="716" y="774" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">chỗ vòng bị cắt</text>
+
+    <line class="sm" x1="892" y1="770" x2="920" y2="770" stroke="#4f4a63" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="4,5"/>
+    <text class="fm" x="932" y="774" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">đường vòng cũ, nay không còn</text>
+  </svg>

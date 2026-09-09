@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 9658856f1e16f5f1e9efb7e9c7a98323106f67ef
+verified_commit: a30ca8ae44564e55ad3f7d552abc6beb506cbb44
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -413,3 +413,7 @@ sha: e9bfd6b8136204247769d41feb5c83bd7b3fdc72 · suites: 9 lệnh exit 0 · eval
 ### Re-pin lần 24 — 2026-09-08, do cac commit vong 4 cua B3 cham paths da khai cua ba ho so
 run_id: repin-20260908T071821Z-33565
 sha: 9658856f1e16f5f1e9efb7e9c7a98323106f67ef · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0
+
+### Re-pin lần 25 — 2026-09-09, do PR #115 (hai-duong-chay-mot-venv) chạm sdk/tongflow/engine/runner.py và sdk/** — union paths của hồ sơ này; mã của gói này không đổi, ô đo chạy lại tại HEAD
+run_id: repin-20260909T005452Z-79111
+sha: a30ca8ae44564e55ad3f7d552abc6beb506cbb44 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0

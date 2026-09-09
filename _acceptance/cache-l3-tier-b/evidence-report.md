@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: a30ca8ae44564e55ad3f7d552abc6beb506cbb44
 human_signoff: Manh 2026-08-04
 ---
 
@@ -234,3 +234,7 @@ máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 3 — 2026-09-09, do PR #115 (hai-duong-chay-mot-venv) chạm sdk/tongflow/engine/runner.py và sdk/** — union paths của hồ sơ này; mã của gói này không đổi, ô đo chạy lại tại HEAD
+run_id: repin-20260909T005452Z-79111
+sha: a30ca8ae44564e55ad3f7d552abc6beb506cbb44 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0
