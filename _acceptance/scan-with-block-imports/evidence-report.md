@@ -8,7 +8,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb
 human_signoff: Manh Phan 2026-08-18
 ---
 
@@ -285,3 +285,7 @@ máy chung cho cả đợt, 15 ô đo bị chạm, cả 15 chạy lại và exit
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 3 — 2026-09-10, do chiến dịch ghim lại theo mốc kit 2.10.0 (luật làn eval ADR 0014); năm hồ sơ có eval đỏ SẴN trên origin/main tách ra, chờ owner quyết
+run_id: repin-20260910T015646Z-20533
+sha: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb · suites: 9 lệnh exit 0 · evals: 16 eval máy exit 0

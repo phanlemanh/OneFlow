@@ -824,6 +824,10 @@ risk_tiers:
     # workspace-record: vendor LẦN ĐẦU ở lượt này. Trước đây oneflow thiếu hẳn
     # file này nên nhánh đọc workspace của cổng chưa từng chạy.
     - "lib/workspace-record.cjs"
+    # lop-nhin-thay: mục thứ CHÍN của INIT-CI-COPY-LIST, vendor lần đầu ở kit
+    # 2.10.0. Thiếu nó thì NOTE lớp nhìn-thấy in «không kiểm được» và luật W8
+    # tắt im ở kho này — cùng lớp measuring-stick với tám mục trên.
+    - "lib/lop-nhin-thay.cjs"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
