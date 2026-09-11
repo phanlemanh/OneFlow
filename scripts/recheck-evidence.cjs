@@ -100,7 +100,7 @@ if (!core.determineEnforce(payload)) process.exit(0);
         for (const id of new Set(cited)) {
           const e = repins.get(id);
           if (!e || e.sha !== vc) continue;
-          for (const x of core.checkRepinEvals(e, evalsText, slug).errs) errs.push(`REPIN x ${x}`);
+          for (const x of core.checkRepinEvals(e, evalsText, slug, payload).errs) errs.push(`REPIN x ${x}`);
         }
       }
     }
