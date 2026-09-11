@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a21840da44f3dc922c530d90d09666d8081f434a
+verified_commit: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb
 human_signoff: Manh 2026-08-27
 ---
 
@@ -417,3 +417,7 @@ Ký Cổng Đáng của `skill-1-footage-kho-clip` (A1) làm hai ca răng `kiem-
 mượn trạng thái chưa-ký từ cây thật thay vì tự dựng. Sửa cho chúng tự gỡ ký trong bản sao — một file
 dưới `scripts/roadmap/**`, nên mốc lần 5 (`be5426e`) hỏng theo glob. Mã của gói này không đổi.
 Cả mười ô đo chạy lại, cả mười exit 0; cây sạch trước và sau, phiên điều phối không ghi gì trong lúc đo.
+
+### Re-pin lần 7 — 2026-09-10, do chiến dịch ghim lại theo mốc kit 2.10.0 (luật làn eval ADR 0014); năm hồ sơ có eval đỏ SẴN trên origin/main tách ra, chờ owner quyết
+run_id: repin-20260910T015646Z-20533
+sha: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb · suites: 9 lệnh exit 0 · evals: 10 eval máy exit 0

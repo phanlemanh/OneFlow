@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a5ed5e0c879727c4cdcbbb18d738e4da35265a0a
+verified_commit: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -233,3 +233,7 @@ Một ghi chú về phép đo, vì nó suýt đọc thành hồi quy: lượt ch
 lệnh-hỏng; lúc đó cây không còn lành vì một hồ sơ vừa được mở ngoài kế hoạch đang băng. Gỡ hồ sơ
 ấy thì ô xanh. Ô đo không sai; cây sai, và ô đo nói đúng điều đó.
 
+
+### Re-pin lần 12 — 2026-09-10, do chiến dịch ghim lại theo mốc kit 2.10.0 (luật làn eval ADR 0014); năm hồ sơ có eval đỏ SẴN trên origin/main tách ra, chờ owner quyết
+run_id: repin-20260910T015646Z-20533
+sha: 12a74f5f78a82e9b2acf00c7342d0ecb72859ebb · suites: 9 lệnh exit 0 · evals: 9 eval máy exit 0
