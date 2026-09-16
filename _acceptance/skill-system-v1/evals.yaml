@@ -327,19 +327,10 @@ evals:
       khong ton tai thi do voi thong diep `rendered state 'unknown:<ten>', asked for '<ten>'`.
     evidence_required: [run_id, exit_code, verifier, verified_at, output, artifact]
 
-  - id: E15
-    criterion: AC-10
-    executor: script
-    cmd: config:executors.design.gate
-    status: not-run
-    paths:
-      - "src/components/proto/skill-system-v1-proto.tsx"
-    expected: >-
-      KHONG CHAY — gioi han da biet, khai tu S1. Tien le da do o
-      chong-mat-khoa-byo-giao-dien E10 (31/08): design-gate duoi jsdom khong parse noi
-      Tailwind v4 nen doc moi phan tu la chu den tren nen trong suot; E14 (axe-core trong
-      Chrome that) la san a11y cua AC-10.
-    evidence_required: [run_id, exit_code, verifier, verified_at, output]
+  # E15 (design gate) GO KHOI evals o S4-r1: khai status not-run tu S1 (so quyet dinh
+  # d-20260916T115020Z-7) nhung duong S4 cua kit van thi hanh lenh va tra BLOCKED moi
+  # luot. San a11y cua AC-10 van la E14 (axe-core trong Chrome that). Xem so quyet dinh
+  # dong «thước: ...» cung ngay.
 
   # ---------- F. Bang chung nen tang ----------
   - id: E16
