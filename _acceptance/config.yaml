@@ -681,9 +681,9 @@ executors:
     pnpm_teeth_legacy_key: "bash scripts/pnpm/check-build-approvals.sh --case teeth-legacy-key"
     pnpm_ci_pnpm10: "bash scripts/pnpm/check-build-approvals.sh --case ci-pnpm10"
     pnpm_tracked_not_ignored: "bash scripts/pnpm/check-build-approvals.sh --case tracked-not-ignored"
-    pnpm_explicit_decisions: "bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"
-    pnpm_keys_intact: "bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
-    pnpm_scope_confined: "bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
+    pnpm_explicit_decisions: "ACCEPTANCE_SLUG=pnpm-build-approvals bash scripts/pnpm/check-build-approvals.sh --case explicit-decisions"
+    pnpm_keys_intact: "ACCEPTANCE_SLUG=pnpm-build-approvals bash scripts/pnpm/check-build-approvals.sh --case keys-intact"
+    pnpm_scope_confined: "ACCEPTANCE_SLUG=pnpm-build-approvals bash scripts/pnpm/check-build-approvals.sh --case scope-confined"
     pnpm_case_completeness: "bash scripts/pnpm/check-build-approvals.sh --case case-completeness"
     # add-media-library Gate 1 (2026-08-19). The tier-boundary key reuses the shared
     # scanner: --allow names the two t3 paths this feature legitimately touches (the

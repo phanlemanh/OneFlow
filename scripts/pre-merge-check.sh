@@ -54,6 +54,9 @@ violations=0
 # Bật khi lưới giữ-chỗ nổ ít nhất một lần; dùng để in ĐÚNG MỘT dòng cảnh báo
 # về phạm vi hẹp của chính lưới đó ở cuối lần chạy.
 NARROW_NET_SEEN=""
+# Lưới giữ-chỗ KHÔNG chạy được (thiếu node / thiếu lib/evidence-core.cjs / lib lỗi).
+# Nói ra ở cuối lượt: một luật im lặng không chạy là luật không còn.
+NARROW_NET_BLIND=""
 # Bật khi răng cross-layer phải chấm bằng khuôn awk nội bộ vì thiếu node hoặc
 # lib/ac-line.cjs. Răng VẪN chạy (awk rộng hơn nên không rụng dòng nào), nhưng đó
 # là một định nghĩa "dòng criterion" khác với ba consumer JS — in đúng một dòng ở
@@ -365,8 +368,8 @@ xanh_sach_check() { # <report path>
       const fs=require("fs");
       const t=fs.readFileSync(process.argv[2],"utf8");
       const h=process.argv[3];
-      const has=t.split("\n").some(l=>/^#{1,6}\s+/.test(l)
-      && l.replace(/^#{1,6}\s+/,"").trim().toLowerCase()===h.toLowerCase());
+      const has=t.split("\n").some(l=>/^#{2,6}\s+/.test(l)
+      && l.replace(/^#{2,6}\s+/,"").trim().toLowerCase()===h.toLowerCase());
       if(!has){process.stdout.write("__VANG__");process.exit(0);}
       process.stdout.write(section(t,h).join("\n").trim()?"__CO__":"");
     ' "$ROOT/lib/md-section.cjs" "$report" "$_sec" 2>/dev/null || printf '__LOI__')"
@@ -410,6 +413,10 @@ claims_released() { # <dir> — 0 iff thư mục TỰ NHẬN đã qua cổng.
   return 1
 }
 
+# MỘT NGUỒN của vị từ «chữ ký thật» (đổi khuôn S4-r2). Đường dẫn suy từ vị trí
+# script như các lib khác của lưới (AC_LINE_LIB, LNT_LIB, WSREC_LIB).
+CHU_KY_LIB="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)/lib/evidence-core.cjs"
+
 placeholder_signoff() { # <chuỗi> — 0 iff chữ ký khớp một mẫu giữ-chỗ đã biết.
   # ĐÂY LÀ LUẬT CHỮ KÝ DUY NHẤT còn lại (ngoài chốt rỗng). Không có lớp dự
   # phòng nào phía sau: `signoff.approvers` KHÔNG được cổng đọc kể từ 1.24.0 —
@@ -422,12 +429,74 @@ placeholder_signoff() { # <chuỗi> — 0 iff chữ ký khớp một mẫu giữ
   # `x`, `.`), và mọi giữ-chỗ viết bằng ngôn ngữ khác (`chờ Manh gật`).
   # Khớp theo TIỀN TỐ vì chữ ký thật dẫn đầu bằng tên. LC_ALL=C để `tr` không
   # chết trên UTF-8.
+  # ĐỔI KHUÔN S4-r2 (owner quyết 12/09): bảng mẫu KHÔNG còn ở đây. Nó sống MỘT
+  # chỗ — `laGiuCho` trong lib/evidence-core.cjs — và hàm này hỏi nó qua node,
+  # cùng nếp `lib/lop-nhin-thay.cjs classify`. Bảng bash cũ (bốn dòng `case`) đã
+  # GỠ và liệt đích danh trong ALLOWED_REMOVALS của DV5: giữ nó lại là giữ đúng
+  # bản-dựng-thứ-hai mà hai lượt chấm vừa bắt.
+  # Không đọc được nguồn (thiếu node / thiếu lib / lib lỗi) → KHÔNG chặn, và nói
+  # ra: cùng doctrine với lớp nhìn-thấy và ac-line trong chính tệp này, và ca NO2
+  # của lưới thường trực ghim đúng điều đó («thiếu node: NOTE không được chặn
+  # merge»). Bản đầu của lượt S4-r2 chọn fail-CLOSED ở đây và làm 6 ca đỏ —
+  # chốt rỗng phía trên vẫn chặn chữ ký trống, nên đường này không im lặng cho
+  # qua một hồ sơ chưa ký; nó chỉ thôi phân loại GIỮ-CHỖ khi không có bộ đọc.
+  _gc="$(node "$CHU_KY_LIB" giu-cho "$1" 2>/dev/null)"
+  case "$_gc" in
+    1) return 0 ;;
+    0) return 1 ;;
+  esac
+  # Engine không nạp được (thiếu node / thiếu lib / lib lỗi). Đây là luật CHẶN và
+  # trước đổi khuôn nó KHÔNG cần node — nên KHÔNG được im lặng cho qua (S4-r3:
+  # đo được «lib bị gỡ → exit 0, mất VIOLATION»). Bản lùi dưới đây là BẢN CHIẾU
+  # của bảng ở lib, KHÔNG phải nguồn thứ hai: chân `lui-khong-engine` chạy MỌI mẫu
+  # của nguồn qua chính đường này với lib đã gỡ và đòi kết luận khớp, nên hai bên
+  # không trôi khỏi nhau trong im lặng. Tiền lệ cùng hình dạng: khuôn awk của
+  # ac-line ở lại làm đường lùi cho máy thiếu node.
+  NARROW_NET_BLIND=1
+# <<<BANG-LUI-GIU-CHO
   case "$(printf '%s' "$1" | LC_ALL=C tr '[:upper:]' '[:lower:]')" in
     '>'|'|'|'-') return 0 ;;
     '<'*) return 0 ;;                       # template chưa điền: "<name> <date>"
     pending*|tbd*|todo*|n/a*|none|unsigned*|waiting*) return 0 ;;
   esac
+# BANG-LUI-GIU-CHO>>>
   return 1
+}
+
+# Chữ ký người ở Cổng Bằng chứng ĐÓNG cửa veto (hồ sơ cua-veto-sau-chu-ky).
+# Cửa veto là đường đảo cho việc MÁY tự quyết mà người chưa nói gì; người đã
+# phát ngôn rồi thì «owner chưa veto» là câu sai. Đo 11/09: 27 trên 30 tên ở
+# dòng tổng của kit đã ký, media-library 3/3, floorplanstudio 1/1.
+#
+# Vị từ là QUAN HỆ, không phải nhãn: `status: signed-off` không đóng cửa (nhãn
+# là lời khai, luật khác đã bắt nó), chữ ký giữ-chỗ cũng không — dùng lại ĐÚNG
+# `placeholder_signoff` ở trên, không dựng bảng thứ hai. Chỉ đọc frontmatter DẪN
+# ĐẦU qua front_field: một dòng `human_signoff:` ở THÂN báo cáo (trích khuôn)
+# không phải chữ ký.
+# MỘT hàm cho CẢ HAI chỗ đọc (NOTE làn V và vòng veto-trace) — hai bản trong
+# cùng một file là hình dạng bên-viết-bên-đọc-trôi mà kit đã dẫm nhiều lần.
+chu_ky_gia_tri() { # <đường dẫn báo cáo> — in GIÁ TRỊ chữ ký theo NGUỒN (rỗng nếu vắng)
+  local _l
+  _l="$(node "$CHU_KY_LIB" chu-ky-that "$1" 2>/dev/null)"
+  if [ -n "$_l" ]; then printf '%s' "$_l" | cut -f3; return 0; fi
+  NARROW_NET_BLIND=1
+  front_field "$1" human_signoff
+}
+
+signoff_that() { # <thư mục hồ sơ> — 0 iff có chữ ký THẬT; đặt $SIGNOFF_THAT
+  # ĐỔI KHUÔN S4-r2: không tự đọc frontmatter nữa. Ngữ pháp (dấu fence, luật cột,
+  # cách viết khoá, bảng giữ-chỗ) sống MỘT chỗ trong lib/evidence-core.cjs; hàm
+  # này hỏi nó qua node và đọc MỘT dòng tab — nếp lib/lop-nhin-thay.cjs.
+  # Không đọc được nguồn → return 1 (chưa ký): cửa veto GIỮ MỞ, chiều an toàn của
+  # luật này, và hồ sơ vẫn đi tiếp qua các chốt bằng chứng như thường.
+  SIGNOFF_THAT=""
+  [ -f "$1/evidence-report.md" ] || return 1
+  local _line _signed
+  _line="$(node "$CHU_KY_LIB" chu-ky-that "$1/evidence-report.md" 2>/dev/null)" || return 1
+  _signed="$(printf '%s' "$_line" | cut -f1)"
+  [ "$_signed" = "1" ] || return 1
+  SIGNOFF_THAT="$(printf '%s' "$_line" | cut -f3)"
+  return 0
 }
 
 
@@ -464,11 +533,39 @@ t1_escape_not_enforced() {
   echo "NOTE: rủi ro khi tắt — nếu một thay đổi chạm code quan trọng lọt vào lần chạy này, nó sẽ KHÔNG bị chặn vì thiếu hồ sơ nghiệm thu. Các luật khác vẫn chạy đủ (phản biện context sạch, chữ ký người, bằng chứng hết hạn). Muốn bật lại: bỏ cờ --no-t1-escape."
 }
 
+# ── `**/` là KHÔNG-hoặc-nhiều thư mục (glob-hai-sao-khop-goc-kho, 2.9.0) ──────
+# `case` của bash đòi `**/` phải có ít nhất một `/`, nên `**/*.md` bỏ sót
+# AGENTS.md ở gốc kho (CRM 07/09: 4 hồ sơ stale/ngày vì commit thuần tài liệu).
+# Sinh mọi biến thể của glob với từng đoạn `**/` được GIỮ hoặc BỎ — chỉ tách tại
+# chuỗi ba ký tự `**/`, KHÔNG tại `**` (docs/** phải đi qua nguyên vẹn, HS10).
+# `*` vẫn vượt `/` như trước — lời khai `*.md`/`docs/**` ở mọi consumer không
+# đổi nghĩa. Biến thể rỗng (glob chỉ là `**/`) bị bộ khớp bỏ qua, không khớp-mọi-thứ.
+glob_variants() { # <đã-xử-lý> <phần-còn-lại> — in mỗi biến thể một dòng
+  case "$2" in
+    *'**/'*)
+      local pre="${2%%\*\*/*}" post="${2#*\*\*/}"
+      glob_variants "$1$pre" "$post"          # GLOB-DOUBLESTAR-ZERO-DIRS
+      glob_variants "$1$pre**/" "$post"
+      ;;
+    *) printf '%s\n' "$1$2" ;;
+  esac
+}
 match_globs() { # <path> <newline-separated globs> — 0 iff any glob matches
   while IFS= read -r g; do
     [ -n "$g" ] || continue
     # unquoted $g on purpose: case PATTERN matching (globs never fs-expand here)
     case "$1" in $g) return 0 ;; esac
+    # Glob có `**/` → thử thêm mọi biến thể giữ/bỏ từng đoạn (glob_variants ở
+    # trên). Thuần CỘNG: dòng khớp cũ vẫn chạy trước, không đổi nghĩa glob nào
+    # không chứa `**/` (HS10) — và DV5 (chỉ-thêm) giữ được nguyên vẹn.
+    case "$g" in *'**/'*)
+      while IFS= read -r v; do
+        [ -n "$v" ] || continue
+        case "$1" in $v) return 0 ;; esac
+      done <<VARIANTS
+$(glob_variants "" "$g")
+VARIANTS
+    ;; esac
   done <<GLOBS
 $2
 GLOBS
@@ -1122,6 +1219,12 @@ for dir in "$ACC"/*/; do
           elif [ -z "$_vat" ] || ! date_parseable "$_vat"; then
             echo "VIOLATION [$slug]: status=$status but approved_by is empty — veto_opened_at ${_vat:+\"$_vat\" }không đọc được: làn V ĐÒI một mốc thời gian parse được, không có nó thì đây là bỏ cổng im lặng chứ không phải cửa veto có dấu vết."
             violations=$((violations+1)); continue
+          elif signoff_that "$dir"; then
+            # Đã ký ở Cổng Bằng chứng: cửa veto hết là chốt đang giữ hồ sơ, nên
+            # câu «cửa veto mở» là sai. Nhánh này đặt TRƯỚC nhánh cũ; vế
+            # `[ -n "$_vsig" ]` của nhánh dưới từ nay không còn tới được nhưng
+            # GIỮ NGUYÊN VĂN — luật diff-chỉ-thêm (DV5) cấm sửa dòng cũ.
+            echo "NOTE [$slug]: làn V — Cổng 1 không có chữ duyệt; Cổng 2 đã có chữ ký người ($SIGNOFF_THAT): cửa veto đã đóng bằng chữ ký"
           elif [ -n "$_vsig" ] || xanh_sach_check "$_vrep"; then
             echo "NOTE [$slug]: làn V — máy đi trước, Cổng 1 không có chữ duyệt; cửa veto mở"
           else
@@ -1229,6 +1332,46 @@ XLACS
     fi
   fi
 
+  # ─── Lớp bằng chứng nhìn-thấy — NOTE, chưa VIOLATION (hồ sơ lop-bang-chung-nhin-thay) ──
+  # Gương của răng cross-layer ở trên: hợp đồng có MẶT NGƯỜI NHÌN (ui; alias web/web-ui —
+  # KHÔNG mobile) mà evals.yaml không có eval executor: ui-check → merge sẽ đi trên bằng
+  # chứng lớp mã cho một bề mặt người nhìn. Vị từ/alias/tiền tố descope RÚT từ
+  # lib/lop-nhin-thay.cjs (một nguồn với lint W8 và thẻ) qua MỘT lệnh node classify in
+  # một dòng tab (mẫu lib/gap-probe.cjs). Phạm vi: slug trong diff, --recheck-all (đường
+  # đếm ngưỡng), hoặc không có phạm vi diff (fail-safe như luật staleness — NOTE vô hại).
+  # Ngưỡng siết thành VIOLATION: 2 hợp đồng ký không frame trong một mốc phát hành — NOTE
+  # in kèm approved_at để đếm «ký trong cửa sổ» bằng grep, hồ sơ cũ bị kéo vào diff ở chiến
+  # dịch ghim lại có ngày cũ nên loại được. Fail-open có tiếng: thiếu node/lib → NOTE
+  # «không kiểm được», không đổi exit. Chỉ THÊM dòng (DV5).
+  LNT_LIB="$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)/lib/lop-nhin-thay.cjs"
+  if { [ "$DIFF_READY" -eq 0 ] || slug_in_diff "$slug" || [ "$RECHECK_ALL" -eq 1 ]; } && [ -f "${dir}evals.yaml" ]; then
+    # Ba nguyên nhân KHÔNG-kiểm-được từng nấp sau một câu gộp: người đọc NOTE không
+    # biết phải copy lib, cài node, hay đi sửa lib đang lỗi (nợ C1 Ngoài-5).
+    lnt_line=""; lnt_why=""
+    if ! command -v node >/dev/null 2>&1; then
+      lnt_why="thiếu node; cài node để cổng đọc được lib"
+    elif [ ! -f "$LNT_LIB" ]; then
+      lnt_why="thiếu lib/lop-nhin-thay.cjs (mang cổng vào repo phải copy CẢ lib/)"
+    else
+      lnt_line="$(node "$LNT_LIB" classify "$dir" 2>/dev/null)"; lnt_rc=$?
+      # exit 3 = hồ sơ không có contract.md (không phải lỗi lib) — im lặng như trước.
+      if [ "$lnt_rc" -ne 0 ] && [ "$lnt_rc" -ne 3 ]; then lnt_why="lib lỗi (exit $lnt_rc)"; lnt_line=""; fi
+    fi
+    if [ -n "$lnt_why" ]; then
+      echo "NOTE [$slug]: lớp nhìn-thấy không kiểm được — ${lnt_why}; NOTE này không chặn."
+    elif [ -n "$lnt_line" ]; then
+      lnt_app="$(printf '%s' "$lnt_line" | cut -f1)"; lnt_decl="$(printf '%s' "$lnt_line" | cut -f2)"
+      lnt_desc="$(printf '%s' "$lnt_line" | cut -f3)"; lnt_appr="$(printf '%s' "$lnt_line" | cut -f4)"
+      if [ "$lnt_app" = "1" ] && [ "$lnt_decl" = "0" ]; then
+        if [ "$lnt_desc" != "-" ]; then
+          echo "NOTE [$slug]: mặt người nhìn (surfaces ui/web) nhưng không eval ui-check — đã BỎ có tên theo ledger $lnt_desc (approved_at $lnt_appr); người ký Cổng Bằng chứng đọc tên ca máy, không nhìn frame. Ngưỡng siết: 2 hợp đồng ký không frame trong một mốc phát hành."
+        else
+          echo "NOTE [$slug]: mặt người nhìn (surfaces ui/web) nhưng không eval ui-check nào — bằng chứng lớp mã thay lớp nhìn-thấy (approved_at $lnt_appr). Thêm ≥1 ui-check (layer: ui-observed) theo hợp đồng, hoặc ghi entry descope có tên. Ngưỡng siết: 2 hợp đồng ký không frame trong một mốc phát hành."
+        fi
+      fi
+    fi
+  fi
+
   # Counter scope NẰM NGOÀI khối luật bên dưới và cố ý khác lexical (off không
   # nháy kép): tiêm vô hiệu khối thì counter vẫn đếm, sổ lệch, chokepoint bắt.
   [ "$GAP_PROBE_MODE" != off ] && slug_in_diff "$slug" && GP_SCOPE_N=$((GP_SCOPE_N+1))
@@ -1286,7 +1429,13 @@ XLACS
   # provenance reads below, so a no-fence/offset-fence report can't pass verdict
   # while its provenance reads empty (would otherwise let a bypassed PASS slip).
   verdict="$(front_field "$report" verdict)"
-  signoff="$(front_field "$report" human_signoff)"
+  # S4-r3: chỗ đọc chữ ký của luật Cổng 2 cũng đi qua NGUỒN. Trước đó nó dùng
+  # front_field (awk chỉ nhận `human_signoff:`) trong khi engine nhận thêm `=` và
+  # khoảng trắng trước dấu — cùng một tệp cho hai kết luận: lưới in «đã đóng bằng
+  # chữ ký (…)» rồi ngay dưới in «xanh-sạch … cửa veto vẫn mở». Một ngữ pháp, một
+  # chỗ. Engine vắng → lùi về front_field (khai ở NOTE của lưới giữ-chỗ).
+  signoff="$(chu_ky_gia_tri "$report")"
+  LAN_V=0 # DLPS-LAN-V-MOT-DUONG: 1 khi hồ sơ làn V xanh-sạch đi tiếp KHÔNG chữ ký (đổi khuôn, owner 08/09)
   # ── machine-cleared × chữ ký người = hai sự thật cãi nhau (hồ sơ ra-co-ten, AC-15) ──
   # Ký thì status phải sang signed-off; để chữ ký nằm trên hồ sơ máy-thông là mọi bên đọc
   # nói hai chuyện về cùng một hồ sơ.
@@ -1329,11 +1478,20 @@ XLACS
       # Đường xanh-sạch KHÔNG có chữ ký để kiểm tiếp — các chốt dưới (giữ-chỗ,
       # provenance commit chữ ký) đều nói về một chuỗi không tồn tại ở đây.
       echo "NOTE [$slug]: xanh-sạch — máy đi tiếp, KHÔNG mời ký (verdict PASS · 0 UNCERTAIN · không bypass · Known limits rỗng · Ngoài hợp đồng rỗng · hạng T2). Cửa veto vẫn mở."
-      continue
+      # DLPS-LAN-V-MOT-DUONG (duong-lui-phai-song, đổi khuôn — owner 08/09/2026): KHÔNG `continue`.
+      # Làn V rơi xuống CÙNG chuỗi kiểm với hồ sơ có chữ ký — hoá cũ · pin ma · re-pin
+      # provenance · làn eval · soi lại — đúng chữ «soi MỌI hồ sơ ở MỌI lượt» (ADR 0014).
+      # Ba vòng S4 của hồ sơ này đều bắt cùng lớp fail-open ở chính chỗ `continue` cũ: hồ sơ
+      # máy-đi-trước là loại KHÔNG có người đọc lại, nên không được là loại duy nhất thoát lưới.
+      # Các chốt chỉ nói về chữ ký (giữ-chỗ · chiều ghi chữ ký) tự bỏ qua vì $signoff rỗng /
+      # LAN_V=1; dòng OK ở cuối gọi đúng tên làn.
+      LAN_V=1
     fi
+    if [ "$LAN_V" != 1 ]; then
     echo "NOTE [$slug]: không đủ điều kiện xanh-sạch để đi tiếp không ký — $clean_why"
     echo "VIOLATION [$slug]: verdict PASS but human_signoff is empty (Gate 2 pending)"
     violations=$((violations+1)); continue
+    fi
   fi
   # THỨ TỰ CÓ RĂNG: chốt rỗng ngay trên chạy TRƯỚC. Gộp hai chốt cho gọn sẽ làm
   # chuỗi rỗng không khớp mẫu lưới-đen nào rồi rơi ra `clean` — hồi quy fail-open
@@ -1384,6 +1542,7 @@ XLACS
   # Phạm vi: CHỈ hồ sơ nằm trong diff PR — dùng ĐÚNG hàm slug_in_diff mà luật
   # staleness/gap-probe dùng. Không thu phạm vi thì mọi hồ sơ sử liệu đều in
   # một dòng mỗi lần chạy (đo thật: 20+ dòng), đúng lớp loãng-tín-hiệu.
+  if [ "$LAN_V" != 1 ]; then # DLPS-LAN-V-MOT-DUONG: làn V không có chữ ký → không có chiều ghi để nói
   if [ -n "$BASE" ] && slug_in_diff "$slug" && command -v git >/dev/null 2>&1 && git -C "$ROOT" rev-parse --git-dir >/dev/null 2>&1; then
     rel_report="$(cd "$ROOT" 2>/dev/null && git ls-files --full-name -- "${report#"$ROOT"/}" 2>/dev/null | head -1)"
     [ -n "$rel_report" ] || rel_report="${report#"$ROOT"/}"
@@ -1394,6 +1553,7 @@ XLACS
       echo "NOTE [$slug]: chữ ký mới trong diff — $signoff — provenance ở forge: người bấm merge xác nhận đây là quyết định của người"
     fi
   fi
+  fi # đóng guard DLPS-LAN-V-MOT-DUONG
   # Stale-evidence check: the PASS certifies the tree at verified_commit. Any
   # non-gate file changed since then (committed or working tree) means the code
   # being merged is NOT the code that was verified — re-verify, don't ride old
@@ -1605,8 +1765,11 @@ REPINIDS
     # xanh (crm-onehub 07/09). MỘT nguồn luật: checkRepinEvals trong
     # lib/evidence-core.cjs (bên đọc thứ hai là recheck-evidence.cjs); nó liệt
     # kê eval máy qua lib/eval-yaml.cjs, nên cả hai phải được chép theo
-    # INIT-CI-COPY-LIST. Làn trước mốc REPIN_EVALS_SINCE là sử liệu suite-only:
-    # NOTE, không chặn. Thiếu node/lib → khai NOT ENFORCED, không im lặng.
+    # INIT-CI-COPY-LIST. KHÔNG mốc ngày, KHÔNG phạm vi diff (owner 08/09/2026,
+    # hai lần): làn suite-only đời nào, hồ sơ nào trong kho, cũng là VIOLATION ở
+    # MỌI lượt chạy — pin chưa chứng không được nằm im chỉ vì PR không chạm nó;
+    # cách sửa duy nhất là ghim lại bằng làn eval. Thiếu node/lib → khai NOT
+    # ENFORCED, không im lặng.
     if [ -n "$vc" ]; then
       if command -v node >/dev/null 2>&1 && [ -f "$HERE/../lib/evidence-core.cjs" ]; then
         repin_evals_out="$(REPIN_IDS="$repin_ids" node -e '
@@ -1623,7 +1786,7 @@ REPINIDS
           let bad = 0;
           for (const id of ids) {
             const e = repins.get(id); if (!e || e.sha !== vc) continue;
-            const r = core.checkRepinEvals(e, evalsText, slug);
+            const r = core.checkRepinEvals(e, evalsText, slug, core.readSignedReportFor(evalsPath));
             if (r.note) process.stdout.write(`NOTE [${slug}]: ${r.note}\n`);
             for (const x of r.errs) { bad = 1; process.stdout.write(`VIOLATION [${slug}]: ${x}\n`); }
           }
@@ -1699,12 +1862,18 @@ NETIDS
         printf '%s\n' "$recheck_out" | sed 's/^/    /'
         if [ "$RECHECK_MODE" = strict ]; then violations=$((violations+1)); continue; fi
       elif [ "$rc" -ne 0 ]; then
+        if [ "$RECHECK_MODE" = strict ]; then echo "VIOLATION [$slug]: evidence re-check KHÔNG CHẠY ĐƯỢC (exit $rc) — recheck: strict coi cổng câm là cổng hỏng; sửa: vendor lib/ cạnh scripts/, đọc được evidence-report.md"; violations=$((violations+1)); continue; fi
         echo "NOTE [$slug]: evidence re-check unavailable (exit $rc) — ${recheck_out:-skipped}"
       fi
     else
+      if [ "$RECHECK_MODE" = strict ]; then
+        if [ ! -f "$RECHECK" ]; then rc_duong="recheck-evidence.cjs vắng"; else rc_duong="node vắng"; fi
+        echo "VIOLATION [$slug]: evidence re-check KHÔNG CHẠY ĐƯỢC ($rc_duong) — recheck: strict coi cổng câm là cổng hỏng; vendor scripts/recheck-evidence.cjs + lib/ và cài node"; violations=$((violations+1)); continue
+      fi
       echo "NOTE [$slug]: evidence re-check not vendored (recheck-evidence.cjs/node missing) — committed-evidence bar NOT enforced"
     fi
   fi
+  if [ "$LAN_V" = 1 ]; then echo "OK [$slug]: $verdict — làn V, máy đi tiếp không chữ ký (đã qua cùng chuỗi kiểm: hoá cũ · pin · làn eval · soi lại)"; continue; fi
   echo "OK [$slug]: $verdict, signed off by $signoff"
 done
 
@@ -1736,6 +1905,11 @@ if [ -d "$ACC" ]; then
     contract="$dir/contract.md"
     [ -f "$contract" ] || continue
     vstate="$(front_field "$contract" veto_state | tr '[:upper:]' '[:lower:]')"
+    # Hồ sơ đã có chữ ký người thì cửa veto không còn là chốt đang giữ nó — đổi
+    # nhãn TRƯỚC khi `case` đếm, để dòng `mo)` bên dưới giữ nguyên văn (DV5).
+    # Nhãn `mo-da-ky` cố ý KHÔNG rỗng: nhánh ghi-ngược bên dưới đọc `$vstate`, và
+    # một chuỗi rỗng ở đó nghĩa là «đã gỡ khoá» — nói dối về một hồ sơ còn khoá.
+    if [ "$vstate" = "mo" ] && signoff_that "$dir"; then vstate="mo-da-ky"; fi
     case "$vstate" in
       mo)
         VETO_OPEN_N=$((VETO_OPEN_N+1))
@@ -1744,6 +1918,11 @@ if [ -d "$ACC" ]; then
         echo "VIOLATION [$slug]: veto_state=da-veto chưa xử — owner đã veto, hồ sơ không được merge ở trạng thái này. Xử bằng một trong hai đường rồi ghi entry sổ quyết định: quay hồ sơ về status draft để làm lại phạm vi, hoặc owner duyệt tay (approved_by)."
         violations=$((violations+1)) ;;
     esac
+    # Trả nhãn tạm về ngay sau `case`: `mo-da-ky` chỉ sống ĐÚNG trong phép đếm ở
+    # trên. Để nó chảy tiếp thì thông điệp của luật ghi-ngược in «da-veto ->
+    # mo-da-ky» — một nhãn nội bộ rò ra câu nói với người, và đó là ĐỔI một câu
+    # chặn chứ không còn là đổi lời của cửa veto (chân luat-lan-can bắt sống).
+    if [ "$vstate" = "mo-da-ky" ]; then vstate="mo"; fi
     # chiều ghi-ngược — chỉ xét được khi dựng nổi phạm vi diff
     if [ "$DIFF_READY" -eq 1 ] && slug_in_diff "$slug"; then
       base_c="$(git -C "$ROOT" show "$BASE_SHA:_acceptance/$slug/contract.md" 2>/dev/null || true)"
@@ -1868,7 +2047,11 @@ if [ -n "$AC_LINE_FALLBACK_SEEN" ]; then
 fi
 
 if [ -n "$NARROW_NET_SEEN" ]; then
-  echo "NOTE: the placeholder net that just fired matches a SHORT FIXED prefix list — pending, tbd, todo, n/a, none, unsigned, waiting, a bare > | or -, and an unfilled <...> template. NOTHING else. A holding note phrased any other way (\"FIXME\", \"LGTM\", \"ok\", or one written in another language) passes this gate. Rewording the line is NOT a fix; put a real approver name + date there."
+  echo "NOTE: the placeholder net that just fired matches a SHORT FIXED prefix list — $(node "$CHU_KY_LIB" bang-mau 2>/dev/null) (dấu * = khớp tiền tố). NOTHING else is treated as a placeholder: unlisted English holds (FIXME, placeholder, LGTM), curt words (ok, yes, x, .), and holds written in any other language ALL PASS the net. Bảng ở lib/evidence-core.cjs là MỘT nguồn — câu này đọc từ đó, không chép lại."
+fi
+
+if [ -n "$NARROW_NET_BLIND" ]; then
+  echo "NOTE: lưới giữ-chỗ của chữ ký KHÔNG chạy được lượt này — thiếu node hoặc thiếu lib/evidence-core.cjs (mang cổng vào repo phải copy CẢ lib/). Chốt «chữ ký rỗng» vẫn chặn; riêng phép phân loại giữ-chỗ (bảng ở lib/evidence-core.cjs, xem \`node lib/evidence-core.cjs bang-mau\`) không kiểm được, nên một dòng giữ chỗ có thể lọt. NOTE này không chặn."
 fi
 
 if [ "$LEGACY_SIGN_KNOB" -eq 1 ]; then

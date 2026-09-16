@@ -264,9 +264,9 @@ export function touchedEvals(evals, changed) {
 }
 
 // ---------- modes ----------
-function modeWrite(slug, sha, runId, suites) {
+function modeWrite(slug, sha, runId, suites, evals) {
     if (!slug || !sha || !runId)
-        die("write can <slug> <sha> <run_id> <suites_json>");
+        die("write can <slug> <sha> <run_id> <suites_json> [evals_json]");
     // `suites_exit` is not metadata. pre-merge-check.sh rejects a re-pin whose array
     // holds a nonzero element -- "a red lane cannot back a signature" -- so an all-zero
     // array IS the proof both readers accept. An optional argument with a helpful
@@ -317,6 +317,39 @@ function modeWrite(slug, sha, runId, suites) {
         die(
             `verified_commit cu (${prev.slice(0, 12)}) khong phai to tien cua ${sha.slice(0, 12)} — hai sha khong nam tren mot duong lich su`,
         );
+    // `evals_exit`: TUY CHON, va co y KHONG co mac dinh. Ly do tuy chon: rang cuong
+    // che da o BEN DOC — `checkRepinEvals` (lib/evidence-core.cjs cua kit) tu choi mot
+    // dong repin thieu truong nay, nen writer khong can nhan doi luat. Ly do khong mac
+    // dinh: mot mang/object toan 0 tu sinh chinh la thu "MINT bang chung" ma chu thich
+    // cua `suites_exit` ngay tren canh bao — vang mat thi truong vang mat, khong bia.
+    //
+    // Vi sao ton tai: lan re-pin cua kit (`repin-lane.mjs` 2.14.0) ghi `evals_exit`
+    // nhung KHONG ghi `prev_sha`; writer nay ghi `prev_sha` nhung khong ghi
+    // `evals_exit`. Do 2026-09-16: trong 117 dong repin tren origin/main, 78 co
+    // prev_sha, 13 co evals_exit, 0 co CA HAI — nen khong cong cu don le nao sinh noi
+    // mot dong hop le theo hop dong hien tai cua kho nay.
+    let evalsObj;
+    if (evals !== undefined) {
+        try {
+            evalsObj = JSON.parse(evals);
+        } catch {
+            die(`evals_json khong phai JSON hop le: ${evals}`);
+        }
+        if (
+            evalsObj === null ||
+            typeof evalsObj !== "object" ||
+            Array.isArray(evalsObj) ||
+            !Object.values(evalsObj).every((n) => Number.isInteger(n))
+        )
+            die(
+                `evals_json phai la object <eval_id>:<exit so nguyen>, nhan duoc: ${evals}`,
+            );
+        const do_ = Object.entries(evalsObj).filter(([, n]) => n !== 0);
+        if (do_.length)
+            die(
+                `eval thoat khac 0 (${do_.map(([k, n]) => `${k}=${n}`).join(",")}) — nghi thuc DUNG o day: khac phuc nguyen nhan roi phong lan MOI, khong ghi dong repin`,
+            );
+    }
     appendLog(slug, {
         ts: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
         kind: "repin",
@@ -324,6 +357,7 @@ function modeWrite(slug, sha, runId, suites) {
         sha,
         prev_sha: prev,
         suites_exit: arr,
+        ...(evalsObj === undefined ? {} : { evals_exit: evalsObj }),
     });
     console.log(
         `ghi 1 dong repin cho ${slug}: prev_sha=${prev.slice(0, 12)} -> sha=${sha.slice(0, 12)}`,
@@ -669,7 +703,7 @@ const table = {
 if (isMain) {
     if (!table[mode]) {
         console.error(
-            "usage: repin-eval-coverage.mjs <write|plan|check [--min-computable N]|newlines> [...]",
+            "usage: repin-eval-coverage.mjs <write <slug> <sha> <run_id> <suites_json> [evals_json]|plan|check [--min-computable N]|newlines> [...]",
         );
         process.exit(2);
     }

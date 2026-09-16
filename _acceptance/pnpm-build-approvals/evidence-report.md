@@ -7,7 +7,7 @@ reason:
 verified_by: separated grader pass (same session; subagent dispatch disabled by session policy — see Known limits)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: e300539ab509f829fdaa924173aec7b8ee0f1594
 human_signoff: Manh 2026-08-18
 ---
 
@@ -284,3 +284,7 @@ máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 2 — 2026-09-16, do chien dich ghim lai kit 2.14.0
+run_id: repin-20260916T045446Z-97276
+sha: e300539ab509f829fdaa924173aec7b8ee0f1594 · suites: 9 lệnh exit 0 · evals: 17/17 eval máy đạt kỳ vọng
