@@ -5,6 +5,7 @@ slug: ci-vitest-sdk-pin
 owner: phanlemanh@gmail.com
 risk_tier: T2
 surfaces: [ci, scripts, docs]
+landed_merge: 32e55c3
 status: signed-off
 approved_by: Manh
 approved_at: 2026-08-05

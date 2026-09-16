@@ -12,6 +12,33 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WS="$ROOT/pnpm-workspace.yaml"
 BASE="${PNPM_APPROVALS_BASE:-origin/main}"
 
+# Cái range này thuộc về `scripts/acceptance/own-range.sh` và không chỗ nào
+# khác: đây là một lời gọi, không phải bản cài đặt thứ hai của nó. Không có
+# ACCEPTANCE_SLUG thì giữ nguyên hành vi cũ (BASE...HEAD), nên mọi lối gọi tay
+# và mọi case không đụng range đều không đổi một chút nào.
+#
+# Vì sao cần: làn re-pin chạy lại eval của hồ sơ trên MỘT NHÁNH KHÁC. Chấm
+# `origin/main...HEAD` ở đó là chấm diff của người khác — đúng lớp lỗi đã làm
+# ba feature đã ký đỏ vĩnh viễn trên feat/compose-overlay (xem đầu own-range.sh).
+if [ -n "${ACCEPTANCE_SLUG:-}" ]; then
+    RESOLVER="$(cd "$(dirname "${BASH_SOURCE[0]}")/../acceptance" && pwd)/own-range.sh"
+    if ! own="$(bash "$RESOLVER" "$ACCEPTANCE_SLUG")"; then
+        echo "could not resolve the commit range owned by '${ACCEPTANCE_SLUG}' — refusing to report a clean tree" >&2
+        exit 2
+    fi
+    RANGE_FROM="$(printf '%s\n' "$own" | sed -n 's/^range_from=//p')"
+    RANGE_TO="$(printf '%s\n' "$own" | sed -n 's/^range_to=//p')"
+    if [ -z "$RANGE_FROM" ] || [ -z "$RANGE_TO" ]; then
+        echo "own-range.sh printed no range for '${ACCEPTANCE_SLUG}' — refusing to report a clean tree" >&2
+        exit 2
+    fi
+    RANGE="${RANGE_FROM}...${RANGE_TO}"
+    RANGE_LABEL="the range ${ACCEPTANCE_SLUG} owns (${RANGE_FROM}..${RANGE_TO})"
+else
+    RANGE="${BASE}...HEAD"
+    RANGE_LABEL="$BASE"
+fi
+
 CASES="no-pnpm-field install-clean addon-built teeth-removed teeth-legacy-key \
 ci-pnpm10 tracked-not-ignored explicit-decisions keys-intact scope-confined \
 case-completeness"
@@ -159,7 +186,7 @@ case "$CASE" in
 
   # AC-11 — config.yaml changes are additive only.
   keys-intact)
-    d="$(cd "$ROOT" && git diff "$BASE"...HEAD -- _acceptance/config.yaml)"
+    d="$(cd "$ROOT" && git diff "$RANGE" -- _acceptance/config.yaml)"
     if [ -n "$d" ]; then
       removed="$(printf '%s' "$d" | grep -E '^-[^-]' || true)"
       [ -n "$removed" ] && die "config.yaml has removed/modified lines (must be additive):
@@ -167,15 +194,15 @@ $removed"
       printf '%s' "$d" | grep -qE '^\+.*suite_keys' \
         && die "feature_loop.suite_keys was touched"
     fi
-    ( cd "$ROOT" && git diff --quiet "$BASE"...HEAD -- pnpm-lock.yaml ) \
+    ( cd "$ROOT" && git diff --quiet "$RANGE" -- pnpm-lock.yaml ) \
       || die "pnpm-lock.yaml changed — dependency set must be untouched"
     pass "config.yaml additive only; suite_keys and lockfile untouched"
     ;;
 
   # AC-12 — the diff stays inside tooling config + this feature's gate artifacts.
   scope-confined)
-    files="$(cd "$ROOT" && git diff --name-only "$BASE"...HEAD)"
-    [ -n "$files" ] || die "empty diff against $BASE"
+    files="$(cd "$ROOT" && git diff --name-only "$RANGE")"
+    [ -n "$files" ] || die "empty diff against $RANGE_LABEL"
     bad=""
     while IFS= read -r f; do
       [ -n "$f" ] || continue
