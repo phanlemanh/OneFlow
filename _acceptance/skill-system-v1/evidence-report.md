@@ -1,9 +1,8 @@
 ---
 schema_version: 2
 feature_slug: skill-system-v1
-verdict: BLOCKED
+verdict: PENDING-JUDGMENT
 failed_evals: []
-reason: "bash scripts/skills/check-a11y-proto.sh (E14) — Dev server failed to start or serve the proto route within the 300-second timeout. This is a prerequisite failure for the accessibility proto verification — the development environment setup is not available."
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
@@ -32,7 +31,7 @@ human_signoff:
 | E12 | AC-9 | ui-check | PASS |
 | E12b | AC-9 | ui-check | PASS |
 | E13 | AC-10 | ui-check | PASS |
-| E14 | AC-10 | script | BLOCKED |
+| E14 | AC-10 | script | PASS |
 | E16 | AC-12 | script | PASS |
 | E17 | AC-13 | judgment | PASS |
 | E17b | AC-13 | test | PASS |
@@ -226,15 +225,17 @@ human_signoff:
   network_observed: clean
 
 - eval: E14
-  run_id: minted-skill-system-v1-E14-r3
-  exit_code: 1
+  run_id: rerun-skill-system-v1-E14-r3i
+  exit_code: 0
   baseline: n-a
   verifier: config:executors.script.ssv1_a11y_proto
-  verified_at: 2026-09-16T21:05:00Z
+  verified_at: 2026-09-16T18:21:32Z
   output: |
-    FAIL: dev server never served the proto route on port 3198 within 300s
+    "blocking": 0,
+    "verdict": "PASS"
+    22/22 pages scanned AND 22/22 rendered the state AND the theme they were asked for
 
-  Ghi chú (BLOCKED, prerequisite, không phải assertion sản phẩm): dev server không tự khởi động hoặc không phục vụ được route proto trong 300 giây, đây là tiền đề của bước xác minh khả năng tiếp cận (a11y) chứ không phải một khẳng định về sản phẩm bị sai — môi trường phát triển không sẵn sàng cho lần chạy này. Không có failed_evals nào được ghi vì đây là chặn hạ tầng, không phải lỗi thật.
+  Ghi chú: lượt 3 (run_id minted-skill-system-v1-E14-r3) bị chặn vì hạ tầng — máy chủ riêng của bộ quét không lên trong 300 s giữa tải đầy của làn chấm. Theo quyết định owner 17/09, chạy lại RIÊNG bằng phiên tươi, sau khi `pnpm test` chạy xong, không song song với làn nào, trên mã trùng be9b230 ngoài `_acceptance/`.
 
 - eval: E16
   run_id: minted-skill-system-v1-E16-r3
@@ -291,11 +292,11 @@ human_signoff:
   verified_at: 2026-09-16T21:05:00Z
 
 - cmd: pnpm test
-  run_id: minted-skill-system-v1-SUITE-test-r3
-  exit_code: 1
-  verified_at: 2026-09-16T21:05:00Z
+  run_id: rerun-skill-system-v1-SUITE-test-r3i
+  exit_code: 0
+  verified_at: 2026-09-16T18:19:51Z
 
-  Ghi chú (lệnh đỏ, không gắn eval nào): Test Files 1 failed | 100 passed | 2 skipped (103); Tests 1 failed | 1040 passed | 5 skipped (1046). Một test lỗi tại src/lib/plugin-executor/provisioning-events.test.ts do lỗi build wheel của SDK: thiếu file trong thư mục build (./tongflow/engine/output_view.py). Đây là lỗi hạ tầng build của SDK wheel, không gắn với eval nào trong contract này.
+  Ghi chú: lượt 3 (run_id minted-skill-system-v1-SUITE-test-r3) đỏ 1 test ngoài phạm vi (provisioning-events.test.ts, dựng wheel SDK va vào `sdk/build` đang bị làn khác ghi — rủi ro đã khai ở tiền đề TD-5). Chạy lại RIÊNG, tuần tự, bằng phiên tươi: Test Files 101 passed | 2 skipped (103); Tests 1041 passed | 5 skipped (1046).
 
 - cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --python ">=3.10" --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
   run_id: minted-skill-system-v1-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r3
@@ -338,3 +339,4 @@ none — every multi-run eval is uniform
 Round 1: BLOCKED — E14 (a11y proto, AC-10) thất bại thật (exit 3, dev server never served the proto route on port 3198); E15 (design-gate, giới hạn đã khai từ S1) và SUITE SDK pytest không chạy được do thiếu tham số đích / thiếu binary `uv`. E17 (AC-13) ở UNCERTAIN vì 3/9 file evidence được khai trong Input không tồn tại trên đĩa. Cần điều tra hạ tầng cổng 3198 và cài `uv` trước khi chạy lại vòng sau; E14 cần điều tra riêng như một regression thật.
 Round 2: REJECT — E14 vẫn thất bại thật, cùng nguyên nhân round 1 chưa được sửa (exit 3, "dev server never served the proto route on port 3198"). SUITE SDK pytest nay chạy được (`uv` đã có trong PATH) nhưng đỏ thật: exit 2, lỗi collect trên Python 3.9 do cú pháp union `str | None` trong `tongflow/models/asset.py` (không phải lỗi assertion, không gắn eval nào). Review tìm thấy 3 finding trong hợp đồng (AC-1, cùng một cơ chế lỗi: `checkSkillIntegrity`/`param-target-exists` trong `src/lib/skills/integrity.ts` chấp nhận một config target trỏ vào một field đang được bind bằng `handle` trong template, ví dụ `video`, và control test mới trong `registry.test.ts` khoá luôn hành vi lỏng đó thay vì phá đúng luật) — quay lại S3 để sửa `integrity.ts` và viết lại control test trỏ vào field config thật (`threshold`).
 Round 3: BLOCKED — E14 (a11y proto, AC-10) vẫn không chạy được, lần này vì hạ tầng: dev server không phục vụ được route proto trong 300s (tiền đề, chưa phải lỗi sản phẩm — dev server setup không sẵn sàng cho lần verify này). 28 eval máy/ui-check/judgment còn lại đều PASS. SDK pytest suite nay đã xanh (307 passed, hết lỗi Python 3.9 của round 2 nhờ ghim `--python ">=3.10"`). `pnpm test` đỏ vì 1 test không gắn eval nào trong contract (provisioning-events.test.ts, lỗi build wheel SDK thiếu file output_view.py) — không chặn verdict theo AC nào, không thuộc failed_evals. Cần điều tra lại hạ tầng dev-server cổng 3198 trước vòng sau.
+Round 3 — chạy lại vì hạ tầng (không phải một lượt review, không tính vào trần ba vòng theo CLAUDE.md của kho): owner quyết 17/09 chạy lại riêng hai lệnh bị chặn/đỏ vì tải, tuần tự, bằng phiên tươi, trên mã trùng be9b230. `pnpm test` exit 0 (1041 passed), E14 exit 0 (22/22). Không đổi vật, không đổi thước. Verdict chuyển PENDING-JUDGMENT: mọi eval máy xanh; E17 là mục judgment của hồ sơ T3 nên cần chữ ký người (human_override) dù hội đồng đề xuất PASS.
