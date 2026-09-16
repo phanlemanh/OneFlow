@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-16T12:57:06Z",
-  "generated_sha": "98a96d78290feb6e3eb54cdfcdf26381f90dceee",
+  "generated_at": "2026-09-16T13:27:34Z",
+  "generated_sha": "4645a51c0eac0e0a65f88da58b4e4f4040ec6142",
   "mainBranchInfo": {
     "branch": "main",
     "source": "remote"
   },
   "slug": "skill-system-v1",
-  "round": 1,
+  "round": 2,
   "riskTier": "T3",
   "evals": [
     {
@@ -388,25 +388,6 @@
       "ref": "config:executors.script.ssv1_a11y_proto"
     },
     {
-      "id": "E15",
-      "criterion": "AC-10",
-      "cmd": "node $(ls $HOME/.claude/plugins/cache/*/acceptance-gate/*/scripts/design-gate.mjs | sort -V | tail -1) --jsdom .",
-      "expected": "KHONG CHAY — gioi han da biet, khai tu S1. Tien le da do o\nchong-mat-khoa-byo-giao-dien E10 (31/08): design-gate duoi jsdom khong parse noi\nTailwind v4 nen doc moi phan tu la chu den tren nen trong suot; E14 (axe-core trong\nChrome that) la san a11y cua AC-10.",
-      "executor": "script",
-      "expectedExit": 0,
-      "paths": [
-        "src/components/proto/skill-system-v1-proto.tsx"
-      ],
-      "evidence_required": [
-        "run_id",
-        "exit_code",
-        "verifier",
-        "verified_at",
-        "output"
-      ],
-      "ref": "config:executors.design.gate"
-    },
-    {
       "id": "E16",
       "criterion": "AC-12",
       "cmd": "bash scripts/skills/check-second-skill-paths.sh && bash scripts/skills/check-second-skill-paths.sh --teeth",
@@ -447,7 +428,8 @@
         "judged_by",
         "verdict",
         "rationale"
-      ]
+      ],
+      "inputsHash": "aeb389ec088150319eb8ef2c94445f17abab27d40add964e2e4acf697a156bbe"
     },
     {
       "id": "E17b",
@@ -486,8 +468,8 @@
   "templatePath": "/Users/manhphan/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.14.0/skills/acceptance/references/evidence-report-template.md",
   "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
   "contractPath": "/Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/contract.md",
-  "invokedAt": "2026-09-16T12:57:06Z",
-  "invokedSha": "98a96d78290feb6e3eb54cdfcdf26381f90dceee",
+  "invokedAt": "2026-09-16T13:27:34Z",
+  "invokedSha": "4645a51c0eac0e0a65f88da58b4e4f4040ec6142",
   "vungVat": [
     "package.json",
     "scripts/skills/build-template.ts",
@@ -602,6 +584,20 @@
     "_acceptance/skill-system-v1/decisions.jsonl",
     "_acceptance/skill-system-v1/design-pass.md",
     "_acceptance/skill-system-v1/evals.yaml",
+    "_acceptance/skill-system-v1/evidence-report.md",
+    "_acceptance/skill-system-v1/evidence/E12-network.txt",
+    "_acceptance/skill-system-v1/evidence/E12-step1.png",
+    "_acceptance/skill-system-v1/evidence/E12-step2.png",
+    "_acceptance/skill-system-v1/evidence/E12-step3.png",
+    "_acceptance/skill-system-v1/evidence/E12b-network.txt",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.dom.json",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png.after-reload.json",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png.click-cat-canh.json",
+    "_acceptance/skill-system-v1/evidence/E13-network.txt",
+    "_acceptance/skill-system-v1/evidence/E13-step1.png",
+    "_acceptance/skill-system-v1/evidence/E13-step2.png",
+    "_acceptance/skill-system-v1/evidence/E13-step3.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--desktop--dark.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--desktop--light.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--mobile--light.png",
@@ -643,6 +639,9 @@
     "_acceptance/skill-system-v1/figures/tien-de-uv.html",
     "_acceptance/skill-system-v1/figures/tien-de-uv.png",
     "_acceptance/skill-system-v1/gap-probe.md",
+    "_acceptance/skill-system-v1/review-findings.md",
+    "_acceptance/skill-system-v1/run-log.jsonl",
+    "_acceptance/skill-system-v1/s4-args.json",
     "_acceptance/skill-system-v1/usage-report.md",
     "docs/superpowers/plans/2026-09-16-skill-system-v1.md",
     "docs/superpowers/specs/2026-09-16-skill-system-v1-design.md",
@@ -657,6 +656,20 @@
     "_acceptance/skill-system-v1/decisions.jsonl",
     "_acceptance/skill-system-v1/design-pass.md",
     "_acceptance/skill-system-v1/evals.yaml",
+    "_acceptance/skill-system-v1/evidence-report.md",
+    "_acceptance/skill-system-v1/evidence/E12-network.txt",
+    "_acceptance/skill-system-v1/evidence/E12-step1.png",
+    "_acceptance/skill-system-v1/evidence/E12-step2.png",
+    "_acceptance/skill-system-v1/evidence/E12-step3.png",
+    "_acceptance/skill-system-v1/evidence/E12b-network.txt",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.dom.json",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png.after-reload.json",
+    "_acceptance/skill-system-v1/evidence/E12b-step1.png.click-cat-canh.json",
+    "_acceptance/skill-system-v1/evidence/E13-network.txt",
+    "_acceptance/skill-system-v1/evidence/E13-step1.png",
+    "_acceptance/skill-system-v1/evidence/E13-step2.png",
+    "_acceptance/skill-system-v1/evidence/E13-step3.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--desktop--dark.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--desktop--light.png",
     "_acceptance/skill-system-v1/evidence/design-pass/bieumau-ban--mobile--light.png",
@@ -698,6 +711,9 @@
     "_acceptance/skill-system-v1/figures/tien-de-uv.html",
     "_acceptance/skill-system-v1/figures/tien-de-uv.png",
     "_acceptance/skill-system-v1/gap-probe.md",
+    "_acceptance/skill-system-v1/review-findings.md",
+    "_acceptance/skill-system-v1/run-log.jsonl",
+    "_acceptance/skill-system-v1/s4-args.json",
     "_acceptance/skill-system-v1/usage-report.md",
     "docs/superpowers/plans/2026-09-16-skill-system-v1.md",
     "docs/superpowers/specs/2026-09-16-skill-system-v1-design.md",
@@ -896,6 +912,132 @@
     "src/lib/task/runner.ts"
   ],
   "coEvalPaths": true,
-  "evalsHash": "828629e7a0136c395db82577b790f138e6e0aea00e1acb75b3502d8663bb9ea4",
-  "runBaseline": true
+  "evalsHash": "f553a44d69d65fcf6ffffc323dd3b99fc391e6157c7d690ea4f285a94809083e",
+  "runBaseline": true,
+  "carriedFindings": [
+    {
+      "file": "src/components/workspace/skills/use-skill-run.ts",
+      "title": "Reopening the skill panel runs an in-flight skill a second time (SSE opened without reconnect=true)",
+      "severity": "high",
+      "plain": "Nếu người dùng đóng rồi mở lại ngăn Skill trong khi một lượt chạy đang xử lý, lượt đó có thể bị chạy lại từ đầu một lần nữa, gây tốn thời gian chờ và có thể cho kết quả không nhất quán.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/lib/api/skills.ts",
+      "title": "The skill client skips the shared API client, and a non-JSON or failed response throws inside startRun",
+      "severity": "medium",
+      "plain": "Khi máy chủ gặp sự cố nội bộ lúc gửi yêu cầu chạy skill, người dùng có thể thấy biểu mẫu đứng yên không phản hồi gì, không có thông báo lỗi, không biết chuyện gì đã xảy ra.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/lib/skills/run.server.ts",
+      "title": "The concurrency limit is copied instead of shared with the workflow execute route",
+      "severity": "low",
+      "plain": "Đây là vấn đề nội bộ về cách mã nguồn tổ chức, không ảnh hưởng trực tiếp tới trải nghiệm người dùng hiện tại, nhưng có nguy cơ khiến giới hạn số lượt chạy đồng thời bị lệch giữa hai tính năng nếu chỉnh sửa sau này.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/use-skill-run.ts",
+      "title": "Reopening the panel during a run starts the same skill task a second time",
+      "severity": "high",
+      "plain": "Nếu người dùng đóng rồi mở lại ngăn Skill trong khi một lượt chạy đang xử lý, lượt đó có thể bị chạy lại từ đầu một lần nữa, gây tốn thời gian chờ và có thể cho kết quả không nhất quán.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/lib/skills/run.server.ts",
+      "title": "A failed run marks steps that never ran, or that failed without a node id, as \"done\"",
+      "severity": "medium",
+      "plain": "Khi một lượt chạy thất bại, một số bước chưa từng chạy hoặc lỗi không rõ bước nào có thể vẫn hiển thị dấu tích 'đã xong', khiến người dùng hiểu nhầm về việc bước nào thực sự chạy được.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/skill-sheet.tsx",
+      "title": "A submit response without a JSON body crashes startRun and the user sees nothing",
+      "severity": "medium",
+      "plain": "Khi máy chủ trả lỗi mà không kèm nội dung mô tả, biểu mẫu chạy skill có thể đứng im, không hiện thông báo lỗi và không cho người dùng biết cần làm gì tiếp theo.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/skill-sheet.tsx",
+      "title": "Upload failures are only logged; the file field quietly goes back to empty",
+      "severity": "medium",
+      "plain": "Nếu tải tệp lên thất bại (sai định dạng hoặc lỗi mạng), ô chọn tệp chỉ lặng lẽ quay về trạng thái trống mà không nói cho người dùng biết vì sao, khiến họ tưởng chưa chọn tệp.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/use-skill-run.ts",
+      "title": "The run view can get stuck on \"running\" because there is no retry after the one refresh",
+      "severity": "medium",
+      "plain": "Trong một số tình huống mất kết nối ngắn hoặc lệch thời điểm cập nhật, màn theo dõi tiến trình có thể bị kẹt ở trạng thái 'đang chạy' mãi dù lượt chạy đã thực sự xong hoặc lỗi, cho tới khi người dùng đóng rồi mở lại ngăn.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/skill-sheet.tsx",
+      "title": "A failed skill list load shows an empty list, or a skeleton that never stops",
+      "severity": "low",
+      "plain": "Nếu việc tải danh sách skill gặp lỗi, ngăn skill có thể hiện danh sách trống không một lời giải thích, hoặc bị kẹt ở trạng thái đang tải mãi mãi.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "scripts/skills/check-a11y-proto.sh",
+      "title": "The a11y guard's default port 3198 is already taken by the media-library guard",
+      "severity": "low",
+      "plain": "Đây là xung đột hạ tầng kiểm thử nội bộ (hai kịch bản kiểm tra khả năng tiếp cận dùng chung một cổng mạng), không ảnh hưởng tới người dùng cuối.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/skill-sheet-run-states.test.tsx",
+      "title": "Hình dạng 2 (fixture viết tay đúng khuôn bên đọc): kết quả engine của split-video trong E10 là gõ tay",
+      "severity": "medium",
+      "plain": "Nếu quy trình xử lý cho ra nhiều tệp kết quả (ví dụ cắt video thành nhiều đoạn) theo khuôn dữ liệu khác với giả định hiện tại của phép kiểm, người dùng có thể thấy thiếu tệp hoặc liên kết tải sai mà không phép đo nào phát hiện trước khi phát hành.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/app/api/skills/runs-collect.test.ts",
+      "title": "Hình dạng 3 (assert «có mặt» trong khi lời hứa là quan hệ): steps chỉ được đếm và kiểm tập khoá, không đối chiếu với node của instance",
+      "severity": "low",
+      "plain": "Việc kiểm tra tiến trình từng bước hiện chỉ xác nhận có đủ số trường dữ liệu, chưa đối chiếu đúng bước nào ứng với đúng node nào — một sai lệch trong việc gán trạng thái từng bước có thể lọt qua mà không bị phát hiện.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/components/workspace/skills/view-plan.test.tsx",
+      "title": "Hình dạng 3 (assert «có mặt» thay vì quan hệ deep-equal): «Huỷ» chỉ kiểm danh sách id node",
+      "severity": "low",
+      "plain": "Nút 'Huỷ' khi mở lại kế hoạch trên canvas hiện chỉ được xác nhận là giữ đúng danh sách node, chưa chắc giữ nguyên các đường nối hay vị trí/tham số — một lỗi làm mất các chi tiết này có thể lọt qua mà không bị phát hiện.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "src/lib/skills/instantiate.test.ts",
+      "title": "Hình dạng 5 (thiếu ma trận toàn phần, số assert không ghim bằng số phần tử): instantiate lặng lẽ bỏ qua tham số không có trong sampleParams",
+      "severity": "low",
+      "plain": "Nếu một skill trong tương lai thiếu giá trị mẫu cho một tham số tuỳ chọn, việc kiểm tra tham số đó có được truyền đúng hay không sẽ tự động bị bỏ qua mà không ai nhận ra.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    },
+    {
+      "file": "scripts/skills/e2e-tach-tieng.sh",
+      "title": "Hình dạng 5 (số assert gõ tay, không đọc từ manifest): e2e kiểm đầu ra theo danh sách cố định tieng/video-cam",
+      "severity": "low",
+      "plain": "Nếu tính năng tách tiếng video sau này có thêm một đầu ra mới, kịch bản kiểm tra tự động hiện tại sẽ không kiểm tra đầu ra mới đó, khiến một đầu ra hỏng có thể lọt qua mà không bị phát hiện.",
+      "proposal": "known-limits",
+      "fromRound": 1
+    }
+  ],
+  "deltaFiles": [
+    "src/lib/skills/integrity.ts",
+    "src/lib/skills/registry.test.ts"
+  ]
 }

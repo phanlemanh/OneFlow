@@ -1,82 +1,35 @@
-E12 network dump — captured via performance.getEntriesByType('resource') filtered to /api/*
-(ego-browser driver has no read_network_requests/read_console_messages equivalent; used
-Resource Timing API inside the page as the closest available substitute — entries persist
-since the last full navigation, which covers: open /workspace (vi locale) -> click Skill ->
-select "Tách tiếng khỏi video" -> upload mau.mp4)
+E12 network truth — captured via ego-browser js() + performance.getEntriesByType('resource')
+(ego-browser has no dedicated read_network_requests/read_console_messages helper; drainEvents()
+returned an empty queue throughout the session — this Resource Timing read is the equivalent
+network-truth source available on this driver.)
 
-dev_server origin in scope: http://localhost:3140 (from executors.script.ssv1_luot BASE)
+Scope: dev_server.url = http://localhost:<port from luot.sh dat> (this tree's per-run server,
+port 3141 this round). All entries below are same-origin (app scope).
 
-[
-  {
-    "name": "http://localhost:3140/api/plugins/registry",
-    "initiatorType": "fetch",
-    "duration": 125,
-    "transferSize": 1858,
-    "responseStatus": 200
-  },
-  {
-    "name": "http://localhost:3140/api/feature/list",
-    "initiatorType": "fetch",
-    "duration": 133,
-    "transferSize": 5072,
-    "responseStatus": 200
-  },
-  {
-    "name": "http://localhost:3140/api/uploads/example-assets/two-scenes.mp4",
-    "initiatorType": "video",
-    "duration": 1,
-    "transferSize": 0,
-    "responseStatus": 206
-  },
-  {
-    "name": "http://localhost:3140/api/uploads/example-assets/two-scenes.mp4",
-    "initiatorType": "video",
-    "duration": 149,
-    "transferSize": 14815,
-    "responseStatus": null
-  },
-  {
-    "name": "http://localhost:3140/api/task/pending",
-    "initiatorType": "fetch",
-    "duration": 8,
-    "transferSize": 313,
-    "responseStatus": 200
-  },
-  {
-    "name": "http://localhost:3140/api/skills",
-    "initiatorType": "fetch",
-    "duration": 493,
-    "transferSize": 1036,
-    "responseStatus": 200
-  },
-  {
-    "name": "http://localhost:3140/api/skills",
-    "initiatorType": "fetch",
-    "duration": 495,
-    "transferSize": 1036,
-    "responseStatus": 200
-  },
-  {
-    "name": "http://localhost:3140/api/upload",
-    "initiatorType": "fetch",
-    "duration": 328,
-    "transferSize": 416,
-    "responseStatus": 200
-  }
-]
+Captured after: open /workspace -> click Skill -> select "Tách tiếng khỏi video" -> upload mau.mp4
 
-Summary: all app-origin (localhost:3140) FAIL-eligible entries with a readable status are
-200. The two /api/uploads/example-assets/two-scenes.mp4 entries are the pre-existing example
-asset thumbnail/video preview (unrelated preloaded example, not our mau.mp4 upload) — status
-206 (partial content, normal for video byte-range streaming) and one null (Resource Timing
-API does not expose status for some media-initiated requests; not a failure signal by itself,
-no visible playback error in screenshots). /api/skills (200, called twice — once for the list,
-once presumably on skill selection) and /api/upload (200) are both present as expected.
-No connection-error/timeout, no 4xx/5xx observed among app-origin requests.
+/api/ resource entries, final atomic capture (name | initiatorType | status | transferSize):
+http://localhost:3141/api/plugins/registry                       | fetch | 200 | 1858
+http://localhost:3141/api/feature/list                            | fetch | 200 | 5072
+http://localhost:3141/api/uploads/example-assets/two-scenes.mp4   | video | 206 | 0
+http://localhost:3141/api/uploads/example-assets/two-scenes.mp4   | video | 0   | 14815
+http://localhost:3141/api/task/pending                            | fetch | 200 | 313
+http://localhost:3141/api/skills                                  | fetch | 200 | 1036
+http://localhost:3141/api/skills                                  | fetch | 200 | 1036
+http://localhost:3141/api/upload                                  | fetch | 200 | 416
 
-Note: dev server briefly hit a Next.js dev HMR fault mid-session ("missing required error
-components, refreshing...", GET /workspace 404) between step2 and step3, self-recovered within
-~13s (confirmed via polling curl), unrelated to the skill panel/API flow itself and before the
-mau.mp4 upload's /api/upload call, which returned 200. Noted for transparency; not counted as
-an app-fail since it was not a call in the FAIL-eligible /api/skills or /api/upload set and
-self-healed before the measured actions.
+FAIL-eligible set (app-origin XHR/fetch, non-static, and part of the E12 flow):
+plugins/registry, feature/list, task/pending, skills (x2), upload — all status 200,
+none >=400/500, no connection errors. These include the two entries named in the
+eval's expected string (/api/skills, /api/upload).
+
+Note-only (media resource, not the E12 flow): uploads/example-assets/two-scenes.mp4 is
+the pre-existing onboarding sample video playing behind the Skill dialog on canvas —
+206 is a normal HTTP range response for <video> byte-range requests; the paired 0-status
+entry is the browser's Resource Timing quirk for range-request media loads (status not
+exposed on that sub-request), not a connection error. Not in the FAIL-eligible set.
+
+Result: every FAIL-eligible app-scope request succeeded (200), including /api/skills and
+/api/upload named in the eval's expected string.
+
+networkObserved: clean
