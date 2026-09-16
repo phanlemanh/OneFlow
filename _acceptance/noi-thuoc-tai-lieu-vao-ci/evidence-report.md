@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a5ed5e0c879727c4cdcbbb18d738e4da35265a0a
+verified_commit: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -233,3 +233,6 @@ Một ghi chú về phép đo, vì nó suýt đọc thành hồi quy: lượt ch
 lệnh-hỏng; lúc đó cây không còn lành vì một hồ sơ vừa được mở ngoài kế hoạch đang băng. Gỡ hồ sơ
 ấy thì ô xanh. Ô đo không sai; cây sai, và ô đo nói đúng điều đó.
 
+### Re-pin lần 12 — 2026-09-16, do chien dich ghim lai kit 2.14.0
+run_id: repin-20260916T063028Z-36924
+sha: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932 · suites: 9 lệnh exit 0 · evals: 9/9 eval máy đạt kỳ vọng
