@@ -2,7 +2,11 @@
  * E7 (AC-7) — the run view: one step per node of the instance for every
  * status, outputs keyed by the manifest, the failed step named from the error
  * envelope the engine delegate writes, and 404 for non-skill or unknown tasks.
- * The error JSON is produced by the REAL writer (error-envelope.ts), not typed.
+ * The error JSON is produced by the REAL writer (error-envelope.ts), and the
+ * completed result is the engine's REAL output recorded from an end-to-end run
+ * (test-support/fixtures/tach-tieng-video.engine-result.json) — the first
+ * version of this test typed the result in the shape the reader expected and
+ * stayed green while the real engine wrote a different one.
  */
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { pointDataDirAtTemp } from "@/lib/skills/test-support/temp-env";
@@ -40,13 +44,24 @@ beforeAll(async () => {
     const { serializeTaskErrorForDb, workflowTaskFailureEnvelope } =
         await import("@/lib/task/error-envelope");
     const nodeIds = def.template.executable.executableNodes.map((n) => n.id);
-    // Engine outputs are keyed by the template's WorkflowOutput names.
-    const result = Object.fromEntries(
-        def.template.executable.outputs.map((o) => [
-            o.name,
-            [`tasks/t-done/${o.name}.mp4`],
-        ]),
-    );
+    const recorded = (
+        await import(
+            "@/lib/skills/test-support/fixtures/tach-tieng-video.engine-result.json"
+        )
+    ).default as { result: Record<string, unknown> };
+    const tachTieng = getSkill("tach-tieng-video");
+    if (!tachTieng) throw new Error("tach-tieng-video missing");
+    await h.insertTask({
+        id: "t-real",
+        feature: "skill",
+        prompt: {
+            skillId: "tach-tieng-video",
+            skillVersion: tachTieng.manifest.version,
+            params: tachTieng.sampleParams,
+        },
+        status: "completed",
+        result: recorded.result,
+    });
     await h.insertTask({
         id: "t-run",
         feature: "skill",
@@ -58,7 +73,6 @@ beforeAll(async () => {
         feature: "skill",
         prompt,
         status: "completed",
-        result,
     });
     await h.insertTask({
         id: "t-fail",
@@ -108,16 +122,32 @@ describe("GET /api/skills/runs/<taskId> (E7)", () => {
         expect(body.outputs).toEqual({});
     });
 
-    it("completed → steps done, outputs keyed by the manifest", async () => {
+    it("completed → steps done", async () => {
         const body = await (await get("t-done")).json();
         expect(
             body.steps.every((s: { status: string }) => s.status === "done"),
         ).toBe(true);
-        const keys = def.manifest.outputs.map((o) => o.key).sort();
+    });
+
+    it("completed with the engine's real result → every manifest output has its file key", async () => {
+        const { getSkill } = await import("@/lib/skills/catalog");
+        const tachTieng = getSkill("tach-tieng-video");
+        const recorded = (
+            await import(
+                "@/lib/skills/test-support/fixtures/tach-tieng-video.engine-result.json"
+            )
+        ).default as { result: Record<string, { [k: string]: unknown }[]> };
+        const body = await (await get("t-real")).json();
+        const keys = (tachTieng?.manifest.outputs ?? [])
+            .map((o) => o.key)
+            .sort();
         expect(Object.keys(body.outputs).sort(), "output keys").toEqual(keys);
-        for (const o of def.manifest.outputs) {
+        for (const o of tachTieng?.manifest.outputs ?? []) {
+            const item = recorded.result[o.from.nodeId][0][o.from.field] as {
+                file_key: string;
+            };
             expect(body.outputs[o.key].values, `output ${o.key}`).toEqual([
-                `tasks/t-done/${o.from}.mp4`,
+                item.file_key,
             ]);
         }
     });

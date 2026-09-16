@@ -43,7 +43,8 @@ export function checkSkillIntegrity(
         if (!ok) out.push({ rule: "param-target-exists", detail: p.key });
     }
     for (const o of manifest.outputs) {
-        if (!wf.outputs.some((w) => w.name === o.from))
+        const producer = wf.executableNodes.find((n) => n.id === o.from.nodeId);
+        if (!producer?.outputs.some((r) => r.sourceField === o.from.field))
             out.push({ rule: "output-from-exists", detail: o.key });
     }
     const re = exportGraph(

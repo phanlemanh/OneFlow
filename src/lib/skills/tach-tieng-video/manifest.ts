@@ -14,7 +14,11 @@ export const manifest: SkillManifest = {
         },
     ],
     outputs: [
-        { key: "tieng", type: "audio", from: "output_a1" },
-        { key: "video-cam", type: "video", from: "output_r1" },
+        { key: "tieng", type: "audio", from: { nodeId: "a1", field: "audio" } },
+        {
+            key: "video-cam",
+            type: "video",
+            from: { nodeId: "r1", field: "video" },
+        },
     ],
 };

@@ -24,8 +24,12 @@ export interface SkillParam {
 export interface SkillOutput {
     key: string;
     type: "video" | "audio" | "image" | "text";
-    /** Name of a WorkflowOutput in the template's executable. */
-    from: string;
+    /**
+     * The node and ABI output field that produce this output. The engine
+     * persists results keyed by node id (raw plugin outputs), so this is the
+     * address the run view reads — not a WorkflowOutput name.
+     */
+    from: { nodeId: string; field: string };
 }
 
 export interface SkillManifest {

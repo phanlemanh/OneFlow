@@ -108,7 +108,15 @@ async function fillAndRun() {
 describe("skill panel run states (E10)", () => {
     it("success: steps finish and each manifest output links to /api/uploads", async () => {
         hoisted.lines.current = succeedingRun(["s1"], {
-            output_s1: ["tasks/t/clip-1.mp4", "tasks/t/clip-2.mp4"],
+            s1: [
+                {
+                    success: true,
+                    video_parts: [
+                        { file_key: "tasks/t/clip-1.mp4" },
+                        { file_key: "tasks/t/clip-2.mp4" },
+                    ],
+                },
+            ],
         });
         await fillAndRun();
         const title = messages.Skills.resultTitle.replace(

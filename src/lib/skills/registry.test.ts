@@ -24,7 +24,10 @@ const BREAKS: Record<string, (d: SkillDefinition) => { dir?: string }> = {
         return {};
     },
     "output-from-exists": (d) => {
-        d.manifest.outputs[0].from = "output_nope";
+        d.manifest.outputs[0].from = {
+            nodeId: d.manifest.outputs[0].from.nodeId,
+            field: "nope",
+        };
         return {};
     },
     "template-matches-exporter": (d) => {
@@ -35,7 +38,7 @@ const BREAKS: Record<string, (d: SkillDefinition) => { dir?: string }> = {
 
 describe("skill registry integrity (AC-1)", () => {
     it("has at least one skill and every skill is clean", () => {
-        expect(SKILLS.length).toBeGreaterThanOrEqual(1);
+        expect(SKILLS.length, "registered skills").toBeGreaterThanOrEqual(2);
         for (const s of SKILLS) {
             expect(
                 checkSkillIntegrity(s.manifest.id, s),

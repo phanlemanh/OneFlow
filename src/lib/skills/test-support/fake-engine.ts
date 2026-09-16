@@ -40,10 +40,14 @@ export function fakeEngineChild(lines: EngineLine[]) {
     return child;
 }
 
-/** NDJSON for a run where every node succeeds. */
+/**
+ * NDJSON for a run where every node succeeds. `nodeOutputs` is in the shape
+ * the real engine returns and the delegate persists: node id -> list of raw
+ * plugin outputs (see fixtures/tach-tieng-video.engine-result.json).
+ */
 export function succeedingRun(
     nodeIds: string[],
-    outputs: Record<string, string[]>,
+    nodeOutputs: Record<string, Record<string, unknown>[]>,
 ): EngineLine[] {
     return [
         {
@@ -57,7 +61,7 @@ export function succeedingRun(
             { event: { type: "node_started", nodeId: id } },
             { event: { type: "node_completed", nodeId: id } },
         ]),
-        { result: { status: "success", outputs } },
+        { result: { status: "success", outputs: nodeOutputs } },
     ];
 }
 

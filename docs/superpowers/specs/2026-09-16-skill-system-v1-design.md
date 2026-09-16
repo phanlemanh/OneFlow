@@ -52,7 +52,7 @@ scripts/skills/build-template.ts   dựng template.json từ đồ thị bằng 
 | `version` | semver 3 số | lần chạy ghi version; đổi code giữa lúc nộp và lúc chạy → lỗi có tên |
 | `requires` | `NodeSlot[]` | bằng đúng tập slot của template — không thừa, không thiếu |
 | `params[]` | `{key, type, required, default?, min?, max?, options?, target}` | `type ∈ text · number · enum · video · image · audio`; `min/max` chỉ cho `number`, `options` chỉ cho `enum`; `target` = `{kind:"input", name}` (nút dữ liệu đầu vào) hoặc `{kind:"config", nodeId, field}` (ô cấu hình của một node) |
-| `outputs[]` | `{key, type, from}` | `from` = tên một `WorkflowOutput` của template |
+| `outputs[]` | `{key, type, from}` | `from` = `{nodeId, field}` — node và trường đầu ra ABI sinh ra nó; engine lưu kết quả theo id node (đổi 16/09 ở S3 sau lần chạy thật, xem decisions.jsonl) |
 | `sideEffects` | mảng rỗng ở v1 | khai từ v1 để skill sau (ingest ngược media-library) không buộc bump major |
 
 Tên, mô tả, nhãn tham số là **khoá i18n** `Skills.<id>.*` — không chép chữ vào manifest.

@@ -130,8 +130,9 @@ evals:
       exit 0. Ba task skill cua cung mot instance, DB tam: processing · completed · failed.
       Voi ca ba: `steps` co dung mot phan tu {nodeId, slot, status} cho MOI node cua
       instance (so phan tu = so node doc tu instantiate, khong go tay). completed: moi
-      step done; result la dau ra THAT do engine gia sinh theo cong ra cua template, outputs
-      co dung tap key cua manifest, moi key tro file key tuong ung. failed: error ghi bang
+      step done; result la ket qua THAT engine ghi vao tasks.result, ghi lai tu lan chay
+      dau-cuoi (test-support/fixtures/tach-tieng-video.engine-result.json, khoa theo id
+      node), outputs co dung tap key cua manifest, moi key tro dung file_key trong ban ghi. failed: error ghi bang
       DUNG workflowTaskFailureEnvelope + serializeTaskErrorForDb cua engine-delegate (writer
       that, khong go tay JSON), step co nodeId trong failures mang failed. Task feature
       "workflow" → 404; taskId la → 404. CHIEU DO: doi ten mot cong ra trong manifest thi
@@ -176,8 +177,9 @@ evals:
       completed; moi output ton tai tren dia luot, > 0 byte; ffprobe: file am thanh co
       audio stream va KHONG video stream, file video co video stream va KHONG audio
       stream. Tien de hong → exit 2 kem ten tien de (khong phai exit 1 — do la tuong, khong
-      phai san pham). Tra luot: xoa thu muc tam, dung may chu. CHIEU DO tren cung video:
-      dua video KHONG co tieng → ca kiem am thanh do voi thong diep ghim ten output.
+      phai san pham). Tra luot: xoa thu muc tam, dung may chu. CHIEU DO (SSV1_SAMPLE_SILENT=1,
+      cung khuon video nhung KHONG co tieng; do 16/09): plugin extract-audio that hong, script
+      exit 1 voi `run status failed` va run view ghi failedNodeIds ["a1"].
     evidence_required: [run_id, exit_code, verifier, verified_at, output]
 
   # ---------- E. Giao dien ----------

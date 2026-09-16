@@ -100,6 +100,32 @@ export async function submitSkillRun(id: string, raw: unknown) {
     return { status: 200 as const, taskId };
 }
 
+/**
+ * Pull one output's values out of what the engine delegate persists: for each
+ * node, the list of raw plugin outputs (one per batch item). An asset field is
+ * `{file_key, ...}` or a list of those (e.g. split-video's `video_parts`); a
+ * text field is a string.
+ */
+export function collectOutputValues(
+    nodeResult: unknown,
+    field: string,
+): string[] {
+    const items = Array.isArray(nodeResult) ? nodeResult : [nodeResult];
+    const values: string[] = [];
+    for (const item of items) {
+        if (!item || typeof item !== "object") continue;
+        const raw = (item as Record<string, unknown>)[field];
+        for (const v of Array.isArray(raw) ? raw : [raw]) {
+            if (typeof v === "string") values.push(v);
+            else if (v && typeof v === "object") {
+                const key = (v as { file_key?: unknown }).file_key;
+                if (typeof key === "string") values.push(key);
+            }
+        }
+    }
+    return values;
+}
+
 async function loadSkillTask(taskId: string) {
     const db = await getDb();
     const task = await db.query.tasks.findFirst({
@@ -145,12 +171,18 @@ export async function readSkillRun(taskId: string) {
                     : "pending",
     }));
     const result = task.result
-        ? (JSON.parse(task.result) as Record<string, string[]>)
+        ? (JSON.parse(task.result) as Record<string, unknown>)
         : {};
     const outputs = Object.fromEntries(
         def.manifest.outputs.map((o) => [
             o.key,
-            { type: o.type, values: result[o.from] ?? [] },
+            {
+                type: o.type,
+                values: collectOutputValues(
+                    result[o.from.nodeId],
+                    o.from.field,
+                ),
+            },
         ]),
     );
     const code: SkillRunErrorCode | null =

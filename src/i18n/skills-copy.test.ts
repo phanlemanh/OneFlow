@@ -28,11 +28,22 @@ function lookup(tree: Tree, dotted: string): unknown {
     // Skill ids contain dots never, hyphens often: split on dots only.
     return dotted
         .split(".")
-        .reduce<unknown>((node, key) => (node as Tree | undefined)?.[key], tree);
+        .reduce<unknown>(
+            (node, key) => (node as Tree | undefined)?.[key],
+            tree,
+        );
 }
 
 // Written first; its length is asserted so a silently shortened list fails.
-const FORBIDDEN = ["slot", "plugin id", "pluginId", "ABI", "executable", "taskId", "node"];
+const FORBIDDEN = [
+    "slot",
+    "plugin id",
+    "pluginId",
+    "ABI",
+    "executable",
+    "taskId",
+    "node",
+];
 
 describe("skill panel copy (E17b)", () => {
     const vi = load("vi");
@@ -41,14 +52,18 @@ describe("skill panel copy (E17b)", () => {
         const keys = leaves(vi).map(([k]) => k);
         for (const loc of LOCALES) {
             const tree = load(loc);
-            const missing = keys.filter((k) => typeof lookup(tree, k) !== "string");
+            const missing = keys.filter(
+                (k) => typeof lookup(tree, k) !== "string",
+            );
             expect(missing, `${loc} missing`).toEqual([]);
         }
     });
 
     it("every reason code has a sentence, and nothing else is in invalid.*", () => {
         for (const loc of LOCALES) {
-            const invalid = Object.keys((load(loc).invalid as Tree) ?? {}).sort();
+            const invalid = Object.keys(
+                (load(loc).invalid as Tree) ?? {},
+            ).sort();
             expect(invalid, `${loc} invalid.* vs SKILL_PARAM_REASONS`).toEqual(
                 [...SKILL_PARAM_REASONS].sort(),
             );
@@ -61,7 +76,9 @@ describe("skill panel copy (E17b)", () => {
             for (const def of SKILLS) {
                 for (const slot of def.manifest.requires) {
                     const key = `skills.${def.manifest.id}.steps.${slot}`;
-                    expect(typeof lookup(tree, key), `${loc} ${key}`).toBe("string");
+                    expect(typeof lookup(tree, key), `${loc} ${key}`).toBe(
+                        "string",
+                    );
                 }
             }
         }
@@ -72,7 +89,10 @@ describe("skill panel copy (E17b)", () => {
         const hits: string[] = [];
         for (const [key, value] of leaves(vi)) {
             for (const word of FORBIDDEN) {
-                const re = new RegExp(`(^|[^\\p{L}])${word}($|[^\\p{L}])`, "iu");
+                const re = new RegExp(
+                    `(^|[^\\p{L}])${word}($|[^\\p{L}])`,
+                    "iu",
+                );
                 if (re.test(value)) hits.push(`${key} contains ${word}`);
             }
         }

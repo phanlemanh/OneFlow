@@ -23,5 +23,11 @@ export const manifest: SkillManifest = {
             target: { kind: "config", nodeId: "s1", field: "threshold" },
         },
     ],
-    outputs: [{ key: "cac-canh", type: "video", from: "output_s1" }],
+    outputs: [
+        {
+            key: "cac-canh",
+            type: "video",
+            from: { nodeId: "s1", field: "video_parts" },
+        },
+    ],
 };
