@@ -1,3 +1,4 @@
+import { ABI_NODES } from "@/generated/abi";
 import { exportGraph, normalizeExecutable } from "./test-support/export-graph";
 import type { SkillDefinition } from "./types";
 
@@ -32,14 +33,20 @@ export function checkSkillIntegrity(
         });
     }
     for (const p of manifest.params) {
-        const ok =
-            p.target.kind === "input"
-                ? wf.inputs.some(
-                      (i) => i.name === (p.target as { name: string }).name,
-                  )
-                : wf.executableNodes.some(
-                      (n) => n.id === (p.target as { nodeId: string }).nodeId,
-                  );
+        const target = p.target;
+        let ok: boolean;
+        if (target.kind === "input") {
+            ok = wf.inputs.some((i) => i.name === target.name);
+        } else {
+            // A config target must name a node of the template AND an input
+            // field that node's slot really declares in the ABI.
+            const node = wf.executableNodes.find((n) => n.id === target.nodeId);
+            const slot = node?.feature as keyof typeof ABI_NODES | undefined;
+            const fields = slot
+                ? Object.keys(ABI_NODES[slot]?.inputs?.properties ?? {})
+                : [];
+            ok = Boolean(node) && fields.includes(target.field);
+        }
         if (!ok) out.push({ rule: "param-target-exists", detail: p.key });
     }
     for (const o of manifest.outputs) {
