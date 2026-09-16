@@ -8,6 +8,8 @@
 
 **Tech Stack:** Next.js 16 route handlers · drizzle + better-sqlite3 · vitest (node + jsdom) · next-intl · shadcn primitives · bash measurement scripts · Python engine unchanged.
 
+**Gate 1.5:** duyệt 2026-09-16 — Mạnh dán dòng /goal theo lời mời duyệt kế hoạch.
+
 **Spec:** `docs/superpowers/specs/2026-09-16-skill-system-v1-design.md` · contract `_acceptance/skill-system-v1/contract.md` (approved 2026-09-16) · evals `_acceptance/skill-system-v1/evals.yaml`
 
 ## Global Constraints
