@@ -4,6 +4,7 @@ import { ByoKeyOnboardingProto } from "@/components/proto/byo-key-onboarding-pro
 import { ChongMatKhoaByoGiaoDienProto } from "@/components/proto/chong-mat-khoa-byo-giao-dien-proto";
 import { KhongNoiSaiVeKhoKhoaProto } from "@/components/proto/khong-noi-sai-ve-kho-khoa-proto";
 import { NormalizeTextViProto } from "@/components/proto/normalize-text-vi-proto";
+import { SkillSystemV1Proto } from "@/components/proto/skill-system-v1-proto";
 
 /**
  * Clickable prototype route — the object a `design-pass` session works on.
@@ -30,6 +31,7 @@ const PROTOS: Record<string, (state: string) => React.ReactNode> = {
     "khong-noi-sai-ve-kho-khoa": (state) => (
         <KhongNoiSaiVeKhoKhoaProto state={state} />
     ),
+    "skill-system-v1": (state) => <SkillSystemV1Proto state={state} />,
 };
 
 // Dark mode is class-based (`@custom-variant dark (&:is(.dark *))`), so the

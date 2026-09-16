@@ -1178,5 +1178,96 @@
         "retry": "再試行",
         "operationFailed": "操作に失敗しました。もう一度お試しください",
         "fetchFailed": "ポートフォリオの取得に失敗しました。再試行してください"
+    },
+    "Skills": {
+        "navTooltip": "スキル — 用意済みの作業",
+        "title": "スキル",
+        "subtitle": "用意済みの作業を選び、入力を渡して結果を受け取ります — 手順を自分で組み立てる必要はありません。",
+        "loadingList": "Loading…",
+        "missingPlugin": "この手順にはプラグインが必要です：{steps}",
+        "openPlugins": "Open plugin manager",
+        "back": "戻る",
+        "required": "Required",
+        "run": "実行",
+        "chooseVideo": "Choose video",
+        "chooseImage": "Choose image",
+        "chooseAudio": "Choose audio file",
+        "replaceFile": "Change file",
+        "uploading": "Uploading {name}… {percent}%",
+        "cancelUpload": "Cancel upload",
+        "busy": "{max} runs are already in progress — wait for one to finish, then press Run again.",
+        "invalid": {
+            "required": "This field is required.",
+            "type": "Wrong kind of value.",
+            "range": "Enter a number from {min} to {max}.",
+            "option": "Pick a value from the list.",
+            "unknown": "This field does not belong to this job."
+        },
+        "progressTitle": "Running: {name}",
+        "keepRunningHint": "You can close this panel — the run keeps going.",
+        "step": {
+            "pending": "Waiting",
+            "running": "Working",
+            "done": "Done",
+            "failed": "Failed"
+        },
+        "resultTitle": "Done: {name}",
+        "download": "ダウンロード",
+        "viewPlan": "プランを表示/編集",
+        "newRun": "New run",
+        "failedTitle": "Did not finish: {name}",
+        "failedBody": "This input could not be processed at step “{step}”. Try again, or use a different file.",
+        "rerun": "再実行",
+        "backToForm": "Edit input",
+        "confirmReplaceTitle": "Replace the graph on the canvas?",
+        "confirmReplaceBody": "The canvas has an unsaved graph. This job's plan will take its place.",
+        "replace": "置き換える",
+        "cancel": "キャンセル",
+        "skills": {
+            "cat-canh-video": {
+                "name": "動画をシーンごとに分割",
+                "description": "Split one long video into clips at each scene change. Use it when you have continuous footage and need short clips to post.",
+                "params": {
+                    "video": {
+                        "label": "Video",
+                        "hint": "Continuous MP4 or MOV"
+                    },
+                    "do-nhay": {
+                        "label": "Scene-change sensitivity",
+                        "hint": "Lower numbers cut more clips"
+                    }
+                },
+                "outputs": {
+                    "cac-canh": {
+                        "label": "Cut clips"
+                    }
+                },
+                "steps": {
+                    "split-video": "Split scenes"
+                }
+            },
+            "tach-tieng-video": {
+                "name": "動画から音声を分離",
+                "description": "Turn one video into two files: the audio alone and the picture without sound. Use it to replace background music or re-dub.",
+                "params": {
+                    "video": {
+                        "label": "Video",
+                        "hint": "A video with sound"
+                    }
+                },
+                "outputs": {
+                    "tieng": {
+                        "label": "Audio"
+                    },
+                    "video-cam": {
+                        "label": "Silent video"
+                    }
+                },
+                "steps": {
+                    "extract-audio": "Take the audio",
+                    "remove-video-audio": "Remove audio from picture"
+                }
+            }
+        }
     }
 }

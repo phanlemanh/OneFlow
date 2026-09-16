@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiền đề uv</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --paper: #f7f7f8; --ink: #1a0033; --muted: #4f4a63; }
+  body { font-family: 'Geist', system-ui, sans-serif; background: var(--paper); color: var(--ink);
+    display: flex; justify-content: center; padding: 2.5rem 2rem; }
+  .frame { max-width: 1200px; width: 100%; }
+  .eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  h1 { font-family: 'Instrument Serif', 'Lora', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.02em;
+    line-height: 1.15; margin-bottom: 1.5rem; }
+  svg { width: 100%; min-width: 900px; display: block; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Cây quyết định · d-10 · tiền đề TD-10 · không AC</p>
+  <h1>Dry-run 8/10: máy thiếu uv — ba cách đi tiếp</h1>
+
+  <svg viewBox="0 0 1160 640" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+      <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c8102e"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+    <!-- ============ CONNECTORS ============ -->
+    <path d="M 540 104 L 540 132 Q 540 140 532 140 L 208 140 Q 200 140 200 148 L 200 184" fill="none" stroke="#e100e1" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <rect x="304" y="112" width="136" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="372" y="124" fill="#a300a3" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">A · MÁY KHUYÊN</text>
+
+    <line x1="580" y1="104" x2="580" y2="184" stroke="#c8102e" stroke-width="1" marker-end="url(#arrow-red)"/>
+    <rect x="592" y="148" width="20" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="596" y="160" fill="#c8102e" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" letter-spacing="0.06em">B</text>
+
+    <path d="M 620 104 L 620 132 Q 620 140 628 140 L 952 140 Q 960 140 960 148 L 960 184" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <rect x="776" y="112" width="24" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="788" y="124" fill="#4f4a63" font-size="9" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">C</text>
+
+    <line x1="200" y1="268" x2="200" y2="304" stroke="#e100e1" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <line x1="200" y1="388" x2="200" y2="424" stroke="#e100e1" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <line x1="580" y1="268" x2="580" y2="304" stroke="#c8102e" stroke-width="1" marker-end="url(#arrow-red)"/>
+    <line x1="580" y1="388" x2="580" y2="424" stroke="#c8102e" stroke-width="1" marker-end="url(#arrow-red)"/>
+    <line x1="960" y1="268" x2="960" y2="304" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <line x1="960" y1="388" x2="960" y2="424" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- ============ ROOT ============ -->
+    <rect x="380" y="40" width="400" height="64" rx="32" fill="#f7f7f8"/>
+    <rect x="380" y="40" width="400" height="64" rx="32" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="580" y="68" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">dry-run 16/09 — không có uv trên máy</text>
+    <text x="580" y="86" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">tiền đề 8/10 · TD-10 thiếu uv</text>
+
+    <!-- ============ BRANCH A (recommended) ============ -->
+    <rect x="40" y="188" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="40" y="188" width="320" height="80" rx="6" fill="#e100e1" fill-opacity="0.06" stroke="#e100e1" stroke-width="1.4"/>
+    <text x="200" y="220" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">người chạy cài uv trước S4</text>
+    <text x="200" y="242" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">brew install uv</text>
+
+    <rect x="40" y="308" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="40" y="308" width="320" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="200" y="340" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ô suite chạy thật mỗi lượt</text>
+    <text x="200" y="362" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">sdk_pytest</text>
+
+    <rect x="40" y="428" width="320" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="40" y="428" width="320" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="200" y="480" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">S4 đi được tới Cổng 2</text>
+
+    <!-- ============ BRANCH B (dead end) ============ -->
+    <rect x="420" y="188" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="420" y="188" width="320" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="580" y="224" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">không cài, không đổi gì</text>
+
+    <rect x="420" y="308" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="420" y="308" width="320" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="580" y="336" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">ô suite thoát 127</text>
+    <text x="580" y="358" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">workflow S4 xếp 127 vào</text>
+    <text x="580" y="374" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">«hạ tầng hỏng»</text>
+
+    <rect x="420" y="428" width="320" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="420" y="428" width="320" height="96" rx="6" fill="#c8102e" fill-opacity="0.08" stroke="#c8102e" stroke-width="1.4"/>
+    <rect x="432" y="436" width="64" height="14" rx="2" fill="none" stroke="#c8102e" stroke-opacity="0.6" stroke-width="0.8"/>
+    <text x="464" y="446" fill="#c8102e" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">NHÁNH CỤT</text>
+    <text x="580" y="476" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">MỌI lượt BLOCKED</text>
+    <text x="580" y="498" fill="#c8102e" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">vòng kẹt trước Cổng 2</text>
+
+    <!-- ============ BRANCH C ============ -->
+    <rect x="800" y="188" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="800" y="188" width="320" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="960" y="216" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">không cài; người chỉ định bỏ khoá</text>
+    <text x="960" y="236" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">khỏi suite của vòng này</text>
+    <text x="960" y="256" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">sdk_pytest</text>
+
+    <rect x="800" y="308" width="320" height="80" rx="6" fill="#f7f7f8"/>
+    <rect x="800" y="308" width="320" height="80" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="960" y="352" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">S4 chạy được</text>
+
+    <rect x="800" y="428" width="320" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="800" y="428" width="320" height="96" rx="6" fill="#ececed" stroke="#4f4a63" stroke-width="1"/>
+    <text x="960" y="456" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">mất một lưới SDK</text>
+    <text x="960" y="476" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">vòng không chạm sdk/ (AC-12)</text>
+    <text x="960" y="500" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">→ một nhát «thước:» trong sổ</text>
+
+    <!-- ============ LEGEND ============ -->
+    <line x1="40" y1="576" x2="1120" y2="576" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+    <text x="40" y="604" fill="#4f4a63" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+    <rect x="128" y="592" width="36" height="16" rx="8" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="172" y="604" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">tình trạng gốc</text>
+    <rect x="296" y="592" width="36" height="16" rx="4" fill="#e100e1" fill-opacity="0.06" stroke="#e100e1" stroke-width="1.4"/>
+    <text x="340" y="604" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">nhánh máy khuyên</text>
+    <rect x="480" y="592" width="36" height="16" rx="4" fill="#c8102e" fill-opacity="0.08" stroke="#c8102e" stroke-width="1.4"/>
+    <text x="524" y="604" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">nhánh cụt</text>
+    <rect x="632" y="592" width="36" height="16" rx="4" fill="#ececed" stroke="#4f4a63" stroke-width="1"/>
+    <text x="676" y="604" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">cái giá phải ghi sổ</text>
+  </svg>
+</div>
+</body>
+</html>
