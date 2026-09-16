@@ -1354,6 +1354,11 @@
                     "remove-video-audio": "Bỏ tiếng khỏi hình"
                 }
             }
+        },
+        "errors": {
+            "SKILL_VERSION_CHANGED": "Việc làm sẵn này vừa được cập nhật sau khi anh bấm Chạy. Bấm Chạy lại để dùng bản mới.",
+            "PLUGIN_NOT_INSTALLED": "Máy đang thiếu plugin cho một bước của việc này. Cài plugin rồi bấm Chạy lại.",
+            "RUN_FAILED": "Chưa chạy xong. Thử lại, hoặc đổi sang tệp khác."
         }
     }
 }

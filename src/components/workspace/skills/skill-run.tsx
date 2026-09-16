@@ -91,6 +91,11 @@ interface SkillResultProps {
     outcome: "done" | "failed";
     steps: SkillStepView[];
     outputs: SkillOutputView[];
+    /**
+     * Why the run failed, when the server named it. Codes other than a plain
+     * run failure get their own sentence; a run failure names the failed step.
+     */
+    errorCode?: "SKILL_VERSION_CHANGED" | "PLUGIN_NOT_INSTALLED" | "RUN_FAILED";
     onViewPlan: () => void;
     onNewRun: () => void;
     onRerun: () => void;
@@ -103,6 +108,7 @@ export function SkillResult({
     outcome,
     steps,
     outputs,
+    errorCode,
     onViewPlan,
     onNewRun,
     onRerun,
@@ -122,11 +128,13 @@ export function SkillResult({
                     role="alert"
                     className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-foreground"
                 >
-                    {t("failedBody", {
-                        step: failed
-                            ? t(`skills.${skillId}.steps.${failed.slot}`)
-                            : "",
-                    })}
+                    {errorCode && errorCode !== "RUN_FAILED"
+                        ? t(`errors.${errorCode}`)
+                        : t("failedBody", {
+                              step: failed
+                                  ? t(`skills.${skillId}.steps.${failed.slot}`)
+                                  : "",
+                          })}
                 </p>
                 <StepList skillId={skillId} steps={steps} />
                 <div className="flex flex-col gap-2 sm:flex-row">

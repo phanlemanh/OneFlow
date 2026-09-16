@@ -1354,6 +1354,11 @@
                     "remove-video-audio": "Remove audio from picture"
                 }
             }
+        },
+        "errors": {
+            "SKILL_VERSION_CHANGED": "This job was updated after you pressed Run. Press Run again to use the new version.",
+            "PLUGIN_NOT_INSTALLED": "A plugin for one step of this job is not installed. Install it, then press Run again.",
+            "RUN_FAILED": "The run did not finish. Try again, or use a different file."
         }
     }
 }
