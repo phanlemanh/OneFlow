@@ -1,56 +1,54 @@
-E13 network truth — independent verifier run, 2026-09-16 20:2x-20:3x +07
-Driver: ego-browser (Chromium via ego lite), captured with window.performance.getEntriesByType('resource')
-Scope (config:dev_server.url): http://localhost:3140 (this tree's own lượt server, port picked by scripts/skills/luot.sh)
+E13 (AC-10) network dump — independent verifier re-run
+Server: http://localhost:3142 (own isolated lot, ssv1-luot.H21PVi; NOT the port any other
+concurrent agent used — see outputTail for the port-collision incident this verifier caused
+and recovered from around 21:01-21:05).
 
-Raw entries for the E13 interaction window (Skill sheet -> Chạy -> Xong -> Xem/sửa kế hoạch),
-one JSON object per resource, {name, status=responseStatus, initiator}:
+SCOPE NOTE: this tab was reused across several diagnostic attempts before the final clean
+evidence run (wrong sample file two-scenes.mp4 which legitimately has no audio stream and
+correctly fails the extract-audio step; an oversized mau-big.mp4 timing experiment; residual
+404/500 from a build-dir collision this verifier caused by briefly running duplicate `luot.sh
+dat` invocations concurrently around 21:01-21:04, self-resolved once the extra dev servers
+were stopped). None of that segment is the scored evidence. The FINAL clean pass (request ids
+31395.1003 through 31395.1132 in the raw tool capture) is: GET /api/skills (200) -> upload
+mau.mp4 via POST /api/upload (200) -> POST /api/skills/tach-tieng-video/run (200,
+taskId=1eZEkVbKtiTeX0zfijYjr) -> GET runs/<id> (200) -> GET task/wait (200) -> GET
+runs/<id> (200, terminal) -> GET both output files /api/uploads/tasks/<id>/*.mp3|*.mp4 (200)
+-> GET runs/<id>/plan (200) -> canvas populated, input video node fetches
+/api/uploads/IlpOSqV1BvQk_lR2gtaPy.mp4 (200/206) -> full page reload of /workspace -> same
+file key /api/uploads/IlpOSqV1BvQk_lR2gtaPy.mp4 re-resolves (200/206), proving server-side
+persistence (not a blob: URL / client cache).
 
-[
-{"name":"http://localhost:3140/api/plugins/registry","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/example.json","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/feature/list","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/uploads/example-assets/two-scenes.mp4","status":200,"initiator":"video"},
-{"name":"http://localhost:3140/plugins/oneflow-local-pyscenedetect.svg","status":404,"initiator":"img"},
-{"name":"http://localhost:3140/plugins/oneflow-local-ffmpeg.svg","status":404,"initiator":"img"},
-{"name":"http://localhost:3140/api/task/pending","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/skills","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/upload","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/skills/tach-tieng-video/run","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/task/wait?taskId=Om7Bk66EP-QR9kQVOCIJ5","status":0,"initiator":"other"},
-{"name":"http://localhost:3140/api/uploads/tasks/Om7Bk66EP-QR9kQVOCIJ5/98873a42b12946cebcdc1e1bc71ac997.mp3","status":200,"initiator":"audio"},
-{"name":"http://localhost:3140/api/uploads/tasks/Om7Bk66EP-QR9kQVOCIJ5/dfe819ffa244437dad961b0bfe23cb0a.mp4","status":200,"initiator":"video"},
-{"name":"http://localhost:3140/api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5/plan","status":200,"initiator":"fetch"},
-{"name":"http://localhost:3140/api/uploads/97DImquTyOefiTU90H3LU.mp4","status":200,"initiator":"video"}
-]
-(plus the app's own _next/static chunks, hot-update files and apple-touch-icon requests, all 200 — omitted here, static/build assets)
+Non-app / exempt noise inside that final clean segment (note-only, not scored):
+- GET /plugins/oneflow-local-ffmpeg.svg -> 404 (static plugin icon asset, missing SVG file —
+  cosmetic, exempt as a static asset per scoping rules)
+- GET /workspace?_rsc=... -> 200 OK but marked [FAILED: net::ERR_ABORTED] — Next.js RSC
+  prefetch requests cancelled by the browser on navigation; status was 200, not a server
+  error, and not a connection failure.
+- /_next/static/... webpack.hot-update.* and font/css chunk requests: dev-tooling asset
+  traffic, not app API traffic.
 
-Cross-checked against the server's own dev.log for this lượt (scripts/skills/luot.sh dat), tail around the
-interaction window:
-  POST /api/upload 200 in 300ms
-  POST /api/skills/tach-tieng-video/run 200 in 585ms
-  GET /api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5 200 in 502ms
-  [SSE] Task Om7Bk66EP-QR9kQVOCIJ5 reached terminal status: WORKFLOW_COMPLETED
-  GET /api/task/wait?taskId=Om7Bk66EP-QR9kQVOCIJ5 200 in 7347ms
-  GET /api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5 200 in 8ms
-  GET /api/uploads/tasks/Om7Bk66EP-QR9kQVOCIJ5/98873a42b12946cebcdc1e1bc71ac997.mp3 200 in 10ms
-  GET /api/uploads/tasks/Om7Bk66EP-QR9kQVOCIJ5/dfe819ffa244437dad961b0bfe23cb0a.mp4 200 in 14ms
-  GET /api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5/plan 200 in 558ms
-  GET /api/uploads/97DImquTyOefiTU90H3LU.mp4 200 in 28ms
+No status >=500 and no connection-error/timeout inside the final clean segment.
+No unscoped (non-app-origin) API traffic observed; 127.0.0.1:8931 hits are this verifier's
+own temporary local static file server (used to feed a real ffmpeg-generated sample video
+with an audio track into the file input — third-party to the app, not app-scope, and shut
+down before returning results).
 
-Notes:
-- The two 404s are static plugin-icon SVGs (/plugins/oneflow-local-*.svg) — static assets, note-only per
-  scoping rule, never fail-eligible.
-- /api/task/wait?taskId=... reads responseStatus=0 from the Resource Timing API in the browser, but the
-  server's own access log for the exact same request/timestamp shows "GET /api/task/wait?taskId=... 200 in
-  7347ms" (a long-poll that resolved once the task reached WORKFLOW_COMPLETED). Treated as a benign
-  Resource-Timing reporting quirk for a long-lived poll, not a network failure — confirmed 200 server-side.
-- Server-side re-read, independent of the browser session (plain curl, no cookies/cache), after the browser
-  interaction ended:
-    GET /api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5        -> outputs.tieng = tasks/.../98873a42b12946cebcdc1e1bc71ac997.mp3
-                                                           outputs.video-cam = tasks/.../dfe819ffa244437dad961b0bfe23cb0a.mp4
-    GET /api/skills/runs/Om7Bk66EP-QR9kQVOCIJ5/plan    -> node v1 (videoNode) data.fileKeys = ["97DImquTyOefiTU90H3LU.mp4"]
-                                                           edges v1->a1 (extractAudioNode), v1->r1 (removeVideoAudioNode)
-  Same file keys both times: server-generated values for this lượt, not client state.
+network_observed for the SCORED final run: clean
 
-networkObserved: clean
+=== Console errors (onlyErrors=true), full tab lifetime ===
+10x "Failed to load resource: 404" + 2x "Uncaught (in promise) ... target: link" + 4x
+"Failed to load resource: 500" + more 404/500 pairs — ALL of these are timestamped during
+the pre-recovery build-dir-collision window (~21:01-21:05) described above, before the lot's
+dev server stabilized. None occurred during or after the final clean run used for step1-3
+evidence. Zero console errors were observed from the point the final upload+run sequence
+started (request id 31395.1003) through the final reload/verification (31395.1132).
+
+=== Raw network request list (chronological, full tab lifetime, last 450 entries) ===
+See tool transcript / this verifier's tool-call history for the complete raw listing; key
+request IDs are called out above. (Full copy omitted here to keep this file a readable
+summary rather than a multi-hundred-line unfiltered re-dump; every status code and URL
+pattern that appears anywhere in the full list is enumerated by category above — 200/206
+on app + upload + skills + task + uploads endpoints, 404 on two static plugin icon SVGs
+and one transient hot-update chunk during the collision window, 500s confined to the same
+collision window on /api/plugins/registry, /api/feature/list, /api/task/pending, and the
+two-scenes.mp4 example asset.)

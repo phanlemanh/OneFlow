@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-16T13:27:34Z",
-  "generated_sha": "4645a51c0eac0e0a65f88da58b4e4f4040ec6142",
+  "generated_at": "2026-09-16T13:58:42Z",
+  "generated_sha": "be9b2305713a942899e294c036e3f583881eaffe",
   "mainBranchInfo": {
     "branch": "main",
     "source": "remote"
   },
   "slug": "skill-system-v1",
-  "round": 2,
+  "round": 3,
   "riskTier": "T3",
   "evals": [
     {
@@ -429,7 +429,7 @@
         "verdict",
         "rationale"
       ],
-      "inputsHash": "aeb389ec088150319eb8ef2c94445f17abab27d40add964e2e4acf697a156bbe"
+      "inputsHash": "f27b5fea5c554217584d940413218607a208393f9acdc75e7961eb466c4d9e74"
     },
     {
       "id": "E17b",
@@ -457,7 +457,7 @@
     "pnpm build && pnpm typecheck",
     "pnpm lint:check",
     "pnpm test",
-    "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q",
+    "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --python \">=3.10\" --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q",
     "pnpm verify:plugins",
     "pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json",
     "bash scripts/fork/check-fork-identity.sh"
@@ -468,8 +468,8 @@
   "templatePath": "/Users/manhphan/.claude/plugins/cache/acceptance-gate-kit/acceptance-gate/2.14.0/skills/acceptance/references/evidence-report-template.md",
   "toolKillRule": "# TOOL-KILL-RULE — lệnh bị công cụ ngắt KHÔNG phải lệnh fail\n\n**Nguồn duy nhất** của luật «hết giờ không phải trượt» cho MỌI đường chạy lệnh\nkiểm của kit. Hai đường tiêu thụ, cùng đọc khối marker dưới đây, không chép tay:\n\n- **Vòng lặp tính năng** (plugin feature-loop): skill `feature-loop` đọc file này\n  (resolve qua `resolve-plugin.mjs --require skills/acceptance/references/tool-kill-rule.md`)\n  và truyền NGUYÊN VĂN vào `args.toolKillRule` của workflow\n  `acceptance-verify.js`; workflow rút khối marker và nội suy vào prompt của mọi\n  agent chạy lệnh (machine · ui-check · baseline). Thiếu args hoặc không rút\n  được marker → workflow trả BLOCKED có tên, không chạy không luật.\n- **Đường VERIFY độc lập** (skill `acceptance` Phase 3): phiên điều phối chép khối\n  marker VERBATIM vào prompt của phiên tươi VERIFY, cùng nếp «Network truth».\n\nVì sao có luật: verifier chạy lệnh qua Bash tool có trần thời gian mặc định\n(~120 s) NGẮN hơn nhiều suite; lệnh bị công cụ giết trả exit code CỦA CÔNG CỤ,\nkhông phải của lệnh (vấp thật release-2-2-0 S4 r5: suite 108 s đơn lẻ, dưới tải\nbị giết ở 118 s → REJECT giả 4 eval). Nhận diện là việc AGENT (nó thấy tool\nresult thật); phần máy chỉ phòng thủ trên field cấu trúc `killedByTool` —\nKHÔNG grep nội dung output trong engine (chuỗi tổng kết là của suite từng repo).\n\n<!-- <<<TOOL-KILL-RULE -->\nTRAN THOI GIAN CONG CU: khi goi Bash chay lenh, LUON dat tham so timeout >= 600000 (ms) — tran mac dinh cua cong cu (~120s) NGAN hon nhieu suite; lenh vuot tran se bi CONG CU giet va exit code luc do la cua cong cu, KHONG phai cua lenh. Neu lenh van bi cong cu dung (tool result bao timeout/killed, hoac output bi CAT giua chung truoc dong tong ket cuoi cua lenh) → DO KHONG PHAI ket qua that: khai cannotRun=true + killedByTool=true + reason \"bi cong cu giet o <so giay> giay\" kem dau hieu (timeout tool / output cat). TUYET DOI khong bao exitCode nhu the lenh tu fail va khong doan PASS/FAIL tu output cut.\n<!-- TOOL-KILL-RULE>>> -->\n\n## Hồ sơ cho lượt bị ngắt (đường độc lập)\n\nPhiên tươi VERIFY gặp lệnh bị công cụ ngắt thì:\n\n- dòng run-log của eval đó: `\"exit_code\": null, \"killed_by_tool\": true` (không\n  ghi mã thoát của công cụ như mã thoát của lệnh);\n- verdict báo cáo `BLOCKED`, `reason: bi cong cu giet o <so giay> giay — <eval ids>`\n  (kèm dấu hiệu: timeout tool / output cắt trước dòng tổng kết); `failed_evals`\n  rỗng — người đọc hồ sơ thấy đây là sự cố hạ tầng, chữa bằng chạy lại với trần\n  công cụ đủ dài, không phải sửa sản phẩm.\n",
   "contractPath": "/Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/contract.md",
-  "invokedAt": "2026-09-16T13:27:34Z",
-  "invokedSha": "4645a51c0eac0e0a65f88da58b4e4f4040ec6142",
+  "invokedAt": "2026-09-16T13:58:42Z",
+  "invokedSha": "be9b2305713a942899e294c036e3f583881eaffe",
   "vungVat": [
     "package.json",
     "scripts/skills/build-template.ts",
@@ -913,7 +913,11 @@
   ],
   "coEvalPaths": true,
   "evalsHash": "f553a44d69d65fcf6ffffc323dd3b99fc391e6157c7d690ea4f285a94809083e",
-  "runBaseline": true,
+  "runBaseline": false,
+  "carriedAnalyst": {
+    "fromRound": 2,
+    "nonDiscriminating": []
+  },
   "carriedFindings": [
     {
       "file": "src/components/workspace/skills/use-skill-run.ts",
@@ -988,14 +992,6 @@
       "fromRound": 1
     },
     {
-      "file": "scripts/skills/check-a11y-proto.sh",
-      "title": "The a11y guard's default port 3198 is already taken by the media-library guard",
-      "severity": "low",
-      "plain": "Đây là xung đột hạ tầng kiểm thử nội bộ (hai kịch bản kiểm tra khả năng tiếp cận dùng chung một cổng mạng), không ảnh hưởng tới người dùng cuối.",
-      "proposal": "known-limits",
-      "fromRound": 1
-    },
-    {
       "file": "src/components/workspace/skills/skill-sheet-run-states.test.tsx",
       "title": "Hình dạng 2 (fixture viết tay đúng khuôn bên đọc): kết quả engine của split-video trong E10 là gõ tay",
       "severity": "medium",
@@ -1037,6 +1033,7 @@
     }
   ],
   "deltaFiles": [
+    "scripts/skills/check-a11y-proto.sh",
     "src/lib/skills/integrity.ts",
     "src/lib/skills/registry.test.ts"
   ]

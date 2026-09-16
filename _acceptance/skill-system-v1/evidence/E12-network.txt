@@ -1,35 +1,12 @@
-E12 network truth — captured via ego-browser js() + performance.getEntriesByType('resource')
-(ego-browser has no dedicated read_network_requests/read_console_messages helper; drainEvents()
-returned an empty queue throughout the session — this Resource Timing read is the equivalent
-network-truth source available on this driver.)
-
-Scope: dev_server.url = http://localhost:<port from luot.sh dat> (this tree's per-run server,
-port 3141 this round). All entries below are same-origin (app scope).
-
-Captured after: open /workspace -> click Skill -> select "Tách tiếng khỏi video" -> upload mau.mp4
-
-/api/ resource entries, final atomic capture (name | initiatorType | status | transferSize):
-http://localhost:3141/api/plugins/registry                       | fetch | 200 | 1858
-http://localhost:3141/api/feature/list                            | fetch | 200 | 5072
-http://localhost:3141/api/uploads/example-assets/two-scenes.mp4   | video | 206 | 0
-http://localhost:3141/api/uploads/example-assets/two-scenes.mp4   | video | 0   | 14815
-http://localhost:3141/api/task/pending                            | fetch | 200 | 313
-http://localhost:3141/api/skills                                  | fetch | 200 | 1036
-http://localhost:3141/api/skills                                  | fetch | 200 | 1036
-http://localhost:3141/api/upload                                  | fetch | 200 | 416
-
-FAIL-eligible set (app-origin XHR/fetch, non-static, and part of the E12 flow):
-plugins/registry, feature/list, task/pending, skills (x2), upload — all status 200,
-none >=400/500, no connection errors. These include the two entries named in the
-eval's expected string (/api/skills, /api/upload).
-
-Note-only (media resource, not the E12 flow): uploads/example-assets/two-scenes.mp4 is
-the pre-existing onboarding sample video playing behind the Skill dialog on canvas —
-206 is a normal HTTP range response for <video> byte-range requests; the paired 0-status
-entry is the browser's Resource Timing quirk for range-request media loads (status not
-exposed on that sub-request), not a connection error. Not in the FAIL-eligible set.
-
-Result: every FAIL-eligible app-scope request succeeded (200), including /api/skills and
-/api/upload named in the eval's expected string.
-
-networkObserved: clean
+200 GET http://localhost:3140/api/plugins/registry
+200 GET http://localhost:3140/api/feature/list
+404 GET http://localhost:3140/plugins/oneflow-local-pyscenedetect.svg
+[console.error] Failed to load resource: the server responded with a status of 404 (Not Found)
+404 GET http://localhost:3140/plugins/oneflow-local-ffmpeg.svg
+[console.error] Failed to load resource: the server responded with a status of 404 (Not Found)
+200 GET http://localhost:3140/api/uploads/example-assets/two-scenes.mp4
+206 GET http://localhost:3140/api/uploads/example-assets/two-scenes.mp4
+200 GET http://localhost:3140/api/task/pending
+200 GET http://localhost:3140/api/skills
+200 GET http://localhost:3140/api/skills
+200 POST http://localhost:3140/api/upload

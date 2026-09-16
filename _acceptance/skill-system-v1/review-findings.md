@@ -1,63 +1,25 @@
 ## Trong hợp đồng
 
-### Config-target check accepts handle-bound ABI fields (e.g. `video`), and the new control test proves exactly that case
-- file: `src/lib/skills/integrity.ts:40`
-- severity: medium
-- source: conventions
-- AC: AC-1
-
-The new check passes any key of `ABI_NODES[slot].inputs.properties`. It never asks whether that field is a config field. The repo already classifies ABI input fields as handle or config in `getAbiTopology` (src/lib/abi/handle-introspect.ts, `FieldClass`), and CLAUDE.md names that path plus the node's resolved sourceSpec as the one source of truth for how a field is fed. Every template also records it in `executableNodes[i].bindings[field].kind`.
-
-Confirmed with a throwaway vitest probe, since deleted. A param `{kind:"config", nodeId:"s1", field:"video"}` on cat-canh-video, or on node `a1` of tach-tieng-video, returns `[]` violations. In both templates `video` is a `kind:"handle"` binding fed by edge v1→`in:video`.
-
-At run time, `instantiate.ts:61` runs `exec.bindings[field] = { kind: "config", value }` and replaces that edge binding with a scalar. The skill passes integrity but sends the plugin a number where a VideoRef belongs.
-
-The new control test in src/lib/skills/registry.test.ts (around line 105) picks `Object.keys(ABI_NODES[slot].inputs.properties)[0]` as its "real ABI field". For both registered skills that key is `video`, the handle field. So the test locks in the loose behaviour instead of covering a real config field such as `threshold`.
-
-Fix direction: take the classification from `getAbiTopology(slot).inputs[field].kind === "config"`, or from the template's own binding kind. Point the control at a config-class field, and add a break for a handle-class field.
-
-Rationale: probe xác nhận check chấp nhận target kind=config trỏ vào field đang được bind bằng handle (video) trong template — vi phạm trực tiếp điều khoản AC-1 rằng target phải trỏ tới một ô cấu hình có thật của template.
-
-### The config-target check accepts fields wired by an edge, and the new control test locks that in
-- file: `src/lib/skills/integrity.ts:46`
-- severity: medium
-- source: bugs
-- AC: AC-1
-
-The new check treats a config target as valid when `target.field` is any key of `ABI_NODES[slot].inputs.properties`. That list also includes Asset inputs that the template fills through an edge (`bindings[field].kind === "handle"`). A config target on such a field is not a real config knob. At run time, instantiate.ts line 61 runs `exec.bindings[field] = { kind: "config", value }`, which overwrites the edge binding. The node then gets a scalar (for example a number) as its `video` Asset, and the canvas edge in originalFlow no longer matches the executable.
-
-Concrete case: in cat-canh-video, node s1 has slot split-video. Its ABI inputs are `video` (an Asset) and `threshold`, and the template binds `video` as `{kind:"handle", sources:[v1.fileKeys]}`. A manifest param `{kind:"config", nodeId:"s1", field:"video"}` passes `param-target-exists`, yet running the skill breaks the video wiring. tach-tieng-video is the same: its nodes a1 and r1 have only a handle-bound `video` input.
-
-The new control test in registry.test.ts (around lines 106–118) makes this worse. It takes the FIRST ABI field of the first node's slot, which is `video` (handle-bound) for both registered skills. It then asserts that a config probe on that field gives no violations. So the test certifies exactly this broken case as "a real ABI field passes".
-
-Fix: accept a config target only when the node's binding for that field is absent or already `kind: "config"`, not `"handle"`. Point the control probe at a real config field such as s1.threshold.
-
-Rationale: cùng một lỗi được xác nhận bằng probe: config target được chấp nhận trên field đã có binding kind:handle, đúng vi phạm điều khoản AC-1 về target hợp lệ trỏ tới ô cấu hình có thật.
-
-### Shape 3 (checks that a string is present when the promise is a relation): the control test marks a config target on a handle input as passing
-- file: `src/lib/skills/registry.test.ts:110`
-- severity: high
-- source: measurement
-- AC: AC-1
-
-The control picks `const [field] = Object.keys(ABI_NODES[slot].inputs.properties ?? {})` for the first executable node. In the generated ABI, split-video lists its inputs as {video, threshold} and extract-audio lists only {video}, so the field is `video` for both skills. The test then expects `checkSkillIntegrity(...)` to return []. In both templates `video` is a handle binding: cat-canh-video/template.json has `bindings.video.kind: "handle"`, and tach-tieng-video/template.json lines 98 and 132 do the same. At runtime, instantiate.ts:61 runs `exec.bindings[field] = { kind: "config", value }`, which overwrites the handle that brings the upstream video into the node. The rule actually needs a relation to hold: the field must be one this node takes as config, not one fed by an edge. The test only checks that the name appears among the slot's ABI input keys. So the control now pins as green the exact case that breaks the graph when the skill runs. The only real config field in either skill is `threshold` on s1, and the control never picks it.
-
-Rationale: AC-1 đòi hỏi phá từng luật trên bản sao phải làm phép kiểm đỏ; control test này lại xác nhận (pin xanh) đúng trường hợp phá luật target-hợp-lệ mà lẽ ra phải đỏ, cùng một hành vi đã được finding #1 xác nhận bằng probe.
-
 ## Ngoài hợp đồng — người quyết ở Gate 2
 
 Các lỗi dưới đây nằm ngoài phạm vi đã duyệt ở Cổng Phạm vi và CHƯA qua bác bỏ đối kháng — người quyết, máy không sửa và không chấm thứ máy không được sửa.
 
-- **Shape 3 (checks that a string is present when the promise is a relation): the config-field break never tests "this node's slot"**
-  Người dùng thấy gì: Nếu sau này có người lỡ trỏ một tham số vào đúng tên trường nhưng thuộc một bước khác trong quy trình, bài kiểm tra tự động hiện tại chưa chắc phát hiện được lỗi cấu hình đó.
+- **param-target-exists only refuses `handle` bindings; `static` and `input` bindings are overwritten the same silent way**
+  Người dùng thấy gì: Nếu sau này một tham số của skill mới được gắn vào một ô đã có sẵn giá trị cố định hoặc giá trị đầu vào của cả quy trình, hệ thống có thể âm thầm ghi đè hoặc bỏ qua giá trị đó mà không báo lỗi, khiến kết quả sai mà không rõ nguyên nhân.
+  file: `src/lib/skills/integrity.ts`
+  severity: low
+  Đề xuất: known-limits
+
+- **Hình dạng 3 (assert chuỗi thay cho QUAN HỆ) + 5 (chỉ điểm-case): ca edge-fed không bao giờ đổi binding độc lập với tên trường, nên quan hệ trường ↔ binding không được đo**
+  Người dùng thấy gì: Bài kiểm tra hiện tại không thực sự chứng minh được rằng hệ thống phân biệt đúng giữa các loại kết nối tham số, nên nếu sau này có lỗi tương tự finding trên xảy ra, bộ kiểm tra tự động có thể không phát hiện ra để cảnh báo trước khi tới tay người dùng.
   file: `src/lib/skills/registry.test.ts`
   severity: medium
   Đề xuất: known-limits
 
-- **Shape 5 (claims to sweep a class but has only point cases): the "covers every target kind" test compares a constant with a literal from the same file**
-  Người dùng thấy gì: Nếu sau này hệ thống có thêm một loại tham số mới, bài kiểm tra tự động hiện tại sẽ không tự phát hiện ra thiếu sót, nên một lỗi cấu hình liên quan có thể lọt qua mà không ai được cảnh báo.
+- **Hình dạng 5 (tuyên quét LỚP nhưng thiếu ma trận toàn phần): ma trận đích vẫn khai «ba thành viên» và tự đếm chính hằng của nó, trong khi luật param-target-exists nay có lý do thứ tư**
+  Người dùng thấy gì: Bảng kiểm tra nội bộ không tự phát hiện khi hệ thống có thêm một lý do từ chối mới, nên nếu sau này có thêm một trường hợp sai cần chặn mà chưa được thêm vào, bộ kiểm tra sẽ không cảnh báo để bổ sung, và lỗi đó có thể lọt tới người dùng mà không ai hay biết.
   file: `src/lib/skills/registry.test.ts`
-  severity: medium
+  severity: low
   Đề xuất: known-limits
 
 - **Reopening the skill panel runs an in-flight skill a second time (SSE opened without reconnect=true) (r1)**
@@ -114,12 +76,6 @@ Các lỗi dưới đây nằm ngoài phạm vi đã duyệt ở Cổng Phạm v
   severity: low
   Đề xuất: known-limits
 
-- **The a11y guard's default port 3198 is already taken by the media-library guard (r1)**
-  Người dùng thấy gì: Đây là xung đột hạ tầng kiểm thử nội bộ (hai kịch bản kiểm tra khả năng tiếp cận dùng chung một cổng mạng), không ảnh hưởng tới người dùng cuối.
-  file: `scripts/skills/check-a11y-proto.sh`
-  severity: low
-  Đề xuất: known-limits
-
 - **Hình dạng 2 (fixture viết tay đúng khuôn bên đọc): kết quả engine của split-video trong E10 là gõ tay (r1)**
   Người dùng thấy gì: Nếu quy trình xử lý cho ra nhiều tệp kết quả (ví dụ cắt video thành nhiều đoạn) theo khuôn dữ liệu khác với giả định hiện tại của phép kiểm, người dùng có thể thấy thiếu tệp hoặc liên kết tải sai mà không phép đo nào phát hiện trước khi phát hành.
   file: `src/components/workspace/skills/skill-sheet-run-states.test.tsx`
@@ -149,5 +105,7 @@ Các lỗi dưới đây nằm ngoài phạm vi đã duyệt ở Cổng Phạm v
   file: `scripts/skills/e2e-tach-tieng.sh`
   severity: low
   Đề xuất: known-limits
+
+## Chưa adversarial-verify (refuter chết)
 
 Cụm ngoài vùng phủ: cluster: n-a (không đo được — không eval nào khai paths, hoặc dưới ngưỡng cụm).

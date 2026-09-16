@@ -187,3 +187,63 @@ wall: 1295s
 - **claude-opus-5**: 3 agent · 21 calls · out 12,234 · in 42 · cache_read 1,197,382 · cache_create 149,908
 - **claude-haiku-4-5-20251001**: 26 agent · 52 calls · out 21,431 · in 468 · cache_read 1,590,352 · cache_create 453,375
 
+### S4 round 3 — wf_1f85697e-073 (38 agent, 282,816 out-tok)
+
+| label | model | calls | out | in | cache_read | s |
+|---|---|--:|--:|--:|--:|--:|
+| ui:E13 | claude-sonnet-5 | 216 | 102,315 | 432 | 40,340,137 | 1432 |
+| ui:E12 | claude-sonnet-5 | 110 | 59,221 | 220 | 13,632,747 | 979 |
+| ui:E12b | claude-sonnet-5 | 75 | 33,320 | 150 | 7,650,213 | 473 |
+| synthesize:report | claude-sonnet-5 | 7 | 29,997 | 14 | 579,763 | 271 |
+| review:measurement | claude-opus-5 | 6 | 6,588 | 12 | 359,600 | 73 |
+| review:bugs | claude-opus-5 | 16 | 6,497 | 32 | 1,076,129 | 80 |
+| triage | claude-sonnet-5 | 2 | 5,923 | 4 | 60,568 | 69 |
+| judge:E17:operational-feasibility | claude-sonnet-5 | 13 | 4,606 | 26 | 894,633 | 56 |
+| judge:E17:domain-correctness | claude-sonnet-5 | 6 | 4,371 | 12 | 345,054 | 50 |
+| review:conventions | claude-opus-5 | 7 | 4,166 | 14 | 401,884 | 46 |
+| judge:E17:spec-alignment | claude-sonnet-5 | 6 | 3,041 | 12 | 377,661 | 35 |
+| machine:pnpm gen:abi && git diff --exit-code src | claude-haiku-4-5-20251001 | 3 | 1,498 | 28 | 102,488 | 16 |
+| capture:provenance | claude-sonnet-5 | 3 | 1,383 | 6 | 137,236 | 15 |
+| machine:bash scripts/skills/check-second-skill-p | claude-haiku-4-5-20251001 | 2 | 1,193 | 18 | 62,124 | 17 |
+| machine:bash scripts/acceptance/preflight-verify | claude-haiku-4-5-20251001 | 2 | 1,153 | 18 | 62,103 | 12 |
+| machine:bash scripts/skills/e2e-tach-tieng.sh | claude-haiku-4-5-20251001 | 2 | 1,052 | 18 | 62,113 | 37 |
+| machine:pnpm test | claude-haiku-4-5-20251001 | 2 | 1,038 | 18 | 62,089 | 24 |
+| machine:pnpm vitest run src/lib/task/runner-skil | claude-haiku-4-5-20251001 | 2 | 998 | 18 | 62,116 | 13 |
+| machine:pnpm vitest run src/i18n/skills-copy.tes | claude-haiku-4-5-20251001 | 2 | 991 | 18 | 62,118 | 11 |
+| machine:bash scripts/fork/check-fork-identity.sh | claude-haiku-4-5-20251001 | 2 | 948 | 18 | 62,105 | 10 |
+| machine:bash scripts/skills/check-a11y-proto.sh | claude-haiku-4-5-20251001 | 2 | 944 | 18 | 48,584 | 332 |
+| machine:pnpm vitest run src/app/api/skills/runs- | claude-haiku-4-5-20251001 | 2 | 821 | 18 | 62,120 | 13 |
+| machine:pnpm vitest run src/lib/skills/registry. | claude-haiku-4-5-20251001 | 2 | 819 | 18 | 37,819 | 9 |
+| machine:pnpm vitest run src/components/workspace | claude-haiku-4-5-20251001 | 2 | 818 | 18 | 62,117 | 12 |
+| machine:pnpm vitest run src/components/workspace | claude-haiku-4-5-20251001 | 2 | 808 | 18 | 62,117 | 12 |
+| machine:pnpm vitest run src/app/api/skills/list- | claude-haiku-4-5-20251001 | 2 | 777 | 18 | 62,118 | 10 |
+| machine:pnpm vitest run src/app/api/skills/run-r | claude-haiku-4-5-20251001 | 2 | 766 | 18 | 62,121 | 11 |
+| machine:pnpm lint:check | claude-haiku-4-5-20251001 | 2 | 743 | 18 | 62,093 | 9 |
+| machine:pnpm vitest run src/app/api/skills/run-t | claude-haiku-4-5-20251001 | 2 | 713 | 18 | 62,121 | 9 |
+| machine:node scripts/roadmap/check-plan-freeze.m | claude-haiku-4-5-20251001 | 2 | 681 | 18 | 62,108 | 7 |
+| machine:pnpm verify:plugins | claude-haiku-4-5-20251001 | 2 | 681 | 18 | 62,093 | 8 |
+| machine:cd sdk && . ../scripts/lib/sdk-version.s | claude-haiku-4-5-20251001 | 2 | 664 | 18 | 62,182 | 17 |
+| machine:pnpm vitest run src/app/api/skills/runs- | claude-haiku-4-5-20251001 | 2 | 655 | 18 | 62,118 | 9 |
+| machine:pnpm vitest run src/lib/skills/instantia | claude-haiku-4-5-20251001 | 2 | 653 | 18 | 62,113 | 10 |
+| machine:pnpm vitest run src/components/workspace | claude-haiku-4-5-20251001 | 2 | 622 | 18 | 62,113 | 11 |
+| machine:pnpm build && pnpm typecheck | claude-haiku-4-5-20251001 | 2 | 604 | 18 | 62,101 | 40 |
+| machine:pnpm vitest run src/app/api/skills/runs- | claude-haiku-4-5-20251001 | 2 | 461 | 18 | 62,118 | 12 |
+| machine:pnpm vitest run src/app/api/skills/run-p | claude-haiku-4-5-20251001 | 2 | 287 | 18 | 62,119 | 9 |
+
+
+wall: 1802s
+
+| vai tro | agents | out | cache_read | wall s | bat dau | ket thuc |
+|---|--:|--:|--:|--:|---|---|
+| machine | 26 | 21,388 | 1,617,531 | 333 | 13:58:48 | 14:04:21 |
+| ui | 3 | 194,856 | 61,623,097 | 1433 | 13:59:01 | 14:22:55 |
+| judge | 3 | 12,018 | 1,617,348 | 57 | 13:59:05 | 14:00:02 |
+| review | 3 | 17,251 | 1,837,613 | 81 | 13:59:08 | 14:00:29 |
+| triage | 1 | 5,923 | 60,568 | 69 | 14:22:55 | 14:24:04 |
+| capture | 1 | 1,383 | 137,236 | 15 | 14:24:04 | 14:24:19 |
+| synthesize | 1 | 29,997 | 579,763 | 271 | 14:24:19 | 14:28:50 |
+
+- **claude-sonnet-5**: 9 agent · 438 calls · out 244,177 · in 876 · cache_read 64,018,012 · cache_create 1,013,193
+- **claude-opus-5**: 3 agent · 29 calls · out 17,251 · in 58 · cache_read 1,837,613 · cache_create 186,044
+- **claude-haiku-4-5-20251001**: 26 agent · 53 calls · out 21,388 · in 478 · cache_read 1,617,531 · cache_create 468,679
+

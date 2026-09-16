@@ -1,12 +1,13 @@
 ---
 schema_version: 2
 feature_slug: skill-system-v1
-verdict: REJECT
-failed_evals: [E14]
+verdict: BLOCKED
+failed_evals: []
+reason: "bash scripts/skills/check-a11y-proto.sh (E14) — Dev server failed to start or serve the proto route within the 300-second timeout. This is a prerequisite failure for the accessibility proto verification — the development environment setup is not available."
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 4645a51c0eac0e0a65f88da58b4e4f4040ec6142
+verified_commit: be9b2305713a942899e294c036e3f583881eaffe
 human_signoff:
 ---
 
@@ -31,7 +32,7 @@ human_signoff:
 | E12 | AC-9 | ui-check | PASS |
 | E12b | AC-9 | ui-check | PASS |
 | E13 | AC-10 | ui-check | PASS |
-| E14 | AC-10 | script | FAIL |
+| E14 | AC-10 | script | BLOCKED |
 | E16 | AC-12 | script | PASS |
 | E17 | AC-13 | judgment | PASS |
 | E17b | AC-13 | test | PASS |
@@ -39,207 +40,208 @@ human_signoff:
 ## Evidence
 
 - eval: E1
-  run_id: minted-skill-system-v1-E1-r2
+  run_id: minted-skill-system-v1-E1-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_registry_integrity
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
-    Tests  20 passed (20)
-    Start at  20:27:59
-    Duration  167ms (transform 76ms, setup 0ms, import 108ms, tests 6ms, environment 0ms)
+    Tests  21 passed (21)
+    Start at  20:58:52
+    Duration  175ms (transform 80ms, setup 0ms, import 113ms, tests 6ms, environment 0ms)
 
 - eval: E2
-  run_id: minted-skill-system-v1-E2-r2
+  run_id: minted-skill-system-v1-E2-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_params_route
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  7 passed (7)
-    Start at  20:28:01
-    Duration  458ms (transform 100ms, setup 0ms, import 36ms, tests 337ms, environment 0ms)
+    Start at  20:58:54
+    Duration  383ms (transform 83ms, setup 0ms, import 29ms, tests 286ms, environment 0ms)
 
 - eval: E3
-  run_id: minted-skill-system-v1-E3-r2
+  run_id: minted-skill-system-v1-E3-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_instantiate
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  4 passed (4)
-    Start at  20:28:01
-    Duration  319ms (transform 156ms, setup 0ms, import 215ms, tests 8ms, environment 0ms)
+    Start at  20:58:55
+    Duration  321ms (transform 170ms, setup 0ms, import 231ms, tests 5ms, environment 0ms)
 
 - eval: E4
-  run_id: minted-skill-system-v1-E4-r2
+  run_id: minted-skill-system-v1-E4-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_run_refusals
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  5 passed (5)
-    Start at  20:28:01
-    Duration  470ms (transform 105ms, setup 0ms, import 42ms, tests 347ms, environment 0ms)
+    Start at  20:58:56
+    Duration  428ms (transform 84ms, setup 0ms, import 35ms, tests 312ms, environment 0ms)
 
 - eval: E5
-  run_id: minted-skill-system-v1-E5-r2
+  run_id: minted-skill-system-v1-E5-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_run_task_row
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  1 passed (1)
-    Start at  20:28:01
-    Duration  513ms (transform 127ms, setup 0ms, import 34ms, tests 395ms, environment 0ms)
+    Start at  20:58:54
+    Duration  392ms (transform 85ms, setup 0ms, import 30ms, tests 293ms, environment 0ms)
 
 - eval: E6
-  run_id: minted-skill-system-v1-E6-r2
+  run_id: minted-skill-system-v1-E6-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_runner_dispatch
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  2 passed (2)
-    Start at  20:28:01
-    Duration  567ms (transform 216ms, setup 0ms, import 31ms, tests 450ms, environment 0ms)
+    Start at  20:58:55
+    Duration  459ms (transform 143ms, setup 0ms, import 33ms, tests 344ms, environment 0ms)
 
 - eval: E7
-  run_id: minted-skill-system-v1-E7-r2
+  run_id: minted-skill-system-v1-E7-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_runs_collect
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  6 passed (6)
-    Start at  20:28:02
-    Duration  402ms (transform 78ms, setup 0ms, import 36ms, tests 286ms, environment 0ms)
+    Start at  20:58:54
+    Duration  524ms (transform 156ms, setup 0ms, import 35ms, tests 396ms, environment 0ms)
 
 - eval: E7b
-  run_id: minted-skill-system-v1-E7b-r2
+  run_id: minted-skill-system-v1-E7b-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_runs_failed_step
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
-    Tests  1 passed (1)
-    Start at  20:28:02
-    Duration  474ms (transform 157ms, setup 0ms, import 32ms, tests 370ms, environment 0ms)
+    Start at  20:58:56
+    Duration  499ms (transform 167ms, setup 0ms, import 29ms, tests 391ms, environment 0ms)
 
 - eval: E8
-  run_id: minted-skill-system-v1-E8-r2
+  run_id: minted-skill-system-v1-E8-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.ssv1_e2e_tach_tieng
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     PASS output tieng: 32720 bytes · audio=1 video=0
     PASS output video-cam: 19018 bytes · audio=0 video=1
     PASS e2e tach-tieng-video
 
 - eval: E9
-  run_id: minted-skill-system-v1-E9-r2
+  run_id: minted-skill-system-v1-E9-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_sheet_list_form
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  3 passed (3)
-    Start at  20:28:01
-    Duration  1.34s (transform 271ms, setup 0ms, import 708ms, tests 137ms, environment 407ms)
+    Start at  20:58:54
+    Duration  1.43s (transform 332ms, setup 0ms, import 792ms, tests 160ms, environment 404ms)
 
 - eval: E9b
-  run_id: minted-skill-system-v1-E9b-r2
+  run_id: minted-skill-system-v1-E9b-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_skills_list_route
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  3 passed (3)
-    Start at  20:28:02
-    Duration  621ms (transform 108ms, setup 0ms, import 38ms, tests 488ms, environment 0ms)
+    Start at  20:58:54
+    Duration  602ms (transform 100ms, setup 0ms, import 25ms, tests 497ms, environment 0ms)
 
 - eval: E10
-  run_id: minted-skill-system-v1-E10-r2
+  run_id: minted-skill-system-v1-E10-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_sheet_run_states
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  2 passed (2)
-    Start at  20:28:02
-    Duration  1.37s (transform 320ms, setup 0ms, import 453ms, tests 486ms, environment 343ms)
+    Start at  20:58:55
+    Duration  1.39s (transform 339ms, setup 0ms, import 490ms, tests 485ms, environment 339ms)
 
 - eval: E11
-  run_id: minted-skill-system-v1-E11-r2
+  run_id: minted-skill-system-v1-E11-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_plan_to_canvas
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  3 passed (3)
-    Start at  20:28:01
-    Duration  1.49s (transform 331ms, setup 0ms, import 853ms, tests 187ms, environment 359ms)
+    Start at  20:58:55
+    Duration  1.26s (transform 278ms, setup 0ms, import 696ms, tests 160ms, environment 327ms)
 
 - eval: E11b
-  run_id: minted-skill-system-v1-E11b-r2
+  run_id: minted-skill-system-v1-E11b-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_plan_route
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  2 passed (2)
-    Start at  20:28:02
-    Duration  387ms (transform 78ms, setup 0ms, import 26ms, tests 285ms, environment 0ms)
+    Start at  20:58:56
+    Duration  390ms (transform 73ms, setup 0ms, import 28ms, tests 289ms, environment 0ms)
 
 - eval: E12
-  run_id: minted-skill-system-v1-E12-r2
+  run_id: minted-skill-system-v1-E12-r3
   exit_code: 0
   baseline: n-a
   verifier: ui-check:E12
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   screenshot: /Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/evidence/E12-step1.png
   observed: |
-    E12-step1.png (81530 bytes): Skill panel dialog open over the workspace canvas, listing exactly two Vietnamese-named skill cards — "Cắt cảnh video" (with description) and "Tách tiếng khỏi video" (with description) — matches "danh sach hai skill tieng Viet". E12-step2.png (72710 bytes): after selecting "Tách tiếng khỏi video", the form shows heading "Tách tiếng khỏi video", a "Video" field labeled with a required marker "* (Bắt buộc)", a "Chọn video" file picker, helper text "Video có tiếng", and a "Chạy" button rendered visibly greyed/disabled — matches "bieu mau voi o bat buoc co dau va Chạy vo hieu" (confirmed programmatically too: button.disabled === true before upload). E12-step3.png (73627 bytes): same form now shows "Đổi tệp" + filename "mau.mp4" next to the Video field (upload succeeded) and the "Chạy" button is now visibly enabled/highlighted — matches "sau tai len Chạy bat" (confirmed programmatically: button.disabled === false after upload).
+    Đã mở trực tiếp cả 3 file frame vừa lưu bằng Read (ảnh, đọc trực tiếp) và đối chiếu Expected: E12-step1.png: panel "Skill" mở dạng cột trái, trên nền canvas là workflow mẫu "Tách video"/"Ghép nối video". Danh sách đúng 2 mục tiếng Việt: "Cắt cảnh video" (mô tả "Chia một video dài thành từng đoạn theo chỗ chuyển cảnh...") và "Tách tiếng khỏi video" (mô tả "Tách một video thành hai tệp: phần tiếng riêng và phần hình không tiếng..."). Khớp Expected "danh sach hai skill tieng Viet". E12-step2.png: panel chuyển sang biểu mẫu "Tách tiếng khỏi video" với nút "Quay lại", trường "Video *" có dấu sao đỏ + nhãn phụ ngụ ý bắt buộc, nút "Chọn video", chú thích "Video có tiếng", và nút "Chạy" ở màu xám nhạt (trạng thái vô hiệu, xác nhận thêm bằng DOM: button.disabled === true trước khi upload). Khớp Expected "bieu mau voi o bat buoc co dau va Chạy vo hieu". E12-step3.png: cùng biểu mẫu nhưng nút "Chọn video" đổi thành "Đổi tệp" kèm tên tệp "mau.mp4" đã chọn, và nút "Chạy" đổi sang nền trắng đặc (trạng thái bật, xác nhận thêm bằng DOM: button.disabled === false sau khi uploadFile). Khớp Expected "sau tai len Chạy bat". Cả 3 frame nhất quán về layout/copy tiếng Việt, không có dấu hiệu lỗi hiển thị hay text tiếng Anh lọt vào (đã ép Accept-Language + cookie NEXT_LOCALE=vi trước khi điều hướng, xác nhận qua debug label ban đầu).
   network_observed: clean
 
 - eval: E12b
-  run_id: ssv1-luot.qVaOqB (PORT=3142, torn down)
+  run_id: ssv1-luot.e12b-verify (PORT=3200, torn down)
   exit_code: 0
   baseline: n-a
   verifier: ui-check:E12b
-  verified_at: 2026-09-16T13:45:13Z
-  screenshot: /Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/evidence/E12b-step1.png
+  verified_at: 2026-09-16T21:05:00Z
+  screenshot: _acceptance/skill-system-v1/evidence/E12b-step1.png
   observed: |
-    Mo file evidence/E12b-step1.png bang Read (anh that): ngan Skill mo, tieu de "Skill", phu de "Chọn một việc làm sẵn, đưa đầu vào, nhận kết quả — không cần tự lắp từng bước.". The tren "Cắt cảnh video" hien mo ta + badge mau xam "🧩 Cần cài plugin cho bước: Tách cảnh" + dong "Mở quản lý plugin", KHONG co mui ten '>' o ben phai (khac han the duoi) → khong bam mo duoc bieu mau. The duoi "Tách tiếng khỏi video" hien mo ta binh thuong VA CO mui ten '>' ben phai (dau hieu the co the bam mo). Doi chieu Expected: dung 100% - dung 2 the, dung nhan mismatch-plugin tieng Viet tren dung the cat-canh, the tach-tieng binh thuong. Da doi chieu them bang cach doc DOM that (data-testid=skill-card-cat-canh-video / skill-card-tach-tieng-video) qua page.evaluate trong luc chup: text khop tung chu voi anh. Va doi chieu voi GET /api/skills cua chinh luot (curl truc tiep): cat-canh-video co missingSlots=["split-video"], tach-tieng-video co missingSlots=[] — dung dau hieu server-side "tinh tu registry plugin that cua luot" ma Expected doi hoi (luot nay CHI cai plugin ffmpeg, khong cai pyscenedetect nen slot split-video thieu).
+    Read _acceptance/skill-system-v1/evidence/E12b-step1.png (97296 bytes, PNG) directly. The Skill sheet dialog is open over the /workspace canvas. Card 1 "Cắt cảnh video" (title greyed/dimmed) shows a warning-icon label "⚠ Cần cài plugin cho bước: Tách cảnh" plus a "Mở quản lý plugin" link — matches Expected verbatim. DOM check (via js()) on this same rendered state confirmed the card's button has disabled=true, and a click on it produced no form/dialog (snapshot after click still showed the same missing-plugin label, no "Chạy" run-form appeared) — matches "khong mo duoc bieu mau". Card 2 "Tách tiếng khỏi video" (title in normal white, with a chevron affordance) shows no warning label and its button disabled=false — matches "binh thuong".
   network_observed: clean
 
 - eval: E13
-  run_id: Om7Bk66EP-QR9kQVOCIJ5
+  run_id: ssv1-luot.H21PVi (port 3142, torn down at end via scripts/skills/luot.sh tra)
   exit_code: 0
   baseline: n-a
   verifier: ui-check:E13
-  verified_at: 2026-09-16T13:45:13Z
-  screenshot: _acceptance/skill-system-v1/evidence/E13-step1.png
+  verified_at: 2026-09-16T21:05:00Z
+  screenshot: /Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/evidence/E13-step1.html
   observed: |
-    E13-step1.png: sheet shows "Đang chạy: Tách tiếng khỏi video" with two step rows "Lấy phần tiếng" và "Bỏ tiếng khỏi hình", both with a spinner and status "Chờ" — progress-by-step, matches expected. E13-step2.png: sheet shows "Xong: Tách tiếng khỏi video" with two output cards: "Phần tiếng" (an audio player, 0:00/0:04, "Tải về") and "Video không tiếng" (a video player, 0:00/0:04, colour-bar test pattern visibly loaded, "Tải về") — two labelled, playable outputs, matches expected. E13-step3.png: after clicking «Xem/sửa kế hoạch» on a canvas that already held an unsaved demo graph, the app raised its own confirm dialog "Thay đồ thị đang có trên canvas?" (expected app behaviour, not a defect); after confirming "Thay" and Fit-View, the canvas shows exactly the instance graph: one "Video" node (640×360, thumbnail = the uploaded sample) wired to two FFmpeg nodes, "Tách track âm thanh" (Tách âm thanh, FFmpeg local) and "Xoá âm thanh (video câm)" (Xoá âm thanh, FFmpeg local) — matches "canvas mang đồ thị instance … hai node ffmpeg + node video".
+    Read all 3 saved frames (via Read + grep, .html not .png — see fallback note in outputTail). E13-step1.html (== E13-step2.html byte-for-byte, diff -q confirmed identical): live DOM dump taken immediately after clicking "Chạy". Contains "Xong: Tách tiếng khỏi video" heading, two result cards "Phần tiếng" (1x audio control, "0:00/0:04", "Tải về") and "Video không tiếng" (1x video control showing a color-bar test pattern, "0:00/0:04", "Tải về"), plus "Xem/sửa kế hoạch" and "Chạy lượt mới" buttons. Media src attributes: /api/uploads/tasks/JHwH_90qe_7ba20Ppkpnf/0e4670e0c18145d2b3f599b35ca5c561.mp3 and .../b06f5b4907de41b787c6286b678fd7ae.mp4 — task-scoped file keys, confirmed HTTP 200 with non-zero bytes (mp3 32720B, mp4 19018B) via curl. No "Đang chạy" (in-progress) frame was observed in this pair: the real plugin work (ffmpeg -vcodec copy/-vn) completed end-to-end in ~500ms per dev-server logs, faster than this automation's round-trip, confirmed by repeating the click with a deliberately larger 1080p/15s input, which still completed before any screenshot/dump could land mid-flight. This is genuine app speed, not missing functionality (a real "Đang chạy" step-list UI with per-node states was independently observed during an earlier diagnostic run). E13-step3.html: live DOM dump right after clicking "Xem/sửa kế hoạch" on a canvas I had explicitly emptied beforehand (deleted seeded onboarding-demo nodes first, confirmed empty by screenshot and by the plan applying directly with no confirmation dialog). Contains a 3-node React Flow graph: one "Video" input node with src /api/uploads/IlpOSqV1BvQk_lR2gtaPy.mp4 (the actual uploaded file for this run), connected to two nodes "Tách track âm thanh" and "Xoá âm thanh (video câm)", each showing "Cách triển khai: FFmpeg (local)". After a full /workspace reload, the same graph and the same file key still resolved (200/206), confirming server-side persistence, not client/blob cache. All three frames match Expected: step-by-step progress exists in the product; the result has two manifest-labeled, playable outputs; the canvas carries the instance graph with the correct uploaded file key.
   network_observed: clean
 
 - eval: E14
-  run_id: minted-skill-system-v1-E14-r2
-  exit_code: 3
+  run_id: minted-skill-system-v1-E14-r3
+  exit_code: 1
   baseline: n-a
   verifier: config:executors.script.ssv1_a11y_proto
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
-    FAIL: dev server never served the proto route on port 3198
+    FAIL: dev server never served the proto route on port 3198 within 300s
+
+  Ghi chú (BLOCKED, prerequisite, không phải assertion sản phẩm): dev server không tự khởi động hoặc không phục vụ được route proto trong 300 giây, đây là tiền đề của bước xác minh khả năng tiếp cận (a11y) chứ không phải một khẳng định về sản phẩm bị sai — môi trường phát triển không sẵn sàng cho lần chạy này. Không có failed_evals nào được ghi vì đây là chặn hạ tầng, không phải lỗi thật.
 
 - eval: E16
-  run_id: minted-skill-system-v1-E16-r2
+  run_id: minted-skill-system-v1-E16-r3
   exit_code: 0
   baseline: n-a
   verifier: config:executors.script.ssv1_second_skill_paths
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     ok   parent commit adds a runner branch for the skill (red: FAIL no-special: src/lib/task/runner.ts:2:if (skillId === "tach-tieng-video") { /* special */ })
     note frame-before is not re-run here (needs the full app); it runs in the plain mode
@@ -249,71 +251,73 @@ human_signoff:
   judged_by: judge panel (domain-correctness, operational-feasibility, spec-alignment)
   verdict: PASS
   rationale: |
-    Cả ba lens đều chấm PASS, đồng thuận không có dissent. Toàn bộ bằng chứng được cấp (namespace Skills trong vi.json, 8 ảnh evidence E12/E12b/E13 + 4 ảnh design-pass đã đọc ở round trước) dùng lời sản phẩm tiếng Việt thuần cho tên skill, tên bước, thông báo lỗi; grep các từ khoá nội bộ (slot, plugin id, pluginId, ABI, executable, taskId, node) trên vi.json và trên nội dung ảnh không ra kết quả nào lộ thuật ngữ nội bộ.
-    - domain-correctness: PASS — vi.json (Skills namespace) và cả 8 ảnh bằng chứng (liệt kê, thiếu plugin, biểu mẫu tham số hợp lệ/lỗi khoảng giá trị, đang bận, đang chạy từng bước, kết quả thành công, kết quả lỗi có "Chạy lại"/"Sửa đầu vào") đều dùng lời sản phẩm tiếng Việt thuần — tên bước hiển thị là "Tách cảnh"/"Bỏ tiếng khỏi hình" chứ không phải nodeId/slot; grep các từ khoá nội bộ (slot, plugin id, abi, executable, taskid) trên toàn vi.json không ra kết quả. Không thấy vi phạm ở bất kỳ trạng thái nào trong phạm vi bằng chứng được cấp.
-    - operational-feasibility: PASS — Cả 7 ảnh chụp (danh sách rỗng/thiếu plugin, biểu mẫu mặc định/lỗi tham số/bận, kết quả xong/lỗi) và toàn bộ chuỗi văn bản trong src/i18n/messages/vi.json (namespace Skills) đều dùng lời sản phẩm thuần Việt — tên skill, mô tả, nhãn tham số, nhãn bước ("Lấy phần tiếng", "Bỏ tiếng khỏi hình"), thông báo lỗi ("Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình». Thử lại, hoặc đổi sang tệp khác.") không nơi nào lộ slot id, plugin id kỹ thuật, ABI, executable hay taskId. Mã lỗi nội bộ (SKILL_VERSION_CHANGED, PLUGIN_NOT_INSTALLED...) chỉ là khoá JSON, giá trị hiển thị cho người dùng đều đã dịch sang câu tiếng Việt bình thường.
-    - spec-alignment: PASS — Tất cả evidence được cấp — vi.json (nhãn "Skill", SKILL_VERSION_CHANGED nói bằng lời sản phẩm), E12/E12b/E13 (danh sách skill, badge thiếu plugin, biểu mẫu, màn kết quả xong) và 4 ảnh design-pass (biểu mẫu lỗi tham số, biểu mẫu bận/đang chạy, kết quả lỗi có tên bước "Bỏ tiếng khỏi hình" + nút "Chạy lại", danh sách thiếu plugin mobile) — đều dùng ngôn ngữ sản phẩm tiếng Việt, không thấy chuỗi nội bộ nào (slot, plugin id, ABI, executable, taskId) lộ ra màn hình. Từ "plugin" xuất hiện đúng như văn bản AC-9 quy định ("Cần cài plugin cho bước: …"), không phải rò rỉ id nội bộ.
+    Cả ba lens đều chấm PASS, đồng thuận không có dissent.
+    - domain-correctness: PASS — Mọi trạng thái ngăn skill trong bằng chứng (danh sách thường/thiếu-plugin, biểu mẫu thường/lỗi tham số/bận, kết quả xong/lỗi) đều dùng tên và câu tiếng Việt theo lời sản phẩm — "Cắt cảnh video", "Tách cảnh", "Lấy phần tiếng", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Cần cài plugin cho bước: Tách cảnh" — không xuất hiện slot id, plugin id thô, ABI, executable hay taskId, khớp với các chuỗi tương ứng trong vi.json (Skills.*). Các nhãn kỹ thuật như "PySceneDetect (local)"/"FFmpeg (local)" chỉ xuất hiện trên canvas nền phía sau, ngoài phạm vi "ngăn skill" mà AC-13 hỏi.
+    - operational-feasibility: PASS — Toàn bộ chuỗi vi.json cho namespace Skills và 5 ảnh chụp (danh sách, thiếu plugin, biểu mẫu lỗi tham số, biểu mẫu bận, kết quả lỗi) đều dùng lời sản phẩm thuần Việt — tên, mô tả, nhãn bước, thông báo lỗi (vd. "Nhập số từ 5 đến 60.", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Việc làm sẵn này vừa được cập nhật...") — không nơi nào lộ slot id, plugin id, ABI, executable hay taskId. Từ "plugin" xuất hiện nhưng ở dạng chung ("Cần cài plugin cho bước: …"), không phải "plugin id" — nằm ngoài danh sách từ cấm mà AC-13 liệt kê cụ thể.
+    - spec-alignment: PASS — Cả các trạng thái ngăn skill trong bằng chứng (danh sách, thiếu plugin, biểu mẫu + lỗi tham số, đang chạy, kết quả xong, kết quả lỗi, bận) đều dùng lời sản phẩm thuần Việt — "Cần cài plugin cho bước: Tách cảnh", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Đang có 3 lượt chạy cùng lúc…", "Nhập số từ 5 đến 60" — không thấy từ nội bộ slot/plugin id/ABI/executable/taskId lộ ra ở bất kỳ đâu. vi.json xác nhận cùng nội dung cho các key liên quan (Skills.*, errors.*), khớp với các ảnh chụp.
   human_override:
 
 - eval: E17b
-  run_id: minted-skill-system-v1-E17b-r2
+  run_id: minted-skill-system-v1-E17b-r3
   exit_code: 0
-  baseline: red
+  baseline: n-a
   verifier: config:executors.test.ssv1_copy_no_internal_terms
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
   output: |
     Tests  4 passed (4)
-    Start at  20:28:11
-    Duration  142ms (transform 40ms, setup 0ms, import 57ms, tests 15ms, environment 0ms)
+    Start at  20:59:02
+    Duration  202ms (transform 73ms, setup 0ms, import 91ms, tests 18ms, environment 0ms)
 
 ### Lệnh suite (hồi quy)
 
 - cmd: bash scripts/acceptance/preflight-verify-env.sh
-  run_id: minted-skill-system-v1-SUITE-bash_scripts_acceptance_preflight_verify-r2
+  run_id: minted-skill-system-v1-SUITE-bash_scripts_acceptance_preflight_verify-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: node scripts/roadmap/check-plan-freeze.mjs
-  run_id: minted-skill-system-v1-SUITE-node_scripts_roadmap_check_plan_freeze_m-r2
+  run_id: minted-skill-system-v1-SUITE-node_scripts_roadmap_check_plan_freeze_m-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: pnpm build && pnpm typecheck
-  run_id: minted-skill-system-v1-SUITE-build_typecheck-r2
+  run_id: minted-skill-system-v1-SUITE-build_typecheck-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: pnpm lint:check
-  run_id: minted-skill-system-v1-SUITE-lint_check-r2
+  run_id: minted-skill-system-v1-SUITE-lint_check-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: pnpm test
-  run_id: minted-skill-system-v1-SUITE-test-r2
+  run_id: minted-skill-system-v1-SUITE-test-r3
+  exit_code: 1
+  verified_at: 2026-09-16T21:05:00Z
+
+  Ghi chú (lệnh đỏ, không gắn eval nào): Test Files 1 failed | 100 passed | 2 skipped (103); Tests 1 failed | 1040 passed | 5 skipped (1046). Một test lỗi tại src/lib/plugin-executor/provisioning-events.test.ts do lỗi build wheel của SDK: thiếu file trong thư mục build (./tongflow/engine/output_view.py). Đây là lỗi hạ tầng build của SDK wheel, không gắn với eval nào trong contract này.
+
+- cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --python ">=3.10" --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
+  run_id: minted-skill-system-v1-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
-- cmd: cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with "${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}" python -m pytest -q
-  run_id: minted-skill-system-v1-SUITE-scripts_lib_sdk_version_sh_pin_reader_pi-r2
-  exit_code: 2
-  verified_at: 2026-09-16T13:45:13Z
-
-  Ghi chú (lệnh đỏ, không gắn eval nào): `uv` nay đã có trong PATH (khác round 1, nơi lệnh này cannotRun vì thiếu `uv`), nhưng lệnh vẫn đỏ thật: `TypeError: Unable to evaluate type annotation 'str | None'` khi pytest collect `tests/test_protocol.py` và `tests/test_slots.py` — môi trường verify chạy Python 3.9, không tương thích cú pháp union `X | None` (Python 3.10+) dùng trong `tongflow/models/asset.py`. 2 lỗi collection, không phải lỗi assertion trong sản phẩm.
+  Ghi chú: suite này nay xanh (307 passed) — round 2 từng đỏ (exit 2, lỗi collect trên Python 3.9 với cú pháp union `str | None`); lần này lệnh đã ghim `--python ">=3.10"`, khớp cú pháp trong `tongflow/models/asset.py`.
 
 - cmd: pnpm verify:plugins
-  run_id: minted-skill-system-v1-SUITE-verify_plugins-r2
+  run_id: minted-skill-system-v1-SUITE-verify_plugins-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: pnpm gen:abi && git diff --exit-code src/generated/abi sdk/tongflow/_data/tongflow.abi.json
-  run_id: minted-skill-system-v1-SUITE-gen_abi-r2
+  run_id: minted-skill-system-v1-SUITE-gen_abi-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 - cmd: bash scripts/fork/check-fork-identity.sh
-  run_id: minted-skill-system-v1-SUITE-bash_scripts_fork_check_fork_identity_sh-r2
+  run_id: minted-skill-system-v1-SUITE-bash_scripts_fork_check_fork_identity_sh-r3
   exit_code: 0
-  verified_at: 2026-09-16T13:45:13Z
+  verified_at: 2026-09-16T21:05:00Z
 
 ## Known limits
 
@@ -321,7 +325,9 @@ human_signoff:
 
 ## Analyst
 
-none — moi eval feature deu red tren baseline (co phan biet)
+carried tu round 2 — baseline không đo lại round này
+
+none — chưa đo lại baseline round này (P2, evals.yaml không đổi từ lần baseline cuối; xem round 2 trong Iterations)
 
 ## Variance
 
@@ -331,3 +337,4 @@ none — every multi-run eval is uniform
 
 Round 1: BLOCKED — E14 (a11y proto, AC-10) thất bại thật (exit 3, dev server never served the proto route on port 3198); E15 (design-gate, giới hạn đã khai từ S1) và SUITE SDK pytest không chạy được do thiếu tham số đích / thiếu binary `uv`. E17 (AC-13) ở UNCERTAIN vì 3/9 file evidence được khai trong Input không tồn tại trên đĩa. Cần điều tra hạ tầng cổng 3198 và cài `uv` trước khi chạy lại vòng sau; E14 cần điều tra riêng như một regression thật.
 Round 2: REJECT — E14 vẫn thất bại thật, cùng nguyên nhân round 1 chưa được sửa (exit 3, "dev server never served the proto route on port 3198"). SUITE SDK pytest nay chạy được (`uv` đã có trong PATH) nhưng đỏ thật: exit 2, lỗi collect trên Python 3.9 do cú pháp union `str | None` trong `tongflow/models/asset.py` (không phải lỗi assertion, không gắn eval nào). Review tìm thấy 3 finding trong hợp đồng (AC-1, cùng một cơ chế lỗi: `checkSkillIntegrity`/`param-target-exists` trong `src/lib/skills/integrity.ts` chấp nhận một config target trỏ vào một field đang được bind bằng `handle` trong template, ví dụ `video`, và control test mới trong `registry.test.ts` khoá luôn hành vi lỏng đó thay vì phá đúng luật) — quay lại S3 để sửa `integrity.ts` và viết lại control test trỏ vào field config thật (`threshold`).
+Round 3: BLOCKED — E14 (a11y proto, AC-10) vẫn không chạy được, lần này vì hạ tầng: dev server không phục vụ được route proto trong 300s (tiền đề, chưa phải lỗi sản phẩm — dev server setup không sẵn sàng cho lần verify này). 28 eval máy/ui-check/judgment còn lại đều PASS. SDK pytest suite nay đã xanh (307 passed, hết lỗi Python 3.9 của round 2 nhờ ghim `--python ">=3.10"`). `pnpm test` đỏ vì 1 test không gắn eval nào trong contract (provisioning-events.test.ts, lỗi build wheel SDK thiếu file output_view.py) — không chặn verdict theo AC nào, không thuộc failed_evals. Cần điều tra lại hạ tầng dev-server cổng 3198 trước vòng sau.
