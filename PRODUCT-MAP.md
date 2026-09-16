@@ -10,8 +10,8 @@ flowchart TD
   GD --> XL["Xếp lại sau<br/>3 việc"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
-  GP --> DL["Đang làm<br/>1 việc"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>38 việc"]
+  GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
+  GB --> DG["Đã giao<br/>39 việc"]
   GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
   GG --> NT["Đã nghiệm thu giá trị<br/>2 việc"]
 ```
@@ -24,10 +24,6 @@ flowchart TD
 ## Sắp mở vòng
 
 - Skill (`skill-1-footage-kho-clip`)
-
-## Đang làm
-
-- Skill system v1 — manifest tham số, template, orchestrator v1, ngăn skill và xem/sửa kế hoạch; skill thứ hai không đụng engine (`skill-system-v1`)
 
 ## Đã giao
 
@@ -67,6 +63,7 @@ flowchart TD
 - The plugin scanner reports the reason it already has, instead of blaming entry.py (`scan-scope-diagnostics`)
 - Plugin scanner reads imports by scope boundary, and says why a slot was skipped (`scan-with-block-imports`)
 - Publish the SDK as oneflow-sdk while keeping the tongflow import package (`sdk-distribution-rename`)
+- Skill system v1 — manifest tham số, template, orchestrator v1, ngăn skill và xem/sửa kế hoạch; skill thứ hai không đụng engine (`skill-system-v1`)
 - Scope evidence staleness by declared eval paths (`stale-scope-by-paths`)
 - Per-task metering columns and measured plugin duration (`task-metering`)
 

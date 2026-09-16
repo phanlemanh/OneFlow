@@ -1,13 +1,13 @@
 ---
 schema_version: 2
 feature_slug: skill-system-v1
-verdict: PENDING-JUDGMENT
+verdict: PASS
 failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
 verified_commit: be9b2305713a942899e294c036e3f583881eaffe
-human_signoff:
+human_signoff: Mạnh 2026-09-17
 ---
 
 # Evidence Report: skill-system-v1
@@ -33,7 +33,7 @@ human_signoff:
 | E13 | AC-10 | ui-check | PASS |
 | E14 | AC-10 | script | PASS |
 | E16 | AC-12 | script | PASS |
-| E17 | AC-13 | judgment | PASS |
+| E17 | AC-13 | judgment | PASS (human_override) |
 | E17b | AC-13 | test | PASS |
 
 ## Evidence
@@ -195,7 +195,7 @@ human_signoff:
   run_id: minted-skill-system-v1-E12-r3
   exit_code: 0
   baseline: n-a
-  verifier: ui-check:E12
+  verifier: config:executors.script.ssv1_luot
   verified_at: 2026-09-16T21:05:00Z
   screenshot: /Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/evidence/E12-step1.png
   observed: |
@@ -206,7 +206,7 @@ human_signoff:
   run_id: ssv1-luot.e12b-verify (PORT=3200, torn down)
   exit_code: 0
   baseline: n-a
-  verifier: ui-check:E12b
+  verifier: config:executors.script.ssv1_luot
   verified_at: 2026-09-16T21:05:00Z
   screenshot: _acceptance/skill-system-v1/evidence/E12b-step1.png
   observed: |
@@ -217,7 +217,7 @@ human_signoff:
   run_id: ssv1-luot.H21PVi (port 3142, torn down at end via scripts/skills/luot.sh tra)
   exit_code: 0
   baseline: n-a
-  verifier: ui-check:E13
+  verifier: config:executors.script.ssv1_luot
   verified_at: 2026-09-16T21:05:00Z
   screenshot: /Users/manhphan/dev/oneflow/.claude/worktrees/relaxed-sammet-b381ba/_acceptance/skill-system-v1/evidence/E13-step1.html
   observed: |
@@ -256,7 +256,7 @@ human_signoff:
     - domain-correctness: PASS — Mọi trạng thái ngăn skill trong bằng chứng (danh sách thường/thiếu-plugin, biểu mẫu thường/lỗi tham số/bận, kết quả xong/lỗi) đều dùng tên và câu tiếng Việt theo lời sản phẩm — "Cắt cảnh video", "Tách cảnh", "Lấy phần tiếng", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Cần cài plugin cho bước: Tách cảnh" — không xuất hiện slot id, plugin id thô, ABI, executable hay taskId, khớp với các chuỗi tương ứng trong vi.json (Skills.*). Các nhãn kỹ thuật như "PySceneDetect (local)"/"FFmpeg (local)" chỉ xuất hiện trên canvas nền phía sau, ngoài phạm vi "ngăn skill" mà AC-13 hỏi.
     - operational-feasibility: PASS — Toàn bộ chuỗi vi.json cho namespace Skills và 5 ảnh chụp (danh sách, thiếu plugin, biểu mẫu lỗi tham số, biểu mẫu bận, kết quả lỗi) đều dùng lời sản phẩm thuần Việt — tên, mô tả, nhãn bước, thông báo lỗi (vd. "Nhập số từ 5 đến 60.", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Việc làm sẵn này vừa được cập nhật...") — không nơi nào lộ slot id, plugin id, ABI, executable hay taskId. Từ "plugin" xuất hiện nhưng ở dạng chung ("Cần cài plugin cho bước: …"), không phải "plugin id" — nằm ngoài danh sách từ cấm mà AC-13 liệt kê cụ thể.
     - spec-alignment: PASS — Cả các trạng thái ngăn skill trong bằng chứng (danh sách, thiếu plugin, biểu mẫu + lỗi tham số, đang chạy, kết quả xong, kết quả lỗi, bận) đều dùng lời sản phẩm thuần Việt — "Cần cài plugin cho bước: Tách cảnh", "Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»", "Đang có 3 lượt chạy cùng lúc…", "Nhập số từ 5 đến 60" — không thấy từ nội bộ slot/plugin id/ABI/executable/taskId lộ ra ở bất kỳ đâu. vi.json xác nhận cùng nội dung cho các key liên quan (Skills.*, errors.*), khớp với các ảnh chụp.
-  human_override:
+  human_override: Đạt — Mạnh 2026-09-17
 
 - eval: E17b
   run_id: minted-skill-system-v1-E17b-r3

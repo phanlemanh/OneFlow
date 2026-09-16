@@ -5,7 +5,7 @@ slug: skill-system-v1
 owner: phanlemanh@gmail.com
 risk_tier: T3
 surfaces: [api, ui]
-status: verified
+status: signed-off
 design_doc: docs/superpowers/specs/2026-09-16-skill-system-v1-design.md
 approved_by: Mạnh
 approved_at: 2026-09-16
@@ -88,3 +88,25 @@ Quét bằng morphological-scan (preset test-matrix, trục tự dựng theo B1)
 - Hồ sơ không có `opportunity.md` riêng: theo thiết kế lát cắt (§5, 04/09), hợp đồng B5 trỏ về cơ hội `_acceptance/skill-1-footage-kho-clip/opportunity.md` — ngưỡng U2 «một nút» đo tại Cổng Giá trị của cơ hội đó (B10), không đo ở vòng này.
 - ADR-0002 · ADR-0013 lằn ranh đỏ 5 (skill là whole-plan, không mở DSL).
 - Vòng T3: trần 4 lượt S4 (CLAUDE.md, quyết định owner 08/09).
+
+**Known limits — người ký nhận tại Cổng 2 (17/09/2026, Mạnh).** Mười bảy mục ngoài hợp đồng
+dưới đây ship như hiện trạng; chi tiết từng mục ở `review-findings.md`:
+
+- Đóng rồi mở lại ngăn Skill khi lượt đang chạy làm lượt đó chạy lại lần nữa, vì luồng chờ mở lại không kèm cờ nối lại (hai phát hiện trùng gốc, mức cao).
+- Luật đích tham số chỉ từ chối trường được nối bằng cạnh; trường mang giá trị cố định hay đầu vào của cả quy trình vẫn bị ghi đè lặng.
+- Ca đối chứng trường nối bằng cạnh không đổi binding độc lập với tên trường, nên quan hệ trường với binding chưa được đo.
+- Ma trận đích tham số vẫn khai ba thành viên và tự đếm chính hằng của nó, trong khi luật nay có lý do thứ tư.
+- Máy khách skill không đi qua máy khách API chung; phản hồi lỗi hoặc không phải JSON làm biểu mẫu đứng im không báo gì.
+- Phản hồi gửi lượt chạy không có thân JSON làm hỏng bước bắt đầu chạy, người dùng không thấy gì.
+- Giới hạn số lượt chạy cùng lúc được chép lại thay vì dùng chung với tuyến chạy workflow.
+- Lượt chạy thất bại có thể đánh dấu «đã xong» cho bước chưa từng chạy hoặc lỗi không mang mã bước.
+- Tải tệp lên thất bại chỉ ghi log; ô chọn tệp lặng lẽ về trống.
+- Màn theo dõi có thể kẹt ở «đang chạy» vì chỉ làm mới một lần, không thử lại.
+- Tải danh sách skill thất bại cho ra danh sách trống hoặc khung chờ không dừng.
+- Kết quả engine của bước tách cảnh trong E10 là dữ liệu gõ tay theo khuôn bên đọc.
+- Các bước của lượt chạy chỉ được đếm và kiểm tập khoá, chưa đối chiếu với node của bản dựng.
+- Nút «Huỷ» khi mở kế hoạch lên canvas chỉ được kiểm danh sách mã node, chưa kiểm cạnh, vị trí và tham số.
+- Bước dựng bản skill lặng lẽ bỏ qua tham số không có trong giá trị mẫu, nên phép đo không phủ tham số đó.
+- Kịch bản đầu cuối kiểm đầu ra theo danh sách gõ tay, không đọc từ manifest.
+
+Mục đầu tiên gộp hai phát hiện cùng gốc (Ngoài-4 và Ngoài-7), nên danh sách có mười sáu gạch cho mười bảy mục.
