@@ -689,14 +689,14 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 /** Point the app's data dir at a fresh temp dir. Call before the first getDb(). */
-export function useTempDataDir(prefix: string): string {
+export function pointDataDirAtTemp(prefix: string): string {
     const dir = mkdtempSync(path.join(tmpdir(), `ssv1-${prefix}-`));
     process.env.TONGFLOW_DATA_DIR = dir;
     return dir;
 }
 ```
 
-Every DB test file starts with `vi.mock("server-only", () => ({}));` and calls `useTempDataDir(...)` at module top before importing any route (use dynamic `await import(...)` inside `beforeAll` for the route module).
+Every DB test file starts with `vi.mock("server-only", () => ({}));` and calls `pointDataDirAtTemp(...)` at module top before importing any route (use dynamic `await import(...)` inside `beforeAll` for the route module).
 
 - [ ] **Step 2: Failing tests** — one file per eval, each shaped as its `expected` in `evals.yaml`. Shared request helper:
 
