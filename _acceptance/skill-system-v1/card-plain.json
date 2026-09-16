@@ -97,6 +97,10 @@
     {
       "id": "d-20260916T135823Z-23",
       "p": "Hạ tầng đo: bộ quét khả năng tiếp cận chờ máy chủ tối đa 300 giây thay 120 — không nới điều nó khẳng định."
+    },
+    {
+      "id": "d-20260916T182330Z-24",
+      "p": "Ghi nhận phép thử kéo thả khung chỉ đỏ khi máy đang chấm giao diện cùng lúc; chạy riêng thì xanh — đổi lại, vòng sau chạm giao diện sẽ gặp lại cho tới khi bộ chấm xếp nó chạy sau."
     }
   ]
 }
