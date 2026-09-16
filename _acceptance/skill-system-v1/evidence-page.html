@@ -1,0 +1,185 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bằng chứng · skill-system-v1</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--bd:#e6e4de;--ink:#1f1f1d;--mut:#6c6a64;--hint:#9a988f}
+*{box-sizing:border-box}body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;line-height:1.5;font-size:15px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 64px}
+h1{font-size:20px;margin:0 0 2px}h2{font-size:15px;margin:30px 0 10px;letter-spacing:.02em}
+.sub{font-size:13px;color:var(--mut)}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;vertical-align:middle}
+.pass{background:#E1F5EE;color:#085041}.pend{background:#FAEEDA;color:#633806}.rej{background:#FAECE7;color:#712B13}.neutral{background:#f1efe8;color:#444441}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--mut);margin-top:6px}
+.meta b{color:var(--ink);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--bd)}th{color:var(--mut);font-weight:600;font-size:12px}
+td a{color:#185FA5;text-decoration:none}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.eval{scroll-margin-top:14px}.eval h3{font-size:14px;margin:0 0 4px}.eval .crit{font-size:13px;color:var(--mut);margin:0 0 8px}
+pre.out{background:#1f1f1d;color:#e8e6df;border-radius:8px;padding:11px 13px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.kv{font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0}.kv b{color:var(--ink)}
+.shot img{display:block;max-width:100%;border:1px solid var(--bd);border-radius:8px}
+.slide{position:relative}.slide .frame{position:absolute;inset:0;opacity:0;transition:opacity .35s}.slide .frame:first-child{position:relative}.slide .frame.on{opacity:1}
+.slidebar{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-top:6px}
+.btn{font-size:12px;padding:4px 11px;border:1px solid var(--bd);border-radius:7px;background:#fff;cursor:pointer}
+.ov{background:#FAEEDA;color:#633806;border-radius:7px;padding:6px 10px;font-size:12px;display:inline-block}
+.ovok{background:#E1F5EE;color:#085041}
+.note{font-size:13px;color:var(--mut)}.flag{font-size:13px;border-radius:8px;padding:8px 11px;margin:6px 0}
+.fred{background:#FAECE7;color:#712B13}.fok{background:#E1F5EE;color:#085041}
+.foot{margin-top:30px;padding-top:14px;border-top:1px solid var(--bd);font-size:12px;color:var(--hint)}
+ul.ck{list-style:none;padding:0;margin:0}ul.ck li{padding:5px 0;font-size:14px}ul.ck input{margin-right:8px}
+.tl{border-left:2px solid var(--bd);padding-left:14px;margin:0}.tl li{font-size:13px;margin:0 0 6px;list-style:none}
+</style></head><body><div class="wrap">
+<h1>Skill system v1 — manifest tham số, template, orchestrator v1, ngăn skill và xem/sửa kế hoạch; skill thứ hai không đụng engine</h1><div class="sub">Trang bằng chứng · <span class="mono">skill-system-v1</span> · tier T3</div>
+<div class="card" style="margin-top:12px"><span class="badge rej">BLOCKED</span>
+<div class="meta"><span>Verified by: <b>fresh-context verification subagent</b></span><span>Human signoff: <b>CHƯA ký</b></span><span>enforcement: <b>strict</b></span><span>reason: <b>bash scripts/skills/check-a11y-proto.sh (E14) — Dev server failed to start or serve the proto route within the 300-second timeout. This is a prerequisite failure for the accessibility proto verification — the development environment setup is not available.</b></span></div></div>
+<h2>Các eval</h2><div class="card" style="padding:4px 8px"><table><thead><tr><th>Eval</th><th>Tiêu chí</th><th>Loại</th><th>Verdict</th><th>run_id</th><th>verified_at</th></tr></thead><tbody>
+<tr><td><a href="#E1">E1</a></td><td>AC-1</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E1-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E2">E2</a></td><td>AC-2</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E2-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E3">E3</a></td><td>AC-3</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E3-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E4">E4</a></td><td>AC-4</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E4-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E5">E5</a></td><td>AC-5</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E5-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E6">E6</a></td><td>AC-6</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E6-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E7">E7</a></td><td>AC-7</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E7-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E7b">E7b</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E7b-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E8">E8</a></td><td>AC-8</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E8-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E9">E9</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E9-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E9b">E9b</a></td><td>AC-9</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E9b-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E10">E10</a></td><td>AC-10</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E10-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E11">E11</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E11-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E11b">E11b</a></td><td>AC-11</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E11b-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E12">E12</a></td><td>AC-9</td><td>ui-check</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E12-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E12b">E12b</a></td><td>AC-9</td><td>ui-check</td><td><span class="badge pass">PASS</span></td><td class="mono">ssv1-luot.e12b-verify (PORT=3200, torn down)</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E13">E13</a></td><td>AC-10</td><td>ui-check</td><td><span class="badge pass">PASS</span></td><td class="mono">ssv1-luot.H21PVi (port 3142, torn down at end via scripts/skills/luot.sh tra)</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E14">E14</a></td><td>AC-10</td><td>script</td><td><span class="badge rej">BLOCKED</span></td><td class="mono">minted-skill-system-v1-E14-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E16">E16</a></td><td>AC-12</td><td>script</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E16-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+<tr><td><a href="#E17">E17</a></td><td>AC-13</td><td>judgment</td><td><span class="badge pass">PASS</span></td><td class="mono">—</td><td class="mono">—</td></tr>
+<tr><td><a href="#E17b">E17b</a></td><td>AC-13</td><td>test</td><td><span class="badge pass">PASS</span></td><td class="mono">minted-skill-system-v1-E17b-r3</td><td class="mono">2026-09-16T21:05:00Z</td></tr>
+</tbody></table></div>
+<h2>Chi tiết từng eval</h2>
+<div class="card eval" id="E1"><h3><span class="badge pass">PASS</span> &nbsp;E1 · test</h3><p class="crit">AC-1: Given mọi skill trong registry, When phép kiểm toàn vẹn chạy, Then mỗi skill có `id` trùng tên thư mục, `version` semver, `requires` bằng đúng tập slot của template, mọi `target` của tham số trỏ tới một nút dữ liệu đầu vào hoặc một ô cấu hình có thật của template, mọi `outputs[].from` là một cổng ra có thật, và chạy exporter thật trên `originalFlow` ra đúng `executable` đã lưu; phá từng luật trên một bản sao làm phép kiểm đỏ và nêu tên luật + tên skill.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E1-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_registry_integrity</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  21 passed (21)
+Start at  20:58:52
+Duration  175ms (transform 80ms, setup 0ms, import 113ms, tests 6ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E2"><h3><span class="badge pass">PASS</span> &nbsp;E2 · test</h3><p class="crit">AC-2: Given một skill có tham số bắt buộc, When `POST /api/skills/&lt;id&gt;/run` gửi thiếu tham số bắt buộc, sai kiểu, giá trị enum hay số ngoài khoảng, hoặc một khoá lạ, Then máy chủ trả 400 mã `SKILL_PARAMS_INVALID` liệt kê từng tham số kèm mã lý do thuộc tập đóng `required · type · range · option · unknown` (xuất từ `params.ts`), và bảng `tasks` không thêm hàng nào; đối chứng: tham số hợp lệ với plugin đủ trả 200 và thêm đúng một hàng.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E2-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_params_route</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  7 passed (7)
+Start at  20:58:54
+Duration  383ms (transform 83ms, setup 0ms, import 29ms, tests 286ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E3"><h3><span class="badge pass">PASS</span> &nbsp;E3 · test</h3><p class="crit">AC-3: Given một template và bộ tham số hợp lệ, When instantiate chạy, Then template gốc không đổi, mỗi giá trị tham số xuất hiện ở cả `executable` lẫn `originalFlow`, mỗi node mang plugin mặc định đã cài của slot, và chạy exporter thật trên `instance.originalFlow` ra đúng `instance.executable` (bỏ `exportedAt`) — cho MỌI skill đã đăng ký.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E3-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_instantiate</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  4 passed (4)
+Start at  20:58:55
+Duration  321ms (transform 170ms, setup 0ms, import 231ms, tests 5ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E4"><h3><span class="badge pass">PASS</span> &nbsp;E4 · test</h3><p class="crit">AC-4: Given một slot của skill không có plugin nào cài, hoặc id skill không tồn tại, hoặc đang có 3 lượt chạy, When nộp lượt chạy, Then máy chủ trả lần lượt 400 `PLUGIN_NOT_INSTALLED` kèm tên slot, 404, 429 `CONCURRENT_TASK_LIMIT_EXCEEDED`, và không thêm hàng `tasks`.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E4-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_run_refusals</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  5 passed (5)
+Start at  20:58:56
+Duration  428ms (transform 84ms, setup 0ms, import 35ms, tests 312ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E5"><h3><span class="badge pass">PASS</span> &nbsp;E5 · test</h3><p class="crit">AC-5: Given tham số hợp lệ và plugin đủ, When nộp lượt chạy, Then máy chủ trả `{taskId}` và hàng `tasks` tương ứng có `feature = &quot;skill&quot;`, `plugin_id` rỗng, `prompt` chỉ gồm `skillId`, `skillVersion`, `params` — không executable, không routing.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E5-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_run_task_row</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  1 passed (1)
+Start at  20:58:54
+Duration  392ms (transform 85ms, setup 0ms, import 30ms, tests 293ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E6"><h3><span class="badge pass">PASS</span> &nbsp;E6 · test</h3><p class="crit">AC-6: Given một task skill đang chờ, When client mở `/api/task/wait` cho task đó, Then runner instantiate lại từ `prompt` và giao cho engine delegate đúng executable của instance; nếu `skillVersion` trong `prompt` khác version đang đăng ký thì task kết thúc `failed` với mã `SKILL_VERSION_CHANGED` mà không gọi engine.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E6-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_runner_dispatch</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  2 passed (2)
+Start at  20:58:55
+Duration  459ms (transform 143ms, setup 0ms, import 33ms, tests 344ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E7"><h3><span class="badge pass">PASS</span> &nbsp;E7 · test</h3><p class="crit">AC-7: Given một task skill, When `GET /api/skills/runs/&lt;taskId&gt;`, Then trả trạng thái và `steps` — một phần tử `{nodeId, slot, status}` cho mỗi node của instance; khi xong, mọi bước `done` và `outputs` mang đúng các `key` của manifest với file key của engine; khi lỗi, bước có `nodeId` trong `tasks.error.failures` mang `failed`; task không phải skill hoặc không tồn tại trả 404.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E7-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_runs_collect</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  6 passed (6)
+Start at  20:58:54
+Duration  524ms (transform 156ms, setup 0ms, import 35ms, tests 396ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E7b"><h3><span class="badge pass">PASS</span> &nbsp;E7b · test</h3><p class="crit">AC-10: Given một lượt chạy đã nộp từ ngăn skill, When lượt đi qua đang chạy → xong hoặc → lỗi, Then ngăn hiện tiến trình theo từng bước (từ sự kiện SSE `NODE_*` khi đang mở, từ `steps` của `GET /api/skills/runs/&lt;taskId&gt;` khi mở lại), rồi kết quả với từng đầu ra theo nhãn manifest xem/tải được, hoặc câu lỗi bằng lời sản phẩm nêu tên bước hỏng kèm «Chạy lại» giữ nguyên tham số. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E7b-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_runs_failed_step</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Start at  20:58:56
+Duration  499ms (transform 167ms, setup 0ms, import 29ms, tests 391ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E8"><h3><span class="badge pass">PASS</span> &nbsp;E8 · script</h3><p class="crit">AC-8: Given không gian lượt có hai plugin cục bộ đã cài và video mẫu có tiếng, When chạy `tach-tieng-video` từ đầu tới cuối qua API thật, Then task kết thúc `completed` và mỗi đầu ra của manifest trỏ một tệp tồn tại, dung lượng &gt; 0, đúng loại (âm thanh / video không tiếng).</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E8-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.ssv1_e2e_tach_tieng</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">PASS output tieng: 32720 bytes · audio=1 video=0
+PASS output video-cam: 19018 bytes · audio=0 video=1
+PASS e2e tach-tieng-video</pre>
+</div>
+<div class="card eval" id="E9"><h3><span class="badge pass">PASS</span> &nbsp;E9 · test</h3><p class="crit">AC-9: Given canvas đang mở, When người dùng bấm nút «Skill» ở thanh trái, Then ngăn skill liệt kê hai skill với tên và mô tả tiếng Việt; skill có slot không plugin nào cài (theo registry plugin thật qua `GET /api/skills`) mang nhãn «Cần cài plugin cho bước: &lt;tên bước&gt;» và không chạy được; chọn một skill hiện biểu mẫu sinh từ manifest với ô bắt buộc có dấu và nút «Chạy» chỉ bật khi đủ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E9-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_sheet_list_form</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  3 passed (3)
+Start at  20:58:54
+Duration  1.43s (transform 332ms, setup 0ms, import 792ms, tests 160ms, environment 404ms)</pre>
+</div>
+<div class="card eval" id="E9b"><h3><span class="badge pass">PASS</span> &nbsp;E9b · test</h3><p class="crit">AC-9: Given canvas đang mở, When người dùng bấm nút «Skill» ở thanh trái, Then ngăn skill liệt kê hai skill với tên và mô tả tiếng Việt; skill có slot không plugin nào cài (theo registry plugin thật qua `GET /api/skills`) mang nhãn «Cần cài plugin cho bước: &lt;tên bước&gt;» và không chạy được; chọn một skill hiện biểu mẫu sinh từ manifest với ô bắt buộc có dấu và nút «Chạy» chỉ bật khi đủ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E9b-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_skills_list_route</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  3 passed (3)
+Start at  20:58:54
+Duration  602ms (transform 100ms, setup 0ms, import 25ms, tests 497ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E10"><h3><span class="badge pass">PASS</span> &nbsp;E10 · test</h3><p class="crit">AC-10: Given một lượt chạy đã nộp từ ngăn skill, When lượt đi qua đang chạy → xong hoặc → lỗi, Then ngăn hiện tiến trình theo từng bước (từ sự kiện SSE `NODE_*` khi đang mở, từ `steps` của `GET /api/skills/runs/&lt;taskId&gt;` khi mở lại), rồi kết quả với từng đầu ra theo nhãn manifest xem/tải được, hoặc câu lỗi bằng lời sản phẩm nêu tên bước hỏng kèm «Chạy lại» giữ nguyên tham số. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E10-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_sheet_run_states</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  2 passed (2)
+Start at  20:58:55
+Duration  1.39s (transform 339ms, setup 0ms, import 490ms, tests 485ms, environment 339ms)</pre>
+</div>
+<div class="card eval" id="E11"><h3><span class="badge pass">PASS</span> &nbsp;E11 · test</h3><p class="crit">AC-11: Given màn kết quả của một lượt, When bấm «Xem/sửa kế hoạch», Then canvas nhận đồ thị của instance với giá trị tham số hiển thị trong node; canvas đang có đồ thị thì hỏi xác nhận trước, và «Huỷ» để canvas nguyên như cũ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E11-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_plan_to_canvas</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  3 passed (3)
+Start at  20:58:55
+Duration  1.26s (transform 278ms, setup 0ms, import 696ms, tests 160ms, environment 327ms)</pre>
+</div>
+<div class="card eval" id="E11b"><h3><span class="badge pass">PASS</span> &nbsp;E11b · test</h3><p class="crit">AC-11: Given màn kết quả của một lượt, When bấm «Xem/sửa kế hoạch», Then canvas nhận đồ thị của instance với giá trị tham số hiển thị trong node; canvas đang có đồ thị thì hỏi xác nhận trước, và «Huỷ» để canvas nguyên như cũ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E11b-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_plan_route</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  2 passed (2)
+Start at  20:58:56
+Duration  390ms (transform 73ms, setup 0ms, import 28ms, tests 289ms, environment 0ms)</pre>
+</div>
+<div class="card eval" id="E12"><h3><span class="badge pass">PASS</span> &nbsp;E12 · ui-check</h3><p class="crit">AC-9: Given canvas đang mở, When người dùng bấm nút «Skill» ở thanh trái, Then ngăn skill liệt kê hai skill với tên và mô tả tiếng Việt; skill có slot không plugin nào cài (theo registry plugin thật qua `GET /api/skills`) mang nhãn «Cần cài plugin cho bước: &lt;tên bước&gt;» và không chạy được; chọn một skill hiện biểu mẫu sinh từ manifest với ô bắt buộc có dấu và nút «Chạy» chỉ bật khi đủ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E12-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">ui-check:E12</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<div class="shot slide" data-n="3"><div class="frame"><img src="evidence/E12-step1.png" alt="frame 1" loading="lazy"></div><div class="frame"><img src="evidence/E12-step2.png" alt="frame 2" loading="lazy"></div><div class="frame"><img src="evidence/E12-step3.png" alt="frame 3" loading="lazy"></div></div><div class="slidebar"><button class="btn" data-toggle>⏸ Tạm dừng</button><span>3 frame · chạy như GIF</span></div>
+</div>
+<div class="card eval" id="E12b"><h3><span class="badge pass">PASS</span> &nbsp;E12b · ui-check</h3><p class="crit">AC-9: Given canvas đang mở, When người dùng bấm nút «Skill» ở thanh trái, Then ngăn skill liệt kê hai skill với tên và mô tả tiếng Việt; skill có slot không plugin nào cài (theo registry plugin thật qua `GET /api/skills`) mang nhãn «Cần cài plugin cho bước: &lt;tên bước&gt;» và không chạy được; chọn một skill hiện biểu mẫu sinh từ manifest với ô bắt buộc có dấu và nút «Chạy» chỉ bật khi đủ. (cross-layer)</p>
+<div class="kv"><span>run_id <b>ssv1-luot.e12b-verify (PORT=3200, torn down)</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">ui-check:E12b</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<div class="shot"><img src="evidence/E12b-step1.png" alt="screenshot E12b" loading="lazy"></div><div class="kv"><span>evidence/E12b-step1.png</span></div>
+</div>
+<div class="card eval" id="E13"><h3><span class="badge pass">PASS</span> &nbsp;E13 · ui-check</h3><p class="crit">AC-10: Given một lượt chạy đã nộp từ ngăn skill, When lượt đi qua đang chạy → xong hoặc → lỗi, Then ngăn hiện tiến trình theo từng bước (từ sự kiện SSE `NODE_*` khi đang mở, từ `steps` của `GET /api/skills/runs/&lt;taskId&gt;` khi mở lại), rồi kết quả với từng đầu ra theo nhãn manifest xem/tải được, hoặc câu lỗi bằng lời sản phẩm nêu tên bước hỏng kèm «Chạy lại» giữ nguyên tham số. (cross-layer)</p>
+<div class="kv"><span>run_id <b>ssv1-luot.H21PVi (port 3142, torn down at end via scripts/skills/luot.sh tra)</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">ui-check:E13</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<div class="flag fred">Không có screenshot — ui-check có thể đã downgrade sang judgment (không có browser).</div>
+</div>
+<div class="card eval" id="E14"><h3><span class="badge rej">BLOCKED</span> &nbsp;E14 · script</h3><p class="crit">AC-10: Given một lượt chạy đã nộp từ ngăn skill, When lượt đi qua đang chạy → xong hoặc → lỗi, Then ngăn hiện tiến trình theo từng bước (từ sự kiện SSE `NODE_*` khi đang mở, từ `steps` của `GET /api/skills/runs/&lt;taskId&gt;` khi mở lại), rồi kết quả với từng đầu ra theo nhãn manifest xem/tải được, hoặc câu lỗi bằng lời sản phẩm nêu tên bước hỏng kèm «Chạy lại» giữ nguyên tham số. (cross-layer)</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E14-r3</b></span><span>exit_code <b>1</b></span><span>verifier <b class="mono">config:executors.script.ssv1_a11y_proto</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">FAIL: dev server never served the proto route on port 3198 within 300s</pre>
+</div>
+<div class="card eval" id="E16"><h3><span class="badge pass">PASS</span> &nbsp;E16 · script</h3><p class="crit">AC-12: Given commit thêm skill `tach-tieng-video`, When đối chiếu các đường dẫn commit đó chạm, Then chỉ gồm `src/lib/skills/tach-tieng-video/**`, đúng một dòng thêm trong `src/lib/skills/registry.ts`, và `src/i18n/messages/**` — không dòng nào trong `src/lib/workflow/**`, `src/lib/director/**`, `src/lib/task/**`, `src/app/api/**`, `sdk/**`; tại commit cha của commit đó, phép kiểm toàn vẹn và instantiate xanh với registry chưa có skill thứ hai; tại HEAD, không tệp nào ngoài `src/lib/skills/tach-tieng-video/` và i18n nhắc chuỗi `tach-tieng-video`, `extract-audio`, `remove-video-audio` trong `src/lib/skills/*.ts`, `src/lib/task/**`, `src/app/api/**`, `src/lib/workflow/**`; một bản sao có thêm một đường ngoài danh sách, hoặc một nhánh theo id skill trong runner ở commit trước, làm phép đối chiếu đỏ và nêu đường dẫn đó.</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E16-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.script.ssv1_second_skill_paths</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">ok   parent commit adds a runner branch for the skill (red: FAIL no-special: src/lib/task/runner.ts:2:if (skillId === &quot;tach-tieng-video&quot;) { /* special */ })
+note frame-before is not re-run here (needs the full app); it runs in the plain mode
+TEETH PASS 5/5</pre>
+</div>
+<div class="card eval" id="E17"><h3><span class="badge pass">PASS</span> &nbsp;E17 · judgment</h3><p class="crit">AC-13: Given ngăn skill ở mọi trạng thái trong bảng trạng thái của thiết kế, When người bán hàng không rành kỹ thuật đọc, Then tên, mô tả, nhãn, thông báo lỗi nói bằng lời sản phẩm, không lộ từ nội bộ (slot, plugin id, ABI, executable, taskId).</p>
+<div class="kv"><span>judged_by <b>judge panel (domain-correctness, operational-feasibility, spec-alignment)</b></span></div>
+<p class="note"><b>Phán đoán:</b> Cả ba lens đều chấm PASS, đồng thuận không có dissent.
+- domain-correctness: PASS — Mọi trạng thái ngăn skill trong bằng chứng (danh sách thường/thiếu-plugin, biểu mẫu thường/lỗi tham số/bận, kết quả xong/lỗi) đều dùng tên và câu tiếng Việt theo lời sản phẩm — &quot;Cắt cảnh video&quot;, &quot;Tách cảnh&quot;, &quot;Lấy phần tiếng&quot;, &quot;Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»&quot;, &quot;Cần cài plugin cho bước: Tách cảnh&quot; — không xuất hiện slot id, plugin id thô, ABI, executable hay taskId, khớp với các chuỗi tương ứng trong vi.json (Skills.*). Các nhãn kỹ thuật như &quot;PySceneDetect (local)&quot;/&quot;FFmpeg (local)&quot; chỉ xuất hiện trên canvas nền phía sau, ngoài phạm vi &quot;ngăn skill&quot; mà AC-13 hỏi.
+- operational-feasibility: PASS — Toàn bộ chuỗi vi.json cho namespace Skills và 5 ảnh chụp (danh sách, thiếu plugin, biểu mẫu lỗi tham số, biểu mẫu bận, kết quả lỗi) đều dùng lời sản phẩm thuần Việt — tên, mô tả, nhãn bước, thông báo lỗi (vd. &quot;Nhập số từ 5 đến 60.&quot;, &quot;Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»&quot;, &quot;Việc làm sẵn này vừa được cập nhật...&quot;) — không nơi nào lộ slot id, plugin id, ABI, executable hay taskId. Từ &quot;plugin&quot; xuất hiện nhưng ở dạng chung (&quot;Cần cài plugin cho bước: …&quot;), không phải &quot;plugin id&quot; — nằm ngoài danh sách từ cấm mà AC-13 liệt kê cụ thể.
+- spec-alignment: PASS — Cả các trạng thái ngăn skill trong bằng chứng (danh sách, thiếu plugin, biểu mẫu + lỗi tham số, đang chạy, kết quả xong, kết quả lỗi, bận) đều dùng lời sản phẩm thuần Việt — &quot;Cần cài plugin cho bước: Tách cảnh&quot;, &quot;Không xử lý được đầu vào này ở bước «Bỏ tiếng khỏi hình»&quot;, &quot;Đang có 3 lượt chạy cùng lúc…&quot;, &quot;Nhập số từ 5 đến 60&quot; — không thấy từ nội bộ slot/plugin id/ABI/executable/taskId lộ ra ở bất kỳ đâu. vi.json xác nhận cùng nội dung cho các key liên quan (Skills.*, errors.*), khớp với các ảnh chụp.</p>
+<div class="ov">human_override: CHƯA điền (việc của bạn ở Gate 2)</div>
+</div>
+<div class="card eval" id="E17b"><h3><span class="badge pass">PASS</span> &nbsp;E17b · test</h3><p class="crit">AC-13: Given ngăn skill ở mọi trạng thái trong bảng trạng thái của thiết kế, When người bán hàng không rành kỹ thuật đọc, Then tên, mô tả, nhãn, thông báo lỗi nói bằng lời sản phẩm, không lộ từ nội bộ (slot, plugin id, ABI, executable, taskId).</p>
+<div class="kv"><span>run_id <b>minted-skill-system-v1-E17b-r3</b></span><span>exit_code <b>0</b></span><span>verifier <b class="mono">config:executors.test.ssv1_copy_no_internal_terms</b></span><span>verified_at <b>2026-09-16T21:05:00Z</b></span><span>baseline <b>n-a</b></span></div>
+<pre class="out">Tests  4 passed (4)
+Start at  20:59:02
+Duration  202ms (transform 73ms, setup 0ms, import 91ms, tests 18ms, environment 0ms)</pre>
+</div>
+<h2>Eval không phân biệt (Analyst)</h2><div class="flag fred">carried tu round 2 — baseline không đo lại round này
+none — chưa đo lại baseline round này (P2, evals.yaml không đổi từ lần baseline cuối; xem round 2 trong Iterations)</div>
+<h2>Vòng verify</h2><ul class="tl"><li>Round 1: BLOCKED — E14 (a11y proto, AC-10) thất bại thật (exit 3, dev server never served the proto route on port 3198); E15 (design-gate, giới hạn đã khai từ S1) và SUITE SDK pytest không chạy được do thiếu tham số đích / thiếu binary `uv`. E17 (AC-13) ở UNCERTAIN vì 3/9 file evidence được khai trong Input không tồn tại trên đĩa. Cần điều tra hạ tầng cổng 3198 và cài `uv` trước khi chạy lại vòng sau; E14 cần điều tra riêng như một regression thật.</li><li>Round 2: REJECT — E14 vẫn thất bại thật, cùng nguyên nhân round 1 chưa được sửa (exit 3, &quot;dev server never served the proto route on port 3198&quot;). SUITE SDK pytest nay chạy được (`uv` đã có trong PATH) nhưng đỏ thật: exit 2, lỗi collect trên Python 3.9 do cú pháp union `str | None` trong `tongflow/models/asset.py` (không phải lỗi assertion, không gắn eval nào). Review tìm thấy 3 finding trong hợp đồng (AC-1, cùng một cơ chế lỗi: `checkSkillIntegrity`/`param-target-exists` trong `src/lib/skills/integrity.ts` chấp nhận một config target trỏ vào một field đang được bind bằng `handle` trong template, ví dụ `video`, và control test mới trong `registry.test.ts` khoá luôn hành vi lỏng đó thay vì phá đúng luật) — quay lại S3 để sửa `integrity.ts` và viết lại control test trỏ vào field config thật (`threshold`).</li><li>Round 3: BLOCKED — E14 (a11y proto, AC-10) vẫn không chạy được, lần này vì hạ tầng: dev server không phục vụ được route proto trong 300s (tiền đề, chưa phải lỗi sản phẩm — dev server setup không sẵn sàng cho lần verify này). 28 eval máy/ui-check/judgment còn lại đều PASS. SDK pytest suite nay đã xanh (307 passed, hết lỗi Python 3.9 của round 2 nhờ ghim `--python &quot;&gt;=3.10&quot;`). `pnpm test` đỏ vì 1 test không gắn eval nào trong contract (provisioning-events.test.ts, lỗi build wheel SDK thiếu file output_view.py) — không chặn verdict theo AC nào, không thuộc failed_evals. Cần điều tra lại hạ tầng dev-server cổng 3198 trước vòng sau.</li></ul>
+<div class="foot">Trang trình bày · KHÔNG quyết — <span class="mono">evidence-report.md</span> + hook là nguồn-sự-thật. Sinh từ run đã verify; ảnh/output gắn run_id.</div>
+<script>
+document.querySelectorAll('.slide').forEach(function(s){var fr=s.querySelectorAll('.frame');if(fr.length<2)return;var i=0;fr[0].classList.add('on');var adv=function(){fr[i].classList.remove('on');i=(i+1)%fr.length;fr[i].classList.add('on');};s._t=setInterval(adv,1600);var bar=s.nextElementSibling,b=bar?bar.querySelector('[data-toggle]'):null;if(b)b.addEventListener('click',function(){if(s._t){clearInterval(s._t);s._t=null;b.textContent='▶ Chạy';}else{s._t=setInterval(adv,1600);b.textContent='⏸ Tạm dừng';}});});
+</script>
+</div></body></html>
