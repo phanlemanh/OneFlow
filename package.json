@@ -41,7 +41,8 @@
         "plan:teeth": "bash scripts/roadmap/check-plan-freeze-teeth.sh",
         "ui:capture": "node scripts/ui-capture.mjs",
         "hooks:install": "git config core.hooksPath .githooks",
-        "sdk:publish": "bash scripts/publish-tongflow-pypi.sh"
+        "sdk:publish": "bash scripts/publish-tongflow-pypi.sh",
+        "skills:build": "tsx scripts/skills/build-template.ts"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "0.115.0",

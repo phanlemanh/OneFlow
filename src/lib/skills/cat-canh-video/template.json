@@ -1,0 +1,151 @@
+{
+    "originalFlow": {
+        "nodes": [
+            {
+                "id": "v1",
+                "type": "videoNode",
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "data": {}
+            },
+            {
+                "id": "s1",
+                "type": "splitVideoNode",
+                "position": {
+                    "x": 400,
+                    "y": 0
+                },
+                "data": {
+                    "threshold": 20,
+                    "pluginId": ""
+                }
+            }
+        ],
+        "edges": [
+            {
+                "id": "e-v1-s1",
+                "source": "v1",
+                "sourceHandle": "out:videoNode",
+                "target": "s1",
+                "targetHandle": "in:video"
+            }
+        ]
+    },
+    "executable": {
+        "warnings": [],
+        "name": "cat-canh-video",
+        "version": "1.0",
+        "exportedAt": "2026-09-16T12:36:16.611Z",
+        "inputs": [
+            {
+                "name": "input_v1",
+                "type": "file[]",
+                "description": "Input data for videoNode",
+                "required": true,
+                "nodeId": "v1"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output_s1",
+                "type": "video",
+                "nodeId": "s1",
+                "field": "fileKeys"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "v1",
+                "type": "videoNode",
+                "dataType": "video",
+                "isInput": true,
+                "inputName": "input_v1",
+                "level": 0
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "s1",
+                "type": "splitVideoNode",
+                "feature": "split-video",
+                "pluginId": "",
+                "bindings": {
+                    "video": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "v1",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:video",
+                        "consumerShape": "scalar"
+                    },
+                    "threshold": {
+                        "kind": "config",
+                        "value": 20
+                    }
+                },
+                "batchField": "video",
+                "outputs": [
+                    {
+                        "sourceField": "video_parts",
+                        "nodeType": "videoNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key"
+                    }
+                ],
+                "dependencies": ["v1"],
+                "level": 1,
+                "rawConfig": {
+                    "threshold": 20,
+                    "pluginId": ""
+                }
+            }
+        ],
+        "executionLevels": [["s1"]],
+        "dataNodeEdges": [
+            {
+                "source": "v1",
+                "target": "s1"
+            }
+        ],
+        "originalFlow": {
+            "nodes": [
+                {
+                    "id": "v1",
+                    "type": "videoNode",
+                    "position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "data": {}
+                },
+                {
+                    "id": "s1",
+                    "type": "splitVideoNode",
+                    "position": {
+                        "x": 400,
+                        "y": 0
+                    },
+                    "data": {
+                        "threshold": 20,
+                        "pluginId": ""
+                    }
+                }
+            ],
+            "edges": [
+                {
+                    "id": "e-v1-s1",
+                    "source": "v1",
+                    "sourceHandle": "out:videoNode",
+                    "target": "s1",
+                    "targetHandle": "in:video"
+                }
+            ]
+        }
+    }
+}
