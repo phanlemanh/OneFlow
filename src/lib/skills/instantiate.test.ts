@@ -38,7 +38,9 @@ describe("instantiate (AC-3)", () => {
                         (n) => n.id === t.nodeId,
                     );
                     expect(
-                        (node?.data as Record<string, unknown>)[t.field],
+                        ((node?.data ?? {}) as Record<string, unknown>)[
+                            t.field
+                        ],
                         `${id}.${p.key} canvas`,
                     ).toEqual(v);
                 } else {
@@ -57,7 +59,8 @@ describe("instantiate (AC-3)", () => {
                         (n) => n.id === nodeId,
                     );
                     expect(
-                        (node?.data as Record<string, unknown>).fileKeys,
+                        ((node?.data ?? {}) as Record<string, unknown>)
+                            .fileKeys,
                         `${id}.${p.key} canvas`,
                     ).toEqual([(v as { fileKey: string }).fileKey]);
                 }
