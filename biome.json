@@ -34,6 +34,7 @@
             "!lib/md-section.cjs",
             "!lib/workspace-record.cjs",
             "!lib/eval-yaml.cjs",
+            "!lib/lop-nhin-thay.cjs",
             "!_acceptance"
         ]
     },
