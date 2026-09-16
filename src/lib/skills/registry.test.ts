@@ -41,6 +41,31 @@ const TARGET_BREAKS = {
     "config-field": { kind: "config", nodeId: "", field: "field_nope" },
 } as const;
 
+/** A template input field of the node that its binding says is fed by an edge. */
+function handleField(d: SkillDefinition): { nodeId: string; field: string } {
+    for (const n of d.template.executable.executableNodes) {
+        const field = Object.entries(n.bindings).find(
+            ([, b]) => b.kind === "handle",
+        )?.[0];
+        if (field) return { nodeId: n.id, field };
+    }
+    throw new Error(`${d.manifest.id}: no edge-fed field to probe`);
+}
+
+/** A real ABI input field of some node that no edge feeds, if the skill has one. */
+function configField(
+    d: SkillDefinition,
+): { nodeId: string; field: string } | null {
+    for (const n of d.template.executable.executableNodes) {
+        const slot = n.feature as keyof typeof ABI_NODES;
+        const field = Object.keys(
+            ABI_NODES[slot]?.inputs?.properties ?? {},
+        ).find((f) => n.bindings[f]?.kind !== "handle");
+        if (field) return { nodeId: n.id, field };
+    }
+    return null;
+}
+
 function withProbe(
     d: SkillDefinition,
     target: SkillParam["target"],
@@ -103,18 +128,34 @@ describe("skill registry integrity (AC-1)", () => {
             });
         }
 
-        it(`${s.manifest.id}: control — a config target on a real ABI field passes`, () => {
+        it(`${s.manifest.id}: a config target on an edge-fed field is refused by name`, () => {
             const d = clone(s);
-            const node = d.template.executable.executableNodes[0];
-            const slot = node.feature as keyof typeof ABI_NODES;
-            const [field] = Object.keys(
-                ABI_NODES[slot].inputs.properties ?? {},
-            );
-            withProbe(d, { kind: "config", nodeId: node.id, field });
-            expect(
-                checkSkillIntegrity(d.manifest.id, d),
-                `${s.manifest.id} control`,
-            ).toEqual([]);
+            const { nodeId, field } = handleField(d);
+            withProbe(d, { kind: "config", nodeId, field });
+            const details = checkSkillIntegrity(d.manifest.id, d)
+                .filter((x) => x.rule === "param-target-exists")
+                .map((x) => x.detail);
+            expect(details, `${s.manifest.id} edge-fed ${field}`).toEqual([
+                `__probe: ${nodeId}.${field} is fed by an edge, not a config field`,
+            ]);
         });
     }
+    it("control — a config target on a real, non-edge ABI field passes (at least one skill has one)", () => {
+        const controlled: string[] = [];
+        for (const s of SKILLS) {
+            const d = clone(s);
+            const real = configField(d);
+            if (!real) continue;
+            withProbe(d, { kind: "config", ...real });
+            expect(
+                checkSkillIntegrity(d.manifest.id, d),
+                `${s.manifest.id} control on ${real.nodeId}.${real.field}`,
+            ).toEqual([]);
+            controlled.push(`${s.manifest.id}:${real.field}`);
+        }
+        expect(
+            controlled,
+            "no skill offered a config field to control",
+        ).toContain("cat-canh-video:threshold");
+    });
 });

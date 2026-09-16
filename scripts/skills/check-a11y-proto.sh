@@ -81,12 +81,18 @@ done
 # real 200 before scanning; without this the sweep races the compiler and reads
 # an empty sheet as a clean one.
 if [ "$OWN_SERVER" -eq 1 ]; then
-    for i in $(seq 1 60); do
+    # Wait ceiling 300s (150 x 2s). The first 120s ceiling held when run alone
+    # (22/22 green) but not inside an S4 round, where build, the full test suite
+    # and three per-run dev servers compile at the same time (skill-system-v1
+    # S4 r1 and r2: exit 3). The ceiling is explicit so a server that never comes
+    # up still fails by name instead of hanging.
+    WAIT_TRIES=150
+    for i in $(seq 1 "$WAIT_TRIES"); do
         if curl -sf -o /dev/null "$BASE/proto/$SLUG?state=danhsach-mac-dinh&theme=light"; then
             break
         fi
-        if [ "$i" -eq 60 ]; then
-            echo "FAIL: dev server never served the proto route on port $PORT"
+        if [ "$i" -eq "$WAIT_TRIES" ]; then
+            echo "FAIL: dev server never served the proto route on port $PORT within $((WAIT_TRIES * 2))s"
             exit 3
         fi
         sleep 2

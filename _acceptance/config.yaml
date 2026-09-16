@@ -71,7 +71,10 @@ executors:
     # swallows the following `python` argument, and every feature using this
     # shared key fails with a uv error pointing nowhere near the cause
     # (S4 round 5 finding). `${pin:?...}` turns that into one legible line.
-    sdk_pytest: "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q"
+    # `--python ">=3.10"` (16/09, skill-system-v1 S4-r2): sdk/pyproject.toml declares
+    # requires-python >=3.10, but without it uv picks the first interpreter on PATH —
+    # /usr/bin/python3 3.9 on macOS — and collection dies on `str | None`.
+    sdk_pytest: "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --python \">=3.10\" --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q"
     # task-metering Gate 1 (2026-07-25): the test files land during implementation;
     # keys are declared now so eval refs stay portable (artifact-platform pattern).
     unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"

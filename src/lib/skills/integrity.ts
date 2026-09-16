@@ -35,6 +35,7 @@ export function checkSkillIntegrity(
     for (const p of manifest.params) {
         const target = p.target;
         let ok: boolean;
+        let detail = p.key;
         if (target.kind === "input") {
             ok = wf.inputs.some((i) => i.name === target.name);
         } else {
@@ -46,8 +47,15 @@ export function checkSkillIntegrity(
                 ? Object.keys(ABI_NODES[slot]?.inputs?.properties ?? {})
                 : [];
             ok = Boolean(node) && fields.includes(target.field);
+            // ...and a field the template does NOT feed through an edge:
+            // instantiate() writes a config binding, which would silently
+            // replace the edge that brings the upstream asset in.
+            if (ok && node?.bindings[target.field]?.kind === "handle") {
+                ok = false;
+                detail = `${p.key}: ${target.nodeId}.${target.field} is fed by an edge, not a config field`;
+            }
         }
-        if (!ok) out.push({ rule: "param-target-exists", detail: p.key });
+        if (!ok) out.push({ rule: "param-target-exists", detail });
     }
     for (const o of manifest.outputs) {
         const producer = wf.executableNodes.find((n) => n.id === o.from.nodeId);
