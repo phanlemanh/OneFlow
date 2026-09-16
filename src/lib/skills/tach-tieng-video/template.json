@@ -1,0 +1,224 @@
+{
+    "originalFlow": {
+        "nodes": [
+            {
+                "id": "v1",
+                "type": "videoNode",
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "data": {}
+            },
+            {
+                "id": "a1",
+                "type": "extractAudioNode",
+                "position": {
+                    "x": 400,
+                    "y": -120
+                },
+                "data": {
+                    "pluginId": ""
+                }
+            },
+            {
+                "id": "r1",
+                "type": "removeVideoAudioNode",
+                "position": {
+                    "x": 400,
+                    "y": 120
+                },
+                "data": {
+                    "pluginId": ""
+                }
+            }
+        ],
+        "edges": [
+            {
+                "id": "e-v1-a1",
+                "source": "v1",
+                "sourceHandle": "out:videoNode",
+                "target": "a1",
+                "targetHandle": "in:video"
+            },
+            {
+                "id": "e-v1-r1",
+                "source": "v1",
+                "sourceHandle": "out:videoNode",
+                "target": "r1",
+                "targetHandle": "in:video"
+            }
+        ]
+    },
+    "executable": {
+        "warnings": [],
+        "name": "tach-tieng-video",
+        "version": "1.0",
+        "exportedAt": "2026-09-16T12:48:00.802Z",
+        "inputs": [
+            {
+                "name": "input_v1",
+                "type": "file[]",
+                "description": "Input data for videoNode",
+                "required": true,
+                "nodeId": "v1"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output_a1",
+                "type": "audio",
+                "nodeId": "a1",
+                "field": "fileKeys"
+            },
+            {
+                "name": "output_r1",
+                "type": "video",
+                "nodeId": "r1",
+                "field": "fileKeys"
+            }
+        ],
+        "dataNodes": [
+            {
+                "id": "v1",
+                "type": "videoNode",
+                "dataType": "video",
+                "isInput": true,
+                "inputName": "input_v1",
+                "level": 0
+            }
+        ],
+        "executableNodes": [
+            {
+                "id": "a1",
+                "type": "extractAudioNode",
+                "feature": "extract-audio",
+                "pluginId": "",
+                "bindings": {
+                    "video": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "v1",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:video",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "video",
+                "outputs": [
+                    {
+                        "sourceField": "audio",
+                        "nodeType": "audioNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key"
+                    }
+                ],
+                "dependencies": ["v1"],
+                "level": 1,
+                "rawConfig": {
+                    "pluginId": ""
+                }
+            },
+            {
+                "id": "r1",
+                "type": "removeVideoAudioNode",
+                "feature": "remove-video-audio",
+                "pluginId": "",
+                "bindings": {
+                    "video": {
+                        "kind": "handle",
+                        "sources": [
+                            {
+                                "fromNodeId": "v1",
+                                "fromField": "fileKeys"
+                            }
+                        ],
+                        "targetHandle": "in:video",
+                        "consumerShape": "scalar"
+                    }
+                },
+                "batchField": "video",
+                "outputs": [
+                    {
+                        "sourceField": "video",
+                        "nodeType": "videoNode",
+                        "dataField": "fileKeys",
+                        "expandEach": false,
+                        "itemValuePath": "file_key"
+                    }
+                ],
+                "dependencies": ["v1"],
+                "level": 1,
+                "rawConfig": {
+                    "pluginId": ""
+                }
+            }
+        ],
+        "executionLevels": [["a1", "r1"]],
+        "dataNodeEdges": [
+            {
+                "source": "v1",
+                "target": "a1"
+            },
+            {
+                "source": "v1",
+                "target": "r1"
+            }
+        ],
+        "originalFlow": {
+            "nodes": [
+                {
+                    "id": "v1",
+                    "type": "videoNode",
+                    "position": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "data": {}
+                },
+                {
+                    "id": "a1",
+                    "type": "extractAudioNode",
+                    "position": {
+                        "x": 400,
+                        "y": -120
+                    },
+                    "data": {
+                        "pluginId": ""
+                    }
+                },
+                {
+                    "id": "r1",
+                    "type": "removeVideoAudioNode",
+                    "position": {
+                        "x": 400,
+                        "y": 120
+                    },
+                    "data": {
+                        "pluginId": ""
+                    }
+                }
+            ],
+            "edges": [
+                {
+                    "id": "e-v1-a1",
+                    "source": "v1",
+                    "sourceHandle": "out:videoNode",
+                    "target": "a1",
+                    "targetHandle": "in:video"
+                },
+                {
+                    "id": "e-v1-r1",
+                    "source": "v1",
+                    "sourceHandle": "out:videoNode",
+                    "target": "r1",
+                    "targetHandle": "in:video"
+                }
+            ]
+        }
+    }
+}
