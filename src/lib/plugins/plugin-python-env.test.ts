@@ -3,6 +3,7 @@
  * Next.js server bundle — mocked away exactly as engine-delegate.test.ts does.
  */
 import {
+    chmodSync,
     existsSync,
     mkdirSync,
     mkdtempSync,
@@ -230,4 +231,112 @@ describe("legacy shared venv migration", () => {
             ).toBe(true);
         }
     });
+});
+
+describe("ensurePluginPython — concurrent SDK installs (parallel provisioning)", () => {
+    const saved = {
+        data: process.env.TONGFLOW_DATA_DIR,
+        resources: process.env.TONGFLOW_RESOURCES_DIR,
+        python: process.env.PYTHON,
+    };
+
+    afterEach(() => {
+        for (const [key, value] of [
+            ["TONGFLOW_DATA_DIR", saved.data],
+            ["TONGFLOW_RESOURCES_DIR", saved.resources],
+            ["PYTHON", saved.python],
+        ] as const) {
+            if (value === undefined) delete process.env[key];
+            else process.env[key] = value;
+        }
+    });
+
+    // setuptools builds a wheel INSIDE the source tree it is handed
+    // (`<src>/build/bdist.*/wheel/...`), so two installs from one tree race on
+    // that directory: `[Errno 17] File exists` and `Failed building wheel`.
+    // Real pip only loses that race when the timing lines up, which is why the
+    // E4 script reddens most runs but not provably every run. This fake pip
+    // makes the collision certain: it claims `<src>/build` with a plain mkdir,
+    // which fails when another install already holds it, and holds it long
+    // enough for the concurrent install to arrive.
+    it.skipIf(process.platform === "win32")(
+        "provisions two plugins at once without sharing a build tree (parallel provisioning)",
+        async () => {
+            const box = mkdtempSync(join(tmpdir(), "venv-parallel-"));
+            const log = join(box, "pip-sources.log");
+            const fakePython = join(box, "fake-python");
+            writeFileSync(
+                fakePython,
+                [
+                    "#!/bin/sh",
+                    'if [ "$1" = "-m" ] && [ "$2" = "pip" ] && [ "$3" = "install" ]; then',
+                    '  for src in "$@"; do :; done',
+                    `  echo "start $src" >> '${log}'`,
+                    '  mkdir "$src/build" || exit 1',
+                    "  sleep 0.5",
+                    '  rmdir "$src/build"',
+                    `  echo "end $src" >> '${log}'`,
+                    "fi",
+                    "exit 0",
+                    "",
+                ].join("\n"),
+            );
+            chmodSync(fakePython, 0o755);
+            process.env.PYTHON = fakePython;
+
+            const resources = join(box, "resources");
+            const sdkDir = join(resources, "sdk");
+            mkdirSync(sdkDir, { recursive: true });
+            writeFileSync(join(sdkDir, "pyproject.toml"), "[project]\n");
+            process.env.TONGFLOW_RESOURCES_DIR = resources;
+            process.env.TONGFLOW_DATA_DIR = join(box, "data");
+
+            // Pre-create each venv's interpreter so provisioning goes straight
+            // to the SDK install — the step under test.
+            const ids = ["parallel-probe-a", "parallel-probe-b"];
+            for (const id of ids) {
+                mkdirSync(join(venvDirFor(id), "bin"), { recursive: true });
+                writeFileSync(
+                    join(venvDirFor(id), "bin", "python"),
+                    readFileSync(fakePython),
+                );
+                chmodSync(join(venvDirFor(id), "bin", "python"), 0o755);
+            }
+
+            // No requirements.txt: a failed SDK install would fall back to the
+            // base interpreter instead of throwing, so the assertion is on the
+            // interpreter returned, not merely on the absence of an error.
+            const pluginDirs = ids.map((id) => {
+                const dir = join(box, "plugins", id);
+                mkdirSync(dir, { recursive: true });
+                return dir;
+            });
+            const pythons = await Promise.all(
+                ids.map((id, i) => ensurePluginPython(id, pluginDirs[i])),
+            );
+
+            expect(pythons).toEqual(
+                ids.map((id) => join(venvDirFor(id), "bin", "python")),
+            );
+            const events = readFileSync(log, "utf8").trim().split("\n");
+            const sources = events
+                .filter((e) => e.startsWith("start "))
+                .map((e) => e.slice("start ".length));
+            expect(sources).toHaveLength(2);
+            // Positive control: both installs were in flight at once, so the
+            // green above is not a pass by sequencing.
+            expect(
+                events.slice(0, 2).every((e) => e.startsWith("start ")),
+            ).toBe(true);
+            for (const src of sources) {
+                expect(
+                    src,
+                    "installed straight from the shared SDK tree",
+                ).not.toBe(sdkDir);
+                // The private copy does not outlive its install.
+                expect(existsSync(src), `${src} was left behind`).toBe(false);
+            }
+            expect(existsSync(join(sdkDir, "build"))).toBe(false);
+        },
+    );
 });

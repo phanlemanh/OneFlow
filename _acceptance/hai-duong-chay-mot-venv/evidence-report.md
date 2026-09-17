@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 60013a4a6be5b5b60ec0d92d0545663c0f325d11
+verified_commit: af00e473603c84bb2bd6ffc8c18cc37f87cb1774
 human_signoff: Phan Le Manh 2026-09-09
 ---
 
@@ -278,3 +278,7 @@ Round 8 (lượt phát biểu lại "lối A" — owner chọn sau round 7, khai
 ### Re-pin lần 1 — 2026-09-09, do bump hằng số ăn khớp check-eval-filters-teeth.sh 38→39 (Ngoài-1 vòng 8, «nâng phạm vi sửa ngay») sau mốc fa92162, cùng lượt chữ ký Cổng 2; file không thuộc paths của ô đo nào, mã sản phẩm không đổi
 run_id: repin-20260909T004806Z-63825
 sha: 60013a4a6be5b5b60ec0d92d0545663c0f325d11 · suites: 9 lệnh exit 0 · evals: 16 eval máy exit 0
+
+### Re-pin lần 2 — 2026-09-17, do sửa lỗi cài SDK song song chạm src/lib/plugins; ghim trước để E20 của local-cpu-plugins xanh
+run_id: repin-20260917T004543Z-33068
+sha: af00e473603c84bb2bd6ffc8c18cc37f87cb1774 · suites: 9 lệnh exit 0 · evals: 16/16 eval máy đạt kỳ vọng
