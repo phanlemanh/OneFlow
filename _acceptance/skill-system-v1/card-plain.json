@@ -1,0 +1,106 @@
+{
+  "feature_plain": "Người dùng bấm nút Skill, chọn một việc làm sẵn, đưa video vào và nhận kết quả mà không phải tự dựng đồ thị; khi muốn thì mở đúng đồ thị đã chạy lên canvas để sửa.",
+  "scope_plain": "Vòng này chưa ẩn canvas làm màn chính, chưa cho trợ lý chọn skill từ câu nói, chưa làm skill footage thành kho clip, chưa có sinh nhiều biến thể hay ước tính chi phí.",
+  "decisions": [
+    {
+      "id": "E17",
+      "q": "Chữ trong ngăn Skill có nói bằng lời người bán hàng hiểu, không lộ từ kỹ thuật?",
+      "why": "Ba người chấm máy đều đề xuất Đạt sau khi xem ảnh màn thật: danh sách, thiếu plugin, kết quả, lỗi, bận."
+    }
+  ],
+  "analyst_plain": "",
+  "decisions_plain": [
+    {
+      "id": "d-20260916T115020Z-1",
+      "p": "Đã chọn ghi mỗi lượt chạy skill như một tác vụ thường, không tạo thêm một quy trình đã lưu cho mỗi lần bấm — đổi lại danh sách «Quy trình của tôi» không bị đầy bản sao, và canvas nhận đồ thị chưa lưu."
+    },
+    {
+      "id": "d-20260916T115020Z-2",
+      "p": "Đã chọn ghi đầu vào vào cả đồ thị trên canvas lẫn bản máy chạy rồi đo hai bản khớp nhau — đổi lại tránh hai lượt chạy cùng lúc giẫm lên nhau."
+    },
+    {
+      "id": "d-20260916T115020Z-3",
+      "p": "KHÔNG ẩn canvas làm màn chính ở vòng này — đổi lại vòng nhỏ hơn, nhưng phiên nghiệm thu sau có thể chê còn thấy canvas."
+    },
+    {
+      "id": "d-20260916T115020Z-4",
+      "p": "KHÔNG làm phép thử bộ nhớ đệm của trợ lý ở vòng này, dời sang lúc trợ lý chọn skill (B8) — vì vòng này không đổi gì của trợ lý."
+    },
+    {
+      "id": "d-20260916T115020Z-5",
+      "p": "KHÔNG có ước tính chi phí trong khai báo skill ở bản đầu — thêm sau không phải đổi phiên bản lớn."
+    },
+    {
+      "id": "d-20260916T115020Z-6",
+      "p": "Đã chọn chạy thật từ đầu tới cuối trên skill «Tách tiếng» — đổi lại mỗi lần đo không phải cài thư viện nặng, nhưng «Cắt cảnh video» chưa từng chạy thật ở vòng này."
+    },
+    {
+      "id": "d-20260916T115020Z-7",
+      "p": "KHÔNG dùng bộ chấm thẩm mỹ tự động vì đã biết nó đọc sai giao diện của kho — sàn khả năng tiếp cận do phép quét trên Chrome thật gánh."
+    },
+    {
+      "id": "d-20260916T115020Z-8",
+      "p": "Đã chọn không hỏi anh câu nào trước cổng này — mọi giả định phạm vi dồn vào thẻ này."
+    },
+    {
+      "id": "d-20260916T115020Z-9",
+      "p": "Đã chọn dựng bản bấm được cho ngăn skill trước cổng — anh duyệt giao diện trên ảnh thật, không trên chữ."
+    },
+    {
+      "id": "d-20260916T115631Z-10",
+      "p": "Chạy thử 10 điều kiện môi trường trước cổng: 8 đứng được; sửa cách nhận diện máy chủ đúng bản đang làm; máy thiếu công cụ uv."
+    },
+    {
+      "id": "d-20260916T120538Z-11",
+      "p": "Sửa lại hệ quả thiếu uv: không cài thì mọi lượt kiểm tra sau khi code đều kẹt, nên lối thật là anh cài uv, hoặc cho phép bỏ phép thử SDK khỏi vòng này."
+    },
+    {
+      "id": "d-20260916T123420Z-13",
+      "p": "Đã chọn tệp đăng ký mỗi skill đúng một dòng — đổi lại có thêm một tệp tra cứu nhỏ."
+    },
+    {
+      "id": "d-20260916T123420Z-14",
+      "p": "Đính chính lý do một lựa chọn đã niêm: cách ghi tham số hai chỗ vẫn giữ, vì đo được đỏ thật; lý do cũ về tranh chấp là sai."
+    },
+    {
+      "id": "d-20260916T123420Z-15",
+      "p": "Đã chọn thứ tự commit: khung xong trước, skill thứ hai vào commit riêng, phép đo gọi tên nó vào sau — để bằng chứng nền tảng sạch."
+    },
+    {
+      "id": "d-20260916T125329Z-16",
+      "p": "Sửa theo lần chạy thật: màn kết quả đọc đúng khuôn dữ liệu máy chạy thật ghi ra — trước đó chạy xong mà màn kết quả trống."
+    },
+    {
+      "id": "d-20260916T132417Z-17",
+      "p": "Thước lần 1: gỡ ô chấm thẩm mỹ tự động đã khai không chạy từ đầu, vì bước kiểm tra vẫn chạy nó và chặn mọi lượt."
+    },
+    {
+      "id": "d-20260916T132507Z-18",
+      "p": "Ghi mốc: anh đã cho cài công cụ uv lúc khoảng 13:05, gỡ tường của bộ test SDK."
+    },
+    {
+      "id": "d-20260916T132726Z-19",
+      "p": "Thước lần 2: kiểm đủ ba kiểu ô tham số trỏ sai — kèm sửa sản phẩm kiểm cả tên trường."
+    },
+    {
+      "id": "d-20260916T135748Z-20",
+      "p": "Sửa sản phẩm: từ chối tham số gắn vào ô đang nhận dữ liệu từ bước trước — trước đó skill như vậy qua kiểm nhưng chạy sẽ hỏng đường nối video."
+    },
+    {
+      "id": "d-20260916T135748Z-21",
+      "p": "Thước lần 3 (anh cho phép): phép kiểm đọc loại ô từ bản mẫu, có ca đỏ cho ô nhận dữ liệu và ca đối chứng trên ô tham số thật."
+    },
+    {
+      "id": "d-20260916T135823Z-22",
+      "p": "Hạ tầng đo: bộ test SDK chạy trên Python 3.10 trở lên đúng như SDK khai — không đổi điều nó khẳng định."
+    },
+    {
+      "id": "d-20260916T135823Z-23",
+      "p": "Hạ tầng đo: bộ quét khả năng tiếp cận chờ máy chủ tối đa 300 giây thay 120 — không nới điều nó khẳng định."
+    },
+    {
+      "id": "d-20260916T182330Z-24",
+      "p": "Ghi nhận phép thử kéo thả khung chỉ đỏ khi máy đang chấm giao diện cùng lúc; chạy riêng thì xanh — đổi lại, vòng sau chạm giao diện sẽ gặp lại cho tới khi bộ chấm xếp nó chạy sau."
+    }
+  ]
+}

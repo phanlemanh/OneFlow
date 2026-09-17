@@ -5,13 +5,14 @@
  * Contains: workflow list, task list, portfolio
  */
 
-import { FolderOpen, Loader2, Workflow, Zap } from "lucide-react";
+import { FolderOpen, LayoutGrid, Loader2, Workflow, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
     SheetContent,
+    SheetDescription,
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
@@ -21,6 +22,10 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { PortfolioDialog } from "@/components/workspace/portfolio-dialog";
+import {
+    type SkillLastRun,
+    SkillPanel,
+} from "@/components/workspace/skills/skill-sheet";
 import { WorkflowDialog } from "@/components/workspace/workflow-dialog";
 import { listTasks, type Task } from "@/lib/api/task";
 import { logger } from "@/lib/logger";
@@ -28,6 +33,11 @@ import { formatStoredTaskErrorForDisplay } from "@/lib/task/error-format";
 
 export function WorkspaceLeftNav() {
     const t = useTranslations("Navigation");
+    const tSkills = useTranslations("Skills");
+
+    // Skill panel: kept here so reopening the panel returns to the last run.
+    const [isSkillSheetOpen, setIsSkillSheetOpen] = useState(false);
+    const [lastSkillRun, setLastSkillRun] = useState<SkillLastRun | null>(null);
 
     // Task list state
     const [isTaskSheetOpen, setIsTaskSheetOpen] = useState(false);
@@ -137,7 +147,47 @@ export function WorkspaceLeftNav() {
                         </Button>
                     }
                 />
+
+                {/* Skill button */}
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsSkillSheetOpen(true)}
+                            aria-label={tSkills("navTooltip")}
+                            className="h-10 w-10 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-700 transition-all duration-200"
+                        >
+                            <LayoutGrid className="h-5 w-5 text-gray-600 dark:text-gray-200" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                        {tSkills("navTooltip")}
+                    </TooltipContent>
+                </Tooltip>
             </div>
+
+            {/* Skill panel */}
+            <Sheet open={isSkillSheetOpen} onOpenChange={setIsSkillSheetOpen}>
+                <SheetContent
+                    side="left"
+                    className="w-full overflow-y-auto sm:max-w-md"
+                >
+                    <SheetHeader>
+                        <SheetTitle>{tSkills("title")}</SheetTitle>
+                        <SheetDescription>
+                            {tSkills("subtitle")}
+                        </SheetDescription>
+                    </SheetHeader>
+                    <div className="px-4 pb-6">
+                        <SkillPanel
+                            onClose={() => setIsSkillSheetOpen(false)}
+                            lastRun={lastSkillRun}
+                            onRunStarted={setLastSkillRun}
+                        />
+                    </div>
+                </SheetContent>
+            </Sheet>
 
             {/* Task list sidebar */}
             <Sheet open={isTaskSheetOpen} onOpenChange={setIsTaskSheetOpen}>

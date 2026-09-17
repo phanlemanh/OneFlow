@@ -1,0 +1,10 @@
+[
+  {
+    "testid": "skill-card-cat-canh-video",
+    "text": "Cắt cảnh video\nChia một video dài thành từng đoạn theo chỗ chuyển cảnh. Dùng khi có video quay liền mạch và cần các clip ngắn để đăng.\nCần cài plugin cho bước: Tách cảnh\nMở quản lý plugin"
+  },
+  {
+    "testid": "skill-card-tach-tieng-video",
+    "text": "Tách tiếng khỏi video\nTách một video thành hai tệp: phần tiếng riêng và phần hình không tiếng. Dùng khi cần thay nhạc nền hoặc lồng tiếng lại."
+  }
+]

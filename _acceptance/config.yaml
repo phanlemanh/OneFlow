@@ -30,6 +30,23 @@ executors:
     # su that VE DAY NOI, khong ham thuan nao nhin thay duoc.
     dws_outcome_not_reported_while_staged: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'reports nothing while the plan is only staged'"
     dws_one_outcome_per_decision: "npx vitest run src/components/workspace/director-prompt.test.tsx -t 'exactly once'"
+    # ---- skill-system-v1 (B5, S1 16/09) ----
+    # Test files land in S3. Route/DB tests run on their own TONGFLOW_DATA_DIR
+    # temp dir — never on data/ of the person using this checkout.
+    ssv1_registry_integrity: "pnpm vitest run src/lib/skills/registry.test.ts"
+    ssv1_params_route: "pnpm vitest run src/app/api/skills/run-params.test.ts"
+    ssv1_instantiate: "pnpm vitest run src/lib/skills/instantiate.test.ts"
+    ssv1_run_refusals: "pnpm vitest run src/app/api/skills/run-refusals.test.ts"
+    ssv1_run_task_row: "pnpm vitest run src/app/api/skills/run-task-row.test.ts"
+    ssv1_runner_dispatch: "pnpm vitest run src/lib/task/runner-skill.test.ts"
+    ssv1_runs_collect: "pnpm vitest run src/app/api/skills/runs-collect.test.ts"
+    ssv1_runs_failed_step: "pnpm vitest run src/app/api/skills/runs-failed-step.test.ts"
+    ssv1_skills_list_route: "pnpm vitest run src/app/api/skills/list-route.test.ts"
+    ssv1_sheet_list_form: "pnpm vitest run src/components/workspace/skills/skill-sheet-list-form.test.tsx"
+    ssv1_sheet_run_states: "pnpm vitest run src/components/workspace/skills/skill-sheet-run-states.test.tsx"
+    ssv1_plan_to_canvas: "pnpm vitest run src/components/workspace/skills/view-plan.test.tsx"
+    ssv1_plan_route: "pnpm vitest run src/app/api/skills/runs-plan.test.ts"
+    ssv1_copy_no_internal_terms: "pnpm vitest run src/i18n/skills-copy.test.ts"
     lint: "pnpm lint:check"
     unit: "pnpm test"
     # Run through uv rather than the ambient python3. On macOS the ambient
@@ -54,7 +71,10 @@ executors:
     # swallows the following `python` argument, and every feature using this
     # shared key fails with a uv error pointing nowhere near the cause
     # (S4 round 5 finding). `${pin:?...}` turns that into one legible line.
-    sdk_pytest: "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q"
+    # `--python ">=3.10"` (16/09, skill-system-v1 S4-r2): sdk/pyproject.toml declares
+    # requires-python >=3.10, but without it uv picks the first interpreter on PATH —
+    # /usr/bin/python3 3.9 on macOS — and collection dies on `str | None`.
+    sdk_pytest: "cd sdk && . ../scripts/lib/sdk-version.sh && pin=$(reader_pin) && PYTHONPATH=. uv run --python \">=3.10\" --no-project --with pytest --with tomli --with pydantic --with typing_extensions --with \"${pin:?no vietnormalizer pin derived from sdk/pyproject.toml}\" python -m pytest -q"
     # task-metering Gate 1 (2026-07-25): the test files land during implementation;
     # keys are declared now so eval refs stay portable (artifact-platform pattern).
     unit_metering_schema: "pnpm vitest run src/db/metering-schema.test.ts"
@@ -729,6 +749,13 @@ executors:
     rkce_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth
     rkce_resign_wave: bash scripts/acceptance/check-resign-wave.sh repin-khong-chay-lai-eval origin/main
     rkce_write_teeth: bash scripts/ci/check-repin-eval-coverage.sh teeth --case healthy && bash scripts/ci/check-repin-eval-coverage.sh teeth --case write-thieu-verified-commit
+    # ---- skill-system-v1 (B5, S1 16/09) ----
+    # ssv1_luot sets/returns the per-run space (temp data + plugins dirs, sample
+    # video, this tree's dev server on a free port that proves it is THIS tree).
+    ssv1_luot: "bash scripts/skills/luot.sh"
+    ssv1_e2e_tach_tieng: "bash scripts/skills/e2e-tach-tieng.sh"
+    ssv1_a11y_proto: "bash scripts/skills/check-a11y-proto.sh"
+    ssv1_second_skill_paths: "bash scripts/skills/check-second-skill-paths.sh && bash scripts/skills/check-second-skill-paths.sh --teeth"
     rkce_newlines_have_prev: bash scripts/ci/check-repin-eval-coverage.sh newlines origin/main && bash scripts/ci/check-repin-eval-coverage.sh teeth --case newlines-thieu-prev
     rkce_paths_law: bash scripts/ci/check-repin-eval-coverage.sh paths-law
     rkce_readers_bytewise: bash scripts/ci/check-repin-eval-coverage.sh readers

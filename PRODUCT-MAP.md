@@ -5,15 +5,15 @@
 
 ```mermaid
 flowchart TD
-  A["Đang cân nhắc cơ hội<br/>1 việc"] --> GD{"Cổng Đáng"}
-  GD --> B["Sắp mở vòng<br/>chưa có"]
+  A["Đang cân nhắc cơ hội<br/>chưa có"] --> GD{"Cổng Đáng"}
+  GD --> B["Sắp mở vòng<br/>1 việc"]
   GD --> XL["Xếp lại sau<br/>3 việc"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
   GP --> DL["Đang làm<br/>chưa có"] --> GB{"Cổng Bằng chứng"}
-  GB --> DG["Đã giao<br/>37 việc"]
-  GB --> CN["Chờ phiên nghiệm thu<br/>3 việc"] --> GG{"Cổng Giá trị"}
-  GG --> NT["Đã nghiệm thu giá trị<br/>chưa có"]
+  GB --> DG["Đã giao<br/>39 việc"]
+  GB --> CN["Chờ phiên nghiệm thu<br/>chưa có"] --> GG{"Cổng Giá trị"}
+  GG --> NT["Đã nghiệm thu giá trị<br/>2 việc"]
 ```
 
 > **Bốn cổng người** — mỗi cổng là một câu hỏi chỉ người trả lời được:
@@ -21,24 +21,12 @@ flowchart TD
 > đã đủ và đúng chưa · **Cổng Bằng chứng** đã làm đúng thứ đã hứa chưa ·
 > **Cổng Giá trị** thứ đã giao có ăn thua không.
 
-## Đang cân nhắc cơ hội
+## Sắp mở vòng
 
 - Skill (`skill-1-footage-kho-clip`)
 
-## Đang làm
-
-_chưa có_
-
-## Đã giao — chờ phiên nghiệm thu
-
-- Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard (`lat-cat-chung-minh`)
-- Nối hai thước tài-liệu-sống ↔ manifest vào CI (`noi-thuoc-tai-lieu-vao-ci`)
-- Mở hoá B01 — hạ cánh nhánh đổi định danh kho (ba README, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, .github, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release) (`mo-hoa-b01`)
-
 ## Đã giao
 
-- Hai đường chạy, một venv — engine Python dùng venv per-plugin như bên TypeScript, thôi nuốt lỗi cấp phát (`hai-duong-chay-mot-venv`)
-- Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0) (`director-wire-shape`)
 - Node nạp-từ-kho — tìm trong media-library và nạp một asset về kho file thành file_key (`add-media-library`)
 - BYO-key onboarding — first run reaches a real result before asking for a key (`byo-key-onboarding`)
 - Cache L1 — node_fingerprint() and digest_form(), pure key computation (`cache-l1-fingerprint`)
@@ -57,11 +45,14 @@ _chưa có_
 - Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
 - Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
 - Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)
+- Hai đường chạy, một venv — engine Python dùng venv per-plugin như bên TypeScript, thôi nuốt lỗi cấp phát (`hai-duong-chay-mot-venv`)
 - Hàng rào thôi đọc nhầm "không đo được" thành "không có gì sai" (`hang-rao-doc-nham-loi-thanh-khong-co-gi`)
 - Kho khoá toàn vẹn — đọc không cắt bớt âm thầm, ghi không để lại file cụt (`kho-khoa-toan-ven`)
 - Không nói sai về kho khoá — server kiểm tiền đề của lệnh thay-kho, client phân loại lỗi đọc dương cả hai chiều (`khong-noi-sai-ve-kho-khoa`)
+- Lát cắt chứng minh — kế hoạch hợp nhất, luật đóng băng và guard (`lat-cat-chung-minh`) — đã giao — không đo, khai ở Cổng Đáng
 - Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
 - Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
+- Mở hoá B01 — hạ cánh nhánh đổi định danh kho (ba README, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, .github, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release) (`mo-hoa-b01`) — đã giao — không đo, khai ở Cổng Đáng
 - slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`)
 - Ô đo chạy 0 ca thử mà vẫn báo đạt — hàng rào ở chốt CI (`o-do-chay-0-ca-van-xanh`)
 - Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
@@ -72,8 +63,14 @@ _chưa có_
 - The plugin scanner reports the reason it already has, instead of blaming entry.py (`scan-scope-diagnostics`)
 - Plugin scanner reads imports by scope boundary, and says why a slot was skipped (`scan-with-block-imports`)
 - Publish the SDK as oneflow-sdk while keeping the tongflow import package (`sdk-distribution-rename`)
+- Skill system v1 — manifest tham số, template, orchestrator v1, ngăn skill và xem/sửa kế hoạch; skill thứ hai không đụng engine (`skill-system-v1`)
 - Scope evidence staleness by declared eval paths (`stale-scope-by-paths`)
 - Per-task metering columns and measured plugin duration (`task-metering`)
+
+## Đã nghiệm thu giá trị
+
+- Nền trạng thái Director — wire trả plan, director_events, body versioned (gói D0) (`director-wire-shape`) — giao rộng (release)
+- Nối hai thước tài-liệu-sống ↔ manifest vào CI (`noi-thuoc-tai-lieu-vao-ci`) — giao rộng (release)
 
 ## Xếp lại sau
 

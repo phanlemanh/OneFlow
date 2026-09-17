@@ -1,0 +1,12 @@
+200 GET http://localhost:3140/api/plugins/registry
+200 GET http://localhost:3140/api/feature/list
+404 GET http://localhost:3140/plugins/oneflow-local-pyscenedetect.svg
+[console.error] Failed to load resource: the server responded with a status of 404 (Not Found)
+404 GET http://localhost:3140/plugins/oneflow-local-ffmpeg.svg
+[console.error] Failed to load resource: the server responded with a status of 404 (Not Found)
+200 GET http://localhost:3140/api/uploads/example-assets/two-scenes.mp4
+206 GET http://localhost:3140/api/uploads/example-assets/two-scenes.mp4
+200 GET http://localhost:3140/api/task/pending
+200 GET http://localhost:3140/api/skills
+200 GET http://localhost:3140/api/skills
+200 POST http://localhost:3140/api/upload

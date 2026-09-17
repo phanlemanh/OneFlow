@@ -1,0 +1,28 @@
+{
+    "_recorded": "Real engine result persisted to tasks.result by the engine delegate: e2e-tach-tieng.sh run PUTHa1Spacj-VKjheDkTd, 2026-09-16, plugins oneflow-api-ffmpeg. Keyed by node id; each value is the list of raw plugin outputs.",
+    "taskId": "PUTHa1Spacj-VKjheDkTd",
+    "result": {
+        "a1": [
+            {
+                "success": true,
+                "audio": {
+                    "file_key": "tasks/PUTHa1Spacj-VKjheDkTd/2573f94ad7764a8984c52818e6294ca3.mp3",
+                    "mime": "audio/mpeg",
+                    "filename": "tmplqkdlfo6.mp3"
+                },
+                "error": null
+            }
+        ],
+        "r1": [
+            {
+                "success": true,
+                "error": null,
+                "video": {
+                    "file_key": "tasks/PUTHa1Spacj-VKjheDkTd/fe0537a6607d44e6b66a6ddb283c45ae.mp4",
+                    "mime": "video/mp4",
+                    "filename": "d34f14a075164af585771ffc41d0a7cc.mp4"
+                }
+            }
+        ]
+    }
+}

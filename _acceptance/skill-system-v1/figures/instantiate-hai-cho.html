@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instantiate ghi hai chỗ</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --paper: #f7f7f8; --ink: #1a0033; --muted: #4f4a63; }
+  body { font-family: 'Geist', system-ui, sans-serif; background: var(--paper); color: var(--ink);
+    display: flex; justify-content: center; padding: 2.5rem 2rem; }
+  .frame { max-width: 1200px; width: 100%; }
+  .eyebrow { font-family: 'Geist Mono', monospace; font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+  h1 { font-family: 'Instrument Serif', 'Lora', serif; font-size: 2rem; font-weight: 400; letter-spacing: -0.02em;
+    line-height: 1.15; margin-bottom: 1.5rem; }
+  svg { width: 100%; min-width: 900px; display: block; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Luồng ngang · d-2 · AC-1 · AC-3</p>
+  <h1>Ghi tham số vào hai chỗ, rồi đo tương đương bằng exporter thật</h1>
+
+  <svg viewBox="0 0 1160 680" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f4a63"/></marker>
+      <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#e100e1"/></marker>
+      <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#1f7a3a"/></marker>
+      <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#c8102e"/></marker>
+      <marker id="arrow-soft" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#66607a" fill-opacity="0.6"/></marker>
+    </defs>
+    <rect width="100%" height="100%" fill="#f7f7f8"/>
+
+    <!-- ============ CONNECTORS ============ -->
+    <!-- template -> instantiate -->
+    <path d="M 280 132 L 312 132 Q 320 132 320 140 L 320 152 Q 320 160 328 160 L 356 160" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- params -> instantiate -->
+    <path d="M 280 256 L 324 256 Q 332 256 332 248 L 332 216 Q 332 208 340 208 L 356 208" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- instantiate -> executable -->
+    <path d="M 560 160 L 588 160 Q 596 160 596 152 L 596 120 Q 596 112 604 112 L 636 112" fill="none" stroke="#e100e1" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <!-- instantiate -> originalFlow -->
+    <path d="M 560 208 L 588 208 Q 596 208 596 216 L 596 272 Q 596 280 604 280 L 636 280" fill="none" stroke="#e100e1" stroke-width="1.2" marker-end="url(#arrow-accent)"/>
+    <text x="760" y="192" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">CÙNG MỘT GIÁ TRỊ</text>
+    <text x="760" y="208" fill="#a300a3" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">GHI VÀO CẢ HAI</text>
+
+    <!-- executable -> measure -->
+    <path d="M 880 112 L 884 112 Q 892 112 892 120 L 892 176 Q 892 184 900 184 L 900 184" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+    <!-- originalFlow -> measure -->
+    <path d="M 880 280 L 884 280 Q 892 280 892 272 L 892 232 Q 892 224 900 224 L 900 224" fill="none" stroke="#4f4a63" stroke-width="1" marker-end="url(#arrow)"/>
+
+    <!-- measure -> pass / fail -->
+    <line x1="940" y1="264" x2="940" y2="340" stroke="#1f7a3a" stroke-width="1.2" marker-end="url(#arrow-green)"/>
+    <rect x="892" y="292" width="40" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="928" y="304" fill="#1f7a3a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">==</text>
+    <line x1="1072" y1="264" x2="1072" y2="340" stroke="#c8102e" stroke-width="1.2" marker-end="url(#arrow-red)"/>
+    <rect x="1080" y="292" width="40" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="1084" y="304" fill="#c8102e" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">LỆCH</text>
+
+    <!-- key idea leader -->
+    <path d="M 760 328 L 760 364" fill="none" stroke="rgba(26,0,51,0.32)" stroke-width="1" stroke-dasharray="4,3"/>
+
+    <!-- rejected path -->
+    <line x1="460" y1="240" x2="460" y2="484" stroke="#66607a" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="3,4" marker-end="url(#arrow-soft)"/>
+    <rect x="248" y="404" width="200" height="16" rx="2" fill="#f7f7f8"/>
+    <text x="448" y="416" fill="#66607a" font-size="8" font-family="'Geist Mono', monospace" text-anchor="end" letter-spacing="0.06em">THAY VÌ GHI HAI CHỖ</text>
+
+    <!-- ============ NODES ============ -->
+    <!-- template.json -->
+    <rect x="40" y="80" width="240" height="104" rx="6" fill="#f7f7f8"/>
+    <rect x="40" y="80" width="240" height="104" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="160" y="112" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">template.json</text>
+    <text x="160" y="136" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">originalFlow + executable</text>
+    <text x="160" y="160" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">cả hai sinh bằng exporter thật</text>
+
+    <!-- params -->
+    <rect x="40" y="224" width="240" height="64" rx="6" fill="#f7f7f8"/>
+    <rect x="40" y="224" width="240" height="64" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="160" y="252" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">tham số người nhập</text>
+    <text x="160" y="272" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">params</text>
+
+    <!-- instantiate (focal) -->
+    <rect x="360" y="128" width="200" height="112" rx="6" fill="#f7f7f8"/>
+    <rect x="360" y="128" width="200" height="112" rx="6" fill="#e100e1" fill-opacity="0.06" stroke="#e100e1" stroke-width="1.4"/>
+    <text x="460" y="172" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">instantiate</text>
+    <text x="460" y="192" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">hàm thuần</text>
+    <text x="460" y="212" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">template gốc không đổi</text>
+
+    <!-- executable -->
+    <rect x="640" y="64" width="240" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="640" y="64" width="240" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="760" y="92" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">executable</text>
+    <text x="760" y="112" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">cái engine chạy</text>
+    <text x="760" y="132" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">dataNodes[].staticData</text>
+    <text x="760" y="146" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">bindings[f] = {kind:"config"}</text>
+
+    <!-- originalFlow -->
+    <rect x="640" y="232" width="240" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="640" y="232" width="240" height="96" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <text x="760" y="260" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist Mono', monospace" text-anchor="middle">originalFlow</text>
+    <text x="760" y="280" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">cái canvas đọc</text>
+    <text x="760" y="304" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">node.data</text>
+
+    <!-- measure -->
+    <rect x="904" y="152" width="208" height="112" rx="6" fill="#f7f7f8"/>
+    <rect x="904" y="152" width="208" height="112" rx="6" fill="#ffffff" stroke="#1a0033" stroke-width="1"/>
+    <rect x="916" y="160" width="48" height="14" rx="2" fill="none" stroke="#1a0033" stroke-opacity="0.4" stroke-width="0.8"/>
+    <text x="940" y="170" fill="#1a0033" fill-opacity="0.8" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">PHÉP ĐO</text>
+    <text x="1008" y="196" fill="#1a0033" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">tương đương?</text>
+    <text x="1008" y="220" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">exportWorkflow(</text>
+    <text x="1008" y="234" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">instance.originalFlow)</text>
+    <text x="1008" y="248" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">== instance.executable</text>
+
+    <!-- pass -->
+    <rect x="872" y="344" width="136" height="64" rx="6" fill="#f7f7f8"/>
+    <rect x="872" y="344" width="136" height="64" rx="6" fill="#1f7a3a" fill-opacity="0.07" stroke="#1f7a3a" stroke-width="1.2"/>
+    <text x="940" y="372" fill="#1f7a3a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">xanh</text>
+    <text x="940" y="392" fill="#4f4a63" font-size="11" font-family="'Geist', sans-serif" text-anchor="middle">khớp</text>
+
+    <!-- fail -->
+    <rect x="1016" y="344" width="112" height="64" rx="6" fill="#f7f7f8"/>
+    <rect x="1016" y="344" width="112" height="64" rx="6" fill="#c8102e" fill-opacity="0.06" stroke="#c8102e" stroke-width="1.2"/>
+    <text x="1072" y="370" fill="#c8102e" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">đỏ</text>
+    <text x="1072" y="390" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">ghim nodeId</text>
+    <text x="1072" y="402" fill="#4f4a63" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">+ field</text>
+
+    <!-- key idea -->
+    <text x="760" y="388" fill="#1a0033" font-size="16" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">«xem/sửa kế hoạch» mở đúng</text>
+    <text x="760" y="408" fill="#1a0033" font-size="16" font-style="italic" font-family="'Instrument Serif', 'Lora', serif" text-anchor="middle">đồ thị engine đã chạy</text>
+
+    <!-- rejected chain (muted, struck) -->
+    <rect x="120" y="488" width="920" height="96" rx="6" fill="#f7f7f8"/>
+    <rect x="120" y="488" width="920" height="96" rx="6" fill="none" stroke="#66607a" stroke-opacity="0.45" stroke-width="1" stroke-dasharray="4,3"/>
+    <rect x="132" y="496" width="52" height="14" rx="2" fill="none" stroke="#66607a" stroke-opacity="0.5" stroke-width="0.8"/>
+    <text x="158" y="506" fill="#66607a" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">ĐÃ LOẠI</text>
+    <g opacity="0.6">
+      <text x="272" y="540" fill="#66607a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">gọi exporter phía server</text>
+      <line x1="196" y1="536" x2="348" y2="536" stroke="#66607a" stroke-width="1"/>
+      <line x1="388" y1="540" x2="424" y2="540" stroke="#66607a" stroke-width="1" marker-end="url(#arrow-soft)"/>
+      <text x="580" y="536" fill="#66607a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">registry node toàn cục</text>
+      <line x1="508" y1="532" x2="652" y2="532" stroke="#66607a" stroke-width="1"/>
+      <text x="580" y="556" fill="#66607a" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Map theo nodeId</text>
+      <line x1="736" y1="540" x2="772" y2="540" stroke="#66607a" stroke-width="1" marker-end="url(#arrow-soft)"/>
+      <text x="904" y="540" fill="#66607a" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">hai lượt đồng thời ghi đè nhau</text>
+      <line x1="812" y1="536" x2="996" y2="536" stroke="#66607a" stroke-width="1"/>
+    </g>
+
+    <!-- ============ LEGEND ============ -->
+    <line x1="40" y1="624" x2="1120" y2="624" stroke="rgba(26,0,51,0.12)" stroke-width="0.8"/>
+    <text x="40" y="652" fill="#4f4a63" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">CHÚ GIẢI</text>
+    <rect x="128" y="640" width="36" height="16" rx="4" fill="#e100e1" fill-opacity="0.06" stroke="#e100e1" stroke-width="1.4"/>
+    <text x="172" y="652" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">hàm ghi hai chỗ</text>
+    <rect x="304" y="640" width="36" height="16" rx="4" fill="#1f7a3a" fill-opacity="0.07" stroke="#1f7a3a" stroke-width="1.2"/>
+    <text x="348" y="652" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">đo khớp</text>
+    <rect x="448" y="640" width="36" height="16" rx="4" fill="#c8102e" fill-opacity="0.06" stroke="#c8102e" stroke-width="1.2"/>
+    <text x="492" y="652" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">đo lệch, chỉ đúng chỗ</text>
+    <rect x="664" y="640" width="36" height="16" rx="4" fill="none" stroke="#66607a" stroke-opacity="0.45" stroke-dasharray="4,3"/>
+    <text x="708" y="652" fill="#4f4a63" font-size="10" font-family="'Geist', sans-serif">phương án đã loại (mờ, gạch)</text>
+  </svg>
+</div>
+</body>
+</html>

@@ -93,6 +93,15 @@ export async function dispatchTask(taskId: string): Promise<void> {
         return;
     }
 
+    // Skill runs carry only business fields in their prompt; the skill module
+    // rebuilds the executable and hands it to the same engine delegate below.
+    if (task.feature === "skill") {
+        const { dispatchSkillTask } = await import(
+            "@/lib/skills/dispatch.server"
+        );
+        return dispatchSkillTask(task);
+    }
+
     if (task.feature === "workflow") {
         if (!task.workflowId) {
             notifyTask(

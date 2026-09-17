@@ -1264,5 +1264,101 @@
         "retry": "Thử lại",
         "operationFailed": "Thao tác thất bại, vui lòng thử lại",
         "fetchFailed": "Tải portfolio thất bại, vui lòng thử lại"
+    },
+    "Skills": {
+        "navTooltip": "Skill — việc làm sẵn",
+        "title": "Skill",
+        "subtitle": "Chọn một việc làm sẵn, đưa đầu vào, nhận kết quả — không cần tự lắp từng bước.",
+        "loadingList": "Đang tải danh sách…",
+        "missingPlugin": "Cần cài plugin cho bước: {steps}",
+        "openPlugins": "Mở quản lý plugin",
+        "back": "Quay lại",
+        "required": "Bắt buộc",
+        "run": "Chạy",
+        "chooseVideo": "Chọn video",
+        "chooseImage": "Chọn ảnh",
+        "chooseAudio": "Chọn tệp âm thanh",
+        "replaceFile": "Đổi tệp",
+        "uploading": "Đang tải lên {name}… {percent}%",
+        "cancelUpload": "Huỷ tải",
+        "busy": "Đang có {max} lượt chạy cùng lúc — chờ một lượt xong rồi bấm Chạy lại.",
+        "invalid": {
+            "required": "Cần điền ô này.",
+            "type": "Giá trị không đúng loại.",
+            "range": "Nhập số từ {min} đến {max}.",
+            "option": "Chọn một giá trị trong danh sách.",
+            "unknown": "Ô này không thuộc việc đang chạy."
+        },
+        "progressTitle": "Đang chạy: {name}",
+        "keepRunningHint": "Có thể đóng ngăn này — lượt vẫn chạy tiếp.",
+        "step": {
+            "pending": "Chờ",
+            "running": "Đang làm",
+            "done": "Xong",
+            "failed": "Hỏng"
+        },
+        "resultTitle": "Xong: {name}",
+        "download": "Tải về",
+        "viewPlan": "Xem/sửa kế hoạch",
+        "newRun": "Chạy lượt mới",
+        "failedTitle": "Chưa chạy xong: {name}",
+        "failedBody": "Không xử lý được đầu vào này ở bước «{step}». Thử lại, hoặc đổi sang tệp khác.",
+        "rerun": "Chạy lại",
+        "backToForm": "Sửa đầu vào",
+        "confirmReplaceTitle": "Thay đồ thị đang có trên canvas?",
+        "confirmReplaceBody": "Canvas đang có đồ thị chưa lưu. Kế hoạch của việc này sẽ thay chỗ nó.",
+        "replace": "Thay",
+        "cancel": "Huỷ",
+        "skills": {
+            "cat-canh-video": {
+                "name": "Cắt cảnh video",
+                "description": "Chia một video dài thành từng đoạn theo chỗ chuyển cảnh. Dùng khi có video quay liền mạch và cần các clip ngắn để đăng.",
+                "params": {
+                    "video": {
+                        "label": "Video",
+                        "hint": "MP4 hoặc MOV quay liền mạch"
+                    },
+                    "do-nhay": {
+                        "label": "Độ nhạy chuyển cảnh",
+                        "hint": "Số nhỏ tách nhiều đoạn hơn"
+                    }
+                },
+                "outputs": {
+                    "cac-canh": {
+                        "label": "Các đoạn đã cắt"
+                    }
+                },
+                "steps": {
+                    "split-video": "Tách cảnh"
+                }
+            },
+            "tach-tieng-video": {
+                "name": "Tách tiếng khỏi video",
+                "description": "Tách một video thành hai tệp: phần tiếng riêng và phần hình không tiếng. Dùng khi cần thay nhạc nền hoặc lồng tiếng lại.",
+                "params": {
+                    "video": {
+                        "label": "Video",
+                        "hint": "Video có tiếng"
+                    }
+                },
+                "outputs": {
+                    "tieng": {
+                        "label": "Phần tiếng"
+                    },
+                    "video-cam": {
+                        "label": "Video không tiếng"
+                    }
+                },
+                "steps": {
+                    "extract-audio": "Lấy phần tiếng",
+                    "remove-video-audio": "Bỏ tiếng khỏi hình"
+                }
+            }
+        },
+        "errors": {
+            "SKILL_VERSION_CHANGED": "Việc làm sẵn này vừa được cập nhật sau khi anh bấm Chạy. Bấm Chạy lại để dùng bản mới.",
+            "PLUGIN_NOT_INSTALLED": "Máy đang thiếu plugin cho một bước của việc này. Cài plugin rồi bấm Chạy lại.",
+            "RUN_FAILED": "Chưa chạy xong. Thử lại, hoặc đổi sang tệp khác."
+        }
     }
 }

@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a30ca8ae44564e55ad3f7d552abc6beb506cbb44
+verified_commit: fcdc6df7fe4121363fb8d4f48b902b7eac7d3326
 human_signoff: Manh 2026-08-04
 ---
 
@@ -238,3 +238,15 @@ minh được.
 ### Re-pin lần 3 — 2026-09-09, do PR #115 (hai-duong-chay-mot-venv) chạm sdk/tongflow/engine/runner.py và sdk/** — union paths của hồ sơ này; mã của gói này không đổi, ô đo chạy lại tại HEAD
 run_id: repin-20260909T005452Z-79111
 sha: a30ca8ae44564e55ad3f7d552abc6beb506cbb44 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0
+
+### Re-pin lần 4 — 2026-09-17, do hoá cũ do nhánh skill-system-v1 chạm runner.ts và src/app/api/skills
+run_id: repin-20260917T000600Z-94801
+sha: 7bc2d6534101992939dcce2a59efc4b8f3c8678a · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
+
+### Re-pin lần 5 — 2026-09-17, do hoá cũ do rebase PR 120 lên main sau khi merge PR 121
+run_id: repin-20260917T010205Z-49608
+sha: ea7f89826c2a03217838a9d737f43c5be036b5ff · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
+
+### Re-pin lần 6 — 2026-09-17, do hoá cũ do thêm .python-version ghim uv lên Python >=3.10
+run_id: repin-20260917T010826Z-59027
+sha: fcdc6df7fe4121363fb8d4f48b902b7eac7d3326 · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
