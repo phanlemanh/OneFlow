@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a30ca8ae44564e55ad3f7d552abc6beb506cbb44
+verified_commit: af00e473603c84bb2bd6ffc8c18cc37f87cb1774
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -417,3 +417,7 @@ sha: 9658856f1e16f5f1e9efb7e9c7a98323106f67ef · suites: 9 lệnh exit 0 · eval
 ### Re-pin lần 25 — 2026-09-09, do PR #115 (hai-duong-chay-mot-venv) chạm sdk/tongflow/engine/runner.py và sdk/** — union paths của hồ sơ này; mã của gói này không đổi, ô đo chạy lại tại HEAD
 run_id: repin-20260909T005452Z-79111
 sha: a30ca8ae44564e55ad3f7d552abc6beb506cbb44 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0
+
+### Re-pin lần 26 — 2026-09-17, do sửa lỗi cài SDK song song chạm src/lib/plugins; ghim trước để E20 của local-cpu-plugins xanh
+run_id: repin-20260917T004543Z-33068
+sha: af00e473603c84bb2bd6ffc8c18cc37f87cb1774 · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
