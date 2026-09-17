@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context machine lane (không hội đồng — xem §Vì sao LANE thay cho VÒNG)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 6a6bb87ca961e557321555f6ef66d28500be80bd
+verified_commit: ea7f89826c2a03217838a9d737f43c5be036b5ff
 human_signoff: Phan Le Manh 2026-08-29
 ---
 
@@ -279,3 +279,7 @@ sha: df22a16b63139b3d34ab753a1ebefa76615e6cb7 · suites: 12 lệnh exit 0
 ### Re-pin lần 2 — 2026-09-17, do làn suite-only đời cũ thiếu evals_exit — ghim lại bằng làn eval để mở merge PR 120
 run_id: repin-20260917T001713Z-38026
 sha: 6a6bb87ca961e557321555f6ef66d28500be80bd · suites: 9 lệnh exit 0 · evals: 12/12 eval máy đạt kỳ vọng
+
+### Re-pin lần 3 — 2026-09-17, do hoá cũ do rebase PR 120 lên main sau khi merge PR 121
+run_id: repin-20260917T010205Z-49608
+sha: ea7f89826c2a03217838a9d737f43c5be036b5ff · suites: 9 lệnh exit 0 · evals: 12/12 eval máy đạt kỳ vọng

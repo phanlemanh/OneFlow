@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: be9b2305713a942899e294c036e3f583881eaffe
+verified_commit: ea7f89826c2a03217838a9d737f43c5be036b5ff
 human_signoff: Mạnh 2026-09-17
 ---
 
@@ -340,3 +340,7 @@ Round 1: BLOCKED — E14 (a11y proto, AC-10) thất bại thật (exit 3, dev se
 Round 2: REJECT — E14 vẫn thất bại thật, cùng nguyên nhân round 1 chưa được sửa (exit 3, "dev server never served the proto route on port 3198"). SUITE SDK pytest nay chạy được (`uv` đã có trong PATH) nhưng đỏ thật: exit 2, lỗi collect trên Python 3.9 do cú pháp union `str | None` trong `tongflow/models/asset.py` (không phải lỗi assertion, không gắn eval nào). Review tìm thấy 3 finding trong hợp đồng (AC-1, cùng một cơ chế lỗi: `checkSkillIntegrity`/`param-target-exists` trong `src/lib/skills/integrity.ts` chấp nhận một config target trỏ vào một field đang được bind bằng `handle` trong template, ví dụ `video`, và control test mới trong `registry.test.ts` khoá luôn hành vi lỏng đó thay vì phá đúng luật) — quay lại S3 để sửa `integrity.ts` và viết lại control test trỏ vào field config thật (`threshold`).
 Round 3: BLOCKED — E14 (a11y proto, AC-10) vẫn không chạy được, lần này vì hạ tầng: dev server không phục vụ được route proto trong 300s (tiền đề, chưa phải lỗi sản phẩm — dev server setup không sẵn sàng cho lần verify này). 28 eval máy/ui-check/judgment còn lại đều PASS. SDK pytest suite nay đã xanh (307 passed, hết lỗi Python 3.9 của round 2 nhờ ghim `--python ">=3.10"`). `pnpm test` đỏ vì 1 test không gắn eval nào trong contract (provisioning-events.test.ts, lỗi build wheel SDK thiếu file output_view.py) — không chặn verdict theo AC nào, không thuộc failed_evals. Cần điều tra lại hạ tầng dev-server cổng 3198 trước vòng sau.
 Round 3 — chạy lại vì hạ tầng (không phải một lượt review, không tính vào trần ba vòng theo CLAUDE.md của kho): owner quyết 17/09 chạy lại riêng hai lệnh bị chặn/đỏ vì tải, tuần tự, bằng phiên tươi, trên mã trùng be9b230. `pnpm test` exit 0 (1041 passed), E14 exit 0 (22/22). Không đổi vật, không đổi thước. Verdict chuyển PENDING-JUDGMENT: mọi eval máy xanh; E17 là mục judgment của hồ sơ T3 nên cần chữ ký người (human_override) dù hội đồng đề xuất PASS.
+
+### Re-pin lần 1 — 2026-09-17, do hoá cũ do rebase PR 120 lên main sau khi merge PR 121
+run_id: repin-20260917T010205Z-49608
+sha: ea7f89826c2a03217838a9d737f43c5be036b5ff · suites: 9 lệnh exit 0 · evals: 17/17 eval máy đạt kỳ vọng
