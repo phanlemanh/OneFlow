@@ -567,3 +567,21 @@ Lý do viết luật này ra: nếu không, mỗi vòng verify vừa là phép �
 và vòng lặp không có đáy — đo được ở chính hồ sơ này: hợp đồng đã nhận 2 lần nâng phạm vi và
 6 amendment trong ba ngày, nên "finding trong hợp đồng" ở vòng sau một phần là hệ quả của
 chữ vừa viết ở vòng trước, chứ không phải sản phẩm tệ đi.
+
+## Nghỉ hẳn (2026-09-17, owner quyết)
+
+- **Hồ sơ nghỉ hẳn cùng plugin đã rút ở vòng 15b.** Kho nguồn
+  `github.com/phanlemanh/oneflow-api-normalize-text-vi` không tồn tại công khai từ 26/08, nên
+  ba ô E14b, E17a, E17b không bao giờ xanh lại được: E14b đòi đối chiếu pin trên cây plugin, E17a
+  và E17b đòi clone kho đó. Đo 17/09 trên nhánh `feat/skill-system-v1`:
+  `FAIL: could not clone https://github.com/phanlemanh/oneflow-api-normalize-text-vi.git`.
+- **Không ký lại, không khai ba ô là không-chạy.** Hợp thức hoá ba phép đo không bao giờ xanh
+  bằng một chữ ký mới là nói dối về thứ hồ sơ từng chứng minh.
+- **Giới hạn khai rõ — hồ sơ VẪN chặn lưới trước merge.** Kit acceptance-gate 2.14.0 không có
+  trạng thái «nghỉ»: lưới xét mọi hồ sơ có báo cáo PASS hoặc hợp đồng `signed-off`. Muốn hồ sơ thôi
+  chặn thì phải đổi `status` hoặc `verdict` sang điều không đúng sự thật, nên `status` giữ nguyên
+  `signed-off` (chữ ký 27/08 là sự thật lịch sử) và pin suite-only đời cũ giữ nguyên. Vi phạm
+  `evals_exit` của hồ sơ này là nợ đã ghi: mỗi lần merge, owner bỏ qua có ghi nhận, cho tới khi kit
+  có trạng thái nghỉ hoặc hồ sơ được gỡ khỏi `_acceptance/` bằng một quyết định riêng.
+- **Mã sản phẩm không đổi:** slot `normalize-text-vi` và phần SDK vẫn trong kho; chỉ plugin
+  chính thức vắng mặt, như vòng 15b đã ghi.
