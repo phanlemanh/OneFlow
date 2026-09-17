@@ -142,7 +142,7 @@ plan: lat-cat-chung-minh · opened: 2026-09-04 · unlock: star=100% AND total>=8
 | B2 | ★ | Hạ cánh nhánh mở hoá b01: ba README, NOTICE, SECURITY, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release | mo-hoa-b01 | ✅ | code có trước hợp đồng nên đi làn prototype keep; merge main vào nhánh trước; T2 vì chạm .github và docker-compose |
 | B3 | ★ | Hạ cánh D0 Director wire-shape: resume S4 VERIFY, Cổng 2, [ADR-0013](adr/0013-director-truong-ky.md) về main, mục Làn D | director-wire-shape | ✅ | T3 vì chạm src/db; soi Gate 1.5 đã qua chưa; director-v2 D1 D2 D4 đã park |
 | B4 | ★ | Engine dùng venv per-plugin như TS, bỏ fallback về sys.executable; SDK 0.2.20 và bump pin bốn plugin | hai-duong-chay-mot-venv | ✅ | T3 vì chạm sdk; ký 09/09 với phạm vi owner chốt 08/09: chỉ sửa va chạm trong kho — không bump SDK (kho khớp PyPI 0.2.23), pin bốn plugin ngoài kho; ba chỗ lệch của dòng này ghi ở contract §Nợ có tên |
-| B5 | ★ | Skill system v1: manifest tham số, template, orchestrator v1, nút skill, xem sửa kế hoạch; skill thứ hai giả lập không đụng engine | skill-system-v1 | ⬜ | T3 vì chạm src/app/api; dòng nền tảng |
+| B5 | ★ | Skill system v1: manifest tham số, template, orchestrator v1, nút skill, xem sửa kế hoạch; skill thứ hai giả lập không đụng engine | skill-system-v1 | ✅ | T3 vì chạm src/app/api; dòng nền tảng; ký 17/09, hạ cánh PR #120 — hai skill thật (cắt cảnh, tách tiếng), 17 hạn chế đã biết ở contract §Notes |
 | B6 | ★ | Overlay chạy local (port khỏi Modal, cùng slot) kèm canvas 9:16 pad crop | overlay-chay-local | ⬜ | T2; sau A7 |
 | B7 | ★ | Skill #1 Footage sang kho clip 9:16: nạp hoặc upload, split, transcribe-timestamp, drop, overlay phụ đề và giá, gom; conformance headless | skill-1-footage-kho-clip | ⬜ | T3 vì chạm src/lib/workflow |
 | B8 | ★ | Director sinh instance skill từ prompt | director-sinh-instance | ⬜ | T3; có thể hạ Should ở mốc 09/10 |
@@ -257,7 +257,7 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `pnpm-build-approvals` | T2 | 18/08 | *ngoài lộ trình* — hạ tầng chuỗi công cụ verify |
 | `scan-with-block-imports` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
 | `scan-scope-diagnostics` | T3 | 18/08 | *ngoài lộ trình* — chẩn đoán scanner plugin |
-| `normalize-text-vi` | T3 | 27/08 | **1.3** — đọc số/giá/ngày thành chữ, bắt buộc đứng trước TTS |
+| `normalize-text-vi` | T3 | 27/08 | **1.3** — đọc số/giá/ngày thành chữ, bắt buộc đứng trước TTS · **nghỉ hẳn 17/09** cùng plugin đã rút (kho nguồn không tồn tại công khai); vẫn chặn lưới trước merge vì kit chưa có trạng thái nghỉ |
 | `roadmap-drift-guard` | T2 | 27/08 | *ngoài lộ trình* — răng cho luật cập nhật của chính file này |
 | `gate-tooling-t1` | T2 | 27/08 | *ngoài lộ trình* — hạ tầng cổng nghiệm thu: đường hợp lệ để sửa guard, trả ba nợ 0.8 |
 | `chong-doc-sai-em-ru` | T3 | 29/08 | **1.3** — bộ đọc TỪ CHỐI thay vì phát nội dung sai; 11/12 tiêu chí, sáu giới hạn có tên |
@@ -277,11 +277,12 @@ cũ **17** (chốt 17/08, trước ba hồ sơ ký 18/08 và hồ sơ 19/08).
 | `mo-hoa-b01` | T2 | 07/09 | **B2** — người tự host theo README nay nhận đúng bản này chứ không phải bản thượng nguồn: ba README, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, .github và docker-compose đổi sang định danh của fork, trigger tag của luồng phát hành desktop tắt đi. Guard nhận diện fork suy mọi chuỗi mong đợi từ MỘT tệp khai (`scripts/fork/fork-identity.conf`) và đối chiếu với remote, kèm bộ răng 32 ca (28 lúc ký, thêm 4 ở vòng 5–6). Vòng 3 sửa một finding nặng: bộ răng nuốt lỗi đối chứng dương ở 24/28 ca vì bash bỏ errexit trong thân hàm chạy ở vị trí điều kiện — thêm `|| return 1` vào 30 chỗ, đối chứng hai chiều. 7 giới hạn khai rõ, 1 mục treo |
 | `director-wire-shape` | T3 | 08/09 | **B3** — Director bắt đầu nhớ: tuyến trả kế hoạch kèm mã lượt và số hiệu phiên bản, bảng sự kiện ghi từng lượt sinh và kết cục người dùng chọn, thân yêu cầu có phiên bản. Bốn vòng verify; vòng 4 nâng phạm vi tại Cổng 2 để sửa đường ghi kết cục ở giao diện — bước đánh dấu chờ-quyết tiêu mất lượt vá duy nhất, và nút xác nhận bắn hai kết cục cho một cú bấm. Mười giới hạn khai rõ, hai mục chuyển thành hợp đồng mới |
 | `hai-duong-chay-mot-venv` | T3 | 09/09 | **B4** — hai runtime thôi phá nhau trên một thư mục venv: engine Python dựng một venv mỗi plugin đúng bố cục bên TypeScript, dọn venv chung đời cũ trước và ném lỗi khi dọn hỏng, cài SDK từ checkout khi chạy trong checkout, và không còn nuốt lỗi cấp phát bằng cách âm thầm chạy interpreter môi trường; mỗi node chạy bằng interpreter của đúng plugin đó. Tám vòng verify: sản phẩm hội tụ ở vòng 3, năm vòng sau tìm bảy lỗ khác nhau trong một guard grep — lối ra là cắt guard về so hằng số và rút ba lời hứa «gọi sống» khỏi tiêu chí. Không publish, không bump version (quyết định owner). Một amendment (AC-7 một điểm-case), mười giới hạn khai rõ |
+| `skill-system-v1` | T3 | 17/09 | **B5** — người dùng bấm nút Skill, chọn một việc làm sẵn, đưa video vào và nhận kết quả mà không tự dựng đồ thị; mở đúng đồ thị đã chạy lên canvas để sửa. Skill là template dựng bằng exporter thật cộng manifest tham số, engine không đổi ([ADR-0002](adr/0002-skill-template-orchestrator.md)); hai skill: cắt cảnh video, tách tiếng khỏi video; 17 hạn chế đã biết, nặng nhất là mở lại ngăn khi lượt đang chạy làm lượt đó chạy lại |
 <!-- roadmap-ledger:end -->
 
-**Đọc được gì từ tỉ lệ này (đếm lại 09/09 trên 40 hồ sơ):** 18/40 là hạng mục trên lộ trình,
-5/40 là sửa lỗi sản phẩm ngoài lộ trình (bốn hồ sơ kho khoá và fork OpenAI), 17/40 là hạ tầng
+**Đọc được gì từ tỉ lệ này (đếm lại 17/09 trên 41 hồ sơ):** 19/41 là hạng mục trên lộ trình,
+5/41 là sửa lỗi sản phẩm ngoài lộ trình (bốn hồ sơ kho khoá và fork OpenAI), 17/41 là hạ tầng
 quy trình và CI. Con số thứ ba không phải lãng phí — nó là giá của luật "mỗi phase một gate bằng
 số" — nhưng nó *là* một khoản chi có thật, và lộ trình 24 tuần không tính nó vào bất kỳ ô nào.
-Trong 16 hồ sơ ký từ 27/08, 7 là hạ tầng quy trình: đó chính là xu hướng mà khối kế hoạch và
+Trong 17 hồ sơ ký từ 27/08, 7 là hạ tầng quy trình: đó chính là xu hướng mà khối kế hoạch và
 luật đóng băng ở trên chặn lại.
