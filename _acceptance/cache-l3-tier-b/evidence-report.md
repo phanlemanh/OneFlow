@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: a30ca8ae44564e55ad3f7d552abc6beb506cbb44
+verified_commit: 7bc2d6534101992939dcce2a59efc4b8f3c8678a
 human_signoff: Manh 2026-08-04
 ---
 
@@ -238,3 +238,7 @@ minh được.
 ### Re-pin lần 3 — 2026-09-09, do PR #115 (hai-duong-chay-mot-venv) chạm sdk/tongflow/engine/runner.py và sdk/** — union paths của hồ sơ này; mã của gói này không đổi, ô đo chạy lại tại HEAD
 run_id: repin-20260909T005452Z-79111
 sha: a30ca8ae44564e55ad3f7d552abc6beb506cbb44 · suites: 9 lệnh exit 0 · evals: 15 eval máy exit 0
+
+### Re-pin lần 4 — 2026-09-17, do hoá cũ do nhánh skill-system-v1 chạm runner.ts và src/app/api/skills
+run_id: repin-20260917T000600Z-94801
+sha: 7bc2d6534101992939dcce2a59efc4b8f3c8678a · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
