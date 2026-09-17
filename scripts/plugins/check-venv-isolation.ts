@@ -49,9 +49,25 @@ function stageCleanResources(): void {
     process.env.TONGFLOW_RESOURCES_DIR = resources;
 }
 
+/**
+ * Best-effort removal of the scratch tree. It must never throw: on the failure
+ * path a pip child can still be writing inside `work`, and an ENOTEMPTY stack
+ * trace printed after the FAIL line buried the verdict it was meant to follow.
+ */
+function cleanup(): void {
+    try {
+        rmSync(work, { recursive: true, force: true });
+    } catch (e) {
+        console.error(
+            `note: could not remove ${work} (${e instanceof Error ? e.message : String(e)})`,
+        );
+    }
+}
+
 function fail(message: string): never {
+    cleanup();
+    // Printed last, so the verdict is the final line of output.
     console.error(`FAIL: ${message}`);
-    rmSync(work, { recursive: true, force: true });
     process.exit(1);
 }
 
@@ -85,10 +101,22 @@ async function main(): Promise<void> {
     console.log(
         `provisioning ${idA} (${PACKAGE}==${PIN_A}) and ${idB} (${PACKAGE}==${PIN_B}) concurrently`,
     );
-    const [pyA, pyB] = await Promise.all([
+    // allSettled, not all: Promise.all rejects on the first failure while the
+    // other plugin's pip is still running, so cleanup raced a live writer and
+    // the second failure was never reported.
+    const settled = await Promise.allSettled([
         ensurePluginPython(idA, dirA),
         ensurePluginPython(idB, dirB),
     ]);
+    const rejected = settled.flatMap((r) =>
+        r.status === "rejected"
+            ? [r.reason instanceof Error ? r.reason.message : String(r.reason)]
+            : [],
+    );
+    if (rejected.length > 0) fail(rejected.join("\n---\n"));
+    const [pyA, pyB] = settled.map((r) =>
+        r.status === "fulfilled" ? r.value : "",
+    );
 
     // A provisioning failure falls back to a plain interpreter, which would
     // make the assertions below meaningless — catch that rather than read it
@@ -153,7 +181,7 @@ async function main(): Promise<void> {
         `OK: each plugin resolved its own pin (${PIN_A} / ${PIN_B}); ` +
             `one shared venv would have left only ${sharedVersion}`,
     );
-    rmSync(work, { recursive: true, force: true });
+    cleanup();
 }
 
 main().catch((e) => fail(e instanceof Error ? e.message : String(e)));
