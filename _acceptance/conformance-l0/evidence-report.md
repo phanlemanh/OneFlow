@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: ea7f89826c2a03217838a9d737f43c5be036b5ff
+verified_commit: fcdc6df7fe4121363fb8d4f48b902b7eac7d3326
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -425,3 +425,7 @@ sha: af00e473603c84bb2bd6ffc8c18cc37f87cb1774 · suites: 9 lệnh exit 0 · eval
 ### Re-pin lần 27 — 2026-09-17, do hoá cũ do rebase PR 120 lên main sau khi merge PR 121
 run_id: repin-20260917T010205Z-49608
 sha: ea7f89826c2a03217838a9d737f43c5be036b5ff · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
+
+### Re-pin lần 28 — 2026-09-17, do hoá cũ do thêm .python-version ghim uv lên Python >=3.10
+run_id: repin-20260917T010826Z-59027
+sha: fcdc6df7fe4121363fb8d4f48b902b7eac7d3326 · suites: 9 lệnh exit 0 · evals: 15/15 eval máy đạt kỳ vọng
