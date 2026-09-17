@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 96ee9b89c428b5ce0d64c8f49ba29eb7bd65727e
+verified_commit: 57781240741975bf9b845e54884f77f367e43551
 human_signoff: Manh 2026-08-07
 ---
 
@@ -475,3 +475,7 @@ máy chung cho cả đợt, không ô đo nào bị chạm — chỉ dời mốc
 KHÔNG KẾT LUẬN ĐƯỢC (cửa sổ diff rỗng khi nhánh đứng ngay tại `main`; hoặc ô `ui-check` không chạy
 được ngoài luồng verify). Dời mốc khi ấy là khai rằng bằng chứng còn đúng trong khi chưa chứng
 minh được.
+
+### Re-pin lần 2 — 2026-09-17, do sửa lỗi cài SDK song song; thay pin suite-only
+run_id: repin-20260917T004730Z-91593
+sha: 57781240741975bf9b845e54884f77f367e43551 · suites: 9 lệnh exit 0 · evals: 25/25 eval máy đạt kỳ vọng
