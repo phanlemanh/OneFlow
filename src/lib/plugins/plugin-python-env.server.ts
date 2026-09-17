@@ -9,7 +9,9 @@ import {
     rmSync,
     writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { cp, mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { basename, dirname, join } from "node:path";
 import { logger } from "@/lib/logger";
 import type { OnMilestone } from "@/lib/plugin-executor/provisioning-events";
 import { PYTHON_UTF8_ENV, resolvePythonLite } from "@/lib/plugins/python-lite";
@@ -202,6 +204,78 @@ async function pipCheck(pluginId: string, py: string): Promise<void> {
     }
 }
 
+/**
+ * Top-level build byproducts and developer detritus that must not travel into
+ * the private copy: a stale `build/` would be packaged into the wheel, and the
+ * `.venv` uv drops inside `sdk/` is large and irrelevant to the install. Matched
+ * at the root only, so a future `tongflow/build` subpackage is not dropped.
+ */
+const SDK_COPY_SKIP_AT_ROOT = new Set([
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+]);
+
+/**
+ * Install the SDK from a private copy of its source tree, never from the tree
+ * itself.
+ *
+ * setuptools builds the wheel INSIDE the directory pip is given
+ * (`<src>/build/bdist.*` and `<src>/*.egg-info`). Every venv installs from the
+ * same `resources/sdk`, so two plugins provisioning at once — which the per-id
+ * chain above deliberately allows — collided on that directory:
+ * `[Errno 17] File exists: 'build/bdist.../wheel/oneflow_sdk-*.dist-info'`.
+ *
+ * Why a copy rather than the alternatives:
+ * - an in-process lock around this step would not cover a second writer in
+ *   another process — the headless engine (`sdk/tongflow/engine/plugins.py`)
+ *   installs from the same checkout, and a dev server can run several workers;
+ * - building one shared wheel first still needs somewhere to build it, i.e.
+ *   the same race plus a cross-process lock and a cache to invalidate.
+ * A throwaway copy is correct across processes with no coordination at all,
+ * and leaves the shared tree unwritten. Cost: copying a ~1 MB tree, only on a
+ * cache miss.
+ */
+async function installSdkFromPrivateCopy(
+    pluginId: string,
+    py: string,
+    sdkDir: string,
+): Promise<{ code: number; out: string }> {
+    const scratch = await mkdtemp(join(tmpdir(), "oneflow-sdk-src-"));
+    const src = join(scratch, "sdk");
+    try {
+        await cp(sdkDir, src, {
+            recursive: true,
+            filter: (path) => {
+                const name = basename(path);
+                if (name === "__pycache__") return false;
+                if (dirname(path) !== sdkDir) return true;
+                return (
+                    !SDK_COPY_SKIP_AT_ROOT.has(name) &&
+                    !name.endsWith(".egg-info")
+                );
+            },
+        });
+        return await runCmd(
+            py,
+            ["-m", "pip", "install", "--upgrade", src],
+            venvDirFor(pluginId),
+        );
+    } finally {
+        // A leftover scratch directory is harmless; turning a finished install
+        // into a provisioning failure because cleanup hiccuped is not.
+        await rm(scratch, { recursive: true, force: true }).catch((e) =>
+            logger.warn(
+                `[plugin-env] could not remove SDK scratch copy ${scratch}: ${String(e)}`,
+            ),
+        );
+    }
+}
+
 async function ensureVenv(
     pluginId: string,
     onMilestone?: OnMilestone,
@@ -251,11 +325,7 @@ async function ensureVenv(
     // Reached only past the cache check above, so a venv whose SDK is already
     // current emits nothing here either.
     onMilestone?.({ step: "install-sdk", phase: "started" });
-    const ins = await runCmd(
-        py,
-        ["-m", "pip", "install", "--upgrade", sdkDir],
-        venvDirFor(pluginId),
-    );
+    const ins = await installSdkFromPrivateCopy(pluginId, py, sdkDir);
     if (ins.code !== 0) {
         throw new Error(
             `failed to install SDK into ${pluginId}'s venv: ${ins.out.trim()}`,
