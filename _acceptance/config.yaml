@@ -851,6 +851,15 @@ risk_tiers:
     # workspace-record: vendor LẦN ĐẦU ở lượt này. Trước đây oneflow thiếu hẳn
     # file này nên nhánh đọc workspace của cổng chưa từng chạy.
     - "lib/workspace-record.cjs"
+    # Kit 2.18.x: sáu tệp vendor LẦN ĐẦU (lớp CI 9 → 15 theo INIT-CI-COPY-LIST).
+    # Cùng lớp thước với các dòng trên — thiếu miễn trừ thì chính PR nâng thước
+    # đỏ ở luật T1-escape (đo 23/09 trên chore/kit-2-18-1).
+    - "lib/nhan-canh-gay.cjs"
+    - "lib/nguong-o-co-hoi.cjs"
+    - "lib/out-of-contract.cjs"
+    - "scripts/product-map.mjs"
+    - "scripts/trang-thai-ho-so.cjs"
+    - "scripts/khong-can-nguoi.mjs"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"

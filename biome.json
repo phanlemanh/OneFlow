@@ -35,6 +35,12 @@
             "!lib/workspace-record.cjs",
             "!lib/eval-yaml.cjs",
             "!lib/lop-nhin-thay.cjs",
+            "!lib/nhan-canh-gay.cjs",
+            "!lib/nguong-o-co-hoi.cjs",
+            "!lib/out-of-contract.cjs",
+            "!scripts/product-map.mjs",
+            "!scripts/trang-thai-ho-so.cjs",
+            "!scripts/khong-can-nguoi.mjs",
             "!_acceptance"
         ]
     },
