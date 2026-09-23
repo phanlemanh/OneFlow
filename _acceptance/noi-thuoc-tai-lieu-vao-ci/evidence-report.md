@@ -7,7 +7,7 @@ reason:
 verified_by: phiên VERIFY tươi, chạy TUẦN TỰ (CLASSIFIER-FALLBACK sau BLOCKED vòng 2)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932
+verified_commit: 825e6cd533e944a4ea7118af431433efc6cd75dd
 human_signoff: Phan Le Manh 2026-09-02
 ---
 
@@ -236,3 +236,7 @@ lệnh-hỏng; lúc đó cây không còn lành vì một hồ sơ vừa đượ
 ### Re-pin lần 12 — 2026-09-16, do chien dich ghim lai kit 2.14.0
 run_id: repin-20260916T063028Z-36924
 sha: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932 · suites: 9 lệnh exit 0 · evals: 9/9 eval máy đạt kỳ vọng
+
+### Re-pin lần 13 — 2026-09-23, do thước = kit từ 23/09 (#128/#129): needle bản đồ trỏ bước kit, guard gọi cổng kit, lcm_pmap/mhb_existing_guards trỏ bộ đọc bản đồ kit
+run_id: repin-20260923T080040Z-11314
+sha: 825e6cd533e944a4ea7118af431433efc6cd75dd · suites: 9 lệnh exit 0 · evals: 9/9 eval máy đạt kỳ vọng

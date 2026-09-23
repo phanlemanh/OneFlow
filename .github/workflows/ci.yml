@@ -161,10 +161,10 @@ jobs:
         run: bash scripts/roadmap/check-roadmap-fresh.sh
 
       # The kit's own reader, not a home-made one: owner decision 23/09. The
-      # home-made scripts/ci/check-product-map.mjs (0d9f5ac, 31/08) describes a
-      # different state model and cannot be green at the same time as the kit's
-      # map. It stays on disk only because signed evidence (cong-tu-canh-minh)
-      # names it as a verifier; it no longer runs in CI.
+      # home-made scripts/ci/check-product-map.mjs (0d9f5ac, 31/08) described a
+      # different state model and could not be green at the same time as the
+      # kit's map. It was deleted on 23/09 once cong-tu-canh-minh, the signed
+      # dossier naming it as a verifier, was retired (owner: manh).
       - name: Product map freshness
         run: node "$CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs" --root . --check
 

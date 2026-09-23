@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: bb2b05d89c7cbb49dd7d8589a1f09d5e50fb1609
+verified_commit: 825e6cd533e944a4ea7118af431433efc6cd75dd
 human_signoff: Phan Le Manh 2026-09-07
 ---
 
@@ -408,3 +408,7 @@ Run-log vòng 7 và 8 append nguyên văn từ kết quả workflow (bộ tổng
 **Lượt ghi này** điền `human_signoff`, Known limits (7 mục đã ký + nợ có tên từ Amendment) và
 Ngoài hợp đồng (từ review-findings) vào evidence — hai mục mà bộ tổng hợp kit luôn để rỗng khiến
 lưới trước merge đọc hồ sơ là «xanh-sạch, không mời ký».
+
+### Re-pin lần 1 — 2026-09-23, do thước = kit từ 23/09 (#128/#129): needle bản đồ trỏ bước kit, guard gọi cổng kit, lcm_pmap/mhb_existing_guards trỏ bộ đọc bản đồ kit
+run_id: repin-20260923T080040Z-11314
+sha: 825e6cd533e944a4ea7118af431433efc6cd75dd · suites: 9 lệnh exit 0 · evals: 11/11 eval máy đạt kỳ vọng

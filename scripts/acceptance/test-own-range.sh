@@ -124,7 +124,10 @@ case_malformed() {
   # decoy in the body, a trailing comment, and quotes.
   printf -- '---\nslug: bad\nlanded_merge: "%s"  # PR #99\n---\n\nlanded_merge: cafebabe\n' \
     "$plain" > "$d/_acceptance/bad/contract.md"
-  ff_src="$(sed -n '/^front_field()/,/^}/p' "$ROOT/scripts/pre-merge-check.sh")"
+  # The gate runs from the kit pinned at KIT_SHA since #129 (23/09), not from a
+  # vendored copy (kit GUIDE §5.3 step 5), so its twin reader lives there.
+  gate="${CLAUDE_PLUGIN_ROOT:?CLAUDE_PLUGIN_ROOT unset: the gate lives in the kit (GUIDE §5.3)}/scripts/pre-merge-check.sh"
+  ff_src="$(sed -n '/^front_field()/,/^}/p' "$gate")"
   [ -n "$ff_src" ] || fail malformed "could not extract front_field() from pre-merge-check.sh"
   eval "$ff_src"
   twin="$(front_field "$d/_acceptance/bad/contract.md" landed_merge)"

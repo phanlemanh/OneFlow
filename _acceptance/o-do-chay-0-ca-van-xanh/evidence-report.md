@@ -7,7 +7,7 @@ reason:
 verified_by: machine-lane (owner chốt bỏ lớp hội đồng, 31/08)
 enforcement_mode: strict
 bypass_used: false
-verified_commit: d6939560d2784fe505a01e1b65fa96c4d530ea94
+verified_commit: 825e6cd533e944a4ea7118af431433efc6cd75dd
 human_signoff: Phan Le Manh 2026-09-01
 ---
 
@@ -338,3 +338,7 @@ minh được.
 ### Re-pin lần 2 — 2026-09-08, do hang so di kem 33->38 trong rang bo kiem o do, va dong B3 neu so hieu ADR-0013
 run_id: repin-20260908T071345Z-62406
 sha: d6939560d2784fe505a01e1b65fa96c4d530ea94 · suites: 9 lệnh exit 0 · evals: 17 eval máy exit 0
+
+### Re-pin lần 3 — 2026-09-23, do thước = kit từ 23/09 (#128/#129): needle bản đồ trỏ bước kit, guard gọi cổng kit, lcm_pmap/mhb_existing_guards trỏ bộ đọc bản đồ kit
+run_id: repin-20260923T080040Z-11314
+sha: 825e6cd533e944a4ea7118af431433efc6cd75dd · suites: 9 lệnh exit 0 · evals: 17/17 eval máy đạt kỳ vọng

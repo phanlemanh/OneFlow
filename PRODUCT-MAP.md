@@ -40,11 +40,11 @@ flowchart TD
 - CI-a — vitest vào CI + gỡ ghim SDK cứng của guard overlay (khử mìn hạ tầng verify) (`ci-vitest-sdk-pin`)
 - slot dán chữ/khung giá/logo/safe-zone lên ảnh & video (Phase 1.2) (`compose-overlay`)
 - Conformance L0 — pluginRev, node_cached contract, TS↔Python conformance suite (`conformance-l0`)
-- Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng (`cong-tu-canh-minh`)
+- Cổng tự canh mình — hai guard vào CI, và suite verify thôi tự đốt vòng (`cong-tu-canh-minh`) — đã giao — đã nghỉ, giữ sử liệu
 - Đăng ký fork oneflow-api-openai vào manifest chính thức (`dang-ky-fork-openai`)
 - Dependency refresh — five pending dependabot updates (`dependency-refresh-2026-07`)
-- Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`)
-- Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`)
+- Gate 0.6 — cùng-không-gian cho scope paths + neo lịch sử cho eval per-PR (`gate-scope-anchors`) — đã giao — đã nghỉ, giữ sử liệu
+- Gate tooling × t1_skip_globs — đường hợp lệ để sửa guard, và trả ba nợ 0.8 (`gate-tooling-t1`) — đã giao — đã nghỉ, giữ sử liệu
 - Hai đường chạy, một venv — engine Python dùng venv per-plugin như bên TypeScript, thôi nuốt lỗi cấp phát (`hai-duong-chay-mot-venv`)
 - Hàng rào thôi đọc nhầm "không đo được" thành "không có gì sai" (`hang-rao-doc-nham-loi-thanh-khong-co-gi`)
 - Kho khoá toàn vẹn — đọc không cắt bớt âm thầm, ghi không để lại file cụt (`kho-khoa-toan-ven`)
@@ -64,7 +64,7 @@ flowchart TD
 - Plugin scanner reads imports by scope boundary, and says why a slot was skipped (`scan-with-block-imports`)
 - Publish the SDK as oneflow-sdk while keeping the tongflow import package (`sdk-distribution-rename`)
 - Skill system v1 — manifest tham số, template, orchestrator v1, ngăn skill và xem/sửa kế hoạch; skill thứ hai không đụng engine (`skill-system-v1`)
-- Scope evidence staleness by declared eval paths (`stale-scope-by-paths`)
+- Scope evidence staleness by declared eval paths (`stale-scope-by-paths`) — đã giao — đã nghỉ, giữ sử liệu
 - Per-task metering columns and measured plugin duration (`task-metering`)
 
 ## Đã nghiệm thu giá trị

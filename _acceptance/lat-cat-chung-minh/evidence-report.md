@@ -6,7 +6,7 @@ failed_evals: []
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: e4ea5ac18424b87a25e02ee4cfc4f82d97f5803d
+verified_commit: 825e6cd533e944a4ea7118af431433efc6cd75dd
 human_signoff: Phan Le Manh 2026-09-05
 ---
 
@@ -315,3 +315,7 @@ Round 3: Toàn bộ E1-E18 (script — thêm E17/E16-liên-quan AC-2 và E18 m�
 Round 4: Toàn bộ E1-E18 (script) và J1 (judgment) đều PASS trên cây HEAD (27e27f1fddf467ed85aa0c009ebc8d9db985a249), cùng 8 lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test 900 passed | 5 skipped, sdk pytest 292 passed, verify:plugins, gen:abi) đều xanh. Ba finding CONFIRMED trong hợp đồng của round 3 (AC-11, AC-5, AC-15) đã được sửa — mục "Trong hợp đồng" của review-findings.md nay rỗng. Review vòng này phát hiện 16 finding mới, toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1; 2/16 rơi vào file không bộ đo nào phủ (package.json, _acceptance/lat-cat-chung-minh/evals.yaml). Sau round 4, owner quyết ở Cổng 2 (05/09) gỡ ô phán đoán J1 khỏi bộ ô đo vì không có đường hợp lệ để đóng chốt bằng chứng cho một ô hội-đồng-máy (không có verifier script/config:<key> và không có run_id trong sổ máy) — quyết định ghi trong `decisions.jsonl` d-20260905T080000Z-lcm18. Verdict tổng round 4 là PASS.
 
 Round 5: Toàn bộ E1-E18 (script) đều PASS trên cây HEAD (e4ea5ac18424b87a25e02ee4cfc4f82d97f5803d) — chỉ còn 18 ô máy do J1 đã bị gỡ ở round 4 — cùng 8 lệnh suite hồi quy (preflight-verify-env, check-plan-freeze.mjs, build/typecheck, lint:check, test 900 passed | 5 skipped, sdk pytest 292 passed, verify:plugins, gen:abi) đều xanh. Review vòng này phát hiện 12 finding mới (4 medium từ "conventions", 4 từ "bugs" gồm 1 high + 2 medium + 1 low, 4 từ "measurement" gồm 1 high + 2 medium + 1 low), toàn bộ đều nằm ngoài phạm vi đã duyệt ở Cổng 1; mục "Trong hợp đồng" rỗng. Verdict tổng là PASS; escalate tiếp theo là quyết định của người ở Gate 2 cho 12 finding này (8 đề xuất mở hợp đồng mới, 4 đề xuất ghi Known limits).
+
+### Re-pin lần 1 — 2026-09-23, do thước = kit từ 23/09 (#128/#129): needle bản đồ trỏ bước kit, guard gọi cổng kit, lcm_pmap/mhb_existing_guards trỏ bộ đọc bản đồ kit
+run_id: repin-20260923T080040Z-11314
+sha: 825e6cd533e944a4ea7118af431433efc6cd75dd · suites: 9 lệnh exit 0 · evals: 18/18 eval máy đạt kỳ vọng

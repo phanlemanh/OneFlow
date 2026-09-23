@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 8aeab256ea83c8f653f04e362da194f5f2a63d29
+verified_commit: b2cd6684f6b8a051515aae821bd8638d14a004ee
 human_signoff: Manh 2026-08-27
 ---
 
@@ -425,3 +425,7 @@ sha: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932 · suites: 9 lệnh exit 0 · eval
 ### Re-pin lần 8 — 2026-09-23, do fixture tick-noi-doi của răng plan-freeze thôi ghim skill-system-v1 (PR #128)
 run_id: repin-20260923T035636Z-96358
 sha: 8aeab256ea83c8f653f04e362da194f5f2a63d29 · suites: 9 lệnh exit 0 · evals: 10/10 eval máy đạt kỳ vọng
+
+### Re-pin lần 9 — 2026-09-23, do PR này đổi scripts/acceptance/** và scripts/ci/** (thước = kit từ 23/09), hồ sơ ghim ở 8aeab25 hoá stale
+run_id: repin-20260923T080348Z-99028
+sha: b2cd6684f6b8a051515aae821bd8638d14a004ee · suites: 9 lệnh exit 0 · evals: 10/10 eval máy đạt kỳ vọng
