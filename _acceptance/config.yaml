@@ -831,36 +831,11 @@ risk_tiers:
     - "_acceptance/**"
     - "public/**"
     - "src/i18n/messages/**"
-    # Vendored gate tooling = measuring stick, not product code; upgrading it must
-    # not stale-invalidate signed feature evidence (exact paths, not globs).
-    - "scripts/pre-merge-check.sh"
-    - "lib/eval-yaml.cjs" # vendored kit 2.9.0 — bộ đọc evals.yaml cho luật làn-eval (ADR 0014)
-    # CẢ HAI bộ tên phải nằm đây cho tới khi commit đổi tên rời khỏi MỌI cửa sổ
-    # diff. Kit 1.40.0 đổi `.js` -> `.cjs`; git ghi đổi tên vào diff PR như
-    # «xoá đường cũ + thêm đường mới», nên nếu chỉ khai `.cjs` thì phía XOÁ nằm
-    # ngoài miễn trừ và mọi slug có hồ sơ trong cùng diff hoá stale cùng lúc
-    # (đo thật ở artifact-platform: 137 hồ sơ, thủ phạm là đúng một dòng).
-    - "scripts/recheck-evidence.cjs"
-    - "scripts/recheck-evidence.js"
-    - "lib/evidence-core.cjs"
-    - "lib/evidence-core.js"
-    - "lib/gap-probe.cjs"
-    - "lib/gap-probe.js"
-    # pre-merge-check.sh gọi ac-line + md-section trong CÙNG một lệnh node để chấm
-    # răng cross-layer. Thiếu một trong hai thì cổng vẫn chạy nhưng tụt về awk
-    # rộng hơn và in NOTE — cùng lớp measuring-stick.
-    - "lib/ac-line.cjs"
-    - "lib/ac-line.js"
-    - "lib/md-section.cjs"
-    - "lib/md-section.js"
-    # workspace-record: vendor LẦN ĐẦU ở lượt này. Trước đây oneflow thiếu hẳn
-    # file này nên nhánh đọc workspace của cổng chưa từng chạy.
-    - "lib/workspace-record.cjs"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
-    # Hai bộ đo a11y của bề mặt /proto — cùng lớp measuring-stick với
-    # pre-merge-check.sh ở trên: chúng ĐO sản phẩm chứ không phải sản phẩm, nên
+    # Hai bộ đo a11y của bề mặt /proto — lớp measuring-stick (cổng nay chạy từ
+    # kit ghim sha, không còn bản chép ở đây): chúng ĐO sản phẩm chứ không phải sản phẩm, nên
     # sửa chúng không được phép làm stale bằng chứng đã ký của feature khác.
     # Khai ĐƯỜNG DẪN CHÍNH XÁC, không phải glob `scripts/**/check-a11y-proto.sh`:
     # một bộ đo mới ở thư mục khác phải tự qua cổng, y như lý lẽ đã ghi cho
