@@ -387,20 +387,11 @@ executors:
     # ---- hai-duong-chay-mot-venv (B4) ----
     hdc_layout_constant_pinned: "bash scripts/plugins/check-venv-layout-pinned.sh"
     hdc_layout_constant_teeth: "bash scripts/plugins/check-venv-layout-teeth.sh"
-    # --- cong-tu-canh-minh (31/08) ---
-    # Bo kiem ban do + rang cua no. Dat o scripts/ci/ chu khong scripts/roadmap/
-    # hay scripts/acceptance/ vi gia re-pin: 0 vs 1 vs 2 ho so (do tren paths da
-    # khai cua 29 ho so).
+    # --- cong-tu-canh-minh (31/08) --- khoa pmap_* (thuoc ban do rieng
+    # scripts/ci/check-product-map*.{mjs,sh}) da go 23/09: ho so nghi (thuoc =
+    # kit, #128/#129), ban do nay do scripts/product-map.mjs cua kit canh.
     kkt_seam_signature: "bash scripts/settings/check-env-store-teeth.sh --case seam-signature"
     kkt_teeth_all: "bash scripts/settings/check-env-store-teeth.sh"
-    pmap_check: "node scripts/ci/check-product-map.mjs"
-    pmap_teeth_all: "bash scripts/ci/check-product-map-teeth.sh"
-    pmap_teeth_missing_slug: "bash scripts/ci/check-product-map-teeth.sh --case missing-slug"
-    pmap_teeth_count: "bash scripts/ci/check-product-map-teeth.sh --case count-mismatch"
-    pmap_teeth_opportunity: "bash scripts/ci/check-product-map-teeth.sh --case opportunity-mismatch"
-    pmap_teeth_unreadable: "bash scripts/ci/check-product-map-teeth.sh --case artifact-missing --case artifact-unreadable"
-    pmap_teeth_extra_slug: "bash scripts/ci/check-product-map-teeth.sh --case extra-slug --case status-downgraded"
-    pmap_teeth_source_buckets: "bash scripts/ci/check-product-map-teeth.sh --case contract-unparsable --case status-unknown --case dir-empty"
     # Lo mu cua guard lo trinh: no so TAP slug trong khoi marker nen dong trung
     # vo hinh. Do 31/08: so cai CO dong trung normalize-text-vi ma guard van xanh.
     roadmap_fresh: "bash scripts/roadmap/check-roadmap-fresh.sh"
@@ -430,7 +421,11 @@ executors:
     # ho so nay (do tren cay eb175ed). Ve «la mot suite key» cua AC-9 do bang
     # phep khang dinh truc tiep ben duoi. Phat hien ngoai hop dong -> Cong 2.
     lcm_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/roadmap/check-plan-suite-key.sh"
-    lcm_pmap: "node scripts/ci/check-product-map.mjs && bash scripts/ci/check-product-map-teeth.sh --case parked-opportunity"
+    # 23/09: tro sang bo doc ban do cua kit ghim KIT_SHA (cung lenh buoc CI
+    # «Product map freshness»); thuoc rieng check-product-map.mjs va case rang
+    # parked-opportunity cua no da xoa — rang do kit tu canh. Ban do kit van in
+    # «Xep lai sau 3 viec» dung ba co hoi park cua AC-11.
+    lcm_pmap: "node \"$CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs\" --root . --check"
     # --- mo-hoa-b01 (05/09) --- guard dinh danh fork + rang, MOT khoa moi ca (khuon lcm_*).
     fork_identity: "bash scripts/fork/check-fork-identity.sh"
     mhb_teeth_all: "bash scripts/fork/check-fork-identity-teeth.sh"
@@ -443,7 +438,7 @@ executors:
     mhb_teeth_notice: "bash scripts/fork/check-fork-identity-teeth.sh --case notice-dist-gone && bash scripts/fork/check-fork-identity-teeth.sh --case notice-unchanged-back && bash scripts/fork/check-fork-identity-teeth.sh --case notice-attribution-gone"
     mhb_prototype_lane: "bash scripts/fork/check-prototype-lane.sh mo-hoa-b01 && bash scripts/fork/check-fork-identity-teeth.sh --case debt-table-missing && bash scripts/fork/check-fork-identity-teeth.sh --case debt-table-duplicate"
     mhb_wiring: "bash scripts/ci/check-gate-guards-job.sh shape && bash scripts/ci/check-gate-guards-job.sh reachable && bash scripts/ci/check-gate-guards-job.sh teeth && bash scripts/fork/check-suite-key.sh fork_identity check-fork-identity.sh && bash scripts/fork/check-fork-identity-teeth.sh --case suite-key-dangling"
-    mhb_existing_guards: "bash scripts/plugins/check-live-docs-manifest-synced.sh readme && bash scripts/plugins/check-live-docs-manifest-synced.sh claude && bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main && bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh && bash scripts/ci/check-action-pins.sh && bash scripts/ci/check-docker-dryrun.sh && node scripts/roadmap/check-plan-freeze.mjs && bash scripts/roadmap/check-plan-docs.sh && bash scripts/roadmap/check-roadmap-fresh.sh && node scripts/ci/check-product-map.mjs"
+    mhb_existing_guards: "bash scripts/plugins/check-live-docs-manifest-synced.sh readme && bash scripts/plugins/check-live-docs-manifest-synced.sh claude && bash scripts/plugins/check-live-docs-manifest-synced.sh orphans origin/main && bash scripts/plugins/check-manifest-doc-synced.sh && bash scripts/plugins/check-prefix-docs.sh && bash scripts/ci/check-action-pins.sh && bash scripts/ci/check-docker-dryrun.sh && node scripts/roadmap/check-plan-freeze.mjs && bash scripts/roadmap/check-plan-docs.sh && bash scripts/roadmap/check-roadmap-fresh.sh && node \"$CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs\" --root . --check"
     # Job CI: rut lenh RA TU ci.yml roi CHAY no, theo khuon check-vitest-job.sh.
     # Doc YAML la do chi dan; chay lenh rut ra moi la do hanh vi.
     # o-do-chay-0-ca-van-xanh: mot o do loc theo ten ca ma khong ca nao khop
@@ -528,39 +523,11 @@ executors:
     # conformance-l0 Gate 1 (2026-07-28).
     conformance_discriminating: bash scripts/conformance/check-suite-discriminating.sh
     plugin_rev_joined_path: pnpm tsx scripts/plugins/check-rev-joined-path.ts
-    # stale-scope-by-paths Gate 1 (2026-07-28): every file below lands during
-    # implementation. These live under scripts/acceptance/ on purpose — the
-    # t1_skip_globs exemption for the gate tooling lists EXACT paths, so a guard
-    # in a new subdirectory is gated and the gate applies to itself.
-    # One key per eval, same guard with a different --case: nine evals behind one
-    # command collapse nine criteria into one exit code, and a case that was
-    # never implemented then looks identical to a case that passed.
-    stale_scope_in_scope: bash scripts/acceptance/check-stale-scoping.sh --case in-scope
-    stale_scope_out_of_scope: bash scripts/acceptance/check-stale-scoping.sh --case out-of-scope
-    stale_scope_partial: bash scripts/acceptance/check-stale-scoping.sh --case partial
-    stale_scope_under_declared: bash scripts/acceptance/check-stale-scoping.sh --case under-declared
-    stale_scope_malformed: bash scripts/acceptance/check-stale-scoping.sh --case malformed
-    stale_scope_indent_drift: bash scripts/acceptance/check-stale-scoping.sh --case indent-drift
-    stale_scope_merged_halves: bash scripts/acceptance/check-stale-scoping.sh --case merged-halves
-    stale_scope_suppression: bash scripts/acceptance/check-stale-scoping.sh --case suppression
-    stale_scope_two_bases: bash scripts/acceptance/check-stale-scoping.sh --case two-bases
-    stale_scope_announce: bash scripts/acceptance/check-stale-scoping.sh --case announce
-    stale_scope_mutation: bash scripts/acceptance/check-stale-scoping.sh --case mutation
-    stale_scope_case_completeness: bash scripts/acceptance/check-stale-scoping.sh --case case-completeness
-    stale_scope_guard_not_exempt: bash scripts/acceptance/check-stale-scoping.sh --case guard-not-exempt
-    stale_scope_no_kill_switch: bash scripts/acceptance/check-stale-scoping.sh --case no-kill-switch
-    stale_scope_real_repo: bash scripts/acceptance/check-stale-real-repo.sh
-    # gate-tooling-t1 (item 0.8). Ba case MỚI của check-stale-scoping.sh giữ
-    # tiền tố stale_scope_* vì chúng là case của guard đó; các guard mới đứng
-    # riêng mang tiền tố gt1_. Một key cho một eval — xem đầu evals.yaml.
-    stale_scope_fork_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case fork-undeclared
-    stale_scope_fork_declared_in_union: bash scripts/acceptance/check-stale-scoping.sh --case fork-declared-in-union
-    stale_scope_undeclared: bash scripts/acceptance/check-stale-scoping.sh --case undeclared
-    gt1_t1_escape_path: bash scripts/acceptance/check-t1-escape-path.sh
-    gt1_all_scoping_cases: bash scripts/acceptance/check-scoping-all-cases.sh
-    gt1_dead_code_absent: bash scripts/acceptance/check-golden-dead-code-absent.sh
-    gt1_fork_teeth: bash scripts/acceptance/check-fork-scope-teeth.sh
-    gt1_no_stale_on_empty_diff: bash scripts/acceptance/check-no-stale-empty-diff.sh
+    # stale-scope-by-paths / gate-tooling-t1 / gate-scope-anchors: cac khoa
+    # stale_scope_*, gt1_* (5 khoa) va scope_ns_*/gate_ns_* da go 23/09 cung
+    # guard cua chung — chung canh co che staleness theo paths cua cong fork da
+    # xoa o #129, ca ba ho so nghi (thuoc = kit). Khoa con lai ben duoi tro vao
+    # script con song.
     gt1_no_golden_claim: bash scripts/acceptance/check-no-golden-claim.sh
     gt1_landed_merge_repinned: bash scripts/acceptance/check-landed-merge-repinned.sh
     # roadmap-drift-guard Gate 1 (2026-08-27). MỘT khoá cho MỖI case: bộ răng cũ
@@ -577,12 +544,9 @@ executors:
     roadmap_teeth_supersede_source_single: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case supersede-source-single
     roadmap_teeth_case_isolation: bash scripts/roadmap/check-roadmap-guard-teeth.sh --case case-isolation
     own_range_case_completeness: bash scripts/acceptance/test-own-range.sh case-completeness
-    scope_ns_case_completeness: bash scripts/acceptance/test-scope-namespace.sh case-completeness
-    # gate-scope-anchors (0.6): same-universe scope check + historical anchors.
+    # gate-scope-anchors (0.6): historical anchors (own-range); the scope
+    # namespace half died with the fork gate (#129).
     # b2_* and ghcr_anchored hit the network (gh) — local verify only, not CI.
-    gate_ns_exempt_refused: bash scripts/acceptance/test-scope-namespace.sh exempt-refused
-    gate_ns_variants_red: bash scripts/acceptance/test-scope-namespace.sh variants-discriminating
-    gate_ns_legit_granted: bash scripts/acceptance/test-scope-namespace.sh legit-granted
     own_range_anchored: bash scripts/acceptance/test-own-range.sh anchored
     own_range_unlanded: bash scripts/acceptance/test-own-range.sh unlanded
     own_range_malformed: bash scripts/acceptance/test-own-range.sh malformed
