@@ -26,15 +26,6 @@
             "!data",
             "!.claude",
             "!plugins",
-            "!scripts/pre-merge-check.sh",
-            "!scripts/recheck-evidence.cjs",
-            "!lib/evidence-core.cjs",
-            "!lib/gap-probe.cjs",
-            "!lib/ac-line.cjs",
-            "!lib/md-section.cjs",
-            "!lib/workspace-record.cjs",
-            "!lib/eval-yaml.cjs",
-            "!lib/lop-nhin-thay.cjs",
             "!_acceptance"
         ]
     },

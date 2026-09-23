@@ -134,9 +134,6 @@ jobs:
         with:
           node-version: 24
 
-      - name: Pre-merge acceptance check
-        run: bash scripts/pre-merge-check.sh . --base "origin/${GITHUB_BASE_REF:-main}"
-
       # Fetched OUTSIDE the repo tree so the kit's own _acceptance/ is never
       # scanned alongside this repo's dossiers (kit GUIDE §5.3, default path).
       - name: Fetch acceptance-gate kit at pinned sha
@@ -145,6 +142,12 @@ jobs:
           git -C "$RUNNER_TEMP/kit" fetch -q --depth 1 https://github.com/phanlemanh/acceptance-gate-kit "$KIT_SHA"
           git -C "$RUNNER_TEMP/kit" checkout -q FETCH_HEAD
           echo "CLAUDE_PLUGIN_ROOT=$RUNNER_TEMP/kit" >> "$GITHUB_ENV"
+
+      # The gate runs from the pinned kit, not from a copy in this repo: the
+      # vendored copy (and this repo's feature_scope fork of it) was removed by
+      # owner decision 23/09. Every reader of the gate finds lib/ next to itself.
+      - name: Pre-merge acceptance check
+        run: bash "$CLAUDE_PLUGIN_ROOT/scripts/pre-merge-check.sh" . --base "origin/${GITHUB_BASE_REF:-main}"
 
       # Both guards below ran only when somebody typed them (zero references in
       # this file, measured 31/08), and both had already let real drift through:
