@@ -821,6 +821,11 @@ risk_tiers:
     # miễn trừ này là `product-map.mjs --check` (ADR 0007 của kit) — bỏ khai dòng
     # này mà vẫn commit bản đồ là cấu hình sai, kit tự có test bắt.
     - "PRODUCT-MAP.md"
+    # The workflow that fetches the kit at a pinned sha. Bumping the kit is a
+    # one-line sha change here; without this exact path every such PR goes red
+    # T1-escape (kit GUIDE §5.3 step 3; the kit lists its own gate.yml the same
+    # way). Exact file, never `.github/**`.
+    - ".github/workflows/ci.yml"
     - ".gitignore"
     - ".claude/**"
     - "_acceptance/**"

@@ -2,13 +2,13 @@
 
 > Trạng thái sống của repo — cập nhật cuối mỗi gói việc. Handoff giữa máy/agent đọc **file này + `_acceptance/`**, không đọc lịch sử chat.
 
-## Hiện trạng (2026-09-09, sau khi ký B4 hai-đường-chạy-một-venv — dòng B4 của kế hoạch ✅)
+## Hiện trạng (2026-09-17, sau khi ký B5 skill-system-v1 — sổ cái roadmap bắt kịp 23/09)
 
 > Chỉ mục tính năng theo góc nhìn người dùng nằm ở [`docs/feature-index.md`](docs/feature-index.md).
 > File này giữ vai *đang ở đâu*; *làm gì tiếp* nằm ở **một chỗ duy nhất**: khối kế hoạch trong
 > [docs/roadmap.md](docs/roadmap.md), mục "Kế hoạch lát cắt chứng minh".
 
-- **40 hồ sơ đã ký** (guard sổ cái xanh 40/40, 09/09); 39 đã trên `main`, `hai-duong-chay-mot-venv` (B4, ký 09/09) đang ở PR #115 — `director-wire-shape` hạ cánh 08/09 qua PR #111. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
+- **41 hồ sơ đã ký** (guard sổ cái xanh 41/41, 23/09); cả 41 đã trên `main` — `skill-system-v1` (B5, ký 17/09) hạ cánh 17/09 qua PR #120 nhưng chưa vào sổ cái roadmap; guard sổ cái lộ đỏ trên `main` ở lần chạy CI 20/09 (hai lần chạy 17/09 dừng sớm hơn, ở bước kiểm trước-merge) và bắt kịp 23/09; `hai-duong-chay-mot-venv` (B4) hạ cánh qua PR #115, `director-wire-shape` 08/09 qua PR #111. Hai hồ sơ ký ngày 04/09 đã hạ cánh: `khong-noi-sai-ve-kho-khoa` (PR #95) và `hang-rao-doc-nham-loi-thanh-khong-co-gi` (PR #96).
 - **Định vị ba tầng** ghi ở [vision.md](docs/strategy/vision.md) (04/09): nền tảng đa mục đích → năm trụ cột → lát cắt. Skill #1 là lát cắt chứng minh đầu tiên, không phải định nghĩa sản phẩm.
 - **Đóng băng mở hạng mục mới** từ khi `lat-cat-chung-minh` merge tới khi 16/16 ★ và ≥ 85% dòng ✅. Xem tỉ lệ: `pnpm plan:check`. Ngoại lệ chỉ ba lý do: mất-dữ-liệu · bảo-mật · chặn-★, và mỗi ngoại lệ cộng vào mẫu số.
 - **Máy dev đang cài 4 plugin:** `oneflow-api-ffmpeg`, `oneflow-api-openai` (phục vụ cả hai slot transcribe — S3 de facto xong), `oneflow-api-pyscenedetect`, `oneflow-modal-compose-overlay` (mắt Modal duy nhất còn lại trên chuỗi Skill #1 → B6).

@@ -119,6 +119,11 @@ jobs:
   acceptance-gate:
     name: Acceptance Gate
     runs-on: ubuntu-latest
+    env:
+      # The acceptance-gate kit this job reads its own rulers from. Pinned to the
+      # sha installed on the dev machine, so machine and CI run the same kit.
+      # Bumping the kit is a one-line PR that changes this sha (kit GUIDE §5.3).
+      KIT_SHA: 8a4ea88105d109d9b79590761b953e95af400f7c
     steps:
       - uses: actions/checkout@v7
         with:
@@ -132,6 +137,15 @@ jobs:
       - name: Pre-merge acceptance check
         run: bash scripts/pre-merge-check.sh . --base "origin/${GITHUB_BASE_REF:-main}"
 
+      # Fetched OUTSIDE the repo tree so the kit's own _acceptance/ is never
+      # scanned alongside this repo's dossiers (kit GUIDE §5.3, default path).
+      - name: Fetch acceptance-gate kit at pinned sha
+        run: |
+          git init -q "$RUNNER_TEMP/kit"
+          git -C "$RUNNER_TEMP/kit" fetch -q --depth 1 https://github.com/phanlemanh/acceptance-gate-kit "$KIT_SHA"
+          git -C "$RUNNER_TEMP/kit" checkout -q FETCH_HEAD
+          echo "CLAUDE_PLUGIN_ROOT=$RUNNER_TEMP/kit" >> "$GITHUB_ENV"
+
       # Both guards below ran only when somebody typed them (zero references in
       # this file, measured 31/08), and both had already let real drift through:
       # PRODUCT-MAP.md advertised 22 delivered items while 26 dossiers were
@@ -143,8 +157,13 @@ jobs:
       - name: Roadmap ledger freshness
         run: bash scripts/roadmap/check-roadmap-fresh.sh
 
+      # The kit's own reader, not a home-made one: owner decision 23/09. The
+      # home-made scripts/ci/check-product-map.mjs (0d9f5ac, 31/08) describes a
+      # different state model and cannot be green at the same time as the kit's
+      # map. It stays on disk only because signed evidence (cong-tu-canh-minh)
+      # names it as a verifier; it no longer runs in CI.
       - name: Product map freshness
-        run: node scripts/ci/check-product-map.mjs
+        run: node "$CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs" --root . --check
 
       # Freeze rule of the proof-slice plan (docs/roadmap.md, block plan-freeze):
       # no working-state dossier outside the plan until every ★ row is done.

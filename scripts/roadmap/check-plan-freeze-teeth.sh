@@ -322,12 +322,39 @@ PY
 }
 
 # AC-3 red half. A slug row ticked ✅ while its contract is not signed off.
+# The row is CHOSEN from the fixture, not named: the first ⬜ row whose slug has
+# no signed-off contract. This case used to hard-code skill-system-v1, and died
+# silently the day that dossier was signed (17/09) — ticking a signed row is not
+# a lie, so the guard stayed green and the case read FAIL for a fixture reason.
+unsigned_open_slug() {
+  python3 - "$tmp/t" <<'PY'
+import pathlib, re, sys
+root = pathlib.Path(sys.argv[1])
+s = (root / "docs/roadmap.md").read_text(encoding="utf-8")
+block = s[s.index("<!-- plan-freeze:start -->"):s.index("<!-- plan-freeze:end -->")]
+for line in block.split("\n"):
+    if not line.startswith("|"):
+        continue
+    cells = [c.strip() for c in line.strip().strip("|").split("|")]
+    if len(cells) != 6 or cells[4] != "⬜" or not re.fullmatch(r"[a-z0-9][a-z0-9-]*", cells[3]):
+        continue
+    contract = root / "_acceptance" / cells[3] / "contract.md"
+    if contract.exists() and re.search(r"^status:\s*signed-off\s*$", contract.read_text(encoding="utf-8"), re.M):
+        continue
+    print(cells[3])
+    break
+PY
+}
+
 case_tick_noi_doi() {
   build_fixture
-  set_row_state "| skill-system-v1 |" "✅"
+  local slug
+  slug=$(unsigned_open_slug)
+  [ -n "$slug" ] || { echo "    fixture stale: không còn dòng ⬜ nào có slug chưa ký" >&2; return 1; }
+  set_row_state "| $slug |" "✅"
   guard_is_red || return 1
   out_has 'F2' || return 1
-  out_has 'skill-system-v1 chưa ký'
+  out_has "$slug chưa ký"
 }
 
 # AC-3 trusted half. A slug-less row with no `kiểm:` note is accepted and NAMED.

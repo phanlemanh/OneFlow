@@ -53,7 +53,7 @@ flowchart TD
 - Local CPU plugins — ffmpeg and pyscenedetect off Modal (`local-cpu-plugins`)
 - Measurement harness — Whisper-vi WER, blind TTS rating, per-node COGS (`measure-harness`)
 - Mở hoá B01 — hạ cánh nhánh đổi định danh kho (ba README, NOTICE, SECURITY, CONTRIBUTING, CLAUDE.md, .github, docker-compose trỏ ảnh của fork, tắt trigger tag desktop-release) (`mo-hoa-b01`) — đã giao — không đo, khai ở Cổng Đáng
-- slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`)
+- slot đọc số/giá/ngày thành chữ tiếng Việt, bắt buộc đứng trước TTS (Phase 1.3) (`normalize-text-vi`) — đã giao — đã nghỉ, giữ sử liệu
 - Ô đo chạy 0 ca thử mà vẫn báo đạt — hàng rào ở chốt CI (`o-do-chay-0-ca-van-xanh`)
 - Plugin directory prefix — accept oneflow-*, keep tongflow-* installable (`oneflow-plugin-prefix`)
 - Per-plugin origin in the official manifest (`per-plugin-origin`)
