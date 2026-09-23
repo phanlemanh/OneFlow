@@ -101,7 +101,10 @@ readers)
     [ -n "$target" ] || fail "khong tim thay run-log nao co dong repin duoc mot section ### Re-pin trich dan"
     echo "muc tieu: ${target#"$W"/} (dong repin duoc ### Re-pin trich dan)"
 
-    run_pmc() { (cd "$W" && bash scripts/pre-merge-check.sh . --base origin/main 2>&1); }
+    # Gate from the kit pinned at KIT_SHA since #129 (23/09): kit GUIDE §5.3 step 5.
+    gate="${CLAUDE_PLUGIN_ROOT:?CLAUDE_PLUGIN_ROOT unset: the gate lives in the kit (GUIDE §5.3)}/scripts/pre-merge-check.sh"
+    [ -f "$gate" ] || fail "kit gate not found at $gate"
+    run_pmc() { (cd "$W" && bash "$gate" . --base origin/main 2>&1); }
 
     with="$(run_pmc)"
     node -e '

@@ -38,7 +38,9 @@ job_block() {
 # needle: three steps run the same script with different modes.
 GUARD_NEEDLES=(
     check-roadmap-fresh.sh
-    check-product-map.mjs
+    # The kit's own map reader since #128 (owner decision 23/09); the home-made
+    # scripts/ci/check-product-map.mjs no longer runs in CI.
+    CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs
     check-plan-freeze.mjs
     check-plan-freeze-teeth.sh
     check-plan-docs.sh
@@ -62,6 +64,7 @@ TEETH_SKIP=(
     "check-plan-freeze-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
     "check-plan-docs-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
     "check-fork-identity-teeth.sh|ve do cua no CHINH LA no; pha no de chung minh no biet do la vong tron"
+    "CLAUDE_PLUGIN_ROOT/scripts/product-map.mjs|thuoc cua kit ghim KIT_SHA; ve do do kit tu canh, cay tham do khong co evidence cua ho so nen se do vi thieu tep chu khong vi lech"
 )
 teeth_skipped() {
     local n="$1" e
@@ -238,7 +241,6 @@ teeth)
     # from the real red output of the probe tree, not guessed.
     RED_TOKEN=(
         "check-roadmap-fresh.sh|roadmap drift"
-        "check-product-map.mjs|vắng trên bản đồ"
         "check-plan-freeze.mjs|teeth-probe-freeze mở ngoài kế hoạch"
         "check-plan-docs.sh|FAIL: STATUS.md đề ngày"
         "check-eval-filters.mjs|KHÔNG ca thử nào khớp"
@@ -325,10 +327,6 @@ teeth)
     python3 - "$probe/t" <<'PERTURB'
 import sys, pathlib
 root = pathlib.Path(sys.argv[1])
-# Drop one signed slug from the delivered block of the map.
-m = root / "PRODUCT-MAP.md"
-m.write_text("".join(l for l in m.read_text(encoding="utf-8").splitlines(keepends=True)
-                     if "(`roadmap-drift-guard`)" not in l), encoding="utf-8")
 # Duplicate one ledger row INSIDE the marker block.
 r = root / "docs" / "roadmap.md"
 lines = r.read_text(encoding="utf-8").splitlines(keepends=True)

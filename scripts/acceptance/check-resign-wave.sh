@@ -35,7 +35,12 @@ fail() { echo "FAIL: $*" >&2; exit 1; }
 if [ -n "${GATE_RESIDUAL_INPUT:-}" ]; then
     out=$(cat "$GATE_RESIDUAL_INPUT")
 else
-    out=$(bash scripts/pre-merge-check.sh . --base "$BASE" 2>&1) || true
+    # The gate runs from the kit pinned at KIT_SHA since #129 (23/09), not from a
+    # vendored copy (kit GUIDE §5.3 step 5). Unset CLAUDE_PLUGIN_ROOT is a loud
+    # error, never a silent empty verdict.
+    gate="${CLAUDE_PLUGIN_ROOT:?CLAUDE_PLUGIN_ROOT unset: the gate lives in the kit (GUIDE §5.3)}/scripts/pre-merge-check.sh"
+    [ -f "$gate" ] || fail "kit gate not found at $gate"
+    out=$(bash "$gate" . --base "$BASE" 2>&1) || true
 fi
 
 # A run that never reached its own summary line crashed; refuse to read silence
