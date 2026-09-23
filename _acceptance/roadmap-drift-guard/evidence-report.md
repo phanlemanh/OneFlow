@@ -7,7 +7,7 @@ reason:
 verified_by: fresh-context verification subagent
 enforcement_mode: strict
 bypass_used: false
-verified_commit: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932
+verified_commit: 8aeab256ea83c8f653f04e362da194f5f2a63d29
 human_signoff: Manh 2026-08-27
 ---
 
@@ -421,3 +421,7 @@ Cả mười ô đo chạy lại, cả mười exit 0; cây sạch trước và 
 ### Re-pin lần 7 — 2026-09-16, do chien dich ghim lai kit 2.14.0
 run_id: repin-20260916T063028Z-36924
 sha: 36651d8d168c1945d2f3ad5f66e7799bf9f5c932 · suites: 9 lệnh exit 0 · evals: 10/10 eval máy đạt kỳ vọng
+
+### Re-pin lần 8 — 2026-09-23, do fixture tick-noi-doi của răng plan-freeze thôi ghim skill-system-v1 (PR #128)
+run_id: repin-20260923T035636Z-96358
+sha: 8aeab256ea83c8f653f04e362da194f5f2a63d29 · suites: 9 lệnh exit 0 · evals: 10/10 eval máy đạt kỳ vọng
