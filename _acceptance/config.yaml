@@ -831,6 +831,30 @@ risk_tiers:
     - "_acceptance/**"
     - "public/**"
     - "src/i18n/messages/**"
+    # lịch sử — tệp đã xoá ở #129; giữ để luật stale không đếm việc xoá là code
+    # đổi sau verify (kit GUIDE §5.3 mục 3, 23/09). Luật stale đếm tệp đổi từ
+    # verified_commit ngoài t1_skip_globs, nên gỡ các dòng này biến chính việc
+    # xoá bản kit đã chép thành «code đổi sau verify» cho mọi hồ sơ ký trước #129.
+    # Giữ cả hai bộ tên `.js`/`.cjs`: cửa sổ diff từ verified_commit cũ còn thấy
+    # đường `.js` (kit 1.40.0 đổi đuôi). Gỡ chỉ khi không hồ sơ sống nào có
+    # verified_commit trước #129.
+    - "scripts/pre-merge-check.sh"
+    - "lib/eval-yaml.cjs"
+    - "scripts/recheck-evidence.cjs"
+    - "scripts/recheck-evidence.js"
+    - "lib/evidence-core.cjs"
+    - "lib/evidence-core.js"
+    - "lib/gap-probe.cjs"
+    - "lib/gap-probe.js"
+    - "lib/ac-line.cjs"
+    - "lib/ac-line.js"
+    - "lib/md-section.cjs"
+    - "lib/md-section.js"
+    - "lib/workspace-record.cjs"
+    # Bản chép lop-nhin-thay.cjs vào ở a282fed (kit 2.14.0) nhưng chưa từng được
+    # khai ở đây; #129 xoá nó nên nó cũng phải là dòng lịch sử, nếu không mọi hồ
+    # sơ có verified_commit từ a282fed tới trước #129 hết hạn vì chính việc xoá.
+    - "lib/lop-nhin-thay.cjs"
     # Lint configuration only — it constrains how source is written, never what
     # the product does at runtime, so a change here cannot invalidate evidence.
     - "biome.json"
