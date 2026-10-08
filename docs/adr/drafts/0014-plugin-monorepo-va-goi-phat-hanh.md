@@ -45,9 +45,10 @@ chạy nguyên trạng trên OneFlow*. Đo ngày 08/10, giả định đó khôn
   - HEAD của `tongflow-api-bytedance` import `tongflow.models.refs_gen_video`, module không
     có trong SDK 0.2.23.
 
-**Image GPU dựng từ SDK của upstream.** 29 plugin Modal của upstream gọi
-`pip_install("tongflow==0.3.3")` (17 plugin), `==0.2.21` (11) hoặc `==0.2.20` (1). Gói PyPI
-`tongflow` thuộc upstream. Image được dựng trong workspace Modal của người dùng, bằng token
+**Image GPU dựng từ SDK của upstream.** `deploy.py` của 29 plugin Modal upstream cài gói
+PyPI `tongflow` ở bản 0.3.3 (17 plugin), 0.2.21 (11) hoặc 0.2.20 (1). Gói PyPI `tongflow`
+thuộc upstream. (Không trích nguyên văn lời gọi: `sdk/tests/test_packaging.py` chặn chuỗi đó
+ở mọi tệp được theo dõi, để không ai quay lại cài SDK bằng tên gói của upstream.) Image được dựng trong workspace Modal của người dùng, bằng token
 và secret của họ. Câu trong `CLAUDE.md` và `docs/plugins.md` rằng mọi `deploy.py` ghim
 `oneflow-sdk` là sai với cả 29 plugin này.
 
