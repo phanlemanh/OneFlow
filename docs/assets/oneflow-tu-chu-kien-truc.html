@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OneFlow tự chủ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400;1,400&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  /* Tokens: docs/reference/diagram-skin.md (OneFlow) — skin: custom */
+  :root {
+    --paper: #f7f7f8;
+    --paper-2: #ececed;
+    --card: #ffffff;
+    --ink: #1a0033;
+    --muted: #4f4a63;
+    --soft: #66607a;
+    --rule: rgba(26, 0, 51, 0.12);
+    --stroke: rgba(26, 0, 51, 0.30);
+    --stroke-faint: rgba(26, 0, 51, 0.20);
+    --store: rgba(26, 0, 51, 0.05);
+    --ext: rgba(26, 0, 51, 0.03);
+    --input: rgba(79, 74, 99, 0.10);
+    --zone-fill: rgba(26, 0, 51, 0.02);
+    --zone-stroke: rgba(26, 0, 51, 0.10);
+    --accent: #e100e1;
+    --accent-tint: rgba(225, 0, 225, 0.06);
+    --link: #0068cc;
+    --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --serif: 'Instrument Serif', 'Lora', Georgia, serif;
+    --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1a0033;
+      --paper-2: #241041;
+      --card: #241041;
+      --ink: #f7f7f8;
+      --muted: #c0bacf;
+      --soft: #a49cb8;
+      --rule: rgba(247, 247, 248, 0.12);
+      --stroke: rgba(247, 247, 248, 0.32);
+      --stroke-faint: rgba(247, 247, 248, 0.22);
+      --store: rgba(247, 247, 248, 0.06);
+      --ext: rgba(247, 247, 248, 0.03);
+      --input: rgba(192, 186, 207, 0.10);
+      --zone-fill: rgba(247, 247, 248, 0.03);
+      --zone-stroke: rgba(247, 247, 248, 0.12);
+      --accent: #ff5cff;
+      --accent-tint: rgba(255, 92, 255, 0.09);
+      --link: #5aa9ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #1a0033;
+    --paper-2: #241041;
+    --card: #241041;
+    --ink: #f7f7f8;
+    --muted: #c0bacf;
+    --soft: #a49cb8;
+    --rule: rgba(247, 247, 248, 0.12);
+    --stroke: rgba(247, 247, 248, 0.32);
+    --stroke-faint: rgba(247, 247, 248, 0.22);
+    --store: rgba(247, 247, 248, 0.06);
+    --ext: rgba(247, 247, 248, 0.03);
+    --input: rgba(192, 186, 207, 0.10);
+    --zone-fill: rgba(247, 247, 248, 0.03);
+    --zone-stroke: rgba(247, 247, 248, 0.12);
+    --accent: #ff5cff;
+    --accent-tint: rgba(255, 92, 255, 0.09);
+    --link: #5aa9ff;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+  }
+  .frame { max-width: 1120px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+  @media (max-width: 640px) { .frame { padding: 2rem 1rem 3rem; } }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.68rem; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--soft);
+    margin: 0 0 0.5rem;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(1.9rem, 1.3rem + 2vw, 2.5rem);
+    letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 0.75rem;
+    text-wrap: balance;
+  }
+  h2 {
+    font-family: var(--serif); font-weight: 400; font-size: 1.6rem;
+    letter-spacing: -0.01em; line-height: 1.2; margin: 0 0 0.4rem;
+  }
+  .sub { color: var(--muted); font-size: 0.95rem; max-width: 78ch; margin: 0 0 1.5rem; }
+  section { margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+  section .num { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.18em; color: var(--soft); }
+
+  .wrap { overflow-x: auto; }
+  svg { width: 100%; min-width: 920px; display: block; }
+
+  /* SVG type ramp */
+  .t-name   { font-family: var(--sans); font-size: 12px; font-weight: 600; fill: var(--ink); }
+  .t-name-l { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .t-focal  { font-family: var(--sans); font-size: 16px; font-weight: 600; fill: var(--ink); }
+  .t-body   { font-family: var(--sans); font-size: 11px; fill: var(--ink); }
+  .t-note   { font-family: var(--sans); font-size: 11px; fill: var(--muted); }
+  .t-resp   { font-family: var(--sans); font-size: 10px; fill: var(--muted); }
+  .t-sub    { font-family: var(--mono); font-size: 9px; fill: var(--muted); }
+  .t-tag    { font-family: var(--mono); font-size: 9px; fill: var(--muted); letter-spacing: 0.08em; }
+  .t-eyebrow{ font-family: var(--mono); font-size: 9px; fill: var(--muted); letter-spacing: 0.14em; }
+  .t-arrow  { font-family: var(--mono); font-size: 9px; fill: var(--soft); letter-spacing: 0.06em; }
+  .t-arrow-l{ font-family: var(--mono); font-size: 9px; fill: var(--link); letter-spacing: 0.06em; }
+  .t-callout{ font-family: var(--serif); font-style: italic; font-size: 15px; fill: var(--muted); }
+  .t-legend { font-family: var(--sans); font-size: 10px; fill: var(--muted); }
+
+  .cards { display: grid; grid-template-columns: 1.1fr 1fr 0.9fr; gap: 1rem; margin-top: 1.25rem; }
+  @media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1.25rem;
+  }
+  .card .eyebrow { margin-bottom: 0.6rem; }
+  .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .card-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex: none; }
+  .card-dot.coral { background: var(--accent); }
+  .card-dot.link { background: var(--link); }
+  .card h3 { font-size: 0.95rem; font-weight: 600; margin: 0; }
+  .card ul { margin: 0; padding-left: 1.1rem; font-size: 0.86rem; color: var(--muted); }
+  .card li + li { margin-top: 0.3rem; }
+  .card code { font-family: var(--mono); font-size: 0.78rem; color: var(--ink); }
+
+  footer {
+    margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 0.7rem; color: var(--soft);
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">Kiến trúc đích · đề xuất 08/10/2026 · đầu vào cho mốc tái hoạch 09/10</p>
+  <h1>OneFlow tự chủ: bốn bản vẽ</h1>
+  <p class="sub">
+    Mã nguồn đã rẽ nhánh khỏi TongFlow từ 24/07. Phần còn dính là <em>lúc chạy</em>: plugin kéo
+    thẳng từ tài khoản tong-io, image GPU dựng từ SDK của upstream. Bốn bản vẽ dưới đây trả
+    lời bốn câu hỏi: phải làm chủ tầng nào, OneFlow đứng giữa ai, plugin đi tới máy người dùng
+    bằng đường nào, và khi phục vụ người dùng thật thì hạ tầng nào thuộc trách nhiệm OneFlow.
+  </p>
+
+  <!-- ============================================================ 1. LAYERS -->
+  <section>
+    <p class="num">01 · TẦNG SỞ HỮU</p>
+    <h2>Sáu tầng phải tự làm chủ</h2>
+    <p class="sub">
+      Hai tầng trên cùng đã tự chủ. Tầng phân phối plugin là chỗ duy nhất còn
+      <strong>phụ thuộc thật</strong>: nó quyết định mã nào chạy trên máy người dùng, và hôm
+      nay người quyết định là upstream.
+    </p>
+    <div class="wrap">
+    <svg viewBox="0 0 1040 556" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Sáu tầng của OneFlow, trạng thái hôm nay và đích đến; tầng phân phối plugin là tầng còn phụ thuộc upstream">
+      <rect width="100%" height="100%" fill="var(--paper)"/>
+
+      <!-- column headers -->
+      <text x="96" y="28" class="t-eyebrow">TẦNG</text>
+      <text x="432" y="28" class="t-eyebrow">HÔM NAY · 08/10</text>
+      <text x="720" y="28" class="t-eyebrow">ĐÍCH ĐẾN</text>
+
+      <!-- stack body -->
+      <rect x="80" y="40" width="880" height="432" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+      <line x1="80" y1="112" x2="960" y2="112" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="80" y1="184" x2="960" y2="184" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="80" y1="256" x2="960" y2="256" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="80" y1="328" x2="960" y2="328" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="80" y1="400" x2="960" y2="400" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="416" y1="40" x2="416" y2="472" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="704" y1="40" x2="704" y2="472" stroke="var(--rule)" stroke-width="1"/>
+
+      <!-- focal layer L3 -->
+      <rect x="80" y="256" width="880" height="72" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+
+      <!-- L6 -->
+      <text x="96" y="80" class="t-tag">L6</text>
+      <text x="128" y="72" class="t-name-l">Trải nghiệm sản phẩm</text>
+      <text x="128" y="90" class="t-sub">canvas · skill · onboarding</text>
+      <rect x="432" y="52" width="56" height="16" rx="2" fill="none" stroke="var(--ink)" stroke-width="0.8"/>
+      <text x="460" y="64" class="t-tag" text-anchor="middle" style="fill:var(--ink)">TỰ CHỦ</text>
+      <text x="432" y="92" class="t-note">Còn nút Discord + QR WeChat của upstream</text>
+      <text x="720" y="72" class="t-body">Kênh hỗ trợ, cộng đồng, tài liệu</text>
+      <text x="720" y="90" class="t-body">mang tên OneFlow</text>
+
+      <!-- L5 -->
+      <text x="96" y="152" class="t-tag">L5</text>
+      <text x="128" y="144" class="t-name-l">Hợp đồng ABI &amp; engine</text>
+      <text x="128" y="162" class="t-sub">abi.json · exporter · engine</text>
+      <rect x="432" y="124" width="56" height="16" rx="2" fill="none" stroke="var(--ink)" stroke-width="0.8"/>
+      <text x="460" y="136" class="t-tag" text-anchor="middle" style="fill:var(--ink)">TỰ CHỦ</text>
+      <text x="432" y="164" class="t-note">Đã rẽ nhánh khỏi ABI upstream từ 24/07</text>
+      <text x="720" y="144" class="t-body">ABI có số phiên bản; CI chặn mọi</text>
+      <text x="720" y="162" class="t-body">plugin lệch hợp đồng</text>
+
+      <!-- L4 -->
+      <text x="96" y="224" class="t-tag">L4</text>
+      <text x="128" y="216" class="t-name-l">SDK cho plugin</text>
+      <text x="128" y="234" class="t-sub">oneflow-sdk 0.2.23 · import tongflow</text>
+      <rect x="432" y="196" width="72" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="468" y="208" class="t-tag" text-anchor="middle">MỘT PHẦN</text>
+      <text x="432" y="236" class="t-note">Tên import, hằng số, env vẫn TONGFLOW_*</text>
+      <text x="720" y="216" class="t-body">Gói oneflow_sdk; tongflow chỉ còn</text>
+      <text x="720" y="234" class="t-body">là bí danh có thời hạn</text>
+
+      <!-- L3 (focal) -->
+      <text x="96" y="296" class="t-tag" style="fill:var(--ink)">L3</text>
+      <text x="128" y="288" class="t-name-l">Phân phối plugin</text>
+      <text x="128" y="306" class="t-sub">config/official-plugins.json</text>
+      <rect x="432" y="268" width="76" height="16" rx="2" fill="var(--card)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="470" y="280" class="t-tag" text-anchor="middle" style="fill:var(--ink)">PHỤ THUỘC</text>
+      <text x="432" y="308" class="t-note" style="fill:var(--ink)">35/39 clone thẳng tong-io, không ghim rev</text>
+      <text x="720" y="288" class="t-body">Registry riêng trên org OneFlow:</text>
+      <text x="720" y="306" class="t-body">mỗi plugin ghim rev + sha256</text>
+
+      <!-- L2 -->
+      <text x="96" y="368" class="t-tag">L2</text>
+      <text x="128" y="360" class="t-name-l">Nền thực thi</text>
+      <text x="128" y="378" class="t-sub">máy người dùng · API · GPU Modal</text>
+      <rect x="432" y="340" width="72" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="468" y="352" class="t-tag" text-anchor="middle">MỘT PHẦN</text>
+      <text x="432" y="380" class="t-note">29 image Modal dựng từ SDK của upstream</text>
+      <text x="720" y="360" class="t-body">Mọi image dựng từ oneflow-sdk,</text>
+      <text x="720" y="378" class="t-body">trong workspace của OneFlow</text>
+
+      <!-- L1 -->
+      <text x="96" y="440" class="t-tag">L1</text>
+      <text x="128" y="432" class="t-name-l">Vận hành &amp; phát hành</text>
+      <text x="128" y="450" class="t-sub">CI · GHCR · PyPI · GitHub</text>
+      <rect x="432" y="412" width="72" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="468" y="424" class="t-tag" text-anchor="middle">MỘT PHẦN</text>
+      <text x="432" y="452" class="t-note">Tài khoản cá nhân; chưa giám sát, chưa SLA</text>
+      <text x="720" y="432" class="t-body">Org OneFlow, giám sát, sao lưu,</text>
+      <text x="720" y="450" class="t-body">quy trình sự cố và bảo mật</text>
+
+      <!-- legend -->
+      <line x1="40" y1="500" x2="1000" y2="500" stroke="var(--rule)" stroke-width="0.8"/>
+      <text x="40" y="528" class="t-eyebrow">CHÚ GIẢI</text>
+      <rect x="128" y="516" width="56" height="16" rx="2" fill="none" stroke="var(--ink)" stroke-width="0.8"/>
+      <text x="156" y="528" class="t-tag" text-anchor="middle" style="fill:var(--ink)">TỰ CHỦ</text>
+      <text x="192" y="528" class="t-legend">không còn gì của upstream</text>
+      <rect x="384" y="516" width="72" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <text x="420" y="528" class="t-tag" text-anchor="middle">MỘT PHẦN</text>
+      <text x="464" y="528" class="t-legend">chạy được, còn dấu vết upstream</text>
+      <rect x="680" y="516" width="76" height="16" rx="2" fill="var(--card)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="718" y="528" class="t-tag" text-anchor="middle" style="fill:var(--ink)">PHỤ THUỘC</text>
+      <text x="764" y="528" class="t-legend">upstream quyết định thay bạn</text>
+    </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2. SYSTEM CONTEXT -->
+  <section>
+    <p class="num">02 · BỐI CẢNH HỆ THỐNG</p>
+    <h2>OneFlow đứng giữa ai</h2>
+    <p class="sub">
+      Trạng thái đích. Mọi thứ OneFlow gọi tới lúc chạy là của OneFlow hoặc của nhà cung cấp
+      được chọn có chủ đích. TongFlow lùi về đúng một vai: nơi đội vận hành đọc để học rồi tự
+      port.
+    </p>
+    <div class="wrap">
+    <svg viewBox="0 0 1040 708" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Sơ đồ bối cảnh: OneFlow ở giữa, người dùng và đội vận hành bên trái, nhà cung cấp model, GPU, OneHub, định danh bên phải, kho phát hành OneFlow bên dưới, TongFlow chỉ còn là nguồn tham khảo">
+      <defs>
+        <marker id="c-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--muted)"/>
+        </marker>
+        <marker id="c-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--link)"/>
+        </marker>
+      </defs>
+      <rect width="100%" height="100%" fill="var(--paper)"/>
+
+      <!-- connectors first -->
+      <!-- user -> oneflow -->
+      <line x1="200" y1="256" x2="398" y2="256" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#c-arrow)"/>
+      <rect x="236" y="234" width="128" height="14" rx="2" fill="var(--paper)"/>
+      <text x="300" y="244" class="t-arrow" text-anchor="middle">DỰNG &amp; CHẠY FLOW</text>
+
+      <!-- ops -> oneflow -->
+      <path d="M200,448 H448 Q456,448 456,440 V318" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#c-arrow)"/>
+      <rect x="248" y="424" width="104" height="14" rx="2" fill="var(--paper)"/>
+      <text x="300" y="434" class="t-arrow" text-anchor="middle">GIÁM SÁT · HỖ TRỢ</text>
+
+      <!-- ops -> release store -->
+      <line x1="200" y1="476" x2="518" y2="476" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#c-arrow)"/>
+      <rect x="252" y="452" width="96" height="14" rx="2" fill="var(--paper)"/>
+      <text x="300" y="462" class="t-arrow" text-anchor="middle">PHÁT HÀNH · KÝ</text>
+
+      <!-- oneflow -> release store -->
+      <line x1="600" y1="316" x2="600" y2="438" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#c-arrow)"/>
+      <rect x="472" y="368" width="120" height="14" rx="2" fill="var(--paper)"/>
+      <text x="588" y="378" class="t-arrow" text-anchor="end">CÀI PLUGIN ĐÃ GHIM</text>
+
+      <!-- ops -> tongflow (reference only) -->
+      <line x1="120" y1="496" x2="120" y2="558" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#c-arrow)"/>
+      <rect x="128" y="518" width="124" height="14" rx="2" fill="var(--paper)"/>
+      <text x="132" y="528" class="t-arrow">THEO DÕI · PORT TAY</text>
+
+      <!-- oneflow -> model api -->
+      <path d="M640,232 H712 Q720,232 720,224 V108 Q720,100 728,100 H838" fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#c-arrow-link)"/>
+      <rect x="752" y="78" width="64" height="14" rx="2" fill="var(--paper)"/>
+      <text x="784" y="88" class="t-arrow-l" text-anchor="middle">SUY LUẬN</text>
+
+      <!-- oneflow -> gpu -->
+      <path d="M640,256 H752 Q760,256 760,248 V204 Q760,196 768,196 H838" fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#c-arrow-link)"/>
+      <rect x="772" y="174" width="64" height="14" rx="2" fill="var(--paper)"/>
+      <text x="804" y="184" class="t-arrow-l" text-anchor="middle">CHẠY GPU</text>
+
+      <!-- oneflow -> onehub -->
+      <line x1="640" y1="292" x2="838" y2="292" stroke="var(--link)" stroke-width="1.2" marker-end="url(#c-arrow-link)"/>
+      <rect x="732" y="270" width="80" height="14" rx="2" fill="var(--paper)"/>
+      <text x="772" y="280" class="t-arrow-l" text-anchor="middle">TÌM FOOTAGE</text>
+
+      <!-- oneflow -> identity & billing (future) -->
+      <path d="M640,308 H712 Q720,308 720,316 V380 Q720,388 728,388 H838" fill="none" stroke="var(--link)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#c-arrow-link)"/>
+      <rect x="736" y="366" width="96" height="14" rx="2" fill="var(--paper)"/>
+      <text x="784" y="376" class="t-arrow-l" text-anchor="middle">ĐĂNG NHẬP · PHÍ</text>
+
+      <!-- nodes -->
+      <!-- person: user -->
+      <rect x="40" y="224" width="160" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="40" y="224" width="160" height="64" rx="6" fill="var(--input)" stroke="var(--soft)" stroke-width="1"/>
+      <rect x="48" y="232" width="48" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8"/>
+      <text x="72" y="244" class="t-tag" text-anchor="middle">NGƯỜI</text>
+      <circle cx="180" cy="238" r="4" fill="none" stroke="var(--muted)" stroke-width="1"/>
+      <path d="M172,252 Q172,244 180,244 Q188,244 188,252" fill="none" stroke="var(--muted)" stroke-width="1"/>
+      <text x="52" y="268" class="t-name">Người dùng</text>
+      <text x="52" y="280" class="t-sub">seller · nhà sáng tạo</text>
+
+      <!-- person: ops -->
+      <rect x="40" y="432" width="160" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="40" y="432" width="160" height="64" rx="6" fill="var(--input)" stroke="var(--soft)" stroke-width="1"/>
+      <rect x="48" y="440" width="48" height="16" rx="2" fill="none" stroke="var(--soft)" stroke-width="0.8"/>
+      <text x="72" y="452" class="t-tag" text-anchor="middle">NGƯỜI</text>
+      <circle cx="180" cy="446" r="4" fill="none" stroke="var(--muted)" stroke-width="1"/>
+      <path d="M172,460 Q172,452 180,452 Q188,452 188,460" fill="none" stroke="var(--muted)" stroke-width="1"/>
+      <text x="52" y="476" class="t-name">Đội vận hành</text>
+      <text x="52" y="488" class="t-sub">chủ sản phẩm · bạn</text>
+
+      <!-- focal: OneFlow -->
+      <rect x="400" y="212" width="240" height="104" rx="6" fill="var(--paper)"/>
+      <rect x="400" y="212" width="240" height="104" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+      <rect x="408" y="220" width="72" height="16" rx="2" fill="none" stroke="var(--accent)" stroke-width="0.8"/>
+      <text x="444" y="232" class="t-tag" text-anchor="middle" style="fill:var(--ink)">TRỌNG TÂM</text>
+      <text x="520" y="264" class="t-focal" text-anchor="middle">OneFlow</text>
+      <text x="520" y="284" class="t-resp" text-anchor="middle">Studio AIGC đa phương thức</text>
+      <text x="520" y="300" class="t-resp" text-anchor="middle">canvas · workflow · skill · chạy plugin</text>
+
+      <!-- external: model api -->
+      <rect x="840" y="68" width="168" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="840" y="68" width="168" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke)" stroke-width="1"/>
+      <rect x="848" y="76" width="48" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="872" y="88" class="t-tag" text-anchor="middle">NGOÀI</text>
+      <text x="852" y="110" class="t-name">Nhà cung cấp model</text>
+      <text x="852" y="124" class="t-sub">OpenAI · Gemini · v.v.</text>
+
+      <!-- external: gpu -->
+      <rect x="840" y="164" width="168" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="840" y="164" width="168" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke)" stroke-width="1"/>
+      <rect x="848" y="172" width="48" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="872" y="184" class="t-tag" text-anchor="middle">NGOÀI</text>
+      <text x="852" y="206" class="t-name">GPU cloud</text>
+      <text x="852" y="220" class="t-sub">Modal · workspace OneFlow</text>
+
+      <!-- sibling: onehub -->
+      <rect x="840" y="260" width="168" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="840" y="260" width="168" height="64" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="848" y="268" width="84" height="16" rx="2" fill="none" stroke="var(--ink)" stroke-width="0.8"/>
+      <text x="890" y="280" class="t-tag" text-anchor="middle" style="fill:var(--ink)">CỦA ONEFLOW</text>
+      <text x="852" y="302" class="t-name">OneHub media-library</text>
+      <text x="852" y="316" class="t-sub">kho footage · REST</text>
+
+      <!-- optional: identity & billing -->
+      <rect x="840" y="356" width="168" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="840" y="356" width="168" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke-faint)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="848" y="364" width="72" height="16" rx="2" fill="none" stroke="var(--stroke-faint)" stroke-width="0.8"/>
+      <text x="884" y="376" class="t-tag" text-anchor="middle">TƯƠNG LAI</text>
+      <text x="852" y="398" class="t-name">Định danh &amp; thanh toán</text>
+      <text x="852" y="412" class="t-sub">chỉ tier managed</text>
+
+      <!-- owned: release store -->
+      <rect x="520" y="440" width="240" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="520" y="440" width="240" height="64" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="528" y="448" width="84" height="16" rx="2" fill="none" stroke="var(--ink)" stroke-width="0.8"/>
+      <text x="570" y="460" class="t-tag" text-anchor="middle" style="fill:var(--ink)">CỦA ONEFLOW</text>
+      <text x="532" y="482" class="t-name">Kho phát hành OneFlow</text>
+      <text x="532" y="496" class="t-sub">GitHub org · PyPI · GHCR · registry</text>
+
+      <!-- reference: tongflow -->
+      <rect x="40" y="560" width="160" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="40" y="560" width="160" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke-faint)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="48" y="568" width="72" height="16" rx="2" fill="none" stroke="var(--stroke-faint)" stroke-width="0.8"/>
+      <text x="84" y="580" class="t-tag" text-anchor="middle">THAM KHẢO</text>
+      <text x="52" y="602" class="t-name">TongFlow upstream</text>
+      <text x="52" y="616" class="t-sub">tong-io · chỉ đọc</text>
+
+      <!-- callout -->
+      <text x="232" y="588" class="t-callout">Không còn mũi tên nào từ OneFlow lúc chạy tới TongFlow.</text>
+      <text x="232" y="608" class="t-callout">Upstream chỉ là chỗ để đọc, học, rồi tự port bằng tay.</text>
+
+      <!-- legend -->
+      <line x1="40" y1="648" x2="1000" y2="648" stroke="var(--rule)" stroke-width="0.8"/>
+      <text x="40" y="680" class="t-eyebrow">CHÚ GIẢI</text>
+      <rect x="128" y="668" width="24" height="16" rx="3" fill="var(--input)" stroke="var(--soft)" stroke-width="1"/>
+      <text x="160" y="680" class="t-legend">Người</text>
+      <rect x="216" y="668" width="24" height="16" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="248" y="680" class="t-legend">Hệ trọng tâm</text>
+      <rect x="344" y="668" width="24" height="16" rx="3" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="376" y="680" class="t-legend">Của OneFlow</text>
+      <rect x="472" y="668" width="24" height="16" rx="3" fill="var(--ext)" stroke="var(--stroke)" stroke-width="1"/>
+      <text x="504" y="680" class="t-legend">Nhà cung cấp ngoài</text>
+      <rect x="632" y="668" width="24" height="16" rx="3" fill="var(--ext)" stroke="var(--stroke-faint)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="664" y="680" class="t-legend">Tương lai / tham khảo</text>
+      <line x1="808" y1="676" x2="840" y2="676" stroke="var(--link)" stroke-width="1.2" marker-end="url(#c-arrow-link)"/>
+      <text x="852" y="680" class="t-legend">Gọi API lúc chạy</text>
+    </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3. SUPPLY CHAIN -->
+  <section>
+    <p class="num">03 · CHUỖI CUNG ỨNG PLUGIN</p>
+    <h2>Đường plugin đi tới máy người dùng</h2>
+    <p class="sub">
+      Đây là thay đổi kiến trúc lớn nhất. Hôm nay app và engine clone thẳng
+      <code>tong-io/&lt;id&gt;@HEAD</code>, và 29 image GPU cài <code>tongflow==0.3.x</code> từ PyPI
+      của upstream. Đích đến: chỉ <strong>một registry của OneFlow</strong> được quyền trỏ tới mã
+      sẽ chạy, mỗi plugin ghim đúng một commit và một checksum, mọi image dựng từ
+      <code>oneflow-sdk</code>.
+    </p>
+    <div class="wrap">
+    <svg viewBox="0 0 1040 556" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Chuỗi cung ứng plugin: repo OneFlow và SDK đi qua CI, xuất bản vào registry có ghim, trình cài đọc registry rồi cài tại máy hoặc deploy GPU">
+      <defs>
+        <marker id="s-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--muted)"/>
+        </marker>
+        <marker id="s-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--accent)"/>
+        </marker>
+      </defs>
+      <rect width="100%" height="100%" fill="var(--paper)"/>
+
+      <!-- zones -->
+      <rect x="24" y="56" width="216" height="280" rx="8" fill="var(--zone-fill)" stroke="var(--zone-stroke)" stroke-width="0.8"/>
+      <rect x="36" y="60" width="52" height="16" rx="2" fill="var(--paper)"/>
+      <text x="62" y="72" class="t-eyebrow" text-anchor="middle">NGUỒN</text>
+      <rect x="256" y="56" width="216" height="280" rx="8" fill="var(--zone-fill)" stroke="var(--zone-stroke)" stroke-width="0.8"/>
+      <rect x="268" y="60" width="100" height="16" rx="2" fill="var(--paper)"/>
+      <text x="318" y="72" class="t-eyebrow" text-anchor="middle">XÁC MINH · CI</text>
+      <rect x="720" y="184" width="304" height="256" rx="8" fill="var(--zone-fill)" stroke="var(--zone-stroke)" stroke-width="0.8"/>
+      <rect x="732" y="188" width="76" height="16" rx="2" fill="var(--paper)"/>
+      <text x="770" y="200" class="t-eyebrow" text-anchor="middle">LÚC CHẠY</text>
+
+      <!-- connectors -->
+      <line x1="132" y1="160" x2="132" y2="230" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#s-arrow)"/>
+      <rect x="140" y="188" width="56" height="14" rx="2" fill="var(--paper)"/>
+      <text x="144" y="198" class="t-arrow">PORT TAY</text>
+
+      <line x1="224" y1="268" x2="270" y2="268" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+      <rect x="230" y="244" width="36" height="14" rx="2" fill="var(--paper)"/>
+      <text x="248" y="254" class="t-arrow" text-anchor="middle">PUSH</text>
+
+      <line x1="364" y1="160" x2="364" y2="230" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+      <rect x="372" y="188" width="56" height="14" rx="2" fill="var(--paper)"/>
+      <text x="376" y="198" class="t-arrow">GHIM SDK</text>
+
+      <line x1="456" y1="268" x2="502" y2="268" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+      <rect x="460" y="244" width="40" height="14" rx="2" fill="var(--paper)"/>
+      <text x="480" y="254" class="t-arrow" text-anchor="middle">BUILD</text>
+
+      <line x1="688" y1="268" x2="742" y2="268" stroke="var(--accent)" stroke-width="1.4" marker-end="url(#s-arrow-accent)"/>
+      <rect x="692" y="244" width="48" height="14" rx="2" fill="var(--paper)"/>
+      <text x="716" y="254" class="t-arrow" text-anchor="middle">REV+SHA</text>
+
+      <line x1="804" y1="304" x2="804" y2="358" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+      <rect x="812" y="324" width="36" height="14" rx="2" fill="var(--paper)"/>
+      <text x="816" y="334" class="t-arrow">VENV</text>
+
+      <line x1="940" y1="304" x2="940" y2="358" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#s-arrow)"/>
+      <rect x="948" y="324" width="48" height="14" rx="2" fill="var(--paper)"/>
+      <text x="952" y="334" class="t-arrow">DEPLOY</text>
+
+      <!-- nodes -->
+      <!-- upstream (reference) -->
+      <rect x="40" y="96" width="184" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="40" y="96" width="184" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke-faint)" stroke-width="1" stroke-dasharray="4,3"/>
+      <rect x="48" y="104" width="72" height="16" rx="2" fill="none" stroke="var(--stroke-faint)" stroke-width="0.8"/>
+      <text x="84" y="116" class="t-tag" text-anchor="middle">THAM KHẢO</text>
+      <text x="52" y="138" class="t-name">TongFlow upstream</text>
+      <text x="52" y="152" class="t-sub">tong-io · chỉ đọc</text>
+
+      <!-- repo -->
+      <rect x="40" y="232" width="184" height="72" rx="6" fill="var(--paper)"/>
+      <rect x="40" y="232" width="184" height="72" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="48" y="240" width="36" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="66" y="252" class="t-tag" text-anchor="middle">GIT</text>
+      <text x="52" y="276" class="t-name">Repo plugin OneFlow</text>
+      <text x="52" y="292" class="t-sub">github.com/&lt;org&gt;/*</text>
+
+      <!-- sdk -->
+      <rect x="272" y="96" width="184" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="272" y="96" width="184" height="64" rx="6" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <rect x="280" y="104" width="40" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="300" y="116" class="t-tag" text-anchor="middle">PYPI</text>
+      <text x="284" y="138" class="t-name">oneflow-sdk</text>
+      <text x="284" y="152" class="t-sub">một SDK cho mọi plugin</text>
+
+      <!-- ci -->
+      <rect x="272" y="232" width="184" height="72" rx="6" fill="var(--paper)"/>
+      <rect x="272" y="232" width="184" height="72" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="280" y="240" width="32" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="296" y="252" class="t-tag" text-anchor="middle">CI</text>
+      <text x="284" y="276" class="t-name">Kiểm &amp; build plugin</text>
+      <text x="284" y="292" class="t-sub">scan ABI · test · CVE</text>
+
+      <!-- registry (focal) -->
+      <rect x="504" y="224" width="184" height="88" rx="6" fill="var(--paper)"/>
+      <rect x="504" y="224" width="184" height="88" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+      <rect x="512" y="232" width="68" height="16" rx="2" fill="none" stroke="var(--accent)" stroke-width="0.8"/>
+      <text x="546" y="244" class="t-tag" text-anchor="middle" style="fill:var(--ink)">REGISTRY</text>
+      <text x="516" y="268" class="t-name-l">Registry plugin</text>
+      <text x="516" y="284" class="t-sub">id · rev · sha256 · sdk</text>
+      <text x="516" y="300" class="t-resp">nguồn sự thật duy nhất</text>
+
+      <!-- installer -->
+      <rect x="744" y="232" width="256" height="72" rx="6" fill="var(--paper)"/>
+      <rect x="744" y="232" width="256" height="72" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="752" y="240" width="88" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="796" y="252" class="t-tag" text-anchor="middle">APP + ENGINE</text>
+      <text x="756" y="276" class="t-name">Trình cài plugin</text>
+      <text x="756" y="292" class="t-sub">một resolver dùng chung</text>
+
+      <!-- local exec -->
+      <rect x="744" y="360" width="120" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="744" y="360" width="120" height="64" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="756" y="388" class="t-name">Tại máy</text>
+      <text x="756" y="404" class="t-sub">venv · subprocess</text>
+
+      <!-- gpu worker -->
+      <rect x="880" y="360" width="120" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="880" y="360" width="120" height="64" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="892" y="388" class="t-name">GPU worker</text>
+      <text x="892" y="404" class="t-sub">image oneflow-sdk</text>
+
+      <!-- callout -->
+      <text x="40" y="380" class="t-callout">Hôm nay mũi tên magenta không tồn tại: app clone thẳng</text>
+      <text x="40" y="400" class="t-callout">tong-io@HEAD, nên upstream push gì máy người dùng nhận nấy.</text>
+
+      <!-- legend -->
+      <line x1="40" y1="480" x2="1000" y2="480" stroke="var(--rule)" stroke-width="0.8"/>
+      <text x="40" y="512" class="t-eyebrow">CHÚ GIẢI</text>
+      <rect x="128" y="500" width="24" height="16" rx="3" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="160" y="512" class="t-legend">Điểm kiểm soát duy nhất</text>
+      <rect x="320" y="500" width="24" height="16" rx="3" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="352" y="512" class="t-legend">Thành phần của OneFlow</text>
+      <rect x="512" y="500" width="24" height="16" rx="3" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="544" y="512" class="t-legend">Gói đã phát hành</text>
+      <line x1="680" y1="508" x2="712" y2="508" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="724" y="512" class="t-legend">Thủ công, có người duyệt</text>
+    </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================ 4. DEPLOYMENT -->
+  <section>
+    <p class="num">04 · TRIỂN KHAI TIER MANAGED</p>
+    <h2>Hạ tầng OneFlow phải chịu trách nhiệm</h2>
+    <p class="sub">
+      Một môi trường: production của tier managed, cho người không tự cầm key. Tier mặc định
+      (ADR-0011) chạy chính cụm ứng dụng này ngay trên máy người dùng, với SQLite và ổ đĩa
+      thay cho các dịch vụ quản lý. Vùng chọn gần Việt Nam là đề xuất, chưa chốt.
+    </p>
+    <div class="wrap">
+    <svg viewBox="0 0 1040 636" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="Triển khai tier managed: người dùng qua CDN vào cụm ứng dụng gồm Web API và worker, dùng Postgres, hàng đợi, object storage, kho khoá, gọi nhà cung cấp suy luận bên ngoài, có lớp giám sát">
+      <defs>
+        <marker id="d-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--muted)"/>
+        </marker>
+        <marker id="d-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="var(--link)"/>
+        </marker>
+      </defs>
+      <rect width="100%" height="100%" fill="var(--paper)"/>
+
+      <!-- region -->
+      <rect x="160" y="40" width="656" height="512" rx="8" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="176" y="64" class="t-eyebrow">CLOUD ONEFLOW · VÙNG GẦN VIỆT NAM</text>
+      <!-- cluster -->
+      <rect x="336" y="88" width="224" height="256" rx="8" fill="none" stroke="var(--stroke)" stroke-width="1" stroke-dasharray="5,4"/>
+      <rect x="344" y="92" width="96" height="16" rx="2" fill="var(--paper-2)"/>
+      <text x="352" y="104" class="t-eyebrow">CỤM ỨNG DỤNG</text>
+
+      <!-- connectors -->
+      <line x1="136" y1="256" x2="182" y2="256" stroke="var(--link)" stroke-width="1.2" marker-end="url(#d-arrow-link)"/>
+      <rect x="140" y="232" width="40" height="14" rx="2" fill="var(--paper)"/>
+      <text x="160" y="242" class="t-arrow-l" text-anchor="middle">HTTPS</text>
+
+      <path d="M304,248 H312 Q320,248 320,240 V160 Q320,152 328,152 H358" fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#d-arrow-link)"/>
+      <rect x="272" y="188" width="40" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="308" y="198" class="t-arrow-l" text-anchor="end">HTTPS</text>
+
+      <line x1="544" y1="128" x2="630" y2="128" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#d-arrow)"/>
+      <rect x="580" y="106" width="32" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="596" y="116" class="t-arrow" text-anchor="middle">SQL</text>
+
+      <line x1="544" y1="172" x2="630" y2="172" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#d-arrow)"/>
+      <rect x="568" y="150" width="56" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="596" y="160" class="t-arrow" text-anchor="middle">ĐẨY JOB</text>
+
+      <line x1="632" y1="264" x2="546" y2="264" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#d-arrow)"/>
+      <rect x="568" y="242" width="56" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="596" y="252" class="t-arrow" text-anchor="middle">NHẬN JOB</text>
+
+      <line x1="544" y1="308" x2="630" y2="308" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#d-arrow)"/>
+      <rect x="568" y="286" width="56" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="596" y="296" class="t-arrow" text-anchor="middle">GHI ASSET</text>
+
+      <path d="M520,320 V396 Q520,404 528,404 H630" fill="none" stroke="var(--muted)" stroke-width="1.2" marker-end="url(#d-arrow)"/>
+      <rect x="552" y="382" width="52" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="578" y="392" class="t-arrow" text-anchor="middle">ĐỌC KEY</text>
+
+      <path d="M416,320 V456 Q416,464 424,464 H854" fill="none" stroke="var(--link)" stroke-width="1.2" marker-end="url(#d-arrow-link)"/>
+      <rect x="688" y="440" width="60" height="14" rx="2" fill="var(--paper-2)"/>
+      <text x="718" y="450" class="t-arrow-l" text-anchor="middle">SUY LUẬN</text>
+
+      <!-- nodes -->
+      <!-- user -->
+      <rect x="24" y="224" width="112" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="24" y="224" width="112" height="64" rx="6" fill="var(--input)" stroke="var(--soft)" stroke-width="1"/>
+      <text x="36" y="252" class="t-name">Người dùng</text>
+      <text x="36" y="268" class="t-sub">web · desktop</text>
+
+      <!-- edge -->
+      <rect x="184" y="224" width="120" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="184" y="224" width="120" height="64" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="196" y="252" class="t-name">Edge</text>
+      <text x="196" y="268" class="t-sub">CDN · TLS · WAF</text>
+
+      <!-- web/api -->
+      <rect x="360" y="112" width="184" height="72" rx="6" fill="var(--paper)"/>
+      <rect x="360" y="112" width="184" height="72" rx="6" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <rect x="508" y="120" width="28" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="522" y="132" class="t-tag" text-anchor="middle">×2</text>
+      <text x="372" y="144" class="t-name">Web + API</text>
+      <text x="372" y="160" class="t-sub">Next.js · :3000</text>
+      <text x="372" y="174" class="t-sub">đăng nhập · tenant</text>
+
+      <!-- worker (focal) -->
+      <rect x="360" y="248" width="184" height="72" rx="6" fill="var(--paper)"/>
+      <rect x="360" y="248" width="184" height="72" rx="6" fill="var(--accent-tint)" stroke="var(--accent)" stroke-width="1.4"/>
+      <rect x="508" y="256" width="28" height="16" rx="2" fill="none" stroke="var(--accent)" stroke-width="0.8"/>
+      <text x="522" y="268" class="t-tag" text-anchor="middle" style="fill:var(--ink)">×N</text>
+      <text x="372" y="284" class="t-name">Worker workflow</text>
+      <text x="372" y="300" class="t-sub">engine Python · sandbox</text>
+      <text x="372" y="314" class="t-sub">plugin từ registry</text>
+
+      <!-- managed: postgres -->
+      <rect x="632" y="96" width="168" height="56" rx="6" fill="var(--paper)"/>
+      <rect x="632" y="96" width="168" height="56" rx="6" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="644" y="120" class="t-name">Postgres</text>
+      <text x="644" y="136" class="t-sub">org · task · sao lưu PITR</text>
+
+      <!-- managed: queue -->
+      <rect x="632" y="160" width="168" height="120" rx="6" fill="var(--paper)"/>
+      <rect x="632" y="160" width="168" height="120" rx="6" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="644" y="212" class="t-name">Hàng đợi run</text>
+      <text x="644" y="228" class="t-sub">retry · timeout · resume</text>
+
+      <!-- managed: storage -->
+      <rect x="632" y="288" width="168" height="56" rx="6" fill="var(--paper)"/>
+      <rect x="632" y="288" width="168" height="56" rx="6" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="644" y="312" class="t-name">Object storage</text>
+      <text x="644" y="328" class="t-sub">asset · URL ký hạn</text>
+
+      <!-- managed: vault -->
+      <rect x="632" y="376" width="168" height="56" rx="6" fill="var(--paper)"/>
+      <rect x="632" y="376" width="168" height="56" rx="6" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="644" y="400" class="t-name">Kho khoá</text>
+      <text x="644" y="416" class="t-sub">key managed · KMS</text>
+
+      <!-- observability footer -->
+      <rect x="184" y="488" width="616" height="44" rx="6" fill="var(--paper)"/>
+      <rect x="184" y="488" width="616" height="44" rx="6" fill="var(--card)" stroke="var(--stroke)" stroke-width="1"/>
+      <text x="196" y="508" class="t-name">Giám sát</text>
+      <text x="196" y="522" class="t-sub">log · metric · trace · cảnh báo · mọi thành phần trong vùng</text>
+
+      <!-- external providers -->
+      <rect x="856" y="432" width="168" height="64" rx="6" fill="var(--paper)"/>
+      <rect x="856" y="432" width="168" height="64" rx="6" fill="var(--ext)" stroke="var(--stroke)" stroke-width="1"/>
+      <rect x="864" y="440" width="48" height="16" rx="2" fill="none" stroke="var(--stroke)" stroke-width="0.8"/>
+      <text x="888" y="452" class="t-tag" text-anchor="middle">NGOÀI</text>
+      <text x="868" y="474" class="t-name">Nhà cung cấp suy luận</text>
+      <text x="868" y="488" class="t-sub">Modal · OpenAI · Gemini</text>
+
+      <!-- callouts -->
+      <text x="840" y="104" class="t-callout">Worker là chỗ rủi ro nhất:</text>
+      <text x="840" y="124" class="t-callout">nó chạy mã plugin bằng key</text>
+      <text x="840" y="144" class="t-callout">của OneFlow. Chỉ registry ghim</text>
+      <text x="840" y="164" class="t-callout">mới được cấp mã cho nó, và</text>
+      <text x="840" y="184" class="t-callout">mỗi run chạy trong sandbox.</text>
+
+      <!-- legend -->
+      <line x1="40" y1="576" x2="1000" y2="576" stroke="var(--rule)" stroke-width="0.8"/>
+      <text x="40" y="608" class="t-eyebrow">CHÚ GIẢI</text>
+      <rect x="128" y="596" width="24" height="16" rx="3" fill="var(--card)" stroke="var(--ink)" stroke-width="1"/>
+      <text x="160" y="608" class="t-legend">Thành phần triển khai</text>
+      <rect x="296" y="596" width="24" height="16" rx="3" fill="var(--store)" stroke="var(--muted)" stroke-width="1"/>
+      <text x="328" y="608" class="t-legend">Dịch vụ quản lý</text>
+      <rect x="440" y="596" width="24" height="16" rx="3" fill="none" stroke="var(--stroke)" stroke-width="1" stroke-dasharray="5,4"/>
+      <text x="472" y="608" class="t-legend">Cụm container</text>
+      <rect x="576" y="596" width="24" height="16" rx="3" fill="var(--paper-2)" stroke="var(--rule)" stroke-width="1"/>
+      <text x="608" y="608" class="t-legend">Vùng cloud</text>
+      <line x1="696" y1="604" x2="728" y2="604" stroke="var(--link)" stroke-width="1.2" marker-end="url(#d-arrow-link)"/>
+      <text x="740" y="608" class="t-legend">Đường công khai / gọi ra ngoài</text>
+    </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================ PLAN CARDS -->
+  <section>
+    <p class="num">THỨ TỰ XÂY</p>
+    <h2>Đi từ chỗ đang hỏng ra ngoài</h2>
+    <p class="sub">Chặng sau không bắt đầu khi chặng trước chưa xong. Đổi tên làm trước là tốn công vô ích, vì nó làm vỡ chính các plugin còn kéo từ upstream.</p>
+    <div class="cards">
+      <div class="card">
+        <p class="eyebrow">Chặng 0–1 · bản vẽ 03</p>
+        <div class="card-header"><span class="card-dot coral"></span><h3>Sở hữu chuỗi cung ứng</h3></div>
+        <ul>
+          <li>Ghim <code>rev</code> cho mọi plugin upstream ngay; gỡ <code>agnes</code> (repo đã chết).</li>
+          <li>Engine dùng chung resolver với app (hôm nay đặt cứng <code>tong-io</code>).</li>
+          <li>Lập org GitHub; fork các plugin thật sự dùng; image đổi sang <code>oneflow-sdk</code>.</li>
+          <li>Đảo mặc định manifest: org OneFlow, upstream thành mục khai rõ.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Chặng 2 · bản vẽ 01</p>
+        <div class="card-header"><span class="card-dot"></span><h3>Cắt hợp đồng tên</h3></div>
+        <ul>
+          <li>ADR mới thay ADR-0008: gói <code>oneflow_sdk</code>, bí danh <code>tongflow</code> có hạn.</li>
+          <li>Env <code>ONEFLOW_*</code> đọc trước, <code>TONGFLOW_*</code> sau.</li>
+          <li>Di trú dữ liệu khi khởi động: <code>tongflow.db</code>, thư mục ứng dụng, volume.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Chặng 3 · bản vẽ 02, 04</p>
+        <div class="card-header"><span class="card-dot link"></span><h3>Sẵn sàng phục vụ</h3></div>
+        <ul>
+          <li>Desktop thật (S5); xoá vỏ Pake trỏ <code>app.tongflow.com</code>.</li>
+          <li>Giám sát, sao lưu, kênh sự cố trước khi mở tier managed.</li>
+          <li>Link mã nguồn trong UI khi host cho người khác (AGPL §13).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    OneFlow · docs/assets/oneflow-tu-chu-kien-truc.html · skin: docs/reference/diagram-skin.md ·
+    số liệu đo 08/10/2026 từ main@8a0df23 và tong-io/tongflow@be171c9 · đề xuất, chưa phải quyết định
+  </footer>
+</div>
+</body>
+</html>
