@@ -123,7 +123,7 @@ jobs:
       # The acceptance-gate kit this job reads its own rulers from. Pinned to the
       # sha installed on the dev machine, so machine and CI run the same kit.
       # Bumping the kit is a one-line PR that changes this sha (kit GUIDE §5.3).
-      KIT_SHA: 8a4ea88105d109d9b79590761b953e95af400f7c
+      KIT_SHA: 9d1ae5271c947d206dbc418b34089e09b68f106b  # v2.24.0
     steps:
       - uses: actions/checkout@v7
         with:
