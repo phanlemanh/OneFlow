@@ -12,6 +12,10 @@ prototype:
   disposition: archive
 ---
 
+## Việc đầu S1 (bàn giao cho dãy P2 của đợt of1)
+
+1. **Phép thử D3 chạy TRƯỚC mọi bước thiết kế:** đổi khuôn câu trả lời của Director (`DirectorPlanSchema` / `output_config`) có làm mất bộ nhớ đệm câu lệnh (prompt cache) của vocabulary không — hai lời gọi thật cùng prefix, khác schema, đọc `cache_read_input_tokens` (~30 phút, ADR-0013 §Hệ quả; giả định #1 bên dưới). Kết quả quyết hình thiết kế: mất cache thì nhánh chọn-skill tách thành lời gọi riêng.
+
 ## Vấn đề & ai gặp
 
 Người bán hàng hoặc môi giới (người dùng đại diện của lát cắt, cơ hội
