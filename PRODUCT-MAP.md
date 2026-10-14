@@ -6,7 +6,7 @@
 ```mermaid
 flowchart TD
   A["Đang cân nhắc cơ hội<br/>chưa có"] --> GD{"Cổng Đáng"}
-  GD --> B["Sắp mở vòng<br/>1 việc"]
+  GD --> B["Sắp mở vòng<br/>2 việc"]
   GD --> XL["Xếp lại sau<br/>3 việc"]
   GD --> DB["Đã bác từ khám phá<br/>chưa có"]
   B --> CD["Chờ duyệt phạm vi<br/>chưa có"] --> GP{"Cổng Phạm vi"}
@@ -23,6 +23,7 @@ flowchart TD
 
 ## Sắp mở vòng
 
+- Director sinh instance skill từ prompt — gõ một câu, nhận đúng skill với tham số đã điền sẵn (B8 ★ của lát cắt chứng minh) (`director-sinh-instance`)
 - Skill (`skill-1-footage-kho-clip`)
 
 ## Đã giao
