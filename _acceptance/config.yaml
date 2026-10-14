@@ -919,3 +919,8 @@ capture:
 design_pass:
   proto_route: http://localhost:3000/proto/{slug}
   dev_cmd: pnpm dev
+
+# Gói đợt Điều phối – Thợ (gói dieu-phoi của kit, từ 2.27.0). `{ten}` là tên đợt.
+# Đợt thử thứ hai của gói chạy trên kho này: docs/dieu-phoi/dot-of1/README.md.
+dieu_phoi:
+  goi_dot: docs/dieu-phoi/dot-{ten}

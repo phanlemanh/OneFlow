@@ -1,0 +1,36 @@
+{
+    "dot": "of1",
+    "day": [
+        {
+            "id": "P1",
+            "worktree": "/CHUA-CO-WORKTREE/P1",
+            "link": ""
+        },
+        {
+            "id": "P2",
+            "worktree": "/CHUA-CO-WORKTREE/P2",
+            "link": ""
+        }
+    ],
+    "hang": [
+        {
+            "ma": "B7",
+            "slug": "skill-1-footage-kho-clip",
+            "day": "P1",
+            "uu_tien": 1,
+            "s4": "local",
+            "ranh_gioi": ["_acceptance/skill-1-footage-kho-clip/**"],
+            "moc": "2026-10-24"
+        },
+        {
+            "ma": "B8",
+            "slug": "director-sinh-instance",
+            "day": "P2",
+            "uu_tien": 1,
+            "s4": "local",
+            "ranh_gioi": ["_acceptance/director-sinh-instance/**"],
+            "moc": "2026-10-24"
+        }
+    ],
+    "ngoai_hang_merge": []
+}
