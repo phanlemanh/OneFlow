@@ -1,7 +1,8 @@
 # Gói đợt of1 — đợt thử thứ hai của gói `dieu-phoi` trên OneFlow
 
-Trạng thái: **NHÁP, chưa mở.** Chờ Điều phối M5 và chủ kho duyệt kế hoạch dưới đây. Mở bằng
-`/dieu-phoi:mo-dot of1` từ một phiên ở gốc kho (phiên đó thành phiên giám sát).
+Trạng thái: **kế hoạch ĐÃ DUYỆT, đợt chưa mở.** Chủ kho (manh) duyệt 14/10/2026, chọn lối (i) cho B8: ký Cổng
+Đáng của B8 TRƯỚC ngày mở. Mở ở ngày chạy bằng `/dieu-phoi:mo-dot of1` từ một phiên ở gốc kho (phiên đó thành
+phiên giám sát).
 
 Mốc ngoài của lộ trình kit: «OneFlow: đợt thử thứ hai trên gói — đo chạy được mà không sửa lõi», hạn 27/10/2026.
 Kit ghim: v2.30.0 (`7cf78c36`), gói `dieu-phoi` 2.30.0 cài ở phạm vi project và user.
@@ -19,7 +20,7 @@ Kit ghim: v2.30.0 (`7cf78c36`), gói `dieu-phoi` 2.30.0 cài ở phạm vi proje
 | Dãy | Mã | Hàng | Quyết lúc soạn | Ghi chú |
 |---|---|---|---|---|
 | P1 | B7 ★ | `skill-1-footage-kho-clip` — Skill #1 Footage sang kho clip 9:16 | `build` (05/09) | T3; B5 skill-system-v1 đã ký 17/09 nên không còn chờ |
-| P2 | B8 ★ | `director-sinh-instance` — Director sinh instance skill từ prompt | chưa có ô | Cổng Đáng ở thẻ khởi tạo, hoặc trước khi mở (xem «Điểm vấp đã biết») |
+| P2 | B8 ★ | `director-sinh-instance` — Director sinh instance skill từ prompt | chưa có ô | lối (i): chủ kho ký Cổng Đáng trước 20/10 bằng `/feature-loop:feature-loop director-sinh-instance` (S0); chưa ký tới ngày mở thì đợt chạy một dãy (xem «Điểm vấp đã biết») |
 
 - **Ngày chạy:** 20–22/10/2026, mốc hàng 24/10, báo cáo đợt trước hạn 27/10.
 - **Số thợ:** hai. Khoá `s4` của gói là khoá cấp máy (`~/.claude/dieu-phoi/may`), dùng chung với mọi đợt khác trên
