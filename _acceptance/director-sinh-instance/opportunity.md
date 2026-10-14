@@ -3,13 +3,13 @@ schema_version: 1
 slug: director-sinh-instance
 feature: Director sinh instance skill từ prompt — gõ một câu, nhận đúng skill với tham số đã điền sẵn (B8 ★ của lát cắt chứng minh)
 owner: phanlemanh@gmail.com
-stage: discovery
-decision:
-decided_by:
-decided_at:
+stage: decided
+decision: build
+decided_by: Phan Le Manh
+decided_at: 2026-10-14T08:42:55Z
 prototype:
   base_commit:
-  disposition:
+  disposition: archive
 ---
 
 ## Vấn đề & ai gặp
@@ -59,11 +59,12 @@ Phép thử #3 đã chạy (đọc kho, không dựng) — xem cột Trạng th�
 > Ô này mở vì gói đợt `of1` cần quyết `build` trước 20/10 (chủ kho chọn lối (i) ngày 14/10), nên
 > máy đề xuất ngưỡng riêng — đo cùng phiên UAT B10, không mở phiên thứ hai. Chủ kho có thể gạch
 > cả khối và giữ đường B (xem Cổng 0).
+> **14/10:** chủ kho giữ ngưỡng riêng — bốn bullet dưới đã gỡ tiền tố đề xuất lúc ký Cổng Đáng.
 
-- Câu hỏi phép đo trả lời: [đề xuất] một người dùng đại diện gõ một câu tiếng Việt tả việc mình muốn có được đúng skill với các tham số chữ/số đã điền, chỉ còn đính tệp và bấm chạy — không mở biểu mẫu trắng, không thấy canvas, và Director không bao giờ tự chạy?
-- Kết quả nào là SỐNG: [đề xuất] trên bộ ≥ 20 prompt tiếng Việt vàng (ghim, có ca không-skill-nào và ca mơ hồ): chọn đúng skill ≥ 90% · tham số không-tệp điền đúng ≥ 80% · ca không-skill-nào được nói rõ là không có skill hợp, 100% · instance sinh ra qua được bộ kiểm tham số của B5 100% · 0 lượt tự chạy · tại phiên UAT B10 ≥ 2/3 người dùng đi từ câu gõ tới kết quả mà không mở biểu mẫu trắng
-- Kết quả nào là CHẾT: [đề xuất] chọn đúng skill < 70% trên bộ vàng · hoặc > 10% instance bị máy chủ B5 từ chối vì tham số sai · hoặc bất kỳ lượt nào tự chạy · hoặc p95 lượt Director vượt 75,1s (mốc EVAL-0) vì nhánh mới làm mất prompt cache
-- Timebox: [đề xuất] vòng code 20–22/10 trong đợt of1 (dãy P2), mốc 24/10; ngưỡng UAT đo ở B10 (02–08/11). Tới 24/10 chưa ký Cổng Bằng chứng → hạ Should (bỏ ★, giữ dòng) ở lần tái hoạch kế, không kéo dài đợt
+- Câu hỏi phép đo trả lời: một người dùng đại diện gõ một câu tiếng Việt tả việc mình muốn có được đúng skill với các tham số chữ/số đã điền, chỉ còn đính tệp và bấm chạy — không mở biểu mẫu trắng, không thấy canvas, và Director không bao giờ tự chạy?
+- Kết quả nào là SỐNG: trên bộ ≥ 20 prompt tiếng Việt vàng (ghim, có ca không-skill-nào và ca mơ hồ): chọn đúng skill ≥ 90% · tham số không-tệp điền đúng ≥ 80% · ca không-skill-nào được nói rõ là không có skill hợp, 100% · instance sinh ra qua được bộ kiểm tham số của B5 100% · 0 lượt tự chạy · tại phiên UAT B10 ≥ 2/3 người dùng đi từ câu gõ tới kết quả mà không mở biểu mẫu trắng
+- Kết quả nào là CHẾT: chọn đúng skill < 70% trên bộ vàng · hoặc > 10% instance bị máy chủ B5 từ chối vì tham số sai · hoặc bất kỳ lượt nào tự chạy · hoặc p95 lượt Director vượt 75,1s (mốc EVAL-0) vì nhánh mới làm mất prompt cache
+- Timebox: vòng code 20–22/10 trong đợt of1 (dãy P2), mốc 24/10; ngưỡng UAT đo ở B10 (02–08/11). Tới 24/10 chưa ký Cổng Bằng chứng → hạ Should (bỏ ★, giữ dòng) ở lần tái hoạch kế, không kéo dài đợt
 
 ## Kết quả prototype
 
@@ -80,9 +81,9 @@ Không dựng prototype — không có code trước ô. Hai phép thử không-
 
 ## Cổng 0
 
-- **decision = …** Máy khuyên **build**. Căn cứ: B8 là dòng ★ của khối kế hoạch đóng băng; mốc §6.3 đã qua với B5 đã ký nên B8 giữ ★; nền cả hai phía đã hạ cánh trên `main` (B5 ký 17/09, D0 release 08/09); ADR-0002 đã quyết hướng từ 27/07 nên ô không mở câu hỏi kiến trúc mới; gói đợt of1 cần `build` trước 20/10 để dãy P2 chạy.
-- **disposition = …** Máy khuyên **archive** — không có prototype trước ô.
-- **Ngưỡng UAT chốt cùng lúc ký:** ba bullet ở mục Ngưỡng sau khi gỡ [đề xuất] — hoặc người gạch cả khối và giữ đường B (thước của B8 là U2 «một nút» của cơ hội skill #1, đo ở B10).
+- **decision = build.** Chủ kho (Phan Le Manh) gõ «build» trong phiên ngày 14/10/2026, trả lời câu hỏi Cổng Đáng; ba ô còn lại của dòng lệnh máy điền sẵn (disposition, ngưỡng, người ký) được nhận nguyên, không sửa. Căn cứ máy trình khi hỏi: B8 là dòng ★ của khối kế hoạch đóng băng; mốc §6.3 đã qua với B5 đã ký nên B8 giữ ★; nền cả hai phía đã hạ cánh trên `main` (B5 ký 17/09, D0 release 08/09); ADR-0002 đã quyết hướng từ 27/07 nên ô không mở câu hỏi kiến trúc mới; gói đợt of1 cần `build` trước 20/10 để dãy P2 chạy.
+- **disposition = archive.** Không có prototype trước ô.
+- **Ngưỡng UAT chốt cùng lúc ký:** ngưỡng riêng — bốn bullet ở mục Ngưỡng, đã gỡ [đề xuất]; đo cùng phiên UAT B10, không mở phiên thứ hai.
 
 ## Thước đo thành công → ứng viên criterion
 
